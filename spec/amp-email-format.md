@@ -79,9 +79,7 @@ An AMP email message must:
 The following is a proposed list of AMP components that are supported in AMP email messages. The components are grouped into the following categories:
 
 * [Dynamic Content](#bookmark=id.u1hzf7v786jy)
-
 * [Layout](#heading=h.x62v9qb5igt5)
-
 * [Media](#bookmark=id.kxcerkv3s3yz)
 
 ### Dynamic Content
@@ -92,35 +90,35 @@ The following is a proposed list of AMP components that are supported in AMP ema
     <td>Description</td>
   </tr>
   <tr>
-    <td><amp-form> [Example]</td>
-    <td>Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with <template type="amp-mustache"> to render a response.
+    <td><code>&lt;amp-form&gt;</code> [Example]</td>
+    <td>Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with <code>&lt;template type="amp-mustache"&gt;</code> to render a response.
 
 Note that submitting a form WILL NOT propagate a user’s cookies, even if they are already logged-into your service.
 
 Binding to the [action-xhr] attribute is also not allowed.</td>
   </tr>
   <tr>
-    <td><amp-selector> [Example]</td>
+    <td><code>&lt;amp-selector&gt;</code> [Example]</td>
     <td>A multi-select widget for use within a form.</td>
   </tr>
   <tr>
-    <td><amp-bind> and <amp-state> [Example]
+    <td><code>&lt;amp-bind&gt;</code> and <code>&lt;amp-state&gt;</code> [Example]
 </td>
     <td>Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.
 
-<amp-state> is used to remotely fetch the initial state machine values.
+<code>&lt;amp-state&gt;</code> is used to remotely fetch the initial state machine values.
 
 Note: It is prohibited to bind an [href] or [src] value. It is also prohibited to use the print, navigate and goBack actions.</td>
   </tr>
   <tr>
-    <td><amp-list> [Example]</td>
-    <td>Remotely fetches JSON data that will be rendered by an <amp-mustache>.
+    <td><code>&lt;amp-list&gt;</code> [Example]</td>
+    <td>Remotely fetches JSON data that will be rendered by an <code>&lt;amp-mustache&gt;</code>.
 
 Binding to the [src] attribute is not allowed.   Including user credentials with credentials="include" is also prohibited.</td>
   </tr>
   <tr>
-    <td><template type="amp-mustache"> [Example]</td>
-    <td>A Mustache template markup to render the results of an <amp-list> call.</td>
+    <td><code>&lt;template type="amp-mustache"&gt;</code> [Example]</td>
+    <td>A Mustache template markup to render the results of an <code>&lt;amp-list&gt;</code> call.</td>
   </tr>
 </table>
 
@@ -133,31 +131,31 @@ Binding to the [src] attribute is not allowed.   Including user credentials with
     <td>Description</td>
   </tr>
   <tr>
-    <td><amp-accordion> [Example]</td>
-    <td>A UI element that facilitates showing/hiding different sections.  </td>
+    <td><code>&lt;amp-accordion&gt;</code> [Example]</td>
+    <td>A UI element that facilitates showing/hiding different sections.</td>
   </tr>
   <tr>
-    <td><amp-carousel> [Example]</td>
+    <td><code>&lt;amp-carousel&gt;</code> [Example]</td>
     <td>A carousel UI component.</td>
   </tr>
   <tr>
-    <td><amp-sidebar> [Example]</td>
+    <td><code>&lt;amp-sidebar&gt;</code> [Example]</td>
     <td>A sidebar for navigational purposes.</td>
   </tr>
   <tr>
-    <td><amp-image-lightbox> [Example]</td>
+    <td><code>&lt;amp-image-lightbox&gt;</code> [Example]</td>
     <td>A lightbox for containing images.</td>
   </tr>
   <tr>
-    <td><amp-lightbox> [Example]</td>
+    <td><code>&lt;amp-lightbox&gt;</code> [Example]</td>
     <td>A lightbox for containing content.</td>
   </tr>
   <tr>
-    <td><amp-fit-text> [Example]</td>
+    <td><code>&lt;amp-fit-text&gt;</code> [Example]</td>
     <td>A helper component for fitting text within a certain area.</td>
   </tr>
   <tr>
-    <td><amp-timeago> [Example]</td>
+    <td><code>&lt;amp-timeago&gt;</code> [Example]</td>
     <td>Provides a convenient way of rendering timestamps.</td>
   </tr>
 </table>
@@ -171,13 +169,13 @@ Binding to the [src] attribute is not allowed.   Including user credentials with
     <td>Description</td>
   </tr>
   <tr>
-    <td><amp-img> [Example]</td>
-    <td>An AMP component that replaces <img>.
+    <td><code>&lt;amp-img&gt;</code> [Example]</td>
+    <td>An AMP component that replaces <code>&lt;img&gt;</code>.
 
 Note: Binding to [src] is not allowed.</td>
   </tr>
   <tr>
-    <td><amp-anim> [Example]</td>
+    <td><code>&lt;amp-anim&gt;</code> [Example]</td>
     <td>Embeds GIF files.
 
 Note: Binding to [src] is not allowed.</td>
@@ -191,33 +189,25 @@ Note: Binding to [src] is not allowed.</td>
 
 All CSS in any AMP document must be included in a <style amp-custom> tag within the header. Inline style attributes are not allowed in AMP.
 
-<table>
-  <tr>
-    <td>  <head>
-    ...
-    <style amp-custom>
-      /* any custom styles go here. */
-      body {
-        background-color: white;
-      }
-      amp-img {
-        border: 5px solid black;
-      }
-      amp-img.grey-placeholder {
-        background-color: grey;
-      }
-    </style>
-    ...
-  </head></td>
-  </tr>
-</table>
+```html
+...
+<style amp-custom>
+  /* any custom styles go here. */
+  body {
+    background-color: white;
+  }
+  amp-img {
+    border: 5px solid black;
+  }
+  amp-img.grey-placeholder {
+    background-color: grey;
+  }
+</style>
+...
+</head>
+```
 
-
-<table>
-  <tr>
-    <td>Note: The entire <style> tag cannot exceed 50,000 bytes. The validator will check for this.</td>
-  </tr>
-</table>
+Note: The entire <style> tag cannot exceed 50,000 bytes. The validator will check for this.
 
 
 ### Allowed CSS properties and selectors
@@ -250,37 +240,30 @@ Follow the instructions to install the [AMP Validator CLI tool](https://www.ampp
 
 **Usage**
 
-Once you have the command-line tool installed, run the following command by replacing **<amphtml file>** with your file containing the HTML content.
+Once you have the command-line tool installed, run the following command by replacing **`<amphtml file>`** with your file containing the HTML content.
 
-<table>
-  <tr>
-    <td>amphtml-validator --html_format AMP4Email \
-<amphtml file></td>
-  </tr>
-</table>
-
+```sh
+amphtml-validator --html_format AMP4Email \
+<amphtml file>
+```
 
 For example:
 
-<table>
-  <tr>
-    <td>amphtml-validator --html_format AMP4Email \
-amp_email.html</td>
-  </tr>
-</table>
-
+```sh
+amphtml-validator --html_format AMP4Email \
+amp_email.html
+```
 
 # Examples
 
 This section provides some AMP for Email code examples.
 
-## Basic usage of <amp-list>
+## Basic usage of `<amp-list>`
 
-The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [<amp-list>](https://www.ampproject.org/docs/reference/components/amp-list).
+The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [`<amp-list>`](https://www.ampproject.org/docs/reference/components/amp-list).
 
-<table>
-  <tr>
-    <td><!doctype html>
+```html
+<!doctype html>
 <html ⚡4email>
 <head>
   <meta charset="utf-8">
@@ -308,18 +291,15 @@ The following is a fictional email that includes an updated list of featured pro
     </template>
   </amp-list>
 </body>
-</html></td>
-  </tr>
-</table>
+</html>
+```
 
+## Basic usage of `<amp-bind>`
 
-## Basic usage of <amp-bind>
+The following is a fictional email that shows interactivity features by using [`<amp-bind>`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
-The following is a fictional email that shows interactivity features by using [<amp-bind>](https://www.ampproject.org/docs/reference/components/amp-bind).
-
-<table>
-  <tr>
-    <td><!doctype html>
+```html
+<!doctype html>
 <html ⚡4email>
 <head>
   <meta charset="utf-8">
@@ -343,10 +323,8 @@ The following is a fictional email that shows interactivity features by using [<
     Set color to blue
   </button>
 </body>
-</html></td>
-  </tr>
-</table>
-
+</html>
+```
 
 # Adding AMP to existing emails
 
@@ -356,9 +334,8 @@ Embedding AMP within an email is simple, add a new MIME part with a content type
 
 It is important to note that the text/x-amp-html part must be nested under a multipart/alternative node, it will not be recognized by the email client otherwise. See the following example:
 
-<table>
-  <tr>
-    <td>From:  Person A <persona@gmail.com>
+```
+From:  Person A <persona@gmail.com>
 To: Person B <personb@gmail.com>
 Subject: An AMP email!
 Content-Type: multipart/alternative; boundary="001a114634ac3555ae05525685ae"
@@ -386,14 +363,13 @@ Content-Type: text/x-amp-html; charset="UTF-8"
 Hello World in AMP!
 </body>
 </html>
---001a114634ac3555ae05525685ae--</td>
-  </tr>
-</table>
+--001a114634ac3555ae05525685ae--
+```
 
 
 # Replying/forwarding semantics
 
-To start, the email client strips out the text/x-amp-html part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
+To start, the email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
 
 # Authentication
 
