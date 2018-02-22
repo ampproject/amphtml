@@ -31,7 +31,7 @@ const MAX_ARTICLES = 2;
  * @const
  * TODO(emarchiori): Make this a configurable parameter.
  */
-const SEPARATPOR_RECOS = 3;
+const SEPARATOR_RECOS = 3;
 
 /** @private {AmpDocumentRecommendations} */
 let activeInstance_ = null;
@@ -48,11 +48,11 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
     activeInstance_ = this;
 
-    /** @private {?./config.AmpDocumentRecommendationsConfig} */
-    this.config_;
+    /** @private {./config.AmpDocumentRecommendationsConfig} */
+    this.config_ = null;
 
     /** @private {MultidocManager} */
-    this.multidocManager_;
+    this.multidocManager_ = null;
 
     /** @private {number} */
     this.nextArticle_ = 0;
@@ -105,14 +105,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     let article = from;
 
     while (article < this.config_.recommendations.length &&
-        article - from < SEPARATPOR_RECOS) {
+        article - from < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
       const articleHolder = doc.createElement('button');
       articleHolder.classList.add('i-amphtml-reco-holder-article');
       articleHolder.addEventListener('click', () => {
-        this.viewer_.navigateTo(next.ampUrl, 'content-discovery');
+        this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
       });
 
       const imageElement = doc.createElement('div');
@@ -160,7 +160,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
         }
 
       } catch (e) {
-        this.handleLoadingError();
+        // TODO(emarchiori): Handle loading errors.
       }
     });
   }
