@@ -271,6 +271,7 @@ data.hideCta;
 data.smallHeader;
 data.adaptContainerWidth;
 data.showFacePile;
+data.showText;
 
 // 3p code
 var twttr;
