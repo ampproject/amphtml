@@ -89,11 +89,11 @@ export class SubscriptionService {
 
   /**
    * @param {!JsonObject} serviceConfig
-   * @param {!Pageconfig} pageConfig
+   * @param {!PageConfig} pageConfig
    * @private
    */
   initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
-    if (serviceConfig.authorizationUrl) {
+    if (serviceConfig['authorizationUrl']) {
       this.subscriptionPlatforms_.push(
           new LocalSubscriptionPlatform(
               this.ampdoc_,
@@ -133,13 +133,15 @@ export class SubscriptionService {
    * @param {boolean} grantState
    * @private
    */
-  processEntitlements_(grantState) {
+  processGrantState_(grantState) {
+    this.renderer_.toggleLoading(false);
+    this.renderer_.setGrantState(grantState);
+
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
     }
 
-    this.renderer_.toggleLoading(false);
   }
 
   /**
@@ -173,8 +175,8 @@ export class SubscriptionService {
         this.fetchEntitlements_(subscriptionPlatform);
       });
 
-      this.entitlementStore_.getFirstResolvedSubscription()
-          .then(grantState => {this.processEntitlements_(grantState);});
+      this.entitlementStore_.getGrantStatus()
+          .then(grantState => {this.processGrantState_(grantState);});
     });
   }
 }
