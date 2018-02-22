@@ -74,7 +74,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
-  isExperimentOn,
+  isExperimentOn, /*OK*/
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
