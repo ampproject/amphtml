@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
-// temp before config in passed in
+
+// TODO(ccordry) replace these constants with user config
 /** @const */
 const MIN_INTERVAL = 3;
 
@@ -25,10 +30,10 @@ const MIN_INTERVAL = 3;
 const MAX_NUMBER = 2;
 
 /** @const */
-// const EXPERIMENT = 'amp-story-auto-ad';
+const TAG = 'amp-story-auto-ads';
 
 /** @const */
-const TAG = 'amp-story-auto-ads';
+const AD_TAG = 'amp-ad';
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -46,10 +51,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.interactions_ = 0;
 
     /** @private {!Array} */
-    this.adElements_ = [];
+    this.adPageEls_ = [];
 
     /** @private {number} */
     this.adsPlaced_ = 0;
+
+    /** @private {boolean} */
+    this.iscurrentAdLoaded_ = false;
   }
 
   /** @override */
@@ -57,6 +65,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryElement = this.element.parentElement;
     user().assert(ampStoryElement.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
+
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, AD_TAG);
 
     ampStoryElement.getImpl().then(impl => {
       this.ampStory_ = impl;
@@ -78,43 +90,84 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return Promise.resolve();
   }
 
+
   /**
    * build page and start preloading
    * @private
    */
   schedulePage_() {
-    const page = this.makeMockPage();
-    this.adElements_.push(page);
+    const page = this.createAdPage_();
+    this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
-
-    // TODO(ccordry): need to fake distance from page to force load
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
     });
   }
 
+
   /**
-   * temporary to be replaced with real fetching
+   * create an `amp-story-page` containing an `amp-ad`
+   * @private
    */
-  makeMockPage() {
-    const ampStoryAdPage = document.createElement('amp-story-page');
-    const id = this.adsPlaced_ + 1;
-    ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
-    ampStoryAdPage.setAttribute('ad', '');
-    ampStoryAdPage./*OK*/innerHTML = `
-      <amp-story-grid-layer template="vertical">
-        <h1>Ad Page #${id}</h1>
-        <p>This is ad #${id} shown in this story.</p>
-      </amp-story-grid-layer>
-      `;
+  createAdPage_() {
+    // TODO(ccordry) add new <amp-story-cta-layer>
+    const ampStoryAdPage = this.createPageElement_();
+    const ampAd = this.createAdElement_();
+
+    ampStoryAdPage.appendChild(ampAd);
+
+    this.iscurrentAdLoaded_ = false;
+
+    // set up listener for ad-loaded event
+    ampAd.getImpl().then(impl => {
+      const signals = impl.signals();
+      return signals.whenSignal(CommonSignals.INI_LOAD);
+    }).then(() => {
+      this.iscurrentAdLoaded_ = true;
+    });
+
     return ampStoryAdPage;
   }
 
 
   /**
-   * Get array containing all pages of associated story
+   * @return {!Element}
+   * @private
+   */
+  createPageElement_() {
+    const id = this.adsPlaced_ + 1;
+    const attributes = dict({
+      'id': `i-amphtml-ad-page-${id}`,
+      'ad': '',
+      'distance': '1',
+    });
+
+    return createElementWithAttributes(
+        document, 'amp-story-page', attributes);
+  }
+
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createAdElement_() {
+    // TODO(ccordry) get this info (e.g. source) from config
+    const attributes = dict({
+      'id': 'i-amphtml-demo-ad',
+      'height': '300',
+      'src': '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json',
+      'type': 'fake',
+    });
+
+    return createElementWithAttributes(
+        document, 'amp-ad', attributes);
+  }
+
+
+  /**
    * @private
    */
   handleStateChange_(stateChangeEvent) {
@@ -158,14 +211,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   placeAdAfterPage_(currentPageId) {
-    // TODO(ccordry) make sure ad is loaded
-    const nextAdElement = this.adElements_[this.adElements_.length - 1];
+    const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
 
-    if (!nextAdElement) {
+    if (!nextAdPageEl || !this.iscurrentAdLoaded_) {
       return;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdElement.id);
+    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
     this.adsPlaced_++;
 
     if (!this.allAdsPlaced_()) {
