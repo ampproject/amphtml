@@ -19,8 +19,11 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {
+  childElementByTag,
+  removeChildren,
+} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
@@ -50,6 +53,9 @@ export class AmpAdCustom extends AMP.BaseElement {
 
     /** {?AmpAdUIHandler} */
     this.uiHandler = null;
+
+    /** @private {boolean} */
+    this.useChildTemplate_ = true;
   }
 
   /** @override */
@@ -73,6 +79,9 @@ export class AmpAdCustom extends AMP.BaseElement {
     // Ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
+
+    // No need to check to template attribute because it's not allowed in amp-ad
+    this.useChildTemplate_ = !!childElementByTag(this.element, 'template');
 
     this.uiHandler = new AmpAdUIHandler(this);
   }
@@ -119,10 +128,10 @@ export class AmpAdCustom extends AMP.BaseElement {
       } catch (e) {
         // Throw user error only when the element template attribute being set.
         this.uiHandler.applyNoContentUI();
-        const templateId = this.element.getAttribute('template');
-        if (templateId) {
+        if (!this.useChildTemplate_) {
           this.user().error(TAG_AD_CUSTOM,
-              `Invalid templateId: ${templateId}`, e);
+              'Cannot find template with templateId: ' +
+              `${this.element.getAttribute('template')}`, e);
         }
       }
     });
@@ -151,29 +160,30 @@ export class AmpAdCustom extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   handleTemplateData_(templateData) {
+    if (this.useChildTemplate_) {
+      return templateData;
+    }
 
-    let data = templateData;
+    // If use remote template specified by response
+    user().assert(templateData['templateId'], 'TemplateId not specified');
 
-    if (templateData['data'] && typeof templateData['data'] == 'object') {
-      // For format option 1.
-      data = templateData['data'];
+    user().assert(
+        templateData['data'] && typeof templateData['data'] == 'object',
+        'Template data not specified');
 
-      if (templateData['templateId']) {
-        // Support for templateId
-        this.element.setAttribute('template', templateData['templateId']);
-      }
+    this.element.setAttribute('template', templateData['templateId']);
 
-      if (templateData['vars'] && typeof templateData['vars'] == 'object') {
-        // Support for vars
-        const vars = templateData['vars'];
-        const keys = Object.keys(vars);
-        for (let i = 0; i < keys.length; i++) {
-          const attrName = 'data-vars-' + keys[i];
-          this.element.setAttribute(attrName, vars[keys[i]]);
-        }
+    if (templateData['vars'] && typeof templateData['vars'] == 'object') {
+      // Support for vars
+      const vars = templateData['vars'];
+      const keys = Object.keys(vars);
+      for (let i = 0; i < keys.length; i++) {
+        const attrName = 'data-vars-' + keys[i];
+        this.element.setAttribute(attrName, vars[keys[i]]);
       }
     }
-    return data;
+
+    return templateData['data'];
   }
 
   /** @override  */

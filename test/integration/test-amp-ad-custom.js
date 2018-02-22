@@ -35,17 +35,19 @@ describe.configure().retryOnSaucelabs().run('amp custom ad', () => {
 
       // ad1
       const ad1 = fixture.doc.getElementById('ad1');
-      expect(ad1.getAttribute('template')).to.equal('amp-template-id1');
-      expect(ad1.getAttribute('data-vars-var1')).to.equal('123');
-      expect(ad1.getAttribute('data-vars-var2')).to.equal('456');
+      expect(ad1.getAttribute('template')).to.be.null;
+      expect(ad1.getAttribute('data-vars-var1')).to.be.null;
+      expect(ad1.getAttribute('data-vars-var2')).to.be.null;
       const img1 = ad1.querySelector('amp-img');
-      expect(img1.getAttribute('data-info')).to.equal('Info1');
+      expect(img1.getAttribute('data-info')).to.equal('Info');
 
       // ad2
       const ad2 = fixture.doc.getElementById('ad2');
       expect(ad2.getAttribute('template')).to.equal('amp-template-id2');
       const img2 = ad2.querySelector('amp-img');
       expect(img2.getAttribute('data-info')).to.equal('Info2');
+      expect(ad2.getAttribute('data-vars-var1')).to.equal('123');
+      expect(ad2.getAttribute('data-vars-var2')).to.equal('456');
 
       // ad3
       const ad3 = fixture.doc.getElementById('ad3');

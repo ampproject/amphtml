@@ -16,8 +16,10 @@
 
 import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
-import {createElementWithAttributes} from '../../../../src/dom';
-
+import {
+  createElementWithAttributes,
+  removeChildren,
+} from '../../../../src/dom';
 describe('Amp custom ad', () => {
   let sandbox;
 
@@ -125,42 +127,82 @@ describe('Amp custom ad', () => {
   });
 
   describe('TemplateData', () => {
-    it('templateData w/o data object', () => {
+    it('templateData with child template', () => {
       const elem = getCustomAd('fake.json');
       const ad = new AmpAdCustom(elem);
-      ad.handleTemplateData_({
+      ad.buildCallback();
+      expect(ad.handleTemplateData_({
         'a': '1',
         'b': '2',
-      });
-      expect(elem.getAttribute('template')).to.be.null;
-    });
-
-    it('templateData with non object data', () => {
-      const elem = getCustomAd('fake.json');
-      const ad = new AmpAdCustom(elem);
-      ad.handleTemplateData_({
-        'a': '1',
-        'b': '2',
-        'data': '3',
-      });
-      expect(elem.getAttribute('template')).to.be.null;
-    });
-
-    it('templateData with data object', () => {
-      const elem = getCustomAd('fake.json');
-      const ad = new AmpAdCustom(elem);
-      ad.handleTemplateData_({
         'data': {
-          'a': '1',
-          'b': '2',
+          'c': '3',
         },
-        'templateId': '123',
+        'templateId': '4',
         'vars': {
-          'abc': '456',
+          'd': '5',
+        },
+      })).to.deep.equal({
+        'a': '1',
+        'b': '2',
+        'data': {
+          'c': '3',
+        },
+        'templateId': '4',
+        'vars': {
+          'd': '5',
         },
       });
-      expect(elem.getAttribute('template')).to.equal('123');
-      expect(elem.getAttribute('data-vars-abc')).to.equal('456');
+      expect(elem.getAttribute('template')).to.be.null;
+      expect(elem.getAttribute('data-vars-d')).to.be.null;
+    });
+
+    it('templateData w/o child template', () => {
+      const elem = getCustomAd('fake.json');
+      removeChildren(elem);
+      const ad = new AmpAdCustom(elem);
+      ad.buildCallback();
+      expect(ad.handleTemplateData_({
+        'a': '1',
+        'b': '2',
+        'data': {
+          'c': '3',
+        },
+        'templateId': '4',
+        'vars': {
+          'd': '5',
+        },
+      })).to.deep.equal({
+        'c': '3',
+      });
+      expect(elem.getAttribute('template')).to.equal('4');
+      expect(elem.getAttribute('data-vars-d')).to.equal('5');
+    });
+
+    it('templateData w/o child template or templateId', () => {
+      const elem = getCustomAd('fake.json');
+      removeChildren(elem);
+      const ad = new AmpAdCustom(elem);
+      ad.buildCallback();
+      expect(() => {
+        ad.handleTemplateData_({
+          'data': {
+            'a': '1',
+            'b': '2',
+          },
+          'vars': {
+            'abc': '456',
+          },
+        });
+      }).to.throw('TemplateId not specified');
+
+      expect(() => {
+        ad.handleTemplateData_({
+          'templateId': '1',
+          'vars': {
+            'abc': '456',
+          },
+        });
+      }).to.throw('Template data not specified');
     });
   });
 });
