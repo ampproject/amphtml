@@ -267,6 +267,9 @@ export const adConfig = {
     ],
   },
 
+  broadstreetads: {
+    prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+  },
 
   caajainfeed: {
     prefetch: [
