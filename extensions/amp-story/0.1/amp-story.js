@@ -92,11 +92,14 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
-/** @const {string} */
-export const ADVANCE_TO_ATTR = 'i-amphtml-advance-to';
+/** @private @const {string} */
+const ADVANCE_TO_ATTR = 'i-amphtml-advance-to';
 
-/** @const {string} */
-export const RETURN_TO_ATTR = 'i-amphtml-return-to';
+/** @private @const {string} */
+const RETURN_TO_ATTR = 'i-amphtml-return-to';
+
+/** @private @const {string} */
+const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 
 
 /**
@@ -1486,15 +1489,18 @@ export class AmpStory extends AMP.BaseElement {
     const currentPageEl = currentPage.element;
 
     const nextPageId = currentPage
-        .getNextPageId(false /*opt_isAutomaticAdvance */);
+        .getNextPageId(true /*opt_isAutomaticAdvance */);
 
-    currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
-    pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
 
     if (nextPageId) {
+      currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
+      currentPageEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
+      pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
+
       const nextPage = this.getPageById_(nextPageId);
       const nextPageEl = nextPage.element;
       pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
+      pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageEl.id);
       nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
     }
   }
