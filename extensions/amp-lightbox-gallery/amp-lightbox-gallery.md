@@ -116,35 +116,39 @@ The CSS API exposes the following CSS classes so that you can customize the styl
 
 <table>
   <tr>
-    <td width="40%"><pre>.amp-lbg-mask</pre></td>
-    <td>Class to customize the background color and opacity for the lightbox.</td>
+    <td width="40%">CSS class</td>
+    <td>Description</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-mask</code></td>
+    <td>Use to customize the background color and opacity for the lightbox.</td>
   </tr>
    <tr>
-    <td width="40%"><pre>.amp-lbv-desc-box.standard, .amp-lbv-desc-box.overflow</pre></td>
-    <td>Class to customize the description box's background color and gradient.</td>
+    <td><code>.amp-lbv-desc-box.standard</code>,<code>.amp-lbv-desc-box.overflow</code></td>
+    <td>Use to customize the description box's background color and gradient.</td>
   </tr>
   <tr>
-    <td width="40%"><pre>.amp-lbg-top-bar</pre></td>
-    <td>Class to customize the color and gradient for the lightbox's top controls bar.</td>
+    <td><code>.amp-lbg-top-bar</code></td>
+    <td>Use to customize the color and gradient for the lightbox's top controls bar.</td>
   </tr>
-    <td width="40%"><pre>.amp-lbv-desc-text</ore></td>
-    <td>Class to customize the font and colors for the description.</td>
-  </tr>
-  <tr>
-    <td width="40%"><pre>.amp-lbg-icon</pre></td>
-    <td>Class to customize the icon colors.</td>
+    <td><code>.amp-lbv-desc-text</code></td>
+    <td>Use to customize the font and colors for the description.</td>
   </tr>
   <tr>
-    <td width="40%"><pre>.amp-lbg-button-close .amp-lbg-icon</pre></td>
-    <td>Class to customize the icon for the close button.</td>
+    <td><code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon colors.</td>
   </tr>
   <tr>
-    <td width="40%"><pre>.amp-lbg-button-gallery .amp-lbg-icon</pre></td>
-    <td>Class to customize the icon for the gallery button.</td>
+    <td><code>.amp-lbg-button-close</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the close button.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-button-gallery</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the gallery button.</td>
   </tr>
     <tr>
-    <td width="40%"><pre>.amp-lbg-button-slide .amp-lbg-icon</pre></td>
-    <td>Class to customize the icon for the slide button.</td>
+    <td><code>.amp-lbg-button-slide</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the slide button.</td>
   </tr>
 </table>
 
