@@ -594,11 +594,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
-<<<<<<< HEAD
               true /* shouldSandbox */);
-=======
-            true /* shouldSandbox */);
->>>>>>> 3c1198b8da93c9a16c9b6e1da1be49ca1ba3a62f
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -608,11 +604,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
-<<<<<<< HEAD
               false /* shouldSandbox */);
-=======
-            false /* shouldSandbox */);
->>>>>>> 3c1198b8da93c9a16c9b6e1da1be49ca1ba3a62f
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -772,11 +764,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
-<<<<<<< HEAD
               true /* shouldSandbox */);
-=======
-            true /* shouldSandbox */);
->>>>>>> 3c1198b8da93c9a16c9b6e1da1be49ca1ba3a62f
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -786,11 +774,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
-<<<<<<< HEAD
               false /* shouldSandbox */);
-=======
-            false /* shouldSandbox */);
->>>>>>> 3c1198b8da93c9a16c9b6e1da1be49ca1ba3a62f
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
