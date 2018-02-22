@@ -248,3 +248,11 @@ requirement: {
   whitelist: 'src/service/cid-api.js'
   whitelist: 'src/service/cid-impl.js'
 }
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
+}
