@@ -45,9 +45,6 @@ const CAROUSEL_TAG = 'amp-carousel';
 const FIGURE_TAG = 'figure';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
 
-const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
-  following tags and <amp-carousel> tags containing said tags right now: `;
-
 /** @typedef {{
  *  url: string,
  *  element: !Element
@@ -282,9 +279,8 @@ export class LightboxManager {
       }
     }
 
-    const errorMsg = VALIDATION_ERROR_MSG + LIGHTBOX_ELIGIBLE_TAGS.toString();
-
-    user().assert(this.baseElementIsSupported_(element), errorMsg);
+    user().assert(this.baseElementIsSupported_(element),
+        `The element ${element.tagName} isn't supported in lightbox yet.`);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
