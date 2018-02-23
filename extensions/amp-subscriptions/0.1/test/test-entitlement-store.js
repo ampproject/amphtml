@@ -50,9 +50,9 @@ describes.realWin('entitlement-store', {}, () => {
     expect(cb).to.be.calledOnce;
   });
 
-  describe('firstResolvedPromise_', () => {
+  describe('getGrantStatus', () => {
     it('should resolve true on recieving a positive entitlement', done => {
-      entitlementStore.getFirstResolvedSubscription()
+      entitlementStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === true) {
               done();
@@ -69,7 +69,7 @@ describes.realWin('entitlement-store', {}, () => {
     it('should resolve true for existing positive entitlement', done => {
       entitlementStore.entitlements_[serviceIds[0]] = entitlementsForService1;
       entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      entitlementStore.getFirstResolvedSubscription()
+      entitlementStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === true) {
               done();
@@ -86,7 +86,7 @@ describes.realWin('entitlement-store', {}, () => {
           serviceIds[0], '', [negativeEntitlement1], currentProduct);
       entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      entitlementStore.getFirstResolvedSubscription()
+      entitlementStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === false) {
               done();
