@@ -268,8 +268,15 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+<<<<<<< HEAD
     id: 'inabox-rov',
     name: 'Extensions layout independent of viewport location if inabox.',
+=======
+    id: 'amp-live-list-sorting',
+    name: 'Allows "newest last" insertion algorithm to be used',
+    spec: 'https://github.com/ampproject/amphtml/issues/5396',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
+>>>>>>> Add a way to insert new items at the bottom of the component
   },
   {
     id: 'amp-consent',
