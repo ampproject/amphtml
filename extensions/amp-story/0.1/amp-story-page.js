@@ -701,6 +701,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+
+  /**
+   * check to see if this page is a wrapper for an ad
+   * @return {boolean}
+   */
   isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
