@@ -224,7 +224,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
-    clonedNode.removeAttribute('class');
     return clonedNode;
   }
   /**
@@ -250,6 +249,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = this.win.document.createElement('amp-image-viewer');
         imageViewer.setAttribute('layout', 'fill');
+        clonedNode.removeAttribute('class');
         imageViewer.appendChild(clonedNode);
         container.appendChild(imageViewer);
         slide = container;
