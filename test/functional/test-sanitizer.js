@@ -246,7 +246,8 @@ describe('rewriteAttributesForElement', () => {
       const element = document.createElement('a');
       element.setAttribute('href', '#hash');
 
-      rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+      rewriteAttributesForElement(
+          element, 'href', 'https://not.hash/', location);
 
       expect(element.getAttribute('href')).to.equal('https://not.hash/');
       expect(element.getAttribute('target')).to.equal('_top');
@@ -260,7 +261,7 @@ describe('rewriteAttributesForElement', () => {
 
       expect(element.getAttribute('href')).to.equal('#hash');
       expect(element.hasAttribute('target')).to.equal(false);
-    })
+    });
   });
 });
 
