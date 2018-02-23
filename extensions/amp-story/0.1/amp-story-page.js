@@ -459,6 +459,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     page.
    */
   setDistance(distance) {
+    // TODO(ccordry) refactor this when pages are managed
+    if (this.isAd()) {
+      distance = Math.min(distance, 1);
+    }
+
     this.element.setAttribute('distance', distance);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
@@ -696,6 +701,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+
+  /**
+   * check to see if this page is a wrapper for an ad
+   * @return {boolean}
+   */
   isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }

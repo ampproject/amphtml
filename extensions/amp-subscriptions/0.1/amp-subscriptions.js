@@ -109,11 +109,42 @@ export class SubscriptionService {
   }
 
   /**
+   * @param {!JsonObject} serviceConfig
+   * @param {!PageConfig} pageConfig
+   * @private
+   */
+  initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
+    if ((serviceConfig['serviceId'] || 'local') == 'local') {
+      this.subscriptionPlatforms_.push(
+          new LocalSubscriptionPlatform(
+              this.ampdoc_,
+              serviceConfig,
+              pageConfig
+          )
+      );
+    }
+  }
+
+  /**
+   * @private
+   * @returns {!Promise<!JsonObject>}
+   */
+  getServiceConfig_() {
+    return new Promise((resolve, reject) => {
+      const rawContent = tryParseJson(this.configElement_.textContent, e => {
+        reject('Failed to parse "amp-subscriptions" JSON: ' + e);
+      });
+      resolve(rawContent);
+    });
+  }
+
+  /**
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
    * @param {function(!JsonObject, !PageConfig):Promise<!SubscriptionPlatform></SubscriptionPlatform>} subscriptionPlatformFactory
    */
+<<<<<<< HEAD
   registerService(serviceId, subscriptionPlatformFactory) {
     this.initialize_.then(() => {
       subscriptionPlatformFactory(this.serviceConfig_, this.pageConfig_)
@@ -122,6 +153,11 @@ export class SubscriptionService {
             this.fetchEntitlements_(subscriptionPlatform);
           });
     });
+=======
+  registerService(serviceId, subscriptionPlatform) {
+
+    this.subscriptionPlatforms_.push(subscriptionPlatform);
+>>>>>>> dfe14d5f89b9bb5144f1844189e906cbe715d2d2
 
   }
 
@@ -163,6 +199,7 @@ export class SubscriptionService {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
 
+<<<<<<< HEAD
       user().assert(this.pageConfig_, 'Page config is null');
 
       user().assert(this.serviceConfig_['services'],
@@ -173,6 +210,8 @@ export class SubscriptionService {
             /** @type {!PageConfig} */(this.pageConfig_));
       });
 
+=======
+>>>>>>> dfe14d5f89b9bb5144f1844189e906cbe715d2d2
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
 

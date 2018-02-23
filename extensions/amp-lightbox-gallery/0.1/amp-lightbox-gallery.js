@@ -19,13 +19,14 @@ import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {
+  ELIGIBLE_TAP_TAGS,
   LightboxManager,
   LightboxedCarouselMetadataDef,
 } from './service/lightbox-manager-impl';
+import {Gestures} from '../../../src/gesture';
+import {KeyCodes} from '../../../src/utils/key-codes';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -205,6 +206,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
     mask.classList.add('i-amphtml-lbg-mask');
+    // public css class for user styling
+    mask.classList.add('amp-lbg-mask');
     this.container_.appendChild(mask);
   }
 
@@ -241,7 +244,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         sourceElement: element,
       };
       let slide = clonedNode;
-      if (clonedNode.tagName === 'AMP-IMG') {
+      if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = this.win.document.createElement('amp-image-viewer');
@@ -324,12 +327,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
     this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
-
     this.descriptionBox_.classList.add('standard');
+
+    // public css api for styling the description box
+    this.descriptionBox_.classList.add('amp-lbg-desc-box');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
     this.descriptionTextArea_.classList.add('non-expanded');
+
+    // public css api for styling the description text area
+    this.descriptionTextArea_.classList.add('amp-lbg-desc-text');
+
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     this.descriptionBox_.addEventListener('click', event => {
@@ -449,9 +458,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
     this.topBar_.classList.add('i-amphtml-lbg-controls');
 
-    this.topGradient_ = this.win.document.createElement('div');
-    this.topGradient_.classList.add('i-amphtml-lbg-top-bar-top-gradient');
-    this.topBar_.appendChild(this.topGradient_);
+    // public css api for top control bar
+    this.topBar_.classList.add('amp-lbg-top-bar');
 
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
@@ -483,7 +491,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     button.appendChild(icon);
     button.classList.add(className);
     button.classList.add('amp-lbg-button');
-
 
     button.addEventListener('click', event => {
       action();
@@ -675,7 +682,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
         this.currentElemId_);
     const tagName = this.getCurrentElement_().tagName;
-    if (tagName === 'AMP-IMG') {
+    if (ELIGIBLE_TAP_TAGS[tagName]) {
       this.getCurrentElement_().imageViewer.signals()
           .whenSignal(CommonSignals.LOAD_END)
           .then(() => this.enter_());
@@ -691,7 +698,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   shouldAnimate_(element) {
-    if (element.tagName !== 'AMP-IMG') {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     const img = elementByTag(dev().assertElement(element), 'img');
@@ -812,7 +819,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
       if (sourceElement !== null
-        && sourceElement.tagName == 'AMP-IMG'
         && this.shouldAnimate_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
