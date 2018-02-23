@@ -17,15 +17,31 @@
 @import '../../../third_party/react-dates/_datepicker.css';
 
 
-amp-date-picker,
-.SingleDatePicker_picker,
-.DateRangePicker_picker {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+amp-date-picker.i-amphtml-element {
+  display: block;
+  position: relative;
 }
 
-amp-date-picker * {
+amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 10px;
+  z-index: 10;
+}
+
+amp-date-picker[fullscreen] .i-amphtml-date-picker-container,
+amp-date-picker[with-full-screen-portal],
+amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+amp-date-picker .i-amphtml-date-picker-container {
   box-sizing: border-box;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 .DateInput_input {
@@ -77,6 +93,11 @@ amp-date-picker * {
   border: 1px solid #cacccd;
 }
 
+.CalendarDay__blocked_calendar.CalendarDay__hovered_span {
+  background-color: #ff8080;
+  border: 1px solid #ff8080;
+}
+
 .CalendarDay__blocked_out_of_range,
 .CalendarDay__blocked_out_of_range:active,
 .CalendarDay__blocked_out_of_range:hover {
@@ -110,7 +131,7 @@ amp-date-picker * {
 
 .DayPickerNavigation_rightButton__horizontal,
 .DayPickerNavigation_rightButton__horizontal:active {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
 }
 
 .DayPickerNavigation_button__horizontal,
@@ -157,6 +178,7 @@ amp-date-picker * {
   font-weight: bold;
 }
 
+/* Show a blue dot on highlighted days */
 .CalendarDay__highlighted_calendar,
 .CalendarDay__highlighted_calendar:hover {
   background-image: radial-gradient(circle at 50% 82%, #0654ab 0px, #0654ab 2px, transparent 3px, transparent 100%);
@@ -176,11 +198,13 @@ amp-date-picker * {
 }
 
 /**
- * TODO(cvializ): scope this to the date picker unless we want to enable AMP
- * tooltips more widely ; ) This is ok now because amp-date-picker is still
- * experimental
- * Adapted from: https://freqdec.github.io/Pure-CSS-Tooltips/
+ * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
+ * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
+ * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
  */
+.DayPicker_transitionContainer {
+  min-height: 354px;
+}
 
 [data-date-tooltip] {
   position: relative;

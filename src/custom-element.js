@@ -1364,6 +1364,9 @@ function createBaseCustomElementClass(win) {
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
+          if (placeholders[i].getAttribute('placeholder') !== '') {
+            continue;
+          }
           placeholders[i].classList.add('amp-hidden');
         }
       }
