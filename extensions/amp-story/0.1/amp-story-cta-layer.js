@@ -29,7 +29,7 @@
  * ...
  */
 
-import { Layout } from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 
 export class AmpStoryCtaLayer extends AMP.BaseElement {
 
