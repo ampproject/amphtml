@@ -53,9 +53,6 @@ export class AmpAdCustom extends AMP.BaseElement {
 
     /** {?AmpAdUIHandler} */
     this.uiHandler = null;
-
-    /** @private {boolean} */
-    this.useChildTemplate_ = true;
   }
 
   /** @override */
@@ -79,9 +76,6 @@ export class AmpAdCustom extends AMP.BaseElement {
     // Ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
-
-    // No need to check to template attribute because it's not allowed in amp-ad
-    this.useChildTemplate_ = !!childElementByTag(this.element, 'template');
 
     this.uiHandler = new AmpAdUIHandler(this);
   }
@@ -126,13 +120,7 @@ export class AmpAdCustom extends AMP.BaseElement {
               this.signals().signal(CommonSignals.INI_LOAD);
             });
       } catch (e) {
-        // Throw user error only when the element template attribute being set.
         this.uiHandler.applyNoContentUI();
-        if (!this.useChildTemplate_) {
-          this.user().error(TAG_AD_CUSTOM,
-              'Cannot find template with templateId: ' +
-              `${this.element.getAttribute('template')}`, e);
-        }
       }
     });
   }
@@ -160,7 +148,8 @@ export class AmpAdCustom extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   handleTemplateData_(templateData) {
-    if (this.useChildTemplate_) {
+    if (childElementByTag(this.element, 'template')) {
+      // Need to check for template attribute if it's allowed in amp-ad tag
       return templateData;
     }
 
@@ -179,7 +168,11 @@ export class AmpAdCustom extends AMP.BaseElement {
       const keys = Object.keys(vars);
       for (let i = 0; i < keys.length; i++) {
         const attrName = 'data-vars-' + keys[i];
-        this.element.setAttribute(attrName, vars[keys[i]]);
+        try {
+          this.element.setAttribute(attrName, vars[keys[i]]);
+        } catch (e) {
+          this.user().error(TAG_AD_CUSTOM, 'Fail to set attribute: ', e);
+        }
       }
     }
 
