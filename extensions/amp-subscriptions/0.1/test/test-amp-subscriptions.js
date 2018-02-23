@@ -91,11 +91,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const service = serviceConfig.services[0];
-    const subsPlatform = new LocalSubscriptionPlatform(
-        ampdoc, service, pageConfig);
-    subscriptionService.registerService(service.serviceID, subsPlatform);
-    expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
-        .to.be.true;
+    const factorySpy = sinon.spy();
+    subscriptionService.registerService(service.serviceID, factorySpy);
+    expect(factorySpy).to.be.calledOnce;
   });
 
   describe('getServiceConfig_', () => {

@@ -102,19 +102,6 @@ export class SubscriptionService {
   }
 
   /**
-   * @private
-   * @returns {!Promise<!ServiceConfig>}
-   */
-  getServiceConfig_() {
-    return new Promise((resolve, reject) => {
-      const rawContent = tryParseJson(this.configElement_.textContent, e => {
-        reject('Failed to parse "amp-subscriptions" JSON: ' + e);
-      });
-      resolve(rawContent);
-    });
-  }
-
-  /**
    * @param {!ServiceConfig} serviceConfig
    * @param {!PageConfig} pageConfig
    * @private
