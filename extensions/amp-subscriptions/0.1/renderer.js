@@ -33,7 +33,7 @@ export class Renderer {
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Initial state is "unknown".
-    this.setGrantState_(null);
+    this.setGrantState(null);
     this.setLoggedinState_(null);
     this.setSubscriberState_(null);
     this.getRootElement_().classList.add(`${CSS_PREFIX}-ready`);
@@ -80,9 +80,8 @@ export class Renderer {
 
   /**
    * @param {?boolean} state
-   * @private
    */
-  setGrantState_(state) {
+  setGrantState(state) {
     this.setState_('grant', state);
   }
 
