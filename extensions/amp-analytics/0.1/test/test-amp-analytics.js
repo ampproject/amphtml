@@ -1667,7 +1667,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForNoSendRequest(analytics).then(() => {
-        expect(addStub).to.not.be.called;;
+        expect(addStub).to.not.be.called;
       });
     });
 

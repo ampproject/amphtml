@@ -21,8 +21,8 @@ import {
   parseUrl,
   resolveRelativeUrl,
 } from './url';
+import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {map} from './utils/object';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -37,7 +37,7 @@ const TAG = 'sanitizer';
  * @const {!Object<string, boolean>}
  * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = {
+const BLACKLISTED_TAGS = dict({
   'applet': true,
   'audio': true,
   'base': true,
@@ -55,11 +55,11 @@ const BLACKLISTED_TAGS = {
   // intention to keep this block for any longer than we have to.
   'svg': true,
   'video': true,
-};
+});
 
 
 /** @const {!Object<string, boolean>} */
-const SELF_CLOSING_TAGS = {
+const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
   'hr': true,
@@ -76,7 +76,7 @@ const SELF_CLOSING_TAGS = {
   'link': true,
   'meta': true,
   'param': true,
-};
+});
 
 
 /** @const {!Array<string>} */
@@ -115,7 +115,10 @@ const WHITELISTED_ATTRS = [
 ];
 
 /** @const {!Object<string, !Array<string>>} */
-const WHITELISTED_ATTRS_BY_TAGS = {
+const WHITELISTED_ATTRS_BY_TAGS = dict({
+  'a': [
+    'rel',
+  ],
   'div': [
     'template',
   ],
@@ -127,7 +130,7 @@ const WHITELISTED_ATTRS_BY_TAGS = {
   'template': [
     'type',
   ],
-};
+});
 
 
 /** @const {!RegExp} */
@@ -147,11 +150,11 @@ const BLACKLISTED_ATTR_VALUES = [
 ];
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
     'type': /(?:image|file|password|button)/i,
   },
-};
+});
 
 
 /** @const {!Array<string>} */
@@ -166,11 +169,11 @@ const BLACKLISTED_FIELDS_ATTR = [
 
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'input': BLACKLISTED_FIELDS_ATTR,
   'textarea': BLACKLISTED_FIELDS_ATTR,
   'select': BLACKLISTED_FIELDS_ATTR,
-};
+});
 
 
 /**

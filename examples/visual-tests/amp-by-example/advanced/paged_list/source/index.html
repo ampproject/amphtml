@@ -1,0 +1,177 @@
+<!--
+  #### Introduction
+
+  Often, users requests data that could fill multiple pages of content, so
+  web applications must provide a way for users to navigate across pages of
+  data. This pattern appears in search results, product browse pages, and more.
+  Here we implement paged navigation using the `amp-bind` and `amp-list`
+  components.
+-->
+<!-- #### Setup -->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <title>Paged List</title>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/paged_list/">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- First we include `amp-bind` to track and mutate the page state. -->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- Next we include `amp-list` to request and display the lists of products. -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- Finally, we include `amp-mustache` to render the mustache templates inside the `<amp-list>`. -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <!--
+  ## Styles
+
+  No additional styles are necessary, but you can optionally add styles to
+  change the layout or the look and feel of the page.
+  -->
+  <!-- -->
+
+  <style amp-custom>
+    amp-list#paged-amp-list {
+      min-width: 320px;
+    }
+    @media (min-width: 480px) {
+      amp-list#paged-amp-list {
+        min-width: 480px;
+      }
+    }
+    @media (min-width: 600px) {
+      amp-list#paged-amp-list {
+        min-width: 600px;
+      }
+    }
+    .info {
+      text-align: right;
+      padding: 0 5px;
+    }
+    .items {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+    }
+    .item {
+      max-width: 320px;
+      max-height: 320px;
+      width: calc(50% - 10px);
+      background: #fafafa;
+      margin: 5px;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 2px 7px rgba(0, 0, 0, .3);
+    }
+    .item > .title,
+    .item > .copy {
+      margin: 0 5px;
+    }
+    .image {
+      max-width: 100%;
+    }
+    .item > .image > img {
+      object-fit: cover;
+      object-position: center;
+    }
+
+    [overflow] {
+      height: 55px;
+      background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, .5));
+    }
+    [overflow] button {
+      position: absolute;
+      bottom: 5px;
+      left: 15px;
+      right: 15px;
+      width: calc(100% - 30px);
+      border-radius: 15px;
+      border: 0;
+      background: #fafafa;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .nav {
+      display: flex;
+    }
+    .prev,
+    .next {
+      max-width: 50%;
+      flex: 1 0 0;
+      cursor: pointer;
+    }
+    .next {
+      margin-left: auto;
+    }
+    .prev {
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- #### Usage -->
+  <!--
+  We use an `<amp-list>` element to render the product cards. An `<amp-state>`
+  element initializes and tracks the number of pages in the response.
+  An overflow element ensures that the user is able to reveal more content
+  if any of the products are truncated by the bottom of the `<amp-list>`.
+  -->
+<div>
+<amp-list
+  id="paged-amp-list"
+  layout="fixed-height"
+  height="700"
+  src="/examples/visual-tests/amp-by-example/advanced/paged_list/search"
+  [src]="'/examples/visual-tests/amp-by-example/advanced/paged_list/search?page=' + pageNumber"
+  single-item
+>
+  <template type="amp-mustache">
+    <p class="info">Page {{currentPage}} of {{pageCount}}</p>
+    <div class="items">
+      {{#products}}
+      <div class="item">
+        <amp-img layout="responsive" class="image" width="320" height="240" src="{{image}}"></amp-img>
+        <strong class="title">{{title}}</strong>
+        <p class="copy">{{copy}}</p>
+      </div>
+      {{/products}}
+    </div>
+  </template>
+  <div overflow>
+    <button>Show more</button>
+  </div>
+</amp-list>
+<div class="nav">
+  <button
+    class="prev"
+    hidden
+    [hidden]="pageNumber < 2"
+    on="tap:
+      AMP.setState({
+        pageNumber: pageNumber - 1
+      })"
+  >Previous</button>
+  <button
+    class="next"
+    [hidden]="page ? pageNumber >= page.items.pageCount : false"
+    on="tap:
+      AMP.setState({
+        pageNumber: pageNumber ? pageNumber + 1 : 2
+      })"
+  >Next</button>
+</div>
+<amp-state
+  id="page"
+  src="/examples/visual-tests/amp-by-example/advanced/paged_list/search"
+  [src]="'/examples/visual-tests/amp-by-example/advanced/paged_list/search?page=' + pageNumber"
+></amp-state>
+</div>
+</body>
+</html>

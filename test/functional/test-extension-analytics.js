@@ -41,7 +41,7 @@ describes.realWin('extension-analytics', {
   describe('insertAnalyticsElement', () => {
     let sandbox;
     class MockInstrumentation {
-    };
+    }
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -160,7 +160,7 @@ describes.realWin('extension-analytics', {
       } catch (e) {
         expect(e.message).to.equal(
             'customEventReporterBuilder should not track same eventType twice');
-      };
+      }
     });
 
     it('should return a customEventReporter instance', () => {

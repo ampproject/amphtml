@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   childElement,
@@ -27,21 +28,23 @@ import {isExperimentOn} from '../../../../src/experiments';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'amp-img': true,
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
+  'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
+  'AMP-INSTAGRAM': true,
+  'AMP-FACEBOOK': true,
 };
 
-const ELIGIBLE_TAP_TAGS = {
-  'amp-img': true,
+export const ELIGIBLE_TAP_TAGS = {
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAG = 'amp-carousel';
-const FIGURE_TAG = 'figure';
+const CAROUSEL_TAG = 'AMP-CAROUSEL';
+const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
-
-const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
-  <amp-img> tag and <figure> and <amp-carousel> tags containing the <amp-img>
-  tag right now.`;
 
 /** @typedef {{
  *  url: string,
@@ -81,7 +84,7 @@ export class LightboxManager {
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
-    this.initPromise_ = null;
+    this.scanPromise_ = null;
 
     /**
      * Ordered lists of lightboxable elements according to group
@@ -98,6 +101,12 @@ export class LightboxManager {
     this.counter_ = 0;
 
     /**
+     * List of lightbox elements that have already been scanned.
+     * @private {!Array<!Element>}
+     */
+    this.seen_ = [];
+
+    /**
      * If the lightbox group is a carousel, this object contains a
      * mapping of the lightbox group id to the carousel element.
      * @private {!Object<string, !LightboxedCarouselMetadataDef>}
@@ -110,11 +119,15 @@ export class LightboxManager {
    * @return {!Promise}
    */
   maybeInit() {
-    if (this.initPromise_) {
-      return this.initPromise_;
+    if (this.scanPromise_) {
+      return this.scanPromise_;
     }
-    this.initPromise_ = this.scanLightboxables_();
-    return this.initPromise_;
+    this.scanPromise_ = this.scanLightboxables_();
+    // Rescan whenever DOM changes happen.
+    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.scanPromise_ = this.scanLightboxables_();
+    });
+    return this.scanPromise_;
   }
 
   /**
@@ -149,7 +162,7 @@ export class LightboxManager {
     dev().assert(element);
     dev().assert(element.hasAttribute('lightbox'));
 
-    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     if (element.hasAttribute('on')) {
@@ -179,7 +192,7 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName];
   }
 
   /**
@@ -220,7 +233,11 @@ export class LightboxManager {
    * @private
    */
   processLightboxElement_(element) {
-    if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
+    if (this.seen_.includes(element)) {
+      return;
+    }
+    this.seen_.push(element);
+    if (element.tagName == CAROUSEL_TAG) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
@@ -253,7 +270,7 @@ export class LightboxManager {
    * @param {string} lightboxGroupId
    */
   processBaseLightboxElement_(element, lightboxGroupId) {
-    if (element.tagName.toLowerCase() == FIGURE_TAG) {
+    if (element.tagName == FIGURE_TAG) {
       const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
           lightboxGroupId);
       if (!unwrappedFigureElement) {
@@ -263,7 +280,8 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element), VALIDATION_ERROR_MSG);
+    user().assert(this.baseElementIsSupported_(element),
+        `The element ${element.tagName} isn't supported in lightbox yet.`);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];

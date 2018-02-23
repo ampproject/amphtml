@@ -145,11 +145,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },
   {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
-  },
-  {
     id: 'ios-embed-wrapper',
     name: 'A new iOS embedded viewport model that wraps the body into' +
         ' a synthetic root (launched)',
@@ -193,12 +188,6 @@ const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'slidescroll-disable-css-snap',
-    name: 'Slidescroll disable css snap',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
-    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
   {
     id: '3p-use-ampcontext',
@@ -266,6 +255,12 @@ const EXPERIMENTS = [
     name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/12965',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
+  },
+  {
+    id: 'a4a-doubleclick-disable-sf',
+    name: 'Disables Doubleclick Safeframe Host API for soft-rollback.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13594',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13591',
   },
 ];
 

@@ -22,7 +22,9 @@
  * https://3p.ampproject.net/$version/f.js
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
@@ -88,6 +90,7 @@ import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
 import {adocean} from '../ads/adocean';
+import {adplugg} from '../ads/adplugg';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -104,10 +107,12 @@ import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
+import {broadstreetads} from '../ads/broadstreetads';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -142,6 +147,7 @@ import {ibillboard} from '../ads/ibillboard';
 import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
+import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
@@ -157,6 +163,7 @@ import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
+import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
@@ -197,7 +204,9 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
+import {trugaze} from '../ads/trugaze';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
@@ -268,6 +277,7 @@ register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
 register('adocean', adocean);
+register('adplugg', adplugg);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -284,10 +294,12 @@ register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('appvador', appvador);
 register('atomx', atomx);
 register('bidtellect', bidtellect);
 register('brainy', brainy);
 register('bringhub', bringhub);
+register('broadstreetads', broadstreetads);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -324,6 +336,7 @@ register('ibillboard', ibillboard);
 register('ima-video', imaVideo);
 register('imedia', imedia);
 register('imobile', imobile);
+register('imonomy', imonomy);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
@@ -342,6 +355,7 @@ register('mathml', mathml);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
+register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
@@ -383,8 +397,10 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('teads', teads);
 register('triplelift', triplelift);
+register('trugaze', trugaze);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('videonow', videonow);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
@@ -460,7 +476,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

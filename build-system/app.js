@@ -632,7 +632,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/FORCE3P/g, force3p)
+        .replace(/CHECKSIG/g, force3p || '')
         .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
@@ -704,11 +704,12 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file, '', inabox);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
       enableCors(req, res, req.headers.origin);
+    } else {
+      file = replaceUrls(mode, file, '', inabox);
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
@@ -857,44 +858,12 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
-// Simulated Cloudflare signed Ad server
-
-const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
-const fakeAdNetworkDataDir = '/extensions/amp-ad-network-fake-impl/0.1/data';
-
-/**
- * Handle CORS headers
- */
-app.use([cloudflareDataDir], function fakeCors(req, res, next) {
-  assertCors(req, res, ['GET', 'OPTIONS'], ['X-AmpAdSignature']);
-
-  if (req.method == 'OPTIONS') {
-    res.status(204).end();
-  } else {
-    next();
-  }
-});
-
-/**
- * Handle fake a4a data
- */
-app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
-  let filePath = req.path;
-  const unwrap = !req.path.endsWith('.html');
-  filePath = pc.cwd() + filePath;
-  fs.readFileAsync(filePath).then(file => {
-    res.setHeader('X-AmpAdRender', 'nameframe');
-    if (!unwrap) {
-      res.end(file);
-      return;
-    }
-    const metadata = JSON.parse(file);
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('X-AmpAdSignature', metadata.signature);
-    res.end(metadata.creative);
-  }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + filePath);
+// Simulated subscription entitlement
+app.use('/subscription/:id/entitlements', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    source: req.params.id,
+    products: ['product1', 'product2'],
   });
 });
 
@@ -1052,6 +1021,7 @@ app.get('/dist/diversions', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache;max-age=150');
   res.end(JSON.stringify(['98' + n]));
 });
+
 /*
  * End Cache SW LOCALDEV section
  */
@@ -1124,7 +1094,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line amphtml-internal/no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =

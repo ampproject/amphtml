@@ -181,4 +181,4 @@ export class PinItButton {
     }
     return promise.then(this.renderTemplate.bind(this));
   }
-};
+}

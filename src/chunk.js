@@ -104,11 +104,11 @@ export function chunkInstanceForTesting(nodeOrAmpDoc) {
  */
 export function deactivateChunking() {
   deactivated = true;
-};
+}
 
 export function activateChunkingForTesting() {
   deactivated = false;
-};
+}
 
 /**
  * Runs all currently scheduled chunks.

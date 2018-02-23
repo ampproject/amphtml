@@ -33,10 +33,17 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><ul>
+      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
+      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+    </ul></td>
+  </tr>
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
 {% endcall %}
 
 [TOC]
@@ -205,17 +212,17 @@ Each of these providers has a different set of available parameters ([see `data-
   "related-articles": {
     "More to Read": [
       {
-        title: "My friends, this is India [...]",
-        url: "http://a-publisher.com/india"
-        image: "./media/b1.jpg"
+        "title": "My friends, this is India [...]",
+        "url": "http://a-publisher.com/india",
+        "image": "./media/b1.jpg"
       },
       {
-        title: "A wonderful weekend with Tenturi",
-        url: "http://a-publisher.com/tenturi"
-        image: "./media/b2.jpg"
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "./media/b2.jpg"
       },
       ...
-    ],
+    ]
   }
 }
 ```
@@ -334,6 +341,12 @@ Example:
 ### Templates
 
 The following are available templates to specify for the layout of the grid layer.
+
+{% call callout('Tip', type='success') %}
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+{% endcall %}
+
+
 
 #### fill
 
@@ -589,6 +602,12 @@ The following animation effects are available as presets for AMP stories:
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
 
+
+{% call callout('Tip', type='success') %}
+See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+{% endcall %}
+
+
 ### Animation attributes
 
 #####  animate-in (required)
@@ -629,7 +648,9 @@ Fly from left!
 </h2>
 ```
 
-**Note**: The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% call callout('Note', type='note') %}
+The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% endcall %}
 
 ##### animate-in-after (optional)
 
@@ -699,9 +720,16 @@ You can apply multiple entrance animations on one element (for example, an eleme
 </div>
 ```
 
-**Note**: If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
-
+{% call callout('Note', type='note') %}
+If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
+{% endcall %}
 
 ## Validation
 
 See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
+
+## Related resources
+
+* [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
+* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)

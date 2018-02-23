@@ -69,7 +69,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     if (options.closeText) {
       ampSidebar.setAttribute('data-close-button-aria-label',
           options.closeText);
-    };
+    }
     ampSidebar.setAttribute('id', 'sidebar1');
     ampSidebar.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(ampSidebar);
@@ -133,7 +133,7 @@ describes.realWin('amp-sidebar 0.1 version', {
   describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
-        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+        assert(sidebarElement.classList.contains('i-amphtml-overlay'));
       });
     });
 

@@ -30,6 +30,29 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 11:00 PM, Feb 7, 2018 UTC
+
+Validator version 317
+
+Rules version 566
+
+Includes:
+ - #12600
+ - Prefer errors based on specificity over volume.
+ - #12832
+ - #12904
+ - #12654
+ - #12836
+ - #13001
+ - #12906
+ - #13036
+ - #12896
+ - #13073
+ - AttrSpec supports requires_extension.
+ - #12955
+ - #13204
+ - #12798
+
 ### 7:00 PM, January 29, 2018 UTC
 
 Validator version 311

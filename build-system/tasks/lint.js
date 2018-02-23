@@ -30,7 +30,6 @@ const isWatching = (argv.watch || argv.w) || false;
 
 const options = {
   fix: false,
-  rulePaths: ['build-system/eslint-rules/'],
 };
 
 /**
@@ -63,9 +62,11 @@ function initializeStream(globs, streamOptions) {
  * @param {string} message
  */
 function logOnSameLine(message) {
-  process.stdout.moveCursor(0, -1);
-  process.stdout.cursorTo(0);
-  process.stdout.clearLine();
+  if (!process.env.TRAVIS) {
+    process.stdout.moveCursor(0, -1);
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
+  }
   log(message);
 }
 
@@ -131,7 +132,11 @@ function lint() {
 }
 
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
+gulp.task(
+    'lint',
+    'Validates against Google Closure Linter',
+    ['update-packages'],
+    lint,
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',
