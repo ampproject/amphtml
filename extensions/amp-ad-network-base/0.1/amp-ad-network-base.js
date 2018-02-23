@@ -15,17 +15,17 @@
  */
 
 import {
+  LayoutInfoDef,
+  getAmpAdMetadata, // eslint-disable-line no-unused-vars
+  sendXhrRequest, // eslint-disable-line no-unused-vars
+} from '../../amp-a4a/0.1/a4a-utils';
+import {
   RendererDef,
-  RenderingDataInputDef,
+  RendererInputDef,
   ValidationResult,
   ValidationResultType, // eslint-disable-line no-unused-vars
   ValidatorDef, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-render';
-import {
-  SizeInfoDef,
-  getAmpAdMetadata, // eslint-disable-line no-unused-vars
-  sendXhrRequest, // eslint-disable-line no-unused-vars
-} from '../../amp-a4a/0.1/a4a-utils';
 import {dev} from '../../../src/log';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
@@ -51,11 +51,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?ArrayBuffer} */
     this.unvalidatedBytes_ = null;
 
-    /** @private {!SizeInfoDef} */
+    /** @private {!LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
-      width: Number(this.element.getAttribute('width')),
-      height: Number(this.element.getAttribute('height')),
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
     };
   }
 
@@ -113,10 +113,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * @param {string} creative
-   * @return {!RenderingDataInputDef}
+   * @return {!RendererInputDef}
    */
   getRenderingDataInput_(creative) {
-    return /** @type {!RenderingDataInputDef} */ ({
+    return /** @type {!RendererInputDef} */ ({
       creativeMetadata: getAmpAdMetadataMock(creative, TAG, ''),
       // TODO(levitzky) This may change based on the ad response.
       size: this.initialSize_,

@@ -18,7 +18,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {
   CreativeMetaDataDef,
-  SizeInfoDef,
+  LayoutInfoDef,
 } from './a4a-utils';
 import {
   FriendlyIframeEmbed, // eslint-disable-line no-unused-vars
@@ -37,26 +37,26 @@ const TAG = 'a4a-render';
 
 /** @typedef {{
       creativeMetadata: !CreativeMetaDataDef,
-      size: !SizeInfoDef,
+      size: !LayoutInfoDef,
       adUrl: string,
       sentinel: ?string,
     }} */
-export let RenderingDataInputDef;
+export let RendererInputDef;
 
 /** @typedef {{
       iframe: ?Element,
       friendlyIframeEmbed: ?Promise<!FriendlyIframeEmbed>
     }} */
-export let RenderingDataOutputDef;
+export let RendererOutputDef;
 
 /** @typedef {string} */
 export let ValidationResultType;
 
 /** @typedef {
       function(
-        !RenderingDataInputDef,
+        !RendererInputDef,
         !Object,
-        function():boolean=):RenderingDataOutputDef
+        function():boolean=):RendererOutputDef
     } */
 export let RendererDef;
 
@@ -90,10 +90,10 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /**
  * Render a validated AMP creative directly in the parent page.
- * @param {!RenderingDataInputDef} renderingData
+ * @param {!RendererInputDef} renderingData
  * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!RenderingDataOutputDef>}
+ * @return {!Promise<!RendererOutputDef>}
  * @private
  */
 export function friendlyFrameRenderer(
@@ -159,7 +159,7 @@ export function friendlyFrameRenderer(
         return friendlyIframeEmbed.whenIniLoaded()
             .then(() => {
               checkStillCurrent();
-              return /** @type {!RenderingDataOutputDef} */ ({
+              return /** @type {!RendererOutputDef} */ ({
                 iframe,
                 friendlyIframeEmbed,
               });

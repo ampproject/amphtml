@@ -19,8 +19,8 @@ import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 
-/** @typedef {{width: number, height: number}} */
-export let SizeInfoDef;
+/** @typedef {{width: string, height: string}} */
+export let LayoutInfoDef;
 
 /** @typedef {{
       minifiedCreative: string,
