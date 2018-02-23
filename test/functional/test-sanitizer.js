@@ -17,6 +17,7 @@
 import {
   resolveUrlAttr,
   rewriteAttributeValue,
+  rewriteAttributesForElement,
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
@@ -219,6 +220,47 @@ describe('sanitizeHtml', () => {
     // Should not change "foo.bar" but should add target="_top".
     expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
         .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+  });
+});
+
+
+describe('rewriteAttributesForElement', () => {
+  let location = 'https://pub.com/';
+
+  it('should not modify `target` on publisher origin', () => {
+    const element = document.createElement('a');
+    element.setAttribute('href', '#hash');
+
+    rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+
+    expect(element.getAttribute('href')).to.equal('https://not.hash/');
+    expect(element.hasAttribute('target')).to.equal(false);
+  });
+
+  describe('on CDN origin', () => {
+    beforeEach(() => {
+      location = 'https://cdn.ampproject.org';
+    });
+
+    it('should set `target` when rewrite <a> from hash to non-hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', '#hash');
+
+      rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+
+      expect(element.getAttribute('href')).to.equal('https://not.hash/');
+      expect(element.getAttribute('target')).to.equal('_top');
+    });
+
+    it('should remove `target` when rewrite <a> from non-hash to hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'https://not.hash/');
+
+      rewriteAttributesForElement(element, 'href', '#hash', location);
+
+      expect(element.getAttribute('href')).to.equal('#hash');
+      expect(element.hasAttribute('target')).to.equal(false);
+    })
   });
 });
 

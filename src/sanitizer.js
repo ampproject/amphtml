@@ -407,19 +407,22 @@ export function isValidAttr(tagName, attrName, attrValue) {
  * @param {!Element} element
  * @param {string} attrName
  * @param {string} attrValue
+ * @param {!Location=} opt_location
  * @return {string}
  */
-export function rewriteAttributesForElement(element, attrName, attrValue) {
+export function rewriteAttributesForElement(
+  element, attrName, attrValue, opt_location)
+{
   const tag = element.tagName.toLowerCase();
   const attr = attrName.toLowerCase();
   const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
   // When served from proxy (CDN), changing an <a> tag from a hash link to a
   // non-hash link requires updating `target` attribute per cache modification
   // rules. @see amp-cache-modifications.md#url-rewrites
-  const isProxy = true;//isProxyOrigin(self.location);
-  if (isProxy && tag == 'a' && attr == 'href') {
-    const newValueIsHash = rewrittenValue.startsWith('#');
-    const oldValueIsHash = element.getAttribute(attrName).startsWith('#');
+  const isProxy = isProxyOrigin(opt_location || self.location);
+  if (isProxy && tag === 'a' && attr === 'href') {
+    const newValueIsHash = rewrittenValue[0] === '#';
+    const oldValueIsHash = element.getAttribute(attr)[0] === '#';
 
     if (newValueIsHash && !oldValueIsHash) {
       // Save the original value of `target` so it can be restored (if needed).

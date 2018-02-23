@@ -921,7 +921,7 @@ export class Bind {
           }
         } else if (newValue !== oldValue) {
           const rewrittenValue =
-              this.rewriteAttributes_(element, property, newValue);
+              this.rewriteAttributes_(element, property, String(newValue));
           if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
             if (updateProperty) {
               element[property] = rewrittenValue;
