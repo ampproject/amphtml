@@ -67,22 +67,20 @@ export class SubscriptionService {
   initialize_() {
     const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
 
-    const configPromises = Promise.all([
+    return Promise.all([
       this.getServiceConfig_(),
       pageConfigResolver.resolveConfig(),
-    ]);
+    ]).then(promiseValues => {
+      /** @type {!JsonObject} */
+      this.serviceConfig_ = dev().assert(promiseValues[0]);
+      /** @type {!PageConfig} */
+      this.pageConfig_ = dev().assert(promiseValues[1]);
 
-    return configPromises.then(promiseValues => {
-      const serviceConfig = user().assert(promiseValues[0]);
-      this.serviceConfig_ = serviceConfig;
-      const pageConfig = user().assert(promiseValues[1]);
-      this.pageConfig_ = pageConfig;
-
-      dev().assert(this.serviceConfig_['services'],
+      user().assert(this.serviceConfig_['services'],
           'Services not configured in service config');
 
       this.serviceConfig_['services'].forEach(service => {
-        this.initializeSubscriptionPlatforms_(service, pageConfig);
+        this.initializeSubscriptionPlatforms_(service, this.pageConfig_);
       });
     });
   }
@@ -124,6 +122,7 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   registerService(serviceId, subscriptionPlatform) {
+
     this.subscriptionPlatforms_.push(subscriptionPlatform);
 
     this.fetchEntitlements_(subscriptionPlatform);
@@ -166,6 +165,7 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
 
