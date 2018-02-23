@@ -470,6 +470,18 @@ describes.realWin('amp-analytics', {
     });
   });
 
+  it('should replace HTML_ATTR', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/bar&ids=${htmlAttr(div,id)}'},
+      'triggers': [{'on': 'visible', 'request': ['foo']}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(decodeURIComponent(sendRequestSpy.args[0][0])).to.equal('https://example.com/bar&ids=[{"id":"parent"}]');
+    });
+  });
+
   it('fills cid', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
