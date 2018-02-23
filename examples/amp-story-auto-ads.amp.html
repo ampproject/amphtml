@@ -38,7 +38,31 @@
 </head>
 <body>
   <amp-story standalone>
-    <amp-story-auto-ads></amp-story-auto-ads>
+    <amp-story-auto-ads>
+      <script type="application/json">
+        {
+            "ad-attributes": {
+              "type": "custom",
+              "data-src": "./amp-story-auto-ads-payload.json"
+            }
+        }
+      </script>
+
+      <template type="amp-mustache" id="template-1">
+        <h2>Template ad 1</h2>
+        <amp-img layout='fixed' height="300" width="300" src="{{imgSrc}}"></amp-img>
+        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+      </template>
+
+      <!-- TODO(ccordry) make a example server that returns different payloads
+      and can take advantage of multiple templates. -->
+      <template type="amp-mustache" id="template-2">
+        <div class="creative-line-1">{{creativeLine1}}</div>
+        <div class="creative-line-2">{{creativeLine2}}</div>
+        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+      </template>
+    </amp-story-auto-ads>
+
     <amp-story-page id="fade-in-page">
       <amp-story-grid-layer template="vertical">
         <h1>fade-in</h1>
