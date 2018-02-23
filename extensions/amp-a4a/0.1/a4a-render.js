@@ -20,14 +20,14 @@ import {
   CreativeMetaDataDef,
   SizeInfoDef,
 } from './a4a-utils';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {
-  FriendlyIframeEmbed,
+  FriendlyIframeEmbed, // eslint-disable-line no-unused-vars
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -44,8 +44,8 @@ const TAG = 'a4a-render';
 export let RenderingDataInputDef;
 
 /** @typedef {{
-      iframe: !Element,
-      friendlyIframeEmbed: !Promise<!FriendlyIframeEmbed>
+      iframe: ?Element,
+      friendlyIframeEmbed: ?Promise<!FriendlyIframeEmbed>
     }} */
 export let RenderingDataOutputDef;
 
@@ -53,15 +53,15 @@ export let RenderingDataOutputDef;
 export let ValidationResultType;
 
 /** @typedef {
-      !function(
+      function(
         !RenderingDataInputDef,
         !Object,
-        function():boolean=):!RenderingDataOutputDef
+        function():boolean=):RenderingDataOutputDef
     } */
 export let RendererDef;
 
 /** @typedef {
-      !function(
+      function(
         !ArrayBuffer,
         !Headers,
         !Object,

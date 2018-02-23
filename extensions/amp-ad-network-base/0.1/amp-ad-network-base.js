@@ -17,14 +17,14 @@
 import {
   RendererDef,
   RenderingDataInputDef,
-  ValidatorDef,
   ValidationResult,
   ValidationResultType, // eslint-disable-line no-unused-vars
+  ValidatorDef, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-render';
 import {
   SizeInfoDef,
-  getAmpAdMetadata,
-  sendXhrRequest,
+  getAmpAdMetadata, // eslint-disable-line no-unused-vars
+  sendXhrRequest, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-utils';
 import {dev} from '../../../src/log';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
@@ -181,10 +181,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 // Mocks for development. These will obviously go away.
 function sendXhrRequestMock(unusedAdUrl) {
   return Promise.resolve({
-    bytes: utf8Encode(JSON.stringify({
+    bytes: utf8Encode(JSON.stringify(/** @type {!JsonObject} */ ({
       templateUrl: 'www.fake.com',
       data: {},
-    })),
+    }))),
     headers: () => {},
   });
 }

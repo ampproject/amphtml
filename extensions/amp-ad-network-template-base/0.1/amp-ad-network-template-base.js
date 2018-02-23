@@ -17,6 +17,7 @@
 import {AmpAdNetworkBase} from '../../amp-ad-network-base/0.1/amp-ad-network-base';
 import {ValidationResult} from '../../amp-a4a/0.1/a4a-render';
 import {dev} from '../../../src/log';
+import {utf8Decode} from '../../../src/utils/bytes'; // For testing/debugging purposes
 
 const TAG = 'amp-ad-network-template-base';
 
@@ -26,9 +27,13 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
    */
   constructor(element) {
     super(element);
-    this.bindValidator(bytes => Promise.resolve(bytes));
+    this.bindValidator(bytes => /** @type {!Promise<?string>} */
+      (Promise.resolve(utf8Decode(bytes))));
     this.bindRenderer(ValidationResult.AMP,
-        creative => dev().info(TAG, creative));
+        creative => {
+          dev().info(TAG, creative);
+          return {iframe: null, friendlyIframeEmbed: null};
+        });
   }
 }
 
