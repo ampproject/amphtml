@@ -81,6 +81,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   if (!rtcConfig) {
     return;
   }
+  customMacros['TIMEOUT'] = () => rtcConfig['timeoutMillis'];
   const promiseArray = [];
   const seenUrls = {};
   const rtcStartTime = Date.now();
