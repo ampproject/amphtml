@@ -184,7 +184,7 @@ export class BaseElement {
   * The default priority for base elements is 0.
   * @return {number}
   */
-  getPriority() {
+  getLayoutPriority() {
     return 0;
   }
 
@@ -196,11 +196,12 @@ export class BaseElement {
    * available. It's a restricted API and special review is required to
    * allow individual extensions to request priority upgrade.
    *
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(newPriority) {
-    this.element.getResources().updatePriority(this.element, newPriority);
+  updateLayoutPriority(newLayoutPriority) {
+    this.element.getResources().updateLayoutPriority(
+        this.element, newLayoutPriority);
   }
 
   /** @return {!Layout} */

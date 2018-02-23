@@ -814,18 +814,18 @@ export class Resources {
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(element, newPriority) {
+  updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
-    resource.updatePriority(newPriority);
+    resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
     this.queue_.forEach(task => {
       if (task.resource == resource) {
-        task.priority = newPriority;
+        task.priority = newLayoutPriority;
       }
     });
 
@@ -1967,11 +1967,11 @@ export class Resources {
       if (resource.getState() == ResourceState.NOT_BUILT) {
         resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
-              parentResource.getPriority());
+              parentResource.getLayoutPriority());
         });
       } else {
         this.measureAndScheduleIfAllowed_(resource, layout,
-            parentResource.getPriority());
+            parentResource.getLayoutPriority());
       }
     });
   }
@@ -2012,7 +2012,7 @@ export class Resources {
     const task = {
       id: taskId,
       resource,
-      priority: Math.max(resource.getPriority(), parentPriority) +
+      priority: Math.max(resource.getLayoutPriority(), parentPriority) +
           priorityOffset,
       forceOutsideViewport,
       callback,
