@@ -1085,7 +1085,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (thumbnailObj.srcset) {
       imgElement.setAttribute('srcset', thumbnailObj.srcset.stringify());
     } else {
-      imgElement.setAttribute('src', thumbnailObj.placeholderUrl);
+      imgElement.setAttribute('src', thumbnailObj.placeholderSrc);
     }
     element.appendChild(imgElement);
     const closeGalleryAndShowTargetSlide = event => {

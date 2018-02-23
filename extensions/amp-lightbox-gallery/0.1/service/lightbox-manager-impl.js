@@ -51,7 +51,7 @@ const SLIDE_SELECTOR = '.amp-carousel-slide';
 
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
- *  placeholderUrl: string,
+ *  placeholderSrc: string,
  *  element: !Element
  * }} */
 export let LightboxThumbnailDataDef;
@@ -374,27 +374,24 @@ export class LightboxManager {
     return this.lightboxGroups_[lightboxGroupId]
         .map(element => ({
           srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
-          placeholderUrl: this.getPlaceholderForElementType_(element),
+          placeholderSrc: this.getPlaceholderForElementType_(element),
           element,
         }));
   }
 
   /**
    * Returns the default placeholder based on element type
-   * @param {!Element} element
+   * @param {!Element=} opt_element
    * @return {string}
    * @private
    */
-  getPlaceholderForElementType_(element) {
-    switch (element.tagName) {
-      // TODO(#12713): add placeholder icons for each component type
-      default:
-        return defaultPlaceholder;
-    }
+  getPlaceholderForElementType_(opt_element) {
+    // TODO(#12713): add placeholder icons for each component type
+    return defaultPlaceholder;
   }
 
   /**
-   * Get thumbnail url for single element.
+   * Get thumbnail srcset for single element.
    * @param {!Element} element
    * @return {!../../../../src/srcset.Srcset|null}
    * @private
@@ -405,16 +402,29 @@ export class LightboxManager {
       const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
       user().assert(thumbnailImage.tagName == 'AMP-IMG');
       return srcsetFromElement(thumbnailImage);
-    } else if (element.tagName == 'AMP-IMG') {
+    } else {
+      return this.getUserPlaceholderSrcset_(element);
+    }
+  }
+
+  /**
+   * Get the srcset for the user-specified placeholder for each element
+   * @param {!Element} element
+   * @return {!../../../../src/srcset.Srcset|null}
+   * @private
+   */
+  getUserPlaceholderSrcset_(element) {
+    if (element.tagName == 'AMP-IMG') {
       return srcsetFromElement(element);
     } else if (element.tagName == 'AMP-ANIM') {
       return srcsetFromElement(element);
     } else if (element.tagName == 'AMP-VIDEO') {
       return this.getThumbnailSrcsetForVideo_(element);
+      // TODO: process placeholder logic for other components as added
     } else {
       const placeholder = childElementByAttr(element, 'placeholder');
-      if (placeholder && placeholder.tagName == 'AMP-IMG') {
-        return srcsetFromElement(placeholder);
+      if (placeholder) {
+        return this.getUserPlaceholderSrcset_(placeholder);
       } else {
         return null;
       }
@@ -427,11 +437,7 @@ export class LightboxManager {
    * @return {!../../../../src/srcset.Srcset|null}
    */
   getThumbnailSrcsetForVideo_(ampVideo) {
-    if (ampVideo.hasAttribute('poster')) {
-      return srcsetFromSrc(ampVideo.getAttribute('poster'));
-    } else {
-      return null;
-    }
+    const poster = ampVideo.getAttribute('poster');
+    return poster ? srcsetFromSrc(poster) : null;
   }
-
 }
