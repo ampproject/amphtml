@@ -67,13 +67,13 @@ export class SubscriptionService {
   initialize_() {
     const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
 
-    const configPromises = Promise.all([
+    return Promise.all([
       this.getServiceConfig_(),
       pageConfigResolver.resolveConfig(),
-    ]);
-
-    return configPromises.then(promiseValues => {
+    ]).then(promiseValues => {
+      /** @type {!JsonObject} */
       this.serviceConfig_ = promiseValues[0];
+      /** @type {!PageConfig} */
       this.pageConfig_ = promiseValues[1];
     });
   }
@@ -115,6 +115,7 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   registerService(serviceId, subscriptionPlatform) {
+
     this.subscriptionPlatforms_.push(subscriptionPlatform);
 
     this.fetchEntitlements_(subscriptionPlatform);
@@ -157,6 +158,7 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+
       user().assert(this.pageConfig_, 'Page config is null');
 
       /** @type {!PageConfig} */

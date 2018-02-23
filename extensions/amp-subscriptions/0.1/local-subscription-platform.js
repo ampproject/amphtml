@@ -50,7 +50,8 @@ export class LocalSubscriptionPlatform {
         user().assert(
             this.serviceConfig_['authorizationUrl'],
             'Service config does not have authorization Url'
-        )
+        ),
+        'Authorization Url'
     );
   }
 
@@ -60,12 +61,14 @@ export class LocalSubscriptionPlatform {
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
-    const authUrl = assertHttpsUrl(this.authorizationUrl_);
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');
 
     return this.xhr_
-        .fetchJson(authUrl)
+        .fetchJson(this.authorizationUrl_,{
+          mode: 'cors',
+          credentials: 'include',
+        })
         .then(res => res.json())
         .then(resJson => {
           return new Entitlements(
