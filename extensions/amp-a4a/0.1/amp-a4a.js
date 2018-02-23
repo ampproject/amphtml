@@ -16,6 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -401,7 +402,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   /** @override */
@@ -794,7 +795,7 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
           // Update priority.
-          this.updateLayoutPriority(0);
+          this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);

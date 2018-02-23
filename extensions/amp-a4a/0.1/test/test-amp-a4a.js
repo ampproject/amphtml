@@ -39,6 +39,7 @@ import {
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
@@ -1072,7 +1073,8 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                 .to.be.calledOnce;
             expect(updateLayoutPriorityStub).to.be.calledOnce;
-            expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
+            expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+                LayoutPriority.CONTENT);
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
@@ -1196,7 +1198,8 @@ describe('amp-a4a', () => {
               expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                   .to.be.calledOnce;
               expect(updateLayoutPriorityStub).to.be.calledOnce;
-              expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
+              expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+                  LayoutPriority.CONTENT);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
@@ -1763,7 +1766,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getLayoutPriority()).to.equal(1);
+        expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
       });
     });
 
@@ -1776,7 +1779,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getLayoutPriority()).to.equal(2);
+        expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
       });
     });
   });
