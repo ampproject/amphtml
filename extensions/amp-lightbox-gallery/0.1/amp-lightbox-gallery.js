@@ -39,6 +39,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {setStyle, toggle} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -223,7 +224,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         'i-amphtml-element');
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
-    clonedNode.removeAttribute('id');
+    const id = clonedNode.getAttribute('id');
+    // Certain ad formats rely on an id prefixed with i-amphtml-demo-
+    if (id && startsWith(id, 'i-amphtml-demo-')) {
+      clonedNode.setAttribute('id', id + '-in-lightbox');
+    } else {
+      clonedNode.removeAttribute('id');
+    }
     return clonedNode;
   }
   /**

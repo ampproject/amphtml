@@ -14,6 +14,7 @@
   <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
   <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -130,7 +131,29 @@
       data-aax_pubname="test123"
       data-aax_src="302">
     </amp-ad>
-
+    <amp-ad
+      layout="responsive"
+      width="350"
+      height="250"
+      id="i-amphtml-demo-1"
+      type="fake"
+      a4a-conversion="true"
+      src="//ads.localhost:8000/test/manual/amp-animation/embeds/scrollbound/clock.a4a.html?inabox=1">
+    </amp-ad>
+    <amp-ad data-slot="/30497360/a4a/a4a_native"
+      height="250"
+      type="doubleclick"
+      width="300">
+    </amp-ad>
+    <amp-ad width="500" height="60"
+      type="custom"
+      data-url="/examples/custom.ad.example.single.json">
+      <template type="amp-mustache" id="amp-template-id-no-slot">
+        <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+          <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+        </a>
+      </template>
+  </amp-ad>
   </amp-carousel>
 
   <amp-img id="fb-thumbnail-img"
