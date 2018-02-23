@@ -21,12 +21,18 @@ import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
-import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
+/** @typedef {{serviceId: string, authorizationUrl: string}} */
+export let ServiceDefination;
+
+/** @typedef {{services:!Array<!ServiceDefination>}} */
+export let ServiceConfig;
 
 export class SubscriptionService {
   /**
@@ -47,7 +53,7 @@ export class SubscriptionService {
     /** @private {?PageConfig} */
     this.pageConfig_ = null;
 
-    /** @private {?JsonObject} */
+    /** @private {!ServiceConfig} */
     this.serviceConfig_ = null;
 
     /** @private @const {!Array<!SubscriptionPlatform>} */
@@ -71,7 +77,7 @@ export class SubscriptionService {
       this.getServiceConfig_(),
       pageConfigResolver.resolveConfig(),
     ]).then(promiseValues => {
-      /** @type {!JsonObject} */
+      /** @type {!ServiceConfig} */
       this.serviceConfig_ = promiseValues[0];
       /** @type {!PageConfig} */
       this.pageConfig_ = promiseValues[1];
@@ -79,7 +85,7 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!JsonObject} serviceConfig
+   * @param {!ServiceConfig} serviceConfig
    * @param {!PageConfig} pageConfig
    * @private
    */
@@ -97,7 +103,7 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @returns {!Promise<!JsonObject>}
+   * @returns {!Promise<!ServiceConfig>}
    */
   getServiceConfig_() {
     return new Promise((resolve, reject) => {
@@ -109,7 +115,7 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!JsonObject} serviceConfig
+   * @param {!ServiceConfig} serviceConfig
    * @param {!PageConfig} pageConfig
    * @private
    */
@@ -127,7 +133,7 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @returns {!Promise<!JsonObject>}
+   * @returns {!Promise<!ServiceConfig>}
    */
   getServiceConfig_() {
     return new Promise((resolve, reject) => {
@@ -142,9 +148,8 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !PageConfig):Promise<!SubscriptionPlatform></SubscriptionPlatform>} subscriptionPlatformFactory
+   * @param {function(!ServiceConfig, !PageConfig):Promise<!SubscriptionPlatform>} subscriptionPlatformFactory
    */
-<<<<<<< HEAD
   registerService(serviceId, subscriptionPlatformFactory) {
     this.initialize_.then(() => {
       subscriptionPlatformFactory(this.serviceConfig_, this.pageConfig_)
@@ -153,11 +158,6 @@ export class SubscriptionService {
             this.fetchEntitlements_(subscriptionPlatform);
           });
     });
-=======
-  registerService(serviceId, subscriptionPlatform) {
-
-    this.subscriptionPlatforms_.push(subscriptionPlatform);
->>>>>>> dfe14d5f89b9bb5144f1844189e906cbe715d2d2
 
   }
 
@@ -199,7 +199,6 @@ export class SubscriptionService {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
 
-<<<<<<< HEAD
       user().assert(this.pageConfig_, 'Page config is null');
 
       user().assert(this.serviceConfig_['services'],
@@ -210,8 +209,6 @@ export class SubscriptionService {
             /** @type {!PageConfig} */(this.pageConfig_));
       });
 
-=======
->>>>>>> dfe14d5f89b9bb5144f1844189e906cbe715d2d2
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
 
