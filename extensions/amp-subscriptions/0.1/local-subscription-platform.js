@@ -17,6 +17,7 @@
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -43,6 +44,15 @@ export class LocalSubscriptionPlatform {
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
+
+    /** @private @const {string} */
+    this.authorizationUrl_ = assertHttpsUrl(
+        user().assert(
+            this.serviceConfig_['authorizationUrl'],
+            'Service config does not have authorization Url'
+        ),
+        'Authorization Url'
+    );
   }
 
   /**
@@ -51,12 +61,13 @@ export class LocalSubscriptionPlatform {
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
-    user().assert(this.serviceConfig_['paywallUrl'],
-        'Service config does not have paywall Url');
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');
+
     return this.xhr_
-        .fetchJson(this.serviceConfig_['paywallUrl'])
+        .fetchJson(this.authorizationUrl_, {
+          credentials: 'include',
+        })
         .then(res => res.json())
         .then(resJson => {
           return new Entitlements(
