@@ -33,7 +33,7 @@ import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {rewriteAttributesForElement} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
 
@@ -863,13 +863,15 @@ export class Bind {
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
+    const tag = element.tagName;
+
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)
-        if (element.tagName == 'TEXTAREA') {
+        if (tag == 'TEXTAREA') {
           element.value = String(newValue);
         }
         break;
@@ -899,8 +901,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty =
-            element.tagName == 'INPUT' && property in element;
+        const updateProperty = (tag == 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -919,24 +920,11 @@ export class Bind {
             mutated = true;
           }
         } else if (newValue !== oldValue) {
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let rewrittenNewValue;
-          try {
-            rewrittenNewValue = rewriteAttributeValue(
-                element.tagName, property, String(newValue));
-          } catch (e) {
-            const err = user().createError(`${TAG}: "${newValue}" is not a ` +
-                `valid result for [${property}]`, e);
-            reportError(err, element);
-          }
-          // Rewriting can fail due to e.g. invalid URL.
-          if (rewrittenNewValue !== undefined) {
-            // TODO(choumx): Don't bother setting for bind-only attrs.
-            element.setAttribute(property, rewrittenNewValue);
+          const rewrittenValue =
+              this.rewriteAttributes_(element, property, newValue);
+          if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
             if (updateProperty) {
-              element[property] = rewrittenNewValue;
+              element[property] = rewrittenValue;
             }
             mutated = true;
           }
@@ -948,6 +936,30 @@ export class Bind {
         break;
     }
     return null;
+  }
+
+  /**
+   * Performs any necessary CDN rewrites for the given mutation and updates
+   * the element. Returns true if rewrite succeeds. Otherwise returns false.
+   * @see amp-cache-modifications.md#url-rewrites
+   * @param {!Element} element
+   * @param {string} property
+   * @param {string} value
+   * @return {string}
+   * @private
+   */
+  rewriteAttributes_(element, property, value) {
+    // Rewrite attributes if necessary. Not done in worker since it relies on
+    // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
+    let rewrittenValue;
+    try {
+      rewrittenValue = rewriteAttributesForElement(element, property, value);
+    } catch (e) {
+      const error = user().createError(`${TAG}: "${value}" is not a ` +
+          `valid result for [${property}]`, e);
+      reportError(error, element);
+    }
+    return rewrittenValue;
   }
 
   /**
