@@ -65,8 +65,7 @@ export class LocalSubscriptionPlatform {
         this.pageConfig_.getProductId(), 'Current Product ID is null');
 
     return this.xhr_
-        .fetchJson(this.authorizationUrl_,{
-          mode: 'cors',
+        .fetchJson(this.authorizationUrl_, {
           credentials: 'include',
         })
         .then(res => res.json())

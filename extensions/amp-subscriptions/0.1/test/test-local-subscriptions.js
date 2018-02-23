@@ -20,11 +20,12 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
-        'authorizationUrl': 'https://subscribe.google.com/subscription/2/entitlements',
+        'authorizationUrl': authUrl,
       },
     ],
   };
@@ -39,7 +40,9 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     const initializeStub =
         sandbox.spy(localSubscriptionPlatform.xhr_, 'fetchJson');
     localSubscriptionPlatform.getEntitlements();
-    expect(initializeStub).to.be.calledWith(
-        serviceConfig.services[0].authorizationUrl);
+    expect(initializeStub).to.be.calledOnce;
+    expect(initializeStub.getCall(0).args[0]).to.be.equals(authUrl);
+    expect(initializeStub.getCall(0).args[1].credentials)
+        .to.be.equals('include');
   });
 });
