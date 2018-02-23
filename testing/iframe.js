@@ -74,6 +74,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
+      [AmpEvents.LOAD_END]: 0,
     };
     const messages = [];
     let html = __html__[fixture];
