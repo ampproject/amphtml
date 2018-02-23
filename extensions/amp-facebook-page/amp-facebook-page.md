@@ -76,10 +76,6 @@ Hides the custom call to action button (if available). Default value is `false`.
 
 Uses the small header instead. Default value is `false`.
 
-##### data-adapt-container-width (optional)
-
-Tries to fit inside the container width. Default value is `true`.
-
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
