@@ -31,6 +31,7 @@ import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
+  'AMP-AD': true,
   'AMP-IMG': true,
   'AMP-ANIM': true,
   'AMP-VIDEO': true,
