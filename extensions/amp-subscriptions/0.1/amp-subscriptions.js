@@ -112,13 +112,17 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
-   * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @param {function(!JsonObject, !PageConfig):Promise<!SubscriptionPlatform></SubscriptionPlatform>} subscriptionPlatformFactory
    */
-  registerService(serviceId, subscriptionPlatform) {
+  registerService(serviceId, subscriptionPlatformFactory) {
+    this.initialize_.then(() => {
+      subscriptionPlatformFactory(this.serviceConfig_, this.pageConfig_)
+          .then(subscriptionPlatform => {
+            this.subscriptionPlatforms_.push(subscriptionPlatform);
+            this.fetchEntitlements_(subscriptionPlatform);
+          });
+    });
 
-    this.subscriptionPlatforms_.push(subscriptionPlatform);
-
-    this.fetchEntitlements_(subscriptionPlatform);
   }
 
   /**
@@ -161,13 +165,12 @@ export class SubscriptionService {
 
       user().assert(this.pageConfig_, 'Page config is null');
 
-      /** @type {!PageConfig} */
-      const pageConfig = this.pageConfig_;
       user().assert(this.serviceConfig_['services'],
           'Services not configured in service config');
 
       this.serviceConfig_['services'].forEach(service => {
-        this.initializeSubscriptionPlatforms_(service, pageConfig);
+        this.initializeSubscriptionPlatforms_(service,
+            /** @type {!PageConfig} */(this.pageConfig_));
       });
 
       const serviceIds = this.serviceConfig_['services'].map(service =>
