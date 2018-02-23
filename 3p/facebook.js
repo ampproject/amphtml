@@ -82,7 +82,7 @@ function getPageContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-tabs', data.tabs);
   container.setAttribute('data-hide-cover', data.hideCover);
-  container.setAttribute('data-show-facepile', data.showFacePile);
+  container.setAttribute('data-show-facepile', data.showFacepile);
   container.setAttribute('data-hide-cta', data.hideCta);
   container.setAttribute('data-small-header', data.smallHeader);
   container.setAttribute(
