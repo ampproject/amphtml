@@ -110,9 +110,34 @@ In this example, `<amp-lightbox-gallery>` displays the `alt` value as its descri
 </amp-img>
 ```
 
+## Thumbnail API
+Lightboxed items have a thumbnail gallery view. You can optionally specify a thumbnail item for your lightboxed element via the attribute `lightbox-thumbnail-id` that references the `id` of an `<amp-img>` element with `layout="nodisplay"`.
+
+#### Example: using `lightbox-thumbnail-id` to specify a thumbnail
+
+```html
+<amp-facebook
+  lightbox
+  lightbox-thumbnail-id="fb-thumbnail-img"
+  width="552"
+  height="303"
+  layout="responsive"
+  data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+</amp-facebook>
+
+<amp-img id="fb-thumbnail-img"
+  width="200"
+  height="200"
+  layout="nodisplay"
+  src="https://picsum.photos/200/200?image=1074">
+</amp-img>
+```
+
+If no thumbnail is specified, `<amp-img>` elements will be cropped per `object-fit: cover`, `<amp-video>` will use the image src specified in its `poster` attribute, and placeholder images will be used for lightboxed elements that have one.
+
 ## CSS API
 
-The CSS API exposes the following CSS classes so that you can customize the style of your lightbox: 
+The CSS API exposes the following CSS classes so that you can customize the style of your lightbox:
 
 <table>
   <tr>
