@@ -269,7 +269,6 @@ data.tabs;
 data.hideCover;
 data.hideCta;
 data.smallHeader;
-data.adaptContainerWidth;
 data.showFacePile;
 data.showText;
 

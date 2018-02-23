@@ -147,8 +147,8 @@ describes.realWin('amp-facebook', {
     expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
   });
 
-  it('adds fb-page element with `data-width` and `data-height` ' +
-    'attributes set correctly', () => {
+  it('check that fb-page element correctly sets `data-adapt-container-width` ' +
+    'attribute to \'true\'', () => {
     const div = doc.createElement('div');
     div.setAttribute('id', 'c');
     doc.body.appendChild(div);
@@ -163,8 +163,7 @@ describes.realWin('amp-facebook', {
     });
     const fbPage = doc.body.getElementsByClassName('fb-page')[0];
     expect(fbPage).not.to.be.undefined;
-    expect(fbPage.getAttribute('data-width')).to.equal('200');
-    expect(fbPage.getAttribute('data-height')).to.equal('200');
+    expect(fbPage.getAttribute('data-adapt-container-width')).to.equal('true');
   });
 
   it('removes iframe after unlayoutCallback', () => {
