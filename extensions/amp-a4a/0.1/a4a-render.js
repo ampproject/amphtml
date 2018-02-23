@@ -37,6 +37,7 @@ const TAG = 'a4a-render';
 
 /** @typedef {{
       creativeMetadata: !CreativeMetaDataDef,
+      templateData: AmpTemplateCreativeDef,
       size: !LayoutInfoDef,
       adUrl: string,
       sentinel: ?string,
@@ -49,16 +50,17 @@ export let RendererInputDef;
     }} */
 export let RendererOutputDef;
 
-/** @typedef {string} */
-export let ValidationResultType;
-
 /** @typedef {
       function(
         !RendererInputDef,
         !Object,
-        function():boolean=):RendererOutputDef
+        function():boolean=): !Promise<!RendererOutputDef>
     } */
 export let RendererDef;
+
+
+/** @typedef {string} */
+export let ValidatorResultType;
 
 /** @typedef {
       function(
@@ -66,27 +68,43 @@ export let RendererDef;
         !Headers,
         !Object,
         function():boolean=,
-        function(string):string=): !Promise<?string>
+        function(string):string=): !Promise<!ValidatorOutputDef>
     } */
 export let ValidatorDef;
 
 /** @typedef {{
+        creative: ?string,
+        templateData: (JsonObject|undefined),
+        analytics: (JsonObject|undefined),
+        result: !ValidatorResultType,
+    }} */
+export let ValidatorOutputDef;
+
+
+/** @typedef {{
       templateUrl: string,
       data: (JsonObject|undefined),
+      analytics: (JsonObject|undefined),
     }} */
 export let AmpTemplateCreativeDef;
 
-/** @enum {ValidationResultType} */
-export const ValidationResult = {
+/** @enum {ValidatorResultType} */
+export const ValidatorResult = {
   AMP: 'amp',
   NON_AMP: 'non-amp',
 };
 
-/** @type {string} */
+/** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
-/** @type {string} */
+/** @const {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+
+/**
+ * Stores an AmpAdInstance for each network type.
+ * @const {Object<string, AmpAdTemplates>}
+ */
+const ampAdTemplatesStore = {};
 
 /**
  * Render a validated AMP creative directly in the parent page.
@@ -94,7 +112,6 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
  * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @return {!Promise<!RendererOutputDef>}
- * @private
  */
 export function friendlyFrameRenderer(
   renderingData,
@@ -167,6 +184,43 @@ export function friendlyFrameRenderer(
       });
 }
 
+/**
+ * Render a validated AMP template.
+ * @param {!RendererInputDef} renderingData
+ * @param {!Object} baseImpl
+ * @param {function():boolean=} checkStillCurrent
+ * @return {!Promise<!RendererOutputDef>}
+ * @private
+ */
+export function templateRenderer(
+  renderingData,
+  baseImpl,
+  checkStillCurrent = () => true) {
+  return friendlyFrameRenderer(renderingData, baseImpl, checkStillCurrent)
+      .then(rendererOutput => {
+        const iframe = rendererOutput.iframe;
+        const templateMacroValues = renderingData.templateData &&
+            renderingData.templateData.data;
+        if (iframe && templateMacroValues) {
+          const ampAdTemplates = getOrCreateAmpAdTemplates(baseImpl);
+          ampAdTemplates.render(
+              templateMacroValues,
+              iframe.contentWindow.document.body)
+              .then(renderedElement => {
+                const templateAnalytics = renderingData.templateData &&
+                    renderingData.templateData.analytics;
+                if (templateAnalytics) {
+                  ampAdTemplates.insertAnalytics(
+                      renderedElement, templateAnalytics);
+                }
+                iframe.contentWindow.document.body./*OK*/innerHTML =
+                    renderedElement./*OK*/innerHTML;
+              });
+        }
+        return rendererOutput;
+      });
+}
+
 
 /**
  * Fetches and returns the template from the given ad response, wrapped as a
@@ -177,7 +231,7 @@ export function friendlyFrameRenderer(
  * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
- * @return {!Promise<?string>}
+ * @return {!Promise<!ValidatorOutputDef>}
  */
 export function templateValidator(
   bytes,
@@ -185,21 +239,28 @@ export function templateValidator(
   baseImpl,
   checkStillCurrent = () => true,
   parseOnFetch = () => {}) {
-
-  if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-    return /**@type {!Promise<?string>}*/ (Promise.resolve(null));
-  }
   return Promise.resolve(utf8Decode(bytes)).then(body => {
     checkStillCurrent();
+    if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
+      return /**@type {!Promise<!ValidatorOutputDef>} */ (Promise.resolve({
+        creative: body,
+        templateData: null,
+        result: ValidatorResult.NON_AMP,
+      }));
+    }
     const ampCreativeJson = /** @type {!AmpTemplateCreativeDef} */
           (tryParseJson(body) || {});
-    // TODO(levitzky) Will probably not want to create a new instance here every
-    // time this is invoked.
-    const doc = baseImpl.element.ownerDocument;
-    return new AmpAdTemplates(doc.defaultView || doc.parentWindow)
+    return getOrCreateAmpAdTemplates(baseImpl)
         .fetch(ampCreativeJson.templateUrl)
         .then(template => {
-          return parseOnFetch ? parseOnFetch(template) : template;
+          return {
+            templateData: {
+              template: parseOnFetch ? parseOnFetch(template) : template,
+              data: ampCreativeJson.data,
+              analytics: ampCreativeJson.analytics,
+            },
+            result: ValidatorResult.AMP,
+          };
         })
         .catch(error => {
           dev().warn(TAG, 'Error fetching/expanding template',
@@ -210,4 +271,12 @@ export function templateValidator(
   });
 }
 
-
+/**
+ * @param {!Object} baseImpl AmpAdNetworkBase impl.
+ */
+function getOrCreateAmpAdTemplates(baseImpl) {
+  const doc = baseImpl.element.ownerDocument;
+  const implType = baseImpl.getAttribute('type') || 'anon';
+  return ampAdTemplatesStore[implType] = ampAdTemplatesStore[implType] ||
+      new AmpAdTemplates(doc.defaultView || doc.parentWindow);
+}

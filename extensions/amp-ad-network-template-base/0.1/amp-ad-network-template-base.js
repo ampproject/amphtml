@@ -15,7 +15,11 @@
  */
 
 import {AmpAdNetworkBase} from '../../amp-ad-network-base/0.1/amp-ad-network-base';
-import {ValidationResult} from '../../amp-a4a/0.1/a4a-render';
+import {
+  ValidatorOutputDef, // eslint-disable-line no-unused-vars
+  ValidatorResult,
+  templateRenderer,
+} from '../../amp-a4a/0.1/a4a-render';
 import {dev} from '../../../src/log';
 import {utf8Decode} from '../../../src/utils/bytes'; // For testing/debugging purposes
 
@@ -27,12 +31,16 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
    */
   constructor(element) {
     super(element);
-    this.bindValidator(bytes => /** @type {!Promise<?string>} */
-      (Promise.resolve(utf8Decode(bytes))));
-    this.bindRenderer(ValidationResult.AMP,
-        creative => {
-          dev().info(TAG, creative);
-          return {iframe: null, friendlyIframeEmbed: null};
+    this.bindValidator(bytes => Promise.resolve(
+        /** @type {!ValidatorOutputDef} */({
+          creative: utf8Decode(bytes),
+          templateData: {},
+          result: 'amp',
+        })));
+    this.bindRenderer(ValidatorResult.AMP,
+        (input, base) => {
+          dev().info(TAG, input.creativeMetadata.minifiedCreative);
+          return templateRenderer(input, base);
         });
   }
 }

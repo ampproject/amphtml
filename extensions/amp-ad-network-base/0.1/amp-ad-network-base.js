@@ -22,12 +22,12 @@ import {
 import {
   RendererDef,
   RendererInputDef,
-  ValidationResult,
-  ValidationResultType, // eslint-disable-line no-unused-vars
   ValidatorDef, // eslint-disable-line no-unused-vars
+  ValidatorOutputDef,
+  ValidatorResultType, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-render';
 import {dev} from '../../../src/log';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 const TAG = 'amp-ad-network-base';
 
@@ -36,7 +36,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<ValidationResultType, !RendererDef>} */
+    /** @private {Object<ValidatorResultType, !RendererDef>} */
     this.boundRenderers_ = {};
 
     /** @private {?ValidatorDef} */
@@ -54,9 +54,21 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {!LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
+      width: element.getAttribute('width'),
+      height: element.getAttribute('height'),
     };
+
+    /**
+     * @private {number} unique ID of the currently executing promise to allow
+     * for cancellation.
+     */
+    this.freshnessId_ = 0;
+
+    /** @private {function():boolean} a function that will return true if the
+     * freshness id changes due to unlayout. Initialized to always return
+     * false, and has an actual value set in onLayoutMeasure.
+     */
+    this.isStale_ = () => false;
   }
 
   /**
@@ -71,7 +83,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {ValidationResultType} resultType
+   * @param {ValidatorResultType} resultType
    * @param {!RendererDef} renderer
    * @protected
    */
@@ -112,10 +124,28 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} creative
+   * @return {function():boolean} function that when called will verify if
+   *    current ad retrieval is current (meaning unlayoutCallback was not
+   *    executed). If not, will return false.
+   * @throws {Error}
+   */
+  getFreshnessVerifier() {
+    const id = this.freshnessId_;
+    return () => {
+      if (id != this.freshnessId_) {
+        this.handleStaleExecution();
+        return true;
+      }
+      return false;
+    };
+  }
+
+  /**
+   * @param {!ValidatorOutputDef} validatorOutput
    * @return {!RendererInputDef}
    */
-  getRenderingDataInput_(creative) {
+  getRenderingDataInput_(validatorOutput) {
+    const creative = validatorOutput.creative;
     return /** @type {!RendererInputDef} */ ({
       creativeMetadata: getAmpAdMetadataMock(creative, TAG, ''),
       // TODO(levitzky) This may change based on the ad response.
@@ -132,13 +162,21 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @protected
    */
   handleAdResponse(response) {
+    if (this.isStale_()) {
+      return;
+    }
     const unvalidatedBytes = response.bytes;
     const headers = response.headers;
+    if (!unvalidatedBytes) {
+      // TODO(levitzky) Add error reporting.
+      this.forceCollapse();
+      return;
+    }
     dev().assert(this.boundValidator_, 'Validator never bound!');
     this.unvalidatedBytes_ = unvalidatedBytes;
     this.boundValidator_(unvalidatedBytes, headers, this)
         .then(validatedBytes =>
-          this.handleValidationResponse(validatedBytes));
+          this.handleValidatorResponse(validatedBytes));
   }
 
   handleAdResponseError(error) {
@@ -147,22 +185,30 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * Processes validation response and delegates further action to appropriate
-   * renderer.
-   * @param {?string} validatedResponse The utf-8 decoded ad response.
+   * Handler invoked when the current freshness id has expired.
    */
-  handleValidationResponse(validatedResponse) {
-    if (validatedResponse) {
-      dev().assert(this.boundRenderers_[ValidationResult.AMP],
-          'Renderer for AMP creatives never bound!');
-      this.boundRenderers_[ValidationResult.AMP](
-          this.getRenderingDataInput_(validatedResponse));
-    } else if (this.unvalidatedBytes_) {
-      dev().assert(this.boundRenderers_[ValidationResult.NON_AMP],
-          'Renderer for non-AMP creatives never bound!');
-      this.boundRenderers_[ValidationResult.NON_AMP](
-          this.getRenderingDataInput_(utf8Decode(this.unvalidatedBytes_)));
+  handleStaleExecution() {}
+
+
+  /**
+   * Processes validator response and delegates further action to appropriate
+   *   renderer.
+   * @param {!ValidatorOutputDef} validatedResponse The utf-8 decoded ad
+   *   response.
+   */
+  handleValidatorResponse(validatedResponse) {
+    if (this.isStale_()) {
+      return;
     }
+    if (!validatedResponse.creative) {
+      // TODO(levitzky) Add error reporting.
+      this.forceCollapse();
+      return;
+    }
+    dev().assert(this.boundRenderers_[validatedResponse.result],
+        'Renderer for AMP creatives never bound!');
+    this.boundRenderers_[validatedResponse.result](
+        this.getRenderingDataInput_(validatedResponse), this);
   }
 
   /** @override */
@@ -172,9 +218,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    ++this.freshnessId_;
+    this.isStale_ = this.getFreshnessVerifier();
     sendXhrRequestMock(this.getExpandedUrl_())
         .then(response => this.handleAdResponse(response))
         .catch(error => this.handleAdResponseError(error));
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.freshnessId_++;
+    return true;
   }
 }
 
