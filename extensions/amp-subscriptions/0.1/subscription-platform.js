@@ -15,6 +15,7 @@
  */
 
 import {Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 
 /**
@@ -24,6 +25,12 @@ import {Entitlements} from '../../../third_party/subscriptions-project/apis';
  * @interface
  */
 export class SubscriptionPlatform {
+
+  /**
+   * @param {!JsonObject} unusedPlatformConfig
+   * @param {!PageConfig} unusedPageConfig
+   */
+  configure(unusedPlatformConfig, unusedPageConfig) {}
 
   /**
    * Requests entitlement for a subscription platform.
@@ -40,4 +47,12 @@ export class SubscriptionPlatform {
  */
 export function getEntitlementsClassForTesting() {
   return Entitlements;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
 }

@@ -55,11 +55,11 @@ export class LocalSubscriptionPlatform {
     );
   }
 
-  /**
-   * Returns the Entitlements object for the subscription platform.
-   *
-   * @return {!Promise<!Entitlements>}
-   */
+  /** @override */
+  configure(unusedPlatformConfig, unusedPageConfig) {
+  }
+
+  /** @override */
   getEntitlements() {
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');

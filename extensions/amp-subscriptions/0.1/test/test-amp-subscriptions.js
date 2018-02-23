@@ -89,10 +89,11 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     });
   });
 
-  it('should add subscription platform while registering it', () => {
+  it('should add subscription platform while registering it', function *() {
     const serviceData = serviceConfig['services'][1];
     const factorySpy = sandbox.stub().callsFake(() => Promise.resolve());
-    subscriptionService.registerService(serviceData.serviceId, factorySpy);
+    yield subscriptionService.registerService(serviceData.serviceId,
+        factorySpy);
     return subscriptionService.initialize_().then(() => {
       expect(factorySpy).to.be.calledOnce;
       expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceData);

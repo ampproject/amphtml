@@ -41,6 +41,9 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
+    /** @private {?Promise} */
+    this.initialized_ = null;
+
     /** @private @const {!Renderer} */
     this.renderer_ = new Renderer(ampdoc);
 
@@ -61,21 +64,23 @@ export class SubscriptionService {
   }
 
   /**
-   * @private
    * @return {!Promise}
+   * @private
    */
   initialize_() {
-    const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
-
-    return Promise.all([
-      this.getServiceConfig_(),
-      pageConfigResolver.resolveConfig(),
-    ]).then(promiseValues => {
-      /** @type {!JsonObject} */
-      this.serviceConfig_ = promiseValues[0];
-      /** @type {!PageConfig} */
-      this.pageConfig_ = promiseValues[1];
-    });
+    if (!this.initialized_) {
+      const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
+      this.initialized_ = Promise.all([
+        this.getServiceConfig_(),
+        pageConfigResolver.resolveConfig(),
+      ]).then(promiseValues => {
+        /** @type {!JsonObject} */
+        this.serviceConfig_ = promiseValues[0];
+        /** @type {!PageConfig} */
+        this.pageConfig_ = promiseValues[1];
+      });
+    }
+    return this.initialized_;
   }
 
   /**
@@ -124,13 +129,12 @@ export class SubscriptionService {
 
       const subscriptionPlatform = subscriptionPlatformFactory(
           matchedServiceConfig,
-          /** @type {!PageConfig} */(this.pageConfig_)
+          /** @type {!PageConfig} */ (this.pageConfig_)
       );
 
       this.subscriptionPlatforms_.push(subscriptionPlatform);
       this.fetchEntitlements_(subscriptionPlatform);
     });
-
   }
 
   /**
@@ -166,7 +170,10 @@ export class SubscriptionService {
       this.resolveEntitlementsToStore_(entitlements));
   }
 
-  /** @private */
+  /**
+   * @return {!SubscriptionService}
+   * @private
+   */
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
@@ -193,6 +200,7 @@ export class SubscriptionService {
       this.entitlementStore_.getGrantStatus()
           .then(grantState => {this.processGrantState_(grantState);});
     });
+    return this;
   }
 }
 
@@ -221,7 +229,7 @@ export function getEntitlementsClassForTesting() {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(TAG, function(ampdoc) {
+  AMP.registerServiceForDoc('subscriptions', function(ampdoc) {
     return new SubscriptionService(ampdoc).start_();
   });
 });
