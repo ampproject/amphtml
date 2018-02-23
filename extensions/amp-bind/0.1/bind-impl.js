@@ -939,13 +939,13 @@ export class Bind {
   }
 
   /**
-   * Performs any necessary CDN rewrites for the given mutation and updates
-   * the element. Returns true if rewrite succeeds. Otherwise returns false.
+   * Performs CDN rewrites for the given mutation and updates the element.
+   * Returns the rewrite of `value` on success. Otherwise, returns undefined.
    * @see amp-cache-modifications.md#url-rewrites
    * @param {!Element} element
    * @param {string} property
    * @param {string} value
-   * @return {string}
+   * @return {string|undefined}
    * @private
    */
   rewriteAttributes_(element, property, value) {
