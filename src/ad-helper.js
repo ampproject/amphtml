@@ -28,6 +28,7 @@ const CONTAINERS = {
   'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
+  'AMP-LIGHTBOX-GALLERY': true,
 };
 
 /**
