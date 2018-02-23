@@ -15,7 +15,9 @@
  */
 
 import {
+  RendererDef,
   RenderingDataInputDef,
+  ValidatorDef,
   ValidationResult,
   ValidationResultType, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-render';
@@ -34,10 +36,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<ValidationResultType, !function()>} */
+    /** @private {Object<ValidationResultType, !RendererDef>} */
     this.boundRenderers_ = {};
 
-    /** @private {?function(string, function(), AmpAdNetworkBase)} */
+    /** @private {?ValidatorDef} */
     this.boundValidator_ = null;
 
     /** @private {?string} */
@@ -70,7 +72,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * @param {ValidationResultType} resultType
-   * @param {function()} renderer
+   * @param {!RendererDef} renderer
    * @protected
    */
   bindRenderer(resultType, renderer) {
@@ -81,7 +83,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {function()} validator
+   * @param {!ValidatorDef} validator
    * @protected
    */
   bindValidator(validator) {
@@ -136,7 +138,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.unvalidatedBytes_ = unvalidatedBytes;
     this.boundValidator_(unvalidatedBytes, headers, this)
         .then(validatedBytes =>
-          this.handleValidationResponse(utf8Decode(validatedBytes)));
+          this.handleValidationResponse(validatedBytes));
   }
 
   handleAdResponseError(error) {
@@ -147,7 +149,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * Processes validation response and delegates further action to appropriate
    * renderer.
-   * @param {string} validatedResponse The utf-8 decoded ad response.
+   * @param {?string} validatedResponse The utf-8 decoded ad response.
    */
   handleValidationResponse(validatedResponse) {
     if (validatedResponse) {

@@ -66,7 +66,7 @@ export let RendererDef;
         !Headers,
         !Object,
         function():boolean=,
-        function(string):string=): !Promise<string>
+        function(string):string=): !Promise<?string>
     } */
 export let ValidatorDef;
 
@@ -177,7 +177,7 @@ export function friendlyFrameRenderer(
  * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
- * @return {!Promise<string>}
+ * @return {!Promise<?string>}
  */
 export function templateValidator(
   bytes,
@@ -187,7 +187,7 @@ export function templateValidator(
   parseOnFetch = () => {}) {
 
   if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-    return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
+    return /**@type {!Promise<?string>}*/ (Promise.resolve(null));
   }
   return Promise.resolve(utf8Decode(bytes)).then(body => {
     checkStillCurrent();
