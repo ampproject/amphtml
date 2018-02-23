@@ -67,8 +67,41 @@ export class StandardActions {
     /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
+    /** @private {?Array<string>} */
+    this.ampActionWhitelist_ = null;
+
     this.installActions_(this.actions_);
   }
+
+  /**
+   * Searches for a meta tag containing whitelist of actions on
+   * the special AMP target, e.g.,
+   * <meta name="amp-action-whitelist" content="AMP.setState,AMP.pushState">
+   * @return {?Array<string>} the whitelist of actions on the special AMP target.
+   * @private
+   */
+  getAmpActionWhitelist_() {
+    if (this.ampActionWhitelist_) {
+      return this.ampActionWhitelist_;
+    }
+
+    const head = this.ampdoc.getRootNode().head;
+    if (!head) {
+      return null;
+    }
+    // A meta[name="amp-action-whitelist"] tag, if present, contains,
+    // in its content attribute, a whitelist of actions on the special AMP target.
+    const meta =
+      head.querySelector('meta[name="amp-action-whitelist"]');
+    if (!meta) {
+      return null;
+    }
+
+    this.ampActionWhitelist_ = meta.getAttribute('content').split(',')
+        .map(action => action.trim());
+    return this.ampActionWhitelist_;
+  }
+
 
   /** @override */
   adoptEmbedWindow(embedWin) {
@@ -100,10 +133,14 @@ export class StandardActions {
    * @param {number=} opt_actionIndex
    * @param {!Array<!./action-impl.ActionInfoDef>=} opt_actionInfos
    * @return {?Promise}
-   * @throws {Error} If action is not recognized.
+   * @throws {Error} If action is not recognized or is not whitelisted.
    */
   handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
     const method = invocation.method;
+    if (this.getAmpActionWhitelist_() &&
+      !this.getAmpActionWhitelist_().includes(`AMP.${method}`)) {
+      throw user().createError(`AMP.${method} is not whitelisted.`);
+    }
     switch (method) {
       case 'pushState':
       case 'setState':
