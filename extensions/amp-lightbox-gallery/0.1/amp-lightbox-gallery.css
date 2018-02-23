@@ -145,8 +145,9 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  overflow-x: hidden !important;
+  overflow: hidden !important;
   color: #ffffff;
+  text-shadow: 1px 1px 2px black;
   z-index: 2 !important;
   opacity: 0;
   animation: fadeIn ease-in 0.4s 1 forwards;
@@ -154,6 +155,14 @@
 
 .i-amphtml-lbg-desc-box.standard {
   max-height: 6rem !important;
+}
+
+.i-amphtml-lbg-desc-mask {
+  height: 80px;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  background: linear-gradient(transparent, transparent 50%, rgba(0,0,0,0.9));
 }
 
 .i-amphtml-lbg-desc-box.overflow {
@@ -169,10 +178,7 @@
 }
 
 .i-amphtml-lbg-desc-text.non-expanded {
-  overflow-y: hidden !important;
-  overflow-x: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
