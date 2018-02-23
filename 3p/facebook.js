@@ -87,6 +87,8 @@ function getPageContainer(global, data) {
   container.setAttribute('data-small-header', data.smallHeader);
   container.setAttribute(
       'data-adapt-container-width', data.adaptContainerWidth);
+  container.setAttribute('data-width', data.width);
+  container.setAttribute('data-height', data.height);
   return container;
 }
 

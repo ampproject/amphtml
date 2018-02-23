@@ -30,6 +30,7 @@ describes.realWin('amp-facebook', {
 
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
+  const fbPageHref = 'https://www.facebook.com/itsdougthepug';
   let win, doc;
 
   beforeEach(() => {
@@ -146,6 +147,25 @@ describes.realWin('amp-facebook', {
     expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
   });
 
+  it('adds fb-page element with `data-width` and `data-height` ' +
+    'attributes set correctly', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK-PAGE',
+    };
+
+    facebook(win, {
+      href: fbPageHref,
+      width: 200,
+      height: 200,
+    });
+    const fbPage = doc.body.getElementsByClassName('fb-page')[0];
+    expect(fbPage).not.to.be.undefined;
+    expect(fbPage.getAttribute('data-width')).to.equal('200');
+    expect(fbPage.getAttribute('data-height')).to.equal('200');
+  });
 
   it('removes iframe after unlayoutCallback', () => {
     return getAmpFacebook(fbPostHref).then(ampFB => {
