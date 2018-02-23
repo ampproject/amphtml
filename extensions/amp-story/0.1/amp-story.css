@@ -279,11 +279,6 @@ amp-story-cta-layer {
   z-index: 3 !important;
 }
 
-amp-story-cta-layer * {
-  box-sizing: border-box !important;
-  margin: 0 !important;
-}
-
 /** Grid level */
 amp-story-grid-layer {
   bottom: 0 !important;
