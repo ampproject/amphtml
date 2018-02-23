@@ -56,8 +56,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {number} */
     this.adsPlaced_ = 0;
 
+    /** @private {number} */
+    this.adPagesCreated_ = 0;
+
     /** @private {boolean} */
-    this.iscurrentAdLoaded_ = false;
+    this.isCurrentAdLoaded_ = false;
   }
 
   /** @override */
@@ -118,14 +121,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     ampStoryAdPage.appendChild(ampAd);
 
-    this.iscurrentAdLoaded_ = false;
+    this.isCurrentAdLoaded_ = false;
 
     // set up listener for ad-loaded event
     ampAd.getImpl().then(impl => {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
-      this.iscurrentAdLoaded_ = true;
+      this.isCurrentAdLoaded_ = true;
     });
 
     return ampStoryAdPage;
@@ -137,7 +140,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createPageElement_() {
-    const id = this.adsPlaced_ + 1;
+    const id = ++this.adPagesCreated_;
     const attributes = dict({
       'id': `i-amphtml-ad-page-${id}`,
       'ad': '',
@@ -213,7 +216,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   placeAdAfterPage_(currentPageId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
 
-    if (!nextAdPageEl || !this.iscurrentAdLoaded_) {
+    if (!nextAdPageEl || !this.isCurrentAdLoaded_) {
       return;
     }
 
