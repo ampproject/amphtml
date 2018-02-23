@@ -128,6 +128,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction('toggle', invocation => {
       const args = invocation.args;
+      user().assert(args['index'] >= 0, '\'index\' must be greater than 0');
       if (args && args['index'] !== undefined) {
         this.toggle_(args['index'], args['value']);
       }
