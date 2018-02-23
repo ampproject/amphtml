@@ -206,31 +206,23 @@ describes.realWin('amp-install-serviceworker', {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       implementation.buildCallback();
-      let iframe;
       const appendChild = install.appendChild;
       install.appendChild = child => {
-        iframe = child;
-        iframe.complete = true; // Mark as loaded.
-        expect(iframe.src).to.equal(iframeSrc);
-        iframe.src = 'about:blank';
-        appendChild.call(install, iframe);
+        child.complete = true; // Mark as loaded.
+        expect(child.src).to.equal(iframeSrc);
+        child.src = 'about:blank';
+        appendChild.call(install, child);
       };
-      let deferredMutate;
-      implementation.deferMutate = fn => {
-        expect(deferredMutate).to.be.undefined;
-        deferredMutate = fn;
-      };
-      return whenVisible.then(() => {
-        expect(deferredMutate).to.exist;
-        expect(iframe).to.be.undefined;
-        deferredMutate();
-        expect(iframe).to.exist;
-        expect(calledSrc).to.undefined;
-        expect(install.style.display).to.equal('none');
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.getAttribute('sandbox')).to.equal(
-            'allow-same-origin allow-scripts');
-      });
+      expect(install.children).to.have.lengthOf(0);
+      implementation.firstLayoutCompleted();
+      expect(install.children).to.have.lengthOf(1);
+      const iframe = install.children[0];
+      expect(iframe).to.exist;
+      expect(calledSrc).to.undefined;
+      expect(install.style.display).to.equal('none');
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.getAttribute('sandbox')).to.equal(
+          'allow-same-origin allow-scripts');
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
@@ -249,11 +241,13 @@ describes.realWin('amp-install-serviceworker', {
       install.setAttribute('data-iframe-src', iframeSrc);
       expect(() => {
         implementation.buildCallback();
+        implementation.firstLayoutCompleted();
       }).to.throw(/should be a URL on the same origin as the source/);
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
       expect(() => {
         implementation.buildCallback();
+        implementation.firstLayoutCompleted();
       }).to.throw(/https/);
     });
   });

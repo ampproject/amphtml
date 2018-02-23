@@ -49,6 +49,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @private {?UrlRewriter_}  */
     this.urlRewriter_ = null;
+
+    /** @private {boolean}  */
+    this.shouldInsertframeOnFirstLayout_ = false;
   }
 
   /** @override */
@@ -62,6 +65,22 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     assertHttpsUrl(src, this.element);
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
+      // Schedule loading the iframe in firstLayoutCompleted().
+      this.shouldInsertframeOnFirstLayout_ = true;
+    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+      this.loadPromise(this.win).then(() => {
+        return install(this.win, src);
+      });
+    } else {
+      this.user().error(TAG,
+          'Did not install ServiceWorker because it does not ' +
+          'match the current origin: ' + src);
+    }
+  }
+
+  /** @override */
+  firstLayoutCompleted() {
+    if (this.shouldInsertframeOnFirstLayout_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
@@ -76,20 +95,16 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.scheduleIframeLoad_();
+        this.insertIframe_();
       }
-      return;
     }
+  }
 
-    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.loadPromise(this.win).then(() => {
-        return install(this.win, src);
-      });
-    } else {
-      this.user().error(TAG,
-          'Did not install ServiceWorker because it does not ' +
-          'match the current origin: ' + src);
-    }
+  /** @override */
+  renderOutsideViewport() {
+    // We want the service worker to be installed wherever the element is
+    // located in the document.
+    return true;
   }
 
   /** @override  */
@@ -98,14 +113,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   }
 
   /** @private */
-  scheduleIframeLoad_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      this.deferMutate(this.insertIframe_.bind(this));
-    });
-  }
-
-  /** @private */
   insertIframe_() {
+    // Mutate block is not required when calling this method, since the inserted
+    // iframe has `display: none` and does not modify the document's layout.
     setStyle(this.element, 'display', 'none');
     const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
