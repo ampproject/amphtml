@@ -28,21 +28,22 @@ import {isExperimentOn} from '../../../../src/experiments';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'amp-img': true,
-  'amp-anim': true,
-  'amp-video': true,
-  'amp-youtube': true,
-  'amp-instagram': true,
-  'amp-facebook': true,
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
+  'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
+  'AMP-INSTAGRAM': true,
+  'AMP-FACEBOOK': true,
 };
 
-const ELIGIBLE_TAP_TAGS = {
-  'amp-img': true,
+export const ELIGIBLE_TAP_TAGS = {
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAG = 'amp-carousel';
-const FIGURE_TAG = 'figure';
+const CAROUSEL_TAG = 'AMP-CAROUSEL';
+const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
 
 /** @typedef {{
@@ -161,7 +162,7 @@ export class LightboxManager {
     dev().assert(element);
     dev().assert(element.hasAttribute('lightbox'));
 
-    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     if (element.hasAttribute('on')) {
@@ -191,7 +192,7 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName];
   }
 
   /**
@@ -236,7 +237,7 @@ export class LightboxManager {
       return;
     }
     this.seen_.push(element);
-    if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
+    if (element.tagName == CAROUSEL_TAG) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
@@ -269,7 +270,7 @@ export class LightboxManager {
    * @param {string} lightboxGroupId
    */
   processBaseLightboxElement_(element, lightboxGroupId) {
-    if (element.tagName.toLowerCase() == FIGURE_TAG) {
+    if (element.tagName == FIGURE_TAG) {
       const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
           lightboxGroupId);
       if (!unwrappedFigureElement) {
