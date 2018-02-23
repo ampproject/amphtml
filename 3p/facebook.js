@@ -85,8 +85,7 @@ function getPageContainer(global, data) {
   container.setAttribute('data-show-facepile', data.showFacepile);
   container.setAttribute('data-hide-cta', data.hideCta);
   container.setAttribute('data-small-header', data.smallHeader);
-  container.setAttribute(
-      'data-adapt-container-width', data.adaptContainerWidth);
+  container.setAttribute('data-adapt-container-width', true);
   return container;
 }
 
