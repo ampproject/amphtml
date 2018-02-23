@@ -21,17 +21,20 @@ import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
+import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
-
 
 export class SubscriptionService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    const configElement = ampdoc.getElementById(TAG);
+
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
@@ -44,11 +47,17 @@ export class SubscriptionService {
     /** @private {?PageConfig} */
     this.pageConfig_ = null;
 
+    /** @private {?JsonObject} */
+    this.serviceConfig_ = null;
+
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
 
     /** @private {?EntitlementStore} */
     this.entitlementStore_ = null;
+
+    /** @const @private {!Element} */
+    this.configElement_ = user().assertElement(configElement);
   }
 
   /**
@@ -58,27 +67,51 @@ export class SubscriptionService {
   initialize_() {
     const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
 
-    // TODO(@prateekbh): read this config from the document.
-    const platformConfigs = [
-      {
-        paywallUrl: '/subscription/1/entitlements',
-      },
-      {
-        paywallUrl: '/subscription/2/entitlements',
-      },
-    ];
+    return Promise.all([
+      this.getServiceConfig_(),
+      pageConfigResolver.resolveConfig(),
+    ]).then(promiseValues => {
+      /** @type {!JsonObject} */
+      this.serviceConfig_ = dev().assert(promiseValues[0]);
+      /** @type {!PageConfig} */
+      this.pageConfig_ = dev().assert(promiseValues[1]);
 
-    return pageConfigResolver.resolveConfig().then(pageConfig => {
-      this.pageConfig_ = pageConfig;
-      platformConfigs.forEach(platformConfig => {
-        this.subscriptionPlatforms_.push(
-            new LocalSubscriptionPlatform(
-                this.ampdoc_,
-                platformConfig,
-                pageConfig
-            )
-        );
+      user().assert(this.serviceConfig_['services'],
+          'Services not configured in service config');
+
+      this.serviceConfig_['services'].forEach(service => {
+        this.initializeSubscriptionPlatforms_(service, this.pageConfig_);
       });
+    });
+  }
+
+  /**
+   * @param {!JsonObject} serviceConfig
+   * @param {!PageConfig} pageConfig
+   * @private
+   */
+  initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
+    if ((serviceConfig['serviceId'] || 'local') == 'local') {
+      this.subscriptionPlatforms_.push(
+          new LocalSubscriptionPlatform(
+              this.ampdoc_,
+              serviceConfig,
+              pageConfig
+          )
+      );
+    }
+  }
+
+  /**
+   * @private
+   * @returns {!Promise<!JsonObject>}
+   */
+  getServiceConfig_() {
+    return new Promise((resolve, reject) => {
+      const rawContent = tryParseJson(this.configElement_.textContent, e => {
+        reject('Failed to parse "amp-subscriptions" JSON: ' + e);
+      });
+      resolve(rawContent);
     });
   }
 
@@ -89,6 +122,7 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   registerService(serviceId, subscriptionPlatform) {
+
     this.subscriptionPlatforms_.push(subscriptionPlatform);
 
     this.fetchEntitlements_(subscriptionPlatform);
@@ -98,13 +132,15 @@ export class SubscriptionService {
    * @param {boolean} grantState
    * @private
    */
-  processEntitlements_(grantState) {
+  processGrantState_(grantState) {
+    this.renderer_.toggleLoading(false);
+    this.renderer_.setGrantState(grantState);
+
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
     }
 
-    this.renderer_.toggleLoading(false);
   }
 
   /**
@@ -129,17 +165,18 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
-      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
-      // from page config.
-      this.entitlementStore_ =
-        new EntitlementStore(['amp-local-subscription', 'google-subscription']);
+
+      const serviceIds = this.serviceConfig_['services'].map(service =>
+        service['serviceId']);
+
+      this.entitlementStore_ = new EntitlementStore(serviceIds);
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         this.fetchEntitlements_(subscriptionPlatform);
       });
 
-      this.entitlementStore_.getFirstResolvedSubscription()
-          .then(grantState => {this.processEntitlements_(grantState);});
+      this.entitlementStore_.getGrantStatus()
+          .then(grantState => {this.processGrantState_(grantState);});
     });
   }
 }
