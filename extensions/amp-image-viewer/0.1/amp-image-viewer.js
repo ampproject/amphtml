@@ -46,6 +46,14 @@ const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
   'aria-labelledby'];
 const DEFAULT_MAX_SCALE = 2;
 
+const ELIGIBLE_TAGS = {
+  'amp-img': true,
+  'amp-anim': true,
+};
+
+const SUPPORT_VALIDATION_MSG = `amp-image-viewer should have its target element
+   as the one and only child`;
+
 export class AmpImageViewer extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -122,10 +130,13 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
+
+    user().assert(children.length == 1, SUPPORT_VALIDATION_MSG);
     user().assert(
-        children.length == 1 && children[0].tagName == 'AMP-IMG',
-        'amp-image-viewer should have an amp-img as its one and only child'
+        this.elementIsSupported_(children[0]),
+        children[0].tagName + ' is not supported by <amp-image-viewer>'
     );
+
     this.sourceAmpImage_ = children[0];
     this.setAsOwner(this.sourceAmpImage_);
   }
@@ -237,6 +248,16 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.posX_,
         this.posY_
     );
+  }
+
+  /**
+   * Checks to see if an element is supported.
+   * @param {Element} element
+   * @return {boolean}
+   * @private
+   */
+  elementIsSupported_(element) {
+    return ELIGIBLE_TAGS[element.tagName.toLowerCase()];
   }
 
   /**
