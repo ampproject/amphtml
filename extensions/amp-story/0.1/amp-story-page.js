@@ -45,7 +45,6 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {upgradeBackgroundAudio} from './audio';
 
-
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
@@ -62,6 +61,9 @@ const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
+
+/** @private @const {string} */
+const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 
 /**
@@ -457,6 +459,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     page.
    */
   setDistance(distance) {
+    // TODO(ccordry) refactor this when pages are managed
+    if (this.isAd()) {
+      distance = Math.min(distance, 1);
+    }
+
     this.element.setAttribute('distance', distance);
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
@@ -497,9 +504,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const adjacentPageIds = [];
 
     const autoAdvanceNext =
-        this.getNextPageId_(true /* opt_isAutomaticAdvance */);
+        this.getNextPageId(true /* opt_isAutomaticAdvance */);
     const manualAdvanceNext =
-        this.getNextPageId_(false /* opt_isAutomaticAdvance */);
+        this.getNextPageId(false /* opt_isAutomaticAdvance */);
     const previous = this.getPreviousPageId_();
 
     if (autoAdvanceNext) {
@@ -525,6 +532,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getPreviousPageId_() {
+    if (this.element.hasAttribute('i-amphtml-return-to')) {
+      return this.element.getAttribute('i-amphtml-return-to');
+    }
+
     const previousElement = this.element.previousElementSibling;
     if (previousElement && previousElement.tagName.toLowerCase() === TAG) {
       return previousElement.id;
@@ -540,16 +551,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
-   * @private
    */
-  getNextPageId_(opt_isAutomaticAdvance) {
+  getNextPageId(opt_isAutomaticAdvance) {
     if (opt_isAutomaticAdvance &&
         this.element.hasAttribute('auto-advance-to')) {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute('advance-to')) {
-      return this.element.getAttribute('advance-to');
+    if (this.element.hasAttribute('i-amphtml-advance-to')) {
+      return this.element.getAttribute('i-amphtml-advance-to');
     }
 
     const nextElement = this.element.nextElementSibling;
@@ -582,7 +592,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    const pageId = this.getNextPageId_(opt_isAutomaticAdvance);
+    const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
     if (pageId === null) {
       dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
@@ -689,6 +699,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.loadingSpinner_.toggle(isActive);
     });
+  }
+
+  isAd() {
+    return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
 
