@@ -138,7 +138,7 @@ export class SubscriptionService {
    * @param {function(!ServiceConfig, !PageConfig):Promise<!SubscriptionPlatform>} subscriptionPlatformFactory
    */
   registerService(serviceId, subscriptionPlatformFactory) {
-    this.initialize_.then(() => {
+    this.initialize_().then(() => {
       subscriptionPlatformFactory(this.serviceConfig_, this.pageConfig_)
           .then(subscriptionPlatform => {
             this.subscriptionPlatforms_.push(subscriptionPlatform);
