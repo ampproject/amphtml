@@ -28,10 +28,8 @@ import {user} from '../../../src/log';
 /** @const */
 const TAG = 'amp-subscriptions';
 
-/** @typedef {{serviceId: string, authorizationUrl: string}} */
-export let ServiceDefination;
 
-/** @typedef {{services:!Array<!ServiceDefination>}} */
+/** @typedef {{services:!Array<!JsonObject>}} */
 export let ServiceConfig;
 
 export class SubscriptionService {
@@ -53,7 +51,7 @@ export class SubscriptionService {
     /** @private {?PageConfig} */
     this.pageConfig_ = null;
 
-    /** @private {!ServiceConfig} */
+    /** @private {?ServiceConfig} */
     this.serviceConfig_ = null;
 
     /** @private @const {!Array<!SubscriptionPlatform>} */
@@ -85,28 +83,11 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!ServiceConfig} serviceConfig
+   * @param {!JsonObject} serviceConfig
    * @param {!PageConfig} pageConfig
    * @private
    */
-  initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
-    if ((serviceConfig['serviceId'] || 'local') == 'local') {
-      this.subscriptionPlatforms_.push(
-          new LocalSubscriptionPlatform(
-              this.ampdoc_,
-              serviceConfig,
-              pageConfig
-          )
-      );
-    }
-  }
-
-  /**
-   * @param {!ServiceConfig} serviceConfig
-   * @param {!PageConfig} pageConfig
-   * @private
-   */
-  initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
+  initializeLocalPlatforms_(serviceConfig, pageConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.subscriptionPlatforms_.push(
           new LocalSubscriptionPlatform(
@@ -139,11 +120,13 @@ export class SubscriptionService {
    */
   registerService(serviceId, subscriptionPlatformFactory) {
     this.initialize_().then(() => {
-      subscriptionPlatformFactory(this.serviceConfig_, this.pageConfig_)
-          .then(subscriptionPlatform => {
-            this.subscriptionPlatforms_.push(subscriptionPlatform);
-            this.fetchEntitlements_(subscriptionPlatform);
-          });
+      const subscriptionPlatform = subscriptionPlatformFactory(
+          /** @type{!ServiceConfig} */(this.serviceConfig_),
+          /** @type{!PageConfig} */(this.pageConfig_)
+      );
+
+      this.subscriptionPlatforms_.push(subscriptionPlatform);
+      this.fetchEntitlements_(subscriptionPlatform);
     });
 
   }
@@ -188,15 +171,15 @@ export class SubscriptionService {
 
       user().assert(this.pageConfig_, 'Page config is null');
 
-      user().assert(this.serviceConfig_['services'],
+      user().assert(this.serviceConfig_.services,
           'Services not configured in service config');
 
-      this.serviceConfig_['services'].forEach(service => {
-        this.initializeSubscriptionPlatforms_(service,
+      this.serviceConfig_.services.forEach(service => {
+        this.initializeLocalPlatforms_(service,
             /** @type {!PageConfig} */(this.pageConfig_));
       });
 
-      const serviceIds = this.serviceConfig_['services'].map(service =>
+      const serviceIds = this.serviceConfig_.services.map(service =>
         service['serviceId']);
 
       this.entitlementStore_ = new EntitlementStore(serviceIds);

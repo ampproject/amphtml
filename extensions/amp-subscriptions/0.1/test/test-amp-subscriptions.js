@@ -89,15 +89,14 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     });
   });
 
-  it('should add subscription platform while registering it', done => {
+  it('should add subscription platform while registering it', () => {
     const service = serviceConfig.services[0];
-    const factorySpy = sinon.stub().callsFake(() => Promise.resolve());
+    const factorySpy = sandbox.stub().callsFake(() => Promise.resolve());
     subscriptionService.registerService(service.serviceID, factorySpy);
-    subscriptionService.initialize_().then(() => {
+    return subscriptionService.initialize_().then(() => {
       expect(factorySpy).to.be.calledOnce;
       expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceConfig);
       expect(factorySpy.getCall(0).args[1]).to.be.equal(pageConfig);
-      done();
     });
   });
 
@@ -112,13 +111,13 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     });
   });
 
-  describe('initializeSubscriptionPlatforms_', () => {
+  describe('initializeLocalPlatforms_', () => {
     it('should put `LocalSubscriptionPlatform` for every service config'
         + ' with authorization Url', () => {
       const service = serviceConfig.services[0];
       const pushStub = sandbox.stub(
           subscriptionService.subscriptionPlatforms_, 'push');
-      subscriptionService.initializeSubscriptionPlatforms_(service, pageConfig);
+      subscriptionService.initializeLocalPlatforms_(service, pageConfig);
       expect(pushStub).to.be.calledWith(new LocalSubscriptionPlatform(
           subscriptionService.ampdoc_,
           service,
