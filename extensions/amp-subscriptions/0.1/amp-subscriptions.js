@@ -73,17 +73,8 @@ export class SubscriptionService {
     ]);
 
     return configPromises.then(promiseValues => {
-      const serviceConfig = user().assert(promiseValues[0]);
-      this.serviceConfig_ = serviceConfig;
-      const pageConfig = user().assert(promiseValues[1]);
-      this.pageConfig_ = pageConfig;
-
-      dev().assert(this.serviceConfig_['services'],
-          'Services not configured in service config');
-
-      this.serviceConfig_['services'].forEach(service => {
-        this.initializeSubscriptionPlatforms_(service, pageConfig);
-      });
+      this.serviceConfig_ = promiseValues[0];
+      this.pageConfig_ = promiseValues[1];
     });
   }
 
@@ -166,6 +157,17 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+      user().assert(this.pageConfig_, 'Page config is null');
+
+      /** @type {!PageConfig} */
+      const pageConfig = this.pageConfig_;
+      user().assert(this.serviceConfig_['services'],
+          'Services not configured in service config');
+
+      this.serviceConfig_['services'].forEach(service => {
+        this.initializeSubscriptionPlatforms_(service, pageConfig);
+      });
+
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
 
