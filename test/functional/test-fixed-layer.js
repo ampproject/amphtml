@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {user} from '../../src/log';
 
 
 describe('FixedLayer', () => {
@@ -33,10 +34,11 @@ describe('FixedLayer', () => {
   let element3;
   let element4;
   let element5;
+  let element6;
   let allRules;
 
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+beforeEach(() => {
+  sandbox = sinon.sandbox.create();
 
     allRules = {};
 
@@ -49,11 +51,13 @@ describe('FixedLayer', () => {
     element3 = createElement('element3');
     element4 = createElement('element4');
     element5 = createElement('element4');
+    element6 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
     docBody.appendChild(element4);
     docBody.appendChild(element5);
+    docBody.appendChild(element6);
 
     const invalidRule = createValidRule('#invalid', 'fixed',
         [element1, element3]);
@@ -360,7 +364,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -1041,6 +1045,19 @@ describe('FixedLayer', () => {
     it('should initiale fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
+    });
+
+    it('should throw user error for inline style', () => {
+      element6.style = {
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      };
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      expect(userError).calledWithMatch(
+          'FixedLayer', 'Inline style not supported for element');
     });
 
     it('should collect turn off transferrable', () => {

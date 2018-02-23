@@ -24,6 +24,7 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'FixedLayer';
 
@@ -33,7 +34,7 @@ const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
- * child of documentElement. It's used to manage the `postition:fixed` and
+ * child of documentElement. It's used to manage the `position:fixed` and
  * `position:sticky` elements in iOS-iframe case due to the
  * https://bugs.webkit.org/show_bug.cgi?id=154399 bug, which is itself
  * a result of workaround for the issue where scrolling is not supported
@@ -100,7 +101,6 @@ export class FixedLayer {
       return;
     }
 
-    // Find all `position:fixed` and `sticky` elements.
     const fixedSelectors = [];
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
@@ -440,6 +440,8 @@ export class FixedLayer {
    * @private
    */
   setupSelectors_(fixedSelectors, stickySelectors) {
+    let hasInlineStyle = false;
+    const isInlineStylesEnabled = isExperimentOn('inline-styles');
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
@@ -449,19 +451,43 @@ export class FixedLayer {
           // We shouldn't have too many of `fixed` elements.
           break;
         }
-        this.setupElement_(elements[j], fixedSelector, 'fixed');
+        const el = elements[j];
+        if (isInlineStylesEnabled) {
+          const sanitized = this.sanitizeElement_(el);
+          if (!hasInlineStyle && sanitized) {
+            hasInlineStyle = true;
+          }
+        }
+        this.setupElement_(el, fixedSelector, 'fixed');
       }
     }
-    for (let i = 0; i < stickySelectors.length; i++) {
+    if (isInlineStylesEnabled) {
+      user().error(TAG, 'Inline style not supported for fixed element');
+    }
+    for (let i = 0, len = stickySelectors.length; i < len; i++) {
       const stickySelector = stickySelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           stickySelector);
-      for (let j = 0; j < elements.length; j++) {
+      for (let j = 0, l = elements.length; j < l; j++) {
         this.setupElement_(elements[j], stickySelector, 'sticky');
       }
     }
   }
 
+  /**
+   * Sanitizes an element, cleaning up the style field attribute.
+   * @param {!Element} element
+   * @return {boolean} True if the element has been sanitized and the style
+   *     field has been removed.
+   * @private
+   */
+  sanitizeElement_(element) {
+    if (element.style) {
+      element.removeAttribute('style');
+      return true;
+    }
+    return false;
+  }
   /**
    * This method records the potentially fixed or sticky element. One of a more
    * critical functions - it records all selectors that may apply "fixed"
@@ -476,10 +502,10 @@ export class FixedLayer {
    */
   setupElement_(element, selector, position, opt_forceTransfer) {
     let fe = null;
-    for (let i = 0; i < this.elements_.length; i++) {
-      if (this.elements_[i].element == element &&
-              this.elements_[i].position == position) {
-        fe = this.elements_[i];
+    for (let i = 0, len = this.elements_.length; i < len; i++) {
+      const el = this.elements_[i].element;
+      if (el == element && el.position == position) {
+        fe = el;
         break;
       }
     }
@@ -521,12 +547,13 @@ export class FixedLayer {
    */
   removeElement_(element) {
     const removed = [];
-    for (let i = 0; i < this.elements_.length; i++) {
-      if (this.elements_[i].element == element) {
+    for (let i = 0, len = this.elements_.length; i < len; i++) {
+      const el = this.elements_[i].element;
+      if (el == element) {
         this.vsync_.mutate(() => {
           setStyle(element, 'top', '');
         });
-        const fe = this.elements_[i];
+        const fe = el;
         this.elements_.splice(i, 1);
         removed.push(fe);
       }
@@ -724,6 +751,7 @@ export class FixedLayer {
   }
 
   /**
+   * Find all `position:fixed` and `sticky` elements.
    * @param {!Array<CSSRule>} rules
    * @param {!Array<string>} foundSelectors
    * @param {!Array<string>} stickySelectors
