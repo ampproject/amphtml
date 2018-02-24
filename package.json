@@ -146,7 +146,7 @@
     "request": "2.83.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
-    "sinon": "4.2.3",
+    "sinon": "4.4.1",
     "sinon-chai": "2.14.0",
     "text-table": "0.2.0",
     "through2": "2.0.3",
