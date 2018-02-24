@@ -20,6 +20,8 @@ import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isJsonScriptTag} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 
 
 // TODO(ccordry) replace these constants with user config
@@ -34,6 +36,9 @@ const TAG = 'amp-story-auto-ads';
 
 /** @const */
 const AD_TAG = 'amp-ad';
+
+/** @const */
+const MUSTACHE_TAG = 'amp-mustache';
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -61,6 +66,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
+
+    /** @private {Object<string, string>} */
+    this.config_ = {};
   }
 
   /** @override */
@@ -72,6 +80,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
         ampdoc, AD_TAG);
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, MUSTACHE_TAG);
 
     ampStoryElement.getImpl().then(impl => {
       this.ampStory_ = impl;
@@ -89,8 +99,40 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.readConfig_();
     this.schedulePage_();
     return Promise.resolve();
+  }
+
+
+  /**
+   * load in config from child <script> element
+   * @private
+   */
+  readConfig_() {
+    const child = this.element.children[0];
+    user().assert(
+        isJsonScriptTag(child),
+        `The <${TAG}> config should ` +
+        'be inside a <script> tag with type="application/json"');
+
+    this.config_ = parseJson(child.textContent);
+    this.validateConfig_();
+  }
+
+
+  /**
+   * make sure given JSON config is shaped correctly
+   * @private
+   */
+  validateConfig_() {
+    const adAttributes = this.config_['ad-attributes'];
+    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
+      'Top level JSON should have an "ad-attributes" key');
+
+    const type = adAttributes.type;
+    user().assert(type, `<${TAG}>: Error reading config.` +
+      'Missing ["ad-attribues"]["type"] key');
   }
 
 
@@ -157,13 +199,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    // TODO(ccordry) get this info (e.g. source) from config
-    const attributes = dict({
-      'id': 'i-amphtml-demo-ad',
-      'height': '300',
-      'src': '/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp.json',
-      'type': 'fake',
-    });
+    const defaultAttrs = {
+      'id': 'i-amphtml-story-ad',
+      'height': '100vh',
+      'width': '100vw',
+    };
+
+    const configAttrs = this.config_['ad-attributes'];
+    const attributes = /** @type {!JsonObject} */ (Object.assign({},
+        defaultAttrs, configAttrs));
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
