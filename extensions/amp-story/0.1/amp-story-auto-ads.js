@@ -199,14 +199,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const defaultAttrs = dict({
+    const defaultAttrs = {
       'id': 'i-amphtml-story-ad',
       'height': '100vh',
       'width': '100vw',
-    });
+    };
 
     const configAttrs = this.config_['ad-attributes'];
-    const attributes = Object.assign({}, defaultAttrs, configAttrs);
+    const attributes = /** @type {!JsonObject} */ (Object.assign({},
+        defaultAttrs, configAttrs));
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
