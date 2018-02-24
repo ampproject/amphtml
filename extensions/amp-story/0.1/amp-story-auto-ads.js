@@ -115,9 +115,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   createStoryLoadPromise_() {
     return new Promise(resolve => {
-      this.ampStory_.element.addEventListener(EventType.STORY_LOADED, () => {
-        resolve();
-      });
+      this.ampStory_.element.addEventListener(EventType.STORY_LOADED, resolve);
     });
   }
 
