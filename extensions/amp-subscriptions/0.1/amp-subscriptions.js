@@ -21,9 +21,9 @@ import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
-import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -72,16 +72,9 @@ export class SubscriptionService {
       pageConfigResolver.resolveConfig(),
     ]).then(promiseValues => {
       /** @type {!JsonObject} */
-      this.serviceConfig_ = dev().assert(promiseValues[0]);
+      this.serviceConfig_ = promiseValues[0];
       /** @type {!PageConfig} */
-      this.pageConfig_ = dev().assert(promiseValues[1]);
-
-      user().assert(this.serviceConfig_['services'],
-          'Services not configured in service config');
-
-      this.serviceConfig_['services'].forEach(service => {
-        this.initializeSubscriptionPlatforms_(service, this.pageConfig_);
-      });
+      this.pageConfig_ = promiseValues[1];
     });
   }
 
@@ -90,7 +83,7 @@ export class SubscriptionService {
    * @param {!PageConfig} pageConfig
    * @private
    */
-  initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
+  initializeLocalPlatforms_(serviceConfig, pageConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.subscriptionPlatforms_.push(
           new LocalSubscriptionPlatform(
@@ -119,13 +112,25 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
-   * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @param {function(!JsonObject, !PageConfig):!SubscriptionPlatform} subscriptionPlatformFactory
    */
-  registerService(serviceId, subscriptionPlatform) {
+  registerService(serviceId, subscriptionPlatformFactory) {
+    this.initialize_().then(() => {
+      const matchedServices = this.serviceConfig_['services'].filter(
+          service => service.serviceId === serviceId);
 
-    this.subscriptionPlatforms_.push(subscriptionPlatform);
+      const matchedServiceConfig = user().assert(matchedServices[0],
+          'No matching services for the ID found');
 
-    this.fetchEntitlements_(subscriptionPlatform);
+      const subscriptionPlatform = subscriptionPlatformFactory(
+          matchedServiceConfig,
+          /** @type {!PageConfig} */(this.pageConfig_)
+      );
+
+      this.subscriptionPlatforms_.push(subscriptionPlatform);
+      this.fetchEntitlements_(subscriptionPlatform);
+    });
+
   }
 
   /**
@@ -165,6 +170,16 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+
+      user().assert(this.pageConfig_, 'Page config is null');
+
+      user().assert(this.serviceConfig_['services'],
+          'Services not configured in service config');
+
+      this.serviceConfig_['services'].forEach(service => {
+        this.initializeLocalPlatforms_(service,
+            /** @type {!PageConfig} */(this.pageConfig_));
+      });
 
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
