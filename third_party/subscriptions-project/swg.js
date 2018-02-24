@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.17-1519356934264 */
+ /** Version: 0.1.18-1519411256378 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -1670,6 +1670,81 @@ class JwtHelper {
 
 
 
+const SERVICE_ID = 'subscribe.google.com';
+
+
+/**
+ */
+class EntitlementsManager {
+
+  /**
+   * @param {!Window} win
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   */
+  constructor(win, config, fetcher) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper();
+
+    /** @private {?Promise<!Entitlements>} */
+    this.responsePromise_ = null;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlements() {
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.fetch_();
+    }
+    return this.responsePromise_;
+  }
+
+  /**
+   */
+  reset() {
+    this.responsePromise_ = null;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetch_() {
+    const url =
+        'https://swg-staging.sandbox.google.com/_/v1/publication/' +
+        encodeURIComponent(this.config_.getPublisherId()) +
+        '/entitlements';
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const signedData = json['signedEntitlements'];
+      if (signedData) {
+        const jwt = this.jwtHelper_.decode(signedData);
+        const entitlementsClaim = jwt['entitlements'];
+        if (entitlementsClaim) {
+          return new Entitlements(
+              SERVICE_ID,
+              signedData,
+              Entitlement.parseListFromJson(entitlementsClaim),
+              this.config_.getProductId());
+        }
+      }
+      // Empty response.
+      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+    });
+  }
+}
+
+
+
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -2125,82 +2200,41 @@ class FetchResponseHeaders {
 
 
 
-const SERVICE_ID = 'subscribe.google.com';
+
+/**
+ * @interface
+ */
+class Fetcher {
+
+  /**
+   * @param {string} unusedUrl
+   * @return {!Promise<!Object>}
+   */
+  fetchCredentialedJson(unusedUrl) {}
+}
 
 
 /**
+ * @implements {Fetcher}
  */
-class EntitlementsManager {
+class XhrFetcher {
 
   /**
    * @param {!Window} win
-   * @param {!../model/page-config.PageConfig} config
    */
-  constructor(win, config) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
-
-    /** @private @const {!Xhr} */
-    this.xhr_ = new Xhr(this.win_);
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper();
-
-    /** @private {?Promise<!Entitlements>} */
-    this.responsePromise_ = null;
+  constructor(win) {
+    /** @const {!Xhr} */
+    this.xhr_ = new Xhr(win);
   }
 
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlements() {
-    if (!this.responsePromise_) {
-      this.responsePromise_ = this.fetch_();
-    }
-    return this.responsePromise_;
-  }
-
-  /**
-   */
-  reset() {
-    this.responsePromise_ = null;
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetch_() {
-    const url =
-        'https://swg-staging.sandbox.google.com/_/v1/publication/' +
-        encodeURIComponent(this.config_.getPublisherId()) +
-        '/entitlements';
+  /** @override */
+  fetchCredentialedJson(url) {
     const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
       method: 'GET',
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
     });
-    return this.xhr_.fetch(url, init).then(response => {
-      return response.json();
-    }).then(json => {
-      const signedData = json['signedEntitlements'];
-      if (signedData) {
-        const jwt = this.jwtHelper_.decode(signedData);
-        const entitlementsClaim = jwt['entitlements'];
-        if (entitlementsClaim) {
-          return new Entitlements(
-              SERVICE_ID,
-              signedData,
-              Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
-        }
-      }
-      // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
-    });
+    return this.xhr_.fetch(url, init).then(response => response.json());
   }
 }
 
@@ -3182,8 +3216,11 @@ class ConfiguredRuntime {
   /**
    * @param {!Window} win
    * @param {!../model/page-config.PageConfig} config
+   * @param {{
+   *     fetcher: (!Fetcher|undefined),
+   *   }=} opt_integr
    */
-  constructor(win, config) {
+  constructor(win, config, opt_integr) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -3193,9 +3230,12 @@ class ConfiguredRuntime {
     /** @private @const {!Promise} */
     this.documentParsed_ = whenDocumentReady(this.win_.document);
 
+    /** @private @const {!Fetcher} */
+    this.fetcher_ = opt_integr && opt_integr.fetcher || new XhrFetcher(win);
+
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ =
-        new EntitlementsManager(this.win_, this.config_);
+        new EntitlementsManager(this.win_, this.config_, this.fetcher_);
 
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(win);
@@ -3337,4 +3377,5 @@ class ConfiguredRuntime {
 
 export {
   ConfiguredRuntime,
+  Fetcher,
 };

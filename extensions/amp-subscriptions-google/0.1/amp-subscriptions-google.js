@@ -16,6 +16,7 @@
 
 import {
   ConfiguredRuntime,
+  Fetcher,
 } from '../../../third_party/subscriptions-project/swg';
 import {Services} from '../../../src/services';
 
@@ -40,12 +41,37 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   configure(platformConfig, pageConfig) {
-    this.runtime_ = new ConfiguredRuntime(this.ampdoc_.win, pageConfig);
+    this.runtime_ = new ConfiguredRuntime(this.ampdoc_.win, pageConfig, {
+      fetcher: new AmpFetcher(this.ampdoc_.win),
+    });
   }
 
   /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements();
+  }
+}
+
+
+/**
+ * Adopts fetcher protocol required for SwG to AMP fetching rules.
+ * @implements {Fetcher}
+ */
+class AmpFetcher {
+
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(win);
+  }
+
+  /** @override */
+  fetchCredentialedJson(url) {
+    return this.xhr_.fetchJson(url, {
+      credentials: 'include',
+    }).then(response => response.json());
   }
 }
 
@@ -60,3 +86,12 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return platform;
   });
 });
+
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getFetcherClassForTesting() {
+  return Fetcher;
+}

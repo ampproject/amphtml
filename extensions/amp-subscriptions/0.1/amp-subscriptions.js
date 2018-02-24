@@ -119,8 +119,8 @@ export class SubscriptionService {
    * @param {string} serviceId
    * @param {function(!JsonObject, !PageConfig):!SubscriptionPlatform} subscriptionPlatformFactory
    */
-  registerService(serviceId, subscriptionPlatformFactory) {
-    this.initialize_().then(() => {
+  registerPlatform(serviceId, subscriptionPlatformFactory) {
+    return this.initialize_().then(() => {
       const matchedServices = this.serviceConfig_['services'].filter(
           service => service.serviceId === serviceId);
 
