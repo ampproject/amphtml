@@ -110,22 +110,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   readConfig_() {
-    const children = this.element.children;
-    dev().assert(children.length >= 1, `<${TAG}>: this tag's first child` +
-        'should be a <script> element');
-
-    const child = children[0];
+    const child = this.element.children[0];
     user().assert(
         isJsonScriptTag(child),
         `The <${TAG}> config should ` +
         'be inside a <script> tag with type="application/json"');
 
-    try {
-      this.config_ = parseJson(child.textContent);
-    } catch (e) {
-      user().error(TAG, 'Invalid JSON config', e);
-    }
-
+    this.config_ = parseJson(child.textContent);
     this.validateConfig_();
   }
 
@@ -142,10 +133,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const type = adAttributes.type;
     user().assert(type, `<${TAG}>: Error reading config.` +
       'Missing ["ad-attribues"]["type"] key');
-
-    const dataSrc = adAttributes['data-src'];
-    user().assert(dataSrc, `<${TAG}>: Error reading config.` +
-      'Missing ["ad-attribues"]["data-src"] key');
   }
 
 
@@ -212,15 +199,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const {'data-src': dataUrl, type} = this.config_['ad-attributes'];
-
-    const attributes = dict({
-      'id': 'i-amphtml-demo-ad',
+    const defaultAttrs = dict({
+      'id': 'i-amphtml-story-ad',
       'height': '100vh',
       'width': '100vw',
-      'data-url': dataUrl,
-      'type': type,
     });
+
+    const configAttrs = this.config_['ad-attributes'];
+    const attributes = Object.assign({}, defaultAttrs, configAttrs);
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
