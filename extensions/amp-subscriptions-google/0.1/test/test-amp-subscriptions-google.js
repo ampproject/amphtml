@@ -31,8 +31,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     ampdoc = env.ampdoc;
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
-    platform = new GoogleSubscriptionsPlatform(ampdoc);
-    platform.configure({}, pageConfig);
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, pageConfig);
   });
 
   it('should proxy fetch via AMP fetcher', () => {
