@@ -27,12 +27,6 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 export class SubscriptionPlatform {
 
   /**
-   * @param {!JsonObject} unusedPlatformConfig
-   * @param {!PageConfig} unusedPageConfig
-   */
-  configure(unusedPlatformConfig, unusedPageConfig) {}
-
-  /**
    * Requests entitlement for a subscription platform.
    * @return {!Promise<!Entitlements>}
    */

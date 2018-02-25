@@ -189,7 +189,7 @@ export class SubscriptionService {
       });
 
       const serviceIds = this.serviceConfig_['services'].map(service =>
-        service['serviceId']);
+        service['serviceId'] || 'local');
 
       this.entitlementStore_ = new EntitlementStore(serviceIds);
 

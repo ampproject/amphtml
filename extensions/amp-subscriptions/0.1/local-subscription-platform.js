@@ -56,10 +56,6 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  configure(unusedPlatformConfig, unusedPageConfig) {
-  }
-
-  /** @override */
   getEntitlements() {
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');

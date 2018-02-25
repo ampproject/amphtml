@@ -862,8 +862,8 @@ app.use('/list/vegetable-data/get', (req, res) => {
 app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
-    source: req.params.id,
-    products: ['product1', 'product2'],
+    source: 'local' + req.params.id,
+    products: ['scenic-2017.appspot.com:news', 'scenic-2017.appspot.com:product2'],
   });
 });
 

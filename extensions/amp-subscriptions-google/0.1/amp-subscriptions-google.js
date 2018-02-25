@@ -18,10 +18,34 @@ import {
   ConfiguredRuntime,
   Fetcher,
 } from '../../../third_party/subscriptions-project/swg';
+import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
+
+
+/**
+ */
+export class GoogleSubscriptionsPlatformService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+  }
+
+  /**
+   * @param {!JsonObject} platformConfig
+   * @param {!PageConfig} pageConfig
+   * @return {!GoogleSubscriptionsPlatform}
+   */
+  createPlatform(platformConfig, pageConfig) {
+    return new GoogleSubscriptionsPlatform(this.ampdoc_,
+        platformConfig, pageConfig);
+  }
+}
 
 
 /**
@@ -31,18 +55,13 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} platformConfig
+   * @param {!PageConfig} pageConfig
    */
-  constructor(ampdoc) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-    /** @private {?ConfiguredRuntime} */
-    this.runtime_ = null;
-  }
-
-  /** @override */
-  configure(platformConfig, pageConfig) {
-    this.runtime_ = new ConfiguredRuntime(this.ampdoc_.win, pageConfig, {
-      fetcher: new AmpFetcher(this.ampdoc_.win),
+  constructor(ampdoc, platformConfig, pageConfig) {
+    /** @private @const {!ConfiguredRuntime} */
+    this.runtime_ = new ConfiguredRuntime(ampdoc.win, pageConfig, {
+      fetcher: new AmpFetcher(ampdoc.win),
     });
   }
 
@@ -78,12 +97,14 @@ class AmpFetcher {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('subscriptions-google', function(ampdoc) {
-    const platform = new GoogleSubscriptionsPlatform(ampdoc);
+  AMP.registerServiceForDoc('subscriptions-google', ampdoc => {
+    const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
     Services.subscriptionsServiceForDoc(ampdoc).then(service => {
-      service.registerPlatform(PLATFORM_ID, platform);
+      service.registerPlatform(PLATFORM_ID, (platformConfig, pageConfig) => {
+        return platformService.createPlatform(platformConfig, pageConfig);
+      });
     });
-    return platform;
+    return platformService;
   });
 });
 
@@ -94,4 +115,12 @@ AMP.extension(TAG, '0.1', function(AMP) {
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
 }
