@@ -296,6 +296,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
       this.carousel_.setAttribute('loop', '');
+      this.carousel_.setAttribute('controls', 'controls');
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
@@ -524,6 +525,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
 
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
+      this.carousel_.setAttribute('controls', 'controls');
       this.topBar_.classList.remove('fade-out');
       if (!this.container_.hasAttribute('gallery-view')) {
         this.descriptionBox_.classList.remove('fade-out');
@@ -531,6 +533,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       }
       this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
     } else {
+      this.carousel_.removeAttribute('controls');
       this.topBar_.classList.add('fade-out');
       this.descriptionBox_.classList.add('fade-out');
       this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
