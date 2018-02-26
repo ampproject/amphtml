@@ -380,6 +380,10 @@ event.response</pre></td>
     <td><code>selectDown(delta=INTEGER)</code></td>
     <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
   </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
+  </tr>
 </table>
 
 ### amp-sidebar
