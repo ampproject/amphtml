@@ -77,13 +77,13 @@ Example 1:  RTC Specification on an amp-ad
             "vendors": {
               "vendorA": {"SLOT_ID": "1"},
               "vendorB": {"PAGE_ID": "2"},
-              “vendorC”: {“SLOT_W”: “320”, “SLOT_H”: “50”}          
+              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}          
               },
             "URLs": [
-              “https://www.AmpPublisher.biz/targetingA”,
-              “https://www.AmpPublisher.biz/targetingB”
+              "https://www.AmpPublisher.biz/targetingA",
+              "https://www.AmpPublisher.biz/targetingB"
             ],
-            "timeoutMillis": 750}’>
+            "timeoutMillis": 750}'>
 </amp-ad>
 ```
 
@@ -91,28 +91,29 @@ Example 1:  RTC Specification on an amp-ad
 The value of rtc-config must conform to the following specification:
 
 
-```
+```json
 {
-	"vendors": {
-"vendor1": {
-"MACRO_1": "MACRO_VALUE_1",
-"MACRO_2": "MACRO_VALUE_2"
-},
-"vendor2": {
-"MACRO_1": "MACRO_VALUE_1",
-"MACRO_2": "MACRO_VALUE_2"
-}
+    "vendors": {
+        "vendor1": {
+            "MACRO_1": "MACRO_VALUE_1",
+            "MACRO_2": "MACRO_VALUE_2"
+        },
+        "vendor2": {
+            "MACRO_1": "MACRO_VALUE_1",
+            "MACRO_2": "MACRO_VALUE_2"
+        }
 	},
-     "urls": ["https://www.exampleA.com/endpoint",
-              "https://www.exampleb.com/endpoint"],
-	"timeoutMillis": 500
+    "urls": [
+        "https://www.exampleA.com/endpoint", 
+        "https://www.exampleb.com/endpoint"],
+	"timeoutMillis": 500 
 }
 ```
 
 
 
 
-*   vendors
+*   **vendors**
     *   Optional parameter
     *   Type: Object
         *   Key is the name of the vendor to use.
@@ -121,12 +122,12 @@ The value of rtc-config must conform to the following specification:
     *   Macros for a given vendor URL are specified by that particular vendor.
         *   E.g., in Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see Vendor URL Specification below). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL.
         *   Vendors can use the same macros as other vendors.
-*   urls
+*   **urls**
     *   Optional parameter
     *   Type: Array
     *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
         *   See [RTC Callout Endpoint and Response Specification](#response-and-endpoint-specification) section below on all requirements for endpoint.
-*   timeoutMillis
+*   **timeoutMillis**
     *   Optional parameter
     *   Type: integer
     *   Value in milliseconds for timeout to use for each individual RTC callout. Must be less than default value of 1000ms, and greater than 0.
@@ -154,7 +155,7 @@ The RTC Response to a GET must meet the following requirements:
     *   CORS
     *   AMP-Access-Control-Allow-Source-Origin
     *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
+    *   Access-control-expose-headers: AMP-Access-Control-Allow-Source-Origin
 *   Body of response is a JSON object of targeting information such as:
     *   {"targeting": {"sport":["rugby","cricket"]}}
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network-specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
@@ -172,7 +173,7 @@ AmpPublisher.biz uses FadNetwork's Fast Fetch implementation for all of their AM
 First, AmpPublisher's developer opens up callout-vendors.js to make sure that all of their desired vendors actually support RTC, and find:
 
 
-```
+```javascript
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor-a": {
@@ -195,7 +196,7 @@ All of the desired vendors are supported, thus they can use all of them.
 AmpPublisher now wants to check what macros they have available to use from FadNetwork's Fast Implementation, so they open up amp-ad-network-fadnetwork-impl.js and check the implementation of getCustomRealTimeConfigMacros:
 
 
-```
+```javascript
 /** amp-ad-network-fadnetwork-impl.js */
 
 export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
@@ -218,7 +219,7 @@ AmpPublisher has also decided that the default timeout of 1000ms per callout is 
 Thus, they define their rtc-config:
 
 
-```
+```html
 <amp-ad width="320" height="50"
             type="network-foo"
             data-slot="/1234/5678"
@@ -261,7 +262,7 @@ These 5 URLs are then called out to as quickly as possible in parallel. A publis
 The results of the 5 callouts are:
 
 
-```
+```javascript
 /** Callout 1 response https://www.AmpPublisher.biz/A */
 {"targeting": {"ages": "18-24", "g":["m", "f", "o"]}}
 
@@ -289,12 +290,14 @@ Callout 1, 4, and 5 all return valid JSON and cause no errors.
 
 The Fast Fetch Implementation for FadNetwork then uses this array of RTC response objects to build and send the ad request URL. It is at the discretion of FadNetwork to merge these parameters however they see fit. In this example, FadNetwork simply does a deep merge of all the successful RTC callout responses, with the last response given precedence in case of collision, and gets the resulting JSON:
 
-
-```
-{“targeting”: {“ages”: “35-45”,
-               “g”:[“m”, “f”, “o”],
-               “i”: {“sport”: “baseball”, “city”: “NYC”}}}
-```
+```json
+{
+  "targeting": {
+    "ages": "35-45",
+    "g": ["m", "f", "o"],
+    "i": {"sport": "baseball", "city": "NYC"}
+  }
+}
 
 
 This targeting information is then added to the Ad Request URL however FadNetwork's implementation dictates.
