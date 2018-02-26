@@ -269,8 +269,7 @@ data.tabs;
 data.hideCover;
 data.hideCta;
 data.smallHeader;
-data.adaptContainerWidth;
-data.showFacePile;
+data.showFacepile;
 data.showText;
 
 // 3p code

@@ -23,19 +23,40 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {SubscriptionService} from '../amp-subscriptions';
 
-const paywallUrl = 'https://lipsum.com';
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
+  let win;
   let ampdoc;
+  let element;
   let pageConfig;
   let subscriptionService;
+  const serviceConfig = {
+    services: [
+      {
+        serviceId: 'local',
+        authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
+      },
+      {
+        serviceId: 'google.subscription',
+      },
+    ],
+  };
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
+    element = win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    element.setAttribute('type', 'json');
+    element.innerHTML = JSON.stringify(serviceConfig);
+
+    win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('example.org:basic', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(() => Promise.resolve(pageConfig));
+    sandbox.stub(subscriptionService, 'getServiceConfig_')
+        .callsFake(() => Promise.resolve(serviceConfig));
   });
 
 
@@ -69,11 +90,39 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   it('should add subscription platform while registering it', () => {
-    const serviceID = 'dummy service';
-    const subsPlatform = new LocalSubscriptionPlatform(
-        ampdoc, {paywallUrl}, pageConfig);
-    subscriptionService.registerService(serviceID, subsPlatform);
-    expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
-        .to.be.true;
+    const serviceData = serviceConfig['services'][1];
+    const factorySpy = sandbox.stub().callsFake(() => Promise.resolve());
+    subscriptionService.registerPlatform(serviceData.serviceId, factorySpy);
+    return subscriptionService.initialize_().then(() => {
+      expect(factorySpy).to.be.calledOnce;
+      expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceData);
+      expect(factorySpy.getCall(0).args[1]).to.be.equal(pageConfig);
+    });
+  });
+
+  describe('getServiceConfig_', () => {
+    it('should return json inside script#amp-subscriptions tag ', done => {
+      subscriptionService.getServiceConfig_.restore();
+      subscriptionService.getServiceConfig_().then(config => {
+        expect(JSON.stringify(config)).to.be.equal(
+            JSON.stringify(serviceConfig));
+        done();
+      });
+    });
+  });
+
+  describe('initializeLocalPlatforms_', () => {
+    it('should put `LocalSubscriptionPlatform` for every service config'
+        + ' with authorization Url', () => {
+      const service = serviceConfig.services[0];
+      const pushStub = sandbox.stub(
+          subscriptionService.subscriptionPlatforms_, 'push');
+      subscriptionService.initializeLocalPlatforms_(service, pageConfig);
+      expect(pushStub).to.be.calledWith(new LocalSubscriptionPlatform(
+          subscriptionService.ampdoc_,
+          service,
+          pageConfig
+      ));
+    });
   });
 });

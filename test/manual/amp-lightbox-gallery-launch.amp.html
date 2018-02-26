@@ -13,6 +13,7 @@
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
   <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -36,68 +37,79 @@
 
   <h1>Lightbox Carousel Test</h1>
   <amp-carousel height="300"
-  layout="fixed-height"
-  type="carousel"
+  width="400"
+  layout="fixed"
+  type="slides"
   lightbox>
-    <amp-img src="https://picsum.photos/300/200/?image=30"
-      width="300"
-      height="200"
-      alt="a sample image"></amp-img>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="400"
+      height="300"
+      alt="a beautiful cat"></amp-img>
     <amp-anim
+      role="button"
+      tabindex="0"
+      width="400"
+      height="225"
       src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no" width="400" height="300">
     </amp-anim>
     <figure>
-        <amp-img src="https://picsum.photos/300/200/?image=31"
-        width="300"
-        height="200"
-        alt="another sample image"></amp-img>
+        <amp-img src="https://images.unsplash.com/photo-1515002246390-7bf7e8f87b54"
+        width="400"
+        height="300"
+        alt="another beautiful cat"></amp-img>
         <figcaption>This is a figure with a figcaption.</figcaption>
     </figure>
-    <amp-img src="https://picsum.photos/300/200/?image=32"
-      width="300"
-      height="200"
+    <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+      width="400"
+      height="300"
       aria-label="Aria labels are cool."></amp-img>
-    <amp-img src="https://picsum.photos/300/200/?image=33"
-      width="300"
-      height="200"
+    <amp-img src="https://images.unsplash.com/photo-1482066490729-6f26115b60dc"
+      width="400"
+      height="300"
       aria-describedby="my-aria-describe"></amp-img>
-    <amp-img src="https://picsum.photos/300/200/?image=34"
-      width="300"
-      height="200"
+    <amp-img src="https://images.unsplash.com/photo-1511275539165-cc46b1ee89bf"
+      width="400"
+      height="300"
       aria-labelledby="my-aria-label"></amp-img>
     <amp-video
       src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
       width="358"
       height="204"
       layout="responsive"
+      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
       controls>
-      <div placeholder>
-        This is a placeholder
-      </div>
-      <div fallback>
-        This is a fallback
-      </div>
     </amp-video>
     <amp-youtube width="480"
       height="270"
       layout="responsive"
       data-videoid="lBTCB7yLs8Y">
+      <amp-img
+        src="https://i.ytimg.com/vi/UKsAoboS-Wc/mqdefault.jpg"
+        placeholder
+        layout="fill"
+        />
     </amp-youtube>
     <amp-youtube width="480"
       height="270"
       layout="responsive"
       data-videoid="lBTCB7yLs8Y"
       autoplay>
+      <amp-img
+        src="https://i.ytimg.com/vi/OO9oKhs80aI/mqdefault.jpg"
+        placeholder
+        layout="fill"
+        />
     </amp-youtube>
     <amp-instagram data-shortcode="1totVhIFXl"
-      width="1"
-      height="1"
-      layout="responsive">
+      width="400"
+      height="400"
+      layout="fixed">
     </amp-instagram>
     <amp-facebook
+      lightbox-thumbnail-id="fb-thumbnail-img"
       width="552"
       height="303"
-      layout="responsive"
+      layout="fixed"
       data-href="https://www.facebook.com/zuck/posts/10102593740125791">
     </amp-facebook>
     <amp-facebook width="552"
@@ -105,8 +117,29 @@
       layout="responsive"
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+      <amp-img
+      src="https://scontent-sjc3-1.xx.fbcdn.net/v/t15.0-10/cp0/e15/q65/p173x172/12104343_10102509276925721_413295500_n.jpg?oh=3ab5d6e109a83d59a7dec75cfc310bcd&oe=5B028D9E"
+      placeholder
+      layout="fill"
+      />
     </amp-facebook>
+    <amp-ad width="300"
+      height="250"
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="test123"
+      data-aax_src="302">
+    </amp-ad>
+
   </amp-carousel>
+
+  <amp-img id="fb-thumbnail-img"
+    width="200"
+    height="200"
+    layout="nodisplay"
+    src="https://picsum.photos/200/200?image=1074">
+  </amp-img>
+
   <div id='my-aria-describe'>
     This is an aria described by a div. <br/>
     I have a linebreak.

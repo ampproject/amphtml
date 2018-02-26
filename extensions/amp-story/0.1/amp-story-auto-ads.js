@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from '../../../src/common-signals';
+import {EventType} from './events';
+import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {isJsonScriptTag} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 
-// temp before config in passed in
+
+// TODO(ccordry) replace these constants with user config
 /** @const */
 const MIN_INTERVAL = 3;
 
@@ -25,10 +33,13 @@ const MIN_INTERVAL = 3;
 const MAX_NUMBER = 2;
 
 /** @const */
-// const EXPERIMENT = 'amp-story-auto-ad';
+const TAG = 'amp-story-auto-ads';
 
 /** @const */
-const TAG = 'amp-story-auto-ads';
+const AD_TAG = 'amp-ad';
+
+/** @const */
+const MUSTACHE_TAG = 'amp-mustache';
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -46,10 +57,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.interactions_ = 0;
 
     /** @private {!Array} */
-    this.adElements_ = [];
+    this.adPageEls_ = [];
 
     /** @private {number} */
     this.adsPlaced_ = 0;
+
+    /** @private {number} */
+    this.adPagesCreated_ = 0;
+
+    /** @private {boolean} */
+    this.isCurrentAdLoaded_ = false;
+
+    /** @private {Object<string, string>} */
+    this.config_ = {};
   }
 
   /** @override */
@@ -57,6 +77,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryElement = this.element.parentElement;
     user().assert(ampStoryElement.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
+
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, AD_TAG);
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, MUSTACHE_TAG);
 
     ampStoryElement.getImpl().then(impl => {
       this.ampStory_ = impl;
@@ -74,47 +100,136 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.schedulePage_();
-    return Promise.resolve();
+    return this.createStoryLoadPromise_()
+        .then(() => {
+          this.readConfig_();
+          this.schedulePage_();
+        });
   }
+
+
+  /**
+   * promise that resolves on STORY_LOADED event
+   * @private
+   * @return {!Promise}
+   */
+  createStoryLoadPromise_() {
+    return new Promise(resolve => {
+      this.ampStory_.element.addEventListener(EventType.STORY_LOADED, resolve);
+    });
+  }
+
+
+  /**
+   * load in config from child <script> element
+   * @private
+   */
+  readConfig_() {
+    const child = this.element.children[0];
+    user().assert(
+        isJsonScriptTag(child),
+        `The <${TAG}> config should ` +
+        'be inside a <script> tag with type="application/json"');
+
+    this.config_ = parseJson(child.textContent);
+    this.validateConfig_();
+  }
+
+
+  /**
+   * make sure given JSON config is shaped correctly
+   * @private
+   */
+  validateConfig_() {
+    const adAttributes = this.config_['ad-attributes'];
+    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
+      'Top level JSON should have an "ad-attributes" key');
+
+    const type = adAttributes.type;
+    user().assert(type, `<${TAG}>: Error reading config.` +
+      'Missing ["ad-attribues"]["type"] key');
+  }
+
 
   /**
    * build page and start preloading
    * @private
    */
   schedulePage_() {
-    const page = this.makeMockPage();
-    this.adElements_.push(page);
+    const page = this.createAdPage_();
+    this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
-
-    // TODO(ccordry): need to fake distance from page to force load
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
     });
   }
 
+
   /**
-   * temporary to be replaced with real fetching
+   * create an `amp-story-page` containing an `amp-ad`
+   * @private
    */
-  makeMockPage() {
-    const ampStoryAdPage = document.createElement('amp-story-page');
-    const id = this.adsPlaced_ + 1;
-    ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
-    ampStoryAdPage.setAttribute('ad', '');
-    ampStoryAdPage./*OK*/innerHTML = `
-      <amp-story-grid-layer template="vertical">
-        <h1>Ad Page #${id}</h1>
-        <p>This is ad #${id} shown in this story.</p>
-      </amp-story-grid-layer>
-      `;
+  createAdPage_() {
+    // TODO(ccordry) add new <amp-story-cta-layer>
+    const ampStoryAdPage = this.createPageElement_();
+    const ampAd = this.createAdElement_();
+
+    ampStoryAdPage.appendChild(ampAd);
+
+    this.isCurrentAdLoaded_ = false;
+
+    // set up listener for ad-loaded event
+    ampAd.getImpl().then(impl => {
+      const signals = impl.signals();
+      return signals.whenSignal(CommonSignals.INI_LOAD);
+    }).then(() => {
+      this.isCurrentAdLoaded_ = true;
+    });
+
     return ampStoryAdPage;
   }
 
 
   /**
-   * Get array containing all pages of associated story
+   * @return {!Element}
+   * @private
+   */
+  createPageElement_() {
+    const id = ++this.adPagesCreated_;
+    const attributes = dict({
+      'id': `i-amphtml-ad-page-${id}`,
+      'ad': '',
+      'distance': '1',
+    });
+
+    return createElementWithAttributes(
+        document, 'amp-story-page', attributes);
+  }
+
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createAdElement_() {
+    const defaultAttrs = {
+      'id': 'i-amphtml-story-ad',
+      'height': '100vh',
+      'width': '100vw',
+    };
+
+    const configAttrs = this.config_['ad-attributes'];
+    const attributes = /** @type {!JsonObject} */ (Object.assign({},
+        defaultAttrs, configAttrs));
+
+    return createElementWithAttributes(
+        document, 'amp-ad', attributes);
+  }
+
+
+  /**
    * @private
    */
   handleStateChange_(stateChangeEvent) {
@@ -158,14 +273,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   placeAdAfterPage_(currentPageId) {
-    // TODO(ccordry) make sure ad is loaded
-    const nextAdElement = this.adElements_[this.adElements_.length - 1];
+    const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
 
-    if (!nextAdElement) {
+    if (!nextAdPageEl || !this.isCurrentAdLoaded_) {
       return;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdElement.id);
+    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
     this.adsPlaced_++;
 
     if (!this.allAdsPlaced_()) {
