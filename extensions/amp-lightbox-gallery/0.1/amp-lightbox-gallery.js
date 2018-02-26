@@ -296,19 +296,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       Services.extensionsFor(this.win).installExtensionForDoc(
           this.getAmpDoc(), 'amp-image-viewer'),
     ]).then(() => {
-      this.carousel_ = this.win.document.createElement('amp-carousel');
-      this.carousel_.setAttribute('type', 'slides');
-      this.carousel_.setAttribute('layout', 'fill');
-      this.carousel_.setAttribute('loop', '');
-      this.carousel_.setAttribute('controls', '');
-      this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
       return this.vsync_.mutatePromise(() => {
+        this.carousel_ = this.win.document.createElement('amp-carousel');
+        this.carousel_.setAttribute('type', 'slides');
+        this.carousel_.setAttribute('layout', 'fill');
+        this.carousel_.setAttribute('loop', '');
+        this.carousel_.setAttribute('controls', '');
+        this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
         this.buildCarouselSlides_(list);
+        this.container_.appendChild(this.carousel_);
       });
-    }).then(() => {
-      this.container_.appendChild(this.carousel_);
     });
   }
 
@@ -326,28 +325,30 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-    this.descriptionBox_ = this.win.document.createElement('div');
-    this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
-    this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
-    this.descriptionBox_.classList.add('standard');
+    this.vsync_.mutate(() => {
+      this.descriptionBox_ = this.win.document.createElement('div');
+      this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
+      this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
+      this.descriptionBox_.classList.add('standard');
 
-    // public css api for styling the description box
-    this.descriptionBox_.classList.add('amp-lbg-desc-box');
+      // public css api for styling the description box
+      this.descriptionBox_.classList.add('amp-lbg-desc-box');
 
-    this.descriptionTextArea_ = this.win.document.createElement('div');
-    this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
-    this.descriptionTextArea_.classList.add('non-expanded');
+      this.descriptionTextArea_ = this.win.document.createElement('div');
+      this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
+      this.descriptionTextArea_.classList.add('non-expanded');
 
-    // public css api for styling the description text area
-    this.descriptionTextArea_.classList.add('amp-lbg-desc-text');
+      // public css api for styling the description text area
+      this.descriptionTextArea_.classList.add('amp-lbg-desc-text');
 
-    this.descriptionBox_.appendChild(this.descriptionTextArea_);
+      this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
-    this.descriptionBox_.addEventListener('click', event => {
-      this.toggleDescriptionOverflow_();
-      event.stopPropagation();
+      this.descriptionBox_.addEventListener('click', event => {
+        this.toggleDescriptionOverflow_();
+        event.stopPropagation();
+      });
+      this.container_.appendChild(this.descriptionBox_);
     });
-    this.container_.appendChild(this.descriptionBox_);
   }
 
   /**
@@ -356,14 +357,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    // The problem with setting innerText is that it not only removes
-    // child nodes from the element, but also permanently destroys all
-    // descendant text nodes. It is okay in this case because the description
-    // text area is a div that does not contain descendant elements.
-    this.descriptionTextArea_./*OK*/innerText = descText;
-    if (!descText) {
-      toggle(dev().assertElement(this.descriptionBox_), false);
-    }
+    this.vsync_.mutate(() => {
+      // The problem with setting innerText is that it not only removes
+      // child nodes from the element, but also permanently destroys all
+      // descendant text nodes. It is okay in this case because the description
+      // text area is a div that does not contain descendant elements.
+      this.descriptionTextArea_./*OK*/innerText = descText;
+      if (!descText) {
+        toggle(dev().assertElement(this.descriptionBox_), false);
+      }
+    });
   }
 
   /**
@@ -456,23 +459,25 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   buildTopBar_() {
     dev().assert(this.container_);
-    this.topBar_ = this.win.document.createElement('div');
-    this.topBar_.classList.add('i-amphtml-lbg-top-bar');
-    this.topBar_.classList.add('i-amphtml-lbg-controls');
+    this.vsync_.mutate(() => {
+      this.topBar_ = this.win.document.createElement('div');
+      this.topBar_.classList.add('i-amphtml-lbg-top-bar');
+      this.topBar_.classList.add('i-amphtml-lbg-controls');
 
-    // public css api for top control bar
-    this.topBar_.classList.add('amp-lbg-top-bar');
+      // public css api for top control bar
+      this.topBar_.classList.add('amp-lbg-top-bar');
 
-    const close = this.close_.bind(this);
-    const openGallery = this.openGallery_.bind(this);
-    const closeGallery = this.closeGallery_.bind(this);
+      const close = this.close_.bind(this);
+      const openGallery = this.openGallery_.bind(this);
+      const closeGallery = this.closeGallery_.bind(this);
 
-    // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Close', 'amp-lbg-button-close', close);
-    this.buildButton_('Gallery', 'amp-lbg-button-gallery', openGallery);
-    this.buildButton_('Content', 'amp-lbg-button-slide', closeGallery);
+      // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
+      this.buildButton_('Close', 'amp-lbg-button-close', close);
+      this.buildButton_('Gallery', 'amp-lbg-button-gallery', openGallery);
+      this.buildButton_('Content', 'amp-lbg-button-slide', closeGallery);
 
-    this.container_.appendChild(this.topBar_);
+      this.container_.appendChild(this.topBar_);
+    });
   }
 
   /**
@@ -484,23 +489,25 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   buildButton_(label, className, action) {
     dev().assert(this.topBar_);
-    const button = this.win.document.createElement('div');
-    button.setAttribute('role', 'button');
-    button.setAttribute('aria-label', label);
+    this.vsync_.mutate(() => {
+      const button = this.win.document.createElement('div');
+      button.setAttribute('role', 'button');
+      button.setAttribute('aria-label', label);
 
-    const icon = this.win.document.createElement('span');
-    icon.classList.add('amp-lbg-icon');
-    button.appendChild(icon);
-    button.classList.add(className);
-    button.classList.add('amp-lbg-button');
+      const icon = this.win.document.createElement('span');
+      icon.classList.add('amp-lbg-icon');
+      button.appendChild(icon);
+      button.classList.add(className);
+      button.classList.add('amp-lbg-button');
 
-    button.addEventListener('click', event => {
-      action();
-      event.stopPropagation();
-      event.preventDefault();
+      button.addEventListener('click', event => {
+        action();
+        event.stopPropagation();
+        event.preventDefault();
+      });
+
+      this.topBar_.appendChild(button);
     });
-
-    this.topBar_.appendChild(button);
   }
 
   /**
@@ -643,14 +650,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
       this.getViewport().enterLightboxMode();
 
-      st.setStyles(this.element, {
-        opacity: 0,
-        display: '',
-      });
+      this.vsync_.mutate(() => {
+        st.setStyles(this.element, {
+          opacity: 0,
+          display: '',
+        });
 
-      st.setStyles(dev().assertElement(this.carousel_), {
-        opacity: 0,
-        display: '',
+        st.setStyles(dev().assertElement(this.carousel_), {
+          opacity: 0,
+          display: '',
+        });
       });
 
       this.active_ = true;
