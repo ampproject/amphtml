@@ -115,19 +115,29 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('should be valid (responsive)', () => {
       isResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.true;
     });
     it('should NOT be valid (responsive with wrong height)', () => {
       isResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
       element.setAttribute('height', '666');
+      element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.false;
     });
     it('should NOT be valid (responsive with wrong width)', () => {
       isResponsiveStub.callsFake(() => true);
+      element.setAttribute('data-full-width', 'true');
       element.setAttribute('height', '320');
       element.setAttribute('width', '666');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (responsive with missing data-full-width)', () => {
+      isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.false;
     });
     it('should NOT be valid (impl tag name)', () => {
