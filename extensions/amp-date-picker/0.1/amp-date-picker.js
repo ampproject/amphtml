@@ -407,7 +407,7 @@ class AmpDatePicker extends AMP.BaseElement {
       if (this.mode_ == DatePickerMode.OVERLAY &&
           (!this.startDateField_ || !this.endDateField_)) {
         user().error(TAG,
-            'Overlay range pickers must specify existing start and end' +
+            'Overlay range pickers must specify existing start and end ' +
             'input elements.');
       }
     } else {
