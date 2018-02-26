@@ -725,7 +725,7 @@ class AmpDatePicker extends AMP.BaseElement {
         this.triggerActivate_();
         const toFocus = this.container_.querySelector('[tabindex="0"]');
         if (toFocus) {
-          toFocus.focus();
+          this.vsync_.mutate(() => toFocus./*OK*/focus());
         }
       }
       e.preventDefault();
