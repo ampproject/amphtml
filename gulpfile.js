@@ -145,6 +145,7 @@ declareExtension('amp-position-observer', '0.1', {hasCss: false});
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
+declareExtension('amp-subscriptions-google', '0.1', {hasCss: false});
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
