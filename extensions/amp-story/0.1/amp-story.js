@@ -24,6 +24,7 @@
  * </amp-story>
  * </code>
  */
+import './amp-story-auto-ads';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {ActionTrust} from '../../../src/action-trust';
@@ -33,6 +34,10 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
+import {
+  DoubletapRecognizer,
+  SwipeXYRecognizer,
+} from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -43,7 +48,6 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -90,6 +94,16 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
+
+/** @private @const {string} */
+const ADVANCE_TO_ATTR = 'i-amphtml-advance-to';
+
+/** @private @const {string} */
+const RETURN_TO_ATTR = 'i-amphtml-return-to';
+
+/** @private @const {string} */
+const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
+
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -225,6 +239,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
 
+    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    this.adPages_ = [];
+
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
 
@@ -255,9 +272,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?ShareWidget} */
     this.shareWidget_ = null;
-
-    /** @private {?function()} */
-    this.boundOnResize_ = null;
 
     /** @private @const {!Array<string>} */
     this.originWhitelist_ = ORIGIN_WHITELIST;
@@ -385,7 +399,9 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.systemLayer_.updateProgress(pageId, progress);
+      if (!this.activePage_.isAd()) {
+        this.systemLayer_.updateProgress(pageId, progress);
+      }
     });
 
     this.element.addEventListener(EventType.REPLAY, () => {
@@ -401,27 +417,36 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
-    const gestures = Gestures.get(this.element,
-        /* shouldNotPreventDefault */ true);
-
-    gestures.onGesture(SwipeXYRecognizer, e => {
-      if (this.bookend_.isActive()) {
-        return;
-      }
-
-      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX)) {
-        return;
-      }
-
-      this.ampStoryHint_.showNavigationOverlay();
-    });
-
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
 
-    this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
-    this.getViewport().onResize(this.boundOnResize_);
+    this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
+    this.installGestureRecognizers_();
+  }
+
+  /** @private */
+  installGestureRecognizers_() {
+    const {element} = this;
+    const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
+
+    // Disables zoom on double-tap.
+    gestures.onGesture(DoubletapRecognizer, gesture => {
+      const {event} = gesture;
+      event.preventDefault();
+    });
+
+    // Shows "tap to navigate" hint when swiping.
+    gestures.onGesture(SwipeXYRecognizer, gesture => {
+      const {deltaX} = gesture.data;
+      if (this.bookend_.isActive()) {
+        return;
+      }
+      if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
+        return;
+      }
+      this.ampStoryHint_.showNavigationOverlay();
+    });
   }
 
   /** @private */
@@ -711,8 +736,8 @@ export class AmpStory extends AMP.BaseElement {
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
-
-    if (activePage !== lastPage) {
+    if (activePage.element.hasAttribute(ADVANCE_TO_ATTR) ||
+        activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
       this.hasBookend_().then(hasBookend => {
@@ -766,7 +791,9 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    this.systemLayer_.setActivePageId(targetPageId);
+    if (!targetPage.isAd()) {
+      this.systemLayer_.setActivePageId(targetPageId);
+    }
 
     // TODO(alanorozco): check if autoplay
     this.navigationState_.updateActivePage(
@@ -879,6 +906,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Handle resize events and set the story's desktop state.
+   * @visibleForTesting
    */
   onResize() {
     if (this.isDesktop_()) {
@@ -1279,7 +1307,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {number}
    */
   getPageCount() {
-    return this.pages_.length;
+    return this.pages_.length - this.adPages_.length;
   }
 
   /**
@@ -1436,6 +1464,55 @@ export class AmpStory extends AMP.BaseElement {
       dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+  }
+
+  /** @return {!NavigationState} */
+  getNavigationState() {
+    return this.navigationState_;
+  }
+
+
+  /**
+   * Add page to back of pages_ array
+   * @param {!./amp-story-page.AmpStoryPage} page
+   */
+  addPage(page) {
+    this.pages_.push(page);
+
+    if (page.isAd()) {
+      this.adPages_.push(page);
+    }
+  }
+
+  /**
+   * Insert a new page in navigation flow by changing the attr pointers
+   * on amp-story-page elements
+   * @param {string} currentPageId
+   * @param {string} pageToBeInsertedId
+   */
+  insertPage(currentPageId, pageToBeInsertedId) {
+    // TODO(ccordry): make sure this method moves to PageManager when implemented
+    const pageToBeInserted = this.getPageById_(pageToBeInsertedId);
+    const pageToBeInsertedEl = pageToBeInserted.element;
+
+    const currentPage = this.getPageById_(currentPageId);
+    const currentPageEl = currentPage.element;
+
+    const nextPageId = currentPage
+        .getNextPageId(true /*opt_isAutomaticAdvance */);
+
+
+    if (nextPageId) {
+      currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
+      currentPageEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
+      pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
+
+      const nextPage = this.getPageById_(nextPageId);
+      const nextPageEl = nextPage.element;
+      pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
+      pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageEl.id);
+      nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+    }
   }
 
   /**
