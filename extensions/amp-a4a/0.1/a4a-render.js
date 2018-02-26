@@ -36,6 +36,13 @@ import {utf8Decode} from '../../../src/utils/bytes';
 const TAG = 'a4a-render';
 
 /** @typedef {{
+      templateUrl: string,
+      data: (JsonObject|undefined),
+      analytics: (JsonObject|undefined),
+    }} */
+export let AmpTemplateCreativeDef;
+
+/** @typedef {{
       creativeMetadata: !CreativeMetaDataDef,
       templateData: AmpTemplateCreativeDef,
       size: !LayoutInfoDef,
@@ -58,10 +65,6 @@ export let RendererOutputDef;
     } */
 export let RendererDef;
 
-
-/** @typedef {string} */
-export let ValidatorResultType;
-
 /** @typedef {
       function(
         !ArrayBuffer,
@@ -80,13 +83,8 @@ export let ValidatorDef;
     }} */
 export let ValidatorOutputDef;
 
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-      analytics: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
+/** @typedef {string} */
+export let ValidatorResultType;
 
 /** @enum {ValidatorResultType} */
 export const ValidatorResult = {
@@ -105,6 +103,7 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
  * @const {Object<string, AmpAdTemplates>}
  */
 const ampAdTemplatesStore = {};
+
 
 /**
  * Render a validated AMP creative directly in the parent page.
@@ -224,8 +223,8 @@ export function templateRenderer(
 
 /**
  * Fetches and returns the template from the given ad response, wrapped as a
- * promise, or rejects if the template cannot be fetched
- * .
+ * promise, or rejects if the template cannot be fetched.
+ *
  * @param {!ArrayBuffer} bytes
  * @param {!Headers} headers
  * @param {!Object} baseImpl
@@ -270,6 +269,7 @@ export function templateValidator(
         });
   });
 }
+
 
 /**
  * @param {!Object} baseImpl AmpAdNetworkBase impl.
