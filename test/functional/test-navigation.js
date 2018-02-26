@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import '../../src/service/document-click';
+import '../../src/service/navigation';
 import * as Impression from '../../src/impression';
 import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
 import {macroTask} from '../../testing/yield';
 
 
-describes.sandboxed('ClickHandler', {}, () => {
+describes.sandboxed('Navigation', {}, () => {
   let event;
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describes.sandboxed('ClickHandler', {}, () => {
       win = env.win;
       doc = win.document;
 
-      handler = Services.clickHandlerForDoc(doc);
+      handler = Services.navigationForDoc(doc);
       handler.isIframed_ = true;
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
@@ -567,7 +567,7 @@ describes.sandboxed('ClickHandler', {}, () => {
         parentWin = env.parentWin;
         embed = env.embed;
 
-        handler = win.services.clickhandler.obj;
+        handler = win.services.navigation.obj;
         winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });

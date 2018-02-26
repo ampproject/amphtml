@@ -18,9 +18,9 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
+import {createElementWithAttributes} from '../../src/dom';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
-
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
@@ -206,8 +206,8 @@ describes.sandboxed('StandardActions', {}, () => {
 
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
-      const clickHandler = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'clickHandlerForDoc').returns(clickHandler);
+      const navigator = {navigateTo: sandbox.stub()};
+      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
 
       const win = {};
       const invocation = {
@@ -225,13 +225,13 @@ describes.sandboxed('StandardActions', {}, () => {
       // Should check trust and fail.
       invocation.satisfiesTrust = () => false;
       standardActions.handleAmpTarget(invocation);
-      expect(clickHandler.navigateTo).to.be.not.called;
+      expect(navigator.navigateTo).to.be.not.called;
 
       // Should succeed.
       invocation.satisfiesTrust = () => true;
       standardActions.handleAmpTarget(invocation);
-      expect(clickHandler.navigateTo).to.be.calledOnce;
-      expect(clickHandler.navigateTo).to.be.calledWithExactly(
+      expect(navigator.navigateTo).to.be.calledOnce;
+      expect(navigator.navigateTo).to.be.calledWithExactly(
           win, 'http://bar.com', 'AMP.navigateTo');
     });
 
@@ -344,6 +344,57 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
     });
+  });
+
+  describes.realWin('whitelist of actions on the special AMP target', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    beforeEach(() => {
+      env.win.document.head.appendChild(
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-action-whitelist',
+            content: 'AMP.pushState,AMP.setState',
+          }));
+    });
+
+    it('should not implement print when not whitelisted', () => {
+      standardActions = new StandardActions(env.ampdoc);
+
+      const windowApi = {
+        print: () => {},
+      };
+      const printStub = sandbox.stub(windowApi, 'print');
+      const invocation = {
+        method: 'print',
+        satisfiesTrust: () => true,
+        target: {
+          ownerDocument: {
+            defaultView: windowApi,
+          },
+        },
+      };
+      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      expect(printStub).to.not.be.called;
+    });
+
+    it('should implement pushState when whitelisted', () => {
+      standardActions = new StandardActions(env.ampdoc);
+
+      const handleAmpBindActionStub =
+        sandbox.stub(standardActions, 'handleAmpBindAction_');
+      const invocation = {
+        method: 'pushState',
+        satisfiesTrust: () => true,
+        target: env.ampdoc,
+      };
+
+      expect(() =>
+        standardActions.handleAmpTarget(invocation, 0, [])).to.not.throw();
+      expect(handleAmpBindActionStub).to.be.calledOnce;
+    });
+
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {

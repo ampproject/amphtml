@@ -23,7 +23,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
 import {isConnectedNode} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
@@ -123,10 +122,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap') &&
-        startsWith(
-            Services.platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = startsWith(
+        Services.platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */

@@ -30,6 +30,7 @@ describes.realWin('amp-facebook', {
 
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
+  const fbPageHref = 'https://www.facebook.com/itsdougthepug';
   let win, doc;
 
   beforeEach(() => {
@@ -123,6 +124,46 @@ describes.realWin('amp-facebook', {
     const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
     expect(fbVideo).not.to.be.undefined;
     expect(fbVideo.getAttribute('data-href')).to.equal(fbVideoHref);
+  });
+
+  it('adds fb-video element with `data-embed-as` and `data-show-text` ' +
+    'attributes set correctly', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-video')).to.be.true;
+    expect(fbVideo.getAttribute('data-embed-as')).to.equal('video');
+    expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
+  });
+
+  it('check that fb-page element correctly sets `data-adapt-container-width` ' +
+    'attribute to \'true\'', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK-PAGE',
+    };
+
+    facebook(win, {
+      href: fbPageHref,
+      width: 200,
+      height: 200,
+    });
+    const fbPage = doc.body.getElementsByClassName('fb-page')[0];
+    expect(fbPage).not.to.be.undefined;
+    expect(fbPage.getAttribute('data-adapt-container-width')).to.equal('true');
   });
 
   it('removes iframe after unlayoutCallback', () => {

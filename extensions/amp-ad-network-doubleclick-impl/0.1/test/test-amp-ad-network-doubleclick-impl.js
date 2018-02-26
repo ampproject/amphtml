@@ -242,8 +242,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.false;
+      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig.writeInBody).to.be.false;
     });
 
     it('should specify nameframe loading behavior; two args', () => {
@@ -256,8 +256,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.true;
+      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig.writeInBody).to.be.true;
     });
   });
 
@@ -1377,11 +1377,9 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should return false if invalid experiment value', () => {
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
           expect(impl.idleRenderOutsideViewport()).to.be.false;
-          expect(impl.isIdleRender_).to.be.false;
         });
 
-        it('should return 12 if launch experiment enabled', () => {
-          forceExperimentBranch(impl.win, 'dfp_ff_render_idle_launch', 1);
+        it('should return 12 if no experiment header', () => {
           expect(impl.idleRenderOutsideViewport()).to.equal(12);
         });
       });

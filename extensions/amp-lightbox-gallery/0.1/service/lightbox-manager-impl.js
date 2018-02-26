@@ -18,34 +18,41 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   childElement,
+  childElementByAttr,
   closestByTag,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
+import {defaultPlaceholder} from './lightbox-placeholders';
 import {dev, user} from '../../../../src/log';
 import {hasOwn, map} from '../../../../src/utils/object';
 import {isExperimentOn} from '../../../../src/experiments';
+import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
-  'amp-img': true,
+  'AMP-AD': true,
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
+  'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
+  'AMP-INSTAGRAM': true,
+  'AMP-FACEBOOK': true,
 };
 
-const ELIGIBLE_TAP_TAGS = {
-  'amp-img': true,
+export const ELIGIBLE_TAP_TAGS = {
+  'AMP-IMG': true,
+  'AMP-ANIM': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAG = 'amp-carousel';
-const FIGURE_TAG = 'figure';
+const CAROUSEL_TAG = 'AMP-CAROUSEL';
+const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
 
-const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
-  <amp-img> tag and <figure> and <amp-carousel> tags containing the <amp-img>
-  tag right now.`;
-
 /** @typedef {{
- *  url: string,
+ *  srcset: ?../../../../src/srcset.Srcset,
+ *  placeholderSrc: string,
  *  element: !Element
  * }} */
 export let LightboxThumbnailDataDef;
@@ -160,7 +167,7 @@ export class LightboxManager {
     dev().assert(element);
     dev().assert(element.hasAttribute('lightbox'));
 
-    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
       return false;
     }
     if (element.hasAttribute('on')) {
@@ -190,7 +197,7 @@ export class LightboxManager {
    * @private
    */
   baseElementIsSupported_(element) {
-    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName];
   }
 
   /**
@@ -235,7 +242,7 @@ export class LightboxManager {
       return;
     }
     this.seen_.push(element);
-    if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
+    if (element.tagName == CAROUSEL_TAG) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
@@ -268,7 +275,7 @@ export class LightboxManager {
    * @param {string} lightboxGroupId
    */
   processBaseLightboxElement_(element, lightboxGroupId) {
-    if (element.tagName.toLowerCase() == FIGURE_TAG) {
+    if (element.tagName == FIGURE_TAG) {
       const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
           lightboxGroupId);
       if (!unwrappedFigureElement) {
@@ -278,7 +285,8 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element), VALIDATION_ERROR_MSG);
+    user().assert(this.baseElementIsSupported_(element),
+        `The element ${element.tagName} isn't supported in lightbox yet.`);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
@@ -365,27 +373,72 @@ export class LightboxManager {
    */
   getThumbnails(lightboxGroupId) {
     return this.lightboxGroups_[lightboxGroupId]
-        .map((element, i) => ({
-          url: this.getThumbnailUrl_(dev().assertElement(element), i),
+        .map(element => ({
+          srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
+          placeholderSrc: this.getPlaceholderForElementType_(element),
           element,
         }));
   }
 
   /**
-   * Get thumbnail url for single element.
-   * @param {!Element} element
-   * @param {number=} index fake it for testing only, will delete later
+   * Returns the default placeholder based on element type
+   * @param {!Element=} opt_element
    * @return {string}
    * @private
    */
-  getThumbnailUrl_(element, index) {
-    if (element.hasAttribute('lightbox-thumbnail-src')) {
-      return element.getAttribute('lightbox-thumbnail-src');
-    } else if (element.tagName == 'AMP-IMG') {
-      return element.getAttribute('src');
+  getPlaceholderForElementType_(opt_element) {
+    // TODO(#12713): add placeholder icons for each component type
+    return defaultPlaceholder;
+  }
+
+  /**
+   * Get thumbnail srcset for single element.
+   * @param {!Element} element
+   * @return {!../../../../src/srcset.Srcset|null}
+   * @private
+   */
+  getThumbnailSrcset_(element) {
+    if (element.hasAttribute('lightbox-thumbnail-id')) {
+      const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
+      const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
+      user().assert(thumbnailImage.tagName == 'AMP-IMG');
+      return srcsetFromElement(thumbnailImage);
     } else {
-      // TODO(#12713): implement default thumbnails
-      return 'https://placehold.it/128x128?text=' + index;
+      return this.getUserPlaceholderSrcset_(element);
     }
+  }
+
+  /**
+   * Get the srcset for the user-specified placeholder for each element
+   * @param {!Element} element
+   * @return {!../../../../src/srcset.Srcset|null}
+   * @private
+   */
+  getUserPlaceholderSrcset_(element) {
+    if (element.tagName == 'AMP-IMG') {
+      return srcsetFromElement(element);
+    } else if (element.tagName == 'AMP-ANIM') {
+      return srcsetFromElement(element);
+    } else if (element.tagName == 'AMP-VIDEO') {
+      return this.getThumbnailSrcsetForVideo_(element);
+      // TODO: process placeholder logic for other components as added
+    } else {
+      const placeholder = childElementByAttr(element, 'placeholder');
+      if (placeholder) {
+        return this.getUserPlaceholderSrcset_(placeholder);
+      } else {
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Given an amp video, returns the thumbnail srcset.
+   * @param {!Element} ampVideo
+   * @return {!../../../../src/srcset.Srcset|null}
+   */
+  getThumbnailSrcsetForVideo_(ampVideo) {
+    const poster = ampVideo.getAttribute('poster');
+    return poster ? srcsetFromSrc(poster) : null;
   }
 }

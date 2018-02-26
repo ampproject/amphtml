@@ -109,3 +109,98 @@ In this example, `<amp-lightbox-gallery>` displays the `alt` value as its descri
   alt="Picture of CN tower">
 </amp-img>
 ```
+
+## Thumbnail API
+Lightboxed items have a thumbnail gallery view. You can optionally specify a thumbnail item for your lightboxed element via the attribute `lightbox-thumbnail-id` that references the `id` of an `<amp-img>` element with `layout="nodisplay"`.
+
+#### Example: using `lightbox-thumbnail-id` to specify a thumbnail
+
+```html
+<amp-facebook
+  lightbox
+  lightbox-thumbnail-id="fb-thumbnail-img"
+  width="552"
+  height="303"
+  layout="responsive"
+  data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+</amp-facebook>
+
+<amp-img id="fb-thumbnail-img"
+  width="200"
+  height="200"
+  layout="nodisplay"
+  src="https://picsum.photos/200/200?image=1074">
+</amp-img>
+```
+
+If no thumbnail is specified, `<amp-img>` elements will be cropped per `object-fit: cover`, `<amp-video>` will use the image src specified in its `poster` attribute, and placeholder images will be used for lightboxed elements that have one.
+
+## CSS API
+
+The CSS API exposes the following CSS classes so that you can customize the style of your lightbox:
+
+<table>
+  <tr>
+    <th width="40%">CSS class</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-mask</code></td>
+    <td>Use to customize the background color and opacity for the lightbox.</td>
+  </tr>
+   <tr>
+    <td><code>.amp-lbv-desc-box.standard</code>,<code>.amp-lbv-desc-box.overflow</code></td>
+    <td>Use to customize the description box's background color and gradient.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-top-bar</code></td>
+    <td>Use to customize the color and gradient for the lightbox's top controls bar.</td>
+  </tr>
+    <td><code>.amp-lbv-desc-text</code></td>
+    <td>Use to customize the font and colors for the description.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon colors.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-button-close</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the close button.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-button-gallery</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the gallery button.</td>
+  </tr>
+    <tr>
+    <td><code>.amp-lbg-button-slide</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the slide button.</td>
+  </tr>
+</table>
+
+#### Example: Using CSS to invert lightbox colors
+
+The following example uses the CSS API to set the lightbox background to white and the icon colors to black.
+
+```html
+.amp-lbg-mask {
+  opacity: 0.9;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.amp-lbv-desc-box.standard, .amp-lbv-desc-box.overflow {
+  background: linear-gradient(transparent,rgba(255, 255, 255, 0.5));
+  color: #000000;
+}
+
+.amp-lbg-top-bar {
+  background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0));
+}
+
+.amp-lbg-icon {
+  background-color: #000000;
+}
+
+.amp-lbv-desc-text {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+```

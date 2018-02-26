@@ -23,7 +23,8 @@
 
 require 'json'
 require 'net/http'
-require 'percy/capybara/anywhere'
+require 'percy/capybara'
+require 'capybara'
 require 'selenium/webdriver'
 
 
@@ -36,6 +37,7 @@ PORT = '8000'
 WEBSERVER_TIMEOUT_SECS = 15
 CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
+AMP_3P_FRAME_FILE = 'dist.3p/current/integration.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
 BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10
@@ -281,7 +283,33 @@ def run_visual_tests(visual_tests_config)
 end
 
 
-# Generates percy snapshots for a set of given webpages.
+# Cleans up any existing AMP config from the runtime and 3p frame.
+def cleanup_amp_config
+  log('verbose', 'Cleaning up existing AMP config')
+  cmd_runtime = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
+  cmd_3p_frame = "gulp prepend-global --target #{AMP_3P_FRAME_FILE} --remove"
+  system(cmd_runtime, :out => OUT)
+  system(cmd_3p_frame, :out => OUT)
+end
+
+
+# Applies the AMP config to the runtime and 3p frame.
+#
+# Args:
+# - config: Config to apply. One of 'canary' or 'prod'.
+def apply_amp_config(config)
+  log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
+  cmd_runtime = "gulp prepend-global --local_dev " +
+      "--target #{AMP_RUNTIME_FILE} --#{config}"
+  cmd_3p_frame = "gulp prepend-global --local_dev " +
+      "--target #{AMP_3P_FRAME_FILE} --#{config}"
+  system(cmd_runtime, :out => OUT)
+  system(cmd_3p_frame, :out => OUT)
+end
+
+
+# Sets the AMP config, launches a server, and generates Percy snapshots for a
+# set of given webpages.
 #
 # Args:
 # - page: Page object used by Percy for snapshotting.
@@ -291,38 +319,54 @@ def generate_snapshots(page, webpages)
   if ARGV.include? '--master'
     Percy::Capybara.snapshot(page, name: 'Blank page')
   end
-  log('verbose', 'Cleaning up existing AMP config')
-  remove_cmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --remove"
-  system(remove_cmd, :out => OUT)
+  cleanup_amp_config
   CONFIGS.each do |config|
-    log('verbose', 'Switching to the ' + cyan("#{config}") + ' AMP config')
-    config_cmd = "gulp prepend-global --target #{AMP_RUNTIME_FILE} --#{config}"
-    system(config_cmd, :out => OUT)
+    apply_amp_config(config)
     log('verbose',
         'Generating snapshots using the ' + cyan("#{config}") + ' AMP config')
-    page.visit('/')
-    webpages.each do |webpage|
-      url = webpage['url']
-      if url.include? 'examples/visual-tests/amp-by-example/' and
-          !ARGV.include? '--master'
-        next
+    begin
+      pid = launch_web_server
+      unless wait_for_web_server
+        log('error', 'Failed to start webserver')
+        raise 'Webserver launch failure'
       end
-      name = "#{webpage['name']} (#{config})"
-      forbidden_css = webpage['forbidden_css']
-      loading_incomplete_css = webpage['loading_incomplete_css']
-      loading_complete_css = webpage['loading_complete_css']
-      enable_experiments(page, webpage['experiments'])
-      log('verbose', 'Navigating to page ' + yellow(url) + '...')
-      page.visit(url)
-      verify_css_elements(
-          page,
-          url,
-          forbidden_css,
-          loading_incomplete_css,
-          loading_complete_css)
-      Percy::Capybara.snapshot(page, name: name)
-      clear_experiments(page)
+      page.visit('/')
+      snapshot_webpages(page, webpages, config)
+    ensure
+      close_web_server(pid)
     end
+  end
+end
+
+
+# Generates Percy snapshots for a set of given webpages.
+#
+# Args:
+# - page: Page object used by Percy for snapshotting.
+# - webpages: JSON object containing details about the pages to snapshot.
+# - config: Config being used. One of 'canary' or 'prod'.
+def snapshot_webpages(page, webpages, config)
+  webpages.each do |webpage|
+    url = webpage['url']
+    if url.include? 'examples/visual-tests/amp-by-example/' and
+        !ARGV.include? '--master'
+      next
+    end
+    name = "#{webpage['name']} (#{config})"
+    forbidden_css = webpage['forbidden_css']
+    loading_incomplete_css = webpage['loading_incomplete_css']
+    loading_complete_css = webpage['loading_complete_css']
+    enable_experiments(page, webpage['experiments'])
+    log('verbose', 'Navigating to page ' + yellow(url) + '...')
+    page.visit(url)
+    verify_css_elements(
+        page,
+        url,
+        forbidden_css,
+        loading_incomplete_css,
+        loading_complete_css)
+    Percy::Capybara.snapshot(page, name: name)
+    clear_experiments(page)
   end
 end
 
@@ -446,19 +490,10 @@ def main
         cyan('PERCY_TOKEN') + ' environment variables.')
     raise 'Missing environment variables'
   end
-  begin
-    set_debugging_level
-    pid = launch_web_server
-    unless wait_for_web_server
-      log('error', 'Failed to start webserver')
-      raise 'Webserver launch failure'
-    end
-    visual_tests_config_json = load_visual_tests_config_json
-    visual_tests_config = JSON.parse(visual_tests_config_json)
-    run_visual_tests(visual_tests_config)
-  ensure
-    close_web_server(pid)
-  end
+  set_debugging_level
+  visual_tests_config_json = load_visual_tests_config_json
+  visual_tests_config = JSON.parse(visual_tests_config_json)
+  run_visual_tests(visual_tests_config)
 end
 
 
