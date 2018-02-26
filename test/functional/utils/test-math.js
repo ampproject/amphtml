@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {mapRange, clamp} from '../../../src/utils/math';
+import {clamp, mapRange, mod} from '../../../src/utils/math';
 
 describes.sandboxed('utils/math', {}, () => {
 
@@ -37,6 +37,54 @@ describes.sandboxed('utils/math', {}, () => {
       expect(mapRange(-2, 0, 10, 10, 20)).to.equal(10);
       expect(mapRange(50, 0, 10, 10, 20)).to.equal(20);
       expect(mapRange(19, 0, 5, 40, 80)).to.equal(80);
+    });
+  });
+
+  describe('mod', () => {
+    it('a -> positive number, b -> positive number', () => {
+      expect(mod(0, 5)).to.equal(0);
+      expect(mod(1, 5)).to.equal(1);
+      expect(mod(2, 5)).to.equal(2);
+      expect(mod(3, 5)).to.equal(3);
+      expect(mod(4, 5)).to.equal(4);
+      expect(mod(5, 5)).to.equal(0);
+      expect(mod(6, 5)).to.equal(1);
+      expect(mod(7, 5)).to.equal(2);
+      expect(mod(1001, 5)).to.equal(1);
+    });
+
+    it('a -> negative number, b -> positive number', () => {
+      expect(mod(-1, 5)).to.equal(4);
+      expect(mod(-2, 5)).to.equal(3);
+      expect(mod(-3, 5)).to.equal(2);
+      expect(mod(-4, 5)).to.equal(1);
+      expect(mod(-5, 5)).to.equal(0);
+      expect(mod(-6, 5)).to.equal(4);
+      expect(mod(-7, 5)).to.equal(3);
+      expect(mod(-1001, 5)).to.equal(4);
+    });
+
+    it('a -> positive number, b -> negative number', () => {
+      expect(mod(0, -5)).to.equal(0);
+      expect(mod(1, -5)).to.equal(-4);
+      expect(mod(2, -5)).to.equal(-3);
+      expect(mod(3, -5)).to.equal(-2);
+      expect(mod(4, -5)).to.equal(-1);
+      expect(mod(5, -5)).to.equal(0);
+      expect(mod(6, -5)).to.equal(-4);
+      expect(mod(7, -5)).to.equal(-3);
+      expect(mod(1001, -5)).to.equal(-4);
+    });
+
+    it('a -> negative number, b -> negative number', () => {
+      expect(mod(-1, -5)).to.equal(-1);
+      expect(mod(-2, -5)).to.equal(-2);
+      expect(mod(-3, -5)).to.equal(-3);
+      expect(mod(-4, -5)).to.equal(-4);
+      expect(mod(-5, -5)).to.equal(0);
+      expect(mod(-6, -5)).to.equal(-1);
+      expect(mod(-7, -5)).to.equal(-2);
+      expect(mod(-1001, -5)).to.equal(-1);
     });
   });
 

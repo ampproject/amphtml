@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CSS} from '../../../build/amp-mathml-0.1.css';
 import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
-import {removeElement} from '../../../src/dom';
 import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {CSS} from '../../../build/amp-mathml-0.1.css';
 
 export class AmpMathml extends AMP.BaseElement {
 

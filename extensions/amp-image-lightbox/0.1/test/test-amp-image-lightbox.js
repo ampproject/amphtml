@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
 import '../amp-image-lightbox';
+import * as dom from '../../../../src/dom';
+import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
-import * as lolex from 'lolex';
-import * as dom from '../../../../src/dom';
 
 describes.realWin('amp-image-lightbox component', {
   amp: {
@@ -68,7 +68,7 @@ describes.realWin('amp-image-lightbox component', {
 
       const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
 
       const container = lightbox
           .querySelector('.i-amphtml-image-lightbox-container');
@@ -117,7 +117,7 @@ describes.realWin('amp-image-lightbox component', {
 
       const ampImage = doc.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
 
       expect(viewportOnChanged).to.be.calledOnce;
       expect(impl.unlistenViewport_).to.not.equal(null);
@@ -189,13 +189,13 @@ describes.realWin('amp-image-lightbox component', {
       ampImage.setAttribute('src', 'data:');
       ampImage.setAttribute('width', '100');
       ampImage.setAttribute('height', '100');
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
       impl.closeOnEscape_({keyCode: KeyCodes.ESCAPE});
       expect(setupCloseSpy).to.be.calledOnce;
 
       // Regression test: ensure escape event listener is bound properly
       expect(nullAddEventListenerSpy).to.have.not.been.called;
-      impl.activate({source: ampImage});
+      impl.activate({caller: ampImage});
       expect(nullAddEventListenerSpy).to.have.not.been.called;
     });
   });
@@ -211,7 +211,7 @@ describes.realWin('amp-image-lightbox component', {
       const sourceElement = doc.createElement('amp-img');
       sourceElement.setAttribute('src', 'data:');
 
-      impl.activate({source: sourceElement});
+      impl.activate({caller: sourceElement});
       impl.close();
 
       expect(tryFocus).to.be.calledOnce;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestBySelector} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -61,15 +62,25 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const boundingClientRect = el./*OK*/getBoundingClientRect();
+  const {width, height, left, top} = el./*OK*/getBoundingClientRect();
 
-  const scaleFactorX = boundingClientRect.width / el./*OK*/offsetWidth;
-  const scaleFactorY = boundingClientRect.height / el./*OK*/offsetHeight;
+  const scaleFactorX = width == 0 ? 1 : width / el./*OK*/offsetWidth;
+  const scaleFactorY = height == 0 ? 1 : height / el./*OK*/offsetHeight;
 
   return /** @type {!ClientRect} */ ({
-    left: boundingClientRect.left / scaleFactorX,
-    top: boundingClientRect.top / scaleFactorY,
-    width: boundingClientRect.width / scaleFactorX,
-    height: boundingClientRect.height / scaleFactorY,
+    left: left / scaleFactorX,
+    top: top / scaleFactorY,
+    width: width / scaleFactorX,
+    height: height / scaleFactorY,
   });
+}
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+export function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
 }

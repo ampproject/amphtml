@@ -88,7 +88,7 @@ describes.realWin('amp-list component', {
     return Promise.all([fetch, render]);
   }
 
-  it('should load and render', () => {
+  it('should fetch and render', () => {
     const items = [
       {title: 'Title1'},
     ];
@@ -126,7 +126,7 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should load and render non-array if single-item is set', () => {
+  it('should fetch and render non-array if single-item is set', () => {
     const items = {title: 'Title1'};
     const itemElement = doc.createElement('div');
     element.setAttribute('single-item', 'true');
@@ -186,7 +186,7 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should _not_ reload if [src] attribute changes (before layout)', () => {
+  it('should _not_ refetch if [src] attribute changes (before layout)', () => {
     // Not allowed before layout.
     listMock.expects('fetchList_').never();
 
@@ -211,7 +211,7 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should reload if [src] attribute changes (after layout)', () => {
+  it('should refetch if [src] attribute changes (after layout)', () => {
     const items = [{title: 'foo'}];
     const foo = doc.createElement('div');
     const rendered = expectFetchAndRender(items, [foo]);

@@ -16,11 +16,11 @@
 
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
+import {Services} from './services';
 import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {Services} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
