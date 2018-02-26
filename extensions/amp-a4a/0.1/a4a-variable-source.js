@@ -113,10 +113,56 @@ export class A4AVariableSource extends VariableSource {
       return getNavigationData(this.win_, 'redirectCount');
     });
 
+    this.set('HTML_ATTR',
+        /** @type {function(...*)} */(this.htmlAttrBinding_.bind(this)));
+
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];
       const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }
+  }
+
+  /**
+   * Provides a binding for getting attributes from the DOM.
+   * Most such bindings are provided in src/service/url-replacements-impl, but
+   * this one needs access to this.win_.document, which if the amp-analytics
+   * tag is contained within an amp-ad tag will NOT be the parent/publisher
+   * page. Hence the need to put it here.
+   * @param {string} cssSelector Elements matching this selector will be
+   *     included, provided they have at least one of the attributeNames
+   *     set, up to a max of 10. May be URI encoded.
+   * @param attributeNames The attributes whose values will be returned.
+   * @returns {string}
+   */
+  htmlAttrBinding_(cssSelector, ...attributeNames) {
+    const HTML_ATTR_MAX_RETURN_SIZE = 10;
+    const result = [];
+    if (!cssSelector || !attributeNames || !attributeNames.length) {
+      return JSON.stringify(result);
+    }
+    cssSelector = decodeURI(cssSelector);
+    try {
+      const elements = this.win_.document.querySelectorAll(cssSelector);
+      for (let i = 0; i < elements.length &&
+      result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+        const currentResult = {};
+        let foundAttr = false;
+        attributeNames.forEach(attributeName => {
+          if (elements[i].hasAttribute(attributeName)) {
+            currentResult[attributeName] =
+                elements[i].getAttribute(attributeName);
+            foundAttr = true;
+          }
+        });
+        if (foundAttr) {
+          result.push(currentResult);
+        }
+      }
+    } catch (e) {
+      const TAG = 'A4AVariableSource';
+      user().warn(TAG, `Invalid selector: ${cssSelector}`);
+    }
+    return JSON.stringify(result);
   }
 }
