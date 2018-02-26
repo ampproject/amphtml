@@ -81,6 +81,12 @@ exports.rules = [
           'third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->' +
           'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/swg.js',
     ],
   },
   // Rules for 3p
