@@ -29,6 +29,7 @@ import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
+  IFRAME_SANDBOXING_FLAGS,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
   SANDBOX_HEADER,
@@ -191,7 +192,7 @@ describe('amp-a4a', () => {
     expect(match).to.be.ok;
     const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandboxAttribute).to.be.ok;
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
     } else {
       expect(sandboxAttribute).to.be.null;
     }
@@ -223,7 +224,7 @@ describe('amp-a4a', () => {
     expect(child).to.be.visible;
     const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandboxAttribute).to.be.ok;
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
     } else {
       expect(sandboxAttribute).to.be.null;
     }
@@ -243,7 +244,7 @@ describe('amp-a4a', () => {
     expect(child).to.be.visible;
     const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandboxAttribute).to.be.ok;
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
     } else {
       expect(sandboxAttribute).to.be.null;
     }
