@@ -747,7 +747,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * page. Hence the need to put it here.
    * @param {string} cssSelector Elements matching this selector will be
    *     included, provided they have at least one of the attributeNames
-   *     set, up to a max of 10.
+   *     set, up to a max of 10. May be URI encoded.
    * @param attributeNames The attributes whose values will be returned.
    * @returns {string}
    */
@@ -757,18 +757,21 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!cssSelector || !attributeNames || !attributeNames.length) {
       return JSON.stringify(result);
     }
+    cssSelector = decodeURI(cssSelector);
     try {
       const elements = this.win.document.querySelectorAll(cssSelector);
-      for (let i = 0; elements && i < elements.length &&
-      result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+      for (let i = 0; i < elements.length &&
+          result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
         const currentResult = {};
+        let foundAttr = false;
         attributeNames.forEach(attributeName => {
-          const attributeValue = elements[i].getAttribute(attributeName);
-          if (attributeValue) {
-            currentResult[attributeName] = attributeValue;
+          if (elements[i].hasAttribute(attributeName)) {
+            currentResult[attributeName] =
+                elements[i].getAttribute(attributeName);
+            foundAttr = true;
           }
         });
-        if (Object.keys(currentResult).length) {
+        if (foundAttr) {
           result.push(currentResult);
         }
       }
