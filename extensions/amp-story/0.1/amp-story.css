@@ -19,7 +19,7 @@
 @import './amp-story-hint.css';
 
 /** Common */
-amp-story, amp-story-page, amp-story-grid-layer {
+amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
 }
@@ -266,6 +266,17 @@ amp-story:not([desktop]) >
   position: absolute !important;
   background: rgba(117, 117, 117, 0.3) !important;
   z-index: 2 !important;
+}
+
+/** Call to action layer */
+amp-story-cta-layer {
+  bottom: 0 !important;
+  display: block !important;
+  height: 20% !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  z-index: 3 !important;
 }
 
 /** Grid level */
