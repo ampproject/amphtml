@@ -1,10 +1,12 @@
 # Advertising support in AMP Stories 
 
+This document describes the principles and practices for including ads in AMP Stories.
+
 ## AMP Story Ad Principles
 
-The current ad ecosystem of banners and boxes doesn't integrate well with the rest of the content around it. Ads feel out of place, are slow and interruptive and don't feel native to the rest of the story experience.
+The current ad formats of banners and boxes doesn't integrate well with the rest of the content around it. Ads feel out of place, are slow, interruptive and don't feel native to the rest of the story experience.
 
-We'd like to establish the following principles for Story Ads:
+The following principles will apply to AMP Story ads:
 
 * *Visual first*:  Inviting, bold, context-driven invitation state.
 * *Native*: The ad page has the same dimensions as an organic story page. 
