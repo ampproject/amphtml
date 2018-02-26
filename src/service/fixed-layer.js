@@ -105,12 +105,13 @@ export class FixedLayer {
     const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
+      const ownerNode = stylesheet.ownerNode;
       if (stylesheet.disabled ||
-              !stylesheet.ownerNode ||
-              stylesheet.ownerNode.tagName != 'STYLE' ||
-              stylesheet.ownerNode.hasAttribute('amp-boilerplate') ||
-              stylesheet.ownerNode.hasAttribute('amp-runtime') ||
-              stylesheet.ownerNode.hasAttribute('amp-extension')) {
+              !ownerNode ||
+              ownerNode.tagName != 'STYLE' ||
+              ownerNode.hasAttribute('amp-boilerplate') ||
+              ownerNode.hasAttribute('amp-runtime') ||
+              ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
       this.discoverSelectors_(
@@ -441,7 +442,8 @@ export class FixedLayer {
    */
   setupSelectors_(fixedSelectors, stickySelectors) {
     let hasInlineStyle = false;
-    const isInlineStylesEnabled = isExperimentOn('inline-styles');
+    const isInlineStylesEnabled =
+        isExperimentOn(this.ampdoc, 'inline-styles');
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
@@ -488,6 +490,7 @@ export class FixedLayer {
     }
     return false;
   }
+
   /**
    * This method records the potentially fixed or sticky element. One of a more
    * critical functions - it records all selectors that may apply "fixed"

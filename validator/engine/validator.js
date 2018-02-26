@@ -3799,10 +3799,13 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
         /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
         context.getRules().getTemplateSpecUrl(), result);
   } else if (attrName === 'style') {
-    context.addError(
-        amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR,
-        context.getLineCol(), /* params */[],
-        context.getRules().getStylesSpecUrl(), result);
+    //TODO(alabiaga): allow inline styles but with restrictions.
+    if (!isExperimentOn('inline-styles')) { 
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_STYLE_ATTR,
+          context.getLineCol(), /* params */[],
+          context.getRules().getStylesSpecUrl(), result);
+    }
   } else {
     context.addError(
         amp.validator.ValidationError.Code.DISALLOWED_ATTR,

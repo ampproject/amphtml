@@ -17,6 +17,11 @@
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
+<<<<<<< HEAD
+=======
+import {installPlatformService} from '../../src/service/platform-impl';
+import {isExperimentOn} from '../../src/experiments';
+>>>>>>> style restriction changes
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {user} from '../../src/log';
@@ -57,7 +62,7 @@ beforeEach(() => {
     docBody.appendChild(element3);
     docBody.appendChild(element4);
     docBody.appendChild(element5);
-    docBody.appendChild(element6);
+    //docBody.appendChild(element6);
 
     const invalidRule = createValidRule('#invalid', 'fixed',
         [element1, element3]);
@@ -1048,6 +1053,7 @@ beforeEach(() => {
     });
 
     it('should throw user error for inline style', () => {
+      ampdoc.__AMP__EXPERIMENT_TOGGLES = {'inline-styles' : false};
       element6.style = {
         top: 0,
         left: 0,
