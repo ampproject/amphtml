@@ -631,6 +631,84 @@ describes.realWin('amp-selector', {
       expect(setInputsSpy).calledTwice;
     });
 
+    it('should trigger `toggle` action even when no `value` argument is' +
+      ' provided to the function', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are different
+      let args = {'index': 2};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are the same
+      args = {'index': 2};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+    });
+
+    it('should trigger `toggle` action even with specified `value`' +
+      ' argument', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are different
+      let args = {'index': 2, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are the same
+      args = {'index': 2, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be removed as `selected` and
+      // the currently selected element are the same
+      args = {'index': 2, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+
+      // Test the case where the element to be removed as `selected`
+      // is different from the currently `selected` element
+      ampSelector.children[0].setAttribute('selected', '');
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      args = {'index': 2, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+    });
+
     it('should trigger `select` action when user selects an option', () => {
       const ampSelector = getSelector({
         config: {
@@ -739,7 +817,6 @@ describes.realWin('amp-selector', {
       expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
       expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
     });
-
 
     describe('keyboard-select-mode', () => {
 
