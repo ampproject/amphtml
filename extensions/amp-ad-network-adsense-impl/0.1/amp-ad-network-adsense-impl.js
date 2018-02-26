@@ -179,6 +179,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * that it has been verified.
      */
     if (this.isResponsive_()) {
+      if (!this.element.hasAttribute('data-full-width')) {
+        user().error(TAG,
+            'Responsive AdSense ad units require the attribute ' +
+            'data-full-width.');
+        return false;
+      }
+
       const height = this.element.getAttribute('height');
       const width = this.element.getAttribute('width');
       if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
