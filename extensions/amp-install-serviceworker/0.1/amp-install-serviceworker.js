@@ -51,7 +51,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     this.urlRewriter_ = null;
 
     /** @private {boolean}  */
-    this.shouldInsertframeOnFirstLayout_ = false;
+    this.insertframeOnFirstLayout_ = false;
   }
 
   /** @override */
@@ -66,7 +66,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
       // Schedule loading the iframe in firstLayoutCompleted().
-      this.shouldInsertframeOnFirstLayout_ = true;
+      this.insertframeOnFirstLayout_ = true;
     } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       this.loadPromise(this.win).then(() => {
         return install(this.win, src);
@@ -80,7 +80,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override */
   firstLayoutCompleted() {
-    if (this.shouldInsertframeOnFirstLayout_) {
+    if (this.insertframeOnFirstLayout_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
