@@ -421,8 +421,9 @@ export function rewriteAttributesForElement(
   // rules. @see amp-cache-modifications.md#url-rewrites
   const isProxy = isProxyOrigin(opt_location || self.location);
   if (isProxy && tag === 'a' && attr === 'href') {
+    const oldValue = element.getAttribute(attr);
     const newValueIsHash = rewrittenValue[0] === '#';
-    const oldValueIsHash = element.getAttribute(attr)[0] === '#';
+    const oldValueIsHash = oldValue && oldValue[0] === '#';
 
     if (newValueIsHash && !oldValueIsHash) {
       // Save the original value of `target` so it can be restored (if needed).
