@@ -1717,11 +1717,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
-   * @return {?Object<string,
+   * @return {!Object<string,
    *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
   getCustomRealTimeConfigMacros_() {
-    return null;
+    return {};
   }
 
   /**
