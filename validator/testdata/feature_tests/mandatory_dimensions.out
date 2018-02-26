@@ -71,18 +71,18 @@ FAIL
 |      <!-- amp-audio/pixel/lightbox have relaxed width/heigh constraints -->
 |      <amp-audio src="https://example.com/audio" layout="fixed" width="42"></amp-audio>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:71:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:71:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-audio src="https://example.com/audio" layout="fixed"></amp-audio>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:72:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:72:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-pixel src="https://example.com/pixel" layout="fixed" width="42"></amp-pixel>
 |      <amp-pixel src="https://example.com/pixel" layout="fixed"></amp-pixel>
 |      <amp-lightbox layout="nodisplay" width="42"></amp-lightbox>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:75:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:75:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-lightbox layout="nodisplay"></amp-lightbox>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:76:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:76:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  
 |      <!-- src or srcset or both are all valid -->
 |      <amp-img width="42" height="42" src="img"></amp-img>
@@ -90,21 +90,21 @@ feature_tests/mandatory_dimensions.html:76:4 The tag 'amp-lightbox' requires inc
 |      <amp-img width="42" height="42" src="img" srcset="img 1x, img2 2x"></amp-img>
 |      <amp-anim width="42" height="42" src="anim"></amp-anim>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:82:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:82:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-anim width="42" height="42" srcset="img 1x, img2 2x"></amp-anim>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:83:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:83:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-anim width="42" height="42" src="anim" srcset="img 1x, img2 2x"></amp-anim>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:84:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:84:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  
 |      <!-- src optional -->
 |      <amp-audio src="https://example.com/audio"></amp-audio>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:87:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:87:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-audio></amp-audio>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:88:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:88:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-video width="42" height="42" src="https://example.com/video"></amp-video>
 |      <amp-video width="42" height="42"></amp-video>
 |      <amp-ad width="42" height="42" type="" src="https://example.com/ad"></amp-ad>
@@ -113,31 +113,31 @@ feature_tests/mandatory_dimensions.html:88:4 The tag 'amp-audio' requires includ
 |      <!-- src or srcdoc required -->
 |      <amp-iframe width="42" height="42" src="https://example.com/iframe"></amp-iframe>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:95:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:95:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-iframe width="42" height="42" srcdoc="<p>Hello, world!</p>"></amp-iframe>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:96:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:96:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-pixel src="https://example.com/pixel"></amp-pixel>
 |  
 |      <!-- disallow a src or srcset -->
 |      <amp-fit-text height="42"></amp-fit-text>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:100:4 The tag 'amp-fit-text' requires including the 'amp-fit-text' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:100:4 The tag 'amp-fit-text' requires including the 'amp-fit-text' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-carousel height="42"></amp-carousel>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:101:4 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:101:4 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-youtube data-videoid="dQw4w9WgXcQ" height="42"></amp-youtube>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:102:4 The tag 'amp-youtube' requires including the 'amp-youtube' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:102:4 The tag 'amp-youtube' requires including the 'amp-youtube' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-twitter data-tweetid="" height="42"></amp-twitter>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:103:4 The tag 'amp-twitter' requires including the 'amp-twitter' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:103:4 The tag 'amp-twitter' requires including the 'amp-twitter' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-instagram data-shortcode="" height="42"></amp-instagram>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:104:4 The tag 'amp-instagram' requires including the 'amp-instagram' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-instagram) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:104:4 The tag 'amp-instagram' requires including the 'amp-instagram' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-instagram) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-lightbox layout="nodisplay"></amp-lightbox>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:105:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:105:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <!-- /Valid Examples -->
 |  
 |    <!-- Invalid Examples -->
@@ -185,14 +185,14 @@ feature_tests/mandatory_dimensions.html:126:4 The mandatory attribute 'src' is m
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:127:4 The mandatory attribute 'src' is missing in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:127:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:127:4 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  
 |      <!-- src optional -->
 |      <amp-audio srcset="img 1x, img2 2x"></amp-audio>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:130:4 The attribute 'srcset' may not appear in tag 'amp-audio'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:130:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:130:4 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-ad height="42" type="" srcset="img 1x, img2 2x"></amp-ad>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:131:4 The attribute 'srcset' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
@@ -202,7 +202,7 @@ feature_tests/mandatory_dimensions.html:131:4 The attribute 'srcset' may not app
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:134:4 The tag 'amp-iframe' is missing a mandatory attribute - pick one of ['src', 'srcdoc']. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:134:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:134:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-pixel></amp-pixel>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:135:4 The mandatory attribute 'src' is missing in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
@@ -212,32 +212,32 @@ feature_tests/mandatory_dimensions.html:135:4 The mandatory attribute 'src' is m
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:138:4 The attribute 'src' may not appear in tag 'amp-fit-text'. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:138:4 The tag 'amp-fit-text' requires including the 'amp-fit-text' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:138:4 The tag 'amp-fit-text' requires including the 'amp-fit-text' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-carousel height="42" src="carousel"></amp-carousel>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:139:4 The attribute 'src' may not appear in tag 'amp-carousel'. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:139:4 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:139:4 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-youtube height="42" data-videoid="dQw4w9WgXcQ" srcset="img 1x, img2 2x"></amp-youtube>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:140:4 The attribute 'srcset' may not appear in tag 'amp-youtube'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:140:4 The tag 'amp-youtube' requires including the 'amp-youtube' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:140:4 The tag 'amp-youtube' requires including the 'amp-youtube' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-twitter height="42" data-tweetid="" srcset="img 1x, img2 2x"></amp-twitter>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:141:4 The attribute 'srcset' may not appear in tag 'amp-twitter'. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:141:4 The tag 'amp-twitter' requires including the 'amp-twitter' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:141:4 The tag 'amp-twitter' requires including the 'amp-twitter' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-twitter) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-instagram height="42" data-shortcode="" srcset="img 1x, img2 2x"></amp-instagram>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:142:4 The attribute 'srcset' may not appear in tag 'amp-instagram'. (see https://www.ampproject.org/docs/reference/components/amp-instagram) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:142:4 The tag 'amp-instagram' requires including the 'amp-instagram' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-instagram) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:142:4 The tag 'amp-instagram' requires including the 'amp-instagram' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-instagram) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-lightbox layout="nodisplay" src="lightbox"></amp-lightbox>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:143:4 The attribute 'src' may not appear in tag 'amp-lightbox'. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:143:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:143:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  
 |      <!-- Not-whitelisted attributes -->
 |      <amp-img height="42" src="img" foo="bar"></amp-img>

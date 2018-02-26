@@ -23,9 +23,8 @@ import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {px, setImportantStyles} from '../../../src/style';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
 
@@ -103,7 +102,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params || {}).forEach(field => {
+    Object.keys(opt_params).forEach(field => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -224,7 +223,7 @@ export class ShareWidget {
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
           dev().assert(this.ampdoc_))).canonicalUrl;
 
-    if (!copyTextToClipboard(this.win_.document, url)) {
+    if (!copyTextToClipboard(this.win_, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
       return;
     }
@@ -240,9 +239,10 @@ export class ShareWidget {
       return;
     }
 
-    const container = scopedQuerySelector(
-        dev().assertElement(this.root_),
+    const container = dev().assertElement(this.root_).querySelector(
         '.i-amphtml-story-share-system');
+
+    this.loadRequiredExtensions_();
 
     container.appendChild(buildProvider(this.win_.document, 'system'));
   }
@@ -448,7 +448,7 @@ export class ScrollableShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-        scopedQuerySelectorAll(dev().assertElement(this.root_), 'li'),
+        dev().assertElement(this.root_).querySelectorAll('li'),
         el => !!el.firstElementChild);
   }
 

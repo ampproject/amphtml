@@ -15,17 +15,18 @@
  */
 'use strict';
 
-const fs = require('fs-extra');
 const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('gulp-closure-compiler');
+const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const gulp = require('gulp');
+const highlight = require('cli-highlight').highlight;
+const internalRuntimeToken = require('../internal-version').TOKEN;
+const internalRuntimeVersion = require('../internal-version').VERSION;
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const util = require('gulp-util');
-const internalRuntimeVersion = require('../internal-version').VERSION;
-const internalRuntimeToken = require('../internal-version').TOKEN;
-const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
+const shortenLicense = require('../shorten-license');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -33,7 +34,7 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intent to continue using
+// production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
   outputFilename, options) {
@@ -45,25 +46,19 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
             if (process.env.TRAVIS) {
-              // When printing simplified log in travis, use dot for each task.
+              // Print a progress dot after each task to avoid Travis timeouts.
               process.stdout.write('.');
             }
             inProgress--;
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(util.colors.red('Compilation error',
-                e.message));
+            console./* OK*/error(colors.red('Compilation error:', e.message));
             process.exit(1);
           });
     }
     function next() {
       if (!queue.length) {
-        // When printing simplified log in travis, print EOF after
-        // all closure compiling task are done.
-        if (process.env.TRAVIS) {
-          process.stdout.write('\n');
-        }
         return;
       }
       if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
@@ -84,6 +79,19 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/src/polyfills/');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
+
+// Formats a closure compiler error message into a more readable form by
+// dropping the lengthy java invocation line...
+//     Command failed: java -jar ... --js_output_file="<file>"
+// ...and then syntax highlighting the error text.
+function formatClosureCompilerError(message) {
+  const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
+  message = message.replace(javaInvocationLine, '');
+  message = highlight(message, {ignoreIllegals: true}); // never throws
+  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
+  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  return message;
+}
 
 function compile(entryModuleFilenames, outputDir,
   outputFilename, options) {
@@ -171,6 +179,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
+      'third_party/subscriptions-project/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
@@ -281,6 +290,7 @@ function compile(entryModuleFilenames, outputDir,
         hide_warnings_for: [
           'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
+          'third_party/subscriptions-project/',
           'third_party/d3/',
           'third_party/mustache/',
           'third_party/vega/',
@@ -311,20 +321,6 @@ function compile(entryModuleFilenames, outputDir,
           'globalThis');
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
-
-      // TODO(aghassemi): Remove when NTI is the default.
-      if (argv.nti) {
-        compilerOptions.compilerFlags.new_type_inf = true;
-        compilerOptions.compilerFlags.jscomp_off.push(
-            'newCheckTypesExtraChecks');
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.nti.extern.js'
-        );
-      } else {
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.oti.extern.js'
-        );
-      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
@@ -340,9 +336,8 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(util.colors.red('Error compiling',
-              entryModuleFilenames));
-          console./* OK*/error(util.colors.red(err.message));
+          console./* OK*/error(colors.red('Compiler error:\n') +
+              formatClosureCompilerError(err.message));
           process.exit(1);
         });
 

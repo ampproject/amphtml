@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../ads/_config';
+import * as lolex from 'lolex';
 import {Services} from '../../src/services';
+import {adConfig} from '../../ads/_config';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
 import {getAdCid} from '../../src/ad-cid';
-import * as lolex from 'lolex';
 
 describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';
@@ -36,7 +36,8 @@ describes.realWin('ad-cid', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     sandbox = env.sandbox;
-    clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     element = env.win.document.createElement('amp-ad');
     element.setAttribute('type', '_ping_');
     const ampdoc = env.ampdoc;
@@ -89,8 +90,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
     });
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should return on timeout', () => {
+  it('should return on timeout', () => {
     config.clientIdScope = cidScope;
     sandbox.stub(cidService, 'get').callsFake(() => {
       return Services.timerFor(win).promise(2000);

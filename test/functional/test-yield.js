@@ -24,15 +24,15 @@ describes.realWin('yield', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install(
+        {target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
   });
 
   afterEach(() => {
     clock.uninstall();
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should work with nested promises', function* () {
+  it('should work with nested promises', function* () {
     let value = false;
 
     const nestPromise = level => {
@@ -51,8 +51,7 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should work with promise chain', function* () {
+  it('should work with promise chain', function* () {
     let value;
 
     const chainPromise = Promise.resolve();
@@ -67,8 +66,7 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should work with promise inside setTimeout', function* () {
+  it('should work with promise inside setTimeout', function* () {
     let value;
     win.setTimeout(() => {
       value = false;
@@ -84,8 +82,7 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should work with manually resolved promise inside ' +
+  it('should work with manually resolved promise inside ' +
       'setTimeout', function* () {
     let value;
     let resolver;

@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-ad-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {adConfig} from '../../../ads/_config';
-import {user} from '../../../src/log';
+import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
+import {adConfig} from '../../../ads/_config';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 
 /**
@@ -30,7 +28,7 @@ import {hasOwn} from '../../../src/utils/object';
  * omits the version number and '.js' suffix for the extension script, which
  * will be handled by the extension loader.
  *
- * @param {!string} type
+ * @param {string} type
  * @return !string
  * @private
  */
@@ -60,8 +58,7 @@ export class AmpAd extends AMP.BaseElement {
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
-      const isCustom = type === 'custom' && isExperimentOn(this.win,
-          'ad-type-custom');
+      const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
           || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
 

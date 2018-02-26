@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import '../amp-accordion';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {tryFocus} from '../../../../src/dom';
-import '../amp-accordion';
 
 
 describes.realWin('amp-accordion', {
@@ -104,6 +104,38 @@ describes.realWin('amp-accordion', {
               .getAttribute('aria-expanded')).to.equal('true');
         });
       });
+
+  it('should collapse other sections when expand action is triggered on a ' +
+    'collapsed section if expand-single-section attribute is set',
+  () => {
+    return getAmpAccordion().then(ampAccordion => {
+      ampAccordion.setAttribute('expand-single-section', '');
+      expect(ampAccordion.hasAttribute('expand-single-section')).to.be.true;
+      const impl = ampAccordion.implementation_;
+      const headerElements = doc.querySelectorAll(
+          'section > *:first-child');
+      // second section is expanded by default
+      expect(headerElements[1]
+          .parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1]
+          .getAttribute('aria-expanded')).to.equal('true');
+
+      // expand the first section
+      impl.expand_(headerElements[0].parentNode);
+
+      // we expect the first section to be expanded
+      expect(headerElements[0].parentNode
+          .hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0]
+          .getAttribute('aria-expanded')).to.equal('true');
+
+      // we expect the second section to be collapsed
+      expect(headerElements[1]
+          .parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1]
+          .getAttribute('aria-expanded')).to.equal('false');
+    });
+  });
 
   it('should stay expanded on the expand action when expanded',
       () => {

@@ -20,7 +20,7 @@ module.exports = function(context) {
     CallExpression: function(node) {
       if (node.callee.name === 'dict') {
         if (node.arguments[0]) {
-          var arg1 = node.arguments[0];
+          const arg1 = node.arguments[0];
           if (arg1.type !== 'ObjectExpression') {
             context.report(node,
                 'calls to `dict` must have an Object Literal Expression as ' +
@@ -30,7 +30,7 @@ module.exports = function(context) {
           checkNode(arg1, context);
         }
       }
-    }
+    },
   };
 };
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 'use strict';
-const transformCss = require('../jsify-css').transformCss;
-const gulp = require('gulp-help')(require('gulp'));
 const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
+const transformCss = require('../jsify-css').transformCss;
 
 function main() {
   return transformCss('./build-system/tasks/create-golden-css/css/main.css', {

@@ -150,7 +150,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.error.message).to.equal('intentional');
       expect(holder.loaded).to.be.undefined;
       expect(holder.resolve).to.exist;
-      expect(holder.reject).to.exist;;
+      expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
       expect(promise).to.equal(holder.promise);
 
@@ -582,6 +582,17 @@ describes.sandboxed('Extensions', {}, () => {
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
       expect(win.customElements.elements['amp-test']).to.be.undefined;
+    });
+
+    it('should insert template extension script correctly', () => {
+      expect(doc.head.querySelectorAll(
+          '[custom-template="amp-mustache"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-mustache']).to.be.undefined;
+      extensions.preloadExtension('amp-mustache');
+      expect(doc.head.querySelectorAll(
+          '[custom-template="amp-mustache"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-mustache'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-mustache']).to.be.undefined;
     });
 
     it('should insert extension version correctly', () => {

@@ -33,10 +33,17 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><ul>
+      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
+      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+    </ul></td>
+  </tr>
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
 {% endcall %}
 
 [TOC]
@@ -113,20 +120,13 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-AMP HTML documents with `amp-story` MUST:
+The AMP Story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+
 
 | RULE | DESCRIPTION |
-| --- | --- |
-| Start with the `<!doctype html>` doctype. | Standard for HTML. |
-| Contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). | Identifies the page as AMP content. |
-| Contain `<head>` and `<body>` tags. | Optional in HTML but not in AMP. |
-| Contain a `<meta charset="utf-8">` tag as the first child of their `<head>` tag. | Identifies the encoding for the page. |
-| Contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the second child of their `<head>` tag. | Includes and loads the AMP JS library.  This is a forked version specific to amp-story; when the feature is generally available, the normal v0.js hosted from cdn.ampproject.org must be used. |
+| ---- | --- |
+| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
 | Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
-| Contain a `<link rel="canonical" href="$STORY_URL" />` tag inside their `<head>`. | Points to itself. Learn more in [Make Your Page Discoverable](https://www.ampproject.org/docs/guides/discovery.html). |
-| Contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their `<head>` tag. It's also recommended to include `initial-scale=1`. | Specifies a responsive viewport. Learn more in [Create Responsive AMP Pages](https://www.ampproject.org/docs/guides/responsive/responsive_design.html). |
-| Contain the [AMP boilerplate code](https://www.ampproject.org/docs/reference/spec/amp-boilerplate.html) in their `<head>` tag. | CSS boilerplate to initially hide the content until AMP JS is loaded. |
-| Contain an `<amp-story standalone>` tag in the body of the document. | Identifies that the document is a story. |
 
 ## Story: `amp-story`
 
@@ -212,17 +212,17 @@ Each of these providers has a different set of available parameters ([see `data-
   "related-articles": {
     "More to Read": [
       {
-        title: "My friends, this is India [...]",
-        url: "http://a-publisher.com/india"
-        image: "./media/b1.jpg"
+        "title": "My friends, this is India [...]",
+        "url": "http://a-publisher.com/india",
+        "image": "./media/b1.jpg"
       },
       {
-        title: "A wonderful weekend with Tenturi",
-        url: "http://a-publisher.com/tenturi"
-        image: "./media/b2.jpg"
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "./media/b2.jpg"
       },
       ...
-    ],
+    ]
   }
 }
 ```
@@ -251,16 +251,15 @@ The `<amp-story-page>` component represents the content to display on a single p
 ```html
 <amp-story-page id="cover">
   <amp-story-grid-layer template="fill">
-    <amp-video src="background.mp4"></amp-video>
+    <amp-video layout="fill" src="background.mp4" poster="background.png" muted autoplay></amp-video>
   </amp-story-grid-layer>
   <amp-story-grid-layer template="vertical">
     <h1>These are the Top 5 World's Most...</h1>
     <p>Jon Bersch</p>
     <p>May 18</p>
   </amp-story-grid-layer>
-  <amp-story-grid-layer template="vertical"
-      align-content="end" justify-content="end">
-    <amp-img src="a-logo.svg"></amp-img>
+  <amp-story-grid-layer template="thirds">
+    <amp-img grid-area="bottom-third" src="a-logo.svg" width="64" height="64"></amp-img>
   </amp-story-grid-layer>
 </amp-story-page>
 ```
@@ -342,6 +341,12 @@ Example:
 ### Templates
 
 The following are available templates to specify for the layout of the grid layer.
+
+{% call callout('Tip', type='success') %}
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+{% endcall %}
+
+
 
 #### fill
 
@@ -571,6 +576,160 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+## Animations
+
+Every element inside an `<amp-story-page>` can have an entrance animation.
+
+You can configure animations by specifying a set of [animation attributes](#animation-attributes) on the element; no additional AMP extensions or configuration is needed.
+
+### Animation effects
+
+The following animation effects are available as presets for AMP stories:
+
+
+| Preset name       | Default duration (ms) | Default delay (ms) |
+| ----------------- | --------------------- | ------------------ |
+| `drop`            | 1600                  | 0 |
+| `fade-in`         | 500                   | 0 |
+| `fly-in-bottom`   | 500                   | 0 |
+| `fly-in-left`     | 500                   | 0 |
+| `fly-in-right`    | 500                   | 0 |
+| `fly-in-top`      | 500                   | 0 |
+| `pulse`           | 500                   | 0 |
+| `rotate-in-left`  | 700                   | 0 |
+| `rotate-in-right` | 700                   | 0 |
+| `twirl-in`        | 1000                  | 0 |
+| `whoosh-in-left`  | 500                   | 0 |
+| `whoosh-in-right` | 500                   | 0 |
+
+
+{% call callout('Tip', type='success') %}
+See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+{% endcall %}
+
+
+### Animation attributes
+
+#####  animate-in (required)
+
+Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
+
+*Example*: A heading flies in from left of the page.
+
+```html
+<h2 animate-in="fly-in-left">
+Fly from left!
+</h2>
+```
+
+##### animate-in-duration (optional)
+
+Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation finishes within half a second.
+
+```html
+<h2 animate-in="fly-in-left" animate-in-duration="0.5s" >
+Fly from left!
+</h2>
+```
+
+##### animate-in-delay (optional)
+
+Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
+
+*Example*: After 0.4 seconds, a heading flies in from the left of the page and completes its entrance within 0.5 seconds.
+
+```html
+<h2 animate-in="fly-in-left"
+    animate-in-duration="0.5s"
+    animate-in-delay="0.4s">
+Fly from left!
+</h2>
+```
+
+{% call callout('Note', type='note') %}
+The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% endcall %}
+
+##### animate-in-after (optional)
+
+Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
+
+For example, in the following code, `object2` animates in after `object1` completes their entrance:
+
+```html
+<amp-story-page id="page1">
+  <amp-story-grid-layer template="vertical">
+    <div id="object1"
+        animate-in="rotate-in-left">
+        1
+    </div>
+    <div id="object2"
+        animate-in="fly-in-right"
+        animate-in-after="object1">
+        2 <!-- will start after object1 has finished -->
+    </div>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+
+### Sequencing animations
+
+To chain animations in sequence, use the `animate-in-after` attribute. All elements in a given chain must be present in the same `<amp-story-page>`. Elements without the `animate-in-after` attribute do not belong to a sequence chain, and will start independently on page entrance.
+
+```html
+<amp-story-page id="my-sequencing-page">
+  <amp-story-grid-layer template="vertical">
+    <div class="circle"
+        animate-in="drop-in"
+        animate-in-duration="1.8s">
+      1 <!-- will start independently -->
+    </div>
+    <div id="rotate-in-left-obj"
+        class="square"
+        animate-in="rotate-in-left"
+        animate-in-after="fade-in-obj"
+        animate-in-delay="0.2s">
+      2 <!-- will start after fade-in-obj has finished -->
+    </div>
+    <div class="square"
+        animate-in-after="rotate-in-left-obj"
+        animate-in="whoosh-in-right"
+        animate-in-delay="0.2s">
+      3 <!-- will start after rotate-in-left-obj has finished -->
+    </div>
+    <div id="fade-in-obj"
+        class="circle"
+        animate-in="fade-in"
+        animate-in-duration="2.2s">
+      1 <!-- will start independently -->
+    </div>
+  </amp-story-grid-layer>
+</amp-story-page>
+```
+### Combining multiple animations
+
+You can apply multiple entrance animations on one element (for example, an element flies into the page and fades in at the same time). It's not possible to assign more than one animation preset to a single element; however, elements with different entrance animations can be nested to combine them into one.
+
+```html
+<div animate-in="fly-in-left">
+   <div animate-in="fade-in">
+     I will fly-in and fade-in!
+   </div>
+</div>
+```
+
+{% call callout('Note', type='note') %}
+If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
+{% endcall %}
+
 ## Validation
 
 See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
+
+## Related resources
+
+* [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
+* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)

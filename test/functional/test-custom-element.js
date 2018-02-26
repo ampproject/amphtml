@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
@@ -22,7 +23,6 @@ import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
-import * as lolex from 'lolex';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -106,7 +106,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      clock = lolex.install();
+      clock = lolex.install({target: win});
       resources = Services.resourcesForDoc(doc);
       resources.isBuildOn_ = true;
       resourcesMock = sandbox.mock(resources);
@@ -179,7 +179,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.everAttached).to.equal(true);
       expect(testElementCreatedCallback).to.be.calledOnce;
       expect(element.isUpgraded()).to.equal(true);
-      expect(build.calledOnce);
+      expect(build.calledOnce).to.equal(true);
 
       expect(element.getResourceId())
           .to.equal(resources.getResourceForElement(element).getId());
@@ -187,7 +187,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('StubElement - createdCallback', () => {
       const element = new StubElementClass();
-      const build = sandbox.stub(element, 'build');
+      sandbox.stub(element, 'build');
 
       expect(element.isBuilt()).to.equal(false);
       expect(element.hasAttributes()).to.equal(false);
@@ -204,7 +204,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.everAttached).to.equal(true);
       expect(testElementCreatedCallback).to.have.not.been.called;
       expect(element.isUpgraded()).to.equal(false);
-      expect(build.calledOnce);
+      // TODO(jeffkaufman, #13422): this test was silently failing.  `build` was
+      // the return value from `sandbox.stub(element, 'build')`.
+      //
+      // expect(build.calledOnce).to.equal(true);
     });
 
     it('Element - should only add classes on first attachedCallback', () => {
@@ -362,8 +365,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isBuilt()).to.equal(false);
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('Element - re-upgrade to new direct instance', () => {
+    it('Element - re-upgrade to new direct instance', () => {
       const element = new ElementClass();
       expect(element.isUpgraded()).to.equal(false);
       const newImpl = new TestElement(element);
@@ -375,8 +377,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.upgradeDelayMs_).to.equal(0);
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('Element - re-upgrade to new promised instance', () => {
+    it('Element - re-upgrade to new promised instance', () => {
       const element = new ElementClass();
       expect(element.isUpgraded()).to.equal(false);
       const oldImpl = element.implementation_;
@@ -544,8 +545,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('Element - buildCallback cannot be called twice', () => {
+    it('Element - buildCallback cannot be called twice', () => {
       const element = new ElementClass();
       expect(element.isBuilt()).to.equal(false);
       expect(testElementBuildCallback).to.have.not.been.called;
@@ -717,8 +717,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(testElementLayoutCallback).to.have.not.been.called;
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('Element - layoutCallback', () => {
+    it('Element - layoutCallback', () => {
       const element = new ElementClass();
       element.setAttribute('layout', 'fill');
       container.appendChild(element);
@@ -839,8 +838,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('should dequeue all actions after build', () => {
+    it('should dequeue all actions after build', () => {
       const element = new ElementClass();
       const handler = sandbox.spy();
       element.implementation_.executeAction = handler;
@@ -1513,7 +1511,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      clock = lolex.install();
+      clock = lolex.install({target: win});
       ElementClass = doc.registerElement('amp-test-loader', {
         prototype: createAmpElementProtoForTesting(
             win, 'amp-test-loader', TestElement),
@@ -1715,8 +1713,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(toggle).to.have.not.been.called;
     });
 
-    // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-    it.skip('should turn on when enters viewport', () => {
+    it('should turn on when enters viewport', () => {
       stubInA4A(false);
       const toggle = sandbox.spy(element, 'toggleLoading_');
       element.viewportCallback(true);

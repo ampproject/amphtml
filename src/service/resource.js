@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../amp-events';
+import {Layout} from '../layout';
+import {computedStyle, toggle} from '../style';
+import {dev} from '../log';
+import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
-import {dev} from '../log';
 import {startsWith} from '../string';
-import {toggle, computedStyle} from '../style';
-import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
-import {Layout} from '../layout';
-import {isExperimentOn} from '../experiments';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -449,7 +449,7 @@ export class Resource {
 
   measureViaResources_() {
     const viewport = this.resources_.getViewport();
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
+    const box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -475,7 +475,7 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
+      this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
   }
@@ -483,7 +483,18 @@ export class Resource {
   measureViaLayers_() {
     const {element} = this;
     const layers = element.getLayers();
-    layers.remeasure(element);
+    /**
+     * TODO(jridgewell): This force remeasure shouldn't be necessary. We
+     * essentially have 3 phases of measurements:
+     * 1. Initial measurements during page load, where we're not mutating
+     * 2. Remeasurements after page load, where we might have mutated (but
+     *    really shouldn't, it's a bug we haven't fixed yet)
+     * 3. Mutation remeasurements
+     *
+     * We can optimize the initial measurements by not forcing remeasure. But
+     * for both 2 and 3, we need for force it.
+     */
+    layers.remeasure(element, /* opt_force */ true);
   }
 
   /**
@@ -680,7 +691,10 @@ export class Resource {
     const scrollDirection = this.resources_.getScrollDirection();
     multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
-    let distance;
+    let distance = 0;
+
+    // TODO(jridgewell): Switch all viewport distance calculations to use
+    // Layer's definition of ancestry layer viewports.
 
     if (this.useLayers_) {
       distance += Math.max(0,

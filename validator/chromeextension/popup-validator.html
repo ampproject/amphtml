@@ -113,9 +113,11 @@ limitations under the License.
               <div class="column">{{ item.col }}</div>
               <div class="issue">
                 {{ getIssue(item) }}
-                <a href="{{ item.webuiUrl }}" target="_blank">Debug</a>.
+                <a href="{{ item.webuiUrl }}" target="_blank"
+                    rel="noopener noreferrer">Debug</a>.
                 <template is="dom-if" if="{{ item.specUrl }}">
-                  <a href="{{ item.specUrl }}" target="_blank">Learn more</a>.
+                  <a href="{{ item.specUrl }}" target="_blank"
+                      rel="noopener noreferrer">Learn more</a>.
                 </template>
               </div>
             </paper-item>
@@ -209,7 +211,7 @@ limitations under the License.
           },
         });
         function processTab(tabs, toolbar, content) {
-          var url = tabs[0].url;
+          var url = tabs[0].url.split('#')[0];
           var validationResult;
           chrome.runtime.getBackgroundPage(function(backgroundPage) {
             validationResult =

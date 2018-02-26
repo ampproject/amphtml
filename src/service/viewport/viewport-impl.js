@@ -17,31 +17,31 @@
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
+import {Services} from '../../services';
+import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingIosEmbedWrapper_,
+} from './viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {dev} from '../../log';
+import {dict} from '../../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
+import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
+import {installLayersServiceForDoc} from '../layers-impl';
+import {isExperimentOn} from '../../experiments';
+import {isIframed} from '../../dom';
 import {
+  layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-  layoutRectFromDomRect,
 } from '../../layout-rect';
-import {dev} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
-import {isExperimentOn} from '../../experiments';
 import {numeric} from '../../transition';
-import {Services} from '../../services';
 import {setStyle} from '../../style';
-import {isIframed} from '../../dom';
-import {getMode} from '../../mode';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {
-  ViewportBindingIosEmbedWrapper_,
-} from './viewport-binding-ios-embed-wrapper';
-import {installLayersServiceForDoc} from '../layers-impl';
 
 
 const TAG_ = 'Viewport';
@@ -540,7 +540,7 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportChangedEventDef events.
-   * @param {!function(!ViewportChangedEventDef)} handler
+   * @param {function(!ViewportChangedEventDef)} handler
    * @return {!UnlistenDef}
    */
   onChanged(handler) {
@@ -553,7 +553,7 @@ export class Viewport {
    * event handler. The primary use case for this handler is to inform that
    * scrolling might be going on. To get more information {@link onChanged}
    * handler should be used.
-   * @param {!function()} handler
+   * @param {function()} handler
    * @return {!UnlistenDef}
    */
   onScroll(handler) {
@@ -562,7 +562,7 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportResizedEventDef events.
-   * @param {!function(!ViewportResizedEventDef)} handler
+   * @param {function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
 

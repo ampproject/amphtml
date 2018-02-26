@@ -16,15 +16,6 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {extractKeyframes} from './keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {parseCss} from './css-expr';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -40,7 +31,16 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
+import {closestBySelector, matches} from '../../../src/dom';
+import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dev, user} from '../../../src/log';
+import {extractKeyframes} from './keyframes-extractor';
+import {getMode} from '../../../src/mode';
+import {isArray, isObject, toArray} from '../../../src/types';
+import {map} from '../../../src/utils/object';
+import {parseCss} from './css-expr';
 
 
 /** @const {string} */
@@ -251,7 +251,7 @@ export class WebAnimationRunner {
   }
 
   /**
-   * @return {!number} total duration in milliseconds.
+   * @return {number} total duration in milliseconds.
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {

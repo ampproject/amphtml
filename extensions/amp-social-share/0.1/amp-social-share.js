@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {addParamsToUrl, parseUrl, parseQueryString} from '../../../src/url';
-import {setStyle} from '../../../src/style';
+import {Services} from '../../../src/services';
+import {addParamsToUrl, parseQueryString, parseUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {openWindowDialog} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {CSS} from '../../../build/amp-social-share-0.1.css';
+import {setStyle} from '../../../src/style';
 
 
 class AmpSocialShare extends AMP.BaseElement {
@@ -102,7 +102,7 @@ class AmpSocialShare extends AMP.BaseElement {
       });
     }
 
-    urlReplacements.expandAsync(hrefWithVars, bindings).then(href => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const protocol = parseUrl(href).protocol;

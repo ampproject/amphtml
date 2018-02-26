@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {
+  checkCorsUrl,
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
-  checkCorsUrl,
 } from './url';
+import {dict, map} from './utils/object';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {parseSrcset} from './srcset';
-import {user} from './log';
-import {urls} from './config';
-import {map} from './utils/object';
 import {startsWith} from './string';
+import {urls} from './config';
+import {user} from './log';
 
 
 /** @private @const {string} */
@@ -37,12 +37,11 @@ const TAG = 'sanitizer';
  * @const {!Object<string, boolean>}
  * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = {
+const BLACKLISTED_TAGS = dict({
   'applet': true,
   'audio': true,
   'base': true,
   'embed': true,
-  'form': true,
   'frame': true,
   'frameset': true,
   'iframe': true,
@@ -55,13 +54,12 @@ const BLACKLISTED_TAGS = {
   // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
   // intention to keep this block for any longer than we have to.
   'svg': true,
-  'template': true,
   'video': true,
-};
+});
 
 
 /** @const {!Object<string, boolean>} */
-const SELF_CLOSING_TAGS = {
+const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
   'hr': true,
@@ -78,7 +76,7 @@ const SELF_CLOSING_TAGS = {
   'link': true,
   'meta': true,
   'param': true,
-};
+});
 
 
 /** @const {!Array<string>} */
@@ -109,10 +107,30 @@ const WHITELISTED_ATTRS = [
   'on',
   'placeholder',
   'option',
+  'submit-success',
+  'submit-error',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
 ];
+
+/** @const {!Object<string, !Array<string>>} */
+const WHITELISTED_ATTRS_BY_TAGS = dict({
+  'a': [
+    'rel',
+  ],
+  'div': [
+    'template',
+  ],
+  'form': [
+    'action-xhr',
+    'custom-validation-reporting',
+    'target',
+  ],
+  'template': [
+    'type',
+  ],
+});
 
 
 /** @const {!RegExp} */
@@ -132,11 +150,11 @@ const BLACKLISTED_ATTR_VALUES = [
 ];
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
     'type': /(?:image|file|password|button)/i,
   },
-};
+});
 
 
 /** @const {!Array<string>} */
@@ -151,11 +169,11 @@ const BLACKLISTED_FIELDS_ATTR = [
 
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'input': BLACKLISTED_FIELDS_ATTR,
   'textarea': BLACKLISTED_FIELDS_ATTR,
   'select': BLACKLISTED_FIELDS_ATTR,
-};
+});
 
 
 /**
@@ -216,6 +234,9 @@ export function sanitizeHtml(html) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
+            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+              attribs[i + 1] = savedAttribs[i + 1];
             }
           }
         }
@@ -260,6 +281,8 @@ export function sanitizeHtml(html) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue)) {
+          user().error(TAG, `Removing "${attrName}" attribute with invalid `
+              + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;
         }
         emit(' ');
@@ -308,7 +331,17 @@ export function sanitizeHtml(html) {
  */
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, unusedAttrs) {
+      function(tagName, attribs) {
+        if (tagName == 'template') {
+          for (let i = 0; i < attribs.length; i += 2) {
+            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+              return {
+                tagName,
+                attribs: ['type', 'amp-mustache'],
+              };
+            }
+          }
+        }
         if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }
@@ -329,7 +362,6 @@ export function sanitizeFormattingHtml(html) {
  * @return {boolean}
  */
 export function isValidAttr(tagName, attrName, attrValue) {
-
   // "on*" attributes are not allowed.
   if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;

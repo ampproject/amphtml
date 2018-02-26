@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {urls} from './config';
+import {DomFingerprint} from './utils/dom-fingerprint';
 import {Services} from './services';
+import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
-import {DomFingerprint} from './utils/dom-fingerprint';
-import {dict} from './utils/object.js';
+import {urls} from './config';
 
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
  * @param {!AmpElement} element
- * @param {!string} sentinel
+ * @param {string} sentinel
  * @param {!JsonObject=} attributes
  * @return {!JsonObject}
  */

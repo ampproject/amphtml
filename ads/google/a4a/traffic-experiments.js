@@ -23,19 +23,19 @@
  */
 
 import {
+  EXPERIMENT_ATTRIBUTE,
   isGoogleAdsA4AValidEnvironment,
   mergeExperimentIds,
-  EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  isExperimentOn,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
   getExperimentBranch,
+  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -44,7 +44,7 @@ import {parseQueryString} from '../../../src/url';
  *  }} */
 export let A4aExperimentBranches;
 
-/** @type {!string} @private */
+/** @type {string} @private */
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
 
@@ -189,14 +189,14 @@ export function extractUrlExperimentId(win, element) {
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
- * @param {!string} experimentName  Name of the overall experiment.
- * @param {!string} controlBranchId  Experiment ID string for control branch of
+ * @param {string} experimentName  Name of the overall experiment.
+ * @param {string} controlBranchId  Experiment ID string for control branch of
  *   the overall experiment.
- * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
+ * @param {string} treatmentBranchId  Experiment ID string for the 'treatment'
  *   branch of the overall experiment.
- * @param {!string} delayedTreatmentBrandId Experiment ID string for the
+ * @param {string} delayedTreatmentBrandId Experiment ID string for the
  *   'treatment' plus delayed request experiment.
- * @param {!string} manualId  ID of the manual experiment.
+ * @param {string} manualId  ID of the manual experiment.
  * @return {boolean}  Whether the experiment state was set from a command-line
  *   parameter or not.
  */
@@ -234,7 +234,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
  * that, use validateExperimentIds.
  *
  * @param {?string} idString  String to parse.
- * @returns {!Array<!string>}  List of experiment IDs (possibly empty).
+ * @returns {!Array<string>}  List of experiment IDs (possibly empty).
  * @see validateExperimentIds
  */
 export function parseExperimentIds(idString) {
@@ -299,7 +299,7 @@ export function hasLaunched(win, element) {
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *
- * @param {!Array<!string>} idList  List of experiment IDs.  Can be empty.
+ * @param {!Array<string>} idList  List of experiment IDs.  Can be empty.
  * @returns {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
@@ -309,7 +309,7 @@ export function validateExperimentIds(idList) {
 /**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
  *
- * @param {!string} experimentId  ID to add to the element.
+ * @param {string} experimentId  ID to add to the element.
  * @param element Element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {

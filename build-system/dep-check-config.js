@@ -42,6 +42,8 @@ exports.rules = [
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
       'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
     ],
@@ -61,6 +63,8 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->' +
           'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
@@ -73,6 +77,10 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
     ],
   },
   // Rules for 3p
@@ -196,8 +204,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
           'src/service/video-manager-impl.js',
-      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
-          'src/service/parallax-impl.js',
+      'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
@@ -206,8 +214,15 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      // TODO(calebcordry) remove this once experiment is launched
+      'extensions/amp-analytics/0.1/variables.js->' +
+          'src/service/url-replacements-impl.js',
     ],
   },
   {
@@ -280,6 +295,7 @@ exports.rules = [
     ],
     whitelist: [
       'ads/ix.js->ads/google/doubleclick.js',
+      'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
       'ads/openx.js->ads/google/doubleclick.js',

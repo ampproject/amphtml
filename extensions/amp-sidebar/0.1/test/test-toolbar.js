@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {createIframePromise} from '../../../../testing/iframe';
-import {Services} from '../../../../src/services';
-import {toArray} from '../../../../src/types';
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {Services} from '../../../../src/services';
 import {Toolbar} from '../toolbar';
+import {adopt} from '../../../../src/runtime';
+import {createIframePromise} from '../../../../testing/iframe';
+import {toArray} from '../../../../src/types';
 
 adopt(window);
 

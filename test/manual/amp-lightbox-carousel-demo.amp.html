@@ -6,7 +6,7 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
@@ -33,92 +33,185 @@
     // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
     // Disable amp-lightbox-viewer-auto experiment if it is enabled.
     setTimeout(function() {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-          AMP.toggleExperiment('amp-lightbox-viewer');
+        if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+          AMP.toggleExperiment('amp-lightbox-gallery');
+          location.reload();
         }
-        if (AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-          AMP.toggleExperiment('amp-lightbox-viewer-auto');
-        }
-        location.reload();
-      }
     }, 1000);
   </script>
 
   <h1>Lightbox Carousel Demo</h1>
 
+  <h2>Lightbox on Carousel Children</h2>
   <amp-carousel height="300"
   layout="fixed-height"
-  type="carousel">
+  type="carousel"
+  >
     <amp-img src="https://picsum.photos/300/200/?image=10"
       width="300"
       height="200"
       alt="a sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=11"
       width="300"
       height="200"
       alt="another sample image"
-      lightbox="evens"
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox="evens"></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=12"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=13"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox="evens"
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox="evens"></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=14"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox="evens"
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox="evens"></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=15"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=16"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=17"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=18"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=19"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=20"
       width="300"
       height="200"
       alt="and another sample image"
-      lightbox
-      on="tap:myLightboxViewer.activate"></amp-img>
+      lightbox></amp-img>
   </amp-carousel>
 
-  <amp-lightbox-viewer id="myLightboxViewer" layout="nodisplay"></amp-lightbox-viewer>
+  <h2>Directly Lightboxed</h2>
 
+  <!-- TODO: make slides work after componentizing ImageViewer -->
+  <amp-carousel height="300"
+  layout="fixed-height"
+  type="slides"
+  lightbox>
+    <amp-img src="https://picsum.photos/300/200/?image=10"
+      width="300"
+      height="200"
+      alt="a sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=11"
+      width="300"
+      height="200"
+      alt="another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=12"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=13"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=14"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=15"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=16"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=17"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=18"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=19"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=20"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+  </amp-carousel>
+
+  <amp-carousel height="300"
+  layout="fixed-height"
+  type="carousel"
+  lightbox>
+    <amp-img src="https://picsum.photos/300/200/?image=30"
+      width="300"
+      height="200"
+      alt="a sample image"></amp-img>
+    <figure>
+        <amp-img src="https://picsum.photos/300/200/?image=31"
+        width="300"
+        height="200"
+        alt="another sample image"></amp-img>
+        <figcaption>This is a figure with a figcaption.</figcaption>
+    </figure>
+    <amp-img src="https://picsum.photos/300/200/?image=32"
+      width="300"
+      height="200"
+      aria-label="Aria labels are cool."></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=33"
+      width="300"
+      height="200"
+      aria-describedby="my-aria-describe"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=34"
+      width="300"
+      height="200"
+      aria-labelledby="my-aria-label"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=35"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=36"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=37"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=38"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=39"
+      width="300"
+      height="200"
+      alt="and another sample image"></amp-img>
+  </amp-carousel>
+  <div id='my-aria-describe'>
+    This is an aria described by a div. <br/>
+    I have a linebreak.
+  </div>
+  <div id='my-aria-label'>
+    This is an aria labelled by a div. <br/>
+    I also have a newline.
+  </div>
 </body>
 </html>

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   IntersectionObserver,
@@ -21,7 +22,6 @@ import {
 } from '../../src/intersection-observer';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {

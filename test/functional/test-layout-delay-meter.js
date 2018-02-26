@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {Services} from '../../src/services';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import * as lolex from 'lolex';
 
 describes.realWin('layout-delay-meter', {
   amp: {
@@ -37,7 +37,8 @@ describes.realWin('layout-delay-meter', {
     installPerformanceService(win);
     const perf = Services.performanceFor(win);
     sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
-    clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     tickSpy = sandbox.spy(perf, 'tickDelta');
 
     meter = new LayoutDelayMeter(win, 2);
@@ -47,8 +48,7 @@ describes.realWin('layout-delay-meter', {
     clock.uninstall();
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should tick when there is a delay', () => {
+  it('should tick when there is a delay', () => {
     clock.tick(100);
     meter.enterViewport(); // first time in viewport
     clock.tick(100);

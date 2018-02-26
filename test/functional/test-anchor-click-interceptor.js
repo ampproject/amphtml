@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {
-  maybeExpandUrlParamsForTesting,
-} from '../../src/anchor-click-interceptor';
+import {createElementWithAttributes} from '../../src/dom';
 import {
   installUrlReplacementsServiceForDoc,
 } from '../../src/service/url-replacements-impl';
-import {createElementWithAttributes} from '../../src/dom';
+import {
+  maybeExpandUrlParamsForTesting,
+} from '../../src/anchor-click-interceptor';
 
 describes.realWin('anchor-click-interceptor', {amp: true}, env => {
 

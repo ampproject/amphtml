@@ -24,7 +24,7 @@
 /**
  * @fileoverview A Html SAX parser.
  *
- * Examples of usage of the {@code goog.string.html.HtmlParser}:
+ * Examples of usage of the `goog.string.html.HtmlParser`:
  * <pre>
  *   const handler = new MyCustomHtmlVisitorHandlerThatExtendsHtmlSaxHandler();
  *   const parser = new goog.string.html.HtmlParser();
@@ -394,21 +394,21 @@ class TagNameStack {
 
 
 /**
- * An Html parser: {@code parse} takes a string and calls methods on
- * {@code amp.htmlparser.HtmlSaxHandler} while it is visiting it.
+ * An Html parser: `parse` takes a string and calls methods on
+ * `amp.htmlparser.HtmlSaxHandler` while it is visiting it.
  */
 amp.htmlparser.HtmlParser = class {
   constructor() {}
 
   /**
-   * Given a SAX-like {@code amp.htmlparser.HtmlSaxHandler} parses a
-   * {@code htmlText} and lets the {@code handler} know the structure while
+   * Given a SAX-like `amp.htmlparser.HtmlSaxHandler` parses a
+   * `htmlText` and lets the `handler` know the structure while
    * visiting the nodes. If the provided handler is an implementation of
-   * {@code amp.htmlparser.HtmlSaxHandlerWithLocation}, then its
-   * {@code setDocLocator} method will get called prior to
-   * {@code startDoc}, and the {@code getLine} / {@code getCol} methods will
+   * `amp.htmlparser.HtmlSaxHandlerWithLocation`, then its
+   * `setDocLocator` method will get called prior to
+   * `startDoc`, and the `getLine` / `getCol` methods will
    * reflect the current line / column while a SAX callback (e.g.,
-   * {@code startTag}) is active.
+   * `startTag`) is active.
    *
    * @param {amp.htmlparser.HtmlSaxHandler|
    *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
@@ -509,7 +509,7 @@ amp.htmlparser.HtmlParser = class {
 
           tagName = eflags = openTag = void 0;
           attribs.length = 0;
-          if (inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = false;
@@ -519,7 +519,7 @@ amp.htmlparser.HtmlParser = class {
           tagStack.pcdata(m[0]);
         } else if (m[3]) {  // Tag.
           openTag = !m[2];
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = true;
@@ -528,7 +528,7 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           tagStack.pcdata(m[4]);
@@ -593,7 +593,7 @@ amp.htmlparser.HtmlParser = class {
   /**
    * The plain text of a chunk of HTML CDATA which possibly containing.
    *
-   * TODO(goto): use {@code goog.string.unescapeEntities} instead ?
+   * TODO(goto): use `goog.string.unescapeEntities` instead ?
    * @param {string} s A chunk of HTML CDATA.  It must not start or end inside
    *   an HTML entity.
    * @return {string} The unescaped entities.
@@ -621,7 +621,7 @@ amp.htmlparser.HtmlParser = class {
 
 /**
  * HTML entities that are encoded/decoded.
- * TODO(goto): use {@code goog.string.htmlEncode} instead.
+ * TODO(goto): use `goog.string.htmlEncode` instead.
  * @type {!Object<string, string>}
  */
 amp.htmlparser.HtmlParser.Entities = {
@@ -941,8 +941,8 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
 
 
 /**
- * An implementation of the {@code amp.htmlparser.DocLocator} interface
- * for use within the {@code amp.htmlparser.HtmlParser}.
+ * An implementation of the `amp.htmlparser.DocLocator` interface
+ * for use within the `amp.htmlparser.HtmlParser`.
  */
 amp.htmlparser.HtmlParser.DocLocatorImpl =
     class extends amp.htmlparser.DocLocator {

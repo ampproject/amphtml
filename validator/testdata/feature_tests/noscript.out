@@ -43,7 +43,9 @@ FAIL
 |      <audio>
 |        <source>
 >>       ^~~~~~~~~
-feature_tests/noscript.html:43:6 The parent tag of tag 'amp-video > source' is 'audio', but it can only be 'amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+feature_tests/noscript.html:43:6 The mandatory attribute 'src' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+feature_tests/noscript.html:43:6 The mandatory attribute 'type' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 |      </audio>
 |    </noscript>
 |    <!-- Invalid: img must have src; alt, height and width are optional -->
@@ -71,6 +73,6 @@ feature_tests/noscript.html:57:2 The tag 'video' may only appear as a descendant
 |    <!-- Invalid: nested noscript tags don't correctly parse. -->
 |    <noscript> <noscript> </noscript> </noscript>
 >>              ^~~~~~~~~
-feature_tests/noscript.html:61:13 The tag 'noscript' may not appear as a descendant of tag 'noscript'. [GENERIC]
+feature_tests/noscript.html:61:13 The parent tag of tag 'noscript enclosure for boilerplate' is 'noscript', but it can only be 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
 |  </body>
 |  </html>

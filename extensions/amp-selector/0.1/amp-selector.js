@@ -18,10 +18,10 @@ import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {closestBySelector, tryFocus, isRTL} from '../../../src/dom';
+import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-
+import {mod} from '../../../src/utils/math';
 const TAG = 'amp-selector';
 
 /**
@@ -113,6 +113,18 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
       this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
     }
+
+    this.registerAction('selectUp', invocation => {
+      const args = invocation.args;
+      const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
+      this.select_(delta);
+    }, ActionTrust.LOW);
+
+    this.registerAction('selectDown', invocation => {
+      const args = invocation.args;
+      const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
+      this.select_(delta);
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -317,6 +329,22 @@ export class AmpSelector extends AMP.BaseElement {
     if (el) {
       this.onOptionPicked_(el);
     }
+  }
+
+  /**
+   * Handles selectUp events.
+   * @param {number} delta
+   */
+  select_(delta) {
+    // Change the selection to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
+    const index = previousIndex + delta;
+    const normalizedIndex = mod(index, this.options_.length);
+
+    this.setSelection_(this.options_[normalizedIndex]);
+    this.clearSelection_(this.options_[previousIndex]);
   }
 
   /**

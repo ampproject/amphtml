@@ -568,9 +568,9 @@ amp-instagram {
 
 
 /**
- * Analytics tags should never be visible. keep them hidden.
+ * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics {
+amp-analytics, amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -596,6 +596,17 @@ amp-iframe iframe {
   display: none;
 }
 
+/**
+ * Minimal Subscriptions CSS. This part initially disables all of the UI
+ * until the complete rules are loaded as part of amp-subscriptions extension.
+ * Notice that, the `[subscription-dialog]` elements are always hidden.
+ */
+html:not(.i-amphtml-subs-ready) [subscriptions-section],
+html:not(.i-amphtml-subs-ready) [subscriptions-action],
+[subscriptions-dialog] {
+  display: none !important;
+}
+
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -603,6 +614,13 @@ amp-iframe iframe {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
   display: none;
 }
 
@@ -794,17 +812,26 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
-  display: block;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 100%;
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
 }
 
 amp-story-page {
   background-color: #757575;
+}
+
+amp-story .i-amphtml-loader {
+  display: none !important;
 }
 
 amp-date-picker {
@@ -836,7 +863,7 @@ amp-date-picker[type="range"] [amp-date-placeholder-end] {
   font-size: 18px;
   line-height: 24px;
   color: #333;
-  font-family: serif;
+  font-family: sans-serif;
   padding: 4px 8px;
   width: 100%;
   height: 100%;

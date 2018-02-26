@@ -18,12 +18,12 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../../src/intersection-observer-polyfill';
+import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 
 class IntersectionObserverStub {

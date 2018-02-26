@@ -72,6 +72,13 @@ Below the term `primary size` refers to the width and height pair specified by t
 - `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
 - `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
 
+### Render on idle
+Slots not marked with data-loading-strategy attribute that are more than 3 viewports but less than 12 from current location are allowed to render when the AMP scheduler
+is idle.  The result is an increase in impressions with a much smaller increase in
+viewable impressions and clicks.  Publishers sensitive to viewability rate should
+set data-loading-strategy=3 to keep the current viewport offset and disable idle render.  Publishers using data-loading-strategy=prefer-viewability-over-views will
+use current 1.25 viewport offset with idle render disabled.
+
 ### AMP Ad Refresh
 
 AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh events. Each such event re-issues a new ad request and attempts to display the returned creative.
@@ -141,7 +148,7 @@ Where `refresh_interval` is the time, in seconds, in between refresh cycles. Thi
 An individual slot is eligible to be refreshed if it is configured as:
 
 ```
-<amp-ad 
+<amp-ad
  ...
  data-enable-refresh=refresh_interval>
 ```
@@ -163,22 +170,23 @@ In order to use this feature, add the following meta tag to the head of the AMP 
 `<meta name=”amp-ad-doubleclick-sra”/>`
 
 Note that SRA is not available in the following cases:
-1. If the AMP page is not served from a valid AMP cache 
+1. If the AMP page is not served from a valid AMP cache
 2. If publishers use [`remote.html`](https://github.com/ampproject/amphtml/blob/master/ads/README.md#1st-party-cookies)
 3. The ad refresh feature is incompatible with SRA
 4. Publishers don't use the amp-ad attribute [`useSameDomainRenderingUntilDeprecated`](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#temporary-use-of-usesamedomainrenderinguntildeprecated)
 
 ### Fluid (alpha)
-A fluid ad slot does not require a publisher to specify its size. Instead, the publisher may simply declare an ad slot with the attribute `height="fluid"`, and a creative of indeterminate size will be returned. The actual size of the slot will be determined by the given creative at render time. It will always occupy the maximum available width, and its height will be determined relative to that width. One benefit of this feature is that, like multi-size, it increases monetization potential by increasing the available pool of creatives that may be rendered in a particular slot. Moreover, this feature relieves the publisher of having to worry about determining what size a slot should use. 
+A fluid ad slot does not require a publisher to specify its size. Instead, the publisher may simply declare an ad slot with the attributes `layout="fluid" height="fluid"`, and a creative of indeterminate size will be returned. The actual size of the slot will be determined by the given creative at render time. It will always occupy the maximum available width, and its height will be determined relative to that width. One benefit of this feature is that, like multi-size, it increases monetization potential by increasing the available pool of creatives that may be rendered in a particular slot. Moreover, this feature relieves the publisher of having to worry about determining what size a slot should use.
 
 Note that due to AMP's no reflow policy, the fluid creative will not be rendered when the slot is within the viewport and it is therefore recommended that fluid be used for below the fold slots.
 
 An example slot might look like:
 
 ```html
-<amp-ad 
+<amp-ad
     type="doubleclick"
     data-slot="/6355419/Travel"
+    layout="fluid"
     height="fluid">
 </amp-ad>
 ```

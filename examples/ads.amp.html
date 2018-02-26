@@ -71,12 +71,13 @@
         <option>adblade</option>
         <option>adbutler</option>
         <option>adfox</option>
-        <option>adition</option>
         <option>adgeneration</option>
         <option>adhese</option>
+        <option>adition</option>
         <option>adman</option>
         <option>admanmedia</option>
         <option>adocean</option>
+        <option>adplugg</option>
         <option>adreactor</option>
         <option>adsense</option>
         <option>adsnative</option>
@@ -86,17 +87,20 @@
         <option>adtech</option>
         <option>adthrive</option>
         <option>aduptech</option>
+        <option>adventive</option>
         <option>adverline</option>
         <option>adverticum</option>
         <option>advertserve</option>
         <option>affiliateb</option>
         <option>amoad</option>
         <option>appnexus</option>
+        <option>appvador</option>
         <option>atomx</option>
         <option>bidtellect</option>
         <option>brainy</option>
         <option>bringhub</option>
         <option>caajainfeed</option>
+        <option>capirs</option>
         <option>caprofitx</option>
         <option>chargeads</option>
         <option>connatix</option>
@@ -109,6 +113,7 @@
         <option>distroscale</option>
         <option>dotandads</option>
         <option>doubleclick</option>
+        <option>eadv</option>
         <option>eas</option>
         <option>Engageya</option>
         <option>eplanning</option>
@@ -125,14 +130,15 @@
         <option>gumgum</option>
         <option>holder</option>
         <option>ibillboard</option>
-        <option>imobile</option>
         <option>imedia</option>
+        <option>imobile</option>
+        <option>imonomy</option>
         <option>industrybrains</option>
         <option>inmobi</option>
         <option>innity</option>
         <option>ix</option>
-        <option>kiosked</option>
         <option>kargo</option>
+        <option>kiosked</option>
         <option>kixer</option>
         <option>ligatus</option>
         <option>lockerdome</option>
@@ -157,10 +163,10 @@
         <option>plista</option>
         <option>polymorphicads</option>
         <option>popin</option>
+        <option>pubexchange</option>
         <option>pubmine</option>
         <option>pulsepoint</option>
         <option>purch</option>
-        <option>capirs</option>
         <option>relap</option>
         <option>revcontent</option>
         <option>revjet</option>
@@ -180,7 +186,9 @@
         <option>taboola</option>
         <option>teads</option>
         <option>triplelift</option>
+        <option>trugaze</option>
         <option>valuecommerce</option>
+        <option>videonow</option>
         <option>viralize</option>
         <option>vmfive</option>
         <option>webediads</option>
@@ -192,8 +200,8 @@
         <option>yandex</option>
         <option>yengo</option>
         <option>yieldbot</option>
-        <option>yieldone</option>
         <option>yieldmo</option>
+        <option>yieldpro</option>
         <option>zedo</option>
         <option>zergnet</option>
         <option>zucks</option>
@@ -341,6 +349,13 @@
           >
   </amp-ad>
 
+  <h2>AdPlugg</h2>
+  <amp-ad width="300" height="250"
+      type="adplugg"
+      data-access-code="A48214096"
+      data-zone="my_amp_zone_300x250">
+  </amp-ad>
+
   <h2>AdReactor</h2>
   <amp-ad width="728" height="90"
       type="adreactor"
@@ -419,6 +434,12 @@
       data-adtest="1">
   </amp-ad>
 
+  <h2>Adventive</h2>
+  <amp-ad width="300" height="250"
+    data-src="https://ads.adventive.com/ad?j&pid=c72f8c57-4bdb-4f84-ba46-8b34a2512501&type=4"
+    type="adventive">
+  </amp-ad>
+
   <h2>Adverline</h2>
   <amp-ad width="300" height="250"
       type="adverline"
@@ -476,6 +497,12 @@
       json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
   </amp-ad>
 
+  <h2>AppVador</h2>
+  <amp-ad width="320" height="180"
+      type="appvador"
+      data-id="8c328a2daa6f9ce4693f57246cd86e0a">
+  </amp-ad>
+
   <h2>Atomx</h2>
   <amp-ad width="300" height="250"
       type="atomx"
@@ -495,6 +522,15 @@
       type="brainy"
       data-aid="10"
       data-slot-id="3347">
+  </amp-ad>
+
+  <h2>Broadstreet Ads</h2>
+  <amp-ad width="300" height="250"
+      type="broadstreetads"
+      data-network="229"
+      data-zone="63940">
+      <div placeholder></div>
+      <div fallback></div>
   </amp-ad>
 
   <h2>Bringhub Mini-Storefront</h2>
@@ -622,7 +658,7 @@
       data-slot="1"
       data-url="/examples/custom.ad.example.json">
     <template type="amp-mustache" id="amp-template-id-leader">
-      <a href="{{href}}" target='_blank'>
+      <a href="{{href}}" target='_blank' rel="noopener noreferrer">
         <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -634,7 +670,7 @@
       data-slot="2"
       data-url="/examples/custom.ad.example.json">
     <template type="amp-mustache">
-      <a href="{{href}}" target="_blank">
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -645,7 +681,7 @@
       type="custom"
       data-url="/examples/custom.ad.example.single.json">
     <template type="amp-mustache" id="amp-template-id-no-slot">
-      <a href="{{href}}" target="_blank">
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
         <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -729,6 +765,13 @@
       type="doubleclick"
       layout="fixed"
       data-slot="/35096353/amptesting/badvideoad">
+  </amp-ad>
+
+  <h2>eADV</h2>
+  <amp-ad width="300" height="250"
+      type="eadv"
+      data-x="ba-16488-75-2-95-0-4c-23-b8-300x250-84-0-a0"
+      data-u="l0o0c0a8l%3Ahtos">
   </amp-ad>
 
   <h2>Engageya widget</h2>
@@ -850,6 +893,14 @@
       data-pid="1847"
       data-adtype="banner"
       data-asid="813689">
+  </amp-ad>
+
+  <h2>Imonomy 728x90 banner</h2>
+  <amp-ad width="728" height="90"
+      type="imonomy"
+      data-slot="/36653869/amp_imo_multi_size"
+      data-pid="1225234623"
+      data-sub-id="636gd">
   </amp-ad>
 
   <h2>Imedia</h2>
@@ -994,6 +1045,12 @@
       <div fallback></div>
   </amp-ad>
 
+  <h2>Medyanet</h2>
+  <amp-ad width="300" height="600"
+      type="medyanet"
+      data-slot="medyanet/9927946/posta/anasayfa/300x600">
+  </amp-ad>
+
   <h2>Meg</h2>
   <amp-ad width="320" height="250"
       type="meg"
@@ -1130,6 +1187,17 @@
       data-widgetIds="112264"
       data-websiteId="115219"
       data-publisherId="157552">
+  </amp-embed>
+
+  <h2>PubExchange</h2>
+  <amp-embed width="640" height="320"
+      heights="(max-width:480px) 400%, (max-width:650px) 100%, 75%"
+      layout="responsive"
+      type="pubexchange"
+      data-publication="test_publication"
+      data-module-id="below_content"
+      data-module-num="2626"
+      data-test="true">
   </amp-embed>
 
   <h2>Pubmine 300x250</h2>
@@ -1364,6 +1432,15 @@
       src="https://ib.3lift.com/dtj/amptest_main_feed/335430">
   </amp-ad>
 
+  <h2>Trugaze</h2>
+  <amp-ad width="300" height="250"
+      type="trugaze"
+      data-public-id="4WMPI6PV"
+      data-slot="/134642692/amp-samples"
+      data-multi-size="320x50"
+      json='{"targeting":{"target":["sample"],"pos":["amp"]}}'>
+  </amp-ad>
+
   <h2>Weborama</h2>
   <amp-ad width="300" height="250"
       type="weborama-display"
@@ -1443,11 +1520,26 @@
       data-ymid="1349317029731662884">
   </amp-ad>
 
+  <h2>Yieldpro</h2>
+  <amp-ad width="300" height="250"
+      type="yieldpro"
+      data-pubnetwork="12c6fc06"
+      data-section-id="1299"
+      data-slot="960">
+  </amp-ad>
+
   <h2>ValueCommerce</h2>
   <amp-ad width="300" height="250"
       type="valuecommerce"
       data-sid="3008"
       data-pid="884466614">
+  </amp-ad>
+
+  <h2>Videonow</h2>
+  <amp-ad width="300" height="200"
+          type="videonow"
+          data-pid="1"
+          layout="responsive">
   </amp-ad>
 
   <h2>Viralize</h2>
@@ -1500,6 +1592,6 @@
       type="zucks"
       data-frame-id="_bda46cf5ac">
   </amp-ad>
-  
+
 </body>
 </html>

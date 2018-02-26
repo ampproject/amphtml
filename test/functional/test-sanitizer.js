@@ -48,12 +48,10 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<template></template>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<link>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<meta>c')).to.be.equal('ac');
   });
@@ -80,6 +78,11 @@ describe('sanitizeHtml', () => {
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
         'a<a href="http://acme.com/" target="_top">b</a>');
+  });
+
+  it('should output "rel" attribute', () => {
+    expect(sanitizeHtml('a<a href="http://acme.com/" rel="amphtml">b</a>')).to.be.equal(
+        'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
   });
 
   it('should default target to _top with href', () => {

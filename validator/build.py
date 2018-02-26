@@ -37,19 +37,17 @@ def Die(msg):
   sys.exit(1)
 
 
-def GetNodeJsCmd():
-  """Ensure Node.js is installed and return the proper command to run."""
+def EnsureNodeJsIsInstalled():
+  """Ensure Node.js is installed and that 'node' is the command to run."""
   logging.info('entering ...')
 
-  for cmd in ['node', 'nodejs']:
-    try:
-      output = subprocess.check_output([cmd, '--eval', 'console.log("42")'])
-      if output.strip() == '42':
-        logging.info('... done')
-        return cmd
-    except (subprocess.CalledProcessError, OSError):
-      continue
-  Die('Node.js not found. Try "apt-get install nodejs".')
+  try:
+    output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
+    if output.strip() == '42':
+      return;
+  except (subprocess.CalledProcessError, OSError):
+    pass
+  Die('Node.js not found. Try "apt-get install nodejs" or install NVM.')
 
 
 def CheckPrereqs():
@@ -184,6 +182,43 @@ def GenValidatorProtoascii(out_dir):
   logging.info('... done')
 
 
+def GenValidatorProtoGeneratedJs(out_dir):
+  """Calls validator_gen_js to generate validator-proto-generated.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
+
+  # These imports happen late, within this method because they don't necessarily
+  # exist when the module starts running, and the ones that probably do
+  # are checked by CheckPrereqs.
+  # pylint: disable=g-import-not-at-top
+  from google.protobuf import text_format
+  from google.protobuf import descriptor
+  from dist import validator_pb2
+  import validator_gen_js
+  # pylint: enable=g-import-not-at-top
+  out = []
+  validator_gen_js.GenerateValidatorGeneratedJs(
+      specfile=None,
+      validator_pb2=validator_pb2,
+      generate_proto_only=True,
+      generate_spec_only=False,
+      text_format=text_format,
+      html_format=None,
+      light=False,
+      descriptor=descriptor,
+      out=out)
+  out.append('')
+  f = open('%s/validator-proto-generated.js' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+  logging.info('... done')
+
+
 def GenValidatorGeneratedJs(out_dir):
   """Calls validator_gen_js to generate validator-generated.js.
 
@@ -197,14 +232,18 @@ def GenValidatorGeneratedJs(out_dir):
   # These imports happen late, within this method because they don't necessarily
   # exist when the module starts running, and the ones that probably do
   # are checked by CheckPrereqs.
+  # pylint: disable=g-import-not-at-top
   from google.protobuf import text_format
   from google.protobuf import descriptor
   from dist import validator_pb2
   import validator_gen_js
+  # pylint: enable=g-import-not-at-top
   out = []
   validator_gen_js.GenerateValidatorGeneratedJs(
       specfile='%s/validator.protoascii' % out_dir,
       validator_pb2=validator_pb2,
+      generate_proto_only=False,
+      generate_spec_only=True,
       text_format=text_format,
       html_format=None,
       light=False,
@@ -212,6 +251,43 @@ def GenValidatorGeneratedJs(out_dir):
       out=out)
   out.append('')
   f = open('%s/validator-generated.js' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+  logging.info('... done')
+
+
+def GenValidatorProtoGeneratedLightAmpJs(out_dir):
+  """Calls validator_gen_js to generate validator-proto-generated-light-amp.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
+
+  # These imports happen late, within this method because they don't necessarily
+  # exist when the module starts running, and the ones that probably do
+  # are checked by CheckPrereqs.
+  # pylint: disable=g-import-not-at-top
+  from google.protobuf import text_format
+  from google.protobuf import descriptor
+  from dist import validator_pb2
+  import validator_gen_js
+  # pylint: enable=g-import-not-at-top
+  out = []
+  validator_gen_js.GenerateValidatorGeneratedJs(
+      specfile=None,
+      validator_pb2=validator_pb2,
+      generate_proto_only=True,
+      generate_spec_only=False,
+      text_format=text_format,
+      html_format=None,
+      light=True,
+      descriptor=descriptor,
+      out=out)
+  out.append('')
+  f = open('%s/validator-proto-generated-light-amp.js' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -230,16 +306,20 @@ def GenValidatorGeneratedLightAmpJs(out_dir):
   # These imports happen late, within this method because they don't necessarily
   # exist when the module starts running, and the ones that probably do
   # are checked by CheckPrereqs.
+  # pylint: disable=g-import-not-at-top
   from google.protobuf import text_format
   from google.protobuf import descriptor
   from dist import validator_pb2
   import validator_gen_js
+  # pylint: enable=g-import-not-at-top
   out = []
   validator_gen_js.GenerateValidatorGeneratedJs(
       specfile='%s/validator.protoascii' % out_dir,
       validator_pb2=validator_pb2,
+      generate_proto_only=False,
+      generate_spec_only=True,
       text_format=text_format,
-      html_format=validator_pb2.TagSpec.AMP,
+      html_format=validator_pb2.HtmlFormat.AMP,
       light=True,
       descriptor=descriptor,
       out=out)
@@ -291,6 +371,7 @@ def CompileValidatorMinified(out_dir):
           'engine/parse-css.js', 'engine/parse-srcset.js',
           'engine/parse-url.js', 'engine/tokenize-css.js',
           '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
           'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
           'light/dom-walker.js', 'engine/htmlparser-interface.js'
@@ -305,18 +386,17 @@ def CompileValidatorMinified(out_dir):
   logging.info('... done')
 
 
-def RunSmokeTest(out_dir, nodejs_cmd):
+def RunSmokeTest(out_dir):
   """Runs a smoke test (minimum valid AMP and empty html file).
 
   Args:
     out_dir: output directory
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
   # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          nodejs_cmd, 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html'
       ],
@@ -331,7 +411,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          nodejs_cmd, 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html'
       ],
@@ -346,15 +426,12 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('... done')
 
 
-def RunIndexTest(nodejs_cmd):
+def RunIndexTest():
   """Runs the index_test.js, which tests the NodeJS API.
-
-  Args:
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
   p = subprocess.Popen(
-      [nodejs_cmd, './index_test.js'],
+      ['node', './index_test.js'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
       cwd='nodejs')
@@ -379,6 +456,7 @@ def CompileValidatorTestMinified(out_dir):
           'engine/parse-css.js', 'engine/parse-srcset.js',
           'engine/parse-url.js', 'engine/tokenize-css.js',
           '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
           'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
           'engine/htmlparser-interface.js', 'light/dom-walker.js',
@@ -404,6 +482,7 @@ def CompileValidatorLightTestMinified(out_dir):
           'engine/parse-css.js', 'engine/parse-srcset.js',
           'engine/parse-url.js', 'engine/tokenize-css.js',
           '%s/validator-generated-light-amp.js' % out_dir,
+          '%s/validator-proto-generated-light-amp.js' % out_dir,
           'engine/validator-in-browser.js', 'engine/validator.js',
           'engine/amp4ads-parse-css.js', 'engine/keyframes-parse-css.js',
           'engine/htmlparser-interface.js', 'light/dom-walker.js',
@@ -447,7 +526,8 @@ def CompileParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-url.js',
           'engine/tokenize-css.js', 'engine/css-selectors.js',
           'engine/json-testutil.js', 'engine/parse-css_test.js',
-          '%s/validator-generated.js' % out_dir
+          '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
       closure_entry_points=['parse_css.ParseCssTest'],
@@ -468,7 +548,8 @@ def CompileParseUrlTestMinified(out_dir):
           'engine/definitions.js', 'engine/parse-url.js', 'engine/parse-css.js',
           'engine/tokenize-css.js', 'engine/css-selectors.js',
           'engine/json-testutil.js', 'engine/parse-url_test.js',
-          '%s/validator-generated.js' % out_dir
+          '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
       closure_entry_points=['parse_url.ParseURLTest'],
@@ -487,10 +568,11 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/amp4ads-parse-css_test.js',
-          'engine/parse-css.js',
-          'engine/parse-url.js', 'engine/amp4ads-parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir
+          'engine/parse-css.js', 'engine/parse-url.js',
+          'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
+          'engine/css-selectors.js', 'engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
       closure_entry_points=['parse_css.Amp4AdsParseCssTest'],
@@ -509,11 +591,11 @@ def CompileKeyframesParseCssTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/keyframes-parse-css_test.js',
-          'engine/parse-css.js',
-          'engine/parse-url.js', 'engine/keyframes-parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir
+          'engine/parse-css.js', 'engine/parse-url.js',
+          'engine/keyframes-parse-css.js', 'engine/tokenize-css.js',
+          'engine/css-selectors.js', 'engine/json-testutil.js',
+          '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
       closure_entry_points=['parse_css.KeyframesParseCssTest'],
@@ -532,8 +614,9 @@ def CompileParseSrcsetTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-srcset.js',
-          'engine/json-testutil.js',
-          'engine/parse-srcset_test.js', '%s/validator-generated.js' % out_dir
+          'engine/json-testutil.js', 'engine/parse-srcset_test.js',
+          '%s/validator-generated.js' % out_dir,
+          '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
       closure_entry_points=['parse_srcset.ParseSrcsetTest'],
@@ -555,7 +638,7 @@ def GenerateTestRunner(out_dir):
   # to the validator rather than a child directory.
   if not os.path.isdir(extensions_dir):
     extensions_dir = '../extensions'
-  f.write("""#!/usr/bin/nodejs
+  f.write("""#!/usr/bin/env node
              global.assert = require('assert');
              global.fs = require('fs');
              global.path = require('path');
@@ -579,16 +662,15 @@ def GenerateTestRunner(out_dir):
   logging.info('... success')
 
 
-def RunTests(out_dir, nodejs_cmd):
+def RunTests(out_dir):
   """Runs all the minified tests.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  subprocess.check_call([nodejs_cmd, '%s/test_runner' % out_dir])
+  subprocess.check_call(['node', '%s/test_runner' % out_dir])
   logging.info('... success')
 
 
@@ -597,17 +679,19 @@ def Main():
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
       level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
-  nodejs_cmd = GetNodeJsCmd()
+  EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')
   GenValidatorProtoascii(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
+  GenValidatorProtoGeneratedJs(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
+  GenValidatorProtoGeneratedLightAmpJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
-  RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
-  RunIndexTest(nodejs_cmd=nodejs_cmd)
+  RunSmokeTest(out_dir='dist')
+  RunIndexTest()
   CompileValidatorTestMinified(out_dir='dist')
   CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
@@ -617,7 +701,7 @@ def Main():
   CompileKeyframesParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
-  RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunTests(out_dir='dist')
 
 
 if __name__ == '__main__':

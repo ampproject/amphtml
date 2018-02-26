@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as dom from '../../../src/dom';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {
@@ -25,9 +28,10 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -35,11 +39,7 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
 
 const TAG = 'amp-image-lightbox';
 
@@ -71,7 +71,7 @@ export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {function(T, number=):Promise<T>} loadPromise
    * @template T
    */
   constructor(lightbox, win, loadPromise) {
@@ -800,7 +800,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.buildLightbox_();
 
-    const source = invocation.source;
+    const source = invocation.caller;
     user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
@@ -905,11 +905,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    if (!caption) {
-      const figure = dom.closestByTag(sourceElement, 'figure');
-      if (figure) {
-        caption = dom.elementByTag(figure, 'figcaption');
-      }
+    const figure = dom.closestByTag(sourceElement, 'figure');
+    if (figure) {
+      caption = dom.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".

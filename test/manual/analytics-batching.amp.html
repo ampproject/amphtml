@@ -17,10 +17,17 @@
       top: 10000px;
       height: 10px;
     }
+    #ele1 {
+      background-color: red;
+      height: 100px;
+      width: 100px;
+    }
+
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
 </head>
 <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
@@ -40,30 +47,45 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
     "requests": {
       "old": "https://fake.com/analytics?timer",
       "batch": {
-        "baseUrl": "https://fake.com/batch-analytics?",
-        "maxDelay": 5
+        "baseUrl": "https://fake.com/batch?",
+        "batchInterval": 5
+      },
+      "batchplugin": {
+        "baseUrl": "https://fake.com/batchplugin?",
+        "batchInterval": 5,
+        "batchPlugin": "_ping_"
+      },
+      "batchInterval1": {
+        "baseUrl": "https://fake.com/batchinterval1?",
+        "batchInterval": [1, 2, 5, 10],
+        "reportWindow": 30
+      },
+      "batchInterval2": {
+        "baseUrl": "https://fake.com/batchinterval2?",
+        "batchInterval": 2,
+        "reportWindow": 10
       }
     },
     "triggers": {
-      "timer": {
+      "batch-time": {
         "on": "timer",
-        "request": "old",
-        "timerSpec": {
-          "interval": 2,
-          "maxTimerLength": 10
-        }
-      },
-      "batch-timer": {
-        "on": "timer",
-        "request": "batch",
+        "request": ["batch", "batchInterval1", "batchInterval2"],
         "timerSpec": {
           "interval": 2,
           "maxTimerLength": 10
         },
-        "batchSegment": "&timer",
         "extraUrlParams": {
-          "extra": "34",
+          "event": "timer",
           "extra2": "${requestCount}"
+        }
+      },
+      "click": {
+        "on": "click",
+        "selector": "#ele1",
+        "request": ["batch", "batchInterval1", "batchInterval2"],
+        "important": true,
+        "extraUrlParams": {
+          "extra": "important"
         }
       }
     },
@@ -75,3 +97,4 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
   }
   </script>
 </amp-analytics>
+<div id="ele1">click me</div>

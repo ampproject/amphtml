@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v3", "amp-animation", "ampdoc-shell", "amp-ima-video"],
+  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 1,
@@ -12,6 +12,7 @@
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
+  "amp-ima-video": 1,
   "amp-playbuzz": 1,
   "chunked-amp": 1,
   "pump-early-frame": 1,
@@ -24,7 +25,7 @@
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-measure-get-ad-urls": 1,
   "a4a-new-signature-verifier": 1,
-  "3p-use-ampcontext": 0,
+  "3p-use-ampcontext": 1,
   "amp-animation": 1,
   "amp-sidebar toolbar": 1,
   "a4a-safeframe-preloading-off": 0.01,

@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
-import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
-import {
-  AmpAdNetworkDoubleclickImpl,
-} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {
+  AmpAdNetworkDoubleclickImpl,
+} from '../amp-ad-network-doubleclick-impl';
+import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
@@ -297,7 +298,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-multi-size-validation': macros['data-multi-size-validation'],
         'data-override-width': macros['data-OVERRIDE-width'],
         'data-override-height': macros['data-override-HEIGHT'],
-        'data-json': JSON.stringify(json),
+        'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
@@ -307,9 +308,45 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
-      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
+      });
+      return customMacros.ADCID().then(adcid => {
+        expect(adcid).to.not.be.null;
+      });
+    });
+
+    it('should return the same ADCID on multiple calls', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      let adcid;
+      return customMacros.ADCID().then(adcid1 => {
+        adcid = adcid1;
+        expect(adcid).to.not.be.null;
+        return customMacros.ADCID().then(adcid2 => {
+          expect(adcid2).to.equal(adcid);
+        });
+      });
+    });
+
+    it('should respect timeout for adcid', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      return customMacros.ADCID(0).then(adcid => {
+        expect(adcid).to.be.undefined;
       });
     });
 
@@ -318,14 +355,14 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'NOTTARGETING': {'a': '123'},
       };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
-        'data-json': JSON.stringify(json),
+        'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
     });
   });
 });

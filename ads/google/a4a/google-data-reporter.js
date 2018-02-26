@@ -15,24 +15,24 @@
  */
 
 import {
+  ADSENSE_A4A_EXPERIMENT_NAME,
+} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
+import {
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {
   EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
-  isReportingEnabled,
   getCorrelator,
+  isReportingEnabled,
 } from './utils';
-import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
+import {dict} from '../../../src/utils/object';
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dict} from '../../../src/utils/object';
-import {
-  ADSENSE_A4A_EXPERIMENT_NAME,
-} from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
-import {
-  DOUBLECLICK_A4A_EXPERIMENT_NAME,
-} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line max-len
 
 /**
  * An experiment config for controlling profiling.  Profiling has no branches:
@@ -138,16 +138,11 @@ function setupPageLoadMetricsReporter_(ampElement) {
       win.ampAnalyticsPageLoadMetricsConfig || dict({
       'requests': {
         'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
-          `&c=${correlator}&met.a4a=` +
-          /* TODO(jonkeller): Add remaining metrics commented-out below to cfg
-          'makeBodyVisible.${MBV_VALUE}~' +
-          */
-          'firstVisibleTime.${firstVisibleTime}'
-          /*
-          + 'firstContentfulPaint.${FCP_VALUE}~' +
-          'firstViewportReady.${FVR_VALUE}'
-          */
-        ,
+            `&c=${correlator}&met.a4a=` +
+	    'makeBodyVisible.${makeBodyVisible}~' +
+	    'firstVisibleTime.${firstVisibleTime}~' +
+	    'firstContentfulPaint.${firstContentfulPaint}~' +
+	    'firstViewportReady.${firstViewportReady}',
       },
       'transport': {
         'beacon': false,

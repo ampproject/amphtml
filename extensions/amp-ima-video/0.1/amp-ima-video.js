@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  isObject,
-  toArray,
-  toWin,
-} from '../../../src/types';
-import {
-  getData,
-  listen,
-} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   fullscreenEnter,
@@ -40,10 +26,23 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {user, dev} from '../../../src/log';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {
+  getData,
+  listen,
+} from '../../../src/event-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isEnumValue} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  isObject,
+  toArray,
+  toWin,
+} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -72,10 +71,10 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectSource_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectTrack_ = null;
 
     /**
@@ -90,9 +89,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        'Experiment ' + TAG + ' is disabled.');
-
     this.viewport_ = this.getViewport();
     if (this.element.getAttribute('data-delay-ad-request') === 'true') {
       this.unlisteners_['onFirstScroll'] =

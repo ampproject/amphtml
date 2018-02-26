@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
+import {map, omit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
 /**
  * Create a SingleDatePicker React component
- * @return {!function(new:React.Component, !Object)} A single date picker component class
+ * @return {function(new:React.Component, !Object)} A single date picker component class
  */
 function createSingleDatePickerBase() {
   const React = requireExternal('react');
-  const PropTypes = requireExternal('prop-types');
   const moment = requireExternal('moment');
   const {
     ANCHOR_LEFT,
@@ -33,28 +32,11 @@ function createSingleDatePickerBase() {
   } = requireExternal('react-dates/constants');
   const {
     SingleDatePicker: DatePicker,
-    SingleDatePickerShape,
   } = requireExternal('react-dates');
 
-  const propTypes = {
-    // example props for the demo
-    autoFocus: PropTypes.bool,
-    initialDate: PropTypes.object,
-    highlightedDates: PropTypes.arrayOf(PropTypes.string),
-    blockedDates: PropTypes.arrayOf(PropTypes.string),
-    firstDayOfWeek: PropTypes.number,
-    onDateChange: PropTypes.func,
-    registerAction: PropTypes.func,
-  };
+  React.options.syncComponentUpdates = false;
 
-  Object.assign(propTypes, omit(SingleDatePickerShape, [
-    'date',
-    'onDateChange',
-    'focused',
-    'onFocusChange',
-  ]));
-
-  const defaultProps = {
+  const defaultProps = map({
     // example props for the demo
     autoFocus: false,
     initialDate: null,
@@ -99,7 +81,7 @@ function createSingleDatePickerBase() {
     monthFormat: 'MMMM YYYY',
 
     registerAction: null,
-  };
+  });
 
   class SingleDatePickerBase extends React.Component {
     /**
@@ -168,7 +150,6 @@ function createSingleDatePickerBase() {
     }
   }
 
-  SingleDatePickerBase.propTypes = propTypes;
   SingleDatePickerBase.defaultProps = defaultProps;
 
   return withDatePickerCommon(SingleDatePickerBase);
@@ -180,7 +161,7 @@ let SingleDatePicker_ = null;
 
 /**
  * Creates a single date picker, injecting its dependencies
- * @return {!function(new:React.Component, !Object)} A date picker component class
+ * @return {function(new:React.Component, !Object)} A date picker component class
  */
 export function createSingleDatePicker() {
   if (!SingleDatePicker_) {
