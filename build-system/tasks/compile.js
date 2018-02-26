@@ -164,6 +164,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-access/**/*.js',
       // Needed for AmpStoryVariableService
       'extensions/amp-story/**/*.js',
+      // Needed for SubscriptionsService
+      'extensions/amp-subscriptions/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
       'src/*.js',
@@ -185,6 +187,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/react-dates/bundle.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
+      'node_modules/web-activities/activity-ports.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
       // 'node_modules/core-js/modules/**.js',
