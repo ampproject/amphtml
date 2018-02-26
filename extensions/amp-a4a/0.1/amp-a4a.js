@@ -82,6 +82,9 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 
+/** @type {string} @visibileForTesting */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
+
 /** @type {string} */
 const TAG = 'amp-a4a';
 
@@ -185,6 +188,15 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
 };
 
 /**
+ * The sandboxing flags to use when applying the "sandbox" attribute to ad
+ * iframes. See http://go/mdn/HTML/Element/iframe#attr-sandbox.
+ * @const {string} @visibleForTesting
+ */
+export const IFRAME_SANDBOXING_FLAGS = 'allow-forms allow-pointer-lock ' +
+    'allow-popups allow-popups-to-escape-sandbox allow-same-origin ' +
+    'allow-scripts allow-top-navigation-by-user-activation';
+
+/**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided or handler throws, error is swallowed and
  * undefined is returned).
@@ -282,6 +294,13 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
+
+    /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -699,6 +718,10 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
+          const browserSupportsSandbox = this.win.HTMLIFrameElement &&
+              'sandbox' in this.win.HTMLIFrameElement.prototype;
+          this.shouldSandbox_ = browserSupportsSandbox &&
+              fetchResponse.headers.get(SANDBOX_HEADER) == 'true';
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
@@ -1413,6 +1436,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
+    }
+    if (this.shouldSandbox_) {
+      mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
     }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
