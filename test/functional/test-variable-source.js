@@ -23,9 +23,9 @@ import {createElementWithAttributes} from '../../src/dom';
 
 
 describes.fakeWin('VariableSource', {
-    amp: {
-      ampdoc: 'single',
-    },
+  amp: {
+    ampdoc: 'single',
+  },
 }, env => {
   let varSource;
   beforeEach(() => {
@@ -98,10 +98,10 @@ describes.fakeWin('VariableSource', {
     let variableSource;
     beforeEach(() => {
       env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-variable-substitution-whitelist',
-          content: 'ABC,ABCD,CANONICAL',
-        }));
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-variable-substitution-whitelist',
+            content: 'ABC,ABCD,CANONICAL',
+          }));
       variableSource = new VariableSource(env.ampdoc);
     });
 

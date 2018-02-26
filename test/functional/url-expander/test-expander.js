@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../../src/service/ampdoc-impl';
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -99,11 +98,11 @@ describes.realWin('Expander', {
     };
     beforeEach(() => {
       env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-variable-substitution-whitelist',
-          content: 'ABC,ABCD,CANONICAL',
-        }));
-      
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-variable-substitution-whitelist',
+            content: 'ABC,ABCD,CANONICAL',
+          }));
+
       variableSource = new GlobalVariableSource(env.ampdoc);
       expander = new Expander(variableSource);
     });

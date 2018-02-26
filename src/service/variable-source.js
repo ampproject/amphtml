@@ -128,15 +128,15 @@ export class VariableSource {
     /** @private {boolean} */
     this.initialized_ = false;
 
-    /** 
+    /**
      * The whitelist of variables allowed for variable substitution.
-     * @private @const {?Array<string>} 
+     * @private @const {?Array<string>}
      */
     this.variableWhitelist_ = this.getVariableWhitelist_();
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in 
+   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
    *     a meta tag).
    * @private
    */
@@ -145,9 +145,9 @@ export class VariableSource {
       return this.variableWhitelist_;
     }
 
-    // TODO(hamousavi): Remove this conditional and change the type annotation 
+    // TODO(hamousavi): Remove this conditional and change the type annotation
     // for this.ampdoc to non-nullable. This is a temporary measures because
-    // tests currently do not respect the non-nullability measure. 
+    // tests currently do not respect the non-nullability measure.
     if (!this.ampdoc) {
       return null;
     }
@@ -157,7 +157,7 @@ export class VariableSource {
       return null;
     }
 
-    // A meta[name="amp-variable-substitution-whitelist"] tag, if present, 
+    // A meta[name="amp-variable-substitution-whitelist"] tag, if present,
     // contains, in its content attribute, a whitelist of variable substitution.
     const meta =
       head.querySelector('meta[name="amp-variable-substitution-whitelist"]');
@@ -301,7 +301,7 @@ export class VariableSource {
    */
   buildExpr_(keys, isV2) {
     // If a whitelist is present, the keys must belong to the whitelist.
-    // We filter the keys one last time to ensure no unwhitelisted key is 
+    // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
     if (this.getVariableWhitelist_()) {
       keys = keys.filter(key => this.getVariableWhitelist_().includes(key));
@@ -329,7 +329,7 @@ export class VariableSource {
    * Returns `true` if a variable whitelist is *not* present or the present
    * whitelist contains the given variable name.
    * @param {string} varName
-   * @return {boolean} 
+   * @return {boolean}
    * @private
    */
   isWhitelisted_(varName) {
