@@ -74,15 +74,24 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
   });
 
   it('should not throw for valid responsive ad unit height', () => {
+    data['fullWidth'] = 'true';
     data['autoFormat'] = 'rspv';
     data['height'] = '320';
     expect(() => adsense(env.win, data)).to.not.throw();
   });
 
   it('should throw on invalid responsive ad unit height', () => {
+    data['fullWidth'] = 'true';
     data['autoFormat'] = 'rspv';
     data['height'] = '666';
     expect(() => adsense(env.win, data)).to.throw(
         /Specified height 666 in <amp-ad> tag is not equal to the required/);
+  });
+
+  it('should throw on missing fullWidth field for responsive ad unit', () => {
+    data['autoFormat'] = 'rspv';
+    data['height'] = '320';
+    expect(() => adsense(env.win, data)).to.throw(
+        /Responsive AdSense ad units require the attribute data-full-width.​/);
   });
 });
