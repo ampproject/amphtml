@@ -987,7 +987,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       },
       CANONICAL_URL: () =>
-          Services.documentInfoForDoc(this.element).canonicalUrl,
+        Services.documentInfoForDoc(this.element).canonicalUrl,
     };
   }
 
