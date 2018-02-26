@@ -189,11 +189,11 @@ describe('amp-a4a', () => {
     const re = /^([^;]+);(\d+);([\s\S]*)$/;
     const match = re.exec(name);
     expect(match).to.be.ok;
-    const sandbox = child.getAttribute('sandbox');
+    const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandbox).to.be.ok;
+      expect(sandboxAttribute).to.be.ok;
     } else {
-      expect(sandbox).to.be.null;
+      expect(sandboxAttribute).to.be.null;
     }
     const contentLength = Number(match[2]);
     const rest = match[3];
@@ -221,11 +221,11 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
-    const sandbox = child.getAttribute('sandbox');
+    const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandbox).to.be.ok;
+      expect(sandboxAttribute).to.be.ok;
     } else {
-      expect(sandbox).to.be.null;
+      expect(sandboxAttribute).to.be.null;
     }
   }
 
@@ -241,11 +241,11 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
-    const sandbox = child.getAttribute('sandbox');
+    const sandboxAttribute = child.getAttribute('sandbox');
     if (shouldSandbox) {
-      expect(sandbox).to.be.ok;
+      expect(sandboxAttribute).to.be.ok;
     } else {
-      expect(sandbox).to.be.null;
+      expect(sandboxAttribute).to.be.null;
     }
   }
 
