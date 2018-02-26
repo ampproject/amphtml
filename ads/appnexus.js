@@ -112,7 +112,7 @@ function appnexusAst(global, data) {
   // for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
     apntag.checkAdAvailable(data.target)
-        .getAd({ resolve: isAdAvailable, reject: noAdAvailable });
+        .getAd({resolve: isAdAvailable, reject: noAdAvailable});
   });
 
   apntag.anq.push(() => {
@@ -123,7 +123,7 @@ function appnexusAst(global, data) {
 
 function isAdAvailable(adObj) {
   global.context.renderStart({width: adObj.width, height: adObj.height});
-  apntag.showTag(adObj.targetId, global.window);
+  global.apntag.showTag(adObj.targetId, global.window);
 }
 
 function noAdAvailable() {
