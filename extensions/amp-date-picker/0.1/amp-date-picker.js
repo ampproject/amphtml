@@ -592,7 +592,7 @@ class AmpDatePicker extends AMP.BaseElement {
       this.listen_(documentElement, 'click', this.handleClick_.bind(this));
     }
 
-    this.listen_(documentElement, 'focus', this.handleFocus_.bind(this));
+    this.listen_(documentElement, 'focusin', this.handleFocus_.bind(this));
     this.listen_(documentElement, 'input', this.handleInput_.bind(this));
     this.listen_(documentElement, 'keydown', this.handleKeydown_.bind(this));
   }
@@ -623,12 +623,10 @@ class AmpDatePicker extends AMP.BaseElement {
 
     const target = dev().assertElement(e.target);
     const clickWasInDatePicker = (
-      this.element.contains(target) || this.isDateField_(target)
+      this.container_.contains(target) || this.isDateField_(target)
     );
 
-    if (clickWasInDatePicker) {
-      // this.setState_({isFocused: false});
-    } else {
+    if (!clickWasInDatePicker) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
     }
   }
