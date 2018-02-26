@@ -95,6 +95,7 @@ declareExtension('amp-carousel', '0.1', {hasCss: true});
 declareExtension('amp-compare-slider', '0.1', {hasCss: false});
 declareExtension('amp-crypto-polyfill', '0.1', {hasCss: false});
 declareExtension('amp-dailymotion', '0.1', {hasCss: false});
+declareExtension('amp-date-countdown', '0.1', {hasCss: false});
 declareExtension('amp-dynamic-css-classes', '0.1', {hasCss: false});
 declareExtension('amp-experiment', '0.1', {hasCss: false});
 declareExtension('amp-facebook', '0.1', {hasCss: false});
