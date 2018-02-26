@@ -589,16 +589,12 @@ class AmpDatePicker extends AMP.BaseElement {
     const documentElement = this.element.ownerDocument.documentElement;
     // Only add for overlay since click events just handle opening and closing
     if (this.mode_ == DatePickerMode.OVERLAY) {
-      this.listen_(documentElement, 'click',
-          this.handleClick_.bind(this), {capture: true});
+      this.listen_(documentElement, 'click', this.handleClick_.bind(this));
     }
 
-    this.listen_(documentElement, 'focus',
-        this.handleFocus_.bind(this), {capture: true});
-    this.listen_(documentElement, 'input',
-        this.handleInput_.bind(this), {capture: true});
-    this.listen_(documentElement, 'keydown',
-        this.handleKeydown_.bind(this), {capture: true});
+    this.listen_(documentElement, 'focus', this.handleFocus_.bind(this));
+    this.listen_(documentElement, 'input', this.handleInput_.bind(this));
+    this.listen_(documentElement, 'keydown', this.handleKeydown_.bind(this));
   }
 
   /**

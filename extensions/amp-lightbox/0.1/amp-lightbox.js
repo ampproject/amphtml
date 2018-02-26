@@ -184,7 +184,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.initialize_();
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
-        'keydown', this.boundCloseOnEscape_, true);
+        'keydown', this.boundCloseOnEscape_);
     this.getViewport().enterLightboxMode(this.element)
         .then(() => this.finalizeOpen_());
   }
@@ -258,7 +258,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.getHistory_().pop(this.historyId_);
     }
     this.win.document.documentElement.removeEventListener(
-        'keydown', this.boundCloseOnEscape_, true);
+        'keydown', this.boundCloseOnEscape_);
     this.element.removeEventListener('transitionend', this.boundReschedule_);
     this.element.removeEventListener('animationend', this.boundReschedule_);
     this.boundCloseOnEscape_ = null;
