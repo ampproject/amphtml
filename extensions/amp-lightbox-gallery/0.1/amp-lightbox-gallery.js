@@ -296,19 +296,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       Services.extensionsFor(this.win).installExtensionForDoc(
           this.getAmpDoc(), 'amp-image-viewer'),
     ]).then(() => {
+      return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
+    }).then(list => {
       this.carousel_ = this.win.document.createElement('amp-carousel');
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
       this.carousel_.setAttribute('loop', '');
       this.carousel_.setAttribute('controls', '');
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
-      return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
-    }).then(list => {
+      this.buildCarouselSlides_(list);
       return this.vsync_.mutatePromise(() => {
-        this.buildCarouselSlides_(list);
+        this.container_.appendChild(this.carousel_);
       });
-    }).then(() => {
-      this.container_.appendChild(this.carousel_);
     });
   }
 
@@ -347,7 +346,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.toggleDescriptionOverflow_();
       event.stopPropagation();
     });
-    this.container_.appendChild(this.descriptionBox_);
+
+    this.vsync_.mutate(() => {
+      this.container_.appendChild(this.descriptionBox_);
+    });
   }
 
   /**
@@ -362,7 +364,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // text area is a div that does not contain descendant elements.
     this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
-      toggle(dev().assertElement(this.descriptionBox_), false);
+      this.vsync_.mutate(() => {
+        toggle(dev().assertElement(this.descriptionBox_), false);
+      });
     }
   }
 
@@ -472,7 +476,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.buildButton_('Gallery', 'amp-lbg-button-gallery', openGallery);
     this.buildButton_('Content', 'amp-lbg-button-slide', closeGallery);
 
-    this.container_.appendChild(this.topBar_);
+    this.vsync_.mutate(() => {
+      this.container_.appendChild(this.topBar_);
+    });
   }
 
   /**
@@ -643,14 +649,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
       this.getViewport().enterLightboxMode();
 
-      st.setStyles(this.element, {
-        opacity: 0,
-        display: '',
-      });
+      this.vsync_.mutate(() => {
+        st.setStyles(this.element, {
+          opacity: 0,
+          display: '',
+        });
 
-      st.setStyles(dev().assertElement(this.carousel_), {
-        opacity: 0,
-        display: '',
+        st.setStyles(dev().assertElement(this.carousel_), {
+          opacity: 0,
+          display: '',
+        });
       });
 
       this.active_ = true;
