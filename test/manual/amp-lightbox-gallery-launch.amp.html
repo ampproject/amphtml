@@ -23,6 +23,13 @@
       font-family: sans-serif;
     }
 
+    /* This is necessary to fix styling for amp-youtube and amp-video */
+    .i-amphtml-slide-item > amp-youtube,
+    .i-amphtml-slide-item > amp-instagram,
+    .i-amphtml-slide-item > amp-video {
+      height: auto;
+    }
+
   </style>
 </head>
 <body>
@@ -129,13 +136,13 @@
     <amp-instagram data-shortcode="1totVhIFXl"
       width="400"
       height="400"
-      layout="fixed">
+      layout="responsive">
     </amp-instagram>
     <amp-facebook
       lightbox-thumbnail-id="fb-thumbnail-img"
       width="552"
       height="303"
-      layout="fixed"
+      layout="responsive"
       data-href="https://www.facebook.com/zuck/posts/10102593740125791">
     </amp-facebook>
     <amp-facebook width="552"
