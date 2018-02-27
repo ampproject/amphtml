@@ -90,7 +90,7 @@ A server endpoint needs to provide ad responses in the following JSON format:
     "imgSrc": "https://cdn.adserver.com/img-12345.jpg",
     "impressionUrl": "https://adserver.com/track?iid=18745543"
   },
-  "var": {
+  "vars": {
     "ctaType": "EXPLORE",
     "ctaUrl": "https://advertiser.com/landing-123.html",
     "impressionId": "ac2d1s2E3B"
@@ -100,7 +100,7 @@ A server endpoint needs to provide ad responses in the following JSON format:
 
 * `templateId`: the ID of the inlined template that is going to be used.
 * `data`: the data model to populate the selected template. The fields should match the variable names in the selected template.
-* `var`: extra variables needed by the story. They will be added to the `amp-ad` element as data attributes, and picked by runtime for different use cases:
+* `vars`: extra variables needed by the story. They will be added to the `amp-ad` element as data attributes, and picked by runtime for different use cases:
    * CTA button rendering (see details in the ["CTA ad" section](#cta-ad))
    * Provide dynamic content of the ad for tracking purpose (see details in the "tracking" section)
 
