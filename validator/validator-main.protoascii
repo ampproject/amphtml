@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 571
+spec_file_revision: 572
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4778,16 +4778,15 @@ error_formats {
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
-  format: "The mandatory text (CDATA) inside tag '%1' is missing or incorrect."
+  format: "The mandatory text inside tag '%1' is missing or incorrect."
 }
 error_formats {
   code: CDATA_VIOLATES_BLACKLIST
-  format: "The text (CDATA) inside tag '%1' contains '%2', "
-          "which is disallowed."
+  format: "The text inside tag '%1' contains '%2', which is disallowed."
 }
 error_formats {
   code: NON_WHITESPACE_CDATA_ENCOUNTERED
-  format: "The tag '%1' contains text (CDATA), which is disallowed."
+  format: "The tag '%1' contains text, which is disallowed."
 }
 error_formats {
   code: DISALLOWED_PROPERTY_IN_ATTR_VALUE
