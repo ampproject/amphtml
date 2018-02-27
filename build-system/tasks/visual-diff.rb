@@ -216,7 +216,7 @@ def load_visual_tests_config_json
   json_file = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.js'),
+          '../../test/visual-diff/visual-tests'),
       'r')
   json_file.read
 end

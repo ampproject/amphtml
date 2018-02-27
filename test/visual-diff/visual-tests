@@ -16,10 +16,6 @@
 
 /**
  * Particulars of the webpages used in the AMP visual diff tests.
- *
- * Note: While the extension of this file is .js, the contents are pseudo-json
- * due to the presence of detailed comments. Ruby's json parser natively
- * supports comments in json files, and is capable of parsing this file.
  */
 {
   /**
