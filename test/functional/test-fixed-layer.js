@@ -17,13 +17,9 @@
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
-<<<<<<< HEAD
-=======
-import {installPlatformService} from '../../src/service/platform-impl';
-import {isExperimentOn} from '../../src/experiments';
->>>>>>> style restriction changes
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 
@@ -39,11 +35,10 @@ describe('FixedLayer', () => {
   let element3;
   let element4;
   let element5;
-  let element6;
   let allRules;
 
-beforeEach(() => {
-  sandbox = sinon.sandbox.create();
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
 
     allRules = {};
 
@@ -55,14 +50,12 @@ beforeEach(() => {
     element2 = createElement('element2');
     element3 = createElement('element3');
     element4 = createElement('element4');
-    element5 = createElement('element4');
-    element6 = createElement('element5');
+    element5 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
     docBody.appendChild(element4);
     docBody.appendChild(element5);
-    //docBody.appendChild(element6);
 
     const invalidRule = createValidRule('#invalid', 'fixed',
         [element1, element3]);
@@ -440,6 +433,17 @@ beforeEach(() => {
       expect(fixedLayer.isDeclaredSticky(element3)).to.be.false;
       expect(fixedLayer.isDeclaredSticky(element4)).to.be.true;
       expect(fixedLayer.isDeclaredSticky(element5)).to.be.true;
+    });
+
+    it('should throw user error for inline style', () => {
+      toggleExperiment(
+          ampdoc,
+          'inline-styles',
+          true /* opt_on */,
+          true /* opt_transientExperiment */);
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      expect(userError).calledWithMatch('FixedLayer');
     });
 
     it('should add and remove element directly', () => {
@@ -1047,23 +1051,9 @@ beforeEach(() => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
-    });
-
-    it('should throw user error for inline style', () => {
-      ampdoc.__AMP__EXPERIMENT_TOGGLES = {'inline-styles' : false};
-      element6.style = {
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      };
-      const userError = sandbox.stub(user(), 'error');
-      fixedLayer.setup();
-      expect(userError).calledWithMatch(
-          'FixedLayer', 'Inline style not supported for element');
     });
 
     it('should collect turn off transferrable', () => {

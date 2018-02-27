@@ -505,9 +505,9 @@ export class FixedLayer {
    */
   setupElement_(element, selector, position, opt_forceTransfer) {
     let fe = null;
-    for (let i = 0, len = this.elements_.length; i < len; i++) {
-      const el = this.elements_[i].element;
-      if (el == element && el.position == position) {
+    for (let i = 0; i < this.elements_.length; i++) {
+      const el = this.elements_[i];
+      if (el.element == element && el.position == position) {
         fe = el;
         break;
       }
@@ -550,9 +550,9 @@ export class FixedLayer {
    */
   removeElement_(element) {
     const removed = [];
-    for (let i = 0, len = this.elements_.length; i < len; i++) {
-      const el = this.elements_[i].element;
-      if (el == element) {
+    for (let i = 0; i < this.elements_.length; i++) {
+      const el = this.elements_[i];
+      if (el.element == element) {
         this.vsync_.mutate(() => {
           setStyle(element, 'top', '');
         });
