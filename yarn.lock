@@ -9414,9 +9414,9 @@ sinon-chai@2.14.0:
   version "2.14.0"
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-2.14.0.tgz#da7dd4cc83cd6a260b67cca0f7a9fdae26a1205d"
 
-sinon@4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.2.3.tgz#ffcd90e48f5a1ca62c41294e320860943f7c454d"
+sinon@4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.4.0.tgz#5bdbe9c96c6a2904d2fddde6316c1c9b7dc70ebe"
   dependencies:
     "@sinonjs/formatio" "^2.0.0"
     diff "^3.1.0"
