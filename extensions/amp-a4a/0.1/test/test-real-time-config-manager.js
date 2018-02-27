@@ -94,12 +94,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     function executeTest(args) {
       const {urls, vendors, timeoutMillis, rtcCalloutResponses,
         expectedCalloutUrls, responseIsString, failXhr,
-        customMacros, expectedRtcArray, calloutCount} = args;
+        expectedRtcArray, calloutCount} = args;
       setRtcConfig({urls, vendors, timeoutMillis});
       (expectedCalloutUrls || []).forEach((expectedUrl, i) => {
         setFetchJsonStubBehavior(expectedUrl, rtcCalloutResponses[i],
             responseIsString, failXhr);
       });
+      const customMacros = args['customMacros'] || {};
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(
           a4aElement, customMacros);
       return rtcResponsePromiseArray.then(rtcResponseArray => {
