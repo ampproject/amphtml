@@ -59,6 +59,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       height: element.getAttribute('height'),
     };
 
+    /** @private {string} @const */
+    this.networkType_ = element.getAttribute('type') || 'anon';
+
     /**
      * @private {number} unique ID of the currently executing promise to allow
      * for cancellation.
@@ -176,7 +179,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   getRenderingDataInput_(validatorOutput) {
     const creative = validatorOutput.creative;
     return /** @type {!RendererInputDef} */ ({
-      creativeMetadata: getAmpAdMetadata(creative, TAG, ''),
+      creativeMetadata: getAmpAdMetadata(creative, TAG, this.networkType_),
       templateData: null,
       crossDomainData: {
         rawCreativeBytes: this.unvalidatedBytes_,
