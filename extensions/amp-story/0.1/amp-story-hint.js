@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageId} from './messages';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -54,7 +55,7 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  text: 'Back',
+                  messageId: MessageId.HINT_UI_PREVIOUS_LABEL,
                 },
               ],
             },
@@ -84,7 +85,7 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  text: 'Next',
+                  messageId: MessageId.HINT_UI_NEXT_LABEL,
                 },
               ],
             },

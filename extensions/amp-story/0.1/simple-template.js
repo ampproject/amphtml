@@ -21,7 +21,7 @@ import {isArray} from '../../../src/types';
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   text: (string|undefined),
+ *   messageId: (string|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -74,8 +74,8 @@ function renderSingle(doc, elementDef) {
     createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
     doc.createElement(elementDef.tag);
 
-  if (elementDef.text) {
-    el.textContent = elementDef.text;
+  if (elementDef.messageId) {
+    el.textContent = getMessageTextContent(elementDef.messageId);
   }
 
   if (elementDef.children) {
