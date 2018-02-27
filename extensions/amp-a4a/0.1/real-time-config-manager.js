@@ -164,23 +164,19 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
   };
 
-  if (macros && Object.keys(macros).length) {
-    const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
-    const whitelist = {};
-    Object.keys(macros).forEach(key => whitelist[key] = true);
-    const urlReplacementStartTime = Date.now();
-    promiseArray.push(Services.timerFor(win).timeoutPromise(
-        timeoutMillis,
-        urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
-      timeoutMillis -= (urlReplacementStartTime - Date.now());
-      return send(url);
-    }).catch(unused => {
-      return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-          opt_vendor || url, undefined, true);
-    }));
-  } else {
-    promiseArray.push(send(url));
-  }
+  const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
+  const whitelist = {};
+  Object.keys(macros).forEach(key => whitelist[key] = true);
+  const urlReplacementStartTime = Date.now();
+  promiseArray.push(Services.timerFor(win).timeoutPromise(
+      timeoutMillis,
+      urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
+    timeoutMillis -= (urlReplacementStartTime - Date.now());
+    return send(url);
+  }).catch(unused => {
+    return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+        opt_vendor || url, undefined, true);
+  }));
 }
 
 /**
