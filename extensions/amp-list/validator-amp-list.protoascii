@@ -27,6 +27,7 @@ tags: {  # amp-list
 }
 tags: {  # amp-list
   html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
@@ -38,6 +39,7 @@ tags: {  # amp-list
 }
 tags: {  # <amp-list>
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
   attrs: { name: "credentials" }
