@@ -74,58 +74,60 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-date-countdown datetime="2020-06-01T00:00:00+08:00" biggest-unit="minute" when-ended="stop" locale='en' width="360">
+  <amp-date-countdown end-date="2020-06-01T00:00:00+08:00" biggest-unit="days" when-ended="stop" locale='en' width="600">
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">
-        {{#days}}
+        {{#d}}
+          <div>
+            <span class="d">{{d}}</span>
+            <div class="smalltext">{{days}}</div>
+          </div>
+        {{/d}}
+        {{#h}}
+          <div>
+            <span class="h">{{h}}</span>
+            <div class="smalltext">{{hours}}</div>
+          </div>
+        {{/h}}
         <div>
-          <span class="days">{{days}}</span>
-          <div class="smalltext">{{dayWord}}</div>
+          <span class="m">{{m}}</span>
+          <div class="smalltext">{{minutes}}</div>
         </div>
-        {{/days}}
         <div>
-          <span class="hours">{{hours}}</span>
-          <div class="smalltext">{{hourWord}}</div>
-        </div>
-        <div>
-          <span class="minutes">{{minutes}}</span>
-          <div class="smalltext">{{minuteWord}}</div>
-        </div>
-        <div>
-          <span class="seconds">{{seconds}}</span>
-          <div class="smalltext">{{secondWord}}</div>
+          <span class="s">{{s}}</span>
+          <div class="smalltext">{{seconds}}</div>
         </div>
       </div>
       <div class="date-count-down">
-        {{#days}} {{days}} <span>{{dayWord}}</span> {{/days}}
-        {{#hours}} {{hours}} <span>{{hourWord}}</span> {{/hours}}
-        {{#minutes}} {{minutes}} <span>{{minuteWord}}</span> {{/minutes}}
-        {{seconds}} <span>{{secondWord}}</span>
+        {{#d}} {{dd}} <span>{{days}}</span> {{/d}}
+        {{#hh}} {{h}} <span>{{hours}}</span> {{/hh}}
+        {{#mm}} {{mm}} <span>{{minutes}}</span> {{/mm}}
+        {{ss}} <span>{{seconds}}</span>
       </div>
       <div>
-        {{daysTwoDigits}} : {{hoursTwoDigits}} : {{minutesTwoDigits}} : {{secondsTwoDigits}}
+        {{dd}} : {{hh}} : {{mm}} : {{ss}}
       </div>
     </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-TW' width="360">
+  <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' width="360">
       <template type="amp-mustache">
         <div class="date-count-down">
-          {{#days}} {{days}} <span>{{dayWord}}</span> {{/days}}
-          {{hours}} <span>{{hourWord}}</span>
-          {{minutes}} <span>{{minuteWord}}</span>
-          {{seconds}} <span>{{secondWord}}</span>
+          {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+          {{h}} <span>{{hours}}</span>
+          {{m}} <span>{{minutes}}</span>
+          {{s}} <span>{{seconds}}</span>
         </div>
       </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="stop" locale='de' width="360">
+  <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' width="360">
     <template type="amp-mustache">
-      <div class="date-count-down">
-        {{#days}} {{days}} <span>{{dayWord}}</span> {{/days}}
-        {{hours}} <span>{{hourWord}}</span>
-        {{minutes}} <span>{{minuteWord}}</span>
-        {{seconds}} <span>{{secondWord}}</span>
-      </div>
+        <div class="date-count-down">
+            {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+            {{h}} <span>{{hours}}</span>
+            {{m}} <span>{{minutes}}</span>
+            {{s}} <span>{{seconds}}</span>
+          </div>
     </template>
   </amp-date-countdown>
   <div class="content">

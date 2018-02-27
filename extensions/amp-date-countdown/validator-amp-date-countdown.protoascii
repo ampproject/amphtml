@@ -30,16 +30,16 @@ tags: {  # <amp-date-countdown>
   tag_name: "amp-date-countdown"
   requires_extension: "amp-date-countdown"
   attrs: {
-    name: "datetime"
-    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    name: "end-date"
+    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
   }
   attrs: {
     name: "timestamp-ms"
-    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
   }
   attrs: {
     name: "timestamp-seconds"
-    mandatory_oneof: "['datetime', 'timestamp-ms', 'timestamp-seconds']"
+    mandatory_oneof: "['end-date', 'timestamp-ms', 'timestamp-seconds']"
   }
   attrs: {
     name: "offset-seconds"
@@ -54,7 +54,7 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "biggest-unit"
-    value: "(day|hour|minute|second)"
+    value: "(days|hours|minutes|seconds)"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
