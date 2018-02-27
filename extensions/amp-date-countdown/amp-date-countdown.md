@@ -41,35 +41,67 @@ limitations under the License.
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+Will return the following params as result back to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
+
+![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
+
+##### Legends - Details
+
+Format | Meaning
+-- | --
+d | day - 0, 1, 2,...12, 13..Infinity
+dd | day - 00, 01, 02, 03..Infinity
+h | hour - 0, 1, 2,...12, 13..Infinity
+hh | hour - 01, 02, 03..Infinity
+m | minute - 0, 1, 2,...12, 13..Infinity
+mm | minute - 01, 01, 02, 03..Infinity
+s | second - 0, 1, 2,...12, 13..Infinity
+ss | second - 00, 01, 02, 03..Infinity
+days | i18n string for day or days
+hours | i18n string for hour or hours
+minutes | i18n string for minute or minutes
+seconds | i18n string for second or seconds
+
+##### Examples :
+
+Format | Sample Output | Remarks
+-- | -- | -
+{hh}:{mm}:{ss} | 04:24:06 | -
+{h} {hours} and {m} {minutes} and {s} {seconds} | 4 hours and 1 minutes and 45 seconds | -
+{d} {days} {h}:{mm} | 1 day 5:03 | -
+{d} {days} {h} {hours} {m} {minutes} | 50 days 5 hours 10 minutes | -
+{d} {days} {h} {hours} {m} {minutes} | 20 days 5 hours 10 minutes | -
+{h} {hours} {m} {minutes} | 240 hours 10 minutes | `biggest-unit='hours'`
+{d} {days} {h} {hours} {m} {minutes} | 50 天 5 小时 10 分钟 | `locale='zh-CN'`
+
 
 ## Attributes
 
-##### datetime
+##### end-date
 - An ISO formatted date to count down to. e.g. `2020-06-01T00:00:00+08:00`
 
-Note: One of `datetime`, `timestamp-ms`, `timestamp-seconds` is required.
+Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
 
 ##### timestamp-ms
 - POSIX epoch value in milliseconds - will be assumed to be UTC timezone.
 
-Note: One of `datetime`, `timestamp-ms`, `timestamp-seconds` is required.
+Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
 
 ##### timestamp-seconds
 - POSIX epoch value in seconds - will be assumed to be UTC timezone.
 
-Note: One of `datetime`, `timestamp-ms`, `timestamp-seconds` is required.
+Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
 
 ##### offset-seconds (optional)
-- Negative or positive number of seconds to add/substract from datetime.
+- Negative or positive number of seconds to add/substract from end-date.
 
 ##### when-ended (optional)
 - `stop` will set the timer to stop at 0 seconds and will not pass the final date.
 - default is `stop`
 
 ##### locale (optional)
-- the language for each datetime unit.
-* Supported value:
+- the i18n language string for each timer unit.
+* Supported value up-to-date:
 
 Code | Language
 -- | --
@@ -90,15 +122,13 @@ th | Thai
 tr | Turkish
 vi | Vietnamese
 
-
-
 * Default: `en`, which stands for **English**
 
 ##### biggest-unit (optional)
-- this will allow `amp-date-countdown` component to set for biggest-unit and automatically folds the remaining time unit.
-  - Example: assume there are `50 days 10 hours` left, if the `biggest-unit` is set as `hour`, it will display `1210` hours.
-* Supported values: `day`, `hour`, `minute`, `second`
-* Default: `day`
+- this will allow `amp-date-countdown` component to calculate the time difference based on biggest-unit set.
+  - Example: assume there are `50 days 10 hours` left, if the `biggest-unit` is set as `hours`, it will display `1210 hours` left.
+* Supported values: `days`, `hours`, `minutes`, `seconds`
+* Default: `days`
 
 
 ## Validation

@@ -15,9 +15,9 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
 
@@ -34,7 +34,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.boundRendered_ = this.rendered_.bind(this);
 
     /** @private {string} */
-    this.datetime_ = '';
+    this.endDate_ = '';
 
     /** @private {number} */
     this.timestampMs_ = 0;
@@ -56,7 +56,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   buildCallback() {
     const self = this;
     //Note: One of datetime, timestamp-ms, timestamp-seconds is required.
-    this.datetime_ = this.element.getAttribute('datetime');
+    this.endDate_ = this.element.getAttribute('end-date');
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
     this.timestampSeconds_
       = Number(this.element.getAttribute('timestamp-seconds'));
@@ -64,7 +64,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     const locale = this.element.getAttribute('locale') || 'en';
     const whenEnded = this.element.getAttribute('when-ended') || 'stop';
-    this.biggestUnit_ = (this.element.getAttribute('biggest-unit')) || 'day';
+    this.biggestUnit_ = (this.element.getAttribute('biggest-unit')) || 'days';
 
     let epoch = this.getEpoch_(); //1519776000000
     if (this.offsetSeconds_) {
@@ -89,7 +89,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
   }
 
   /**
@@ -109,8 +109,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   getEpoch_() {
     let epoch;
 
-    if (this.datetime_) {
-      epoch = Date.parse(this.datetime_);
+    if (this.endDate_) {
+      epoch = Date.parse(this.endDate_);
     } else if (this.timestampMs_) {
       epoch = this.timestampMs_;
     } else if (this.timestampSeconds_) {
@@ -119,7 +119,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     if (isNaN(epoch)) {
       user().error(TAG,
-          'One of datetime, timestamp-ms, timestamp-seconds is required');
+          'One of end-date, timestamp-ms, timestamp-seconds is required');
     }
 
     //console.log('epoch', epoch);
@@ -155,12 +155,12 @@ export class AmpDateCountdown extends AMP.BaseElement {
     if (localeWord[locale]) {
       const localeWordList = (localeWord[locale]).split('|');
       result = {
-        'yearWord': localeWordList[0],
-        'monthWord': localeWordList[1],
-        'dayWord': localeWordList[2],
-        'hourWord': localeWordList[3],
-        'minuteWord': localeWordList[4],
-        'secondWord': localeWordList[5],
+        'years': localeWordList[0],
+        'months': localeWordList[1],
+        'days': localeWordList[2],
+        'hours': localeWordList[3],
+        'minutes': localeWordList[4],
+        'seconds': localeWordList[5],
       };
     } else {
       user().error(TAG, `Invalid locale '${locale}', return empty locale word`);
@@ -176,40 +176,40 @@ export class AmpDateCountdown extends AMP.BaseElement {
   getYDHMSFromMs_(ms) {
 
     const priorityList = {
-      day: 1,
-      hour: 2,
-      minute: 3,
-      second: 4,
+      days: 1,
+      hours: 2,
+      minutes: 3,
+      seconds: 4,
     };
 
 
-    const days = priorityList[this.biggestUnit_] == 1
+    const d = priorityList[this.biggestUnit_] == 1
       ? (Math.trunc((ms) / (24 * 60 * 60 * 1000))) : 0;
-    const daysms = ms % (24 * 60 * 60 * 1000);
-    const hours = priorityList[this.biggestUnit_] == 2
+    const dMs = ms % (24 * 60 * 60 * 1000);
+    const h = priorityList[this.biggestUnit_] == 2
       ? (Math.trunc((ms) / (60 * 60 * 1000)))
       : priorityList[this.biggestUnit_] < 2
-        ? (Math.trunc((daysms) / (60 * 60 * 1000)))
+        ? (Math.trunc((dMs) / (60 * 60 * 1000)))
         : 0;
-    const hoursms = ms % (60 * 60 * 1000);
-    const minutes = priorityList[this.biggestUnit_] == 3
+    const hMs = ms % (60 * 60 * 1000);
+    const m = priorityList[this.biggestUnit_] == 3
       ? (Math.trunc((ms) / (60 * 1000)))
       : priorityList[this.biggestUnit_] < 3
-        ? (Math.trunc((hoursms) / (60 * 1000)))
+        ? (Math.trunc((hMs) / (60 * 1000)))
         : 0;
-    const minutesms = ms % (60 * 1000);
-    const seconds = priorityList[this.biggestUnit_] == 4
-      ? (Math.trunc((ms) / (1000))) : (Math.trunc((minutesms) / (1000)));
+    const mMs = ms % (60 * 1000);
+    const s = priorityList[this.biggestUnit_] == 4
+      ? (Math.trunc((ms) / (1000))) : (Math.trunc((mMs) / (1000)));
 
     return {
-      days,
-      daysTwoDigits: this.padStart_(days),
-      hours,
-      hoursTwoDigits: this.padStart_(hours),
-      minutes,
-      minutesTwoDigits: this.padStart_(minutes),
-      seconds,
-      secondsTwoDigits: this.padStart_(seconds),
+      d,
+      dd: this.padStart_(d),
+      h,
+      hh: this.padStart_(h),
+      m,
+      mm: this.padStart_(m),
+      s,
+      ss: this.padStart_(s),
     };
   }
 
