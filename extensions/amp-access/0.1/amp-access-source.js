@@ -57,11 +57,11 @@ export class AccessSource {
    * @param {!JsonObject} configJson
    * @param {function():!Promise<string>} readerIdFn
    * @param {function(time)} scheduleViewFn
-   * @param {function()} broadcastReauthorizeFn
+   * @param {function(!Promise)} onReauthorizeFn
    * @param {!Element} accessElement
    */
   constructor(ampdoc, configJson, readerIdFn, scheduleViewFn,
-    broadcastReauthorizeFn, accessElement) {
+    onReauthorizeFn, accessElement) {
 
     /** @const */
     this.ampdoc = ampdoc;
@@ -73,7 +73,7 @@ export class AccessSource {
     this.scheduleView_ = scheduleViewFn;
 
     /** @const */
-    this.broadcastReauthorize_ = broadcastReauthorizeFn;
+    this.onReauthorize_ = onReauthorizeFn;
 
     /** @const */
     this.accessElement_ = accessElement;
@@ -484,11 +484,12 @@ export class AccessSource {
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
         return exchangePromise.then(() => {
-          this.broadcastReauthorize_();
-          return this.runAuthorization(/* disableFallback */ true)
-              .then(() => {
-                this.scheduleView_(/* timeToView */ 0);
-              });
+          const authorizationPromise = this.runAuthorization(
+              /* disableFallback */ true);
+          this.onReauthorize_(authorizationPromise);
+          return authorizationPromise.then(() => {
+            this.scheduleView_(/* timeToView */ 0);
+          });
         });
       }
     }).catch(reason => {
