@@ -16,9 +16,9 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {Layout} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
+import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -30,7 +30,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!function(!Element)} */
+    /** @const {function(!Element)} */
     this.boundRendered_ = this.rendered_.bind(this);
 
     /** @private {string} */
@@ -58,7 +58,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
     //Note: One of datetime, timestamp-ms, timestamp-seconds is required.
     this.datetime_ = this.element.getAttribute('datetime');
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
-    this.timestampSeconds_ = Number(this.element.getAttribute('timestamp-seconds'));
+    this.timestampSeconds_
+      = Number(this.element.getAttribute('timestamp-seconds'));
     this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds'));
 
     const locale = this.element.getAttribute('locale') || 'en';
@@ -74,7 +75,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const localeWordList = this.getLocaleWord_(locale);
     const delay = 1000;
 
-    let countDownTicker = setInterval(function() {
+    const countDownTicker = setInterval(function() {
       //console.log('differentBetween', differentBetween);
       data = self.getYDHMSFromMs_(differentBetween);
       if (whenEnded === 'stop' && differentBetween < 1000) {
@@ -102,7 +103,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @return {!number}
+   * @return {number}
    * @private
    */
   getEpoch_() {
@@ -117,16 +118,17 @@ export class AmpDateCountdown extends AMP.BaseElement {
     }
 
     if (isNaN(epoch)) {
-      user().error(TAG, `One of datetime, timestamp-ms, timestamp-seconds is required`);
+      user().error(TAG,
+          'One of datetime, timestamp-ms, timestamp-seconds is required');
     }
 
-    console.log('epoch', epoch);
+    //console.log('epoch', epoch);
     return epoch;
   }
 
   /**
-   * @param {!string} locale
-   * @return {!object}
+   * @param {string} locale
+   * @return {Object}
    * @private
    */
   getLocaleWord_(locale) {
@@ -147,7 +149,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
       'ru': 'год|месяц|день|час|минута|секунда',
       'th': 'ปี|เดือน|วัน|ชั่วโมง|นาที|วินาที',
       'tr': 'yıl|ay|gün|saat|dakika|saniye',
-      'vi': 'năm|tháng|ngày|giờ|phút|giây'
+      'vi': 'năm|tháng|ngày|giờ|phút|giây',
     };
     let result = {};
     if (localeWord[locale]) {
@@ -167,8 +169,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @param {!number} ms
-   * @return {!object}
+   * @param {number} ms
+   * @return {Object}
    * @private
    */
   getYDHMSFromMs_(ms) {
@@ -177,11 +179,12 @@ export class AmpDateCountdown extends AMP.BaseElement {
       day: 1,
       hour: 2,
       minute: 3,
-      second: 4
+      second: 4,
     };
 
 
-    const days = priorityList[this.biggestUnit_] == 1 ? (Math.trunc((ms) / (24 * 60 * 60 * 1000))) : 0;
+    const days = priorityList[this.biggestUnit_] == 1
+      ? (Math.trunc((ms) / (24 * 60 * 60 * 1000))) : 0;
     const daysms = ms % (24 * 60 * 60 * 1000);
     const hours = priorityList[this.biggestUnit_] == 2
       ? (Math.trunc((ms) / (60 * 60 * 1000)))
@@ -195,7 +198,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
         ? (Math.trunc((hoursms) / (60 * 1000)))
         : 0;
     const minutesms = ms % (60 * 1000);
-    const seconds = priorityList[this.biggestUnit_] == 4 ? (Math.trunc((ms) / (1000))) : (Math.trunc((minutesms) / (1000)));
+    const seconds = priorityList[this.biggestUnit_] == 4
+      ? (Math.trunc((ms) / (1000))) : (Math.trunc((minutesms) / (1000)));
 
     return {
       days,
@@ -210,8 +214,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /**
-   * @param {!number} input
-   * @return {!string}
+   * @param {number} input
+   * @return {Object}
    * @private
    */
   padStart_(input) {
@@ -222,7 +226,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     return '0' + input;
   }
 
-    /**
+  /**
    * @param {!Element} element
    * @private
    */
