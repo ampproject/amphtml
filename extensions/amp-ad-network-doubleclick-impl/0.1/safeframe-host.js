@@ -135,9 +135,6 @@ export class SafeframeHostApi {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
-
     /** @type {?string} */
     this.channel = null;
 
@@ -613,6 +610,7 @@ export class SafeframeHostApi {
    * Unregister this Host API.
    */
   destroy() {
+    this.iframe_ = null;
     delete safeframeHosts[this.sentinel_];
     if (this.unlisten_) {
       this.unlisten_();
