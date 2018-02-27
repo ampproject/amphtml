@@ -189,11 +189,11 @@ export class AccessService {
 
     const readerIdFn = this.getReaderId_.bind(this);
     const scheduleViewFn = this.scheduleView_.bind(this);
-    const broadcastReauthorizeFn = this.broadcastReauthorize_.bind(this);
+    const onReauthorizeFn = this.onReauthorize_.bind(this);
 
     return Object.keys(configMap).map(key =>
       new AccessSource(this.ampdoc, configMap[key], readerIdFn, scheduleViewFn,
-          broadcastReauthorizeFn, this.accessElement_)
+          onReauthorizeFn, this.accessElement_)
     );
   }
 
@@ -302,6 +302,27 @@ export class AccessService {
       if (message['type'] == 'amp-access-reauthorize' &&
               message['origin'] == this.pubOrigin_) {
         this.runAuthorization_();
+      }
+    });
+  }
+
+  /**
+   * @param {!Promise} authorization
+   * @private
+   */
+  onReauthorize_(authorization) {
+    this.broadcastReauthorize_();
+    authorization.then(() => {
+      // If nothing has happened, initial render will cover this change.
+      if (this.firstAuthorizationsCompleted_) {
+        // Guard against anything else in flight.
+        this.lastAuthorizationPromises_.then(() => {
+          this.ampdoc.whenReady().then(() => {
+            const root = this.ampdoc.getRootNode();
+            const responses = this.combinedResponses();
+            return this.applyAuthorizationToRoot_(root, responses);
+          });
+        });
       }
     });
   }
