@@ -1031,7 +1031,7 @@ describe('amp-a4a', () => {
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, null)).to.be.true;
+              a4a, {})).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(getAdUrlSpy.calledWith(rtcResponse)).to.be.true;
@@ -2232,8 +2232,8 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   });
 
   describe('#getCustomRealTimeConfigMacros_', () => {
-    it('should return null', () => {
-      expect(a4a.getCustomRealTimeConfigMacros_()).to.be.null;
+    it('should return empty object', () => {
+      expect(a4a.getCustomRealTimeConfigMacros_()).to.deep.equal({});
     });
   });
 });
