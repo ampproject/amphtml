@@ -55,26 +55,28 @@ export class InaboxHost {
           win[INABOX_IFRAMES]);
       win[INABOX_IFRAMES] = [];
     }
-    const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
+    try {
+      const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
 
-    const queuedMsgs = win[PENDING_MESSAGES];
-    if (queuedMsgs) {
-      if (Array.isArray(queuedMsgs)) {
-        queuedMsgs.forEach(message => {
-          try {
-            host.processMessage(message);
-          } catch (err) {
-            dev().error(TAG, 'Error processing inabox message', message, err);
-          }
-        });
-      } else {
-        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+      const queuedMsgs = win[PENDING_MESSAGES];
+      if (queuedMsgs) {
+        if (Array.isArray(queuedMsgs)) {
+          queuedMsgs.forEach(message => {
+            try {
+              host.processMessage(message);
+            } catch (err) {
+              dev().error(TAG, 'Error processing inabox message', message, err);
+            }
+          });
+        } else {
+          dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+        }
       }
-    }
-    // Empty and ensure that future messages are no longer stored in the array.
-    win[PENDING_MESSAGES] = [];
-    win[PENDING_MESSAGES]['push'] = () => {};
-    win.addEventListener('message', host.processMessage.bind(host));
+      // Empty and ensure that future messages are no longer stored in the array.
+      win[PENDING_MESSAGES] = [];
+      win[PENDING_MESSAGES]['push'] = () => {};
+      win.addEventListener('message', host.processMessage.bind(host));
+    } catch (unused) {}
   }
 }
 
