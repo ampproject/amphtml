@@ -108,6 +108,7 @@ describes.fakeWin('VariableSource', {
     it('Works with whitelisted variables', () => {
       variableSource.setAsync('ABCD', () => Promise.resolve('abcd'));
       expect(variableSource.getExpr()).to.be.ok;
+      expect(variableSource.getExpr().toString()).to.contain('ABCD');
 
       return variableSource.get('ABCD')['async']().then(value => {
         expect(value).to.equal('abcd');
@@ -117,8 +118,11 @@ describes.fakeWin('VariableSource', {
     it('Should not work with unwhitelisted variables', () => {
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;
+      expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
 
-      expect(variableSource.get('RANDOM')).to.be.undefined;
+      return variableSource.get('RANDOM')['async']().then(value => {
+        expect(value).to.equal('0.1234');
+      });
     });
 
   });

@@ -136,34 +136,6 @@ export class VariableSource {
   }
 
   /**
-   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
-   *     a meta tag).
-   * @private
-   */
-  getVariableWhitelist_() {
-    if (this.variableWhitelist_) {
-      return this.variableWhitelist_;
-    }
-
-    const head = this.ampdoc.getRootNode().head;
-    if (!head) {
-      return null;
-    }
-
-    // A meta[name="amp-variable-substitution-whitelist"] tag, if present,
-    // contains, in its content attribute, a whitelist of variable substitution.
-    const meta =
-      head.querySelector('meta[name="amp-variable-substitution-whitelist"]');
-    if (!meta) {
-      return null;
-    }
-
-    this.variableWhitelist_ = meta.getAttribute('content').split(',')
-        .map(variable => variable.trim());
-    return this.variableWhitelist_;
-  }
-
-  /**
    * Lazily initialize the default replacements.
    * @private
    */
@@ -204,10 +176,6 @@ export class VariableSource {
    */
   set(varName, syncResolver) {
     dev().assert(varName.indexOf('RETURN') == -1);
-    if (!this.isWhitelisted_(varName)) {
-      return this;
-    }
-
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
@@ -228,9 +196,6 @@ export class VariableSource {
    */
   setAsync(varName, asyncResolver) {
     dev().assert(varName.indexOf('RETURN') == -1);
-    if (!this.isWhitelisted_(varName)) {
-      return this;
-    }
     this.replacements_[varName] =
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
@@ -316,6 +281,34 @@ export class VariableSource {
       regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
     }
     return new RegExp(regexStr, 'g');
+  }
+
+  /**
+   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
+   *     a meta tag).
+   * @private
+   */
+  getVariableWhitelist_() {
+    if (this.variableWhitelist_) {
+      return this.variableWhitelist_;
+    }
+
+    const head = this.ampdoc.getRootNode().head;
+    if (!head) {
+      return null;
+    }
+
+    // A meta[name="amp-variable-substitution-whitelist"] tag, if present,
+    // contains, in its content attribute, a whitelist of variable substitution.
+    const meta =
+      head.querySelector('meta[name="amp-variable-substitution-whitelist"]');
+    if (!meta) {
+      return null;
+    }
+
+    this.variableWhitelist_ = meta.getAttribute('content').split(',')
+        .map(variable => variable.trim());
+    return this.variableWhitelist_;
   }
 
   /**
