@@ -27,6 +27,8 @@ function AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl() {};
 /** @constructor */
 function AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a() {};
 /** @constructor */
+function AmpAdNetworkBase$$module$extensions$amp_ad_network_base$0_1$amp_ad_network_base() {};
+/** @constructor */
 function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Long list of, uhm, stuff the ads code needs to compile.

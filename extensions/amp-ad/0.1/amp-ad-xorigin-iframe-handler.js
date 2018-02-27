@@ -44,7 +44,7 @@ const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 export class AmpAdXOriginIframeHandler {
 
   /**
-   * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
+   * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A|!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseInstance
    */
   constructor(baseInstance) {
     /** @private {!Window} */

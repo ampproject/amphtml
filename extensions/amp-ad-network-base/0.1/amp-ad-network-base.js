@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAdUIHandler} from '../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   LayoutInfoDef,
   getAmpAdMetadata, // eslint-disable-line no-unused-vars
@@ -69,6 +70,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * false, and has an actual value set in onLayoutMeasure.
      */
     this.isStale_ = () => false;
+
+    /** {?AMP.AmpAdUIHandler} */
+    this.uiHandler = null;
   }
 
   /**
@@ -106,10 +110,35 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * Called at various lifecycle stages. Can be overwitten by implementing
+   * networks to handle lifecycle event.
+   */
+  emitLifecycleEvent() {}
+
+  /**
    * Collapses slot by setting its size to 0x0.
    */
   forceCollapse() {
+    dev().assert(this.uiHandler);
+    this.uiHandler.applyNoContentUI();
     super.attemptChangeSize(0, 0);
+  }
+
+  /**
+   * Returns context data necessary to render creative in cross-domain
+   * NameFrame.
+   * @return {!JsonObject}
+   */
+  getCrossDomainContextData() {
+    return /** @type {!JsonObject} */ ({});
+  }
+
+  /**
+   * Returns sentinel value necessary for interframe communicaiton.
+   * @return {?string}
+   */
+  getCrossDomainSentinel() {
+    return null;
   }
 
   /**
@@ -148,6 +177,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     const creative = validatorOutput.creative;
     return /** @type {!RendererInputDef} */ ({
       creativeMetadata: getAmpAdMetadataMock(creative, TAG, ''),
+      templateData: null,
+      crossDomainData: {
+        rawCreativeBytes: this.unvalidatedBytes_,
+        additionalContextMetadata: this.getCrossDomainContextData(),
+        sentinel: this.getCrossDomainSentinel(),
+      },
+      unvalidatedBytes: this.unvalidatedBytes_,
       // TODO(levitzky) This may change based on the ad response.
       size: this.initialSize_,
       adUrl: this.expandedAdUrl_ ? this.expandedAdUrl_ : this.adUrl_,
@@ -189,7 +225,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleStaleExecution() {}
 
-
   /**
    * Processes validator response and delegates further action to appropriate
    *   renderer.
@@ -209,6 +244,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         'Renderer for AMP creatives never bound!');
     this.boundRenderers_[validatedResponse.result](
         this.getRenderingDataInput_(validatedResponse), this);
+  }
+
+
+  resetInstance() {
+    this.freshnessId_++;
+    this.uiHandler.applyUnlayoutUI();
+  }
+
+  /** @override */
+  buildCallback() {
+    this.uiHandler = new AMP.AmpAdUIHandler(this);
   }
 
   /** @override */
