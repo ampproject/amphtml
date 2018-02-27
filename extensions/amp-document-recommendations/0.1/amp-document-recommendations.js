@@ -19,10 +19,14 @@ import {Layout} from '../../../src/layout';
 import {MultidocManager} from '../../../src/runtime';
 import {Services} from '../../../src/services';
 import {assertConfig} from './config';
+import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
+
+/** @const */
+const TAG = 'amp-document-recommendations';
 
 /** @const */
 const MAX_ARTICLES = 2;
@@ -167,6 +171,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment ${TAG} disabled`);
+
     if (activeInstance_ !== this) {
       return Promise.resolve();
     }
@@ -213,5 +220,4 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(
-    'amp-document-recommendations', AmpDocumentRecommendations, CSS);
+AMP.registerElement(TAG, AmpDocumentRecommendations, CSS);

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-.i-amphtml-document-recommendations {
-  background: #FFFFFF;
-}
-
 .amp-document-recommendations-division {
   border-bottom: 1px solid rgba(0,0,0,0.12);
 }
@@ -29,6 +25,10 @@
   color: #3c4043;
   font-family: sans-serif;
   font-size: 17px;
+}
+
+.i-amphtml-document-recommendations {
+  background: #FFFFFF;
 }
 
 .i-amphtml-reco-holder-article {
