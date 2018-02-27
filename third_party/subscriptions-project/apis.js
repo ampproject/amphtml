@@ -21,7 +21,7 @@
 /**
  * The holder of the entitlements for a service.
  */
-class Entitlements {
+export class Entitlements {
 
   /**
    * @param {string} service
@@ -119,7 +119,7 @@ class Entitlements {
 /**
  * The single entitlement object.
  */
-class Entitlement {
+export class Entitlement {
 
   /**
    * @param {string} source
@@ -197,8 +197,3 @@ class Entitlement {
 
 
 
-
-export {
-  Entitlements,
-  Entitlement,
-};
