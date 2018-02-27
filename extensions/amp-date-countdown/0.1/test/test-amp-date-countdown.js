@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDateCountdown} from '../amp-date-countdown';
+//import {AmpDateCountdown} from '../amp-date-countdown';
 
 describes.realWin('amp-date-countdown', {
   amp: {
     extensions: ['amp-date-countdown'],
-  }
+  },
 }, env => {
 
   let win;
@@ -29,10 +29,5 @@ describes.realWin('amp-date-countdown', {
     win = env.win;
     element = win.document.createElement('amp-date-countdown');
     win.document.body.appendChild(element);
-  });
-
-  it('should have run test when built', () => {
-    // element.build();
-    // expect(element.querySelector('div').textContent).to.equal('hello world');
   });
 });
