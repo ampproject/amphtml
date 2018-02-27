@@ -413,7 +413,7 @@ export function adoptShadowMode(global) {
 /**
  * A manager for documents in the multi-doc environment.
  */
-class MultidocManager {
+export class MultidocManager {
 
   /**
    * @param {!Window} win

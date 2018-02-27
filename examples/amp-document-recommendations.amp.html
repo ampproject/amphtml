@@ -1,0 +1,146 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP document recommendations examples</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-document-recommendations" src="https://cdn.ampproject.org/v0/amp-document-recommendations-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <style amp-custom>
+    .amp-document-recommendations-text {
+      font-family: serif;
+    }
+  </style>
+</head>
+<body>
+  <amp-analytics>
+    <script type="application/json">
+    {
+      "requests": {
+        "documentrecommendations": "https://foo.com/pixel?RANDOM&toURL=${toURL}"
+      },
+      "triggers": {
+        "trackScrollThrough": {
+          "on": "amp-document-recommendations-scroll",
+          "request": "documentrecommendations"
+        },
+        "trackClickThrough": {
+          "on": "amp-document-recommendations-click",
+          "request": "documentrecommendations"
+        }        
+      }
+    }
+    </script>
+  </amp-analytics>
+
+<h2>Content discovery</h2>
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis cursus libero magna imperdiet purus. In condimentum vehicula est, nec varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+</p>
+<p>
+Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique. Integer eleifend diam vel nunc porttitor sollicitudin. Aliquam quis ullamcorper tortor. Morbi et dui vitae elit finibus sodales. Donec pharetra tincidunt neque, eget sagittis nisi sodales vel. Duis elit massa, malesuada a rhoncus sed, bibendum nec velit. Duis iaculis magna suscipit felis fermentum accumsan. Nunc venenatis pellentesque magna at tincidunt. Mauris nec placerat augue, eu auctor elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum pretium ligula diam, a eleifend lectus porttitor non. Integer vitae tempus enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non, consectetur enim.
+</p>
+<p>
+Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla nisl, ullamcorper et hendrerit vel, sagittis sit amet ex. Mauris a enim in sem feugiat mollis in eu lorem. Quisque finibus a diam ut facilisis. Sed ultricies massa ut urna dapibus semper. Integer id nunc dictum, luctus ligula eu, bibendum ex. Etiam tincidunt sapien ut lorem pharetra feugiat. Aliquam erat volutpat. Sed vehicula tincidunt mauris, vitae cursus nisl. Nulla imperdiet ex at venenatis dignissim.
+</p>
+<p>
+Sed pretium sed ex eu varius. Praesent sapien purus, tincidunt at dolor ac, porttitor fermentum enim. Morbi rhoncus quam eu lorem ultrices, vitae tempor felis volutpat. Suspendisse auctor, quam quis suscipit dictum, felis lectus imperdiet velit, a faucibus quam diam et risus. Etiam varius in arcu sed cursus. Praesent pulvinar enim nibh, eu euismod ante pretium et. Pellentesque nec vestibulum eros. Praesent nec venenatis ipsum. Duis pharetra suscipit mauris quis dictum. Pellentesque sed porttitor tellus. Aenean rutrum blandit est in tincidunt. Nulla ante orci, pellentesque id imperdiet at, posuere quis dui. Cras fringilla lobortis lectus. Mauris vitae convallis orci. Mauris sodales faucibus nulla vitae posuere.
+</p>
+<p>
+Donec vehicula nisi eget metus blandit, at semper nunc porttitor. Vestibulum sit amet posuere risus, at mattis nibh. Maecenas ultricies scelerisque nibh et feugiat. Praesent mattis, nibh viverra consequat rhoncus, turpis leo venenatis orci, vitae mollis libero magna eget massa. In dapibus, metus sit amet venenatis finibus, lacus metus rhoncus massa, sit amet mattis tortor massa vitae nunc. Mauris a enim sagittis, condimentum tortor vitae, egestas nulla. Ut dictum laoreet sapien non blandit. Etiam fermentum, magna et tincidunt maximus, ex orci sollicitudin felis, ut dapibus orci ipsum quis leo. Nam accumsan tortor sit amet orci gravida, eget dapibus metus dapibus. Fusce congue ultrices dignissim. Duis quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit rhoncus. Fusce commodo risus id sapien ultrices vehicula.
+</p>
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis cursus libero magna imperdiet purus. In condimentum vehicula est, nec varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+</p>
+<p>
+Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique. Integer eleifend diam vel nunc porttitor sollicitudin. Aliquam quis ullamcorper tortor. Morbi et dui vitae elit finibus sodales. Donec pharetra tincidunt neque, eget sagittis nisi sodales vel. Duis elit massa, malesuada a rhoncus sed, bibendum nec velit. Duis iaculis magna suscipit felis fermentum accumsan. Nunc venenatis pellentesque magna at tincidunt. Mauris nec placerat augue, eu auctor elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum pretium ligula diam, a eleifend lectus porttitor non. Integer vitae tempus enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non, consectetur enim.
+</p>
+<p>
+Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla nisl, ullamcorper et hendrerit vel, sagittis sit amet ex. Mauris a enim in sem feugiat mollis in eu lorem. Quisque finibus a diam ut facilisis. Sed ultricies massa ut urna dapibus semper. Integer id nunc dictum, luctus ligula eu, bibendum ex. Etiam tincidunt sapien ut lorem pharetra feugiat. Aliquam erat volutpat. Sed vehicula tincidunt mauris, vitae cursus nisl. Nulla imperdiet ex at venenatis dignissim.
+</p>
+<p>
+Sed pretium sed ex eu varius. Praesent sapien purus, tincidunt at dolor ac, porttitor fermentum enim. Morbi rhoncus quam eu lorem ultrices, vitae tempor felis volutpat. Suspendisse auctor, quam quis suscipit dictum, felis lectus imperdiet velit, a faucibus quam diam et risus. Etiam varius in arcu sed cursus. Praesent pulvinar enim nibh, eu euismod ante pretium et. Pellentesque nec vestibulum eros. Praesent nec venenatis ipsum. Duis pharetra suscipit mauris quis dictum. Pellentesque sed porttitor tellus. Aenean rutrum blandit est in tincidunt. Nulla ante orci, pellentesque id imperdiet at, posuere quis dui. Cras fringilla lobortis lectus. Mauris vitae convallis orci. Mauris sodales faucibus nulla vitae posuere.
+</p>
+<p>
+Donec vehicula nisi eget metus blandit, at semper nunc porttitor. Vestibulum sit amet posuere risus, at mattis nibh. Maecenas ultricies scelerisque nibh et feugiat. Praesent mattis, nibh viverra consequat rhoncus, turpis leo venenatis orci, vitae mollis libero magna eget massa. In dapibus, metus sit amet venenatis finibus, lacus metus rhoncus massa, sit amet mattis tortor massa vitae nunc. Mauris a enim sagittis, condimentum tortor vitae, egestas nulla. Ut dictum laoreet sapien non blandit. Etiam fermentum, magna et tincidunt maximus, ex orci sollicitudin felis, ut dapibus orci ipsum quis leo. Nam accumsan tortor sit amet orci gravida, eget dapibus metus dapibus. Fusce congue ultrices dignissim. Duis quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit rhoncus. Fusce commodo risus id sapien ultrices vehicula.
+</p>
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis cursus libero magna imperdiet purus. In condimentum vehicula est, nec varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+</p>
+<p>
+Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique. Integer eleifend diam vel nunc porttitor sollicitudin. Aliquam quis ullamcorper tortor. Morbi et dui vitae elit finibus sodales. Donec pharetra tincidunt neque, eget sagittis nisi sodales vel. Duis elit massa, malesuada a rhoncus sed, bibendum nec velit. Duis iaculis magna suscipit felis fermentum accumsan. Nunc venenatis pellentesque magna at tincidunt. Mauris nec placerat augue, eu auctor elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum pretium ligula diam, a eleifend lectus porttitor non. Integer vitae tempus enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non, consectetur enim.
+</p>
+<p>
+Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla nisl, ullamcorper et hendrerit vel, sagittis sit amet ex. Mauris a enim in sem feugiat mollis in eu lorem. Quisque finibus a diam ut facilisis. Sed ultricies massa ut urna dapibus semper. Integer id nunc dictum, luctus ligula eu, bibendum ex. Etiam tincidunt sapien ut lorem pharetra feugiat. Aliquam erat volutpat. Sed vehicula tincidunt mauris, vitae cursus nisl. Nulla imperdiet ex at venenatis dignissim.
+</p>
+<p>
+Sed pretium sed ex eu varius. Praesent sapien purus, tincidunt at dolor ac, porttitor fermentum enim. Morbi rhoncus quam eu lorem ultrices, vitae tempor felis volutpat. Suspendisse auctor, quam quis suscipit dictum, felis lectus imperdiet velit, a faucibus quam diam et risus. Etiam varius in arcu sed cursus. Praesent pulvinar enim nibh, eu euismod ante pretium et. Pellentesque nec vestibulum eros. Praesent nec venenatis ipsum. Duis pharetra suscipit mauris quis dictum. Pellentesque sed porttitor tellus. Aenean rutrum blandit est in tincidunt. Nulla ante orci, pellentesque id imperdiet at, posuere quis dui. Cras fringilla lobortis lectus. Mauris vitae convallis orci. Mauris sodales faucibus nulla vitae posuere.
+</p>
+<p>
+Donec vehicula nisi eget metus blandit, at semper nunc porttitor. Vestibulum sit amet posuere risus, at mattis nibh. Maecenas ultricies scelerisque nibh et feugiat. Praesent mattis, nibh viverra consequat rhoncus, turpis leo venenatis orci, vitae mollis libero magna eget massa. In dapibus, metus sit amet venenatis finibus, lacus metus rhoncus massa, sit amet mattis tortor massa vitae nunc. Mauris a enim sagittis, condimentum tortor vitae, egestas nulla. Ut dictum laoreet sapien non blandit. Etiam fermentum, magna et tincidunt maximus, ex orci sollicitudin felis, ut dapibus orci ipsum quis leo. Nam accumsan tortor sit amet orci gravida, eget dapibus metus dapibus. Fusce congue ultrices dignissim. Duis quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit rhoncus. Fusce commodo risus id sapien ultrices vehicula.
+</p>
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis cursus libero magna imperdiet purus. In condimentum vehicula est, nec varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+</p>
+<p>
+Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique. Integer eleifend diam vel nunc porttitor sollicitudin. Aliquam quis ullamcorper tortor. Morbi et dui vitae elit finibus sodales. Donec pharetra tincidunt neque, eget sagittis nisi sodales vel. Duis elit massa, malesuada a rhoncus sed, bibendum nec velit. Duis iaculis magna suscipit felis fermentum accumsan. Nunc venenatis pellentesque magna at tincidunt. Mauris nec placerat augue, eu auctor elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum pretium ligula diam, a eleifend lectus porttitor non. Integer vitae tempus enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non, consectetur enim.
+</p>
+<p>
+Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla nisl, ullamcorper et hendrerit vel, sagittis sit amet ex. Mauris a enim in sem feugiat mollis in eu lorem. Quisque finibus a diam ut facilisis. Sed ultricies massa ut urna dapibus semper. Integer id nunc dictum, luctus ligula eu, bibendum ex. Etiam tincidunt sapien ut lorem pharetra feugiat. Aliquam erat volutpat. Sed vehicula tincidunt mauris, vitae cursus nisl. Nulla imperdiet ex at venenatis dignissim.
+</p>
+<p>
+Sed pretium sed ex eu varius. Praesent sapien purus, tincidunt at dolor ac, porttitor fermentum enim. Morbi rhoncus quam eu lorem ultrices, vitae tempor felis volutpat. Suspendisse auctor, quam quis suscipit dictum, felis lectus imperdiet velit, a faucibus quam diam et risus. Etiam varius in arcu sed cursus. Praesent pulvinar enim nibh, eu euismod ante pretium et. Pellentesque nec vestibulum eros. Praesent nec venenatis ipsum. Duis pharetra suscipit mauris quis dictum. Pellentesque sed porttitor tellus. Aenean rutrum blandit est in tincidunt. Nulla ante orci, pellentesque id imperdiet at, posuere quis dui. Cras fringilla lobortis lectus. Mauris vitae convallis orci. Mauris sodales faucibus nulla vitae posuere.
+</p>
+<p>
+Donec vehicula nisi eget metus blandit, at semper nunc porttitor. Vestibulum sit amet posuere risus, at mattis nibh. Maecenas ultricies scelerisque nibh et feugiat. Praesent mattis, nibh viverra consequat rhoncus, turpis leo venenatis orci, vitae mollis libero magna eget massa. In dapibus, metus sit amet venenatis finibus, lacus metus rhoncus massa, sit amet mattis tortor massa vitae nunc. Mauris a enim sagittis, condimentum tortor vitae, egestas nulla. Ut dictum laoreet sapien non blandit. Etiam fermentum, magna et tincidunt maximus, ex orci sollicitudin felis, ut dapibus orci ipsum quis leo. Nam accumsan tortor sit amet orci gravida, eget dapibus metus dapibus. Fusce congue ultrices dignissim. Duis quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit rhoncus. Fusce commodo risus id sapien ultrices vehicula.
+</p>
+<p>
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque varius. Nam pulvinar dui a tortor hendrerit, id iaculis elit auctor. Nam dapibus felis in gravida ornare. Nulla varius id mauris sed venenatis. Sed turpis ex, aliquet nec fermentum eget, sollicitudin non est. Suspendisse tincidunt ornare tortor, at vehicula orci aliquam a. Aliquam eleifend odio quis quam dignissim posuere. Proin ac dolor rhoncus, consectetur ipsum non, dictum est. Nam sollicitudin est eu est aliquet eleifend. Duis condimentum, nisl eu finibus auctor, lectus odio fringilla nisi, quis cursus libero magna imperdiet purus. In condimentum vehicula est, nec varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
+</p>
+<p>
+Donec vehicula nisi eget metus blandit, at semper nunc porttitor. Vestibulum sit amet posuere risus, at mattis nibh. Maecenas ultricies scelerisque nibh et feugiat. Praesent mattis, nibh viverra consequat rhoncus, turpis leo venenatis orci, vitae mollis libero magna eget massa. In dapibus, metus sit amet venenatis finibus, lacus metus rhoncus massa, sit amet mattis tortor massa vitae nunc. Mauris a enim sagittis, condimentum tortor vitae, egestas nulla. Ut dictum laoreet sapien non blandit. Etiam fermentum, magna et tincidunt maximus, ex orci sollicitudin felis, ut dapibus  orci ipsum quis leo. Nam accumsan tortor sit amet orci gravida, eget dapibus metus dapibus. Fusce congue ultrices dignissim. Duis quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit rhoncus. Fusce commodo risus id sapien ultrices vehicula.
+</p>
+  <amp-document-recommendations>
+    <script type='application/json'>
+      {
+        "recommendations": [
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one another article",
+            "ampUrl": "/examples/article-parallax.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This article has fixed position elements",
+            "ampUrl": "/examples/article-fixed-header.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one another article with a very very very very long title",
+            "ampUrl": "/examples/amp-document-recommendations.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is one article",
+            "ampUrl": "/examples/article.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is some article",
+            "ampUrl": "/examples/article.amp.html"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "This is yet another article",
+            "ampUrl": "/examples/article.amp.html"
+          }
+        ]
+      }
+    </script>
+  </amp-document-recommendations>
+</body>
+</html>
