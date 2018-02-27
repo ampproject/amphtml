@@ -42,6 +42,7 @@ export class EntitlementStore {
 
     /** @private {?Promise<!Object<string, !Entitlements>>} */
     this.allResolvedPromise_ = null;
+
   }
 
   /**
@@ -73,7 +74,6 @@ export class EntitlementStore {
     }
 
     this.grantStatusPromise_ = new Promise(resolve => {
-      const entitlementsResolved = Object.keys(this.entitlements_).length;
 
       // Check if current entitlements unblocks the reader
       for (const key in this.entitlements_) {
@@ -83,7 +83,7 @@ export class EntitlementStore {
         }
       }
 
-      if (entitlementsResolved === this.serviceIds_.length) {
+      if (this.areAllPlatformsResolved_()) {
         // Resolve with null if non of the entitlements unblocks the reader
         return resolve(false);
       } else {
@@ -101,10 +101,65 @@ export class EntitlementStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<Entitlements>}
+   * @private
+   * @returns {!Promise<!Array<!Entitlements>>}
    */
-  getAllPlatformsEntitlement() {
-    // TODO(@prateekbh): implement this.
+  getAllPlatformsEntitlements_() {
+    if (this.allResolvedPromise_) {
+      return this.allResolvedPromise_;
+    }
+
+    this.allResolvedPromise_ = new Promise(resolve => {
+      if (this.areAllPlatformsResolved_()) {
+        // Resolve with null if non of the entitlements unblocks the reader
+        return resolve(Object.values(this.entitlements_));
+      } else {
+        // Listen if any upcoming entitlements unblock the reader
+        this.onChange(() => {
+          if (this.areAllPlatformsResolved_()) {
+            resolve(Object.values(this.entitlements_));
+          }
+        });
+      }
+    });
+
+    return this.allResolvedPromise_;
+  }
+
+  /**
+   * Returns entitlements when all services are done fetching them.
+   * @returns {!Promise<!Entitlements>}
+   */
+  selectPlatform() {
+    return this.getAllPlatformsEntitlements_().then(entitlements => {
+      return this.selectApplicablePlatform_(entitlements);
+    });
+  }
+
+  /**
+   * Returns the number of entitlements resolved
+   * @returns {boolean}
+   * @private
+   */
+  areAllPlatformsResolved_() {
+    const entitlementsResolved = Object.keys(this.entitlements_).length;
+    return entitlementsResolved === this.serviceIds_.length;
+  }
+
+  /**
+   * Returns most qualified platform
+   * @param {!List<!Entitlements>} platforms
+   * @returns {!Entitlements}
+   */
+  selectApplicablePlatform_(platforms) {
+    let chosenPlatform;
+    platforms.forEach(platform => {
+      // TODO(@prateekbh): add metering logic here
+      if (platform.enablesThis()) {
+        chosenPlatform = platform;
+      }
+    });
+    return chosenPlatform;
   }
 }
 

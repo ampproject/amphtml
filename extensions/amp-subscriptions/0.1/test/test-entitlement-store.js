@@ -96,5 +96,34 @@ describes.realWin('entitlement-store', {}, () => {
           });
     });
   });
+
+  describe('areAllPlatformsResolved_', () => {
+    it('should return true if all entitlements are present', () => {
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(false);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(true);
+    });
+  });
+
+  describe('selectPlatform', () => {
+    it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
+        + 'is true', done => {
+      const fakeResult = [entitlementsForService1, entitlementsForService2];
+      const getAllPlatformsStub = sandbox.stub(entitlementStore,
+          'getAllPlatformsEntitlements_').callsFake(
+          () => Promise.resolve(fakeResult));
+      const selectApplicablePlatformSpy = sandbox.stub(entitlementStore,
+          'selectApplicablePlatform_').callsFake(() => Promise.resolve());
+      entitlementStore.selectPlatform().then(() => {
+        expect(getAllPlatformsStub).to.be.calledOnce;
+        expect(selectApplicablePlatformSpy).to.be.calledWith(fakeResult);
+        done();
+      });
+    });
+  });
+
 });
 
