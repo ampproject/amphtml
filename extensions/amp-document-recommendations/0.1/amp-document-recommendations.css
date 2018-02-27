@@ -1,0 +1,59 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software'
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.amp-document-recommendations-division {
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+.amp-document-recommendations-image {
+}
+
+.amp-document-recommendations-text {
+  color: #3c4043;
+  font-family: sans-serif;
+  font-size: 17px;
+}
+
+.i-amphtml-document-recommendations {
+  background: #FFFFFF;
+}
+
+.i-amphtml-reco-holder-article {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 92px;
+  width: 100%;
+}
+
+.i-amphtml-next-article-image {
+  width: 72px;
+  height: 72px;
+  float: left;
+  margin-left: 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.i-amphtml-next-article-title {
+  position: relative;
+  left: 10px;
+  top: 5px;
+  height: 60px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-right: 30px;
+  text-align: left;
+}
