@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAdUIHandler} from '../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
   LayoutInfoDef,
   getAmpAdMetadata,
@@ -27,6 +28,7 @@ import {
   ValidatorResultType, // eslint-disable-line no-unused-vars
 } from '../../amp-a4a/0.1/a4a-render';
 import {dev} from '../../../src/log';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 const TAG = 'amp-ad-network-base';
 
@@ -57,9 +59,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       height: element.getAttribute('height'),
     };
 
-    /** @private {string} @const */
-    this.networkType_ = element.getAttribute('type') || 'anon';
-
     /**
      * @private {number} unique ID of the currently executing promise to allow
      * for cancellation.
@@ -71,6 +70,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * false, and has an actual value set in onLayoutMeasure.
      */
     this.isStale_ = () => false;
+
+    /** {?AMP.AmpAdUIHandler} */
+    this.uiHandler = null;
   }
 
   /**
@@ -108,10 +110,35 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * Called at various lifecycle stages. Can be overwitten by implementing
+   * networks to handle lifecycle event.
+   */
+  emitLifecycleEvent() {}
+
+  /**
    * Collapses slot by setting its size to 0x0.
    */
   forceCollapse() {
+    dev().assert(this.uiHandler);
+    this.uiHandler.applyNoContentUI();
     super.attemptChangeSize(0, 0);
+  }
+
+  /**
+   * Returns context data necessary to render creative in cross-domain
+   * NameFrame.
+   * @return {!JsonObject}
+   */
+  getCrossDomainContextData() {
+    return /** @type {!JsonObject} */ ({});
+  }
+
+  /**
+   * Returns sentinel value necessary for interframe communicaiton.
+   * @return {?string}
+   */
+  getCrossDomainSentinel() {
+    return null;
   }
 
   /**
@@ -149,7 +176,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   getRenderingDataInput_(validatorOutput) {
     const creative = validatorOutput.creative;
     return /** @type {!RendererInputDef} */ ({
-      creativeMetadata: getAmpAdMetadata(creative, TAG, this.networkType_),
+      creativeMetadata: getAmpAdMetadata(creative, TAG, ''),
+      templateData: null,
+      crossDomainData: {
+        rawCreativeBytes: this.unvalidatedBytes_,
+        additionalContextMetadata: this.getCrossDomainContextData(),
+        sentinel: this.getCrossDomainSentinel(),
+      },
+      unvalidatedBytes: this.unvalidatedBytes_,
       // TODO(levitzky) This may change based on the ad response.
       size: this.initialSize_,
       adUrl: this.expandedAdUrl_ ? this.expandedAdUrl_ : this.adUrl_,
@@ -191,7 +225,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleStaleExecution() {}
 
-
   /**
    * Processes validator response and delegates further action to appropriate
    *   renderer.
@@ -211,6 +244,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         'Renderer for AMP creatives never bound!');
     this.boundRenderers_[validatedResponse.result](
         this.getRenderingDataInput_(validatedResponse), this);
+  }
+
+
+  resetInstance() {
+    this.freshnessId_++;
+    this.uiHandler.applyUnlayoutUI();
+  }
+
+  /** @override */
+  buildCallback() {
+    this.uiHandler = new AMP.AmpAdUIHandler(this);
   }
 
   /** @override */
@@ -237,3 +281,4 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkBase);
 });
+
