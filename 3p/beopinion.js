@@ -100,7 +100,7 @@ function getBeOpinionAsyncInit(global, accountId) {
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });
-    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation on Travis
+    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation
   };
 }
 

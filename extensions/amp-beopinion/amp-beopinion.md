@@ -14,6 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# BeOpinion
+[BeOpinion](https://beopinion.com/) is a tool for content creators to add interactive blocks such as polls and quizzes in their pages. We mostly work with journalists of major media groups in Europe.
+We created an AMP extension usable with the `amp-beopinion` tag.
+We also added type `beopinion` for the `amp-ad` element.
+
+# Integration examples
+
+## As a 3rd party
+```html
+<amp-beopinion width=375 height=472
+      layout="responsive"
+      data-account="589446dd42ee0d6fdd9c3dfd"
+      data-content="5a703a2f46e0fb00016d51b3"
+      data-name="content-slot">
+</amp-beopinion>
+```
+
+## As an ad provider
+```html
+<amp-ad width="300" height="220"
+      type="beopinion"
+      layout="responsive"
+      data-account="589446dd42ee0d6fdd9c3dfd"
+      data-name="slot_0"
+      data-my-content="0">
+</amp-ad>
+```
+
 # <a name="amp-beopinion"></a> `amp-beopinion`
 
 <table>
