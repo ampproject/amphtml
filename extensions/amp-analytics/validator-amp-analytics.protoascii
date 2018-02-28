@@ -18,6 +18,7 @@
 tags: {  # amp-analytics
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-analytics"
@@ -31,6 +32,7 @@ tags: {  # amp-analytics
 tags: {  # amp-analytics (json)
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   requires_extension: "amp-analytics"
@@ -53,6 +55,7 @@ tags: {  # amp-analytics (json)
 tags: {  # <amp-analytics>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANALYTICS"
   requires_extension: "amp-analytics"
   attrs: { name: "type" }

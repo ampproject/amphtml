@@ -17,6 +17,7 @@
 tags: {  # amp-position-observer
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-position-observer"
@@ -28,6 +29,7 @@ tags: {  # amp-position-observer
 tags: {  # <amp-position-observer>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-POSITION-OBSERVER"
   requires_extension: "amp-position-observer"
   attrs: {

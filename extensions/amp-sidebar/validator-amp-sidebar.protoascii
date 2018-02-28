@@ -15,6 +15,7 @@
 #
 tags: {  # amp-sidebar
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-sidebar"
@@ -39,6 +40,7 @@ tags: {  # amp-sidebar
 tags: {  # <amp-sidebar>
   html_format: AMP
   html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "AMP-SIDEBAR"
   mandatory_parent: "BODY"
   requires_extension: "amp-sidebar"
@@ -54,6 +56,7 @@ tags: {  # <amp-sidebar>
 tags: {  # amp-sidebar > nav
   html_format: AMP
   html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "NAV"
   spec_name: "amp-sidebar > nav"
   mandatory_parent: "AMP-SIDEBAR"
