@@ -25,6 +25,7 @@ import {dev, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {Pass} from '../../../src/pass';
 import {removeChildren} from '../../../src/dom';
 
 /** @const {string} */
@@ -45,6 +46,12 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
+
+    /** @const @private {!../../../src/pass.Pass} */
+    this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
+
+    /** @const @private {!Array<{resolver:!Function, items:!Array>}} */
+    this.renderQueue_ = [];
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
@@ -117,7 +124,7 @@ export class AmpList extends AMP.BaseElement {
         }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
-        this.renderItems_(items);
+        this.scheduleRender_(items);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
       } else {
@@ -125,7 +132,7 @@ export class AmpList extends AMP.BaseElement {
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
-      this.renderItems_(items);
+      this.scheduleRender_(items);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
@@ -179,7 +186,7 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.renderItems_(items);
+      return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     });
@@ -190,12 +197,27 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  renderItems_(items) {
+  scheduleRender_(items) {
     user().error(TAG, 'A');
 
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
+    let resolver;
+    const promise = new Promise(resolve => {
+      resolver = resolve;
+    });
+    this.renderQueue_.push({resolver, items});
+    this.renderPass_.schedule();
+    return promise;
+  }
+
+  /**
+   * @private
+   */
+  doRenderPass_() {
+    const {resolver, items} = this.renderQueue_.shift();
+    this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindings_(elements))
-        .then(elements => this.rendered_(elements));
+        .then(elements => this.rendered_(elements))
+        .then(() => resolver());
   }
 
   /**
