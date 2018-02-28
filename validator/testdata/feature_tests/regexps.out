@@ -29,7 +29,7 @@ FAIL
 >>   ^~~~~~~~~
 feature_tests/regexps.html:27:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
 >>   ^~~~~~~~~
-feature_tests/regexps.html:27:2 The mandatory text (CDATA) inside tag 'head > style[amp-boilerplate] - old variant' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/regexps.html:27:2 The mandatory text inside tag 'head > style[amp-boilerplate] - old variant' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  
@@ -46,7 +46,7 @@ feature_tests/regexps.html:36:2 The attribute 'src' in tag 'amp-vine extension .
 feature_tests/regexps.html:37:2 The attribute 'src' in tag 'amp-vine extension .js script' is set to the invalid value 'http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://www.ampproject.org/docs/reference/components/amp-vine) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:38:2 The tag 'amp-hulu extension .js script' contains text (CDATA), which is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [DISALLOWED_HTML]
+feature_tests/regexps.html:38:2 The tag 'amp-hulu extension .js script' contains text, which is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [DISALLOWED_HTML]
 |  
 |    <!--
 |    href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
@@ -131,7 +131,7 @@ feature_tests/regexps.html:97:2 The attribute 'name' in tag 'meta name= and cont
 |    -->
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:103:2 The text (CDATA) inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:103:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }
