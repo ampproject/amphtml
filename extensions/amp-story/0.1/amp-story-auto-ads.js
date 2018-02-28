@@ -17,6 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
+import {TapRecognizer} from '../../../src/gesture-recognizers';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
@@ -40,6 +41,20 @@ const AD_TAG = 'amp-ad';
 /** @const */
 const MUSTACHE_TAG = 'amp-mustache';
 
+/** @const */
+const CTA_TYPE_ATTR = 'data-vars-ctatype';
+
+/** @const */
+const CTA_URL_ATTR = 'data-vars-ctaurl';
+
+/** @const */
+const CTA_TYPES = {
+  EXPLORE: 'Explore Now',
+  SHOP: 'Shop Now',
+  READ: 'Read Now',
+};
+
+
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -58,7 +73,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {!Object<string, boolean>} */
     this.uniquePageIds_ = dict({});
 
-    /** @private {!Array} */
+    /** @private {!Array<Element>} */
     this.adPageEls_ = [];
 
     /** @private {number} */
@@ -72,6 +87,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
+
+    /** @private {?Element} */
+    this.currentAdElement_ = null;
   }
 
   /** @override */
@@ -178,6 +196,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
+      this.maybeCreateCtaLayer_(ampStoryAdPage);
       this.isCurrentAdLoaded_ = true;
     });
 
@@ -216,8 +235,58 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         defaultAttrs, configAttrs));
 
-    return createElementWithAttributes(
+    const adElement = createElementWithAttributes(
         document, 'amp-ad', attributes);
+
+    this.currentAdElement_ = adElement;
+    return adElement;
+  }
+
+
+  /**
+   * Validate ad-server response has requirements to build outlink
+   * @param {!Element} adPageElement
+   */
+  maybeCreateCtaLayer_(adPageElement) {
+    // if making a CTA layer we need a button name & outlink url
+    const ctaUrl = this.currentAdElement_.getAttribute(CTA_URL_ATTR);
+    const ctaType = this.currentAdElement_.getAttribute(CTA_TYPE_ATTR);
+
+    if (!ctaUrl || !ctaType) {
+      dev().error(TAG, 'Both "vars.ctaType" & "vars.ctaUrl" ' +
+          'are required in ad-server JSON response."');
+    }
+
+    const ctaText = CTA_TYPES[ctaType];
+    dev().assert(ctaText, `${TAG}: the 'ctaType' returned by the ad-server` +
+        'must be one of the predefined choices.');
+    return this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
+  }
+
+
+  /**
+   * Create layer to contain outlink button
+   * @param {!Element} adPageElement
+   * @param {string} ctaText
+   * @param {string} ctaUrl
+   */
+  createCtaLayer_(adPageElement, ctaText, ctaUrl) {
+    const button = document.createElement('button');
+    button.className = 'i-amphtml-story-ad-button';
+
+    const span = document.createElement('span');
+    span.className = 'i-amphtml-story-ad-button-text';
+    span.textContent = ctaText;
+
+    const gestures = Gestures.get(button, /* shouldNotPreventDefault */ false);
+    gestures.onGesture(TapRecognizer, () => {
+      window.open(ctaUrl, '_blank');
+    });
+
+    const ctaLayer = document.createElement('amp-story-cta-layer');
+    ctaLayer.appendChild(button);
+    button.appendChild(span);
+    adPageElement.appendChild(ctaLayer);
   }
 
 

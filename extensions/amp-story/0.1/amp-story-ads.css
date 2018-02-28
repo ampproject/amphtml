@@ -1,0 +1,29 @@
+
+.i-amphtml-story-ad-button {
+  background-color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 20px;
+  bottom: 32px !important;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
+  height: 36px !important;
+  left: 50% !important;
+  margin: 0 auto !important;
+  margin-left: -60px !important;
+  position: absolute !important;
+  width: 120px !important;
+}
+
+.i-amphtml-story-ad-button-text {
+  color: #4285F4 !important;
+  font-size: 13px !important;
+  font-family: 'Roboto-Bold', sans-serif !important;
+  letter-spacing: 0.2px !important;
+}
+
+.i-amphtml-story-ad-attribution {
+  color: #FFFFFF !important;
+  font-size: 18px !important;
+  font-family: 'Roboto-Bold', sans-serif !important;
+  letter-spacing: 0.5px !important;
+}
+
