@@ -127,6 +127,19 @@ describes.realWin('entitlement-store', {}, () => {
     });
   });
 
+  describe('getAvailablePlatformsEntitlements_', () => {
+    it('should return all available entitlements', () => {
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2]);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2, entitlementsForService1]);
+    });
+  });
+
   describe('selectPlatform', () => {
     it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
         + 'is true', done => {

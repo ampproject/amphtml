@@ -40,7 +40,7 @@ export class EntitlementStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private {?Promise<!Object<string, !Entitlements>>} */
+    /** @private {?Promise<!Array<!Entitlements>>} */
     this.allResolvedPromise_ = null;
 
   }
@@ -114,18 +114,33 @@ export class EntitlementStore {
     this.allResolvedPromise_ = new Promise(resolve => {
       if (this.areAllPlatformsResolved_()) {
         // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(Object.values(this.entitlements_));
+        return resolve(this.getAvailablePlatformsEntitlements_());
       } else {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(() => {
           if (this.areAllPlatformsResolved_()) {
-            resolve(Object.values(this.entitlements_));
+            resolve(this.getAvailablePlatformsEntitlements_());
           }
         });
       }
     });
 
     return this.allResolvedPromise_;
+  }
+
+  /**
+   * Returns entitlements for resolved platforms.
+   * @private
+   * @returns {!Array<!Entitlements>}
+   */
+  getAvailablePlatformsEntitlements_() {
+    const entitlements = [];
+    for (const platform in this.entitlements_) {
+      if (this.entitlements_.hasOwnProperty(platform)) {
+        entitlements.push(this.entitlements_[platform]);
+      }
+    }
+    return entitlements;
   }
 
   /**
