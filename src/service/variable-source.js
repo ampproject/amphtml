@@ -128,11 +128,7 @@ export class VariableSource {
     /** @private {boolean} */
     this.initialized_ = false;
 
-    /**
-     * The whitelist of variables allowed for variable substitution.
-     * @private @const {?Array<string>}
-     */
-    this.variableWhitelist_ = this.getVariableWhitelist_();
+    this.getVariableWhitelist_();
   }
 
   /**
@@ -306,6 +302,10 @@ export class VariableSource {
       return null;
     }
 
+    /**
+     * The whitelist of variables allowed for variable substitution.
+     * @private {?Array<string>}
+     */
     this.variableWhitelist_ = meta.getAttribute('content').split(',')
         .map(variable => variable.trim());
     return this.variableWhitelist_;
