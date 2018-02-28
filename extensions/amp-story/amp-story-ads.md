@@ -25,12 +25,12 @@ There are two type of ad formats supported as part of AMP Stories:
 ### Single page ad 
 
 In-line with the principles, a single page ad appears in between organic story content as a full page. 
-single page ads have a predefined set of call to action buttons and those call to action buttons take a web landing page URL where the user is navigated to, on click.
+Single page ads have a predefined set of call to action buttons and those call to action buttons take a web landing page URL where the user is navigated to, on click.
 
 ![Story Page Ad](img/story-page-ad.png)
 
 ### Sponsored story ad 
-When publishing sponsored story ads, use the `<amp-story ad>` tag instead of `<amp-story>`, so platforms can surface these stories appropriately. Since a sponsored story ad is just a URL on the web, you can also send user traffic to a sponsored story ad from the CTA URL button of a single page ad. 
+ A sponsored story ad is just an URL on the web. Therefore you can drive user traffic to a sponsored story ad from the CTA URL button of a single page ad. In the future, there may be the ability to inline the entire sponsored story inside a regular AMP story, but that's pending user experimentation. 
 
 ![Sponsored Story Ad](img/sponsored-story-ad.png)
 
