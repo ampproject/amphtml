@@ -234,6 +234,15 @@
   right: 0;
 }
 
+/*
+ * This is necessary to fix styling for responsive styling for video
+ * and ad elements inside the lightbox. More investigation is necessary
+ * to see if this should be more globally applied to carousel.
+ */
+amp-lightbox-gallery .i-amphtml-slide-item > * {
+  height: auto;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to {
