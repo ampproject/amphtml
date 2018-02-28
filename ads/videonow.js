@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function videonow(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global._videonow_amp = {
-    allowed_data: ['pid'],
+    allowed_data: ['pid', 'type', 'src'],
     mandatory_data: ['pid'],
     data,
   };
@@ -32,19 +32,23 @@ export function videonow(global, data) {
       global._videonow_amp.mandatory_data, global._videonow_amp.allowed_data);
 
   const profileId = data.pid || 1;
-  const src = data.src || 'prod';
+  const type = data.type || 'prod';
 
+  const protocol = global.location && global.location.protocol || 'https:';
   // production version by default
-  let script = 'http://static.videonow.ru/dev/vn_init_module.js?profileId=' + profileId;
+  let script = (data.src && decodeURI(data.src)) || (protocol +
+      '//static.videonow.ru/dev/vn_init_module.js?profileId=' + profileId);
 
-  if (src === 'local') {
-    script = 'http://localhost:8085/vn_init.js?profileId=' +
-        profileId + '&url=' + encodeURIComponent('http://localhost:8085/init');
-  } else if (src === 'dev') {
-    // this part can be changed late
-    script = 'http://static.videonow.ru/dev/vn_init_module.js?profileId=' +
+  if (type === 'local') {
+    script = protocol + '//localhost:8085/vn_init.js?profileId=' +
         profileId + '&url=' +
-        encodeURIComponent('http://data.videonow.ru/?init');
+        encodeURIComponent(protocol + '//localhost:8085/init');
+  } else if (type === 'dev') {
+    // this part can be changed late
+    script = protocol +
+        '//static.videonow.ru/dev/vn_init_module.js?profileId=' +
+        profileId + '&url=' +
+        encodeURIComponent(protocol + '//data.videonow.ru/?init');
   }
 
   loadScript(global, script);
