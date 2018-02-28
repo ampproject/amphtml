@@ -584,7 +584,9 @@ export const adConfig = {
     ],
   },
 
-  monetizer101: {},
+  monetizer101: {
+    renderStartImplemented: true,
+  },
 
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
