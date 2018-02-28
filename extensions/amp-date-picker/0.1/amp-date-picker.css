@@ -17,11 +17,6 @@
 @import '../../../third_party/react-dates/_datepicker.css';
 
 
-amp-date-picker.i-amphtml-element {
-  display: block;
-  position: relative;
-}
-
 amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   position: absolute;
   top: calc(100% + 10px);
@@ -39,8 +34,11 @@ amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
   left: 0;
 }
 
-amp-date-picker .i-amphtml-date-picker-container {
+.amp-date-picker-calendar-container * {
   box-sizing: border-box;
+}
+
+.amp-date-picker-calendar-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 

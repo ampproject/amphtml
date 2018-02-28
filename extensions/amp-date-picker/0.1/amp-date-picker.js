@@ -30,6 +30,7 @@ import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent, isRTL} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
@@ -128,6 +129,24 @@ const DateFieldType = {
   END_DATE: 'end-date',
 };
 
+/** @enum {string} */
+const DatePickerEvent = {
+  /**
+   * Triggered when the overlay opens or when the static date picker should
+   * receive focus from the attached input.
+   */
+  ACTIVATE: 'activate',
+
+  /**
+   * Triggered when the overlay closes or when the static date picker has
+   * finished selecting.
+   */
+  DEACTIVATE: 'deactivate',
+
+  /** Triggered when the user selects a date range. */
+  SELECT: 'select',
+};
+
 /**
  * The size in PX of each calendar day. This value allows the date picker to
  * fit within a 320px wide viewport when fully rendered.
@@ -141,6 +160,14 @@ const DEFAULT_WEEK_DAY_FORMAT_CSS = 'i-amphtml-default-week-day-format';
 const DEFAULT_WEEK_DAY_FORMAT = 'dd';
 
 const INPUT_FOCUS_CSS = 'amp-date-picker-selecting';
+
+const CALENDAR_CONTAINER_CSS = 'i-amphtml-date-picker-container';
+
+const PRIVATE_CALENDAR_CONTAINER_CSS = 'amp-date-picker-calendar-container';
+
+const INFO_TEMPLATE_AREA_CSS = 'i-amphtml-amp-date-picker-info';
+
+const DEFAULT_DEBOUNCE_INTERVAL = 300; // ms
 
 class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -227,8 +254,9 @@ class AmpDatePicker extends AMP.BaseElement {
         highlighted ? highlighted.split(DATE_SEPARATOR) : []);
 
     /** @private @const */
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.toggle('i-amphtml-date-picker-container');
+    this.container_ = this.document_.createElement('div');
+    this.container_.classList.add(CALENDAR_CONTAINER_CSS);
+    this.container_.classList.add(PRIVATE_CALENDAR_CONTAINER_CSS);
 
     /** @private @const */
     this.type_ = this.element.getAttribute('type') || DatePickerType.SINGLE;
@@ -346,7 +374,7 @@ class AmpDatePicker extends AMP.BaseElement {
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
       this.setState_({isOpen: true, isFocused: false, focused: false})
           .then(() => {
-            this.triggerActivate_();
+            this.triggerEvent_(DatePickerEvent.ACTIVATE);
           });
     });
     sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
@@ -391,7 +419,7 @@ class AmpDatePicker extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment ${TAG} is disabled.`);
 
-    this.element.appendChild(this.container_);
+    this.vsync_.mutate(() => this.element.appendChild(this.container_));
 
     if (this.type_ === DatePickerType.SINGLE) {
       this.dateField_ = this.setupDateField_(DateFieldType.DATE);
@@ -417,7 +445,6 @@ class AmpDatePicker extends AMP.BaseElement {
     this.setupListeners_();
     this.render(this.state_);
 
-    this.element.setAttribute('i-amphtml-date-picker-attached', '');
     // NOTE(cvializ): There is no standard date format for just the first letter
     // of the week-day. So we hack it in with this CSS class and don't apply the
     // CSS class if there is a week-day-format specified.
@@ -443,7 +470,7 @@ class AmpDatePicker extends AMP.BaseElement {
     const momentDate = this.createMoment_(date);
     this.setState_({date: momentDate});
     this.updateDateField_(this.dateField_, momentDate);
-    this.triggerSelectDate_(momentDate);
+    this.triggerEvent_(DatePickerEvent.SELECT, this.getBindDate_(momentDate));
   }
 
   /**
@@ -479,7 +506,8 @@ class AmpDatePicker extends AMP.BaseElement {
     // TODO(cvializ): check if valid date, blocked, outside range, etc
     this.setState_(state);
     if (momentStart && momentEnd) {
-      this.triggerSelectDates_(momentStart, momentEnd);
+      this.triggerEvent_(DatePickerEvent.SELECT,
+          this.getSelectData_(momentStart, momentEnd));
     }
   }
 
@@ -492,17 +520,18 @@ class AmpDatePicker extends AMP.BaseElement {
     this.clearDateField_(this.dateField_);
     this.clearDateField_(this.startDateField_);
     this.clearDateField_(this.endDateField_);
-    this.triggerSelectDate_(null);
-    this.triggerSelectDates_(null, null);
+    this.triggerEvent_(DatePickerEvent.SELECT, null);
 
     this.setState_({focusedInput: this.ReactDatesConstants_.START_DATE});
     this.updateDateFieldFocus_(this.startDateField_, true);
 
     if (this.props_.reopenPickerOnClearDate) {
-      this.triggerActivate_();
+      this.triggerEvent_(DatePickerEvent.ACTIVATE);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_INPUT);
     }
   }
+
+
 
   /**
    * Get the initial value for properties that change during the lifetime of
@@ -586,15 +615,17 @@ class AmpDatePicker extends AMP.BaseElement {
    * input fields and to enable overlay open/close.
    */
   setupListeners_() {
-    const documentElement = this.element.ownerDocument.documentElement;
+    const root =
+        this.ampdoc_.getRootNode().documentElement || this.ampdoc_.getBody();
     // Only add for overlay since click events just handle opening and closing
     if (this.mode_ == DatePickerMode.OVERLAY) {
-      this.listen_(documentElement, 'click', this.handleClick_.bind(this));
+      this.listen_(root, 'click', this.handleClick_.bind(this));
     }
 
-    this.listen_(documentElement, 'focusin', this.handleFocus_.bind(this));
-    this.listen_(documentElement, 'input', this.handleInput_.bind(this));
-    this.listen_(documentElement, 'keydown', this.handleKeydown_.bind(this));
+    this.listen_(root, 'focusin', this.handleFocus_.bind(this));
+    this.listen_(root, 'input',
+        debounce(this.handleInput_.bind(this), DEFAULT_DEBOUNCE_INTERVAL));
+    this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
 
   /**
@@ -616,11 +647,6 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!Event} e
    */
   handleClick_(e) {
-    // Disregard spacebar and enter "clicks"
-    if (e.screenX == 0 && e.screenY == 0) {
-      return;
-    }
-
     const target = dev().assertElement(e.target);
     const clickWasInDatePicker = (
       this.container_.contains(target) || this.isDateField_(target)
@@ -673,9 +699,8 @@ class AmpDatePicker extends AMP.BaseElement {
           (target === this.startDateField_ ? 'startDate' :
             (target === this.endDateField_ ? 'endDate' : '')));
     const moment = this.createMoment_(target.value);
-    if (moment.isValid()) {
-      this.setState_({[property]: moment});
-    }
+    const value = moment.isValid() ? moment : null;
+    this.setState_({[property]: value});
   }
 
   /**
@@ -688,7 +713,7 @@ class AmpDatePicker extends AMP.BaseElement {
     if (this.isDateField_(target)) {
       this.handleInputKeydown_(e);
     } else {
-      this.handleDocumentKeydown_(e);
+      return this.handleDocumentKeydown_(e);
     }
   }
 
@@ -720,7 +745,7 @@ class AmpDatePicker extends AMP.BaseElement {
       this.updateDateFieldFocus_(target);
       this.transitionTo_(DatePickerState.OVERLAY_OPEN_PICKER);
       if (this.mode_ === DatePickerMode.STATIC) {
-        this.triggerActivate_();
+        this.triggerEvent_(DatePickerEvent.ACTIVATE);
         const toFocus = this.container_.querySelector('[tabindex="0"]');
         if (toFocus) {
           this.vsync_.mutate(() => toFocus./*OK*/focus());
@@ -752,6 +777,7 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   cleanupListeners_() {
     this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
   }
 
   /** @private */
@@ -878,7 +904,8 @@ class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    this.triggerSelectDates_(startDate, endDate);
+    this.triggerEvent_(DatePickerEvent.SELECT,
+        this.getSelectData_(startDate, endDate));
     this.setState_({
       startDate,
       endDate,
@@ -891,7 +918,7 @@ class AmpDatePicker extends AMP.BaseElement {
         startDate &&
         endDate) {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
-      this.triggerDeactivate_();
+      this.triggerEvent_(DatePickerEvent.DEACTIVATE);
     }
   }
 
@@ -900,7 +927,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {?moment} date
    */
   onDateChange(date) {
-    this.triggerSelectDate_(date);
+    this.triggerEvent_(DatePickerEvent.SELECT, this.getSelectData_(date));
     this.setState_({date});
     this.updateDateField_(this.dateField_, date);
 
@@ -950,54 +977,35 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Trigger the activate AMP action. Triggered when the overlay opens or when
    * the static date picker should receive focus from the attached input.
+   * @param {string} name
+   * @param {!JsonObject=} opt_data
    */
-  triggerActivate_() {
-    const name = 'activate';
-    const event = createCustomEvent(this.win_, `${TAG}.${name}`, {});
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
-  }
-
-
-  /**
-   * Trigger the deactivate AMP action. Triggered when the overlay closes or
-   * when the static date picker has finished selecting.
-   */
-  triggerDeactivate_() {
-    const name = 'deactivate';
-    const event = createCustomEvent(this.win_, `${TAG}.${name}`, {});
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
-  }
-
-
-
-  /**
-   * Trigger the select AMP action. Triggered when the user selects a
-   * single date.
-   */
-  triggerSelectDate_(date) {
-    const name = 'select';
-    const event = createCustomEvent(
-        this.win_, `${TAG}.${name}`, this.getBindDate_(date));
+  triggerEvent_(name, opt_data) {
+    const event = createCustomEvent(this.win_, `${TAG}.${name}`, opt_data);
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 
   /**
-   * Trigger the select AMP action. Triggered when the user selects a
-   * date range.
-   * @param {?moment} endDate
-   * @param {?moment} startDate
+   * Create the response for the 'select' AMP event.
+   * @param {?moment} dateOrStartDate
+   * @param {?moment=} endDate
+   * @return {!JsonObject}
    */
-  triggerSelectDates_(startDate, endDate) {
-    const name = 'select';
-    const dates = startDate ? this.getBindDates_(startDate, endDate) : [];
-    const event = createCustomEvent(this.win_, `${TAG}.${name}`, {
-      dates,
-      start: dates[0],
-      end: dates[dates.length - 1],
-    });
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+  getSelectData_(dateOrStartDate, endDate) {
+    if (this.type_ == DatePickerType.SINGLE) {
+      return this.getBindDate_(dateOrStartDate);
+    } else if (this.type_ == DatePickerType.RANGE) {
+      const dates = dateOrStartDate ?
+        this.getBindDates_(dateOrStartDate, endDate) : [];
+      return {
+        dates,
+        start: dates[0],
+        end: dates[dates.length - 1],
+      };
+    } else {
+      dev().error(TAG, 'Invalid date picker type');
+    }
   }
-
 
   /**
    * Toggle the provided class on the given input
@@ -1190,7 +1198,7 @@ class AmpDatePicker extends AMP.BaseElement {
     if (template) {
       return this.renderTemplateElement_(template)
           .then(element => {
-            element.classList.add('i-amphtml-amp-date-picker-info');
+            element.classList.add(INFO_TEMPLATE_AREA_CSS);
             return this.getRenderedTemplateString_(element);
           });
     } else {
