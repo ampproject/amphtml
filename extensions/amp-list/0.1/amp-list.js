@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {
@@ -57,6 +58,10 @@ export class AmpList extends AMP.BaseElement {
 
     /** @const @private {string} */
     this.initialSrc_ = element.getAttribute('src');
+
+    this.registerAction('refresh', () => {
+      this.fetchList_();
+    }, ActionTrust.LOW);
   }
 
   /** @override */
