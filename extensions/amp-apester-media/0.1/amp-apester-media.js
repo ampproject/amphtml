@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -109,6 +110,9 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    }
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
         dev().fine(TAG, 'media seen');
@@ -328,6 +332,10 @@ class AmpApesterMedia extends AMP.BaseElement {
                   : payload;
                 const src = this.constructUrlFromMedia_(media['interactionId']);
                 const iframe = this.constructIframe_(src);
+                this.intersectionObserverApi_ = new IntersectionObserverApi(
+                    this,
+                    iframe
+                );
                 const overflow = this.constructOverflow_();
                 const mutate = state => {
                   state.element.classList.add('i-amphtml-apester-iframe-ready');
@@ -342,11 +350,14 @@ class AmpApesterMedia extends AMP.BaseElement {
                 this.element.appendChild(iframe);
                 this.registerToApesterEvents_();
 
-                return (this.iframePromise_ = this.loadPromise(iframe)
-                    .then(() => {
-                      Services.vsyncFor(this.win).runPromise({mutate}, state);
-                      return media;
-                    }));
+                return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
+                  Services.vsyncFor(this.win).runPromise({mutate}, state);
+                  this.iframe_.contentWindow./*OK*/ postMessage(
+                      {type: 'campaigns', data: media['campaignData']},
+                      '*'
+                  );
+                  return media;
+                }));
               },
               error => {
                 dev().error(TAG, 'Display', error);
@@ -392,6 +403,8 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
+      this.intersectionObserverApi_.destroy();
+      this.intersectionObserverApi_ = null;
       this.unlisteners_.forEach(unlisten => unlisten());
       removeElement(this.iframe_);
       this.iframe_ = null;
