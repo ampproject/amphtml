@@ -235,9 +235,10 @@
 }
 
 /*
- * This is necessary to fix styling for responsive styling for video
- * and ad elements inside the lightbox. More investigation is necessary
+ * This is necessary to fix responsive styling for video and ad
+ * elements inside the lightbox. More investigation is necessary
  * to see if this should be more globally applied to carousel.
+ * TODO(#13677): set i-amphtml-slide-item to height: auto.
  */
 amp-lightbox-gallery .i-amphtml-slide-item > * {
   height: auto;
