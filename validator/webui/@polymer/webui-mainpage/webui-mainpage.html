@@ -49,12 +49,7 @@
 
     var minimumValidAmp4Ads =
       '\x3C!--\n' +
-      '     AMP4ADS is a format for ads that is similar to the AMP format for web documents.\n' +
-      '     This is a work in progress (https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md).\n' +
-      '     If you\'re looking for currently supported ad formats and providers for AMP pages,\n' +
-      '     see https://www.ampproject.org/docs/reference/components/amp-ad instead.\n' +
-      '\n' +
-      '     Below is the minimum valid AMP4ADS document. Type away\n' +
+      '     This is the minimum valid AMP4ADS document. Type away\n' +
       '     here and the AMP Validator will re-check your document on the fly.\n' +
       '-->\n' +
       '\x3C!doctype html>\n' +
@@ -66,6 +61,23 @@
       '  \x3Cscript async src="https://cdn.ampproject.org/amp4ads-v0.js">\x3C/script>\n' +
       '\x3C/head>\n' +
       '\x3Cbody>Hello, AMP4ADS world.\x3C/body>\n' +
+      '\x3C/html>\n';
+
+    var minimumValidAmp4Email =
+      '\x3C!--\n' +
+      '     This is the minimum valid AMP4EMAIL document. Type away\n' +
+      '     here and the AMP Validator will re-check your document on the fly.\n' +
+      '-->\n' +
+      '\x3C!doctype html>\n' +
+      '\x3Chtml ⚡4email>\n' +
+      '\x3Chead>\n' +
+      '  \x3Cmeta charset="utf-8">\n' +
+      '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+      '  \x3Cstyle amp4email-boilerplate>body{visibility:hidden}\x3C/style>\n' +
+      '\x3C/head>\n' +
+      '\x3Cbody>\n' +
+      '  Hello, AMP4EMAIL world.\n' +
+      '\x3C/body>\n' +
       '\x3C/html>\n';
 
     Polymer({
@@ -221,18 +233,31 @@
         });
 
         urlForm.addEventListener('webui-urlform-html-format-changes', function(e) {
+          var editorValue = editor.getEditorValue();
           if (e.detail.htmlFormat === 'AMP4ADS') {
             var params = getLocationHashParams();
             params['htmlFormat'] = 'AMP4ADS';
             setLocationHashParams(params);
-            if (editor.getEditorValue() === minimumValidAmp) {
+            if (editorValue === minimumValidAmp ||
+                editorValue === minimumValidAmp4Email) {
               editor.setEditorValue(minimumValidAmp4Ads);
+            } else {
+              refreshEditorAndErrors();
+            }
+          } else if (e.detail.htmlFormat === 'AMP4EMAIL') {
+            var params = getLocationHashParams();
+            params['htmlFormat'] = 'AMP4EMAIL';
+            setLocationHashParams(params);
+            if (editorValue === minimumValidAmp ||
+                editorValue === minimumValidAmp4Ads) {
+              editor.setEditorValue(minimumValidAmp4Email);
             } else {
               refreshEditorAndErrors();
             }
           } else {
             removeParamFromLocationHashParams('htmlFormat');
-            if (editor.getEditorValue() === minimumValidAmp4Ads) {
+            if (editorValue === minimumValidAmp4Ads ||
+                editorValue === minimumValidAmp4Email) {
               editor.setEditorValue(minimumValidAmp);
             } else {
               refreshEditorAndErrors();
@@ -254,6 +279,10 @@
                    params['htmlFormat'] === 'AMP4ADS' ) {
           urlForm.setHtmlFormat('AMP4ADS');
           editor.setEditorValue(minimumValidAmp4Ads);
+        } else if (params.hasOwnProperty('htmlFormat') &&
+                   params['htmlFormat'] === 'AMP4EMAIL' ) {
+          urlForm.setHtmlFormat('AMP4EMAIL');
+          editor.setEditorValue(minimumValidAmp4Email);
         } else {
           urlForm.setHtmlFormat('AMP');
           editor.setEditorValue(minimumValidAmp);
