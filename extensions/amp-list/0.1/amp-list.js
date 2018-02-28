@@ -47,10 +47,18 @@ export class AmpList extends AMP.BaseElement {
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
 
-    /** @const @private {!../../../src/pass.Pass} */
+    /**
+     * Maintains invariant that only one fetch result may be processed for
+     * render at a time.
+     * @const @private {!../../../src/pass.Pass}
+     */
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
-    /** @const @private {!Array<{resolver:!Function, items:!<Array>}} */
+    /**
+     * FIFO queue of fetched items to render. Each queue item also includes
+     * the promise resolver to be invoked on render.
+     * @const @private {!Array<{resolver:!Function, items:!Array}>}
+     */
     this.renderQueue_ = [];
 
     /** @const {!../../../src/service/template-impl.Templates} */
@@ -193,6 +201,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
    * @return {!Promise}
    * @private
@@ -208,9 +217,11 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Dequeues a fetch result and renders it immediately.
    * @private
    */
   doRenderPass_() {
+    dev().assert(this.renderQueue_.length > 0, 'Nothing queued to render.');
     const {resolver, items} = this.renderQueue_.shift();
     this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindings_(elements))
