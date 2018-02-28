@@ -70,7 +70,8 @@ describes.realWin('amp-list component', {
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    listMock.expects('fetch_').withExactArgs(opts.expr).returns(fetch).once();
+    listMock.expects('fetch_')
+        .withExactArgs(opts.expr).returns(fetch).atLeast(1);
 
     let itemsToRender = fetched;
     if (opts.singleItem) {
@@ -81,9 +82,7 @@ describes.realWin('amp-list component', {
     }
     const render = Promise.resolve(rendered);
     templatesMock.expects('findAndRenderTemplateArray')
-        .withExactArgs(element, itemsToRender)
-        .returns(render)
-        .atLeast(1);
+        .withExactArgs(element, itemsToRender).returns(render).atLeast(1);
 
     return Promise.all([fetch, render]);
   }
@@ -224,6 +223,26 @@ describes.realWin('amp-list component', {
 
       element.setAttribute('src', 'https://new.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    });
+  });
+
+  it('should only process one fetch result at a time for rendering', () => {
+    const spy = sandbox.spy(list, 'doRenderPass_');
+
+    const items = [{title: 'foo'}];
+    const foo = doc.createElement('div');
+    const rendered = expectFetchAndRender(items, [foo]);
+    const layout = list.layoutCallback();
+
+    // Execute another fetch-triggering action immediately...
+    element.setAttribute('src', 'https://new.com/list.json');
+    list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+
+    return layout.then(() => rendered).then(() => {
+      expect(list.container_.contains(foo)).to.be.true;
+
+      // Only one render pass should be scheduled at a time.
+      expect(spy).to.be.calledOnce;
     });
   });
 
