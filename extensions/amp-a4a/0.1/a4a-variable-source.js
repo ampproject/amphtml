@@ -68,6 +68,7 @@ const WHITELISTED_VARIABLES = [
   'FIRST_CONTENTFUL_PAINT',
   'FIRST_VIEWPORT_READY',
   'MAKE_BODY_VISIBLE',
+  'HTML_ATTR',
 ];
 
 /** Provides A4A specific variable substitution. */
