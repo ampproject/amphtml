@@ -56,8 +56,8 @@ export class AmpList extends AMP.BaseElement {
 
     /**
      * FIFO queue of fetched items to render. Each queue item also includes
-     * the promise resolver to be invoked on render.
-     * @const @private {!Array<{resolver:!Function, items:!Array}>}
+     * the promise resolver and rejecter to be invoked on render success/fail.
+     * @const @private {!Array<{items:!Array, resolver:!Function, rejecter:!Function}>}
      */
     this.renderQueue_ = [];
 
@@ -208,10 +208,12 @@ export class AmpList extends AMP.BaseElement {
    */
   scheduleRender_(items) {
     let resolver;
-    const promise = new Promise(resolve => {
+    let rejecter;
+    const promise = new Promise((resolve, reject) => {
       resolver = resolve;
+      rejecter = reject;
     });
-    this.renderQueue_.push({resolver, items});
+    this.renderQueue_.push({items, resolver, rejecter});
     this.renderPass_.schedule();
     return promise;
   }
@@ -222,11 +224,11 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     dev().assert(this.renderQueue_.length > 0, 'Nothing queued to render.');
-    const {resolver, items} = this.renderQueue_.shift();
+    const {items, resolver, rejecter} = this.renderQueue_.shift();
     this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindings_(elements))
         .then(elements => this.rendered_(elements))
-        .then(() => resolver());
+        .then(() => resolver(), () => rejecter());
   }
 
   /**
