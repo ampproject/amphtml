@@ -91,6 +91,8 @@ export class EntitlementStore {
         this.onChange(({entitlements}) => {
           if (entitlements.enablesThis()) {
             resolve(true);
+          } else if (this.areAllPlatformsResolved_()) {
+            resolve(false);
           }
         });
       }
@@ -132,6 +134,7 @@ export class EntitlementStore {
    */
   selectPlatform() {
     return this.getAllPlatformsEntitlements_().then(entitlements => {
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlements.
       return this.selectApplicablePlatform_(entitlements);
     });
   }
@@ -148,7 +151,7 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
-   * @param {!List<!Entitlements>} platforms
+   * @param {!Array<!Entitlements>} platforms
    * @returns {!Entitlements}
    */
   selectApplicablePlatform_(platforms) {

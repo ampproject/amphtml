@@ -79,7 +79,7 @@ describes.realWin('entitlement-store', {}, () => {
           });
     });
 
-    it('should resolve false with null for negative entitlement', done => {
+    it('should resolve false for negative entitlement', done => {
       const negativeEntitlement1 =
           new Entitlement(serviceIds[0], ['product1'], '');
       const negativeEntitlements = new Entitlements(
@@ -94,6 +94,25 @@ describes.realWin('entitlement-store', {}, () => {
               throw new Error('Incorrect entitlement resolved');
             }
           });
+    });
+
+    it('should resolve false if all future entitlement '
+        + 'are also negative ', done => {
+      const negativeEntitlement1 =
+          new Entitlement(serviceIds[0], ['product1'], '');
+      const negativeEntitlements = new Entitlements(
+          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      entitlementStore.getGrantStatus()
+          .then(entitlements => {
+            if (entitlements === false) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
     });
   });
 
