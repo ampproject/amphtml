@@ -55,7 +55,7 @@ If you still have a problem after following these steps, check the table below.
     <tr>
       <td>Content is being served that must be removed due to a legal takedown notice.</td>
       <td>The AMP Cache has not yet picked up the removal.</td>
-      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="hhttps://developers.google.com/amp/cache/update-cache">Update AMP Content</a>.</td>
+      <td>Follow the guidelines for each AMP Cache to refresh the content. For Google AMP Cache, see <a href="https://developers.google.com/amp/cache/update-cache">Update AMP Content</a>.</td>
     </tr>
 </tbody>
 </table>
