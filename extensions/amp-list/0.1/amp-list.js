@@ -198,8 +198,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
-    user().error(TAG, 'A');
-
     let resolver;
     const promise = new Promise(resolve => {
       resolver = resolve;
@@ -226,8 +224,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindings_(elements) {
-    user().error(TAG, 'B');
-
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
@@ -242,8 +238,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
-    user().error(TAG, 'C');
-
     removeChildren(dev().assertElement(this.container_));
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
