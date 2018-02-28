@@ -131,12 +131,14 @@ export class A4AVariableSource extends VariableSource {
    * @param {string} cssSelector Elements matching this selector will be
    *     included, provided they have at least one of the attributeNames
    *     set, up to a max of 10. May be URI encoded.
-   * @param attributeNames The attributes whose values will be returned.
+   * Note: Additional params will be the names of the attributes whose values
+   * will be returned. There should be at least 1.
    * @returns {string}
    */
-  htmlAttrBinding_(cssSelector, ...attributeNames) {
+  htmlAttrBinding_(cssSelector) {
     const HTML_ATTR_MAX_RETURN_SIZE = 10;
     const result = [];
+    const attributeNames = Array.prototype.slice.call(arguments, 1);
     if (!cssSelector || !attributeNames || !attributeNames.length) {
       return JSON.stringify(result);
     }
