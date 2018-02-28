@@ -176,7 +176,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
-    ampStoryAdPage.appendChild(ampAd);
+    const gridLayer = document.createElement('amp-story-grid-layer');
+    gridLayer.setAttribute('template', 'fill');
+    gridLayer.appendChild(ampAd);
+    ampStoryAdPage.appendChild(gridLayer);
 
     this.isCurrentAdLoaded_ = false;
 
@@ -216,8 +219,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   createAdElement_() {
     const defaultAttrs = {
       'id': 'i-amphtml-story-ad',
-      'height': '100vh',
-      'width': '100vw',
+      'layout': 'fill',
     };
 
     const configAttrs = this.config_['ad-attributes'];
