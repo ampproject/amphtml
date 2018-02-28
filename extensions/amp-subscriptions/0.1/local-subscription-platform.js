@@ -82,7 +82,7 @@ export class LocalSubscriptionPlatform {
    * @private
    */
   initActions_() {
-    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.readerIdPromise_);
+    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
     this.actions_ = new Actions(

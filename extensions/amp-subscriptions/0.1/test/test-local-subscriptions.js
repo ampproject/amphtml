@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
+import {Actions} from '../actions';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {UrlBuilder} from '../url-builder';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  const actionMap = {
+    'subscribe': 'https://lipsum.com/subscribe',
+    'login': 'https://lipsum.com/login',
+  };
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
         'authorizationUrl': authUrl,
+        'actions': actionMap,
       },
     ],
   };
@@ -44,5 +51,44 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     expect(initializeStub.getCall(0).args[0]).to.be.equals(authUrl);
     expect(initializeStub.getCall(0).args[1].credentials)
         .to.be.equals('include');
+  });
+
+  describe('initActions_', () => {
+    it('should build actions and urlbuilder on constructor', () => {
+      expect(localSubscriptionPlatform.urlBuilder_).to.be
+          .instanceof(UrlBuilder);
+      expect(localSubscriptionPlatform.actions_).to.be
+          .instanceof(Actions);
+      expect(JSON.stringify(localSubscriptionPlatform.actions_.actionsConfig_))
+          .to.be.equal(JSON.stringify(actionMap));
+    });
+  });
+
+  describe('validateActionMap', () => {
+    let actionMap;
+    beforeEach(() => {
+      actionMap = {
+        'subscribe': 'https://lipsum.com/subscribe',
+        'login': 'https://lipsum.com/login',
+      };
+    });
+
+    it('should check that login action is present', () => {
+      delete (actionMap['login']);
+      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+    });
+
+    it('should check that subscribe action is present', () => {
+      delete (actionMap['subscribe']);
+      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+    });
+
+    it('should return actionMap as is if login and subscribe actions'
+        + ' are present', () => {
+      const returnedMap =
+          localSubscriptionPlatform.validateActionMap(actionMap);
+      expect(JSON.stringify(returnedMap)).to.be
+          .equal(JSON.stringify((actionMap)));
+    });
   });
 });
