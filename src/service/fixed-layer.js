@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../log';
-import {endsWith} from '../string';
 import {Services} from '../services';
 import {
+  computedStyle,
+  getVendorJsPropertyName,
   setImportantStyles,
   setStyle,
   setStyles,
-  computedStyle,
-  getVendorJsPropertyName,
 } from '../style';
+import {dev, user} from '../log';
+import {endsWith} from '../string';
 
 const TAG = 'FixedLayer';
 
@@ -192,6 +192,12 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
+    const win = this.ampdoc.win;
+    if (!element./*OK*/offsetParent &&
+        computedStyle(win, element).display === 'none') {
+      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
+          element.tagName);
+    }
     this.setupElement_(
         element,
         /* selector */ '*',
@@ -301,6 +307,7 @@ export class FixedLayer {
           const {offsetWidth, offsetHeight, offsetTop} = element;
           const {
             position = '',
+            display = '',
             bottom,
             zIndex,
           } = style;
@@ -311,12 +318,13 @@ export class FixedLayer {
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
-              position == 'fixed' &&
+            position == 'fixed' &&
               (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
           // Element is indeed sticky.
           const isSticky = endsWith(position, 'sticky');
+          const isDisplayed = display !== 'none';
 
-          if (!isFixed && !isSticky) {
+          if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
               fixed: false,
               sticky: false,
@@ -346,8 +354,8 @@ export class FixedLayer {
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
           const isTransferrable = isFixed && (
-              fe.forceTransfer || (
-                  opacity > 0 &&
+            fe.forceTransfer || (
+              opacity > 0 &&
                   offsetHeight < 300 &&
                   (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
           if (isTransferrable) {
@@ -477,8 +485,10 @@ export class FixedLayer {
     }
     const isFixed = position == 'fixed';
     if (fe) {
-      // Already seen.
-      fe.selectors.push(selector);
+      if (!fe.selectors.includes(selector)) {
+        // Already seen.
+        fe.selectors.push(selector);
+      }
     } else {
       // A new entry.
       const id = 'F' + (this.counter_++);

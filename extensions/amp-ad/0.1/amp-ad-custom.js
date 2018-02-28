@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {AmpAdUIHandler} from './amp-ad-ui';
+import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
-import {removeChildren} from '../../../src/dom';
-import {AmpAdUIHandler} from './amp-ad-ui';
+import {
+  childElementByTag,
+  removeChildren,
+} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 
-/** @const {!string} Tag name for custom ad implementation. */
+/** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
 /** @var {Object} A map of promises for each value of data-url. The promise
@@ -53,8 +57,10 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   getPriority() {
-    // Loads ads after other content.
-    return 2;
+    // Loads ads after other content
+    const isPWA = !this.element.getAmpDoc().isSingleDoc();
+    // give the ad higher priority if it is inside a PWA
+    return isPWA ? 1 : 2;
   }
 
   /** @override **/
@@ -67,10 +73,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   buildCallback() {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
-    // Ensure that there are templates in this ad
-    const templates = this.element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in custom ad');
-    // And ensure that the slot value is legal
+    // Ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
 
@@ -88,28 +91,92 @@ export class AmpAdCustom extends AMP.BaseElement {
           Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
-      const element = this.element;
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
         templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
-            null;
+          null;
       }
-      // Set UI state
-      if (templateData !== null && typeof templateData == 'object') {
-        this.renderStarted();
+
+      if (!templateData || typeof templateData != 'object') {
+        this.uiHandler.applyNoContentUI();
+        return;
+      }
+
+      templateData = this.handleTemplateData_(templateData);
+
+      this.renderStarted();
+
+      try {
         Services.templatesFor(this.win)
-            .findAndRenderTemplate(element, templateData)
+            .findAndRenderTemplate(this.element, templateData)
             .then(renderedElement => {
               // Get here when the template has been rendered
-              // Clear out the template and replace it by the rendered version
-              removeChildren(element);
-              element.appendChild(renderedElement);
+              // Clear out the child template and replace it by the rendered version
+              // Note that we can't clear templates that's not ad's child because
+              // they maybe used by other ad component.
+              removeChildren(this.element);
+              this.element.appendChild(renderedElement);
+              this.signals().signal(CommonSignals.INI_LOAD);
             });
-      } else {
+      } catch (e) {
         this.uiHandler.applyNoContentUI();
       }
     });
+  }
+
+  /**
+   * Handles the template data response.
+   * There are two types of templateData format
+   * Format option 1
+   * {
+   *   'templateId': {},
+   *   'vars': {},
+   *   'data': {
+   *     'a': '1',
+   *     'b': '2'
+   *   }
+   * }
+   * or format option 2
+   * {
+   *  'a': '1',
+   *  'b': '2'
+   * }
+   * if `templateId` or `vars` are not specified.
+   *
+   * @param {!JsonObject} templateData
+   * @return {!JsonObject}
+   */
+  handleTemplateData_(templateData) {
+    if (childElementByTag(this.element, 'template')) {
+      // Need to check for template attribute if it's allowed in amp-ad tag
+      return templateData;
+    }
+
+    // If use remote template specified by response
+    user().assert(templateData['templateId'], 'TemplateId not specified');
+
+    user().assert(
+        templateData['data'] && typeof templateData['data'] == 'object',
+        'Template data not specified');
+
+    this.element.setAttribute('template', templateData['templateId']);
+
+    if (templateData['vars'] && typeof templateData['vars'] == 'object') {
+      // Support for vars
+      const vars = templateData['vars'];
+      const keys = Object.keys(vars);
+      for (let i = 0; i < keys.length; i++) {
+        const attrName = 'data-vars-' + keys[i];
+        try {
+          this.element.setAttribute(attrName, vars[keys[i]]);
+        } catch (e) {
+          this.user().error(TAG_AD_CUSTOM, 'Fail to set attribute: ', e);
+        }
+      }
+    }
+
+    return templateData['data'];
   }
 
   /** @override  */

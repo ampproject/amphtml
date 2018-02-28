@@ -1,0 +1,179 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Date Picker Example</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+  body {
+    padding: 20px;
+    min-height: 125vh;
+  }
+  .highlight-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: red;
+    border-bottom: 0;
+    border-right: 0;
+  }
+
+  .taco-tuesday {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .hidden {display: none;}
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1><code>amp-date-picker</code> example</h1>
+  <p>Experimental under the 'amp-date-picker' flag</p>
+  <h2><code>&lt;amp-date&gt;</code></h2>
+  <p>Try to pick a date. This is a single-date picker</p>
+  <button on="tap:sdp.setDate(date='2017-10-22')">Set date</button>
+  <button on="tap:sdp.clear">Clear</button>
+  <amp-date-picker
+    layout="container"
+    width="300"
+    height="300"
+    on="select:AMP.setState({date: event.date, dateType: event.id})"
+    locale="en"
+    format="YYYY-MM-DD"
+    number-of-months="1"
+    highlighted="2017-10-10 2017-10-12"
+    blocked="2017-10-10 2017-10-17 2017-10-19 2017-10-21 2018-01-29"
+    show-clear-date
+    keep-open-on-date-select
+    show-default-input-icon
+    id="sdp"
+  >
+    <input amp-date-placeholder placeholder="Pick a date!!" id="wow"/>
+    <template type="amp-mustache" date-template default>
+      {{^isBlocked}}{{^isHighlighted}}{{D}}{{/isHighlighted}}{{/isBlocked}}
+      {{#isBlocked}}:({{/isBlocked}}
+      {{#isHighlighted}}
+        {{D}}
+        <span class="highlight-corner"></span>
+      {{/isHighlighted}}
+    </template>
+    <template
+      type="amp-mustache"
+      date-template
+      dates="FREQ=WEEKLY;DTSTART=20170101T160000Z;INTERVAL=2;WKST=SU;BYDAY=TU 2017-10-30"
+      id="tacos1"
+    >
+      <span>🌮</span>
+      <span class="taco-tuesday"></span>
+      {{#isHighlighted}}
+        <span class="highlight-corner"></span>
+      {{/isHighlighted}}
+    </template>
+    <template type="amp-mustache" info-template>
+      <div
+        [text]="'You picked ' + date + '.' +
+        (dateType == 'tacos1' ? ' Happy Taco Tuesday!' : '')"
+      >You will see your chosen date here.</div>
+    </template>
+  </amp-date-picker>
+
+  <h2><code>&lt;amp-date-range&gt;</code></h2>
+  <p>Try to pick a range. This is a date-range picker</p>
+  <button on="tap:drp.setDates(startDate='2017-10-26',endDate='2017-11-04')">Set date range</button>
+  <button on="tap:drp.clear">Clear</button>
+  <amp-date-picker
+    type="range"
+    id="drp"
+    on="
+    select:
+      AMP.setState({
+        dates: event.dates,
+        tacoTuesdays: event.dates.filter(d => d.id == 'tacos2').length,
+      })"
+    locale="en"
+    format="Y-MM-DD"
+    blocked="2017-10-15 2017-09-17 2017-10-19 2017-10-21"
+    highlighted="2018-01-29"
+    keep-open-on-date-select
+    number-of-months="1"
+    show-clear-dates
+  >
+    <input amp-date-placeholder-start placeholder="Start date" id="start" />
+    <input amp-date-placeholder-end placeholder="End date" id="end" />
+    <template type="amp-mustache" date-template default>
+      {{^isBlocked}}{{^isHighlighted}}{{D}}{{/isHighlighted}}{{/isBlocked}}
+      {{#isBlocked}}:({{/isBlocked}}
+      {{#isHighlighted}}{{D}}!{{/isHighlighted}}
+    </template>
+    <template type="amp-mustache" date-template dates="FREQ=WEEKLY;DTSTART=20170101T160000Z;INTERVAL=2;WKST=SU;BYDAY=TU" id="tacos2">
+      <span>🌮</span>
+      <span class="taco-tuesday" data-date-tooltip="Taco Tuesday"></span>
+    </template>
+    <template type="amp-mustache" date-template dates="FREQ=WEEKLY;DTSTART=20170101T160000Z;WKST=MO;BYDAY=SA,SU" id="weekendDelivery">
+      <span>+$10</span>
+    </template>
+    <template type="amp-mustache" info-template>
+      <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ''"></span>
+    </template>
+  </amp-date-picker>
+
+  <h2>external <code>src</code></h2>
+  <amp-date-picker
+    type="single"
+    locale="en"
+    format="Y-MM-DD"
+    show-clear-date
+    number-of-months="1"
+    src="date-picker.json"
+    with-portal
+  >
+    <input amp-date-placeholder placeholder="Pick a date!!" id="externalSrc"/>
+    <template type="amp-mustache" date-template id="spooky">
+      <span>🙀</span>
+    </template>
+  </amp-date-picker>
+
+  <h2>minimal example</h2>
+  <amp-date-picker>
+    <input amp-date-placeholder placeholder="Pick a date" id="myDate"/>
+  </amp-date-picker>
+
+  <amp-state id="sales">
+    <script type="application/json">
+    {
+      "dates": [
+        "2017-10-20",
+        "2017-10-22",
+        "2017-10-24"
+      ],
+      "datesToDetails": {
+        "2017-10-20": {
+          "imageUrl": "https://www.ampbyexample.com/img/product1_640x426.jpg",
+          "message": "We are having a special on apples!"
+        },
+        "2017-10-22": {
+          "imageUrl": "https://www.ampbyexample.com/img/product2_640x426.jpg",
+          "message": "We are having a special on oranges!"
+        },
+        "2017-10-24": {
+          "imageUrl": "https://www.ampbyexample.com/img/product3_640x426.jpg",
+          "message": "We are having a special on pears!"
+        }
+      }
+    }
+    </script>
+  </amp-state>
+</body>
+</html>

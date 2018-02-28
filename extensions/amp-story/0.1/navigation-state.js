@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {EventType} from './events';
 import {Observable} from '../../../src/observable';
 
 
@@ -22,6 +23,9 @@ import {Observable} from '../../../src/observable';
  */
 export const StateChangeType = {
   ACTIVE_PAGE: 0,
+  BOOKEND_ENTER: 1,
+  BOOKEND_EXIT: 2,
+  END: 3,
 };
 
 
@@ -33,41 +37,69 @@ export let StateChangeEventDef;
  * State store to decouple navigation changes from consumers.
  */
 export class NavigationState {
-  constructor() {
+  /**
+   * @param {!Element} storyElement
+   * @param {function():Promise<boolean>} hasBookend
+   */
+  constructor(storyElement, hasBookend) {
+    /** @private @const {!function():Promise<boolean>} */
+    this.hasBookend_ = hasBookend;
+
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
+
+    this.attachEvents_(storyElement);
   }
 
-  /** @param {!function(!StateChangeEventDef):void} stateChangeFn */
+  /**
+   * @param {!Element} storyElement
+   * @private
+   */
+  attachEvents_(storyElement) {
+    storyElement.addEventListener(EventType.SHOW_BOOKEND, () => {
+      this.fire_(StateChangeType.BOOKEND_ENTER);
+      this.fire_(StateChangeType.END);
+    });
+
+    storyElement.addEventListener(EventType.CLOSE_BOOKEND, () => {
+      this.fire_(StateChangeType.BOOKEND_EXIT);
+    });
+  }
+
+  /** @param {function(!StateChangeEventDef):void} stateChangeFn */
   observe(stateChangeFn) {
     this.observable_.add(stateChangeFn);
   }
 
   /**
-   * @param {number} index
+   * @param {number} pageIndex
+   * @param {number} totalPages
    * @param {string=} opt_pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(index, opt_pageId) {
-    const changeValue = {
-      pageIndex: index,
-    };
+  updateActivePage(pageIndex, totalPages, opt_pageId) {
+    const changeValue = {pageIndex, totalPages};
 
     if (opt_pageId) {
       changeValue.pageId = opt_pageId;
     }
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
+
+    if (pageIndex >= totalPages - 1) {
+      this.hasBookend_().then(hasBookend => {
+        if (!hasBookend) {
+          this.fire_(StateChangeType.END);
+        }
+      });
+    }
   }
 
   /**
-   * @param {!StateChangeType} changeType
-   * @param {*} changeValue
+   * @param {!StateChangeType} type
+   * @param {*=} opt_changeValue
    */
-  fire_(changeType, changeValue) {
-    this.observable_.fire({
-      type: changeType,
-      value: changeValue,
-    });
+  fire_(type, opt_changeValue) {
+    this.observable_.fire({type, value: opt_changeValue});
   }
 }

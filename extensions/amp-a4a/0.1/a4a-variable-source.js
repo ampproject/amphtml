@@ -18,8 +18,8 @@ import {Services} from '../../../src/services';
 import {
   VariableSource,
   getNavigationData,
-  getTimingDataSync,
   getTimingDataAsync,
+  getTimingDataSync,
 } from '../../../src/service/variable-source';
 import {user} from '../../../src/log';
 
@@ -65,6 +65,9 @@ const WHITELISTED_VARIABLES = [
   'TOTAL_ENGAGED_TIME',
   'AMP_VERSION',
   'USER_AGENT',
+  'FIRST_CONTENTFUL_PAINT',
+  'FIRST_VIEWPORT_READY',
+  'MAKE_BODY_VISIBLE',
 ];
 
 

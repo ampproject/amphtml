@@ -1,0 +1,245 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '../../../third_party/react-dates/_datepicker.css';
+
+
+amp-date-picker,
+.SingleDatePicker_picker,
+.DateRangePicker_picker {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+amp-date-picker * {
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.DateInput_input {
+  font-size: 100%;
+}
+
+.CalendarMonth_caption {
+  font-weight: lighter;
+  margin: 0 -30px 38px;
+  padding-bottom: 20px;
+  background-color: #000;
+  color: #fff;
+}
+
+.CalendarMonth_caption > * {
+  font-weight: lighter;
+}
+
+.DayPicker_weekHeader {
+  top: 75px;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li::first-letter {
+  font-size: small;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li {
+  font-size: 0;
+}
+
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-color: #fff;
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container, /* remove after update to react-dates v16 */
+.CalendarDay__default {
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container:hover, /* remove after update to react-dates v16 */
+.CalendarDay__default:hover {
+  background-color: #e4e7e7;
+  border: 1px solid #e4e7e7;
+}
+
+.CalendarDay__blocked_calendar {
+  border: 1px solid #cacccd;
+}
+
+.CalendarDay__blocked_out_of_range,
+.CalendarDay__blocked_out_of_range:active,
+.CalendarDay__blocked_out_of_range:hover {
+  color: rgb(0, 0, 0, .1);
+  border: 1px solid transparent;
+}
+
+.CalendarDay__hovered_span,
+.CalendarDay__hovered_span:hover,
+.CalendarDay__selected_span,
+.CalendarDay__selected_span:active,
+.CalendarDay__selected_span:hover {
+  background-color: #9bbbdd;
+  border: 1px solid #9bbbdd;
+  color: #000;
+}
+
+.CalendarDay__selected,
+.CalendarDay__selected_start,
+.CalendarDay__selected:active,
+.CalendarDay__selected:hover {
+  background-color: #0654ab;
+  border: 1px solid #0654ab;
+  color: #fff;
+}
+
+.DayPickerNavigation_leftButton__horizontal,
+.DayPickerNavigation_leftButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
+}
+
+.DayPickerNavigation_rightButton__horizontal,
+.DayPickerNavigation_rightButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
+}
+
+.DayPickerNavigation_button__horizontal,
+.DayPickerNavigation_button__horizontal:hover,
+.DayPickerNavigation_button__horizontal:active {
+  border: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 55% 50%;
+  height: 30px;
+  width: 26px;
+  background-size: 13px 20px;
+}
+
+.DayPickerNavigation_svg__horizontal {
+  display: none;
+}
+
+.DateInput_fangShape {
+  fill: #000;
+}
+
+.DayPickerKeyboardShortcuts_show,
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #0654ab;
+  border-radius: 50%;
+  color: #0654ab;
+  width: 22px;
+  height: 22px;
+  margin: 10px;
+}
+
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_show:hover .DayPickerKeyboardShortcuts_showSpan {
+  color: #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_showSpan {
+  position: static;
+  color: #0654ab;
+  font-weight: bold;
+}
+
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-image: radial-gradient(circle at 50% 82%, #0654ab 0px, #0654ab 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__selected.CalendarDay__highlighted_calendar {
+  background-image: radial-gradient(circle at 50% 82%, #fff 0px, #fff 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__blocked_out_of_range.CalendarDay__highlighted_calendar::after {
+  background-image: radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 2px, transparent 3px, transparent 100%);
+}
+
+.i-amphtml-amp-date-picker-info {
+  display: block;
+  padding: 10px;
+}
+
+/**
+ * TODO(cvializ): scope this to the date picker unless we want to enable AMP
+ * tooltips more widely ; ) This is ok now because amp-date-picker is still
+ * experimental
+ * Adapted from: https://freqdec.github.io/Pure-CSS-Tooltips/
+ */
+
+[data-date-tooltip] {
+  position: relative;
+}
+
+[data-date-tooltip]::before,
+[data-date-tooltip]::after {
+  pointer-events: none;
+  outline: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+}
+
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:hover::after {
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+[data-date-tooltip]::before {
+  content: "";
+  width: 0;
+  height: 0;
+  line-height: 0;
+  border: 5px solid transparent;
+  border-top: 5px solid #000;
+  border-bottom: 0px;
+  overflow: hidden;
+}
+
+[data-date-tooltip]::after {
+  content: attr(data-date-tooltip);
+  width: 85px;
+  margin-bottom: 5px;
+  letter-spacing: normal;
+  text-align: center;
+  text-decoration: none;
+  word-spacing: normal;
+  word-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
+  font-weight: normal;
+  font-size: 14px;
+  padding: 6px;
+  min-height: 18px;
+  color: #e9e6e6;
+  background-color: #222;
+  border-radius: 3px;
+}
+
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:focus::before,
+[data-date-tooltip]:hover::after,
+[data-date-tooltip]:focus::after {
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  opacity: 1;
+}

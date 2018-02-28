@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  InstrumentationService,
-} from '../instrumentation.js';
+import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   AnalyticsEventType,
   ClickEventTracker,
@@ -26,15 +25,16 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
-import * as sinon from 'sinon';
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {
+  InstrumentationService,
+} from '../instrumentation.js';
+import {Services} from '../../../../src/services';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {
-    installResourcesServiceForDoc,
+  installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
-import {Services} from '../../../../src/services';
+import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -106,14 +106,14 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     });
 
     it('should reject trigger in a disallowed environment', () => {
-      sandbox.stub(root, 'getType', () => 'other');
+      sandbox.stub(root, 'getType').callsFake(() => 'other');
       expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
       }).to.throw(/Trigger type "click" is not allowed in the other/);
     });
 
     it('should reject trigger that fails to initialize', () => {
-      sandbox.stub(root, 'getTracker', () => {
+      sandbox.stub(root, 'getTracker').callsFake(() => {
         throw new Error('intentional');
       });
       expect(() => {
@@ -140,7 +140,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     it('should add "click" trigger', () => {
       const tracker = root.getTracker('click', ClickEventTracker);
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       const config = {on: 'click', selector: '*'};
       const handler = function() {};
       expect(group.listeners_).to.be.empty;
@@ -156,7 +156,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     it('should add "custom" trigger', () => {
       const tracker = root.getTracker('custom', CustomEventTracker);
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       const config = {on: 'custom-event-1', selector: '*'};
       const handler = function() {};
       expect(group.listeners_).to.be.empty;
@@ -176,7 +176,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(tracker).to.be.instanceOf(SignalTracker);
 
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       const handler = function() {};
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
@@ -191,7 +191,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(tracker).to.be.instanceOf(IniLoadTracker);
 
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       const handler = function() {};
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
@@ -202,7 +202,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     it('should add "timer" trigger', () => {
       const handler = function() {};
       const unlisten = function() {};
-      const stub = sandbox.stub(TimerEventTracker.prototype, 'add',
+      const stub = sandbox.stub(TimerEventTracker.prototype, 'add').callsFake(
           () => unlisten);
       const config = {on: 'timer'};
       group.addTrigger(config, handler);
@@ -221,7 +221,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(tracker).to.be.instanceOf(VisibilityTracker);
 
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       const handler = function() {};
       group.addTrigger(config, handler);
       expect(stub).to.be.calledOnce;
@@ -237,7 +237,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       expect(getTrackerSpy).to.be.calledWith('visible');
       const tracker = root.getTrackerOptional('visible');
       const unlisten = function() {};
-      const stub = sandbox.stub(tracker, 'add', () => unlisten);
+      const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
       group.addTrigger(config, () => {});
       expect(stub).to.be.calledWith(analyticsElement, 'hidden', config);
     });
@@ -301,7 +301,7 @@ describe('amp-analytics.instrumentation OLD', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const docState = Services.documentStateFor(window);
-    sandbox.stub(docState, 'isHidden', () => false);
+    sandbox.stub(docState, 'isHidden').callsFake(() => false);
     ampdoc = new AmpDocSingle(window);
     installResourcesServiceForDoc(ampdoc);
     installPlatformService(window);
@@ -333,7 +333,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-        fn1);
+    fn1);
     ins.addListenerDepr_({'on': 'scroll', 'scrollSpec': {
       'verticalBoundaries': [92], 'horizontalBoundaries': [92]}}, fn2);
 
@@ -371,7 +371,7 @@ describe('amp-analytics.instrumentation OLD', function() {
         'verticalBoundaries': [0, 100],
         'horizontalBoundaries': [0, 100],
       }},
-        fn1);
+    fn1);
 
     // Scroll Down
     fakeViewport.getScrollTop.returns(10);
@@ -395,13 +395,13 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
-        fn1);
+    fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
       'on': 'scroll',
       'scrollSpec': {'verticalBoundaries': [], 'horizontalBoundaries': []}},
-        fn1);
+    fn1);
     expect(fn1).to.have.not.been.called;
 
     ins.addListenerDepr_({
@@ -409,7 +409,7 @@ describe('amp-analytics.instrumentation OLD', function() {
       'scrollSpec': {
         'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
-        fn1);
+    fn1);
     expect(fn1).to.have.not.been.called;
   });
 
@@ -459,7 +459,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     it('allows some trigger', () => {
       const iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
-      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      el = document.createElement('foo'); // dummy element as amp-analytics can't be used in iframe.
       iframe.contentWindow.document.body.appendChild(el);
       expect(ins.isTriggerAllowed_(AnalyticsEventType.VISIBLE, el)).to.be.true;
       expect(ins.isTriggerAllowed_(AnalyticsEventType.CLICK, el)).to.be.true;
@@ -471,7 +471,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     it('disallows scroll trigger', () => {
       const iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
-      el = document.createElement('foo');  // dummy element as amp-analytics can't be used in iframe.
+      el = document.createElement('foo'); // dummy element as amp-analytics can't be used in iframe.
       iframe.contentWindow.document.body.appendChild(el);
 
       expect(ins.isTriggerAllowed_(AnalyticsEventType.SCROLL, el)).to.be.false;

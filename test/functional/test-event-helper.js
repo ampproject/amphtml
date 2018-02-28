@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Observable} from '../../src/observable';
 import {
   createCustomEvent,
   isLoaded,
@@ -26,8 +28,6 @@ import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
 } from '../../src/event-helper-listen';
-import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('EventHelper', () => {
 
@@ -259,11 +259,12 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub =
-      sandbox.stub(self, 'addEventListener', eventListenerStubAcceptOpts);
+    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
+        eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
     removeEventListenerStub =
-      sandbox.stub(self, 'removeEventListener', eventListenerStubAcceptOpts);
+        sandbox.stub(self, 'removeEventListener').callsFake(
+            eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.true;
     expect(addEventListenerStub.called).to.be.true;
@@ -289,11 +290,12 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub =
-      sandbox.stub(self, 'addEventListener', eventListenerStubRejectOpts);
+    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
+        eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
     removeEventListenerStub =
-      sandbox.stub(self, 'removeEventListener', eventListenerStubRejectOpts);
+        sandbox.stub(self, 'removeEventListener').callsFake(
+            eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.false;
     expect(addEventListenerStub.called).to.be.true;

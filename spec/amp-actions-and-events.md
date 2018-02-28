@@ -180,9 +180,14 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
+  <tr>
+    <td><code>toggleAutoplay</code></td>
+    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
+    <td><pre>optional toggle status</pre></td>
+  </tr>
 </table>
 
-### amp-selector
+### amp-lightbox
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -190,12 +195,47 @@ event.index</pre></td>
     <th width="40%">Data</th>
   </tr>
   <tr>
-    <td><code>select</code></td>
-    <td>Fired when the user manually selects an option.</td>
-    <td><pre>// The option attribute
-// value of
-// the selected element.
-event.targetOption</pre></td>
+    <td><code>lightboxOpen</code></td>
+    <td>Fired when lightbox is fully visible.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>lightboxClose</code></td>
+    <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-sidebar
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>sidebarOpen</code></td>
+    <td>Fired when sidebar is fully opened after transition has ended.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>sidebarClose</code></td>
+    <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-video, amp-youtube
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>timeUpdate</code>(low-trust)</td>
+    <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
   </tr>
 </table>
 
@@ -323,6 +363,26 @@ event.response</pre></td>
   <tr>
     <td><code>update (default)</code></td>
     <td>Updates the DOM items to show updated content.</td>
+  </tr>
+</table>
+
+### amp-selector
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>selectUp(delta=INTEGER)</code></td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+  </tr>
+  <tr>
+    <td><code>selectDown(delta=INTEGER)</code></td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+  </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
   </tr>
 </table>
 

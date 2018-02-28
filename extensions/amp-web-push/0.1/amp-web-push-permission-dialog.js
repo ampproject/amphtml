@@ -14,10 +14,11 @@
  * the License.
  */
 
-import {tryDecodeUriComponent, parseQueryString} from '../../../src/url.js';
+import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
-import {StorageKeys, NotificationPermission} from './vars';
+import {parseQueryString, parseUrl, tryDecodeUriComponent} from '../../../src/url.js';
 
 /** @typedef {{
  *    debug: boolean,
@@ -63,7 +64,8 @@ export class AmpWebPushPermissionDialog {
    * @return {boolean}
    */
   isCurrentDialogPopup() {
-    return !!this.window_.opener && this.window_.opener !== this.window_;
+    return !!this.window_.opener &&
+      this.window_.opener !== this.window_;
   }
 
   /**
@@ -113,9 +115,7 @@ export class AmpWebPushPermissionDialog {
     const closeIcon = this.window_.document.querySelector('#close');
 
     if (closeIcon) {
-      closeIcon.addEventListener('click', () => {
-        this.closeDialog();
-      });
+      closeIcon.addEventListener('click', () => { this.closeDialog(); });
     }
   }
 
@@ -131,9 +131,7 @@ export class AmpWebPushPermissionDialog {
       const winLocation = this.window_.fakeLocation || this.window_.location;
       const queryParams = parseQueryString(winLocation.search);
       if (!queryParams['return']) {
-        throw new Error(
-          'Expecting return URL query parameter to redirect back.'
-        );
+        throw new Error('Missing required parameter.');
       }
       const redirectLocation = tryDecodeUriComponent(queryParams['return']);
       this.redirectToUrl(redirectLocation);
@@ -142,8 +140,7 @@ export class AmpWebPushPermissionDialog {
 
   /** @private */
   onPermissionDenied_() {
-    navigator.permissions
-        .query({name: 'notifications'})
+    navigator.permissions.query({name: 'notifications'})
         .then(permissionStatus => {
           permissionStatus.onchange = () => {
             this.storeNotificationPermission_();
@@ -166,7 +163,7 @@ export class AmpWebPushPermissionDialog {
     this.window_.localStorage.setItem(
         StorageKeys.NOTIFICATION_PERMISSION,
         this.window_.Notification.permission
-     );
+    );
   }
 
   /** @private */
@@ -180,7 +177,9 @@ export class AmpWebPushPermissionDialog {
 
     // Show the section that matches the current permission
     const section = this.window_.document.querySelector(
-        `[permission=${this.window_.Notification.permission}]`
+        `[permission=${escapeCssSelectorIdent(
+            this.window_.Notification.permission
+        )}]`
     );
 
     if (section) {
@@ -230,11 +229,10 @@ export class AmpWebPushPermissionDialog {
       if (this.isCurrentDialogPopup()) {
         this.ampMessenger_.connect(opener, '*');
 
-        return this.ampMessenger_
-            .send(
+        return this.ampMessenger_.send(
             WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
             permission
-          )
+        )
             .then(result => {
               const message = result[0];
               if (message && message.closeFrame) {
@@ -255,7 +253,15 @@ export class AmpWebPushPermissionDialog {
    * @param {string} url
    */
   redirectToUrl(url) {
-    this.window_.location.href = url;
+    const parsedUrl = parseUrl(url);
+    if (parsedUrl &&
+      (
+        parsedUrl.protocol === 'http:' ||
+        parsedUrl.protocol === 'https:'
+      )
+    ) {
+      this.window_.location.href = url;
+    }
   }
 }
 

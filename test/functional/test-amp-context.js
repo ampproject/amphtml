@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sinon from 'sinon';
 import {
   AmpContext,
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
-import * as sinon from 'sinon';
 import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
@@ -75,7 +75,7 @@ describe('3p ampcontext.js', () => {
         '1-291921',
         {'message': 'test'},
         '$internalRuntimeVersion$'
-      ));
+    ));
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
@@ -157,7 +157,7 @@ describe('3p ampcontext.js', () => {
     win.name = generateIncorrectAttributes();
     const platform = new Platform(window);
     expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
-        /undefined is not an object/ : /Cannot read property/);
+      /undefined is not an object/ : /Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {

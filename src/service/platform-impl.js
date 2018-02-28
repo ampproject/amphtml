@@ -125,7 +125,7 @@ export class Platform {
   getMajorVersion() {
     if (this.isSafari()) {
       return this.isIos() ? (this.getIosMajorVersion() || 0) :
-          this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+        this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
@@ -195,7 +195,7 @@ export class Platform {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-};
+}
 
 
 /**
@@ -203,4 +203,4 @@ export class Platform {
  */
 export function installPlatformService(window) {
   return registerServiceBuilder(window, 'platform', Platform);
-};
+}

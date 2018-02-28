@@ -118,7 +118,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
       opt_bypassCache);
   if (propertyName) {
     element.style[propertyName] =
-        /** @type {string} */ (opt_units ? value + opt_units : value);
+      /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 

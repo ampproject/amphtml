@@ -15,16 +15,17 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
 const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
+const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+const log = require('fancy-log');
 
-const red = util.colors.red;
-const cyan = util.colors.cyan;
+const red = colors.red;
+const cyan = colors.cyan;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -47,7 +48,7 @@ function sanityCheck(str) {
   const numMatches = numConfigs(str);
   if (numMatches != 1) {
     throw new Error(
-      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+        'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
   }
 }
 
@@ -92,8 +93,8 @@ function prependConfig(configString, fileString) {
  */
 function writeTarget(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
-    util.log(cyan(`overwriting: ${filename}`));
-    util.log(fileString);
+    log(cyan(`overwriting: ${filename}`));
+    log(fileString);
     return Promise.resolve();
   }
   return fs.writeFileAsync(filename, fileString);
@@ -121,7 +122,7 @@ function valueOrDefault(value, defaultValue) {
  * @return {!Promise}
  */
 function applyConfig(
-    config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
+  config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
       .then(() => {
         return Promise.all([
@@ -134,7 +135,7 @@ function applyConfig(
         try {
           configJson = JSON.parse(files[0].toString());
         } catch (e) {
-          util.log(red(`Error parsing config file: ${filename}`));
+          log(red(`Error parsing config file: ${filename}`));
           throw e;
         }
         if (opt_localDev) {
@@ -150,7 +151,7 @@ function applyConfig(
       })
       .then(() => {
         if (!process.env.TRAVIS) {
-          util.log('Wrote', cyan(config), 'AMP config to', cyan(target));
+          log('Wrote', cyan(config), 'AMP config to', cyan(target));
         }
       });
 }
@@ -164,27 +165,21 @@ function applyConfig(
 function enableLocalDev(config, target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   if (!process.env.TRAVIS) {
-    util.log('Enabled local development mode in', cyan(target));
+    log('Enabled local development mode in', cyan(target));
   }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
+      thirdPartyUrl: 'http://' + TESTING_HOST,
       thirdPartyFrameHost: TESTING_HOST,
       thirdPartyFrameRegex: TESTING_HOST,
     });
     if (!process.env.TRAVIS) {
-      util.log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
+      log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
           'in', cyan(target));
     }
   }
-  LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
-  const herokuConfigFile = 'node_modules/AMP_CONFIG.json';
-  fs.writeFileSync(herokuConfigFile, JSON.stringify(LOCAL_DEV_AMP_CONFIG));
-  if (!process.env.TRAVIS) {
-    util.log('Wrote', cyan(config), 'AMP config to', cyan(herokuConfigFile),
-        'for use with Heroku');
-  }
-  return LOCAL_DEV_AMP_CONFIG;
+  return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
 }
 
 /**
@@ -197,7 +192,7 @@ function removeConfig(target) {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
           if (!process.env.TRAVIS) {
-            util.log('No configs found in', cyan(target));
+            log('No configs found in', cyan(target));
           }
           return Promise.resolve();
         }
@@ -207,7 +202,7 @@ function removeConfig(target) {
         contents = contents.replace(config, '');
         return writeTarget(target, contents, argv.dryrun).then(() => {
           if (!process.env.TRAVIS) {
-            util.log('Removed existing config from', cyan(target));
+            log('Removed existing config from', cyan(target));
           }
         });
       });
@@ -218,7 +213,7 @@ function main() {
   const target = argv.target || TESTING_HOST;
 
   if (!target) {
-    util.log(red('Missing --target.'));
+    log(red('Missing --target.'));
     return;
   }
 
@@ -227,7 +222,7 @@ function main() {
   }
 
   if (!(argv.prod || argv.canary)) {
-    util.log(red('One of --prod or --canary should be provided.'));
+    log(red('One of --prod or --canary should be provided.'));
     return;
   }
 

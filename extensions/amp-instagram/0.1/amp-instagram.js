@@ -47,14 +47,14 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
-import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
+import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /*
  * These padding values are specifc to intagram embeds with
@@ -87,7 +87,7 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {string}  */
     this.captioned_ = '';
   }
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -114,7 +114,7 @@ class AmpInstagram extends AMP.BaseElement {
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     this.captioned_ = this.element.hasAttribute('data-captioned') ?
-        'captioned/' : '';
+      'captioned/' : '';
   }
 
   /** @override */
@@ -198,7 +198,7 @@ class AmpInstagram extends AMP.BaseElement {
     const eventData = getData(event);
     if (!eventData || !(isObject(eventData)
         || startsWith(/** @type {string} */ (eventData), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
     if (data === undefined) {
@@ -210,8 +210,7 @@ class AmpInstagram extends AMP.BaseElement {
         if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
           // Height returned by Instagram includes header, so
           // subtract 48px top padding
-          this.attemptChangeHeight(height - (PADDING_TOP + PADDING_BOTTOM))
-              .catch(() => {});
+          this./*OK*/changeHeight(height - (PADDING_TOP + PADDING_BOTTOM));
         }
       });
     }
@@ -232,7 +231,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 }
 

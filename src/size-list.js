@@ -117,12 +117,12 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
     }
     sizes.push({mediaQuery: mediaStr,
       size: func ? sizeStr :
-          opt_allowPercentAsLength ?
-              assertLengthOrPercent(sizeStr) :
-              assertLength(sizeStr)});
+        opt_allowPercentAsLength ?
+          assertLengthOrPercent(sizeStr) :
+          assertLength(sizeStr)});
   });
   return new SizeList(sizes);
-};
+}
 
 
 /**

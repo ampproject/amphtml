@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,28 +15,16 @@
  * limitations under the license.
  */
 
-goog.provide('parse_css.stripVendorPrefix');
 goog.provide('parse_css.validateAmp4AdsCss');
 
 goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
-goog.require('parse_css.DelimToken');
 goog.require('parse_css.ErrorToken');
-goog.require('parse_css.IdentToken');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.Stylesheet');
 goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
-
-/**
- * Strips vendor prefixes from identifiers, e.g. property names or names
- * of at rules. E.g., "-moz-keyframes" -> "keyframes".
- * TODO(powdercloud): Revisit which vendor prefixes to cover.
- * @param {string} identifier
- * @return {string}
- */
-parse_css.stripVendorPrefix = function(identifier) {
-  return identifier.replace(/^-[a-z]+-/, '');
-};
+goog.require('parse_css.TokenType');
+goog.require('parse_css.stripVendorPrefix');
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.
@@ -70,29 +58,6 @@ function firstIdent(tokens) {
     return /** @type {!parse_css.StringValuedToken} */ (tokens[1]).value;
   }
   return '';
-}
-
-/**
- * For a qualified |rule|, determine whether its selector starts with
- * '.amp-animate'.
- * @param {!parse_css.QualifiedRule} rule
- * @return {boolean}
- */
-function hasAmpAnimate(rule) {
-  /** @type {!Array<!parse_css.Token>} */
-  const prelude = rule.prelude;
-  if (prelude.length < 2) {
-    return false;
-  }
-  if (prelude[0].tokenType !== parse_css.TokenType.DELIM) {
-    return false;
-  }
-  const first = /** @type {!parse_css.DelimToken} */ (prelude[0]);
-  if (prelude[1].tokenType !== parse_css.TokenType.IDENT) {
-    return false;
-  }
-  const second = /** @type {!parse_css.IdentToken} */ (prelude[1]);
-  return first.value === '.' && second.value === 'amp-animate';
 }
 
 /** @private */
@@ -182,8 +147,7 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
 
     // If transition or animation are present:
-    // (1) Only transition, animation, transform, visibility, opacity allowed.
-    // (2) Must be qualified with .amp_animate.
+    // Only transition, animation, transform, visibility, opacity allowed.
     if (transitionOrAnimation === null) {
       return;
     }
@@ -205,17 +169,6 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             'style', decl.name, transitionOrAnimation.name,
             '[\'' + allowed.join('\', \'') + '\']'
           ]));
-    }
-    // (2) Check that the rule is qualified with .amp-animate.
-    if (!hasAmpAnimate(qualifiedRule)) {
-      if (amp.validator.LIGHT) {
-        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
-        return;
-      }
-      this.errors.push(createParseErrorTokenAt(
-          qualifiedRule, amp.validator.ValidationError.Code
-                             .CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION,
-          ['style', transitionOrAnimation.name, '.amp-animate']));
     }
   }
 

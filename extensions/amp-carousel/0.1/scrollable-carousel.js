@@ -18,8 +18,9 @@ import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
+import {numeric} from '../../../src/transition';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -44,6 +45,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
+
+    /** @private {boolean} */
+    this.useLayers_ = false;
   }
 
   /** @override */
@@ -59,8 +63,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
+
     this.cells_.forEach(cell => {
-      this.setAsOwner(cell);
+      if (!this.useLayers_) {
+        this.setAsOwner(cell);
+      }
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
@@ -70,19 +78,27 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.container_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
+
+    if (this.useLayers_) {
+      this.declareLayer(this.container_);
+    }
   }
 
   /** @override */
   layoutCallback() {
-    this.doLayout_(this.pos_);
-    this.preloadNext_(this.pos_, 1);
+    if (!this.useLayers_) {
+      this.doLayout_(this.pos_);
+      this.preloadNext_(this.pos_, 1);
+    }
     this.setControlsState();
     return Promise.resolve();
   }
 
   /** @override */
   onViewportCallback(unusedInViewport) {
-    this.updateInViewport_(this.pos_, this.pos_);
+    if (!this.useLayers_) {
+      this.updateInViewport_(this.pos_, this.pos_);
+    }
   }
 
   /** @override */
@@ -124,7 +140,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!number} startingScrollLeft
+   * @param {number} startingScrollLeft
    * @private
    */
   waitForScroll_(startingScrollLeft) {
@@ -150,10 +166,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    this.updateInViewport_(pos, this.oldPos_);
-    this.doLayout_(pos);
-    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
-    this.oldPos_ = pos;
+    if (!this.useLayers_) {
+      this.updateInViewport_(pos, this.oldPos_);
+      this.doLayout_(pos);
+      this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+      this.oldPos_ = pos;
+    }
     this.pos_ = pos;
     this.setControlsState();
   }
@@ -165,6 +183,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   nextPos_(pos, dir) {
+    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.element./*OK*/offsetWidth;
     const fullWidth = this.container_./*OK*/scrollWidth;
     const newPos = pos + dir * containerWidth;
@@ -246,6 +265,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
+    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.getLayoutWidth();
     const scrollWidth = this.container_./*OK*/scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);

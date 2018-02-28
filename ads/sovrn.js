@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
- /*
+/*
  *********
  * Existing sovrn customers feel free to contact amp-implementations@sovrn.com for assistance with setting up your amp-ad tagid
  * New customers please see www.sovrn.com to sign up and get started!

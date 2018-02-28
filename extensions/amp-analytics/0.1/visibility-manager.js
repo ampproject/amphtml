@@ -19,12 +19,13 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
+import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isArray, isFiniteNumber} from '../../../src/types';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
-import {isFiniteNumber, isArray} from '../../../src/types';
 
 const TAG = 'VISIBILITY-MANAGER';
 
@@ -230,7 +231,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(
-      element, spec, readyPromise, createReportPromiseFunc, callback) {
+    element, spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
     return this.createModelAndListen_(calcVisibility, spec, readyPromise,
         createReportPromiseFunc, callback, element);
@@ -247,7 +248,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   createModelAndListen_(calcVisibility, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     if (spec['visiblePercentageThresholds'] &&
         spec['visiblePercentageMin'] == undefined &&
         spec['visiblePercentageMax'] == undefined) {
@@ -272,7 +273,13 @@ export class VisibilityManager {
         }
         const min = Number(percents[0]);
         const max = Number(percents[1]);
-        if (min < 0 || max > 100 || min >= max) {
+        // Min and max must be valid percentages. Min may not be more than max.
+        // Max is inclusive. Min is usually exclusive, but there are two
+        // special cases: if min and max are both 0, or both 100, then both
+        // are inclusive. Otherwise it would not be possible to trigger an
+        // event on exactly 0% or 100%.
+        if (min < 0 || max > 100 || min > max ||
+            (min == max && min != 100 && max != 0)) {
           user().error(TAG,
               'visiblePercentageThresholds entry invalid min/max value');
           continue;
@@ -305,7 +312,7 @@ export class VisibilityManager {
    * @private
    */
   listen_(model, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
@@ -322,7 +329,6 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
-      model.disposeOrReset();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -331,16 +337,26 @@ export class VisibilityManager {
 
       // Optionally, element-level state.
       let layoutBox;
+
       if (opt_element) {
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
             resource ?
-            resource.getLayoutBox() :
-            Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              resource.getLayoutBox() :
+              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+        const intersectionRatio = this.getElementVisibility(opt_element);
+        const intersectionRect = this.getElementIntersectionRect(opt_element);
+        Object.assign(state, {
+          'intersectionRatio': intersectionRatio,
+          'intersectionRect': JSON.stringify(intersectionRect),
+        });
+
       } else {
         layoutBox = this.getRootLayoutBox();
       }
+      model.maybeDispose();
+
       if (layoutBox) {
         Object.assign(state, {
           'elementX': layoutBox.left,
@@ -349,7 +365,6 @@ export class VisibilityManager {
           'elementHeight': layoutBox.height,
         });
       }
-
       callback(state);
     });
 
@@ -393,6 +408,13 @@ export class VisibilityManager {
    * @abstract
    */
   getElementVisibility(unusedElement) {}
+
+  /**
+   * @param {!Element} unusedElement
+   * @return {?JsonObject}
+   * @abstract
+   */
+  getElementIntersectionRect(unusedElement) {}
 }
 
 
@@ -496,6 +518,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       trackedElement = {
         element,
         intersectionRatio: 0,
+        intersectionRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
@@ -528,6 +551,18 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
     return trackedElement && trackedElement.intersectionRatio || 0;
+  }
+
+  getElementIntersectionRect(element) {
+    if (this.getElementVisibility(element) <= 0) {
+      return null;
+    }
+    const id = getElementId(element);
+    const trackedElement = this.trackedElements_[id];
+    if (trackedElement) {
+      return /** @type {!JsonObject} */ (trackedElement.intersectionRect);
+    }
+    return null;
   }
 
   /**
@@ -594,21 +629,33 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   onIntersectionChanges_(entries) {
     entries.forEach(change => {
-      this.onIntersectionChange_(change.target, change.intersectionRatio);
+      let intersection = change.intersectionRect;
+      // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
+      // TODO(@zhouyx): Fix all InOb related type.
+      intersection = layoutRectLtwh(Number(intersection.left),
+          Number(intersection.top),
+          Number(intersection.width),
+          Number(intersection.height));
+      this.onIntersectionChange_(
+          change.target,
+          change.intersectionRatio,
+          intersection);
     });
   }
 
   /**
    * @param {!Element} target
    * @param {number} intersectionRatio
+   * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
    * @private
    */
-  onIntersectionChange_(target, intersectionRatio) {
+  onIntersectionChange_(target, intersectionRatio, intersectionRect) {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
+      trackedElement.intersectionRect = intersectionRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
         trackedElement.listeners[i](intersectionRatio);
       }
@@ -673,4 +720,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     }
     return this.parent.getElementVisibility(element);
   }
+
+  getElementIntersectionRect(element) {
+    if (this.getRootVisibility() == 0) {
+      return null;
+    }
+    return this.parent.getElementIntersectionRect(element);
+  }
+
 }

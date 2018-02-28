@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,12 @@
  */
 
 goog.provide('parse_css.validateKeyframesCss');
-
 goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.Stylesheet');
 goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
-
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.

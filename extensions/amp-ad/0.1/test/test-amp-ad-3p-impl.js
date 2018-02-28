@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {stubService} from '../../../../testing/test-helper';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {adConfig} from '../../../../ads/_config';
-import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
-import {macroTask} from '../../../../testing/yield';
+import * as adCid from '../../../../src/ad-cid';
 import * as lolex from 'lolex';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {adConfig} from '../../../../ads/_config';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
+import {stubService} from '../../../../testing/test-helper';
 
-function createAmpAd(win) {
+function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
     type: '_ping_',
     width: 300,
@@ -33,6 +33,11 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
+
+  if (attachToAmpdoc) {
+    ampdoc.getBody().appendChild(ampAdElement);
+  }
+
   ampAdElement.isBuilt = () => {return true;};
 
   return new AmpAd3PImpl(ampAdElement);
@@ -106,7 +111,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagete CID to ad iframe', () => {
-      sandbox.stub(adCid, 'getAdCid', () => {
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
         return Promise.resolve('sentinel123');
       });
 
@@ -121,7 +126,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should proceed w/o CID', () => {
-      sandbox.stub(adCid, 'getAdCid', () => {
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
         return Promise.resolve(undefined);
       });
       return ad3p.layoutCallback().then(() => {
@@ -287,7 +292,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should only allow rendering one ad per second', function* () {
-      const clock = lolex.install(win);
+      const clock = lolex.install({target: win});
       const ad3p2 = createAmpAd(win);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
@@ -355,6 +360,191 @@ describes.realWin('amp-ad-3p-impl', {
         expect(newIntersection.width).to.equal(300);
         expect(newIntersection.height).to.equal(200);
       });
+    });
+  });
+
+  describe('full width responsive ad', () => {
+
+    const VIEWPORT_WIDTH = 300;
+    const VIEWPORT_HEIGHT = 600;
+
+    beforeEach(() => {
+      adConfig['_ping_'].fullWidthHeightRatio = 1.2;
+      win.document.body.removeChild(ad3p.element);
+    });
+
+    describe('should resize correctly', () => {
+      let impl;
+      let element;
+
+      function constructImpl(config) {
+        config.type = '_ping_';
+        element = createElementWithAttributes(win.document, 'amp-ad', config);
+        win.document.body.appendChild(element);
+        impl = new AmpAd3PImpl(element);
+        impl.element.style.display = 'block';
+        impl.element.style.position = 'relative';
+        impl.element.style.top = '101vh';
+
+        // Fix the viewport to a consistent size to that the test doesn't depend
+        // on the actual browser window opened.
+        impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+      }
+
+      it('should do nothing for non-responsive', () => {
+        constructImpl({
+          width: '280',
+          height: '280',
+        });
+        const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+        expect(impl.buildCallback()).to.be.undefined;
+        expect(attemptChangeSizeSpy).to.not.be.called;
+      });
+
+      it('should schedule a resize for responsive', () => {
+        constructImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        });
+        const attemptChangeSizeSpy =
+            sandbox.stub(impl, 'attemptChangeSize').callsFake(
+                (height, width) => {
+                  expect(width).to.equal(VIEWPORT_WIDTH);
+                  expect(height).to.equal(250);
+                  return Promise.resolve();
+                });
+
+        const callback = impl.buildCallback();
+        expect(callback).to.exist;
+        expect(attemptChangeSizeSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('should align correctly', () => {
+      // Nested elements to contain the ad. (container contains the ad, and
+      // containerContainer contains that container.)
+      let containerContainer, container;
+      let viewer;
+      let element;
+      let impl;
+
+      function buildImpl(config) {
+        containerContainer = win.document.createElement('div');
+        container = win.document.createElement('div');
+        // Create an element with horizontal margins for the ad to break out
+        // of.
+        containerContainer.style.marginLeft = '5px';
+        containerContainer.style.marginRight = '9px';
+
+        // Create an element with horizontal margins for the ad to break out
+        // of.
+        container.style.marginLeft = '14px';
+        container.style.paddingLeft = '5px';
+        container.style.marginRight = '20px';
+        container.style.paddingRight = '5px';
+
+        config.type = '_ping_';
+
+        element = createElementWithAttributes(win.document, 'amp-ad', config);
+
+        container.appendChild(element);
+        containerContainer.appendChild(container);
+        win.document.body.appendChild(containerContainer);
+
+        impl = new AmpAd3PImpl(element);
+        impl.element.style.display = 'block';
+        impl.element.style.position = 'relative';
+        impl.element.style.top = '150vh';
+
+        // Stub out vsync tasks to run immediately.
+        impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
+          if (vsyncTaskSpec.measure) {
+            vsyncTaskSpec.measure(vsyncState);
+          }
+          if (vsyncTaskSpec.mutate) {
+            vsyncTaskSpec.mutate(vsyncState);
+          }
+        };
+
+        // Fix the viewport to a consistent size to that the test doesn't
+        // depend on the actual browser window opened.
+        impl.getViewport().getSize =
+              () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+
+        return impl.buildCallback();
+      }
+
+      beforeEach(() => {
+        viewer = win.services.viewer.obj;
+        viewer.toggleRuntime(); // Turn runtime on for these tests.
+      });
+
+      afterEach(() => {
+        viewer.toggleRuntime(); // Turn runtime off again.
+        win.document.body.style.direction = '';
+      });
+
+      it('should change left margin for responsive', () => {
+        return buildImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }).then(() => {
+          expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+
+          impl.onLayoutMeasure();
+          // Left margin is 19px from container and 5px from body.
+          expect(element.style.marginRight).to.be.equal('');
+          expect(element.style.marginLeft).to.be.equal('-24px');
+        });
+      });
+
+      it('should change right margin for responsive in RTL', () => {
+        win.document.body.style.direction = 'rtl';
+
+        return buildImpl({
+          width: '100vw',
+          height: '320',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }).then(() => {
+          expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+
+          impl.onLayoutMeasure();
+          // Right margin is 9px from containerContainer and 25px from
+          // container.
+          expect(element.style.marginLeft).to.be.equal('');
+          expect(element.style.marginRight).to.be.equal('-49px');
+        });
+      });
+    });
+  });
+});
+
+describe('#getPriority', () => {
+  describes.realWin('with shadow AmpDoc', {
+    amp: {
+      ampdoc: 'shadow',
+    },
+  }, env => {
+    it('should return priority of 1', () => {
+      const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
+      expect(ad3p.getPriority()).to.equal(1);
+    });
+  });
+
+  describes.realWin('with single AmpDoc', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    it('should return priority of 2', () => {
+      const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
+      expect(ad3p.getPriority()).to.equal(2);
     });
   });
 });

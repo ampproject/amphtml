@@ -1,3 +1,40 @@
 PASS
+|  <!--
+|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <title>Twitter examples</title>
+|    <link rel="canonical" href="amps.html" >
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+|    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+>>   ^~~~~~~~~
 feature_tests/old-boilerplate.html:24:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
+>>                                             ^~~~~~~~~
 feature_tests/old-boilerplate.html:24:44 The tag 'noscript > style[amp-boilerplate] - old variant' is deprecated - use 'noscript > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <h1>AMP boilerplate</h1>
+|    <h2>Testing if the old validator is still accepted.</h2>
+|    <p>
+|      "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit..."
+|      "There is no one who loves pain itself, who seeks after it and wants to have it, simply because it is pain..."
+|    </p>
+|  </body>
+|  </html>

@@ -30,9 +30,93 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 11:00 PM, Feb 7, 2018 UTC
+
+Validator version 317
+
+Rules version 566
+
+Includes:
+ - #12600
+ - Prefer errors based on specificity over volume.
+ - #12832
+ - #12904
+ - #12654
+ - #12836
+ - #13001
+ - #12906
+ - #13036
+ - #12896
+ - #13073
+ - AttrSpec supports requires_extension.
+ - #12955
+ - #13204
+ - #12798
+
+### 7:00 PM, January 29, 2018 UTC
+
+Validator version 311
+
+Rules version 546
+
+Includes:
+ - #7394
+ - #11198
+ - #12196
+ - #12285
+ - #12352
+ - #12425
+ - #12452
+ - #12457
+ - #12461
+ - #12471
+ - #12483
+ - #12664
+
+
+### 7:00 PM, January 3, 2018 UTC
+
+Validator version 288
+
+Rules version 532
+
+Includes:
+ - #11953
+ - #12095
+
+
+### 9:00 PM, December 5, 2017 UTC
+
+Validator version 266
+
+Rules version 525
+
+Includes:
+ - #10323
+ - #12111
+ - #12102
+ - #12030
+ - #12044, amp-animation: remove mandatory body as parent
+ - #12015, #12004
+
+### 3:00 AM, November 29, 2017 UTC
+
+Validator version 265
+
+Rules version 519
+
+Includes:
+ - #11851 Whitelist additional attributes on amp-story-grid-layer direct children
+ - Only support http and https URLs for the 'cite' attribute.
+ - #11962
+ - #11965
+ - Remove warnings for non-usage of grandfathered extensions.
+
+
 ### 7:00 PM, November 15, 2017 UTC
 
 Validator version 263
+
 Rules version 514
 
 Includes:
@@ -48,6 +132,7 @@ Includes:
 ### 7:30 PM, October 23, 2017 UTC
 
 Validator version 256
+
 Rules version 501
 
 Includes:
@@ -62,6 +147,7 @@ Includes:
 ### 9:00 PM, October 10, 2017 UTC
 
 Validator version 253
+
 Rules version 493
 
 Includes:
@@ -71,6 +157,7 @@ Includes:
 ### 8:00 PM, October 4, 2017 UTC
 
 Validator version 252
+
 Rules version 491
 
 Inclues:
@@ -82,6 +169,7 @@ Inclues:
 ### 3:15 PM, September 26, 2017 UTC
 
 Validator Version 251
+
 Spec Version 485
 
 Includes:
@@ -95,7 +183,8 @@ Includes:
 ### 9:00 PM, September 6, 2017 UTC
 
 Validator Version 248
-Spec Version 474
+
+Rules Version 474
 
 Includes:
  - #11087
@@ -103,7 +192,8 @@ Includes:
 ### 11:00 PM, August 30, 2017 UTC
 
 Validator Version 246
-Spec Version 473
+
+Rules Version 473
 
 Includes:
  - `<amp-position-observer>` #10818
@@ -114,7 +204,8 @@ Includes:
 ### 7:00 PM, August 23, 2017 UTC
 
 Validator Version 245
-Spec Version 466
+
+Rules Version 466
 
 Includes:
  - Whitelist `use.typekit.net` font provider #10888 & #10889
@@ -125,7 +216,8 @@ Includes:
 ### 11:00 PM, August 14, 2017 UTC
 
 Validator Version 244
-Spec Version 458
+
+Rules Version 458
 
 Includes:
  - `<amp-video crossorigin>` attribute #10635
@@ -133,7 +225,8 @@ Includes:
 ### 9:00 PM, July 27, 2017 UTC
 
 Validator Version 244
-Spec Version 456
+
+Rules Version 456
 
 Includes:
  - `amp-google-client-id-api` meta tag
@@ -141,7 +234,8 @@ Includes:
 ### 12:01 PM, July 21, 2017 UTC
 
 Validator Version 244
-Spec Version 455
+
+Rules Version 455
 
 Includes:
 
@@ -160,7 +254,8 @@ Includes:
 ### 9:00 PM, June 26, 2017 UTC
 
 Validator Version 239
-Spec Version 443
+
+Rules Version 443
 
 Includes:
 
@@ -187,7 +282,8 @@ Includes:
 **Rolled Back**
 
 Validator Version 234
-Spec Version 433
+
+Rules Version 433
 
 Includes:
 
@@ -202,7 +298,8 @@ Includes:
 ### 6:00 PM, June 8, 2017 UTC
 
 Validator Version 232
-Spec Version 427
+
+Rules Version 427
 
 Includes:
 
@@ -211,7 +308,8 @@ Includes:
 ### 6:00 PM, June 7, 2017 UTC
 
 Validator Version 232
-Spec Version 426
+
+Rules Version 426
 
 Includes:
 
@@ -224,7 +322,8 @@ Includes:
 ### 11:30 PM, May 22, 2017 UTC
 
 Validator Version 232
-Spec Version 421
+
+Rules Version 421
 
 Includes:
 

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, assertVendor, TransportMode} from './config';
-import {createFilter} from './filters/factory';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {
+  MessageType,
+  deserializeMessage,
+  listen,
+} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
+import {TransportMode, assertConfig, assertVendor} from './config';
+import {createFilter} from './filters/factory';
+import {dev, user} from '../../../src/log';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {user, dev} from '../../../src/log';
+import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {makeClickDelaySpec} from './filters/click-delay';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
-import {
-  listen,
-  deserializeMessage,
-  MessageType,
-} from '../../../src/3p-frame-messaging';
-import {getData} from '../../../src/event-helper';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -181,7 +181,7 @@ export class AmpAdExit extends AMP.BaseElement {
           // Either it's not a 3p analytics variable, or it is one
           // but no matching response has been received yet.
           return (customVarName in args) ?
-              args[customVarName] : customVar.defaultValue;
+            args[customVarName] : customVar.defaultValue;
         };
         whitelist[customVarName] = true;
       }

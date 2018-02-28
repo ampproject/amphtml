@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseCss} from '../css-expr';
 import * as ast from '../css-expr-ast';
+import {parseCss} from '../css-expr';
 
 
 describe('CSS parse', () => {
@@ -971,9 +971,10 @@ describes.sandboxed('CSS resolve', {}, () => {
         dimStack.pop();
         return res;
       };
-      sandbox.stub(ast.CssPassthroughNode.prototype, 'resolve', function() {
-        return new ast.CssPassthroughNode(this.css_ + dimStack.join(''));
-      });
+      sandbox.stub(ast.CssPassthroughNode.prototype, 'resolve').callsFake(
+          function() {
+            return new ast.CssPassthroughNode(this.css_ + dimStack.join(''));
+          });
     });
 
     it('should always consider as const', () => {
@@ -1200,7 +1201,7 @@ describes.sandboxed('CSS resolve', {}, () => {
 
   describe('rand', () => {
     beforeEach(() => {
-      sandbox.stub(Math, 'random', () => 0.25);
+      sandbox.stub(Math, 'random').callsFake(() => 0.25);
     });
 
     it('should always consider as non-const', () => {

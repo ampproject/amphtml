@@ -17,7 +17,9 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
+import {findIndex} from './utils/array';
 import {toWin} from './types';
+
 
 const PROP_ = '__AMP_Gestures';
 
@@ -171,6 +173,35 @@ export class Gestures {
       this.overservers_[type] = overserver;
     }
     return overserver.add(handler);
+  }
+
+  /**
+   * Unsubscribes all handlers from the given gesture recognizer. Returns
+   * true if anything was done. Returns false if there were no handlers
+   * registered on the given gesture recognizer in first place.
+   *
+   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @return {boolean}
+   */
+  removeGesture(recognizerConstr) {
+    const type = new recognizerConstr(this).getType();
+    const overserver = this.overservers_[type];
+    if (overserver) {
+      overserver.removeAll();
+      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      if (index < 0) {
+        return false;
+      }
+      // Remove the recognizer as well as all associated tracking state
+      this.recognizers_.splice(index, 1);
+      this.ready_.splice(index, 1);
+      this.pending_.splice(index, 1);
+      this.tracking_.splice(index, 1);
+      delete this.overservers_[type];
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**

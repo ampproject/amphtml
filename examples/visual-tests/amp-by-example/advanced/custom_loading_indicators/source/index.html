@@ -1,0 +1,85 @@
+<!--
+  ## Introduction
+
+  While the AMP runtime fetches content from endpoints, it will display a loading indicator. This indicator is used by `amp-list`, `amp-iframe`, `amp-video`, and any other components that talk to an endpoint. While the loading indicator is not intended [yet](https://github.com/ampproject/amphtml/issues/4299) to be fully customizable, this sample shows how some custom styling can still be applied.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Custom Loading Indicators</title>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/custom_loading_indicators/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-list` and `amp-mustache` components in the header -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <!--
+    ## CSS for the custom loading indicator
+  -->
+  <!-- 
+    The loading indicator consists of three `div`s all within a `div.i-amphtml-loader`, which lastly is placed in a `div.i-amphtml-loading-container`.
+
+    We'll set up a 3D spinner instead (inspired by http://tobiasahlin.com/spinkit/) for any loading indicators in elements with the class `custom-loader`. First we hide the dots, then we style their outer div with a CSS animation that resembles a square spinning in space. Since [`i-amp...` classes are not meant to be customized](https://www.ampproject.org/docs/reference/spec#class-and-tag-names), we'll target the `.amp-active` class that the runtime adds to the loader during its display. 
+  -->
+  <style amp-custom>
+    amp-list, amp-iframe {
+      margin-left: 1em;
+    }
+
+    .custom-loader .amp-active {
+      max-width: 10%;
+      max-height: 50%;
+      width: 2em;
+      height: 2em;
+      background-color: #333;
+
+      margin: -1em auto;
+      animation: sk-rotateplane 1.2s infinite ease-in-out;
+    }
+    @keyframes sk-rotateplane {
+      0% { transform: perspective(120px); }
+      50% { transform: perspective(120px) rotateX(-180deg); }
+      100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
+    }
+    /* Hide the three default dots */
+    .custom-loader .amp-active > div {
+      display: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ## Default loading indicator -->
+<!-- While loading content from an endpoint, the default loading indicator (three dots) will be displayed. This iframe takes 5 seconds to be returned by the slow-iframe endpoint. -->
+<amp-iframe title="Displays default loading indicator (three dots) for 5 seconds"
+            width="auto" height="250"
+            layout="fixed-height"
+            frameborder="0"
+            src="https://ampbyexample.com/samples_templates/slow-iframe/?delay=5000">
+</amp-iframe>
+
+<!-- ## Displaying a loading indicator -->
+<!--
+  The `slow-json` endpoint returns a basic JSON response, with a configurable delay (10 seconds), in order to see the loading indicator.
+  Our custom loading indicator has a class of `custom-loader`.
+-->
+<amp-list class="custom-loader" 
+          width="auto" 
+          height="250" 
+          layout="fixed-height" 
+          src="https://ampbyexample.com/samples_templates/slow-json/?delay=10000">
+          <template type="amp-mustache">
+            <div>
+              <p>{{title}}</p>
+            </div>
+          </template>
+</amp-list>
+
+</body>
+</html>

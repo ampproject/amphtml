@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
+  getExtraParamsUrl,
   getTrackImpressionPromise,
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
-  getExtraParamsUrl,
 } from '../../src/impression';
-import {toggleExperiment} from '../../src/experiments';
-import {Services} from '../../src/services';
 import {macroTask} from '../../testing/yield';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('impression', () => {
 
@@ -52,10 +52,10 @@ describe('impression', () => {
     }));
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
     isTrustedViewer = false;
-    sandbox.stub(viewer, 'isTrustedViewer', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
     });
-    sandbox.stub(viewer, 'isTrustedReferrer', () => {
+    sandbox.stub(viewer, 'isTrustedReferrer').callsFake(() => {
       return Promise.resolve(isTrustedReferrer);
     });
     resetTrackImpressionPromiseForTesting();
