@@ -29,6 +29,9 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+export let SubscriptionService;
+
 export class Services {
   /**
    * Returns a promise for the Access service.
@@ -39,6 +42,17 @@ export class Services {
     return (/** @type {!Promise<
         !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
         getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
@@ -152,11 +166,11 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/document-click.ClickHandler}
+   * @return {!./service/navigation.Navigation}
    */
-  static clickHandlerForDoc(nodeOrDoc) {
-    return /** @type {!./service/document-click.ClickHandler} */ (
-      getServiceForDoc(nodeOrDoc, 'clickhandler'));
+  static navigationForDoc(nodeOrDoc) {
+    return /** @type {!./service/navigation.Navigation} */ (
+      getServiceForDoc(nodeOrDoc, 'navigation'));
   }
 
   /**

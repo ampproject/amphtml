@@ -55,7 +55,10 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 # Test AMP
 
-* Run the tests: `gulp test`
+* Run all tests: `gulp test`
+* Run only the unit tests: `gulp test --unit` (doesn't build the runtime)
+* Run only the integration tests: `gulp test --integration` (builds the runtime)
+* Run tests, but skip building after having done so previously: `gulp test --nobuild`
 * Run the tests in a specified set of files: `gulp test --files=<filename>`
 * Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
 * To run only a certain set of Mocha tests change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
@@ -87,6 +90,8 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
 * For pushes after the first, just use `git push`
 * If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
+* If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
+
 * Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
 
 # Delete your branch after your changes are merged (optional)

@@ -17,6 +17,7 @@
 tags: {  # amp-anim
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
@@ -27,9 +28,21 @@ tags: {  # amp-anim
   }
   attr_lists: "common-extension-attrs"
 }
+tags: {  # amp-anim
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "amp-anim extension .js script (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-anim"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 tags: {  # <amp-anim>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANIM"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
@@ -44,6 +57,26 @@ tags: {  # <amp-anim>
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
     supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-anim>
+  html_format: AMP4EMAIL
+  tag_name: "AMP-ANIM"
+  spec_name: "AMP-ANIM (AMP4EMAIL)"
+  requires_extension: "amp-anim"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "controls" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-amp4email"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

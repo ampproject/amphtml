@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {escapeCssSelectorIdent} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
 /**
@@ -71,6 +73,13 @@ const VENDOR_ANIMATIONEND_EVENTS = ['animationend', 'webkitAnimationEnd'];
 const GOTO_AND_PAUSE_DELAY = 40;
 
 /**
+ * Property name used to store pending goto counters on an element.
+ * @const {string}
+ * Exported for test only.
+ */
+export const GOTO_COUNTER_PROP = '__AMP_GWD_GOTO_COUNTERS__';
+
+/**
  * The GWD runtime service ID (arbitrary string).
  * @const {string}
  */
@@ -90,9 +99,9 @@ const LOG_ID = 'GWD';
  * @private
  */
 function getCounter(receiver, counterName) {
-  if (receiver.gwdGotoCounters &&
-      receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
-    return receiver.gwdGotoCounters[counterName];
+  if (receiver[GOTO_COUNTER_PROP] &&
+      receiver[GOTO_COUNTER_PROP].hasOwnProperty(counterName)) {
+    return receiver[GOTO_COUNTER_PROP][counterName];
   }
   return 0;
 }
@@ -106,13 +115,13 @@ function getCounter(receiver, counterName) {
 function setCounter(receiver, counterName, counterValue) {
   // Ensure a goto counters map with an empty counter is initialized for the
   // given element and goto event name.
-  if (!receiver.gwdGotoCounters) {
-    receiver.gwdGotoCounters = {};
+  if (!receiver[GOTO_COUNTER_PROP]) {
+    receiver[GOTO_COUNTER_PROP] = {};
   }
-  if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
-    receiver.gwdGotoCounters[counterName] = 0;
+  if (!receiver[GOTO_COUNTER_PROP].hasOwnProperty(counterName)) {
+    receiver[GOTO_COUNTER_PROP][counterName] = 0;
   }
-  receiver.gwdGotoCounters[counterName] = counterValue;
+  receiver[GOTO_COUNTER_PROP][counterName] = counterValue;
 }
 
 /**
@@ -168,28 +177,92 @@ export class AmpGwdRuntimeService {
   }
 
   /**
-   * Stops animations on the previously-active page and starts them on the
-   * newly-active page.
-   * @param {number} index The index of the newly-active slide.
+   * Handles a page switch by resetting animations and goto counters on the
+   * currently-active page and starting animations on the new page.
+   * @param {number} index The index of the newly-active page (a slide in the
+   *     pagedeck amp-carousel).
    */
   setCurrentPage(index) {
-    // Turn off animations on the previously-active page, if there was one.
+    const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
+
+    if (gwdPages.length == 0) {
+      return;
+    }
+
+    // Deactivate the outgoing current page, if there is one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const currentPageEl = this.ampdoc_.getRootNode().querySelector(
-        `.${GWD_PAGE_WRAPPER_CLASS}.${PlaybackCssClass.PLAY}`);
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}.${
+          escapeCssSelectorIdent(PlaybackCssClass.PLAY)
+        }`);
 
     if (currentPageEl) {
-      currentPageEl.classList.remove(PlaybackCssClass.PLAY);
+      this.deactivatePage_(currentPageEl);
     }
 
     // Activate animations on the new current page.
-    const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
-        `.${GWD_PAGE_WRAPPER_CLASS}`);
     const newPageEl = gwdPages[index];
 
     if (newPageEl) {
-      newPageEl.classList.add(PlaybackCssClass.PLAY);
+      this.activatePage_(newPageEl);
+    } else {
+      user().error(LOG_ID, 'Could not find page with index ' + index + '.');
     }
+  }
+
+  /**
+   * Sets a page as the current active page by enabling animations on it.
+   * Animations are prevented from running on inactive pages.
+   * @param {!Element} pageEl
+   * @private
+   */
+  activatePage_(pageEl) {
+    pageEl.classList.add(PlaybackCssClass.PLAY);
+  }
+
+  /**
+   * Sets a page inactive by disabling all animations and resetting all
+   * animation state (such as goto counters) on all elements within the page.
+   * @param {!Element} pageEl
+   * @private
+   */
+  deactivatePage_(pageEl) {
+    // Cancel and disable all animations on the page.
+    pageEl.classList.remove(PlaybackCssClass.PLAY);
+
+    // Reset other animation state on the page and all descendants.
+    [pageEl]
+        .concat(toArray(pageEl.querySelectorAll('*')))
+        .forEach(el => this.resetAnimatedElement_(el));
+  }
+
+  /**
+   * Resets all transient GWD animation state on an animated element associated
+   * with a page (either a descendant of the page or the page element itself).
+   * The page elements themselves have an additional class which controls
+   * whether any animations may play on the page (PlaybackCssClass.PLAY); this
+   * class is toggled separately in activatePage_ and deactivatePage_.
+   * @param {!Element} element A descendant of a page or a page element.
+   * @private
+   */
+  resetAnimatedElement_(element) {
+    // Reset animation-play-state for animations which have been paused.
+    element.classList.remove(PlaybackCssClass.PAUSE);
+
+    // Cancel any active label animations in the page. The main non-label
+    // animations will be automatically cancelled when the play class is
+    // removed above, but because goto animations are activated with a special
+    // class, the class must be removed manually.
+    if (element.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)) {
+      const activeGotoAnimation =
+          element.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
+      element.classList.remove(activeGotoAnimation);
+      element.removeAttribute(CURRENT_LABEL_ANIMATION_ATTR);
+    }
+
+    // Clear all gotoAndPlayNTimes counters.
+    delete element[GOTO_COUNTER_PROP];
   }
 
   /**

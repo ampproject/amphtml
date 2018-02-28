@@ -30,7 +30,6 @@ const isWatching = (argv.watch || argv.w) || false;
 
 const options = {
   fix: false,
-  rulePaths: ['build-system/eslint-rules/'],
 };
 
 /**
@@ -133,7 +132,11 @@ function lint() {
 }
 
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
+gulp.task(
+    'lint',
+    'Validates against Google Closure Linter',
+    ['update-packages'],
+    lint,
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',

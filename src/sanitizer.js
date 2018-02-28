@@ -28,10 +28,11 @@ import {startsWith} from './string';
 import {urls} from './config';
 import {user} from './log';
 
-
 /** @private @const {string} */
 const TAG = 'sanitizer';
 
+/** @private @const {string} */
+const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
 
 /**
  * @const {!Object<string, boolean>}
@@ -57,7 +58,6 @@ const BLACKLISTED_TAGS = dict({
   'video': true,
 });
 
-
 /** @const {!Object<string, boolean>} */
 const SELF_CLOSING_TAGS = dict({
   'br': true,
@@ -77,7 +77,6 @@ const SELF_CLOSING_TAGS = dict({
   'meta': true,
   'param': true,
 });
-
 
 /** @const {!Array<string>} */
 const WHITELISTED_FORMAT_TAGS = [
@@ -99,7 +98,6 @@ const WHITELISTED_FORMAT_TAGS = [
   'u',
 ];
 
-
 /** @const {!Array<string>} */
 const WHITELISTED_ATTRS = [
   'fallback',
@@ -116,6 +114,9 @@ const WHITELISTED_ATTRS = [
 
 /** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
+  'a': [
+    'rel',
+  ],
   'div': [
     'template',
   ],
@@ -129,10 +130,8 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
   ],
 });
 
-
 /** @const {!RegExp} */
 const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
-
 
 /** @const {!Array<string>} */
 const WHITELISTED_TARGETS = ['_top', '_blank'];
@@ -153,7 +152,6 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   },
 });
 
-
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
   'form',
@@ -164,14 +162,12 @@ const BLACKLISTED_FIELDS_ATTR = [
   'formenctype',
 ];
 
-
 /** @const {!Object<string, !Array<string>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'input': BLACKLISTED_FIELDS_ATTR,
   'textarea': BLACKLISTED_FIELDS_ATTR,
   'select': BLACKLISTED_FIELDS_ATTR,
 });
-
 
 /**
  * Sanitizes the provided HTML.
@@ -318,7 +314,6 @@ export function sanitizeHtml(html) {
   return output.join('');
 }
 
-
 /**
  * Sanitizes the provided formatting HTML. Only the most basic inline tags are
  * allowed, such as <b>, <i>, etc.
@@ -349,7 +344,6 @@ export function sanitizeFormattingHtml(html) {
       }
   );
 }
-
 
 /**
  * Whether the attribute/value are valid.
@@ -408,6 +402,45 @@ export function isValidAttr(tagName, attrName, attrValue) {
 }
 
 /**
+ * The same as rewriteAttributeValue() but actually updates the element and
+ * modifies other related attribute(s) for special cases, i.e. `target` for <a>.
+ * @param {!Element} element
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!Location=} opt_location
+ * @return {string}
+ */
+export function rewriteAttributesForElement(
+  element, attrName, attrValue, opt_location)
+{
+  const tag = element.tagName.toLowerCase();
+  const attr = attrName.toLowerCase();
+  const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
+  // When served from proxy (CDN), changing an <a> tag from a hash link to a
+  // non-hash link requires updating `target` attribute per cache modification
+  // rules. @see amp-cache-modifications.md#url-rewrites
+  const isProxy = isProxyOrigin(opt_location || self.location);
+  if (isProxy && tag === 'a' && attr === 'href') {
+    const oldValue = element.getAttribute(attr);
+    const newValueIsHash = rewrittenValue[0] === '#';
+    const oldValueIsHash = oldValue && oldValue[0] === '#';
+
+    if (newValueIsHash && !oldValueIsHash) {
+      // Save the original value of `target` so it can be restored (if needed).
+      if (!element[ORIGINAL_TARGET_VALUE]) {
+        element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
+      }
+      element.removeAttribute('target');
+    } else if (oldValueIsHash && !newValueIsHash) {
+      // Restore the original value of `target` or default to `_top`.
+      element.setAttribute('target', element[ORIGINAL_TARGET_VALUE] || '_top');
+    }
+  }
+  element.setAttribute(attr, rewrittenValue);
+  return rewrittenValue;
+}
+
+/**
  * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
  * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
  * @see resolveUrlAttr for rewriting rules.
@@ -415,6 +448,7 @@ export function isValidAttr(tagName, attrName, attrValue) {
  * @param {string} attrName
  * @param {string} attrValue
  * @return {string}
+ * @private Visible for testing.
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
   const tag = tagName.toLowerCase();

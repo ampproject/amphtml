@@ -468,7 +468,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.be.undefined;
-          expect(e.retriable === true).to.be.false;
+          expect(e.retriable).to.not.equal(true);
         });
       });
 
@@ -486,7 +486,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 
@@ -504,7 +504,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 

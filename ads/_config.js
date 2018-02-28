@@ -133,6 +133,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adplugg: {
+    prefetch: 'https://www.adplugg.com/serve/js/ad.js',
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
@@ -220,6 +225,17 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  appvador: {
+    prefetch: [
+      'https://cdn.apvdr.com/js/VastAdUnit.min.js',
+      'https://cdn.apvdr.com/js/VideoAd.min.js',
+      'https://cdn.apvdr.com/js/VideoAd3PAS.min.js',
+      'https://cdn.apvdr.com/js/VideoAdAutoPlay.min.js',
+      'https://cdn.apvdr.com/js/VideoAdNative.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
@@ -255,6 +271,9 @@ export const adConfig = {
     ],
   },
 
+  broadstreetads: {
+    prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
+  },
 
   caajainfeed: {
     prefetch: [
@@ -433,7 +452,10 @@ export const adConfig = {
     prefetch: 'https://spamp.i-mobile.co.jp/script/amp.js',
     preconnect: 'https://spad.i-mobile.co.jp',
   },
-
+  imonomy: {
+    prefetch: 'https://srv.imonomy.com/amp/amp.js',
+    renderStartImplemented: true,
+  },
   improvedigital: {},
 
   industrybrains: {
@@ -536,6 +558,10 @@ export const adConfig = {
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  medyanet: {
     renderStartImplemented: true,
   },
 
@@ -765,12 +791,21 @@ export const adConfig = {
 
   triplelift: {},
 
+  trugaze: {
+    clientIdScope: '__tg_amp',
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  videonow: {
     renderStartImplemented: true,
   },
 

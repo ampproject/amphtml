@@ -28,9 +28,9 @@ FAIL
 |    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 |    <style amp-boilerplate>incorrect cdata</style><noscript><style amp-boilerplate>incorrect cdata</style></noscript>
 >>   ^~~~~~~~~
-feature_tests/incorrect_mandatory_style.html:28:2 The mandatory text (CDATA) inside tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/incorrect_mandatory_style.html:28:2 The mandatory text inside tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>                                                           ^~~~~~~~~
-feature_tests/incorrect_mandatory_style.html:28:58 The mandatory text (CDATA) inside tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/incorrect_mandatory_style.html:28:58 The mandatory text inside tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>

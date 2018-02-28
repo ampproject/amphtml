@@ -77,6 +77,16 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
+      'extensions/amp-subscriptions-google/**/*.js->' +
+          'third_party/subscriptions-project/swg.js',
     ],
   },
   // Rules for 3p
@@ -291,6 +301,7 @@ exports.rules = [
     ],
     whitelist: [
       'ads/ix.js->ads/google/doubleclick.js',
+      'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
       'ads/openx.js->ads/google/doubleclick.js',

@@ -14,14 +14,32 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {CommonSignals} from '../../../src/common-signals';
+import {EventType} from './events';
+import {Services} from '../../../src/services';
+import {StateChangeType} from './navigation-state';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {isJsonScriptTag} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 
+
+// TODO(ccordry) replace these constants with user config
+/** @const */
+const MIN_INTERVAL = 3;
 
 /** @const */
-// const EXPERIMENT = 'amp-story-auto-ad';
+const MAX_NUMBER = 2;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
+
+/** @const */
+const AD_TAG = 'amp-ad';
+
+/** @const */
+const MUSTACHE_TAG = 'amp-mustache';
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -29,42 +47,247 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?AmpStory} */
+    /** @private {?./amp-story.AmpStory} */
     this.ampStory_ = null;
+
+    /** @private {?./navigation-state.NavigationState} */
+    this.navigationState_ = null;
+
+    /** @private {number} */
+    this.interactions_ = 0;
+
+    /** @private {!Array} */
+    this.adPageEls_ = [];
+
+    /** @private {number} */
+    this.adsPlaced_ = 0;
+
+    /** @private {number} */
+    this.adPagesCreated_ = 0;
+
+    /** @private {boolean} */
+    this.isCurrentAdLoaded_ = false;
+
+    /** @private {Object<string, string>} */
+    this.config_ = {};
   }
 
   /** @override */
   buildCallback() {
-    const ampStory = this.element.parentElement;
-    user().assert(ampStory.tagName === 'AMP-STORY',
+    const ampStoryElement = this.element.parentElement;
+    user().assert(ampStoryElement.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
-    this.ampStory_ = ampStory;
+
+    const ampdoc = this.getAmpDoc();
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, AD_TAG);
+    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+        ampdoc, MUSTACHE_TAG);
+
+    ampStoryElement.getImpl().then(impl => {
+      this.ampStory_ = impl;
+      this.navigationState_ = this.ampStory_.getNavigationState();
+      this.navigationState_.observe(this.handleStateChange_.bind(this));
+    });
   }
+
 
   /** @override */
   isLayoutSupported() {
     return true;
   }
 
+
   /** @override */
   layoutCallback() {
-    this.ampStory.appendChild(this.makeMockPage());
+    return this.createStoryLoadPromise_()
+        .then(() => {
+          this.readConfig_();
+          this.schedulePage_();
+        });
   }
 
-  // temporary to be replaced with real page later
-  makeMockPage() {
-    const ampStoryAdPage = document.createElement('amp-story-page');
-    ampStoryAdPage.id = 'i-amphtml-ad-page-1';
-    ampStoryAdPage./*OK*/innerHTML = `
-      <amp-story-grid-layer template="vertical">
-        <h1>First Ad Page</h1>
-        <p>This is the first ad shown in this story.</p>
-      </amp-story-grid-layer>
-      `;
+
+  /**
+   * promise that resolves on STORY_LOADED event
+   * @private
+   * @return {!Promise}
+   */
+  createStoryLoadPromise_() {
+    return new Promise(resolve => {
+      this.ampStory_.element.addEventListener(EventType.STORY_LOADED, resolve);
+    });
+  }
+
+
+  /**
+   * load in config from child <script> element
+   * @private
+   */
+  readConfig_() {
+    const child = this.element.children[0];
+    user().assert(
+        isJsonScriptTag(child),
+        `The <${TAG}> config should ` +
+        'be inside a <script> tag with type="application/json"');
+
+    this.config_ = parseJson(child.textContent);
+    this.validateConfig_();
+  }
+
+
+  /**
+   * make sure given JSON config is shaped correctly
+   * @private
+   */
+  validateConfig_() {
+    const adAttributes = this.config_['ad-attributes'];
+    user().assert(adAttributes, `<${TAG}>: Error reading config.` +
+      'Top level JSON should have an "ad-attributes" key');
+
+    const type = adAttributes.type;
+    user().assert(type, `<${TAG}>: Error reading config.` +
+      'Missing ["ad-attribues"]["type"] key');
+  }
+
+
+  /**
+   * build page and start preloading
+   * @private
+   */
+  schedulePage_() {
+    const page = this.createAdPage_();
+    this.adPageEls_.push(page);
+
+    this.ampStory_.element.appendChild(page);
+
+    page.getImpl().then(impl => {
+      this.ampStory_.addPage(impl);
+    });
+  }
+
+
+  /**
+   * create an `amp-story-page` containing an `amp-ad`
+   * @private
+   */
+  createAdPage_() {
+    // TODO(ccordry) add new <amp-story-cta-layer>
+    const ampStoryAdPage = this.createPageElement_();
+    const ampAd = this.createAdElement_();
+
+    ampStoryAdPage.appendChild(ampAd);
+
+    this.isCurrentAdLoaded_ = false;
+
+    // set up listener for ad-loaded event
+    ampAd.getImpl().then(impl => {
+      const signals = impl.signals();
+      return signals.whenSignal(CommonSignals.INI_LOAD);
+    }).then(() => {
+      this.isCurrentAdLoaded_ = true;
+    });
+
     return ampStoryAdPage;
+  }
+
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createPageElement_() {
+    const id = ++this.adPagesCreated_;
+    const attributes = dict({
+      'id': `i-amphtml-ad-page-${id}`,
+      'ad': '',
+      'distance': '1',
+    });
+
+    return createElementWithAttributes(
+        document, 'amp-story-page', attributes);
+  }
+
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  createAdElement_() {
+    const defaultAttrs = {
+      'id': 'i-amphtml-story-ad',
+      'height': '100vh',
+      'width': '100vw',
+    };
+
+    const configAttrs = this.config_['ad-attributes'];
+    const attributes = /** @type {!JsonObject} */ (Object.assign({},
+        defaultAttrs, configAttrs));
+
+    return createElementWithAttributes(
+        document, 'amp-ad', attributes);
+  }
+
+
+  /**
+   * @private
+   */
+  handleStateChange_(stateChangeEvent) {
+    switch (stateChangeEvent.type) {
+      case StateChangeType.ACTIVE_PAGE:
+        const {pageIndex, pageId} = stateChangeEvent.value;
+        this.handleActivePageChange_(
+            dev().assertNumber(pageIndex),
+            dev().assertString(pageId));
+        break;
+    }
+  }
+
+
+  /**
+   * @param {number} pageIndex
+   * @param {string} pageId
+   * @private
+   */
+  handleActivePageChange_(pageIndex, pageId) {
+    this.interactions_++;
+    // temp before config in passed in
+    if (this.interactions_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+      this.placeAdAfterPage_(pageId);
+      this.interactions_ = 0;
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  allAdsPlaced_() {
+    return this.adsPlaced_ >= MAX_NUMBER;
+  }
+
+
+  /**
+   * Place ad based on user config
+   * @param {string} currentPageId
+   * @private
+   */
+  placeAdAfterPage_(currentPageId) {
+    const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+
+    if (!nextAdPageEl || !this.isCurrentAdLoaded_) {
+      return;
+    }
+
+    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    this.adsPlaced_++;
+
+    if (!this.allAdsPlaced_()) {
+      this.schedulePage_();
+    }
   }
 }
 
-AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds);
+AMP.registerElement(TAG, AmpStoryAutoAds);
 
 

@@ -858,6 +858,16 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
+// Simulated subscription entitlement
+app.use('/subscription/:id/entitlements', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    source: 'local' + req.params.id,
+    products: ['scenic-2017.appspot.com:news',
+      'scenic-2017.appspot.com:product2'],
+  });
+});
+
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
   assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
@@ -1012,6 +1022,7 @@ app.get('/dist/diversions', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache;max-age=150');
   res.end(JSON.stringify(['98' + n]));
 });
+
 /*
  * End Cache SW LOCALDEV section
  */
@@ -1084,7 +1095,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line amphtml-internal/no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =
