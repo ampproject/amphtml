@@ -40,6 +40,7 @@ require('./runtime-test');
 require('./serve');
 require('./size');
 require('./todos');
+require('./typescript');
 require('./update-packages');
 require('./validator');
 require('./visual-diff');
