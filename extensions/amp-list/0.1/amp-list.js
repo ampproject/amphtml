@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
@@ -25,7 +26,6 @@ import {dev, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {Pass} from '../../../src/pass';
 import {removeChildren} from '../../../src/dom';
 
 /** @const {string} */
@@ -50,7 +50,7 @@ export class AmpList extends AMP.BaseElement {
     /** @const @private {!../../../src/pass.Pass} */
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
-    /** @const @private {!Array<{resolver:!Function, items:!Array>}} */
+    /** @const @private {!Array<{resolver:!Function, items:!<Array>}} */
     this.renderQueue_ = [];
 
     /** @const {!../../../src/service/template-impl.Templates} */
