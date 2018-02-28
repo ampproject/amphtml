@@ -17,20 +17,6 @@
     height: 100%;
   }
 
-  .button-area {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    margin: auto;
-    z-index: 10;
-    height: 40px;
-
-    background: #f6f7f8;
-    box-shadow: 0 -2px 1px 0 rgba(0,0,0,0.1);
-  }
-
   .date-picker {
     margin-bottom: 40px;
   }
@@ -107,7 +93,6 @@
     }
   }
 
-
   .lightbox-close {
     position: absolute;
     top: 0;
@@ -121,6 +106,7 @@
     border: 0;
     background-color: transparent;
   }
+
   .lightbox-close::before {
     content: '';
     display: block;
@@ -172,7 +158,7 @@
       week-day-format="dd"
       reopen-picker-on-clear-date
       on="
-        activate: lb;
+        activate: lb.open;
         deactivate: lb.close;
         select:
           AMP.setState({
@@ -190,7 +176,6 @@
   <div class="tooltip" [class]="'tooltip' + (tooltip ? ' tooltip-show' : '')">
     Great price
   </div>
-  <div class="button-area"><button>Select these dates</button></div>
 </amp-lightbox>
 
 </body>

@@ -280,8 +280,8 @@
       mode="static"
       locale="fa"
       on="
+        activate: lb.open;
         deactivate: lb.close;
-        activate: lb;
         select:
           AMP.setState({
             tooltip: event.dates.filter(d => d.id == 'deal').length > 0
