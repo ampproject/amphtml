@@ -50,6 +50,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'externalReferrer': 'EXTERNAL_REFERRER',
       'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
       'firstViewportReady': 'FIRST_VIEWPORT_READY',
+      'htmlAttr': 'HTML_ATTR',
       'makeBodyVisible': 'MAKE_BODY_VISIBLE',
       'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
