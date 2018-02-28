@@ -1,4 +1,3 @@
-
 .i-amphtml-story-ad-button {
   background-color: #FFFFFF !important;
   border: none !important;
@@ -7,18 +6,23 @@
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
   height: 36px !important;
   left: 50% !important;
-  margin: 0 auto !important;
+  margin-left: -60px !important;
   opacity: 0 !important;
   position: absolute !important;
-  transition: all 300ms cubic-bezier(0.4, 0.0, 0.2, 1) 100ms !important;
   transform: scale(0) !important;
   width: 120px !important;
 }
 
+amp-story-page[active] .i-amphtml-story-ad-button,
+amp-story-page[active] .i-amphtml-story-ad-button-text {
+  animation-delay: 100ms !important;
+  animation-duration: 300ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  animation-fill-mode: forwards !important;
+}
+
 amp-story-page[active] .i-amphtml-story-ad-button {
-  margin-left: -60px !important;
-  opacity: 1 !important;
-  transform: scale(1) !important;
+  animation-name: ad-cta-btn !important;
 }
 
 .i-amphtml-story-ad-button-text {
@@ -29,7 +33,31 @@ amp-story-page[active] .i-amphtml-story-ad-button {
 }
 
 amp-story-page[active] .i-amphtml-story-ad-button-text {
-  font-size: 13px !important;
+  animation-name: ad-cta-btn-text !important;
+}
+
+@keyframes ad-cta-btn {
+  from {
+    opacity: 0;
+    transform: scale(0)
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ad-cta-btn-text {
+  from {
+    opacity: 0;
+    font-size: 0px;
+  }
+
+  to {
+    opacity: 1;
+    font-size: 13px;
+  }
 }
 
 .i-amphtml-story-ad-attribution {
