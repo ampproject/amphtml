@@ -15,6 +15,7 @@
 #
 tags: {  # amp-image-lightbox
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-image-lightbox"

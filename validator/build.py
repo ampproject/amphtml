@@ -44,7 +44,7 @@ def EnsureNodeJsIsInstalled():
   try:
     output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
     if output.strip() == '42':
-      return;
+      return
   except (subprocess.CalledProcessError, OSError):
     pass
   Die('Node.js not found. Try "apt-get install nodejs" or install NVM.')

@@ -17,6 +17,7 @@
 tags: {  # amp-animation
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-animation"
@@ -48,6 +49,7 @@ tags: {  # <amp-animation> (json)
 tags: {  # <amp-animation>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANIMATION"
   requires_extension: "amp-animation"
   requires: "amp-animation extension .json script"

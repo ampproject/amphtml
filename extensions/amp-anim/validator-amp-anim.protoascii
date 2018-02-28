@@ -17,6 +17,7 @@
 tags: {  # amp-anim
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
@@ -41,6 +42,7 @@ tags: {  # amp-anim
 tags: {  # <amp-anim>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANIM"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }

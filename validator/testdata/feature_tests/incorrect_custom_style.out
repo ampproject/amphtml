@@ -27,7 +27,7 @@ FAIL
 |    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:27:2 The text (CDATA) inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:27:2 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 |      /* These CSS Rules violate essential CSS validation */
 |      @import url("http://somewhere/on/the/internet.css");
 >>     ^~~~~~~~~
