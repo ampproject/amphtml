@@ -191,6 +191,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   renderItems_(items) {
+    user().error(TAG, 'A');
+
     return this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindings_(elements))
         .then(elements => this.rendered_(elements));
@@ -202,6 +204,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindings_(elements) {
+    user().error(TAG, 'B');
+
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
@@ -216,6 +220,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
+    user().error(TAG, 'C');
+
     removeChildren(dev().assertElement(this.container_));
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {

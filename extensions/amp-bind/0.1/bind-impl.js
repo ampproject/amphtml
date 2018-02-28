@@ -269,12 +269,15 @@ export class Bind {
    */
   scanAndApply(added, removed, timeout = 2000) {
     const promise = this.removeBindingsForNodes_(removed)
-        .then(() => this.addBindingsForNodes_(added))
+        .then(() => { user().error(TAG, '1'); return this.addBindingsForNodes_(added); })
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
-            return this.evaluate_().then(results =>
-              this.applyElements_(results, added));
+            user().error(TAG, '2');
+            return this.evaluate_().then(results => {
+              user().error(TAG, '3');
+              return this.applyElements_(results, added);
+            });
           }
         });
     return this.timer_.timeoutPromise(timeout, promise,
