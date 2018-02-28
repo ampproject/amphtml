@@ -4661,9 +4661,9 @@ graceful-fs@~1.2.0:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-1.2.3.tgz#15a4806a57547cb2d2dbf27f42e89a8c3451b364"
 
-greenkeeper-lockfile@1.13.2:
-  version "1.13.2"
-  resolved "https://registry.yarnpkg.com/greenkeeper-lockfile/-/greenkeeper-lockfile-1.13.2.tgz#3a225f6fef967fc558adf60f5ebfd192fe7d4618"
+greenkeeper-lockfile@1.13.3:
+  version "1.13.3"
+  resolved "https://registry.yarnpkg.com/greenkeeper-lockfile/-/greenkeeper-lockfile-1.13.3.tgz#4401f45669649c9ecf5213f2e8934accef5c6dd2"
   dependencies:
     lodash "^4.17.4"
     require-relative "^0.8.7"
