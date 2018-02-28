@@ -27,6 +27,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const colors = require('ansi-colors');
+const exec = require('./exec').exec;
 const execOrDie = require('./exec').execOrDie;
 const getStderr = require('./exec').getStderr;
 const getStdout = require('./exec').getStdout;
@@ -59,6 +60,16 @@ function stopTimer(functionName, startTime) {
   console.log(
       fileLogPrefix, 'Done running', colors.cyan(functionName),
       'Total time:', colors.green(mins + 'm ' + secs + 's'));
+}
+
+/**
+ * Executes the provided command and times it. Errors, if any, are printed.
+ * @param {string} cmd
+ */
+function timedExec(cmd) {
+  const startTime = startTimer(cmd);
+  exec(cmd);
+  stopTimer(cmd, startTime);
 }
 
 /**
@@ -317,7 +328,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    timedExecOrDie(cmd);
+    timedExec(cmd);
   },
   verifyVisualDiffTests: function() {
     if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
@@ -328,7 +339,7 @@ const command = {
           '. Skipping verification of visual diff tests.');
       return;
     }
-    timedExecOrDie('gulp visual-diff --verify');
+    timedExec('gulp visual-diff --verify');
   },
   runPresubmitTests: function() {
     timedExecOrDie('gulp presubmit');
