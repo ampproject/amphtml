@@ -99,7 +99,7 @@ describes.realWin('Expander', {
     beforeEach(() => {
       env.win.document.head.appendChild(
           createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-variable-substitution-whitelist',
+            name: 'amp-allowed-url-macros',
             content: 'ABC,ABCD,CANONICAL',
           }));
 

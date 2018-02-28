@@ -128,7 +128,7 @@ export class VariableSource {
     /** @private {boolean} */
     this.initialized_ = false;
 
-    this.getVariableWhitelist_();
+    this.getUrlMacroWhitelist_();
   }
 
   /**
@@ -257,8 +257,8 @@ export class VariableSource {
     // If a whitelist is present, the keys must belong to the whitelist.
     // We filter the keys one last time to ensure no unwhitelisted key is
     // allowed.
-    if (this.getVariableWhitelist_()) {
-      keys = keys.filter(key => this.getVariableWhitelist_().includes(key));
+    if (this.getUrlMacroWhitelist_()) {
+      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
     }
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
@@ -284,7 +284,7 @@ export class VariableSource {
    *     a meta tag).
    * @private
    */
-  getVariableWhitelist_() {
+  getUrlMacroWhitelist_() {
     if (this.variableWhitelist_) {
       return this.variableWhitelist_;
     }
@@ -294,10 +294,10 @@ export class VariableSource {
       return null;
     }
 
-    // A meta[name="amp-variable-substitution-whitelist"] tag, if present,
+    // A meta[name="amp-allowed-url-macros"] tag, if present,
     // contains, in its content attribute, a whitelist of variable substitution.
     const meta =
-      head.querySelector('meta[name="amp-variable-substitution-whitelist"]');
+      head.querySelector('meta[name="amp-allowed-url-macros"]');
     if (!meta) {
       return null;
     }
@@ -319,7 +319,7 @@ export class VariableSource {
    * @private
    */
   isWhitelisted_(varName) {
-    return !this.getVariableWhitelist_() ||
-      this.getVariableWhitelist_().includes(varName);
+    return !this.getUrlMacroWhitelist_() ||
+      this.getUrlMacroWhitelist_().includes(varName);
   }
 }
