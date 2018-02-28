@@ -56,6 +56,15 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
+/**
+ * @typedef {(string|!Promise<string>|function(): string)}
+ */
+let DynamicVariableBindingDef;
+
+/**
+ * @typedef {function(string, ...?): string}
+ */
+let HtmlAttrBindingDef;
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -685,7 +694,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
+   * @return {!Object<string, DynamicVariableBindingDef>}
    * @private
    */
   getDynamicVariableBindings_(trigger, expansionOptions) {
@@ -721,6 +730,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandAndSendRequest_(request, trigger, event) {
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
+    /** @type {!Object<string, (DynamicVariableBindingDef|HtmlAttrBindingDef)>} */
     const dynamicBindings =
         this.getDynamicVariableBindings_(trigger, expansionOptions);
     request.send(
