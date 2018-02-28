@@ -32,6 +32,8 @@ ENV['PERCY_DEBUG'] = '0'
 ENV['WEBSERVER_QUIET'] = '--quiet'
 # CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 DEFAULT_WIDTHS = [375, 411, 1400]
+VIEWPORT_WIDTH = 1400
+VIEWPORT_HEIGHT = 100000
 HOST = 'localhost'
 PORT = '8000'
 WEBSERVER_TIMEOUT_SECS = 15
@@ -232,10 +234,20 @@ def configure_browser
   capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
     chromeOptions: { args: chrome_args }
   )
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_emulation(
+    device_metrics: {
+      width: VIEWPORT_WIDTH,
+      height: VIEWPORT_HEIGHT,
+      pixelRatio: 1,
+      touch: false
+    }
+  )
   Capybara.register_driver :chrome do |app|
     Capybara::Selenium::Driver.new app,
       browser: :chrome,
-      desired_capabilities: capabilities
+      desired_capabilities: capabilities,
+      options: options
   end
   Capybara.javascript_driver = :chrome
 end
