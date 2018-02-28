@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {Actions} from './actions';
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics} from './analytics';
+import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
@@ -53,6 +56,70 @@ export class LocalSubscriptionPlatform {
         ),
         'Authorization Url'
     );
+
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
+
+    /** @private {UrlBuilder} */
+    this.urlBuilder_ = null;
+
+    /** @private {Actions} */
+    this.actions_ = null;
+
+    /** @private {Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+
+    this.initActions_();
+  }
+
+  /**
+   * Initializes the actions for the local platform
+   * @private
+   */
+  initActions_() {
+    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.readerIdPromise_);
+    user().assert(this.serviceConfig_['actions'],
+        'Actions have not been defined in the service config');
+    this.actions_ = new Actions(
+        this.ampdoc_, this.urlBuilder_,
+        this.subscriptionAnalytics_,
+        this.validateActionMap(this.serviceConfig_['actions'])
+    );
+  }
+
+  /**
+   * Validates the action map
+   * @param {!JsonObject<string, string>} actionMap
+   * @returns {!JsonObject<string, string>}
+   */
+  validateActionMap(actionMap) {
+    user().assert(actionMap['login'],
+        'Login action is not present in action map');
+    user().assert(actionMap['subscribe'],
+        'Subscribe action is not present in action map');
+    return actionMap;
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get(
+            {scope: 'amp-subscriptions', createCookieIfNotPresent: true},
+            consent
+        );
+      });
+    }
+    return this.readerIdPromise_;
   }
 
   /** @override */
