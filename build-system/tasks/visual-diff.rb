@@ -227,14 +227,14 @@ end
 # Configures the Chrome browser (optionally in headless mode)
 def configure_browser
   if ARGV.include? '--headless'
-    chrome_args = %w(no-sandbox disable-extensions headless disable-gpu)
+    chrome_args = %w[--no-sandbox --disable-extensions --headless --disable-gpu]
   else
-    chrome_args = %w(no-sandbox disable-extensions)
+    chrome_args = %w[--no-sandbox --disable-extensions]
   end
-  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-    chromeOptions: { args: chrome_args }
-  )
   options = Selenium::WebDriver::Chrome::Options.new
+  chrome_args.each do |option|
+    options.add_argument(option)
+  end
   options.add_emulation(
     device_metrics: {
       width: VIEWPORT_WIDTH,
@@ -244,11 +244,13 @@ def configure_browser
     }
   )
   Capybara.register_driver :chrome do |app|
-    Capybara::Selenium::Driver.new app,
+    Capybara::Selenium::Driver.new(
+      app,
       browser: :chrome,
-      desired_capabilities: capabilities,
       options: options
+    )
   end
+  Capybara.default_driver = :chrome
   Capybara.javascript_driver = :chrome
 end
 
