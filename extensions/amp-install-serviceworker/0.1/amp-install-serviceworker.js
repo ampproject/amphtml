@@ -79,8 +79,9 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   }
 
   /** @override */
-  firstLayoutCompleted() {
+  layoutCallback() {
     if (this.insertframeOnFirstLayout_) {
+      this.insertframeOnFirstLayout_ = false;
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
@@ -114,8 +115,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   insertIframe_() {
-    // Mutate block is not required when calling this method, since the inserted
-    // iframe has `display: none` and does not modify the document's layout.
+    // Should only be called from layoutCallback.
     setStyle(this.element, 'display', 'none');
     const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');

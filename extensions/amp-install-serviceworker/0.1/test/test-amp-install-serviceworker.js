@@ -214,7 +214,7 @@ describes.realWin('amp-install-serviceworker', {
         appendChild.call(install, child);
       };
       expect(install.children).to.have.lengthOf(0);
-      implementation.firstLayoutCompleted();
+      implementation.layoutCallback();
       expect(install.children).to.have.lengthOf(1);
       const iframe = install.children[0];
       expect(iframe).to.exist;
@@ -241,13 +241,13 @@ describes.realWin('amp-install-serviceworker', {
       install.setAttribute('data-iframe-src', iframeSrc);
       expect(() => {
         implementation.buildCallback();
-        implementation.firstLayoutCompleted();
+        implementation.layoutCallback();
       }).to.throw(/should be a URL on the same origin as the source/);
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
       expect(() => {
         implementation.buildCallback();
-        implementation.firstLayoutCompleted();
+        implementation.layoutCallback();
       }).to.throw(/https/);
     });
   });
