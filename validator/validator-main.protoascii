@@ -1446,6 +1446,7 @@ tags: {
       allow_relative: true
       allowed_protocol: "ftp"
       allowed_protocol: "geo"
+      allowed_protocol: "maps"
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
