@@ -40,9 +40,9 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
-8. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
+8. Supports a public Update Cache mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
 
-    1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
+    1. Equivalent to the [Google AMP Update Cache API](https://developers.google.com/amp/cache/update-cache)
 
 9. Supports a public AMP Cache URL API:
 
