@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
- /* Public CSS Classes */
+ /* PUBLIC CSS CLASSES, CURRENTLY INACTIVE */
 
  .amp-lbg-desc-box.standard {
-  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
+   /* Public CSS class for description background */
  }
 
  .amp-lbg-desc-box.overflow {
-  background-color: rgba(0,0,0,0.5);
+    /* Public CSS class for description background */
  }
 
  .amp-lbg-desc-text {
@@ -29,9 +29,10 @@
  }
 
 .amp-lbg-mask {
-  opacity: 1;
-  background-color: rgba(0,0,0, 1);
+  /* Public CSS class for mask background and opacity */
 }
+
+/* END PUBLIC CSS CLASSES */
 
 .amp-lbg-icon {
   width: 100%;
@@ -94,6 +95,8 @@
 
 .i-amphtml-lbg-mask,
 .i-amphtml-lbg-gallery {
+  opacity: 1;
+  background-color: rgba(0,0,0, 1);
   position: absolute !important;
   top:0 !important;
   left: 0 !important;
@@ -153,10 +156,12 @@
 }
 
 .i-amphtml-lbg-desc-box.standard {
+  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
   max-height: 6rem !important;
 }
 
 .i-amphtml-lbg-desc-box.overflow {
+  background-color: rgba(0,0,0,0.5);
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   top: 0px !important;
