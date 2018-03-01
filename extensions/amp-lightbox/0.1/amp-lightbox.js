@@ -92,6 +92,9 @@ class AmpLightbox extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-overlay');
     this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
+
+    this.registerAction('open', this.activate.bind(this));
+    this.registerAction('close', this.close.bind(this));
   }
 
   /** @override */
@@ -159,9 +162,6 @@ class AmpLightbox extends AMP.BaseElement {
 
       this.element.addEventListener('scroll', this.scrollHandler_.bind(this));
     }
-
-    this.registerAction('open', this.activate.bind(this));
-    this.registerAction('close', this.close.bind(this));
 
     if (!this.isScrollable_) {
       const gestures = Gestures.get(this.element);
