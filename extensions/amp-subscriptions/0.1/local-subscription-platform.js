@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
+import {closestBySelector} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -38,6 +39,9 @@ export class LocalSubscriptionPlatform {
   constructor(ampdoc, serviceConfig, pageConfig) {
     /** @const */
     this.ampdoc_ = ampdoc;
+
+    /** @private @const */
+    this.document_ = this.ampdoc_.win.document;
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = serviceConfig;
@@ -63,6 +67,9 @@ export class LocalSubscriptionPlatform {
     /** @private {UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
+    /** @private {SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
 
@@ -76,8 +83,7 @@ export class LocalSubscriptionPlatform {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
-    /** @private {SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+    this.initializeListeners_();
   }
 
   /**
@@ -108,6 +114,16 @@ export class LocalSubscriptionPlatform {
       });
     }
     return this.readerIdPromise_;
+  }
+
+  initializeListeners_() {
+    this.document_.addEventListener('click', e => {
+      const element = closestBySelector(e.target, '[subscriptions-action]');
+      if (element) {
+        const action = element.getAttribute('subscriptions-action');
+        this.actions_.execute(action);
+      }
+    });
   }
 
   /** @override */
