@@ -1173,7 +1173,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   registerAndPreloadBackgroundAudio_() {
-    const backgroundAudioEl = upgradeBackgroundAudio(this.element);
+    let backgroundAudioEl = upgradeBackgroundAudio(this.element);
 
     if (!backgroundAudioEl) {
       return;
@@ -1184,12 +1184,15 @@ export class AmpStory extends AMP.BaseElement {
     // it programmatically later.
     this.activePage_.whenLoaded()
         .then(() => {
+          backgroundAudioEl =
+            /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
           this.mediaPool_.register(backgroundAudioEl);
           return this.mediaPool_.preload(backgroundAudioEl);
         }).then(() => {
-          this.backgroundAudioEl_ = childElement(this.element, el => {
-            return el.tagName.toLowerCase() === 'audio';
-          });
+          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */
+              (childElement(this.element, el => {
+                return el.tagName.toLowerCase() === 'audio';
+              }));
         });
   }
 
