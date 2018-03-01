@@ -431,7 +431,19 @@ class AmpDatePicker extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, TAG),
         `Experiment ${TAG} is disabled.`);
 
-    this.vsync_.mutate(() => this.element.appendChild(this.container_));
+
+    // NOTE(cvializ): There is no standard date format for just the first letter
+    // of the week-day. So we hack it in with this CSS class and don't apply the
+    // CSS class if there is a week-day-format specified.
+    const isDefaultWeekDayFormat =
+      this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT;
+
+    this.vsync_.mutate(() => {
+      this.element.appendChild(this.container_);
+
+      this.element.classList.toggle(
+          DEFAULT_WEEK_DAY_FORMAT_CSS, isDefaultWeekDayFormat);
+    });
 
     if (this.type_ === DatePickerType.SINGLE) {
       this.dateField_ = this.setupDateField_(DateFieldType.DATE);
@@ -456,14 +468,6 @@ class AmpDatePicker extends AMP.BaseElement {
 
     this.setupListeners_();
     this.render(this.state_);
-
-    // NOTE(cvializ): There is no standard date format for just the first letter
-    // of the week-day. So we hack it in with this CSS class and don't apply the
-    // CSS class if there is a week-day-format specified.
-    const isDefaultWeekDayFormat =
-        this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT;
-    this.element.classList.toggle(
-        DEFAULT_WEEK_DAY_FORMAT_CSS, isDefaultWeekDayFormat);
 
     this.registerAction('setDate',
         invocation => this.handleSetDate_(invocation.args['date']));
@@ -1021,7 +1025,7 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   toggleDateFieldClass_(field, className, value) {
     if (field) {
-      field.classList.toggle(className, value);
+      this.vsync_.mutate(() => field.classList.toggle(className, value));
     }
   }
 
