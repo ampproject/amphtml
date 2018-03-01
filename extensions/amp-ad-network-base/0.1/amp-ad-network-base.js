@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpAdUIHandler} from '../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
-import {
-  LayoutInfoDef,
-  getAmpAdMetadata,
-  sendXhrRequest,
-} from '../../amp-a4a/0.1/a4a-utils';
-import {
-  RendererDef,
-  RendererInputDef,
-  ValidatorDef, // eslint-disable-line no-unused-vars
-  ValidatorOutputDef,
-  ValidatorResultType, // eslint-disable-line no-unused-vars
-} from '../../amp-a4a/0.1/a4a-render';
+import {AmpAdContext} from './amp-ad-context';
 import {dev} from '../../../src/log';
+import {sendXhrRequest} from './amp-ad-utils';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 const TAG = 'amp-ad-network-base';
@@ -37,22 +26,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<ValidatorResultType, !RendererDef>} */
+    /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
     this.boundRenderers_ = {};
 
-    /** @private {?ValidatorDef} */
+    /** @private {?./amp-ad-render.Validator} */
     this.boundValidator_ = null;
 
-    /** @private {?string} */
-    this.adUrl_ = null;
-
-    /** @private {?string} */
-    this.expandedAdUrl_ = null;
-
-    /** @private {?ArrayBuffer} */
-    this.unvalidatedBytes_ = null;
-
-    /** @private {!LayoutInfoDef} */
+    /** @private {!./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
       width: element.getAttribute('width'),
@@ -62,37 +42,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {string} @const */
     this.networkType_ = element.getAttribute('type') || 'anon';
 
-    /**
-     * @private {number} unique ID of the currently executing promise to allow
-     * for cancellation.
-     */
-    this.freshnessId_ = 0;
-
-    /** @private {function():boolean} a function that will return true if the
-     * freshness id changes due to unlayout. Initialized to always return
-     * false, and has an actual value set in onLayoutMeasure.
-     */
-    this.isStale_ = () => false;
-
-    /** {?AMP.AmpAdUIHandler} */
-    this.uiHandler = null;
+    /** @const @private {!AmpAdContext} */
+    this.context_ = new AmpAdContext().setSize(this.initialSize_);
   }
 
   /**
-   * @param {string} adUrl
-   * @protected
-   */
-  bindAdRequestUrl(adUrl) {
-    if (this.adUrl_) {
-      dev().warn(TAG, `Ad Request URL already bound: '${this.adUrl_}'`);
-    }
-    this.adUrl_ = adUrl;
-  }
-
-  /**
-   * @param {ValidatorResultType} resultType
-   * @param {!RendererDef} renderer
-   * @protected
+   * @param {./amp-ad-type-defs.ValidatorResultType} resultType
+   * @param {!./amp-ad-render.Renderer} renderer
+   * @final
    */
   bindRenderer(resultType, renderer) {
     if (this.boundRenderers_[resultType]) {
@@ -102,8 +59,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ValidatorDef} validator
-   * @protected
+   * @param {!./amp-ad-render.Validator} validator
+   * @final
    */
   bindValidator(validator) {
     if (this.boundValidator_) {
@@ -113,84 +70,19 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * Called at various lifecycle stages. Can be overwitten by implementing
-   * networks to handle lifecycle event.
-   */
-  emitLifecycleEvent() {}
-
-  /**
    * Collapses slot by setting its size to 0x0.
+   * @private
    */
-  forceCollapse() {
-    dev().assert(this.uiHandler);
-    this.uiHandler.applyNoContentUI();
+  forceCollapse_() {
     super.attemptChangeSize(0, 0);
   }
 
   /**
-   * Returns context data necessary to render creative in cross-domain
-   * NameFrame.
-   * @return {!JsonObject}
-   */
-  getCrossDomainContextData() {
-    return /** @type {!JsonObject} */ ({});
-  }
-
-  /**
-   * Returns sentinel value necessary for interframe communicaiton.
-   * @return {?string}
-   */
-  getCrossDomainSentinel() {
-    return null;
-  }
-
-  /**
    * @return {string} The finalized ad request URL.
-   * @private
+   * @protected
    */
-  getExpandedUrl_() {
-    dev().assert(this.adUrl_, 'Ad Request URL never registered!');
-    // TODO add expansion logic
-    this.expandedAdUrl_ = /** @type {string} */ (this.adUrl_);
-    return this.expandedAdUrl_;
-  }
-
-  /**
-   * @return {function():boolean} function that when called will verify if
-   *    current ad retrieval is current (meaning unlayoutCallback was not
-   *    executed). If not, will return false.
-   * @throws {Error}
-   */
-  getFreshnessVerifier() {
-    const id = this.freshnessId_;
-    return () => {
-      if (id != this.freshnessId_) {
-        this.handleStaleExecution();
-        return true;
-      }
-      return false;
-    };
-  }
-
-  /**
-   * @param {!ValidatorOutputDef} validatorOutput
-   * @return {!RendererInputDef}
-   */
-  getRenderingDataInput_(validatorOutput) {
-    const creative = validatorOutput.creative;
-    return /** @type {!RendererInputDef} */ ({
-      creativeMetadata: getAmpAdMetadata(creative, TAG, this.networkType_),
-      templateData: null,
-      crossDomainData: {
-        rawCreativeBytes: this.unvalidatedBytes_,
-        additionalContextMetadata: this.getCrossDomainContextData(),
-        sentinel: this.getCrossDomainSentinel(),
-      },
-      unvalidatedBytes: this.unvalidatedBytes_,
-      // TODO(levitzky) This may change based on the ad response.
-      size: this.initialSize_,
-      adUrl: this.expandedAdUrl_ ? this.expandedAdUrl_ : this.adUrl_,
-    });
+  getRequestUrl() {
+    return '';
   }
 
   /**
@@ -198,66 +90,55 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * overridden and used as a hook to perform any desired logic before passing
    * the response to the validator.
    * @param {{bytes: !ArrayBuffer, headers: !Headers}} response
-   * @protected
+   * @private
    */
-  handleAdResponse(response) {
-    if (this.isStale_()) {
-      return;
-    }
+  handleAdResponse_(response) {
     const unvalidatedBytes = response.bytes;
     const headers = response.headers;
     if (!unvalidatedBytes) {
       // TODO(levitzky) Add error reporting.
-      this.forceCollapse();
+      this.forceCollapse_();
       return;
     }
     dev().assert(this.boundValidator_, 'Validator never bound!');
-    this.unvalidatedBytes_ = unvalidatedBytes;
-    this.boundValidator_(unvalidatedBytes, headers, this)
-        .then(validatedBytes =>
-          this.handleValidatorResponse(validatedBytes));
+    this.context_.setUnvalidatedBytes(unvalidatedBytes)
+        .setHeaders(headers);
+    this.boundValidator_.validate(this.context_)
+        .then(context => this.handleValidatorResponse_(context))
+        .catch(error => this.handleValidatorError_(error));
   }
 
-  handleAdResponseError(error) {
+  /**
+   * Invoked whenever the ad response errors out for any reason whatsoever.
+   * @param {*} error
+   * @private
+   */
+  handleAdResponseError_(error) {
     // TODO(levitzky) add actual error processing logic.
     dev().warn(TAG, error);
   }
 
   /**
-   * Handler invoked when the current freshness id has expired.
+   * Invoked whenever the validator encounters an error.
+   * @param {*} error
+   * @private
    */
-  handleStaleExecution() {}
+  handleValidatorError_(error) {
+    // TODO(levitzky) add actual error processing logic.
+    dev().warn(TAG, error);
+  }
 
   /**
    * Processes validator response and delegates further action to appropriate
    *   renderer.
-   * @param {!ValidatorOutputDef} validatedResponse The utf-8 decoded ad
-   *   response.
+   * @param {!AmpAdContext} context
+   * @private
    */
-  handleValidatorResponse(validatedResponse) {
-    if (this.isStale_()) {
-      return;
-    }
-    if (!validatedResponse.creative) {
-      // TODO(levitzky) Add error reporting.
-      this.forceCollapse();
-      return;
-    }
-    dev().assert(this.boundRenderers_[validatedResponse.result],
+  handleValidatorResponse_(context) {
+    const result = context.getValidatorResult();
+    dev().assert(this.boundRenderers_[result],
         'Renderer for AMP creatives never bound!');
-    this.boundRenderers_[validatedResponse.result](
-        this.getRenderingDataInput_(validatedResponse), this);
-  }
-
-
-  resetInstance() {
-    this.freshnessId_++;
-    this.uiHandler.applyUnlayoutUI();
-  }
-
-  /** @override */
-  buildCallback() {
-    this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.boundRenderers_[result].render(context, this);
   }
 
   /** @override */
@@ -267,21 +148,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    ++this.freshnessId_;
-    this.isStale_ = this.getFreshnessVerifier();
-    sendXhrRequest(this.getExpandedUrl_())
-        .then(response => this.handleAdResponse(response))
-        .catch(error => this.handleAdResponseError(error));
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    this.freshnessId_++;
-    return true;
+    const url = this.getRequestUrl();
+    this.context_.setRequestUrl(url);
+    sendXhrRequest(url)
+        .then(response => this.handleAdResponse_(response))
+        .catch(error => this.handleAdResponseError_(error));
   }
 }
-
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkBase);
-});
-
