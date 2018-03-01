@@ -88,6 +88,7 @@ declareExtension('amp-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-bind', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1', {hasCss: false});
 declareExtension('amp-brightcove', '0.1', {hasCss: false});
+declareExtension('amp-bodymovin-player', '0.1', {hasCss: false});
 declareExtension('amp-byside-content', '0.1', {hasCss: true});
 declareExtension('amp-kaltura-player', '0.1', {hasCss: false});
 declareExtension('amp-call-tracking', '0.1', {hasCss: false});
