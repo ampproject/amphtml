@@ -53,17 +53,6 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         .to.be.equals('include');
   });
 
-  describe('initActions_', () => {
-    it('should build actions and urlbuilder on constructor', () => {
-      expect(localSubscriptionPlatform.urlBuilder_).to.be
-          .instanceof(UrlBuilder);
-      expect(localSubscriptionPlatform.actions_).to.be
-          .instanceof(Actions);
-      expect(JSON.stringify(localSubscriptionPlatform.actions_.actionsConfig_))
-          .to.be.equal(JSON.stringify(actionMap));
-    });
-  });
-
   describe('validateActionMap', () => {
     let actionMap;
     beforeEach(() => {

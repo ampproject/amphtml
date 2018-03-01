@@ -57,39 +57,27 @@ export class LocalSubscriptionPlatform {
         'Authorization Url'
     );
 
-    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
-    // is migrated to ampdoc as well.
     /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
     /** @private {UrlBuilder} */
-    this.urlBuilder_ = null;
-
-    /** @private {Actions} */
-    this.actions_ = null;
-
-    /** @private {Promise<string>} */
-    this.readerIdPromise_ = null;
-
-    /** @private {SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
-
-    this.initActions_();
-  }
-
-  /**
-   * Initializes the actions for the local platform
-   * @private
-   */
-  initActions_() {
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
+
+    /** @private {Actions} */
     this.actions_ = new Actions(
         this.ampdoc_, this.urlBuilder_,
         this.subscriptionAnalytics_,
         this.validateActionMap(this.serviceConfig_['actions'])
     );
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
   }
 
   /**
@@ -99,9 +87,9 @@ export class LocalSubscriptionPlatform {
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
-        'Login action is not present in action map');
+        'Action `Login` is not present in action map');
     user().assert(actionMap['subscribe'],
-        'Subscribe action is not present in action map');
+        'Action `Subscribe` is not present in action map');
     return actionMap;
   }
 
@@ -114,7 +102,7 @@ export class LocalSubscriptionPlatform {
       const consent = Promise.resolve();
       this.readerIdPromise_ = this.cid_.then(cid => {
         return cid.get(
-            {scope: 'amp-subscriptions', createCookieIfNotPresent: true},
+            {scope: 'amp-access', createCookieIfNotPresent: true},
             consent
         );
       });
