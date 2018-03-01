@@ -443,6 +443,9 @@ describe('FixedLayer', () => {
           true /* opt_transientExperiment */);
       const userError = sandbox.stub(user(), 'error');
       fixedLayer.setup();
+      // Expect error regarding inline styles. Note that all
+      // elements created in the test via createElement have a style set.
+      // We are leverage those settings for this test.
       expect(userError).calledWithMatch('FixedLayer');
     });
 

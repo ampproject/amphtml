@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,7 +266,7 @@ export class FixedLayer {
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
-    // it will be decorated and possibly move to a separate layer.
+    // it will be decorated and possibly moved to a separate layer.
     let hasTransferables = false;
     return this.vsync_.runPromise({
       measure: state => {
@@ -323,7 +323,7 @@ export class FixedLayer {
               (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
           // Element is indeed sticky.
           const isSticky = endsWith(position, 'sticky');
-          const isDisplayed = display !== 'none';
+          const isDisplayed = (display !== 'none');
 
           if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
@@ -339,7 +339,7 @@ export class FixedLayer {
           if (top === 'auto' || autoTops[i] !== top) {
             if (isFixed &&
                 offsetTop === this.committedPaddingTop_ + this.borderTop_) {
-              top = '0px';
+              top = '0';
             } else {
               top = '';
             }
@@ -466,11 +466,11 @@ export class FixedLayer {
     if (isInlineStylesEnabled) {
       user().error(TAG, 'Inline style not supported for fixed element');
     }
-    for (let i = 0, len = stickySelectors.length; i < len; i++) {
+    for (let i = 0; i < stickySelectors.length; i++) {
       const stickySelector = stickySelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           stickySelector);
-      for (let j = 0, l = elements.length; j < l; j++) {
+      for (let j = 0; j < elements.length; j++) {
         this.setupElement_(elements[j], stickySelector, 'sticky');
       }
     }
