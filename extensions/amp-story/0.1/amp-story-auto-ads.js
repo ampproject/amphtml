@@ -15,7 +15,6 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
-import {EventType} from './events';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -100,23 +99,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.createStoryLoadPromise_()
+    return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
           this.readConfig_();
           this.schedulePage_();
         });
-  }
-
-
-  /**
-   * promise that resolves on STORY_LOADED event
-   * @private
-   * @return {!Promise}
-   */
-  createStoryLoadPromise_() {
-    return new Promise(resolve => {
-      this.ampStory_.element.addEventListener(EventType.STORY_LOADED, resolve);
-    });
   }
 
 
