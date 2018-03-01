@@ -26,7 +26,7 @@
  * </code>
  */
 
-import {AmpBaseLayer} from './amp-story-base-layer';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -72,7 +72,7 @@ const TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
-export class AmpStoryGridLayer extends AmpBaseLayer {
+export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

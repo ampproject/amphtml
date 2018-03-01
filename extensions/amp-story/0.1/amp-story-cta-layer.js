@@ -29,9 +29,9 @@
  * ...
  */
 
-import {AmpBaseLayer} from './amp-story-base-layer';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
-export class AmpStoryCtaLayer extends AmpBaseLayer {
+export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
