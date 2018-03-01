@@ -15,17 +15,17 @@
  */
 
 .i-amphtml-lbg-icon {
-  width: 100%;
-  height: 100%;
-  display: block;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-color: #ffffff;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-color: #ffffff !important;
 }
 
 .i-amphtml-lbg-button-close {
-  top: 0;
-  right: 0;
+  top: 0 !important;
+  right: 0 !important;
 }
 
 .i-amphtml-lbg-button-close .i-amphtml-lbg-icon {
@@ -33,8 +33,8 @@
 }
 
 .i-amphtml-lbg-button-gallery {
-  top: 0;
-  left: 0;
+  top: 0 !important;
+  left: 0 !important;
 }
 
 .i-amphtml-lbg-button-gallery .i-amphtml-lbg-icon {
@@ -42,8 +42,8 @@
 }
 
 .i-amphtml-lbg-button-slide {
-  top: 0;
-  left: 0;
+  top: 0 !important;
+  left: 0 !important;
   display: none;
 }
 
@@ -53,7 +53,7 @@
 
 .i-amphtml-lbg-button {
   position: absolute !important;
-  cursor: pointer;
+  cursor: pointer !important;
   width: 24px;
   height: 24px;
   padding: 16px;
@@ -70,8 +70,8 @@
 
 .i-amphtml-lbg-mask,
 .i-amphtml-lbg-gallery {
-  opacity: 1;
-  background-color: rgba(0,0,0, 1);
+  opacity: 1 !important;
+  background-color: rgba(0,0,0, 1) !important;
   position: absolute !important;
   top:0 !important;
   left: 0 !important;
@@ -144,7 +144,7 @@
 }
 
 .i-amphtml-lbg-desc-text {
-  padding: 20px;
+  padding: 20px !important;
   position: relative !important;
 }
 
@@ -180,12 +180,12 @@
 }
 
 .i-amphtml-lbg-gallery-thumbnail-img {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  object-fit: cover;
-  cursor: pointer;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  object-fit: cover !important;
+  cursor: pointer !important;
 }
 
 @media (min-width: 1024px) {
@@ -206,12 +206,12 @@
 
 .i-amphtml-lightbox-gallery-trans {
   pointer-events: none !important;
-  position: fixed;
-  z-index: 1001;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+  position: fixed !important;
+  z-index: 1001 !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
 }
 
 /*
