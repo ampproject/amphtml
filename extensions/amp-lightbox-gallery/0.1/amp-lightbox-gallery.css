@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
- /* PUBLIC CSS CLASSES, CURRENTLY INACTIVE */
-
- .amp-lbg-desc-box.standard {
-   /* Public CSS class for description background */
- }
-
- .amp-lbg-desc-box.overflow {
-    /* Public CSS class for description background */
- }
-
- .amp-lbg-desc-text {
-   /* Public CSS class for description font */
- }
-
-.amp-lbg-mask {
-  /* Public CSS class for mask background and opacity */
-}
-
-/* END PUBLIC CSS CLASSES */
-
 .i-amphtml-lbg-icon {
   width: 100%;
   height: 100%;
