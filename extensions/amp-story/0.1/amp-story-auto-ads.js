@@ -248,7 +248,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.uniquePagesCount_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
-      this.placeAdAfterPage_(pageId);
+      this.tryToPlaceAdAfterPage_(pageId);
     }
   }
 
@@ -266,21 +266,29 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {string} currentPageId
    * @private
    */
-  placeAdAfterPage_(currentPageId) {
+  tryToPlaceAdAfterPage_(currentPageId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
 
     if (!nextAdPageEl || !this.isCurrentAdLoaded_) {
-      return;
+      return false;
+    }
+
+    const currentPage = this.ampStory_.getPageById(currentPageId);
+    const nextPage = this.ampStory_.getNextPage(currentPage);
+    // we do not ever want two consecutive ads
+    if (currentPage.isAd() || nextPage.isAd()) {
+      return false;
     }
 
     const inserted = this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
     // failed insertion (consecutive ads, or no next page)
     if (!inserted) {
-      return;
+      return false;
     }
 
     this.adsPlaced_++;
     this.uniquePagesCount_ = 0;
+
 
     if (!this.allAdsPlaced_()) {
       // start loading next ad
