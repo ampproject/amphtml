@@ -220,15 +220,27 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Dequeues a fetch result and renders it immediately.
+   * Queues another render pass when render completes.
    * @private
    */
   doRenderPass_() {
-    dev().assert(this.renderQueue_.length > 0, 'Nothing queued to render.');
+    dev().assert(this.renderQueue_.length > 0, 'Nothing queued for render.');
     const {items, resolver, rejecter} = this.renderQueue_.shift();
+    const scheduleNextPass = () => {
+      if (this.renderQueue_.length) {
+        this.renderPass_.schedule(1); // Allow paint frame before next render.
+      }
+    };
     this.templates_.findAndRenderTemplateArray(this.element, items)
         .then(elements => this.updateBindings_(elements))
         .then(elements => this.rendered_(elements))
-        .then(() => resolver(), () => rejecter());
+        .then(/* onFulfilled */ () => {
+          scheduleNextPass();
+          resolver();
+        }, /* onRejected */ () => {
+          scheduleNextPass();
+          rejecter();
+        });
   }
 
   /**
