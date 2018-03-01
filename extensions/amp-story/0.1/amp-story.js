@@ -1527,6 +1527,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   getNextPage(page) {
     const nextPageId = page.getNextPageId(true /*opt_isAutomaticAdvance */);
+    if (!nextPageId) {
+      return null;
+    }
     return this.getPageById(nextPageId);
   }
 
