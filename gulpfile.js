@@ -95,6 +95,7 @@ declareExtension('amp-carousel', '0.1', {hasCss: true});
 declareExtension('amp-compare-slider', '0.1', {hasCss: false});
 declareExtension('amp-crypto-polyfill', '0.1', {hasCss: false});
 declareExtension('amp-dailymotion', '0.1', {hasCss: false});
+declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1', {hasCss: false});
 declareExtension('amp-experiment', '0.1', {hasCss: false});
 declareExtension('amp-facebook', '0.1', {hasCss: false});
@@ -145,6 +146,8 @@ declareExtension('amp-position-observer', '0.1', {hasCss: false});
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
+declareExtension('amp-subscriptions-google', '0.1', {hasCss: false});
+
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
