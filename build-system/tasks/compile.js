@@ -38,6 +38,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
   outputFilename, options) {
+  console.log(entryModuleFilename);
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve) {
@@ -95,6 +96,7 @@ function formatClosureCompilerError(message) {
 
 function compile(entryModuleFilenames, outputDir,
   outputFilename, options) {
+  //return getGraph(entryModuleFilenames, {}).then(function(val) {
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
@@ -103,6 +105,8 @@ function compile(entryModuleFilenames, outputDir,
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
+    entryModuleFilenames = ['src/amp.js',
+      'extensions/amp-live-list/0.1/amp-live-list.js'];
     const checkTypes = options.checkTypes || argv.typecheck_only;
     const intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
@@ -209,13 +213,13 @@ function compile(entryModuleFilenames, outputDir,
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
-    entryModuleFilenames.forEach(function(filename) {
-      if (!filename.includes('extensions/')) {
-        return;
-      }
-      const path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
-      srcs.push(path);
-    });
+    //entryModuleFilenames.forEach(function(filename) {
+      //if (!filename.includes('extensions/')) {
+        //return;
+      //}
+      //const path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      //srcs.push(path);
+    //});
     if (options.extraGlobs) {
       srcs.push.apply(srcs, options.extraGlobs);
     }
@@ -369,6 +373,7 @@ function compile(entryModuleFilenames, outputDir,
     }
     return stream;
   });
+  //});
 }
 
 function patchRegisterElement() {
