@@ -38,3 +38,4 @@ Supported parameters:
 - data-token
 - data-url
 - data-anchorid
+- data-version
