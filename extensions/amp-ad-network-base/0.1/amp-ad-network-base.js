@@ -15,19 +15,11 @@
  */
 
 import {AmpAdUIHandler} from '../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+import {dev} from '../../../src/log';
 import {
-  LayoutInfoDef,
   getAmpAdMetadata, // eslint-disable-line no-unused-vars
   sendXhrRequest, // eslint-disable-line no-unused-vars
-} from '../../amp-a4a/0.1/a4a-utils';
-import {
-  RendererDef,
-  RendererInputDef,
-  ValidatorDef, // eslint-disable-line no-unused-vars
-  ValidatorOutputDef,
-  ValidatorResultType, // eslint-disable-line no-unused-vars
-} from '../../amp-a4a/0.1/a4a-render';
-import {dev} from '../../../src/log';
+} from './amp-ad-utils';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 const TAG = 'amp-ad-network-base';
@@ -36,11 +28,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   constructor(element) {
     super(element);
+    dev().assert(AMP.AmpAdUIHandler);
 
-    /** @private {Object<ValidatorResultType, !RendererDef>} */
+    /** @private {Object<./amp-ad-render.ValidatorResultType, !./amp-ad-render.RendererDef>} */
     this.boundRenderers_ = {};
 
-    /** @private {?ValidatorDef} */
+    /** @private {?./amp-ad-render.ValidatorDef} */
     this.boundValidator_ = null;
 
     /** @private {?string} */
@@ -52,7 +45,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?ArrayBuffer} */
     this.unvalidatedBytes_ = null;
 
-    /** @private {!LayoutInfoDef} */
+    /** @private {!./amp-ad-utils.LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
       width: element.getAttribute('width'),
@@ -90,8 +83,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {ValidatorResultType} resultType
-   * @param {!RendererDef} renderer
+   * @param {./amp-ad-render.ValidatorResultType} resultType
+   * @param {!./amp-ad-render.RendererDef} renderer
    * @protected
    */
   bindRenderer(resultType, renderer) {
@@ -102,7 +95,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ValidatorDef} validator
+   * @param {!./amp-ad-render.ValidatorDef} validator
    * @protected
    */
   bindValidator(validator) {
@@ -159,7 +152,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @return {function():boolean} function that when called will verify if
    *    current ad retrieval is current (meaning unlayoutCallback was not
    *    executed). If not, will return false.
-   * @throws {Error}
    */
   getFreshnessVerifier() {
     const id = this.freshnessId_;
@@ -173,12 +165,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ValidatorOutputDef} validatorOutput
-   * @return {!RendererInputDef}
+   * @param {!./amp-ad-render.ValidatorOutputDef} validatorOutput
+   * @return {!./amp-ad-render.RendererInputDef}
    */
   getRenderingDataInput_(validatorOutput) {
     const creative = validatorOutput.creative;
-    return /** @type {!RendererInputDef} */ ({
+    return /** @type {!./amp-ad-render.RendererInputDef} */ ({
       creativeMetadata: getAmpAdMetadataMock(creative, TAG, this.networkType_),
       templateData: null,
       crossDomainData: {
@@ -218,6 +210,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           this.handleValidatorResponse(validatedBytes));
   }
 
+  /**
+   * Invoked whenever the ad response errors out for any reason whatsoever.
+   * @param {!Error} error
+   * @protected
+   */
   handleAdResponseError(error) {
     // TODO(levitzky) add actual error processing logic.
     dev().warn(TAG, error);
@@ -225,14 +222,16 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * Handler invoked when the current freshness id has expired.
+   * @protected
    */
   handleStaleExecution() {}
 
   /**
    * Processes validator response and delegates further action to appropriate
    *   renderer.
-   * @param {!ValidatorOutputDef} validatedResponse The utf-8 decoded ad
+   * @param {!./amp-ad-render.ValidatorOutputDef} validatedResponse The utf-8 decoded ad
    *   response.
+   * @protected
    */
   handleValidatorResponse(validatedResponse) {
     if (this.isStale_()) {
@@ -248,7 +247,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.boundRenderers_[validatedResponse.result](
         this.getRenderingDataInput_(validatedResponse), this);
   }
-
 
   resetInstance() {
     this.freshnessId_++;
@@ -276,7 +274,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.freshnessId_++;
+    this.resetInstance();
     return true;
   }
 }
@@ -300,6 +298,3 @@ function getAmpAdMetadataMock(creative, unusedTag, unusedType) {
   };
 }
 
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkBase);
-});

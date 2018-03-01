@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkBase} from '../../amp-ad-network-base/0.1/amp-ad-network-base';
+import {AmpAdNetworkBase} from './amp-ad-network-base';
 import {
-  ValidatorOutputDef, // eslint-disable-line no-unused-vars
   ValidatorResult,
   templateRenderer,
-} from '../../amp-a4a/0.1/a4a-render';
+} from './amp-ad-render';
 import {dev} from '../../../src/log';
 import {utf8Decode} from '../../../src/utils/bytes'; // For testing/debugging purposes
 
@@ -32,7 +31,7 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   constructor(element) {
     super(element);
     this.bindValidator(bytes => Promise.resolve(
-        /** @type {!ValidatorOutputDef} */({
+        /** @type {!./amp-ad-render.ValidatorOutputDef} */({
           creative: utf8Decode(bytes),
           templateData: {},
           result: 'amp',

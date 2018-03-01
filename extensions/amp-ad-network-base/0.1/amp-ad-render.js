@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from './a4a-variable-source';
+import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {
   CreativeMetaDataDef,
   LayoutInfoDef,
-} from './a4a-utils';
+} from './amp-ad-utils';
 import {
   FriendlyIframeEmbed, // eslint-disable-line no-unused-vars
   installFriendlyIframeEmbed,
@@ -71,7 +71,7 @@ export let RendererOutputDef;
 /** @typedef {
       function(
         !RendererInputDef,
-        !../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase,
+        !./amp-ad-network-base.AmpAdNetworkBase,
         function():boolean=): !Promise<!RendererOutputDef>
     } */
 export let RendererDef;
@@ -80,7 +80,7 @@ export let RendererDef;
       function(
         !ArrayBuffer,
         !Headers,
-        !../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase,
+        !./amp-ad-network-base.AmpAdNetworkBase,
         function():boolean=,
         function(string):string=): !Promise<!ValidatorOutputDef>
     } */
@@ -129,7 +129,7 @@ const ampAdTemplatesStore = {};
 /**
  * Render a validated AMP creative directly in the parent page.
  * @param {!RendererInputDef} renderingData
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @return {!Promise<!RendererOutputDef>}
  */
@@ -209,7 +209,7 @@ export function friendlyFrameRenderer(
 /**
  * Render a non-AMP creative into a NameFrame.
  * @param {!RendererInputDef} renderingData
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @return {!Promise<!RendererOutputDef>}
  */
@@ -239,7 +239,7 @@ export function nameFrameRenderer(
 /**
  * Render a validated AMP template.
  * @param {!RendererInputDef} renderingData
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @return {!Promise<!RendererOutputDef>}
  * @private
@@ -280,7 +280,7 @@ export function templateRenderer(
  *
  * @param {!ArrayBuffer} bytes
  * @param {!Headers} headers
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
  * @return {!Promise<!ValidatorOutputDef>}
@@ -325,7 +325,7 @@ export function templateValidator(
 
 
 /**
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  */
 function getOrCreateAmpAdTemplates(baseImpl) {
   const implType = baseImpl.element.getAttribute('type') || 'anon';
@@ -336,15 +336,11 @@ function getOrCreateAmpAdTemplates(baseImpl) {
 
 /**
  * Shared functionality for cross-domain iframe-based rendering methods.
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
  * @param {!LayoutInfoDef} size The creative size.
  * @param {?string} sentinel
- * @return {!{
- *   frameLoadPromise: !Promise,
- *   iframe: !Element,
- *   crossOriginIframeHandler: ?AMP.AmpAdXOriginIframeHandler
- * }} The promise here will resolve when iframe fires load event.
+ * @return {!RendererOutputDef}
  */
 function iframeRenderHelper(baseImpl, attributes, size, sentinel) {
   const mergedAttributes = Object.assign(attributes, dict({

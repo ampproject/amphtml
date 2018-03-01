@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkTemplateBase} from '../../amp-ad-network-template-base/0.1/amp-ad-network-template-base';
+import {AmpAdNetworkTemplateBase} from '../../amp-ad-network-base/0.1/amp-ad-network-template-base';
 import {NetworkRegistry} from './config';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-ad-common';
 
-export class AmpAdNetworkTemplateCommon extends AmpAdNetworkTemplateBase {
+export class AmpAdTemplateCommon extends AmpAdNetworkTemplateBase {
   /**
    * @param {!Element} element
    */
@@ -35,5 +35,5 @@ export class AmpAdNetworkTemplateCommon extends AmpAdNetworkTemplateBase {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkTemplateCommon);
+  AMP.registerElement(TAG, AmpAdTemplateCommon);
 });
