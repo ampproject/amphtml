@@ -27,25 +27,26 @@ export function relap(global, data) {
 
   if (data['version'] === 'v7') {
     window.onRelapAPIReady = function(relapAPI) {
-      relapAPI.init({
+      relapAPI['init']({
         token: data['token'],
         url: urlParam,
-      })
-          .then(function() {
-            relapAPI.addWidget({
-              cfgId: data['anchorid'],
-              anchorEl: global.document.getElementById('c'),
-              position: 'append',
-              events: {
-                onReady: function() {
-                  window.context.renderStart();
-                },
-                onNoContent: function() {
-                  window.context.noContentAvailable();
-                },
-              },
-            });
-          });
+      });
+    };
+
+    window.onRelapAPIInit = function(relapAPI) {
+      relapAPI['addWidget']({
+        cfgId: data['anchorid'],
+        anchorEl: global.document.getElementById('c'),
+        position: 'append',
+        events: {
+          onReady: function() {
+            window.context.renderStart();
+          },
+          onNoContent: function() {
+            window.context.noContentAvailable();
+          },
+        },
+      });
     };
 
     loadScript(global, 'https://v7.relap.io/relap.js');
