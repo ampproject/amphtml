@@ -15,7 +15,6 @@
  */
 
 import {Sources} from './sources';
-import {dev} from '../../../src/log';
 import {isConnectedNode} from '../../../src/dom';
 
 
@@ -336,30 +335,12 @@ export class BlessTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    const isPaused = mediaEl.paused;
     const isMuted = mediaEl.muted;
-    const currentTime = mediaEl.currentTime;
-
-    const whenPlaying = isPaused ?
-      Promise.resolve(mediaEl.play()) : Promise.resolve();
-
-    return whenPlaying.then(() => {
-      mediaEl.muted = false;
-
-      if (isPaused) {
-        mediaEl.pause();
-        mediaEl.currentTime = currentTime;
-      }
-
-      if (isMuted) {
-        mediaEl.muted = true;
-      }
-
-      mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
-    }).catch(reason => {
-      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason, mediaEl);
-    });
+    mediaEl.muted = false;
+    if (isMuted) {
+      mediaEl.muted = true;
+    }
+    return Promise.resolve();
   }
 }
 
