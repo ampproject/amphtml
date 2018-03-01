@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -441,7 +441,6 @@ export class FixedLayer {
    * @private
    */
   setupSelectors_(fixedSelectors, stickySelectors) {
-    let hasInlineStyle = false;
     const isInlineStylesEnabled =
         isExperimentOn(this.ampdoc.win, 'inline-styles');
     for (let i = 0; i < fixedSelectors.length; i++) {
@@ -455,23 +454,21 @@ export class FixedLayer {
         }
         const el = elements[j];
         if (isInlineStylesEnabled) {
-          const sanitized = this.sanitizeElement_(el);
-          if (!hasInlineStyle && sanitized) {
-            hasInlineStyle = true;
-          }
+          this.sanitizeElement_(el);
         }
         this.setupElement_(el, fixedSelector, 'fixed');
       }
-    }
-    if (isInlineStylesEnabled) {
-      user().error(TAG, 'Inline style not supported for fixed element');
     }
     for (let i = 0; i < stickySelectors.length; i++) {
       const stickySelector = stickySelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           stickySelector);
       for (let j = 0; j < elements.length; j++) {
-        this.setupElement_(elements[j], stickySelector, 'sticky');
+        let element = elements[j];
+        if (isInlineStylesEnabled) {
+          this.sanitizeElement(element)
+        }
+        this.setupElement_(element, stickySelector, 'sticky');
       }
     }
   }
@@ -479,16 +476,14 @@ export class FixedLayer {
   /**
    * Sanitizes an element, cleaning up the style field attribute.
    * @param {!Element} element
-   * @return {boolean} True if the element has been sanitized and the style
-   *     field has been removed.
    * @private
    */
   sanitizeElement_(element) {
     if (element.style) {
       element.removeAttribute('style');
-      return true;
+      user().error(
+          TAG, 'Inline style not supported for fixed element', element);
     }
-    return false;
   }
 
   /**
