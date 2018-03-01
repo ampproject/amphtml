@@ -8,9 +8,9 @@ This implementation guide is intended for publishers who wish to use Real Time C
 
 ## Background
 
-For full details and background, please refer to the [RTC Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended to highlight some of the details of DoubleClick's implementation of RTC.
+For full details and background, please first make sure to familiarize yourself with the [RTC Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) and the generic [RTC Publisher Implementation Guide](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md). This guide is intended only as supplement to those two documents, to address the specific details of DoubleClick's implementation of RTC.
 
-AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to augment ad requests with targeting information that is retrieved at runtime. This dynamic targeting data can be applied in addition to any existing statically-defined data on each amp-ad element. RTC allows 5 callouts to targeting servers for each individual ad slot, the results of which can be added to the ad request. To use RTC with DoubleClick, you must simply setup the rtc-config on each amp-ad element.
+AMP Real Time Config (RTC) is a feature of Fast Fetch that allows Publishers to augment ad requests with targeting information that is retrieved at page runtime. This dynamic targeting data can be applied in addition to any existing statically-defined data on each amp-ad element. RTC works by sending HTTP requests to specified URLs for targeting information. These URLs then respond with specially formatted JSON that is processed and added on to the ad request that is then sent to Doubleclick For Publishers (DFP).  RTC allows 5 callouts to targeting servers for each individual ad slot. To use RTC with DoubleClick, you must simply setup the rtc-config on each amp-ad element.
 
 
 ## Setting Up RTC-Config
@@ -29,7 +29,7 @@ Doubleclick's RTC implementation has made many macros available for RTC url expa
 
 ## Response and Endpoint Specification
 
-To use their own first-party data, publishers will need to build a RTC-compatible endpoint that returns this targeting data. For those only retrieving data from 3rd-party vendors, this section is not applicable.
+To use their own first-party data, publishers will need to build a RTC-compatible endpoint that returns targeting data as specified below. If you only plan to retrieve data from 3rd-party vendors who have their own RTC response server, this section is not applicable as you will not need to build your own RTC server endpoint.
 
 The requirements for an RTC endpoint to be used with DoubleClick are the same as what is specified in the Publisher Implementation Guide. In summary:
 

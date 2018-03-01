@@ -13,6 +13,8 @@ Remote HTML support was added for Delayed Fetch to support first-party cookie ta
 
 ## Overview
 
+RTC works by sending HTTP requests to URLs that a publisher specifies for each ad slot. The servers that receive these RTC requests respond with a JSON object that the associated AMP Fast Fetch implementation can use for various purposes, for instance the DoubleClick Fast Fetch implementation takes the data and adds it to the ad request to DFP as targeting parameters.
+
 The design of RTC is per-slot, with a** maximum of 5 parallel callouts allowed per slot**. RTC is usable by any Fast Fetch network implementation. Call-outs for all slots will be sent as soon as possible. There are two different types of callouts that will be supported:
 
 
@@ -24,8 +26,29 @@ The design of RTC is per-slot, with a** maximum of 5 parallel callouts allowed p
 
 In both cases, the results of these call-outs will be passed to the Fast Fetch implementations as part of ad url construction via the **getAdUrl** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.   
 
+## Glossary of Important Terms
+* **RTC Callout / RTC Request:** The HTTP request sent from the AMP page by the Fast Fetch implementation, to a server endpoint, asking for an RTC Response.
+
+* **RTC Response:** The JSON object returned in response to the RTC Callout.
+
+* **RTC Endpoint:** A URL that will respond with RTC Response.
+
+* **Vendor URL:** A vendor URL is simply an RTC endpoint that belongs to a third-party company that is registered within amp-a4a/0.1/callout-vendors.js. A publisher may send RTC requests to a vendor registered in that file by simply specifying the vendor's name in their RTC Config.
+
+* **Custom URL:** A 'custom URL' as used in RTC documentation means an RTC endpoint URL that is not registered within callout-vendors.js. For instance, if MyFirstPartyPublisher.com wanted to use RTC to make requests to their own targeting server, they would not register themselves within callout-vendors.js as other publishers would not need to use them. Thus, their RTC endpoint is referred to as a 'custom URL'.
+
+* **RTC Config:** The JSON configuration object written directly onto the amp-ad element. This JSON config is used by the implemenation of Real Time Config to determine what URLs to make requests to.
+
+* **Macros:** When making an RTC request, often times information about the associated slot is pertinent, for instance the vendor you are making a request to might want to know the height of the slot. Rather than manually modify the URL to contain the correct parameters, vendor and custom URLs can be specified with macros in them to be substituted. These macros can then be replaced either with values that the publisher specifies in the RTC config, or automatically done by the Fast Fetch implementation. See the section below on Macro Substitution for more information.
+
 
 ## Design
+
+### Network-Specific Addendums
+
+Each Ad Network that works with Real Time Config may have their own additional documentation supplements, see links here:
+
+* [DoubleClick - RTC Documentation Supplement](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/doubleclick-rtc.md)
 
 
 ### Per-Slot RTC Specification
@@ -144,7 +167,7 @@ RTC requests are only sent to HTTPS endpoints.
 
 ### RTC Callout Endpoint and Response Specification
 
-The RTC endpoint must respond to the RTC GET request with a valid JSON object of targeting information to insert into the ad request URL. Redirects are not allowed, and if the endpoint attempts to redirect, the RTC will be abandoned. Special care should be made to respond to these requests as quickly as possible, as there is a 1 second default timeout imposed by RTC, and publishers may optionally shorten this timeout. Responses that return after the timeout will be dropped.
+The RTC endpoint must respond to the RTC GET request with a valid JSON object to insert into the ad request URL. Redirects are not allowed, and if the endpoint attempts to redirect, the RTC will be abandoned. Special care should be made to respond to these requests as quickly as possible, as there is a 1 second default timeout imposed by RTC, and publishers may optionally shorten this timeout. Responses that return after the timeout will be dropped.
 
 Responses from one RTC callout do not affect any of the other RTC callouts. All requests are independent of each other.
 
@@ -160,9 +183,9 @@ The RTC Response to a GET request must meet the following requirements:
     *   AMP-Access-Control-Allow-Source-Origin
     *   Access-control-allow-origin 
     *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
-*   Body of response is a JSON object of targeting information such as:
+*   Body of response is a JSON object such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code></strong>
-    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs - See list at top for all network specific documentation).
 
 
 ### URL Macro Substitution
