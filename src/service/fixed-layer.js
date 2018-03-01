@@ -464,9 +464,9 @@ export class FixedLayer {
       const elements = this.ampdoc.getRootNode().querySelectorAll(
           stickySelector);
       for (let j = 0; j < elements.length; j++) {
-        let element = elements[j];
+        const element = elements[j];
         if (isInlineStylesEnabled) {
-          this.sanitizeElement(element)
+          this.sanitizeElement(element);
         }
         this.setupElement_(element, stickySelector, 'sticky');
       }
