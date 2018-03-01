@@ -879,6 +879,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-weight: 400 !important;
   font-size: 12px !important;
   max-width: 640px !important;
+  z-index: 100002 !important; /** Bookend + 1 */
 }
 
 @media (min-width: 640px) {
