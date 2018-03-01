@@ -275,7 +275,7 @@ describe('FixedLayer', () => {
         }
         return 0;
       },
-      getAttribute: name => {
+      hasAttribute: name => {
         return attrs[name];
       },
       setAttribute: (name, value) => {
@@ -436,6 +436,7 @@ describe('FixedLayer', () => {
     });
 
     it('should throw user error for inline style', () => {
+      element1.setAttribute('style', {});
       toggleExperiment(
           ampdoc.win,
           'inline-styles',
