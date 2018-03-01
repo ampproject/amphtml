@@ -111,7 +111,7 @@ const attributesToForward = [
   'orientation',
   'reopen-picker-on-clear-date',
   'with-full-screen-portal',
-  'with-portal',
+  // 'with-portal',
   'day-size',
   'month-format',
 ];
@@ -595,7 +595,7 @@ class AmpDatePicker extends AMP.BaseElement {
     } else if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
-      hiddenInput.name = this.getHiddenInputId(form, type);
+      hiddenInput.name = this.getHiddenInputId_(form, type);
       this.element.appendChild(hiddenInput);
       return hiddenInput;
     } else {
@@ -608,8 +608,9 @@ class AmpDatePicker extends AMP.BaseElement {
    * Date pickers not in a form don't need named hidden inputs.
    * @param {!Element} form
    * @param {!DateFieldType} type
+   * @private
    */
-  getHiddenInputId(form, type) {
+  getHiddenInputId_(form, type) {
     const id = this.element.id;
     if (form) {
       const alternativeName = `${id}-${type}`;
@@ -629,6 +630,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Add the document-level event listeners to attach behavior to any referenced
    * input fields and to enable overlay open/close.
+   * @private
    */
   setupListeners_() {
     const root =
@@ -646,6 +648,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * True if the input is a field of this date picker.
    * @param {?Element} field
    * @return {boolean}
+   * @private
    */
   isDateField_(field) {
     return (
@@ -659,6 +662,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Handle clicks inside and outside of the date picker to detect when to
    * open and close the date picker.
    * @param {!Event} e
+   * @private
    */
   handleClick_(e) {
     const target = dev().assertElement(e.target);
@@ -675,6 +679,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Handle focus events in the document to switch between selecting the start
    * and end dates, and when to open and close the date picker.
    * @param {!Event} e
+   * @private
    */
   handleFocus_(e) {
     const target = dev().assertElement(e.target);
@@ -721,6 +726,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Handle changing values of the attached input fields, and the hotkey for
    * closing the date picker.
    * @param {!Event} e
+   * @private
    */
   handleKeydown_(e) {
     const target = dev().assertElement(e.target);
@@ -734,6 +740,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Close the date picker overlay when the escape key is pressed.
    * @param {!Event} e
+   * @private
    */
   handleDocumentKeydown_(e) {
     if (e.keyCode == KeyCodes.ESCAPE &&
@@ -779,6 +786,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {string} eventType
    * @param {function(!Event)} listener
    * @param {Object=} opt_evtListenerOpts
+   * @private
    */
   listen_(element, eventType, listener, opt_evtListenerOpts) {
     this.unlisteners_.push(
@@ -794,7 +802,10 @@ class AmpDatePicker extends AMP.BaseElement {
     this.unlisteners_.length = 0;
   }
 
-  /** @private */
+  /**
+   * Fetch and parse any templates specified via the `src` attribute.
+   * @private
+   */
   setupTemplates_() {
     return this.fetchSrcTemplates_()
         .then(json => this.parseSrcTemplates_(json))
@@ -845,6 +856,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Create a new map to store rendered templates and drop the old reference
    * for garbage collection.
+   * @private
    */
   clearRenderedTemplates_() {
     this.renderedTemplates_ = map();
@@ -852,6 +864,7 @@ class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Cleanup the resources allocated for the src templates.
+   * @private
    */
   cleanupSrcTemplates_() {
     this.srcTemplates_ = [];
@@ -975,6 +988,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * the others.
    * @param {?Element} focusedField The field to apply focus to
    * @param {boolean=} opt_toggle
+   * @private
    */
   updateDateFieldFocus_(focusedField, opt_toggle) {
     if (this.mode_ == DatePickerMode.STATIC) {
@@ -993,6 +1007,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * the static date picker should receive focus from the attached input.
    * @param {string} name
    * @param {?BindDatesDetails|?BindDateDetails=} opt_data
+   * @private
    */
   triggerEvent_(name, opt_data = null) {
     const event = createCustomEvent(this.win_, `${TAG}.${name}`, opt_data);
@@ -1004,6 +1019,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {?moment} dateOrStartDate
    * @param {?moment=} endDate
    * @return {?BindDatesDetails|?BindDateDetails}
+   * @private
    */
   getSelectData_(dateOrStartDate, endDate = null) {
     if (this.type_ == DatePickerType.SINGLE) {
@@ -1022,6 +1038,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {?Element} field An input field
    * @param {string} className A css classname
    * @param {boolean=} value
+   * @private
    */
   toggleDateFieldClass_(field, className, value) {
     if (field) {
@@ -1033,6 +1050,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Assign the provided date value to the given input
    * @param {?Element} field An input field
    * @param {?moment} date A date value
+   * @private
    */
   updateDateField_(field, date) {
     if (field) {
@@ -1043,6 +1061,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Clear the value from the given input field.
    * @param {?Element} field An input field
+   * @private
    */
   clearDateField_(field) {
     if (field) {
@@ -1088,6 +1107,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!moment} startDate
    * @param {?moment} endDate
    * @param {function(!moment)} cb
+   * @private
    */
   iterateDateRange_(startDate, endDate, cb) {
     const normalizedEndDate = endDate || startDate;
