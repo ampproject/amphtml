@@ -26,9 +26,8 @@
  * </code>
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpBaseLayer} from './amp-story-base-layer';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import { AmpBaseLayer } from './amp-story-base-layer';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -86,6 +85,7 @@ export class AmpStoryGridLayer extends AmpBaseLayer {
 
   /** @override */
   buildCallback() {
+    super.buildCallback();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();

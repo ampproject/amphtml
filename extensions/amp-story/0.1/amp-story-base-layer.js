@@ -21,9 +21,18 @@
 import {Layout} from '../../../src/layout';
 
 export class AmpBaseLayer extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+  }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
+  }
+
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-story-layer');
   }
 }

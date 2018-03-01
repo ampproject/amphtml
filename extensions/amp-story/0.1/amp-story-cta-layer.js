@@ -29,8 +29,7 @@
  * ...
  */
 
-import {Layout} from '../../../src/layout';
-import { AmpBaseLayer } from './amp-story-base-layer';
+import {AmpBaseLayer} from './amp-story-base-layer';
 
 export class AmpStoryCtaLayer extends AmpBaseLayer {
 
