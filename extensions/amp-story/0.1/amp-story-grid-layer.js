@@ -28,6 +28,7 @@
 
 import {Layout} from '../../../src/layout';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import { AmpBaseLayer } from './amp-story-base-layer';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -72,7 +73,7 @@ const TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
-export class AmpStoryGridLayer extends AMP.BaseElement {
+export class AmpStoryGridLayer extends AmpBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -155,11 +156,6 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
         element.removeAttribute(attributeName);
       }
     }
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
   }
 }
 
