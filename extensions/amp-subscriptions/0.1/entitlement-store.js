@@ -40,7 +40,7 @@ export class EntitlementStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private {?Promise<!Object<string, !Entitlements>>} */
+    /** @private {?Promise<!Array<!Entitlements>>} */
     this.allResolvedPromise_ = null;
 
   }
@@ -91,6 +91,8 @@ export class EntitlementStore {
         this.onChange(({entitlements}) => {
           if (entitlements.enablesThis()) {
             resolve(true);
+          } else if (this.areAllPlatformsResolved_()) {
+            resolve(false);
           }
         });
       }
@@ -112,12 +114,12 @@ export class EntitlementStore {
     this.allResolvedPromise_ = new Promise(resolve => {
       if (this.areAllPlatformsResolved_()) {
         // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(Object.values(this.entitlements_));
+        return resolve(this.getAvailablePlatformsEntitlements_());
       } else {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(() => {
           if (this.areAllPlatformsResolved_()) {
-            resolve(Object.values(this.entitlements_));
+            resolve(this.getAvailablePlatformsEntitlements_());
           }
         });
       }
@@ -127,11 +129,27 @@ export class EntitlementStore {
   }
 
   /**
+   * Returns entitlements for resolved platforms.
+   * @private
+   * @returns {!Array<!Entitlements>}
+   */
+  getAvailablePlatformsEntitlements_() {
+    const entitlements = [];
+    for (const platform in this.entitlements_) {
+      if (this.entitlements_.hasOwnProperty(platform)) {
+        entitlements.push(this.entitlements_[platform]);
+      }
+    }
+    return entitlements;
+  }
+
+  /**
    * Returns entitlements when all services are done fetching them.
    * @returns {!Promise<!Entitlements>}
    */
   selectPlatform() {
     return this.getAllPlatformsEntitlements_().then(entitlements => {
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlements.
       return this.selectApplicablePlatform_(entitlements);
     });
   }
@@ -148,7 +166,7 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
-   * @param {!List<!Entitlements>} platforms
+   * @param {!Array<!Entitlements>} platforms
    * @returns {!Entitlements}
    */
   selectApplicablePlatform_(platforms) {

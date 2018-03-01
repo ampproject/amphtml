@@ -32,6 +32,8 @@ ENV['PERCY_DEBUG'] = '0'
 ENV['WEBSERVER_QUIET'] = '--quiet'
 # CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 DEFAULT_WIDTHS = [375, 411, 1400]
+VIEWPORT_WIDTH = 1400
+VIEWPORT_HEIGHT = 100000
 HOST = 'localhost'
 PORT = '8000'
 WEBSERVER_TIMEOUT_SECS = 15
@@ -216,7 +218,7 @@ def load_visual_tests_config_json
   json_file = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.js'),
+          '../../test/visual-diff/visual-tests'),
       'r')
   json_file.read
 end
@@ -225,18 +227,30 @@ end
 # Configures the Chrome browser (optionally in headless mode)
 def configure_browser
   if ARGV.include? '--headless'
-    chrome_args = %w(no-sandbox disable-extensions headless disable-gpu)
+    chrome_args = %w[--no-sandbox --disable-extensions --headless --disable-gpu]
   else
-    chrome_args = %w(no-sandbox disable-extensions)
+    chrome_args = %w[--no-sandbox --disable-extensions]
   end
-  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-    chromeOptions: { args: chrome_args }
+  options = Selenium::WebDriver::Chrome::Options.new
+  chrome_args.each do |option|
+    options.add_argument(option)
+  end
+  options.add_emulation(
+    device_metrics: {
+      width: VIEWPORT_WIDTH,
+      height: VIEWPORT_HEIGHT,
+      pixelRatio: 1,
+      touch: false
+    }
   )
   Capybara.register_driver :chrome do |app|
-    Capybara::Selenium::Driver.new app,
+    Capybara::Selenium::Driver.new(
+      app,
       browser: :chrome,
-      desired_capabilities: capabilities
+      options: options
+    )
   end
+  Capybara.default_driver = :chrome
   Capybara.javascript_driver = :chrome
 end
 

@@ -79,7 +79,7 @@ describes.realWin('entitlement-store', {}, () => {
           });
     });
 
-    it('should resolve false with null for negative entitlement', done => {
+    it('should resolve false for negative entitlement', done => {
       const negativeEntitlement1 =
           new Entitlement(serviceIds[0], ['product1'], '');
       const negativeEntitlements = new Entitlements(
@@ -95,6 +95,25 @@ describes.realWin('entitlement-store', {}, () => {
             }
           });
     });
+
+    it('should resolve false if all future entitlement '
+        + 'are also negative ', done => {
+      const negativeEntitlement1 =
+          new Entitlement(serviceIds[0], ['product1'], '');
+      const negativeEntitlements = new Entitlements(
+          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      entitlementStore.getGrantStatus()
+          .then(entitlements => {
+            if (entitlements === false) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+    });
   });
 
   describe('areAllPlatformsResolved_', () => {
@@ -105,6 +124,19 @@ describes.realWin('entitlement-store', {}, () => {
       entitlementStore.resolveEntitlement(serviceIds[0],
           entitlementsForService1);
       expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(true);
+    });
+  });
+
+  describe('getAvailablePlatformsEntitlements_', () => {
+    it('should return all available entitlements', () => {
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2]);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2, entitlementsForService1]);
     });
   });
 
