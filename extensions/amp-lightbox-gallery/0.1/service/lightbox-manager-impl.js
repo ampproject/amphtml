@@ -17,13 +17,19 @@
 import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
+  LIGHTBOX_THUMBNAIL_AD,
+  LIGHTBOX_THUMBNAIL_GIF,
+  LIGHTBOX_THUMBNAIL_UNKNOWN,
+  LIGHTBOX_THUMBNAIL_VIDEO,
+
+} from './lightbox-placeholders';
+import {
   childElement,
   childElementByAttr,
   closestByTag,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {defaultPlaceholder} from './lightbox-placeholders';
 import {dev, user} from '../../../../src/log';
 import {hasOwn, map} from '../../../../src/utils/object';
 import {isExperimentOn} from '../../../../src/experiments';
@@ -382,13 +388,24 @@ export class LightboxManager {
 
   /**
    * Returns the default placeholder based on element type
-   * @param {!Element=} opt_element
+   * @param {!Element} element
    * @return {string}
    * @private
    */
-  getPlaceholderForElementType_(opt_element) {
+  getPlaceholderForElementType_(element) {
     // TODO(#12713): add placeholder icons for each component type
-    return defaultPlaceholder;
+    const type = element.tagName;
+    switch (type) {
+      case 'AMP-AD':
+        return LIGHTBOX_THUMBNAIL_AD;
+      case 'AMP-ANIM':
+        return LIGHTBOX_THUMBNAIL_GIF;
+      case 'AMP-VIDEO':
+      case 'AMP-YOUTUBE':
+        return LIGHTBOX_THUMBNAIL_VIDEO;
+      default:
+        return LIGHTBOX_THUMBNAIL_UNKNOWN;
+    }
   }
 
   /**
