@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {Actions} from '../actions';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
-import {UrlBuilder} from '../url-builder';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
@@ -59,6 +57,7 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
       actionMap = {
         'subscribe': 'https://lipsum.com/subscribe',
         'login': 'https://lipsum.com/login',
+        'other': 'https://lipsum.com/other',
       };
     });
 
