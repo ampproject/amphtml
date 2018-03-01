@@ -28,48 +28,8 @@ export let AmpTemplateCreativeDef;
     }} */
 export let CrossDomainDataDef;
 
-/** @typedef {{
-      creativeMetadata: !./amp-ad-utils.CreativeMetaDataDef,
-      templateData: ?AmpTemplateCreativeDef,
-      crossDomainData: ?CrossDomainDataDef,
-      size: !./amp-ad-utils.LayoutInfoDef,
-      adUrl: string,
-    }} */
-export let RendererInputDef;
-
-/** @typedef {{
-      iframe: ?Element,
-      friendlyIframeEmbed: ?Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>,
-      crossOriginIframeHandler: ?AMP.AmpAdXOriginIframeHandler,
-      frameLoadPromise: ?Promise,
-    }} */
-export let RendererOutputDef;
-
-/** @typedef {
-      function(
-        !RendererInputDef,
-        !./amp-ad-network-base.AmpAdNetworkBase,
-        function():boolean=): !Promise<!RendererOutputDef>
-    } */
-export let RendererDef;
-
-/** @typedef {
-      function(
-        !ArrayBuffer,
-        !Headers,
-        !./amp-ad-network-base.AmpAdNetworkBase,
-        function():boolean=,
-        function(string):string=): !Promise<!ValidatorOutputDef>
-    } */
-export let ValidatorDef;
-
-/** @typedef {{
-        creative: ?string,
-        templateData: (JsonObject|undefined),
-        analytics: (JsonObject|undefined),
-        result: !ValidatorResultType,
-    }} */
-export let ValidatorOutputDef;
+/** @typedef {{width: string, height: string}} */
+export let LayoutInfoDef;
 
 /** @typedef {string} */
 export let ValidatorResultType;

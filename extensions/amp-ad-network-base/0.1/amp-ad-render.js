@@ -19,18 +19,18 @@ import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {
   CreativeMetaDataDef,
   LayoutInfoDef,
+  getAmpAdMetadata, // eslint-disable-line no-unused-vars
 } from './amp-ad-utils';
-import {
-  FriendlyIframeEmbed, // eslint-disable-line no-unused-vars
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
 import {ValidatorResult} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -52,225 +52,256 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 /** @const {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
-/**
- * Stores an AmpAdInstance for each network type.
- * @const {Object<string, AmpAdTemplates>}
- */
-const ampAdTemplatesStore = {};
+
+export class Renderer {
+  /**
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @param {!./amp-ad-network-base.AmpAdNetworkBase} unusedBaseInstance
+   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   */
+  render(context, unusedBaseInstance) {
+    return Promise.resolve(context);
+  }
+}
+
+export class Validator {
+  /**
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   */
+  validate(context) {
+    return Promise.resolve(context);
+  }
+}
 
 
 /**
  * Render a validated AMP creative directly in the parent page.
- * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
- * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
  */
-export function friendlyFrameRenderer(
-  renderingData,
-  baseImpl,
-  checkStillCurrent = () => true) {
+export class FriendlyFrameRenderer extends Renderer {
 
-  const creativeMetaData = renderingData.creativeMetadata;
-  const size = renderingData.size;
-  const adUrl = renderingData.adUrl;
+  /** @override */
+  render(context, baseInstance) {
 
-  dev().assert(creativeMetaData.minifiedCreative, 'missing minified creative');
-  dev().assert(baseImpl.element.ownerDocument, 'missing owner document?!');
+    const creativeMetaData = context.getCreativeMetadata();
+    const size = context.getSize();
+    const adUrl = context.getRequestUrl();
 
-  // Create and setup friendly iframe.
-  const iframe = /** @type {!HTMLIFrameElement} */(
-    createElementWithAttributes(
-        /** @type {!Document} */(baseImpl.element.ownerDocument), 'iframe',
-        dict({
-          // NOTE: It is possible for either width or height to be 'auto',
-          // a non-numeric value.
-          'height': size.height,
-          'width': size.width,
-          'frameborder': '0',
-          'allowfullscreen': '',
-          'allowtransparency': '',
-          'scrolling': 'no',
-        })));
-  baseImpl.applyFillContent(iframe);
+    dev().assert(creativeMetaData, 'missing creative metadata');
+    dev().assert(size, 'missing creative size');
+    dev().assert(adUrl, 'missing ad request url');
+    dev().assert(creativeMetaData.minifiedCreative,
+        'missing minified creative');
+    dev().assert(baseInstance.element.ownerDocument,
+        'missing owner document?!');
 
-  const fontsArray = [];
-  if (creativeMetaData.customStylesheets) {
-    creativeMetaData.customStylesheets.forEach(s => {
-      const href = s['href'];
-      if (href) {
-        fontsArray.push(href);
-      }
-    });
-  }
+    // Create and setup friendly iframe.
+    const iframe = /** @type {!HTMLIFrameElement} */(
+      createElementWithAttributes(
+          /** @type {!Document} */(baseInstance.element.ownerDocument),
+          'iframe',
+          dict({
+            // NOTE: It is possible for either width or height to be 'auto',
+            // a non-numeric value.
+            'height': size.height,
+            'width': size.width,
+            'frameborder': '0',
+            'allowfullscreen': '',
+            'allowtransparency': '',
+            'scrolling': 'no',
+          })));
+    baseInstance.applyFillContent(iframe);
 
-  return installFriendlyIframeEmbed(
-      iframe, baseImpl.element, {
-        host: baseImpl.element,
-        url: adUrl,
-        html: creativeMetaData.minifiedCreative,
-        extensionIds: creativeMetaData.customElementExtensions || [],
-        fonts: fontsArray,
-      }, embedWin => {
-        installUrlReplacementsForEmbed(baseImpl.getAmpDoc(), embedWin,
-            new A4AVariableSource(baseImpl.getAmpDoc(), embedWin));
-      })
-      .then(friendlyIframeEmbed => {
-        checkStillCurrent();
-        setFriendlyIframeEmbedVisible(
-            friendlyIframeEmbed, baseImpl.isInViewport());
-        // Ensure visibility hidden has been removed (set by boilerplate).
-        const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
-            friendlyIframeEmbed.win.document;
-        setStyle(frameDoc.body, 'visibility', 'visible');
-        // It's enough to wait for "ini-load" signal because in a FIE case
-        // we know that the embed no longer consumes significant resources
-        // after the initial load.
-        return friendlyIframeEmbed.whenIniLoaded()
-            .then(() => {
-              checkStillCurrent();
-              return /** @type {!./amp-ad-type-defs.RendererOutputDef} */ ({
-                iframe,
-                friendlyIframeEmbed,
-                crossOriginIframeHandler: null,
-                frameLoadPromise: null,
-              });
-            });
+    const fontsArray = [];
+    if (creativeMetaData.customStylesheets) {
+      creativeMetaData.customStylesheets.forEach(s => {
+        const href = s['href'];
+        if (href) {
+          fontsArray.push(href);
+        }
       });
+    }
+
+    return installFriendlyIframeEmbed(
+        iframe, baseInstance.element, {
+          host: baseInstance.element,
+          url: /** @type {string} */ (adUrl),
+          html: creativeMetaData.minifiedCreative,
+          extensionIds: creativeMetaData.customElementExtensions || [],
+          fonts: fontsArray,
+        }, embedWin => {
+          installUrlReplacementsForEmbed(baseInstance.getAmpDoc(), embedWin,
+              new A4AVariableSource(baseInstance.getAmpDoc(), embedWin));
+        })
+        .then(friendlyIframeEmbed => {
+          setFriendlyIframeEmbedVisible(
+              friendlyIframeEmbed, baseInstance.isInViewport());
+          // Ensure visibility hidden has been removed (set by boilerplate).
+          const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
+              friendlyIframeEmbed.win.document;
+          setStyle(frameDoc.body, 'visibility', 'visible');
+          // It's enough to wait for "ini-load" signal because in a FIE case
+          // we know that the embed no longer consumes significant resources
+          // after the initial load.
+          return friendlyIframeEmbed.whenIniLoaded()
+              .then(() => {
+                return context.setIframe(iframe)
+                    .setFriendlyIframeEmbed(friendlyIframeEmbed);
+              });
+        });
+  }
 }
 
 /**
  * Render a non-AMP creative into a NameFrame.
- * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
- * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
  */
-
-export function nameFrameRenderer(
-  renderingData,
-  baseImpl,
-  checkStillCurrent = () => true) {
-  dev().assert(renderingData.crossDomainData, 'CrossDomain data undefined!');
-  const rawCreativeBytes = renderingData.crossDomainData.rawCreativeBytes;
-  return Promise.resolve(utf8Decode(rawCreativeBytes)).then(creative => {
-    checkStillCurrent();
-    const srcPath = getDefaultBootstrapBaseUrl(baseImpl.win, 'nameframe');
-    const additionalContextMetadata =
-      renderingData.crossDomainData.additionalContextMetadata;
-    const sentinel = renderingData.crossDomainData.sentinel;
-    const size = renderingData.size;
-    const contextMetadata = getContextMetadata(
-        baseImpl.win, baseImpl.element, sentinel, additionalContextMetadata);
-    contextMetadata['creative'] = creative;
-    const name = JSON.stringify(contextMetadata);
-    return iframeRenderHelper(
-        baseImpl, dict({'src': srcPath, 'name': name}), size, sentinel);
-  });
+export class NameFrameRenderer extends Renderer {
+  /** @override */
+  render(context, baseInstance) {
+    const crossDomainData = context.getCrossDomainData();
+    dev().assert(crossDomainData, 'CrossDomain data undefined!');
+    const rawCreativeBytes = crossDomainData.rawCreativeBytes;
+    return Promise.resolve(utf8Decode(rawCreativeBytes)).then(creative => {
+      const srcPath =
+          getDefaultBootstrapBaseUrl(baseInstance.win, 'nameframe');
+      const additionalContextMetadata =
+          crossDomainData.additionalContextMetadata;
+      const sentinel = crossDomainData.sentinel;
+      const contextMetadata = getContextMetadata(
+          baseInstance.win,
+          baseInstance.element,
+          sentinel,
+          additionalContextMetadata);
+      contextMetadata['creative'] = creative;
+      const name = JSON.stringify(contextMetadata);
+      return iframeRenderHelper(
+          baseInstance, dict({'src': srcPath, 'name': name}), context);
+    });
+  }
 }
 
 /**
  * Render a validated AMP template.
- * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
- * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
- * @private
  */
-export function templateRenderer(
-  renderingData,
-  baseImpl,
-  checkStillCurrent = () => true) {
-  return friendlyFrameRenderer(renderingData, baseImpl, checkStillCurrent)
-      .then(rendererOutput => {
-        const iframe = rendererOutput.iframe;
-        const templateMacroValues = renderingData.templateData &&
-            renderingData.templateData.data;
-        if (iframe && templateMacroValues) {
-          const ampAdTemplates = getOrCreateAmpAdTemplates(baseImpl);
-          ampAdTemplates.render(
-              templateMacroValues,
-              iframe.contentWindow.document.body)
-              .then(renderedElement => {
-                const templateAnalytics = renderingData.templateData &&
-                    renderingData.templateData.analytics;
-                if (templateAnalytics) {
-                  ampAdTemplates.insertAnalytics(
-                      renderedElement, templateAnalytics);
-                }
-                iframe.contentWindow.document.body./*OK*/innerHTML =
-                    renderedElement./*OK*/innerHTML;
-              });
-        }
-        return rendererOutput;
-      });
-}
+export class TemplateRenderer extends FriendlyFrameRenderer {
 
+  constructor() {
+    super();
+
+    /** @private {?AmpAdTemplates} */
+    this.ampAdTemplates_ = null;
+  }
+
+  /** @override */
+  render(context, baseInstance) {
+    return super.render(context, baseInstance)
+        .then(context => {
+          const iframe = context.getIframe();
+          const templateData = context.getTemplateData();
+          const templateMacroValues = templateData && templateData.data;
+          if (iframe && templateMacroValues) {
+            const ampAdTemplates = this.ampAdTemplates_ ||
+              new AmpAdTemplates(baseInstance.win);
+            ampAdTemplates.render(
+                templateMacroValues,
+                iframe.contentWindow.document.body)
+                .then(renderedElement => {
+                  const analytics = templateData && templateData.analytics;
+                  if (analytics) {
+                    ampAdTemplates.insertAnalytics(renderedElement, analytics);
+                  }
+                  iframe.contentWindow.document.body./*OK*/innerHTML =
+                    renderedElement./*OK*/innerHTML;
+                });
+          }
+          return context;
+        });
+  }
+}
 
 /**
  * Fetches and returns the template from the given ad response, wrapped as a
  * promise, or rejects if the template cannot be fetched.
- *
- * @param {!ArrayBuffer} bytes
- * @param {!Headers} headers
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
- * @param {function():boolean=} checkStillCurrent
- * @param {function(string):string=} parseOnFetch
- * @return {!Promise<!./amp-ad-type-defs.ValidatorOutputDef>}
  */
-export function templateValidator(
-  bytes,
-  headers,
-  baseImpl,
-  checkStillCurrent = () => true,
-  parseOnFetch = () => {}) {
-  return Promise.resolve(utf8Decode(bytes)).then(body => {
-    checkStillCurrent();
-    if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<!./amp-ad-type-defs.ValidatorOutputDef>} */ (
-        Promise.resolve({
-          creative: body,
-          templateData: null,
-          result: ValidatorResult.NON_AMP,
-        }));
+export class TemplateValidator extends Validator {
+
+  /** @param {function(string):string=} parseOnFetch */
+  constructor(parseOnFetch = tmpl => tmpl) {
+    super();
+
+    /** @const @private {function(string):string} */
+    this.parseOnFetch_ = parseOnFetch;
+
+    /** @private {?AmpAdTemplates} */
+    this.ampAdTemplates_ = null;
+  }
+
+  /** @override */
+  validate(context) {
+    const unvalidatedBytes = context.getUnvalidatedBytes();
+    dev().assert(unvalidatedBytes, 'no bytes available for validation');
+    const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
+    const headers = context.getHeaders();
+    if (!headers ||
+        headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
+      context.setCreative(body)
+          .setValidatorResult(ValidatorResult.NON_AMP);
+      return Promise.resolve(context);
     }
-    const ampCreativeJson = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */
-          (tryParseJson(body) || {});
-    return getOrCreateAmpAdTemplates(baseImpl)
-        .fetch(ampCreativeJson.templateUrl)
+
+    const templateCreative =
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body) || {});
+    context.setCreativeMetadata(getAmpAdMetadataMock(body, '', ''));
+    context.setTemplateData(templateCreative);
+    return this.ampAdTemplates_
+        .fetch(templateCreative.templateUrl)
         .then(template => {
-          return {
-            templateData: {
-              template: parseOnFetch ? parseOnFetch(template) : template,
-              data: ampCreativeJson.data,
-              analytics: ampCreativeJson.analytics,
-            },
-            result: ValidatorResult.AMP,
-          };
+          return context
+              .setTemplateData(templateCreative)
+              .setCreative(this.parseOnFetch_(template))
+              .setValidatorResult(ValidatorResult.AMP);
         });
-  });
+  }
 }
 
+export class TestValidator extends Validator {
+  /** @override */
+  validate(context) {
+    return Promise.resolve(context
+        .setCreative(utf8Decode(/** @type {!ArrayBuffer} */ (
+          context.getUnvalidatedBytes())))
+        .setValidatorResult(ValidatorResult.AMP));
+  }
+}
 
-/**
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
- */
-function getOrCreateAmpAdTemplates(baseImpl) {
-  const implType = baseImpl.element.getAttribute('type') || 'anon';
-  return ampAdTemplatesStore[implType] = ampAdTemplatesStore[implType] ||
-      new AmpAdTemplates(baseImpl.win);
+export class TestRenderer extends TemplateRenderer {
+  render(context, unusedBaseInstance) {
+    dev().info('TEST', context.getCreativeMetadata().minifiedCreative);
+    return super.render(context, unusedBaseInstance);
+  }
+}
+
+function getAmpAdMetadataMock(creative, unusedTag, unusedType) {
+  return {
+    minifiedCreative: creative,
+    customElementExtensions: [],
+    extensions: [],
+  };
 }
 
 
 /**
  * Shared functionality for cross-domain iframe-based rendering methods.
- * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
+ * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseInstance
  * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
- * @param {!LayoutInfoDef} size The creative size.
- * @param {?string} sentinel
- * @return {!./amp-ad-type-defs.RendererOutputDef}
+ * @param {!./amp-ad-context.AmpAdContext} context
+ * @return {!./amp-ad-context.AmpAdContext}
  */
-function iframeRenderHelper(baseImpl, attributes, size, sentinel) {
+function iframeRenderHelper(baseInstance, attributes, context) {
+  const size = context.getSize();
+  const crossDomainData = context.getCrossDomainData();
+  const sentinel = crossDomainData && crossDomainData.sentinel;
   const mergedAttributes = Object.assign(attributes, dict({
     'height': size.height,
     'width': size.width,
@@ -279,20 +310,18 @@ function iframeRenderHelper(baseImpl, attributes, size, sentinel) {
     mergedAttributes['data-amp-3p-sentinel'] = sentinel;
   }
   const iframe = createElementWithAttributes(
-      /** @type {!Document} */ (baseImpl.element.ownerDocument), 'iframe',
+      /** @type {!Document} */ (baseInstance.element.ownerDocument), 'iframe',
       /** @type {!JsonObject} */ (Object.assign(mergedAttributes,
           SHARED_IFRAME_PROPERTIES)));
-  const crossOriginIframeHandler = new AMP.AmpAdXOriginIframeHandler(baseImpl);
+  const crossOriginIframeHandler =
+      new AMP.AmpAdXOriginIframeHandler(baseInstance);
   // Iframe is appended to element as part of xorigin frame handler init.
   // Executive onCreativeRender after init to ensure it can get reference
   // to frame but prior to load to allow for earlier access.
   const frameLoadPromise =
       crossOriginIframeHandler.init(iframe, /* opt_isA4A */ true);
-  return {
-    frameLoadPromise,
-    iframe,
-    crossOriginIframeHandler,
-    friendlyIframeEmbed: null,
-  };
+  return context.setFrameLoadPromise(frameLoadPromise)
+      .setIframe(iframe)
+      .setCrossOriginIframeHandler(crossOriginIframeHandler);
 }
 

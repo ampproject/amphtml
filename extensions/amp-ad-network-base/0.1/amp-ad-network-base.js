@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAdContext} from './amp-ad-context';
 import {dev} from '../../../src/log';
 import {
   getAmpAdMetadata, // eslint-disable-line no-unused-vars
@@ -28,16 +29,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-type-defs.RendererDef>} */
+    /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
     this.boundRenderers_ = {};
 
-    /** @private {?./amp-ad-type-defs.ValidatorDef} */
+    /** @private {?./amp-ad-render.Validator} */
     this.boundValidator_ = null;
 
-    /** @private {?ArrayBuffer} */
-    this.unvalidatedBytes_ = null;
-
-    /** @private {!./amp-ad-utils.LayoutInfoDef} */
+    /** @private {!./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
       width: element.getAttribute('width'),
@@ -46,11 +44,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
     /** @private {string} @const */
     this.networkType_ = element.getAttribute('type') || 'anon';
+
+    /** @const @private {!AmpAdContext} */
+    this.context_ = new AmpAdContext().setSize(this.initialSize_);
   }
 
   /**
    * @param {./amp-ad-type-defs.ValidatorResultType} resultType
-   * @param {!./amp-ad-type-defs.RendererDef} renderer
+   * @param {!./amp-ad-render.Renderer} renderer
    * @final
    */
   bindRenderer(resultType, renderer) {
@@ -61,7 +62,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.ValidatorDef} validator
+   * @param {!./amp-ad-render.Validator} validator
    * @final
    */
   bindValidator(validator) {
@@ -88,28 +89,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.ValidatorOutputDef} validatorOutput
-   * @return {!./amp-ad-type-defs.RendererInputDef}
-   * @private
-   */
-  getRendererInput_(validatorOutput) {
-    const creative = validatorOutput.creative;
-    return /** @type {!./amp-ad-type-defs.RendererInputDef} */ ({
-      creativeMetadata: getAmpAdMetadataMock(creative, TAG, this.networkType_),
-      templateData: null,
-      crossDomainData: {
-        rawCreativeBytes: this.unvalidatedBytes_,
-        additionalContextMetadata: {},
-        sentinel: '',
-      },
-      unvalidatedBytes: this.unvalidatedBytes_,
-      // TODO(levitzky) This may change based on the ad response.
-      size: this.initialSize_,
-      adUrl: this.getRequestUrl(),
-    });
-  }
-
-  /**
    * Processes the ad response as soon as the XHR request returns. This can be
    * overridden and used as a hook to perform any desired logic before passing
    * the response to the validator.
@@ -125,9 +104,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       return;
     }
     dev().assert(this.boundValidator_, 'Validator never bound!');
-    this.unvalidatedBytes_ = unvalidatedBytes;
-    this.boundValidator_(unvalidatedBytes, headers, this)
-        .then(validatedBytes => this.handleValidatorResponse_(validatedBytes))
+    this.context_.setUnvalidatedBytes(unvalidatedBytes)
+        .setHeaders(headers);
+    this.boundValidator_.validate(this.context_)
+        .then(context => this.handleValidatorResponse_(context))
         .catch(error => this.handleValidatorError_(error));
   }
 
@@ -154,20 +134,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * Processes validator response and delegates further action to appropriate
    *   renderer.
-   * @param {!./amp-ad-type-defs.ValidatorOutputDef} validatedResponse The utf-8 decoded ad
-   *   response.
+   * @param {!AmpAdContext} context
    * @private
    */
-  handleValidatorResponse_(validatedResponse) {
-    if (!validatedResponse.creative) {
-      // TODO(levitzky) Add error reporting.
-      this.forceCollapse_();
-      return;
-    }
-    dev().assert(this.boundRenderers_[validatedResponse.result],
+  handleValidatorResponse_(context) {
+    const result = context.getValidatorResult();
+    dev().assert(this.boundRenderers_[result],
         'Renderer for AMP creatives never bound!');
-    const rendererInput = this.getRendererInput_(validatedResponse);
-    this.boundRenderers_[validatedResponse.result](rendererInput, this);
+    this.boundRenderers_[result].render(context, this);
   }
 
   /** @override */
@@ -177,7 +151,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    sendXhrRequestMock(this.getRequestUrl())
+    const url = this.getRequestUrl();
+    this.context_.setRequestUrl(url);
+    sendXhrRequestMock(url)
         .then(response => this.handleAdResponse_(response))
         .catch(error => this.handleAdResponseError_(error));
   }
@@ -194,11 +170,4 @@ function sendXhrRequestMock(unusedAdUrl) {
   });
 }
 
-function getAmpAdMetadataMock(creative, unusedTag, unusedType) {
-  return {
-    minifiedCreative: creative,
-    customElementExtensions: [],
-    extensions: [],
-  };
-}
 

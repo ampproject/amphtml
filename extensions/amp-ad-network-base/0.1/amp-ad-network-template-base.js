@@ -15,10 +15,11 @@
  */
 
 import {AmpAdNetworkBase} from './amp-ad-network-base';
+import {
+  TestRenderer,
+  TestValidator,
+} from './amp-ad-render';
 import {ValidatorResult} from './amp-ad-type-defs';
-import {dev} from '../../../src/log';
-import {templateRenderer} from './amp-ad-render';
-import {utf8Decode} from '../../../src/utils/bytes'; // For testing/debugging purposes
 
 const TAG = 'amp-ad-network-template-base';
 
@@ -28,17 +29,9 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
    */
   constructor(element) {
     super(element);
-    this.bindValidator(bytes => Promise.resolve(
-        /** @type {!./amp-ad-type-defs.ValidatorOutputDef} */({
-          creative: utf8Decode(bytes),
-          templateData: {},
-          result: 'amp',
-        })));
-    this.bindRenderer(ValidatorResult.AMP,
-        (input, base) => {
-          dev().info(TAG, input.creativeMetadata.minifiedCreative);
-          return templateRenderer(input, base);
-        });
+
+    this.bindValidator(new TestValidator());
+    this.bindRenderer(ValidatorResult.AMP, new TestRenderer());
   }
 }
 
