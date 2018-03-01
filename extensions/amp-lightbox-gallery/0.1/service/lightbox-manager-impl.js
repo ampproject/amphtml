@@ -21,7 +21,6 @@ import {
   LIGHTBOX_THUMBNAIL_GIF,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
-
 } from './lightbox-placeholders';
 import {
   childElement,
