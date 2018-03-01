@@ -76,7 +76,7 @@ export class LocalSubscriptionPlatform {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
-    /** @private {SubscriptionAnalytics} */
+    /** @private {!SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = new SubscriptionAnalytics();
   }
 
