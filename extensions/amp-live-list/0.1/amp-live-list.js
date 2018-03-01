@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
 import {ActionTrust} from '../../../src/action-trust';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
 import {childElementByAttr} from '../../../src/dom';
-import {liveListManagerForDoc, LiveListManager} from './live-list-manager';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 
@@ -850,6 +851,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * @return {boolean}
    */
   isElementBelowViewport_(element) {
+    if (isExperimentOn(this.win, 'layers')) {
+      // Well, if the scroller is above the viewport, but the element is way
+      // down in the box, is it above or below?
+      return this.viewport_.getLayoutRect(element).top > 0;
+    }
+
     return this.viewport_.getLayoutRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
   }

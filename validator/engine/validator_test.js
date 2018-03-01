@@ -17,12 +17,14 @@
 goog.provide('amp.validator.ValidatorTest');
 
 goog.require('amp.validator.CssLength');
-goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.HtmlFormat');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
+goog.require('amp.validator.renderErrorMessage');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
+goog.require('goog.uri.utils');
 
 /**
  * Returns the absolute path for a given test file, that is, a file
@@ -151,6 +153,16 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4ads-') != -1) {
     this.htmlFormat = 'AMP4ADS';
   }
+  if (this.ampHtmlFile.indexOf('amp4email_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
+    this.htmlFormat = 'AMP4EMAIL';
+  }
+  /**
+   * If set to false, output will be generated without inlining the input
+   * document.
+   * @type {boolean}
+   */
+  this.inlineOutput = true;
   /**
    * This field can be null, indicating that the expectedOutput did not
    * come from a file.
@@ -160,11 +172,66 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       path.dirname(ampHtmlFile), path.basename(ampHtmlFile, '.html') + '.out');
   /** @type {string} */
   this.ampHtmlFileContents =
-      fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8');
+      fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8').trim();
   /** @type {string} */
   this.expectedOutput =
       fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
 };
+
+/**
+ * Renders one line of error output.
+ * @param {string} filenameOrUrl
+ * @param {!amp.validator.ValidationError} error
+ * @return {string}
+ */
+function renderErrorWithPosition(filenameOrUrl, error) {
+  const line = error.line || 1;
+  const col = error.col || 0;
+
+  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) + ':' + line +
+      ':' + col + ' ';
+  errorLine += amp.validator.renderErrorMessage(error);
+  if (error.specUrl) {
+    errorLine += ' (see ' + error.specUrl + ')';
+  }
+  if (error.category !== null) {
+    errorLine += ' [' + error.category + ']';
+  }
+  return errorLine;
+}
+
+/**
+ * Like amp.validator.renderValidationResult, except inlines any error messages
+ * into the input document.
+ * @param {!Object} validationResult
+ * @param {string} filename to use in rendering error messages.
+ * @param {string} filecontents
+ * @return {string}
+ */
+function renderInlineResult(validationResult, filename, filecontents) {
+  let rendered = '';
+  rendered += validationResult.status;
+
+  const lines = filecontents.split('\n');
+  let linesEmitted = 0;
+  for (const error of validationResult.errors) {
+    // Emit all input lines up to and including the line containing the error,
+    // prefixed with '|  '.
+    while (linesEmitted < error.line && linesEmitted < lines.length) {
+      rendered += '\n|  ' + lines[linesEmitted++];
+    }
+    // Emit a carat showing the column of the following error.
+    rendered += '\n>>';
+    for (let i = 0; i < error.col + 1; ++i)
+      rendered += ' ';
+    rendered += '^~~~~~~~~\n';
+    rendered += renderErrorWithPosition(filename, error);
+  }
+  while (linesEmitted < lines.length) {
+    rendered += '\n|  '+ lines[linesEmitted++];
+  }
+  return rendered;
+}
 
 /**
  * Runs the test, by executing the AMP Validator, then comparing its output
@@ -174,8 +241,10 @@ ValidatorTestCase.prototype.run = function() {
   const results =
       amp.validator.validateString(this.ampHtmlFileContents, this.htmlFormat);
   amp.validator.annotateWithErrorCategories(results);
-  const observed =
+  const observed = this.inlineOutput ?
+      renderInlineResult(results, this.ampUrl, this.ampHtmlFileContents) :
       amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
+
   if (observed === this.expectedOutput) {
     return;
   }
@@ -214,8 +283,12 @@ describe('ValidatorOutput', () => {
     const test = new ValidatorTestCase(
         'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
+    const results =
+        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
+    amp.validator.annotateWithErrorCategories(results);
+    const observed =
+        amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
+    const expectedOutput = 'FAIL\n' +
         'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
         'are allowed, and only in the document head. (see ' +
         'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
@@ -224,7 +297,9 @@ describe('ValidatorOutput', () => {
         'are allowed, and only in the document head. (see ' +
         'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
         '[CUSTOM_JAVASCRIPT_DISALLOWED]';
-    test.run();
+    if (observed !== expectedOutput)
+      assert.fail(
+          '', '', 'expected:\n' + expectedOutput + '\nsaw:\n' + observed, '');
   });
 });
 
@@ -244,8 +319,10 @@ describe('ValidatorCssLengthValidation', () => {
     assertStrictEqual(50000, maxBytes.length);
 
     const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replaceme {}', maxBytes);
+    test.expectedOutput = 'PASS';
     test.run();
   });
 
@@ -253,6 +330,7 @@ describe('ValidatorCssLengthValidation', () => {
     const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
     assertStrictEqual(50001, oneTooMany.length);
     const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replaceme {}', oneTooMany);
     test.expectedOutputFile = null;
@@ -269,6 +347,7 @@ describe('ValidatorCssLengthValidation', () => {
     const multiByteSheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
     assertStrictEqual(49999, multiByteSheet.length);  // character length
     const test = new ValidatorTestCase('feature_tests/css_length.html');
+    test.inlineOutput = false;
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replaceme {}', multiByteSheet);
     test.expectedOutputFile = null;
@@ -575,49 +654,51 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.extensionSpec !== null) {
+      if (tagSpec.specName !== null) {
+        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
+        specNameIsUnique[tagSpec.specName] = 0;
+      } else if (tagSpec.extensionSpec !== null) {
         const specName = tagSpec.extensionSpec.name + ' extension .js script';
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
-      } else if (tagSpec.specName !== null) {
-        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
-        specNameIsUnique[tagSpec.specName] = 0;
       } else {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+    if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
-              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+              amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
-        'AMP-ACCORDION': 0,
-        'AMP-AD-EXIT': 0,
-        'AMP-ANALYTICS': 0,
-        'AMP-ANIM': 0,
-        'AMP-ANIMATION': 0,
-        'AMP-AUDIO': 0,
-        'AMP-CAROUSEL': 0,
-        'AMP-FIT-TEXT': 0,
-        'AMP-FONT': 0,
-        'AMP-FORM': 0,
-        'AMP-GWD-ANIMATION': 0,
-        'AMP-IMG': 0,
-        'AMP-LAYOUT': 0,
-        'AMP-PIXEL': 0,
-        'AMP-POSITION-OBSERVER': 0,
-        'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0,
-        'AMP-YOUTUBE': 0
+        'amp-accordion': 0,
+        'amp-ad-exit': 0,
+        'amp-analytics': 0,
+        'amp-anim': 0,
+        'amp-animation': 0,
+        'amp-audio': 0,
+        'amp-carousel': 0,
+        'amp-fit-text': 0,
+        'amp-font': 0,
+        'amp-form': 0,
+        'amp-gwd-animation': 0,
+        'amp-img': 0,
+        'amp-layout': 0,
+        'amp-mustache': 0,
+        'amp-pixel': 0,
+        'amp-position-observer': 0,
+        'amp-social-share': 0,
+        'amp-video': 0,
+        'amp-youtube': 0
       };
-      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
-          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+      const extension = tagSpec.extensionSpec.name;
+      it(extension + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + extension + ' is not whitelisted' +
           ' for AMP4ADS', () => {
-        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(extension))
             .toBe(true);
       });
     }

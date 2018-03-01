@@ -20,88 +20,92 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-  DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
-  experimentFeatureEnabled,
-  DOUBLECLICK_EXPERIMENT_FEATURE,
-  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-} from './doubleclick-a4a-config';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {
-  googleAdUrl,
-  truncAndTimeUrl,
-  googleBlockParameters,
-  googlePageParameters,
-  isCdnProxy,
-  isReportingEnabled,
   AmpAnalyticsConfigDef,
+  QQID_HEADER,
+  ValidAdContainerTypes,
+  addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
-  groupAmpAdsByType,
-  addCsiSignalsToAmpAnalyticsConfig,
-  QQID_HEADER,
   getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-  maybeAppendErrorParameter,
   getIdentityToken,
+  googleAdUrl,
+  googleBlockParameters,
+  googlePageParameters,
+  groupAmpAdsByType,
+  isCdnProxy,
+  isReportingEnabled,
+  maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
+  truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
+  experimentFeatureEnabled,
+} from './doubleclick-a4a-config';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '../../amp-a4a/0.1/refresh-manager';
+import {SafeframeHostApi} from './safeframe-host';
+import {Services} from '../../../src/services';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {deepMerge, dict} from '../../../src/utils/object';
+import {dev, user} from '../../../src/log';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {getData} from '../../../src/event-helper';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {
-  lineDelimitedStreamer,
-  metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '../../amp-ad/0.1/concurrent-load';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installAnchorClickInterceptor,
 } from '../../../src/anchor-click-interceptor';
-import {stringHash32} from '../../../src/string';
-import {removeElement, createElementWithAttributes} from '../../../src/dom';
-import {getData} from '../../../src/event-helper';
-import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isObject} from '../../../src/types';
-import {Services} from '../../../src/services';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles} from '../../../src/style';
-import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
-import {VisibilityState} from '../../../src/visibility-state';
 import {
-  isExperimentOn,
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {
-  getRefreshManager,
-  RefreshManager,
-  DATA_ATTR_NAME,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {
-  addExperimentIdToElement,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
-import '../../amp-a4a/0.1/real-time-config-manager';
+import {isSecureUrl, parseQueryString} from '../../../src/url';
+import {
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
+} from '../../../ads/google/a4a/line-delimited-response-handler';
+import {setStyles} from '../../../src/style';
+import {stringHash32} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -144,7 +148,7 @@ let sraRequests = null;
       slotId: string,
       slotIndex: string,
     }} */
-let TroubleshootData;
+let TroubleshootData; // eslint-disable-line no-unused-vars
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
@@ -192,7 +196,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
+      `${instance.initialSize.width}x${instance.initialSize.height}`).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -231,19 +235,23 @@ const BLOCK_SRA_COMBINERS_ = [
       instance => instance.buildIdentityParams_()),
 ];
 
+
+
 /**
  * Used to manage messages for different fluid ad slots.
  *
  * Maps a sentinel value to an object consisting of the impl to which that
  * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
+ * @type{!Object<string, !{instance: !AmpAdNetworkDoubleClickDisableSfBinding, connectionEstablished: boolean}>}
  */
+// TODO(alanorozco, #13591): Remove.
 const fluidListeners = {};
 
 /**
  * @param {!Event} event
  * @private
  */
+// TODO(alanorozco, #13591): Remove.
 function fluidMessageListener_(event) {
   const data = tryParseJson(getData(event));
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
@@ -274,8 +282,215 @@ function fluidMessageListener_(event) {
   if (data['s'] != 'creative_geometry_update') {
     return;
   }
-  listener.instance.receiveMessageForFluid_(payload);
+  listener.instance.receiveMessageForFluid(payload);
 }
+
+
+
+// TODO(alanorozco, #13591): Flatten into `AmpAdNetworkDoubleclickImpl`
+class AmpAdNetworkDoubleclickBinding {
+  /** @param {!AmpAdNetworkDoubleclickImpl} impl */
+  constructor(impl) {
+    /** @protected @const {!AmpAdNetworkDoubleclickImpl} */
+    this.impl = impl;
+
+    /** @private {?./safeframe-host.SafeframeHostApi} */
+    this.safeframeApi_ = null;
+  }
+
+  /** @public */
+  layoutCallback() {
+    // NOOP
+  }
+
+  /** @public */
+  unlayoutCallback() {
+    if (this.safeframeApi_) {
+      this.safeframeApi_.destroy();
+    }
+  }
+
+  /**
+   * @param {boolean=} isSafeFrame
+   * @return {!JsonObject|undefined}
+   */
+  getAdditionalContextMetadata(isSafeFrame = false) {
+    const {impl} = this;
+    const {isFluid, initialSize, fluidImpressionUrl} = impl;
+    const creativeSize = impl.getCreativeSize();
+
+    if (!isFluid && !isSafeFrame) {
+      return;
+    }
+
+    this.safeframeApi_ = this.safeframeApi_ ||
+        new SafeframeHostApi(
+            impl, isFluid, initialSize, creativeSize, fluidImpressionUrl);
+
+    return this.safeframeApi_.getSafeframeNameAttr();
+  }
+}
+
+
+// TODO(alanorozco, #13591): Remove
+class AmpAdNetworkDoubleClickDisableSfBinding
+  extends AmpAdNetworkDoubleclickBinding {
+
+  /** @override */
+  layoutCallback() {
+    const {isFluid} = this.impl;
+    if (!isFluid) {
+      return;
+    }
+    this.registerListenerForFluid_();
+  }
+
+  /** @private */
+  registerListenerForFluid_() {
+    const {sentinel, win} = this.impl;
+
+    fluidListeners[sentinel] = fluidListeners[sentinel] || {
+      instance: this,
+      connectionEstablished: false,
+    };
+
+    if (Object.keys(fluidListeners).length == 1) {
+      win.addEventListener('message', fluidMessageListener_, false);
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.maybeRemoveListenerForFluid_();
+  }
+
+  /** @private */
+  maybeRemoveListenerForFluid_() {
+    const {isFluid, win, sentinel} = this.impl;
+    if (!isFluid) {
+      return;
+    }
+    delete fluidListeners[sentinel];
+    if (!Object.keys(fluidListeners).length) {
+      win.removeEventListener('message', fluidMessageListener_);
+    }
+  }
+
+  /** @override */
+  getAdditionalContextMetadata(unusedIsSafeframe) {
+    const {
+      isFluid,
+      win,
+      safeframeVersion,
+      sentinel,
+      nameframeExperimentConfig,
+    } = this.impl;
+
+    const attributes = dict({});
+
+    if (isFluid) {
+      attributes['uid'] = 1;
+      attributes['hostPeerName'] = win.location.origin;
+      // The initial geometry isn't used for anything important, but it is
+      // expected, so we pass this string with all zero values.
+      attributes['initialGeometry'] = JSON.stringify(
+          dict({
+            'windowCoords_t': 0,
+            'windowCoords_r': 0,
+            'windowCoords_b': 0,
+            'windowCoords_l': 0,
+            'frameCoords_t': 0,
+            'frameCoords_r': 0,
+            'frameCoords_b': 0,
+            'frameCoords_l': 0,
+            'styleZIndex': 'auto',
+            'allowedExpansion_t': 0,
+            'allowedExpansion_r': 0,
+            'allowedExpansion_b': 0,
+            'allowedExpansion_l': 0,
+            'xInView': 0,
+            'yInView': 0,
+          }));
+      attributes['permissions'] = JSON.stringify(
+          dict({
+            'expandByOverlay': false,
+            'expandByPush': false,
+            'readCookie': false,
+            'writeCookie': false,
+          }));
+      attributes['metadata'] = JSON.stringify(
+          dict({
+            'shared': {
+              'sf_ver': safeframeVersion,
+              'ck_on': 1,
+              'flash_ver': '26.0.0',
+            },
+          }));
+      attributes['reportCreativeGeometry'] = true;
+      attributes['isDifferentSourceWindow'] = false;
+      attributes['sentinel'] = sentinel;
+    } else {
+      Object.assign(attributes, nameframeExperimentConfig);
+    }
+
+    return attributes;
+  }
+
+  /**
+   * Handles Fluid-related messages dispatched from SafeFrame.
+   * @param {!JsonObject} payload
+   * @public
+   */
+  receiveMessageForFluid(payload) {
+    const {impl} = this;
+    const newHeight = payload && parseInt(payload['height'], 10);
+    if (!newHeight) {
+      // TODO(levitzky) Add actual error handling here.
+      impl.forceCollapse();
+      return;
+    }
+    impl.attemptChangeHeight(newHeight)
+        .then(() => this.onFluidResize_())
+        .catch(() => {
+          // TODO(levitzky) Add more error handling here
+          impl.forceCollapse();
+        });
+  }
+
+  /**
+   * Postmessages an initial message to the fluid creative.
+   * @public
+   */
+  connectFluidMessagingChannel() {
+    const {iframe} = this.impl;
+    dev().assert(iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
+  }
+
+  /**
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
+   * @private
+   */
+  onFluidResize_() {
+    const {impl} = this;
+    const {fluidImpressionUrl, iframe} = this.impl;
+
+    if (fluidImpressionUrl) {
+      impl.fireDelayedImpressions(fluidImpressionUrl);
+      impl.fluidImpressionUrl = null;
+    }
+    dev().assert(iframe.contentWindow,
+        'Frame contentWindow unavailable.');
+    iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
+  }
+}
+
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -285,6 +500,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+
+    /** @private @const {!AmpAdNetworkDoubleclickBinding} */
+    // TODO(alanorozco, #13591): Flatten.
+    this.binding_ = isExperimentOn(this.win, 'a4a-doubleclick-disable-sf') ?
+      new AmpAdNetworkDoubleClickDisableSfBinding(this) :
+      new AmpAdNetworkDoubleclickBinding(this);
+    /* eslint-enable no-undef */
 
     /**
      * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
@@ -305,8 +527,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.initialSize_ = null;
+    /** @package {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
+    // TODO(alanorozco, #13591): Make `@private`.
+    this.initialSize = null;
 
     /** @private {?{width: number, height: number}} */
     this.returnedSize_ = null;
@@ -348,11 +571,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.ifi_ = 0;
 
-    /** @private {boolean} */
-    this.isFluid_ = false;
+    /** @package {boolean} */
+    // TODO(alanorozco, #13591): Make `@private`.
+    this.isFluid = false;
 
-    /** @private {?string} */
-    this.fluidImpressionUrl_ = null;
+    /** @package {?string} */
+    // TODO(alanorozco, #13591): Make `@private`.
+    this.fluidImpressionUrl = null;
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -374,24 +599,43 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @package {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
+    // TODO(alanorozco, #13591): Make `@private`.
+    this.nameframeExperimentConfig = {
+      instantLoad: false,
+      writeInBody: false,
+    };
   }
 
   /** @override */
   idleRenderOutsideViewport() {
-    const vpRange =
-        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
     // Disable if publisher has indicated a non-default loading strategy.
-    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
+    if (this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
+    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
+    let vpRange = parseInt(expVal, 10);
+    if (expVal && isNaN(vpRange)) {
+      // holdback branch sends non-numeric value.
+      return false;
+    }
+    vpRange = vpRange || 12;
     this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource().whenWithinRenderOutsideViewport().then(
+        () => this.isIdleRender_ = false);
     return vpRange;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluid_ = layout == Layout.FLUID;
-    return this.isFluid_ || isLayoutSizeDefined(layout);
+    this.isFluid = layout == Layout.FLUID;
+    return this.isFluid || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -438,7 +682,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
     experimentInfoMap[sfPreloadExpName] = {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
@@ -462,7 +707,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+          /** @type {!Object<string,
+          !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -485,32 +731,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
   }
 
-  /**
-   * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} payload
-   * @private
-   */
-  receiveMessageForFluid_(payload) {
-    let newHeight;
-    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.forceCollapse();
-      return;
-    }
-    this.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
-          // TODO(levitzky) Add more error handling here
-          this.forceCollapse();
-        });
-  }
-
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
     dev().assert(!isCdnProxy(this.win));
     return !experimentFeatureEnabled(
         this.win, DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP,
         UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.binding_.layoutCallback();
+    return super.layoutCallback();
   }
 
   /**
@@ -547,10 +779,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
-    dev().assert(this.initialSize_);
+    dev().assert(this.initialSize);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = this.isFluid_ ?
-      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    let sizeStr = this.isFluid ?
+      '320x50' : `${this.initialSize.width}x${this.initialSize.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -566,10 +798,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
           multiSizeDataStr,
-          this.initialSize_.width,
-          this.initialSize_.height,
+          this.initialSize.width,
+          this.initialSize.height,
           multiSizeValidation == 'true',
-          this.isFluid_);
+          this.isFluid);
       sizeStr += '|' + dimensions
           .map(dimension => dimension.join('x'))
           .join('|');
@@ -594,7 +826,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
-      'fluid': this.isFluid_ ? 'height' : null,
+      'fluid': this.isFluid ? 'height' : null,
     }, googleBlockParameters(this));
   }
 
@@ -608,14 +840,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
+    this.initialSize = this.isFluid ? {width: 0, height: 0} :
       (width && height ?
         // width/height could be 'auto' in which case we fallback to measured.
         {width, height} : this.getIntersectionElementLayoutBox());
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
-        `${this.initialSize_.width}x${this.initialSize_.height}`);
+        `${this.initialSize.width}x${this.initialSize.height}`);
   }
 
   /** @override */
@@ -634,7 +866,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
-        .catch(err => {
+        .catch(() => {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
@@ -721,11 +953,49 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /** @override */
+  getCustomRealTimeConfigMacros_() {
+    /**
+     * This whitelist allow attributes on the amp-ad element to be used as
+     * macros for constructing the RTC URL. Add attributes here, in lowercase,
+     * to make them available.
+     */
+    const whitelist = {
+      'height': true,
+      'width': true,
+      'data-slot': true,
+      'data-multi-size': true,
+      'data-multi-size-validation': true,
+      'data-override-width': true,
+      'data-override-height': true,
+    };
+    return {
+      PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      HREF: () => this.win.location.href,
+      TGT: () =>
+        JSON.stringify(
+            (tryParseJson(
+                this.element.getAttribute('json')) || {})['targeting']),
+      ADCID: opt_timeout => getOrCreateAdCid(
+          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga',
+          parseInt(opt_timeout, 10)),
+      ATTR: name => {
+        if (!whitelist[name.toLowerCase()]) {
+          dev().warn('TAG', `Invalid attribute ${name}`);
+        } else {
+          return this.element.getAttribute(name);
+        }
+      },
+      CANONICAL_URL: () =>
+        Services.documentInfoForDoc(this.element).canonicalUrl,
+    };
+  }
+
   /**
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
    * @param {!Object<string, string>} response
-   * @param {!string} callout
+   * @param {string} callout
    * @return {!Object<string, string>}
    * @private
    */
@@ -761,13 +1031,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval) {
-      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
-    }
 
-    if (this.isFluid_) {
-      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig);
+
+    if (this.isFluid) {
+      this.fluidImpressionUrl = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
@@ -834,27 +1103,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.registerListenerForFluid_();
-      }
-      return super.layoutCallback();
-    };
+  renderNonAmpCreative() {
+    // If render idle with throttling, impose one second render delay for
+    // non-AMP creatives.  This is not done in the scheduler to ensure as many
+    // slots as possible are marked for layout given scheduler imposes 5 seconds
+    // past previous execution.
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-        this.isIdleRender_) {
-      return this.isVerifiedAmpCreativePromise().then(verified => {
-        // Control concurrent loading of non-AMP creatives executed via
-        // idleRenderOutsideViewport as doing so within
-        // idleRenderOutsideViewport would impose at least 5 second delay due to
-        // scheduler constraints.
-        const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
-        return throttleFn();
-      });
+          this.isIdleRender_) {
+      if (is3pThrottled(this.win)) {
+        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+      } else {
+        incrementLoadingAds(this.win);
+        return super.renderNonAmpCreative(true);
+      }
     }
-    return registerFluidAndExec();
+    return super.renderNonAmpCreative();
   }
 
   /** @override  */
@@ -878,38 +1141,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
     }
+    this.binding_.unlayoutCallback();
     const superResult = super.unlayoutCallback();
-    this.maybeRemoveListenerForFluid();
     return superResult;
-  }
-
-  /**
-   * Postmessages an initial message to the fluid creative.
-   * @visibleForTesting
-   */
-  connectFluidMessagingChannel() {
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
-  }
-
-  /**
-   * Fires a delayed impression and notifies the Fluid creative that its
-   * container has been resized.
-   * @private
-   */
-  onFluidResize_() {
-    if (this.fluidImpressionUrl_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
-    }
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
   }
 
   /** @override */
@@ -965,7 +1199,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
     const size = this.returnedSize_ || this.getSlotSize();
-    const isMultiSizeFluid = this.isFluid_ && this.returnedSize_ &&
+    const isMultiSizeFluid = this.isFluid && this.returnedSize_ &&
         // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
         // the size header for fluid ads. Fluid size headers always come back as
         // 0x0.
@@ -1030,7 +1264,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if (this.isFluid ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1164,7 +1398,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => utf8Encode(creative),
+                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.
@@ -1232,7 +1466,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+    return this.isFluid ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
@@ -1250,73 +1484,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdditionalContextMetadata() {
-    const attributes = dict({});
-    if (this.isFluid_) {
-      attributes['uid'] = 1;
-      attributes['hostPeerName'] = this.win.location.origin;
-      // The initial geometry isn't used for anything important, but it is
-      // expected, so we pass this string with all zero values.
-      attributes['initialGeometry'] = JSON.stringify(
-          dict({
-            'windowCoords_t': 0,
-            'windowCoords_r': 0,
-            'windowCoords_b': 0,
-            'windowCoords_l': 0,
-            'frameCoords_t': 0,
-            'frameCoords_r': 0,
-            'frameCoords_b': 0,
-            'frameCoords_l': 0,
-            'styleZIndex': 'auto',
-            'allowedExpansion_t': 0,
-            'allowedExpansion_r': 0,
-            'allowedExpansion_b': 0,
-            'allowedExpansion_l': 0,
-            'xInView': 0,
-            'yInView': 0,
-          }));
-      attributes['permissions'] = JSON.stringify(
-          dict({
-            'expandByOverlay': false,
-            'expandByPush': false,
-            'readCookie': false,
-            'writeCookie': false,
-          }));
-      attributes['metadata'] = JSON.stringify(
-          dict({
-            'shared': {
-              'sf_ver': this.safeframeVersion,
-              'ck_on': 1,
-              'flash_ver': '26.0.0',
-            },
-          }));
-      attributes['reportCreativeGeometry'] = true;
-      attributes['isDifferentSourceWindow'] = false;
-      attributes['sentinel'] = this.sentinel;
-    }
-    return attributes;
-  }
-
-  /** @private  */
-  registerListenerForFluid_() {
-    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
-      instance: this,
-      connectionEstablished: false,
-    };
-    if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', fluidMessageListener_, false);
-    }
-  }
-
-  /** @visibleForTesting */
-  maybeRemoveListenerForFluid() {
-    if (!this.isFluid_) {
-      return;
-    }
-    delete fluidListeners[this.sentinel];
-    if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', fluidMessageListener_);
-    }
+  getAdditionalContextMetadata(optIsSafeframe) {
+    return this.binding_.getAdditionalContextMetadata(optIsSafeframe);
   }
 
   /**
@@ -1459,7 +1628,7 @@ function serializeItem_(key, value) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
- * @param {!function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @param {function(AmpAdNetworkDoubleclickImpl):?T} extractFn
  * @return {?T} value of first instance with non-null/undefined value or null
  *    if none can be found
  * @template T

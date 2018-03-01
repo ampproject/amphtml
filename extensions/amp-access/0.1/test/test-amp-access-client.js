@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../amp-access-client';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as mode from '../../../../src/mode';
+import * as sinon from 'sinon';
+import {AccessClientAdapter} from '../amp-access-client';
 
 
 describes.realWin('AccessClientAdapter', {
@@ -31,7 +31,7 @@ describes.realWin('AccessClientAdapter', {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    clock = lolex.install();
+    clock = lolex.install({target: ampdoc.win});
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -190,8 +190,7 @@ describes.realWin('AccessClientAdapter', {
         });
       });
 
-      // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-      it.skip('should time out XHR fetch', () => {
+      it('should time out XHR fetch', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
                 'https://acme.com/a?rid=READER_ID',

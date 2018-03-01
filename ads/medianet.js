@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData, computeInMasterFrame} from '../3p/3p';
-import {getSourceUrl} from '../src/url';
+import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getSourceUrl, parseUrl} from '../src/url';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [
@@ -59,7 +59,7 @@ export function medianet(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} publisherUrl
+ * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
 function loadCMTag(global, data, publisherUrl, referrerUrl) {
@@ -123,7 +123,7 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} publisherUrl
+ * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
 function loadHBTag(global, data, publisherUrl, referrerUrl) {
@@ -188,7 +188,8 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       setAmpTargeting: () => {},
       renderAmpAd: () => {},
     };
-    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(global.context.location.hostname), () => {
+    const publisherDomain = parseUrl(publisherUrl).hostname;
+    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(publisherDomain), () => {
       done(null);
     });
   }, mnetHBHandle);

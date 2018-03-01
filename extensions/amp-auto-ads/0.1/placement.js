@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -65,7 +65,7 @@ const BLACKLISTED_ANCESTOR_TAGS = [
 ];
 
 /**
- * @const {!Object<!Position, !function(!Element, !Element)>}
+ * @const {!Object<!Position, function(!Element, !Element)>}
  */
 const INJECTORS = {};
 INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
@@ -88,7 +88,7 @@ export class Placement {
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
-   * @param {!function(!Element, !Element)} injector
+   * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */

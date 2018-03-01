@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {parseUrl, getSourceUrl} from '../url';
-import {map} from '../utils/object';
+import {getSourceUrl, parseUrl} from '../url';
 import {isArray} from '../types';
+import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */

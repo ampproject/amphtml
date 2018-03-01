@@ -17,9 +17,9 @@
 // Requires polyfills in immediate side effect.
 import '../polyfills';
 
-import {user} from '../log';
 import {registerServiceBuilder} from '../service';
 import {reportError} from '../error';
+import {user} from '../log';
 
 /**
  * Helper with all things Timer.
@@ -58,7 +58,7 @@ export class Timer {
    * be close to 0 and this will NOT yield to the event queue.
    *
    * Returns the timer ID that can be used to cancel the timer (cancel method).
-   * @param {!function()} callback
+   * @param {function()} callback
    * @param {number=} opt_delay
    * @return {number|string}
    */
@@ -172,4 +172,4 @@ export class Timer {
  */
 export function installTimerService(window) {
   registerServiceBuilder(window, 'timer', Timer);
-};
+}

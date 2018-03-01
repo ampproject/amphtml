@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
-import {isProxyOrigin} from '../url';
-import {WindowInterface} from '../window-interface';
+import {getCookie, setCookie} from '../cookies';
+import {isProxyOrigin, parseUrl} from '../url';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
@@ -44,11 +44,12 @@ const YEAR = 365 * DAY;
  */
 export class GoogleCidApi {
 
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /**
+     * @private {!Window}
+     */
+    this.win_ = ampdoc.win;
     /**
      * @private {!./timer-impl.Timer}
      */
@@ -58,6 +59,11 @@ export class GoogleCidApi {
      * @private {!Object<string, !Promise<?string>>}
      */
     this.cidPromise_ = {};
+
+    const canonicalUrl = Services.documentInfoForDoc(ampdoc).canonicalUrl;
+
+    /** @private {?string} */
+    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
   }
 
   /**
@@ -108,7 +114,13 @@ export class GoogleCidApi {
           })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
-            dev().error(TAG, e);
+            if (e && e.response) {
+              e.response.json().then(res => {
+                dev().error(TAG, JSON.stringify(res));
+              });
+            } else {
+              dev().error(TAG, e);
+            }
             return null;
           });
     });
@@ -123,6 +135,7 @@ export class GoogleCidApi {
   fetchCid_(url, scope, token) {
     const payload = dict({
       'originScope': scope,
+      'canonicalOrigin': this.canonicalOrigin_,
     });
     if (token) {
       payload['securityToken'] = token;
@@ -164,7 +177,9 @@ export class GoogleCidApi {
    */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
-      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires), {
+        highestAvailableDomain: true,
+      });
     }
   }
 

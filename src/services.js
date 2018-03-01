@@ -15,12 +15,12 @@
  */
 
 import {
+  getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceOrNull,
-  getExistingServiceForDocInEmbedScope,
-  getAmpdoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -28,6 +28,9 @@ import {
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
+
+/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+export let SubscriptionService;
 
 export class Services {
   /**
@@ -39,6 +42,17 @@ export class Services {
     return (/** @type {!Promise<
         !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
         getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
@@ -151,6 +165,15 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/navigation.Navigation}
+   */
+  static navigationForDoc(nodeOrDoc) {
+    return /** @type {!./service/navigation.Navigation} */ (
+      getServiceForDoc(nodeOrDoc, 'navigation'));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -201,15 +224,15 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
-  };
+  }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
+   * @return {!./service/layers-impl.LayoutLayers}
    */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+  static layersForDoc(nodeOrDoc) {
+    return /** @type {!./service/layers-impl.LayoutLayers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
   }
 
   /**

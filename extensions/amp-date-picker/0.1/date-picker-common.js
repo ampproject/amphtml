@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {map, omit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-import {omit} from '../../../src/utils/object';
 
 
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {!function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
- * @return {!function(new:React.Component, !Object)} A date picker component with common functionality
+ * @param {function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
+ * @return {function(new:React.Component, !Object)} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const {
@@ -30,7 +30,6 @@ export function withDatePickerCommon(WrappedComponent) {
     isInclusivelyBeforeDay,
   } = requireExternal('react-dates');
   const React = requireExternal('react');
-  const PropTypes = requireExternal('prop-types');
   const moment = requireExternal('moment');
 
   /**
@@ -66,17 +65,7 @@ export function withDatePickerCommon(WrappedComponent) {
     }
   }
 
-  const propTypes = {
-    blocked: PropTypes.object,
-    highlighted: PropTypes.object,
-    initialVisibleMonth: PropTypes.string,
-    max: PropTypes.string,
-    min: PropTypes.string,
-    registerAction: PropTypes.func,
-    src: PropTypes.string,
-  };
-
-  const defaultProps = {
+  const defaultProps = map({
     blocked: null,
     highlighted: null,
     initialVisibleMonth: '',
@@ -84,7 +73,7 @@ export function withDatePickerCommon(WrappedComponent) {
     min: '',
     registerAction: null,
     src: '',
-  };
+  });
 
   class Component extends React.Component {
     constructor(props) {
@@ -102,6 +91,13 @@ export function withDatePickerCommon(WrappedComponent) {
       this.isDayBlocked = this.isDayBlocked.bind(this);
       this.isDayHighlighted = this.isDayHighlighted.bind(this);
       this.isOutsideRange = this.isOutsideRange.bind(this);
+    }
+
+    /** @override */
+    componentDidMount() {
+      if (this.props.emitUpdate) {
+        this.props.emitUpdate();
+      }
     }
 
     /**
@@ -145,10 +141,9 @@ export function withDatePickerCommon(WrappedComponent) {
         isOutsideRange: this.isOutsideRange,
       }));
     }
-  };
+  }
 
   Component.defaultProps = defaultProps;
-  Component.propTypes = propTypes;
 
   return Component;
 }

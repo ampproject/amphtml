@@ -21,3 +21,5 @@ test/coverage
 package-lock.json
 *.swp
 *.swo
+yarn-error.log
+PERCY_BUILD_ID

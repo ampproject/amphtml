@@ -15,16 +15,16 @@
  */
 
 import * as sinon from 'sinon';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  xhrServiceForTesting,
-  fetchPolyfill,
   FetchResponse,
   assertSuccess,
+  fetchPolyfill,
+  xhrServiceForTesting,
 } from '../../src/service/xhr-impl';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
+import {getCookie} from '../../src/cookies';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -468,7 +468,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.be.undefined;
-          expect(e.retriable === true).to.be.false;
+          expect(e.retriable).to.not.equal(true);
         });
       });
 
@@ -486,7 +486,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 
@@ -504,7 +504,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 

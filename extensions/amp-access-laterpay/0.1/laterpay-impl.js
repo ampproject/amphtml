@@ -15,13 +15,13 @@
  */
 
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
 
@@ -69,13 +69,13 @@ let LaterpayConfigDef;
 
 /**
  * @typedef {{
- *   description: !string,
+ *   description: string,
  *   price: !Object<string, number>,
- *   purchase_type: !string,
- *   purchase_url: !string,
- *   title: !string,
- *   validity_unit: !string,
- *   validity_value: !number
+ *   purchase_type: string,
+ *   purchase_url: string,
+ *   title: string,
+ *   validity_unit: string,
+ *   validity_value: number
  * }}
  */
 let PurchaseOptionDef;
@@ -99,19 +99,20 @@ export class LaterpayVendor {
 
   /**
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(accessService) {
+  constructor(accessService, accessSource) {
     /** @const */
     this.ampdoc = accessService.ampdoc;
 
-    /** @const @private {!../../amp-access/0.1/amp-access.AccessService} */
-    this.accessService_ = accessService;
+    /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
 
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
-    this.laterpayConfig_ = this.accessService_.getAdapterConfig();
+    this.laterpayConfig_ = this.accessSource_.getAdapterConfig();
 
     /** @private {?JsonObject} For shape see PurchaseConfigDef */
     this.purchaseConfig_ = null;
@@ -125,7 +126,7 @@ export class LaterpayVendor {
     /** @const @private {!Array<function()>} */
     this.purchaseOptionListeners_ = [];
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.containerEmpty_ = true;
 
     /** @private {?Node} */
@@ -167,7 +168,7 @@ export class LaterpayVendor {
 
   /**
    * @private
-   * @return {!string}
+   * @return {string}
    */
   getConfigUrl_() {
     const region = this.laterpayConfig_['region'] || DEFAULT_REGION;
@@ -226,10 +227,10 @@ export class LaterpayVendor {
   getPurchaseConfig_() {
     const url = this.purchaseConfigBaseUrl_ +
                 '&article_title=' + encodeURIComponent(this.getArticleTitle_());
-    const urlPromise = this.accessService_.buildUrl(
+    const urlPromise = this.accessSource_.buildUrl(
         url, /* useAuthData */ false);
     return urlPromise.then(url => {
-      return this.accessService_.getLoginUrl(url);
+      return this.accessSource_.getLoginUrl(url);
     }).then(url => {
       dev().info(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
@@ -249,7 +250,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return {!string}
+   * @return {string}
    * @private
    */
   getArticleTitle_() {
@@ -360,7 +361,7 @@ export class LaterpayVendor {
 
   /**
    * @private
-   * @param {!string} area
+   * @param {string} area
    */
   renderTextBlock_(area) {
     if (this.i18n_[area]) {
@@ -458,8 +459,8 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!number} priceValue
-   * @return {!string}
+   * @param {number} priceValue
+   * @return {string}
    * @private
    */
   formatPrice_(priceValue) {
@@ -472,7 +473,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!string} href
+   * @param {string} href
    * @return {!Element}
   */
   createAlreadyPurchasedLink_(href) {
@@ -516,17 +517,17 @@ export class LaterpayVendor {
 
   /**
    * @param {!Event} ev
-   * @param {!string} purchaseUrl
-   * @param {!string} purchaseType
+   * @param {string} purchaseUrl
+   * @param {string} purchaseType
    * @private
    */
   handlePurchase_(ev, purchaseUrl, purchaseType) {
     ev.preventDefault();
-    const urlPromise = this.accessService_.buildUrl(
+    const urlPromise = this.accessSource_.buildUrl(
         purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(url, purchaseType);
+      this.accessSource_.loginWithUrl(url, purchaseType);
     });
   }
 

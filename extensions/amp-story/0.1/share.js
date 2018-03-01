@@ -23,9 +23,8 @@ import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {px, setImportantStyles} from '../../../src/style';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
 
@@ -74,7 +73,10 @@ const TEMPLATE = {
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+const SHARE_ITEM_TEMPLATE = {
+  tag: 'li',
+  attrs: dict({'class': 'i-amphtml-story-share-item'}),
+};
 
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -88,6 +90,10 @@ const LINK_SHARE_ITEM_TEMPLATE = {
 };
 
 
+/** @private @const {string} */
+const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
+
+
 /**
  * @param {!JsonObject=} opt_params
  * @return {!JsonObject}
@@ -96,7 +102,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params || {}).forEach(field => {
+    Object.keys(opt_params).forEach(field => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -166,16 +172,6 @@ export class ShareWidget {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
-
-    /**
-     * Container width is being tracked to prevent unnecessary layout
-     * calculations.
-     * @private {?number}
-     */
-    this.containerWidth_ = null;
-
     /** @private {?Element} */
     this.root_ = null;
   }
@@ -196,19 +192,10 @@ export class ShareWidget {
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
-    this.attachEvents_(ampdoc);
-
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
 
     return this.root_;
-  }
-
-  /** @private */
-  attachEvents_(ampdoc) {
-    Services.viewportForDoc(ampdoc).onResize(
-        // we don't require a lot of smoothness here, so we throttle
-        throttle(this.win_, () => this.applyButtonPadding_(), 100));
   }
 
   /** @private */
@@ -227,6 +214,164 @@ export class ShareWidget {
       e.preventDefault();
       this.copyUrlToClipboard_();
     });
+  }
+
+  /** @private */
+  // TODO(alanorozco): i18n for toast.
+  copyUrlToClipboard_() {
+    const url = Services.documentInfoForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+          dev().assert(this.ampdoc_))).canonicalUrl;
+
+    if (!copyTextToClipboard(this.win_, url)) {
+      Toast.show(this.win_, 'Could not copy link to clipboard :(');
+      return;
+    }
+
+    Toast.show(this.win_, buildCopySuccessfulToast(this.win_.document, url));
+  }
+
+  /** @private */
+  maybeAddSystemShareButton_() {
+    if (!this.isSystemShareSupported_()) {
+      // `amp-social-share` will hide `system` buttons when not supported, but
+      // we also need to avoid adding it for rendering reasons.
+      return;
+    }
+
+    const container = dev().assertElement(this.root_).querySelector(
+        '.i-amphtml-story-share-system');
+
+    this.loadRequiredExtensions_();
+
+    container.appendChild(buildProvider(this.win_.document, 'system'));
+  }
+
+  /** @private */
+  // NOTE(alanorozco): This is a duplicate of the logic in the
+  // `amp-social-share` component.
+  isSystemShareSupported_() {
+    const viewer = Services.viewerForDoc(
+        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+          dev().assert(this.ampdoc_)));
+
+    const platform = Services.platformFor(this.win_);
+
+    // Chrome exports navigator.share in WebView but does not implement it.
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
+    const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
+
+    return ('share' in navigator) && !isChromeWebview;
+  }
+
+  /**
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @public
+   */
+  // TODO(alanorozco): Set story metadata in share config
+  setProviders(providers) {
+    this.loadRequiredExtensions_();
+
+    Object.keys(providers).forEach(type => {
+      if (type == 'system') {
+        user().warn('AMP-STORY',
+            '`system` is not a valid share provider type. Native sharing is ' +
+            'enabled by default and cannot be turned off.',
+            type);
+        return;
+      }
+
+      if (isObject(providers[type])) {
+        this.add_(buildProvider(this.win_.document, type,
+            /** @type {!JsonObject} */ (providers[type])));
+        return;
+      }
+
+      // Bookend config API requires real boolean, not just truthy
+      if (providers[type] === true) {
+        this.add_(buildProvider(this.win_.document, type));
+        return;
+      }
+
+      user().warn('AMP-STORY',
+          'Invalid amp-story bookend share configuration for %s. ' +
+          'Value must be `true` or a params object.',
+          type);
+    });
+  }
+
+  /** @private */
+  loadRequiredExtensions_() {
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+      dev().assert(this.ampdoc_));
+
+    Services.extensionsFor(this.win_)
+        .installExtensionForDoc(ampdoc, 'amp-social-share');
+  }
+
+  /**
+   * @param {!Node} node
+   * @private
+   */
+  add_(node) {
+    const list = dev().assert(this.root_).firstElementChild;
+    const item = renderAsElement(this.win_.document, SHARE_ITEM_TEMPLATE);
+
+    item.appendChild(node);
+
+    // `lastElementChild` is the system share button container, which should
+    // always be last in list
+    list.insertBefore(item, list.lastElementChild);
+  }
+}
+
+
+/**
+ * Social share widget for story bookend with a scrollable layout.
+ * This class is coupled to the DOM structure for ShareWidget, but that's ok.
+ */
+export class ScrollableShareWidget {
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
+    /** @private @const {!ShareWidget} */
+    this.mixin_ = ShareWidget.create(win);
+
+    /**
+     * Container width is being tracked to prevent unnecessary layout
+     * calculations.
+     * @private {?number}
+     */
+    this.containerWidth_ = null;
+
+    /** @private {?Element} */
+    this.root_ = null;
+  }
+
+  /** @param {!Window} win */
+  static create(win) {
+    return new ScrollableShareWidget(win);
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
+    this.root_ = this.mixin_.build(ampdoc);
+
+    this.root_.classList.add(SCROLLABLE_CLASSNAME);
+
+    Services.viewportForDoc(ampdoc).onResize(
+        // we don't require a lot of smoothness here, so we throttle
+        throttle(this.win_, () => this.applyButtonPadding_(), 100));
+
+    return this.root_;
   }
 
   /**
@@ -303,116 +448,16 @@ export class ShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-        scopedQuerySelectorAll(dev().assertElement(this.root_), 'li'),
+        dev().assertElement(this.root_).querySelectorAll('li'),
         el => !!el.firstElementChild);
-  }
-
-  /** @private */
-  // TODO(alanorozco): i18n for toast.
-  copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-          dev().assert(this.ampdoc_))).canonicalUrl;
-
-    if (!copyTextToClipboard(this.win_.document, url)) {
-      Toast.show(this.win_, 'Could not copy link to clipboard :(');
-      return;
-    }
-
-    Toast.show(this.win_, buildCopySuccessfulToast(this.win_.document, url));
-  }
-
-  /** @private */
-  maybeAddSystemShareButton_() {
-    if (!this.isSystemShareSupported_()) {
-      // `amp-social-share` will hide `system` buttons when not supported, but
-      // we also need to avoid adding it for rendering reasons.
-      return;
-    }
-
-    const container = scopedQuerySelector(
-        dev().assertElement(this.root_),
-        '.i-amphtml-story-share-system');
-
-    container.appendChild(buildProvider(this.win_.document, 'system'));
-  }
-
-  /** @private */
-  // NOTE(alanorozco): This is a duplicate of the logic in the
-  // `amp-social-share` component.
-  isSystemShareSupported_() {
-    const viewer = Services.viewerForDoc(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-          dev().assert(this.ampdoc_)));
-
-    const platform = Services.platformFor(this.win_);
-
-    // Chrome exports navigator.share in WebView but does not implement it.
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
-    const isChromeWebview = viewer.isWebviewEmbedded() && platform.isChrome();
-
-    return ('share' in navigator) && !isChromeWebview;
   }
 
   /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @public
    */
-  // TODO(alanorozco): Set story metadata in share config
   setProviders(providers) {
-    this.loadRequiredExtensions_();
-
-    Object.keys(providers).forEach(type => {
-      if (type == 'system') {
-        user().warn('AMP-STORY',
-            '`system` is not a valid share provider type. Native sharing is ' +
-            'enabled by default and cannot be turned off.',
-            type);
-        return;
-      }
-
-      if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win_.document, type,
-            /** @type {!JsonObject} */ (providers[type])));
-        return;
-      }
-
-      // Bookend config API requires real boolean, not just truthy
-      if (providers[type] === true) {
-        this.add_(buildProvider(this.win_.document, type));
-        return;
-      }
-
-      user().warn('AMP-STORY',
-          'Invalid amp-story bookend share configuration for %s. ' +
-          'Value must be `true` or a params object.',
-          type);
-    });
-
+    this.mixin_.setProviders(providers);
     this.applyButtonPadding_();
-  }
-
-  /** @private */
-  loadRequiredExtensions_() {
-    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-      dev().assert(this.ampdoc_));
-
-    Services.extensionsFor(this.win_)
-        .installExtensionForDoc(ampdoc, 'amp-social-share');
-  }
-
-  /**
-   * @param {!Node} node
-   * @private
-   */
-  add_(node) {
-    const list = dev().assert(this.root_).firstElementChild;
-    const item = renderAsElement(this.win_.document, SHARE_ITEM_TEMPLATE);
-
-    item.appendChild(node);
-
-    // `lastElementChild` is the system share button container, which should
-    // always be last in list
-    list.insertBefore(item, list.lastElementChild);
   }
 }

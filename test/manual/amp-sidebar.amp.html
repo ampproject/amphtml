@@ -196,62 +196,24 @@
 
 </head>
 <body id="mybody">
-  <amp-sidebar id="sidebar1" layout="nodisplay" on="sidebarOpen:focusOnMe.focus">
-    <div>
-      <amp-social-share width="57" type="twitter"></amp-social-share>
-      <amp-social-share width="57" type="linkedin"></amp-social-share>
-      <amp-social-share width="57" type="facebook"></amp-social-share>
-    </div>
+  <amp-sidebar
+    id="sidebar1"
+    layout="nodisplay"
+    on="sidebarOpen:focusOnMe.focus"
+    side="right">
     <ul>
       <li><a id="focusOnMe" href="https://google.com">This gets focused on open</a></li>
-      <li> Nav item 1</li>
-      <li> Nav item 2</li>
-      <li> Nav item 3</li>
-      <li> Nav item 4</li>
-      <li> Nav item 5</li>
-      <li> Nav item 6</li>
-      <li> Nav item 7</li>
-      <li> Nav item 8</li>
-      <li> Nav item 9</li>
-      <li> Nav item 10</li>
-      <li> Nav item 11</li>
-      <li> Nav item 12</li>
-      <li> Nav item 13</li>
-      <li> Nav item 14</li>
-      <li> Nav item 15</li>
-      <li> Nav item 16</li>
-      <li> Nav item 17</li>
-      <li> Nav item 18</li>
+      <li><a href="#section1">Section 1</li>
+      <li><a href="#section2">Section 2</a></li>
+      <li><a href="#myImage">My Image</a></li>
+      <li><button on="tap:section3.scrollTo">Section 3</button></li>
+      <li> <button on="tap:myInput.focus,sidebar1.close">Click to focus input and close</button></li>
+      <li> <button on="tap:sidebar1.close,myInput.focus">Click to close and focus input</button></li>
       <li> <a href="http://abcnews.go.com/">Google</a></li>
       <li> <a href="http://www.wsj.com">WSJ</a></li>
       <li on="tap:sidebar1.close"> Close</li>
     </ul>
-    <amp-accordion>
-      <section>
-        <h2>Menu</h2>
-        <ul>
-          <li> Sub menu1 </li>
-          <li> Sub menu2 </li>
-        </ul>
-      </section>
-      <section>
-        <h2>Menu</h2>
-        <ul>
-          <li> Sub menu1 </li>
-          <li> Sub menu2 </li>
-        </ul>
-      </section>
-      <section>
-        <h2>Menu</h2>
-        <ul>
-          <li> Sub menu1 </li>
-          <li> Sub menu2 </li>
-        </ul>
-      </section>
-    </amp-accordion>
-    <amp-youtube layout="responsive" data-videoid="lBTCB7yLs8Y"
-      width="480" height="270">
-    </amp-youtube>
+
     <amp-list width="396" height="80" layout=fixed
       src="/test/manual/amp-list-data.json?RANDOM">
       <template type="amp-mustache">
@@ -265,7 +227,7 @@
       </div>
     </amp-list>
   </amp-sidebar>
-  <h1>AMP #0</h1>
+  <h1>AMP Sidebar Example</h1>
   <button
     class="hamburger"
     on='tap:sidebar1.toggle'
@@ -273,35 +235,16 @@
     >
     <div class="hamburger"></div>
   </button>
-  <amp-accordion>
-    <section>
-      <h2>Section 1</h2>
-      <div>
-        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus
-      </div>
-    </section>
-    <section>
-      <h2>Section 2</h2>
-      <div>
-        Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus
-      </div>
-    </section>
-    <section>
-      <h2>Section 3</h2>
-      <div>
-        <amp-img id="img1" srcset="https://lh4.googleusercontent.com/kDqWeHQ0Zt-UFeHAlc2ydE9AwK7W-kbMXBqyuNvPNy0mNSGAP7FOVB3_1iAOdbQSsbZByErbehvvSKtnTb1L5GoYreijfKwgYwpP1eLCHyl9Am7BSpwRuBABOAO12PtyPBTirdAadnxOmfq9dH_rsLSTaYGmNz1D5QIwXeWd8UeDNUQ3f-cMgvkq4ePqmKoe9t5ySqqLMZs-v3wTi2pd4jV_CurzcMB76k_b4lyD5w77NUowkSaQfscYVQpkDjo6OgG2nBiKJ2TITWVDu2rvt6NuEoOD9xaHgXuv81OnOjXCokxZd5K6TZiAH-Qm1jTKGMANklXiXt6hbwrN3QPA1mq2FardxGNLj1_oqOpXaqfUuj8LvejFRY6zJMGq0r6S_TEtPvbyulIg4PkKPIaVzi5nVdGrAWWoesWh-ORqmxZ4FIhdbd_Igsdh5AcMETBcZz3l5-IX0hmnyUeT5IOPSGw-p3Esgp_abwWB9-kElEiiHPD4QuQ_swsRu0NSFwfRi_QefnJQJ5UATng6iVP3K0g7uumHcwLtFId0vCeHp4A=w1024-h768-no" width=512 height=344></amp-img>
-      </div>
-    </section>
-  </amp-accordion>
-  <amp-youtube data-videoid="mGENRKrdoGY" width="480" height="270">
-  </amp-youtube>
+
+  <input type="text" id="myInput">
   <article>
     <figure>
       <amp-img
+          id="myImage"
           srcset="
               https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h1114-no/PANO_20150726_171347%257E2.jpg 2004w,
               https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h557-no/PANO_20150726_171347%257E2.jpg 1002w"
-          layout="responsive" width="360" placeholder
+          layout="fixed" width="360" placeholder
           alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
           height="216" on="tap:headline-img-lightbox">
       </amp-img>
@@ -326,25 +269,21 @@
 
     <div class="content-container">
       <header>
-        <h1 itemprop="headline">Lorem Ipsum</h1>
+        <h1 itemprop="headline" id="section1">Section 1</h1>
         <time class="header-time" itemprop="datePublished"
             datetime="2015-09-14 13:00">September 14, 2015</time>
-        <p class="standfirst">
-          Fusce pretium tempor justo, vitae consequat dolor maximus eget.
-        </p>
-      </header>
-
-      <div class="author">
-        <div class="byline">
-          <p>
-            by <span itemscope itemtype="http://schema.org/Person"
-            itemprop="author"><b>Lorem Ipsum</b>
-            <a class="mailto" href="mailto:lorem.ipsum@">
-            lorem.ipsum@</a></span>
-          </p>
-          <p class="brand">PublisherName News Reporter<p>
+        <div class="author">
+          <div class="byline">
+            <p>
+              by <span itemscope itemtype="http://schema.org/Person"
+              itemprop="author"><b>Lorem Ipsum</b>
+              <a class="mailto" href="mailto:lorem.ipsum@">
+              lorem.ipsum@</a></span>
+            </p>
+            <p class="brand">PublisherName News Reporter<p>
+          </div>
         </div>
-      </div>
+      </header>
       <div class="article-body" itemprop="articleBody">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -406,6 +345,7 @@
           nec lectus finibus rutrum vel sed orci.
         </p>
 
+        <h1 id="section2">Section 2</h1>
         <figure>
           <amp-img class="full-bleed" placeholder
               srcset="
@@ -420,7 +360,7 @@
           </figcaption>
         </figure>
         <hr>
-
+        <h1 id="section3">Section 3</h1>
         <p>
           Cum sociis natoque penatibus et magnis dis parturient montes,
           nascetur ridiculus mus. Nulla et viverra turpis. Fusce

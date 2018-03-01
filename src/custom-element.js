@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -34,10 +35,10 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
-import * as dom from './dom';
 import {toWin} from './types';
 
 const TAG = 'CustomElement';
@@ -171,6 +172,12 @@ function createBaseCustomElementClass(win) {
        * @private {?./service/resources-impl.Resources}
        */
       this.resources_ = null;
+
+      /**
+       * Layers can only be looked up when an element is attached.
+       * @private {?./service/layers-impl.LayoutLayers}
+       */
+      this.layers_ = null;
 
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
@@ -316,6 +323,19 @@ function createBaseCustomElementClass(win) {
       return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_,
             'no resources yet, since element is not attached'));
+    }
+
+    /**
+     * Returns LayoutLayers. Only available after attachment. It throws
+     * exception before the element is attached.
+     * @return {!./service/layers-impl.LayoutLayers}
+     * @final @this {!Element}
+     * @package
+     */
+    getLayers() {
+      return /** @type {!./service/layers-impl.LayoutLayers} */ (
+        dev().assert(this.layers_,
+            'no layers yet, since element is not attached'));
     }
 
     /**
@@ -690,6 +710,13 @@ function createBaseCustomElementClass(win) {
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+      }
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        if (!this.layers_) {
+          // Resources can now be initialized since the ampdoc is now available.
+          this.layers_ = Services.layersForDoc(this.ampdoc_);
+        }
+        this.getLayers().add(this);
       }
       this.getResources().add(this);
 
@@ -1574,7 +1601,7 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
-  };
+  }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
 }

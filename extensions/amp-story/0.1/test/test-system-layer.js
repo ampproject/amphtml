@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {SystemLayer} from '../system-layer';
-import {EventType} from '../events';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
+import {SystemLayer} from '../system-layer';
 
 
 const NOOP = () => {};
@@ -28,24 +27,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let progressBarStub;
   let progressBarRoot;
 
-  function matchEvent(name, bubbles) {
-    return sandbox.match.has('type', name)
-        .and(sandbox.match.has('bubbles', bubbles));
-  }
-
-  function expectEventTransform(eventHandler, expectedEventType) {
-    const dispatchEvent = sandbox.spy();
-    const stopPropagation = sandbox.spy();
-
-    sandbox.stub(systemLayer, 'getRoot').returns({dispatchEvent});
-
-    eventHandler({stopPropagation});
-
-    expect(stopPropagation).to.be.calledOnce;
-    expect(dispatchEvent).to.have.been.calledWith(
-        matchEvent(expectedEventType, /* bubbles */ true));
-  }
-
   beforeEach(() => {
     win = env.win;
 
@@ -54,7 +35,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
     progressBarStub = {
       build: sandbox.stub().returns(progressBarRoot),
       getRoot: sandbox.stub().returns(progressBarRoot),
-      setActivePageIndex: sandbox.spy(),
+      setActiveSegmentId: sandbox.spy(),
       updateProgress: sandbox.spy(),
     };
 
@@ -74,7 +55,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
     const root = systemLayer.build();
 
     expect(root).to.not.be.null;
-    expect(systemLayer.exitFullScreenBtn_).to.not.be.null;
 
     expect(addEventHandlers).to.have.been.called;
   });
@@ -91,55 +71,10 @@ describes.fakeWin('amp-story system layer', {}, env => {
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
 
-  it('should dispatch EXIT_FULLSCREEN when exit button is clicked', () => {
-    expectEventTransform(
-        e => systemLayer.onExitFullScreenClick_(e), EventType.EXIT_FULLSCREEN);
-  });
-
-  it('should dispatch ENTER_FULLSCREEN when enter button is clicked', () => {
-    expectEventTransform(
-        e => systemLayer.onEnterFullScreenClick_(e), EventType.ENTER_FULLSCREEN
-    );
-  });
-
-  // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
-  it.skip('should hide exit and show enter fullscreen button' +
-      'when not in fullscreen',
-  () => {
-    const exitButton = win.document.createElement('button');
-    const enterButton = win.document.createElement('button');
-
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_').callsFake(exitButton);
-    sandbox.stub(systemLayer, 'enterFullScreenBtn_').callsFake(enterButton);
-
-    systemLayer.setInFullScreen(false);
-
-    expect(exitButton.hasAttribute('hidden')).to.be.true;
-    expect(enterButton.hasAttribute('hidden')).to.be.false;
-  }
-  );
-
-  // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
-  it.skip('should show exit and hide enter fullscreen button' +
-      'when in fullscreen',
-  () => {
-    const exitButton = win.document.createElement('button');
-    const enterButton = win.document.createElement('button');
-
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_').callsFake(exitButton);
-    sandbox.stub(systemLayer, 'enterFullScreenBtn_').callsFake(enterButton);
-
-    systemLayer.setInFullScreen(true);
-
-    expect(exitButton.hasAttribute('hidden')).to.be.false;
-    expect(enterButton.hasAttribute('hidden')).to.be.true;
-  }
-  );
-
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach(index => {
-      systemLayer.setActivePageIndex(index);
-      progressBarStub.setActivePageIndex.should.have.been.calledWith(index);
+      systemLayer.setActivePageId(index);
+      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });
   });
 });

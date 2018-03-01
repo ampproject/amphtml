@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {MessageType} from '../../src/3p-frame-messaging';
+import {Observable} from '../observable';
 import {Services} from '../services';
 import {Viewport} from '../service/viewport/viewport-impl';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {registerServiceBuilderForDoc} from '../service';
+import {dev} from '../log';
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../layout-rect';
-import {Observable} from '../observable';
-import {MessageType} from '../../src/3p-frame-messaging';
-import {dev} from '../log';
-import {px, setImportantStyles, resetStyles} from '../../src/style';
+import {px, resetStyles, setImportantStyles} from '../../src/style';
+import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
@@ -205,6 +205,11 @@ export class ViewportBindingInabox {
   /** @override */
   getScrollLeft() {
     return this.viewportRect_.left;
+  }
+
+  /** @override */
+  getScrollingElement() {
+    return this.getBodyElement();
   }
 
   /**

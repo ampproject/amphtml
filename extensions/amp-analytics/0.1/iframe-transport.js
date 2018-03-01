@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
+import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
-import {hasOwn} from '../../../src/utils/object';
-import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.IframeTransport';
@@ -31,7 +31,7 @@ const LONG_TASK_REPORTING_THRESHOLD = 5;
 
 /** @typedef {{
  *    frame: Element,
- *    sentinel: !string,
+ *    sentinel: string,
  *    usageCount: number,
  *    queue: IframeTransportMessageQueue,
  *  }} */
@@ -60,9 +60,9 @@ export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
 export class IframeTransport {
   /**
    * @param {!Window} ampWin The window object of the AMP document
-   * @param {!string} type The value of the amp-analytics tag's type attribute
+   * @param {string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {!string} id If (potentially) using sendResponseToCreative(), it
+   * @param {string} id If (potentially) using sendResponseToCreative(), it
    *     should be something that the recipient can use to identify the
    *     context of the message, e.g. the resourceID of a DOM element.
    */
@@ -185,10 +185,9 @@ export class IframeTransport {
             entry.attribution.forEach(attrib => {
               if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                user().warn(TAG_,
+                user().error(TAG_,
                     'Long Task: ' +
                       `Vendor: "${this.type_}" ` +
-                      `Src: "${attrib.containerSrc}" ` +
                       `Duration: ${entry.duration}ms ` +
                       `Occurrences: ${this.numLongTasks_}`);
               }
@@ -207,7 +206,7 @@ export class IframeTransport {
    * Once all creatives using a frame are done with it, the frame can be
    * destroyed.
    * @param {!HTMLDocument} ampDoc The AMP document
-   * @param {!string} type The type attribute of the amp-analytics tag
+   * @param {string} type The type attribute of the amp-analytics tag
    */
   static markCrossDomainIframeAsDone(ampDoc, type) {
     const frameData = IframeTransport.getFrameData(type);
@@ -228,8 +227,8 @@ export class IframeTransport {
 
   /**
    * Returns whether this type of cross-domain frame is already known
-   * @param {!string} type The type attribute of the amp-analytics tag
-   * @return {!boolean}
+   * @param {string} type The type attribute of the amp-analytics tag
+   * @return {boolean}
    * @VisibleForTesting
    */
   static hasCrossDomainIframe(type) {
@@ -249,7 +248,7 @@ export class IframeTransport {
   /**
    * Sends an AMP Analytics trigger event to a vendor's cross-domain iframe,
    * or queues the message if the frame is not yet ready to receive messages.
-   * @param {!string} event A string describing the trigger event
+   * @param {string} event A string describing the trigger event
    * @VisibleForTesting
    */
   sendRequest(event) {
@@ -267,7 +266,7 @@ export class IframeTransport {
 
   /**
    * Gets the FrameData associated with a particular cross-domain frame type.
-   * @param {!string} type The type attribute of the amp-analytics tag
+   * @param {string} type The type attribute of the amp-analytics tag
    * @returns {FrameData}
    * @VisibleForTesting
    */
@@ -285,7 +284,7 @@ export class IframeTransport {
   }
 
   /**
-   * @returns {!string} Unique ID of this instance of IframeTransport
+   * @returns {string} Unique ID of this instance of IframeTransport
    * @VisibleForTesting
    */
   getCreativeId() {
@@ -293,7 +292,7 @@ export class IframeTransport {
   }
 
   /**
-   * @returns {!string} Type attribute of parent amp-analytics instance
+   * @returns {string} Type attribute of parent amp-analytics instance
    * @VisibleForTesting
    */
   getType() {
