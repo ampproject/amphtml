@@ -339,7 +339,7 @@ export class FixedLayer {
           if (top === 'auto' || autoTops[i] !== top) {
             if (isFixed &&
                 offsetTop === this.committedPaddingTop_ + this.borderTop_) {
-              top = '0';
+              top = '0px';
             } else {
               top = '';
             }
