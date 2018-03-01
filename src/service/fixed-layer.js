@@ -479,7 +479,7 @@ export class FixedLayer {
    * @private
    */
   sanitizeElement_(element) {
-    if (element.style) {
+    if (element.hasAttribute('style')) {
       element.removeAttribute('style');
       user().error(
           TAG, 'Inline style not supported for fixed element', element);
