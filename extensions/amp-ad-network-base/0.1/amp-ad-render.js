@@ -25,6 +25,7 @@ import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
+import {ValidatorResult} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -34,74 +35,6 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
-
-const TAG = 'a4a-render';
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-      analytics: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
-
-/** @typedef {{
-      rawCreativeBytes: !ArrayBuffer,
-      additionalContextMetadata: !JsonObject,
-      sentinel: string,
-    }} */
-export let CrossDomainDataDef;
-
-/** @typedef {{
-      creativeMetadata: !CreativeMetaDataDef,
-      templateData: ?AmpTemplateCreativeDef,
-      crossDomainData: ?CrossDomainDataDef,
-      size: !LayoutInfoDef,
-      adUrl: string,
-    }} */
-export let RendererInputDef;
-
-/** @typedef {{
-      iframe: ?Element,
-      friendlyIframeEmbed: ?Promise<!FriendlyIframeEmbed>,
-      crossOriginIframeHandler: ?AMP.AmpAdXOriginIframeHandler,
-      frameLoadPromise: ?Promise,
-    }} */
-export let RendererOutputDef;
-
-/** @typedef {
-      function(
-        !RendererInputDef,
-        !./amp-ad-network-base.AmpAdNetworkBase,
-        function():boolean=): !Promise<!RendererOutputDef>
-    } */
-export let RendererDef;
-
-/** @typedef {
-      function(
-        !ArrayBuffer,
-        !Headers,
-        !./amp-ad-network-base.AmpAdNetworkBase,
-        function():boolean=,
-        function(string):string=): !Promise<!ValidatorOutputDef>
-    } */
-export let ValidatorDef;
-
-/** @typedef {{
-        creative: ?string,
-        templateData: (JsonObject|undefined),
-        analytics: (JsonObject|undefined),
-        result: !ValidatorResultType,
-    }} */
-export let ValidatorOutputDef;
-
-/** @typedef {string} */
-export let ValidatorResultType;
-
-/** @enum {ValidatorResultType} */
-export const ValidatorResult = {
-  AMP: 'amp',
-  NON_AMP: 'non-amp',
-};
 
 /** @type {!Object} @private */
 const SHARED_IFRAME_PROPERTIES = dict({
@@ -128,10 +61,10 @@ const ampAdTemplatesStore = {};
 
 /**
  * Render a validated AMP creative directly in the parent page.
- * @param {!RendererInputDef} renderingData
+ * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
  * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!RendererOutputDef>}
+ * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
  */
 export function friendlyFrameRenderer(
   renderingData,
@@ -196,7 +129,7 @@ export function friendlyFrameRenderer(
         return friendlyIframeEmbed.whenIniLoaded()
             .then(() => {
               checkStillCurrent();
-              return /** @type {!RendererOutputDef} */ ({
+              return /** @type {!./amp-ad-type-defs.RendererOutputDef} */ ({
                 iframe,
                 friendlyIframeEmbed,
                 crossOriginIframeHandler: null,
@@ -208,10 +141,10 @@ export function friendlyFrameRenderer(
 
 /**
  * Render a non-AMP creative into a NameFrame.
- * @param {!RendererInputDef} renderingData
+ * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
  * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!RendererOutputDef>}
+ * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
  */
 
 export function nameFrameRenderer(
@@ -238,10 +171,10 @@ export function nameFrameRenderer(
 
 /**
  * Render a validated AMP template.
- * @param {!RendererInputDef} renderingData
+ * @param {!./amp-ad-type-defs.RendererInputDef} renderingData
  * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
- * @return {!Promise<!RendererOutputDef>}
+ * @return {!Promise<!./amp-ad-type-defs.RendererOutputDef>}
  * @private
  */
 export function templateRenderer(
@@ -283,7 +216,7 @@ export function templateRenderer(
  * @param {!./amp-ad-network-base.AmpAdNetworkBase} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
- * @return {!Promise<!ValidatorOutputDef>}
+ * @return {!Promise<!./amp-ad-type-defs.ValidatorOutputDef>}
  */
 export function templateValidator(
   bytes,
@@ -294,13 +227,14 @@ export function templateValidator(
   return Promise.resolve(utf8Decode(bytes)).then(body => {
     checkStillCurrent();
     if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      return /**@type {!Promise<!ValidatorOutputDef>} */ (Promise.resolve({
-        creative: body,
-        templateData: null,
-        result: ValidatorResult.NON_AMP,
-      }));
+      return /**@type {!Promise<!./amp-ad-type-defs.ValidatorOutputDef>} */ (
+        Promise.resolve({
+          creative: body,
+          templateData: null,
+          result: ValidatorResult.NON_AMP,
+        }));
     }
-    const ampCreativeJson = /** @type {!AmpTemplateCreativeDef} */
+    const ampCreativeJson = /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */
           (tryParseJson(body) || {});
     return getOrCreateAmpAdTemplates(baseImpl)
         .fetch(ampCreativeJson.templateUrl)
@@ -313,12 +247,6 @@ export function templateValidator(
             },
             result: ValidatorResult.AMP,
           };
-        })
-        .catch(error => {
-          dev().warn(TAG, 'Error fetching/expanding template',
-              ampCreativeJson, error);
-          baseImpl.forceCollapse();
-          return Promise.reject(NO_CONTENT_RESPONSE);
         });
   });
 }
@@ -340,7 +268,7 @@ function getOrCreateAmpAdTemplates(baseImpl) {
  * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
  * @param {!LayoutInfoDef} size The creative size.
  * @param {?string} sentinel
- * @return {!RendererOutputDef}
+ * @return {!./amp-ad-type-defs.RendererOutputDef}
  */
 function iframeRenderHelper(baseImpl, attributes, size, sentinel) {
   const mergedAttributes = Object.assign(attributes, dict({

@@ -30,7 +30,14 @@ export class AmpAdTemplateCommon extends AmpAdNetworkTemplateBase {
     dev().assert(networkType, 'Element did not specify network type!');
     const networkConfig = NetworkRegistry[element.getAttribute('type')];
     dev().assert(networkConfig, `Network ${networkType} not registered!`);
-    this.bindAdRequestUrl(networkConfig.requestUrl);
+
+    /** @const {string} */
+    this.requestUrl_ = networkConfig.requestUrl;
+  }
+
+  /** @override */
+  getRequestUrl() {
+    return this.requestUrl_;
   }
 }
 
