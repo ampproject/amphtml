@@ -466,7 +466,7 @@ export class FixedLayer {
       for (let j = 0; j < elements.length; j++) {
         const element = elements[j];
         if (isInlineStylesEnabled) {
-          this.sanitizeElement(element);
+          this.sanitizeElement_(element);
         }
         this.setupElement_(element, stickySelector, 'sticky');
       }
