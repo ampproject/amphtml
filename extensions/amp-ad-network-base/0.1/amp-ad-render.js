@@ -268,9 +268,11 @@ export class TemplateValidator extends Validator {
 export class TestValidator extends Validator {
   /** @override */
   validate(context) {
+    const creative = utf8Decode(
+        /** @type {!ArrayBuffer} */ (context.getUnvalidatedBytes()));
     return Promise.resolve(context
-        .setCreative(utf8Decode(/** @type {!ArrayBuffer} */ (
-          context.getUnvalidatedBytes())))
+        .setCreative(creative)
+        .setCreativeMetadata(getAmpAdMetadataMock(creative, '', ''))
         .setValidatorResult(ValidatorResult.AMP));
   }
 }
