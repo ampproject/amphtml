@@ -34,6 +34,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
@@ -606,6 +607,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   markStoryAsLoaded_() {
     dispatch(this.element, EventType.STORY_LOADED, true);
+    this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
