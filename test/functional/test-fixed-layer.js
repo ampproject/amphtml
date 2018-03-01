@@ -437,7 +437,7 @@ describe('FixedLayer', () => {
 
     it('should throw user error for inline style', () => {
       toggleExperiment(
-          ampdoc,
+          ampdoc.win,
           'inline-styles',
           true /* opt_on */,
           true /* opt_transientExperiment */);

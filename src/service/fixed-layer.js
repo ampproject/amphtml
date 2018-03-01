@@ -443,7 +443,7 @@ export class FixedLayer {
   setupSelectors_(fixedSelectors, stickySelectors) {
     let hasInlineStyle = false;
     const isInlineStylesEnabled =
-        isExperimentOn(this.ampdoc, 'inline-styles');
+        isExperimentOn(this.ampdoc.win, 'inline-styles');
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.ampdoc.getRootNode().querySelectorAll(
