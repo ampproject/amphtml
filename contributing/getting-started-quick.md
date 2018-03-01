@@ -102,7 +102,8 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 # See your changes in production
 
-* Barring any issues releases are cut on Wednesdays, pushed to Dev Channel Thursday, pushed to 1% of AMP pages on Monday and pushed to all pages a few days later on Thursday.
+* If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.
+* If your change was to the code that runs on AMP pages across the web, you'll have to wait for the change to be included in a production release. Generally, it takes about 1-2 weeks for a change to be live for all users. Reference our [release schedule](release-schedule.md) for more specific details.
 * The [amphtml Releases page](https://github.com/ampproject/amphtml/releases) will list your PR in the first build that contains it.  `Pre-release` is the build on the Dev Channel, `Latest Release` is the build in production.
 * Opt-in to using the Dev Channel in a browser by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.
 * Find the AMP version being used on a page in the developer console, i.e. `Powered by AMP ⚡ HTML – Version <build number>`).
