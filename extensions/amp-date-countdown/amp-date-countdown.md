@@ -41,7 +41,7 @@ limitations under the License.
 
 ## Behavior
 
-Will return the following params as result back to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
+Will return the following params as result and pass to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
 
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
 

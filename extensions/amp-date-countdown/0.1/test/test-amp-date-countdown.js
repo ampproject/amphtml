@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpDateCountdown} from '../amp-date-countdown';
+//import {AmpDateCountdown} from '../amp-date-countdown';
 
 describes.realWin('amp-date-countdown', {
   amp: {
