@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
@@ -53,7 +53,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.navigationState_ = null;
 
     /** @private {number} */
-    this.interactions_ = 0;
+    this.uniquePagesCount_ = 0;
+
+    /** @private {!Object<string, boolean>} */
+    this.uniquePageIds_ = dict({});
 
     /** @private {!Array} */
     this.adPageEls_ = [];
@@ -239,11 +242,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   handleActivePageChange_(pageIndex, pageId) {
-    this.interactions_++;
-    // temp before config in passed in
-    if (this.interactions_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+    if (!hasOwn(this.uniquePageIds_, pageId)) {
+      this.uniquePagesCount_++;
+      this.uniquePageIds_[pageId] = true;
+    }
+
+    if (this.uniquePagesCount_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
       this.placeAdAfterPage_(pageId);
-      this.interactions_ = 0;
     }
   }
 
@@ -268,10 +273,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    const inserted = this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    // failed insertion (consecutive ads, or no next page)
+    if (!inserted) {
+      return;
+    }
+
     this.adsPlaced_++;
+    this.uniquePagesCount_ = 0;
 
     if (!this.allAdsPlaced_()) {
+      // start loading next ad
       this.schedulePage_();
     }
   }

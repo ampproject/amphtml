@@ -1491,6 +1491,7 @@ export class AmpStory extends AMP.BaseElement {
    * on amp-story-page elements
    * @param {string} currentPageId
    * @param {string} pageToBeInsertedId
+   * @return {boolean} was page inserted
    */
   insertPage(currentPageId, pageToBeInsertedId) {
     // TODO(ccordry): make sure this method moves to PageManager when implemented
@@ -1503,18 +1504,27 @@ export class AmpStory extends AMP.BaseElement {
     const nextPageId = currentPage
         .getNextPageId(true /*opt_isAutomaticAdvance */);
 
-
     if (nextPageId) {
+      const nextPage = this.getPageById_(nextPageId);
+
+      // we do not ever want two consecutive ads
+      if (currentPage.isAd() || nextPage.isAd()) {
+        return false;
+      }
+
       currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
       currentPageEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
       pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
 
-      const nextPage = this.getPageById_(nextPageId);
       const nextPageEl = nextPage.element;
       pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
       pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageEl.id);
       nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+
+      return true;
     }
+
+    return false;
   }
 
   /**
