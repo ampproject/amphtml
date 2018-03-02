@@ -529,15 +529,15 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via one of document info's urls.
    * @param {string} field A field on the docInfo
-   * @param {string=} opt_subproperty A subproperty of the field
+   * @param {string=} opt_urlProp A subproperty of the field
    * @return {T}
    * @template T
    */
-  getDocInfoUrl_(field, opt_subproperty) {
+  getDocInfoUrl_(field, opt_urlProp) {
     return () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       const value = docInfo[field];
-      return opt_subproperty ? value[opt_subproperty] : value;
+      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
     };
   }
 
