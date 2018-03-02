@@ -47,6 +47,11 @@ export const RTC_VENDORS = {
     macros: ['PLACEMENT_ID'],
     disableKeyAppend: true,
   },
+  indexexchange: {
+    url: "https://amp.casalemedia.com/amprtc?v=1&p=HREF&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID",
+    macros: ['SITE_ID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
