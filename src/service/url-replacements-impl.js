@@ -86,6 +86,17 @@ function screenProperty(screen, property) {
 }
 
 /**
+ * Returns a function that executs method on the viewport.
+ *
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function viewportMethod(viewport, method) {
+  return () => viewport[method]();
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
@@ -335,22 +346,22 @@ export class GlobalVariableSource extends VariableSource {
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+    this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.set('SCROLL_LEFT', viewportMethod(viewport, 'getScrollLeft'));
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
+    this.set('SCROLL_HEIGHT', viewportMethod(viewport, 'getScrollHeight'));
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
+    this.set('SCROLL_WIDTH', viewportMethod(viewport, 'getScrollWidth'));
 
     // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', () => viewport.getSize().height);
+    this.set('VIEWPORT_HEIGHT', viewportMethod(viewport, 'getHeight'));
 
     // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
+    this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
     const screen = this.ampdoc.win.screen;
