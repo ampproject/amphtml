@@ -75,8 +75,10 @@ export class AmpList extends AMP.BaseElement {
     this.initialSrc_ = element.getAttribute('src');
 
     this.registerAction('refresh', () => {
-      this.fetchList_();
-    }, ActionTrust.LOW);
+      if (this.layoutCompleted_) {
+        this.fetchList_();
+      }
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
