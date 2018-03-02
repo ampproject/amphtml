@@ -174,7 +174,8 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
  *
  * This function expects the HTML to be already pre-sanitized and thus it does
  * not validate all of the AMP rules - only the most dangerous security-related
- * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
+ * cases, such as <SCRIPT> and <IFRAME>. <STYLE> is allowed but restricted based
+ * on whether the experiment is enabled.
  *
  * @param {string} html
  * @return {string}
@@ -190,6 +191,76 @@ export function sanitizeHtml(html) {
     }
   }
 
+  /**
+   * @param {string} tagName
+   * @param {!Array{string}} attribs
+   */
+  function handleNonAmpElement(tagName, attribs) {
+    // Ask Caja to validate the element as well.
+    // Use the resulting properties.
+    const savedAttribs = attribs.slice(0);
+    const scrubbed = tagPolicy(tagName, attribs);
+    if (!scrubbed) {
+      ignore++;
+    } else {
+      attribs = scrubbed.attribs;
+      // Restore some of the attributes that AMP is directly responsible
+      // for, such as "on"
+      for (let i = 0; i < attribs.length; i += 2) {
+        const attrib = attribs[i];
+        if (WHITELISTED_ATTRS.includes(attrib)) {
+          attribs[i + 1] = savedAttribs[i + 1];
+        } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+          attribs[i + 1] = savedAttribs[i + 1];
+        }
+      }
+    }
+    // `<A>` has special target rules:
+    // - Default target is "_top";
+    // - Allowed targets are "_blank", "_top";
+    // - All other targets are rewritted to "_top".
+    if (tagName == 'a') {
+      let index = -1;
+      let hasHref = false;
+      for (let i = 0; i < savedAttribs.length; i += 2) {
+        if (savedAttribs[i] == 'target') {
+          index = i + 1;
+        } else if (savedAttribs[i] == 'href') {
+          // Only allow valid `href` values.
+          hasHref = attribs[i + 1] != null;
+        }
+      }
+      let origTarget = index != -1 ? savedAttribs[index] : null;
+      if (origTarget != null) {
+        origTarget = origTarget.toLowerCase();
+        if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
+          attribs[index] = origTarget;
+        } else {
+          attribs[index] = '_top';
+        }
+      } else if (hasHref) {
+        attribs.push('target');
+        attribs.push('_top');
+      }
+    }
+  }
+
+ /**
+  *  Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
+  * brackets before custom validation and reading them afterwards.
+  * @param {!Array<string>} attribs
+  * @param {!Array} bindAttribsIndices
+  */
+  function handleAmpBindAttributes(attribs, bindAttribsIndices) {
+    for (let i = 0; i < attribs.length; i += 2) {
+      const attr = attribs[i];
+      if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
+        bindAttribsIndices[i] = true;
+        attribs[i] = attr.slice(1, -1);
+      }
+    }
+  }
+
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
       if (ignore > 0) {
@@ -199,68 +270,11 @@ export function sanitizeHtml(html) {
         return;
       }
       const isBinding = map();
-      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
-      // brackets before custom validation and readding them afterwards.
-      for (let i = 0; i < attribs.length; i += 2) {
-        const attr = attribs[i];
-        if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          isBinding[i] = true;
-          attribs[i] = attr.slice(1, -1);
-        }
-      }
+      handleAmpBindAttributes(attribs, bindAttribsIndices);
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
       } else if (!startsWith(tagName, 'amp-')) {
-        // Ask Caja to validate the element as well.
-        // Use the resulting properties.
-        const savedAttribs = attribs.slice(0);
-        const scrubbed = tagPolicy(tagName, attribs);
-        if (!scrubbed) {
-          ignore++;
-        } else {
-          attribs = scrubbed.attribs;
-          // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on"
-          for (let i = 0; i < attribs.length; i += 2) {
-            const attrib = attribs[i];
-            if (WHITELISTED_ATTRS.includes(attrib)) {
-              attribs[i + 1] = savedAttribs[i + 1];
-            } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
-              attribs[i + 1] = savedAttribs[i + 1];
-            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
-              attribs[i + 1] = savedAttribs[i + 1];
-            }
-          }
-        }
-        // `<A>` has special target rules:
-        // - Default target is "_top";
-        // - Allowed targets are "_blank", "_top";
-        // - All other targets are rewritted to "_top".
-        if (tagName == 'a') {
-          let index = -1;
-          let hasHref = false;
-          for (let i = 0; i < savedAttribs.length; i += 2) {
-            if (savedAttribs[i] == 'target') {
-              index = i + 1;
-            } else if (savedAttribs[i] == 'href') {
-              // Only allow valid `href` values.
-              hasHref = attribs[i + 1] != null;
-            }
-          }
-          let origTarget = index != -1 ? savedAttribs[index] : null;
-          if (origTarget != null) {
-            origTarget = origTarget.toLowerCase();
-            if (WHITELISTED_TARGETS.indexOf(origTarget) != -1) {
-              attribs[index] = origTarget;
-            } else {
-              attribs[index] = '_top';
-            }
-          } else if (hasHref) {
-            attribs.push('target');
-            attribs.push('_top');
-          }
-        }
+        handleNonAmpElement(tagName, attribs);
       }
       if (ignore > 0) {
         if (SELF_CLOSING_TAGS[tagName]) {
