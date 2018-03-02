@@ -139,10 +139,13 @@ export class InaboxMessagingHost {
       return true;
     }
 
-    this.registeredIframeSentinels_[request.sentinel] = true;
-    this.positionObserver_.observe(iframe, data => {
-      this.sendPosition_(request, source, origin, data);
-    });
+    const positionObserverHandle = this.positionObserver_.observe(
+        iframe, data => {
+          this.sendPosition_(request, source, origin, data);
+        }
+    );
+    this.registeredIframeSentinels_[request.sentinel] = {
+      iframe, positionObserverHandle};
     return true;
   }
 
@@ -235,7 +238,7 @@ export class InaboxMessagingHost {
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel];
+      return this.iframeMap_[sentinel].measurableFrame;
     }
     const measureableFrame =
         /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
@@ -245,7 +248,7 @@ export class InaboxMessagingHost {
       for (let j = 0, tempWin = measureableWin;
         j < 10; j++, tempWin = tempWin.parent) {
         if (iframe.contentWindow == tempWin) {
-          this.iframeMap_[sentinel] = measureableFrame;
+          this.iframeMap_[sentinel] = {iframe, measureableFrame};
           return measureableFrame;
         }
         if (tempWin == window.top) {
@@ -294,6 +297,35 @@ export class InaboxMessagingHost {
     // If topXDomainWin does not exist, then win is friendly, and we can
     // just return its frameElement directly.
     return win.frameElement;
+  }
+
+  /**
+   * Removes an iframe from the set of iframes we watch, along with executing
+   * any necessary cleanup.  Available at win.AMP.inaboxUnregisterIframe().
+   *
+   * @param {!HTMLIFrameElement} iframe
+   */
+  unregisterIframe(iframe) {
+    // Remove iframe from the list of iframes we're watching.
+    const iframeIndex = this.iframes_.indexOf(iframe);
+    if (iframeIndex != -1) {
+      this.iframes_.splice(iframeIndex, 1);
+    }
+    // Also remove it and all of its descendents from our sentinel cache.
+    // TODO(jeffkaufman): save more info so we don't have to walk the dom here.
+    for (const sentinel in this.iframeMap_) {
+      if (this.iframeMap_[sentinel].iframe == iframe) {
+        delete this.iframeMap_[sentinel];
+      }
+    }
+    // And the position observer listener.
+    for (const sentinel in this.registeredIframeSentinels_) {
+      if (iframe == this.registeredIframeSentinels_[sentinel].iframe) {
+        this.positionObserver_.stopObserving(
+            this.registeredIframeSentinels_[sentinel].positionObserverHandle);
+        delete this.registeredIframeSentinels_[sentinel];
+      }
+    }
   }
 }
 

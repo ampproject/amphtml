@@ -383,7 +383,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
       };
       const creativeWinMock = {};
       const creativeIframeMock = {};
-      host.iframeMap_[sentinel] = creativeIframeMock;
+      host.iframeMap_[sentinel] = {
+        'iframe': creativeIframeMock, 'measurableFrame': creativeIframeMock};
       expect(host.getFrameElement_(creativeWinMock, sentinel)
       ).to.equal(creativeIframeMock);
     });
@@ -401,6 +402,48 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMock = topWinMock.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
       expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
+    });
+  });
+
+  describe.only('unregisterIframe', () => {
+    it('unregisters frames', () => {
+      const iframeObjA = createNestedIframeMocks(6,3);
+      const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
+      const iframeObjB = createNestedIframeMocks(6,6);
+      const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
+      const iframeObjC = createNestedIframeMocks(6,0);
+      const frameMockC = iframeObjC.topWin.document.querySelectorAll()[0];
+      host = new InaboxMessagingHost(win, [frameMockA, frameMockB, frameMockC]);
+      host.getFrameElement_(iframeObjA.source, 'sentinelA');
+      host.getFrameElement_(iframeObjB.source, 'sentinelB');
+      host.getFrameElement_(iframeObjC.source, 'sentinelC');
+      expect(host.iframes_.length).to.equal(3);
+      expect('sentinelA' in host.iframeMap_).to.be.true;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      host.unregisterIframe(frameMockA);
+      expect(host.iframes_.length).to.equal(2);
+      expect('sentinelA' in host.iframeMap_).to.be.false;
+      expect('sentinelB' in host.iframeMap_).to.be.true;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      host.unregisterIframe(frameMockB);
+      expect(host.iframes_.length).to.equal(1);
+      expect('sentinelA' in host.iframeMap_).to.be.false;
+      expect('sentinelB' in host.iframeMap_).to.be.false;
+      expect('sentinelC' in host.iframeMap_).to.be.true;
+      host.unregisterIframe(frameMockC);
+      expect(host.iframes_).to.be.empty;
+      expect(host.iframeMap_).to.be.empty;
+    });
+
+    it('no errors or effects if called with a non-registered iframe', () => {
+      const iframeObj = createNestedIframeMocks(6,3);
+      const frameMock = iframeObj.topWin.document.querySelectorAll()[0];
+      host = new InaboxMessagingHost(win, [frameMock]);
+      host.getFrameElement_(iframeObj.source, 'sentinelA');
+      host.unregisterIframe(createNestedIframeMocks(1,1));
+      expect(host.iframes_.length).to.equal(1);
+      expect('sentinelA' in host.iframeMap_).to.be.true;
     });
   });
 });
