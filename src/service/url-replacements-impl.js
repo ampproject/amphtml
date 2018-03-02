@@ -643,7 +643,7 @@ export class GlobalVariableSource extends VariableSource {
       const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
       return service.then(storyVariables => {
         user().assert(storyVariables,
-          'To use variable %s amp-story should be configured', name);
+            'To use variable %s amp-story should be configured', name);
         return storyVariables[property];
       });
     };
