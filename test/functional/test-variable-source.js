@@ -126,37 +126,4 @@ describes.fakeWin('VariableSource', {
     });
 
   });
-
-  describes.fakeWin('getTimingData', {}, env => {
-    let win;
-
-    beforeEach(() => {
-      win = env.win;
-      win.performance = {
-        timing: {
-          navigationStart: 1,
-          loadEventStart: 0,
-        },
-      };
-    });
-
-    it('should resolve immediate when data is ready', () => {
-      win.performance.timing.loadEventStart = 12;
-      return getTimingDataAsync(win, 'navigationStart', 'loadEventStart')
-          .then(value => {
-            expect(value).to.equal(11);
-          });
-    });
-
-    it('should wait for load event', () => {
-      win.readyState = 'other';
-      const p = getTimingDataAsync(win, 'navigationStart', 'loadEventStart');
-      expect(win.eventListeners.count('load')).to.equal(1);
-      win.performance.timing.loadEventStart = 12;
-      win.eventListeners.fire({type: 'load'});
-      return p.then(value => {
-        expect(value).to.equal(11);
-      });
-    });
-  });
 });
