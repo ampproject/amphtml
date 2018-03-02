@@ -25,7 +25,7 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
     amp-date-countdown {
-      display: block!important;
+      display: block;
     }
     h1{
       color: #396;
@@ -74,7 +74,13 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-date-countdown end-date="2020-06-01T00:00:00+08:00" biggest-unit="days" when-ended="stop" locale='en' width="600">
+  <h1 id="sample">
+      When Timer hits 0, will hide the timer itself and hide this message.
+  </h1>
+  <h1 id="sample2" hidden>
+      When Timer hits 0, will hide the timer itself and display this message.
+  </h1>
+  <amp-date-countdown id="ampdate" end-date="2018-03-02T22:49:00+08:00" on="tap: sample.show; timeout: ampdate.hide, sample.hide, sample2.show;" biggest-unit="days" when-ended="stop" locale='en'>
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">

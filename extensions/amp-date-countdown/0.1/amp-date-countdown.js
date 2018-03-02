@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -79,11 +80,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
       //console.log('differentBetween', differentBetween);
       data = self.getYDHMSFromMs_(differentBetween);
       if (whenEnded === 'stop' && differentBetween < 1000) {
+        Services.actionServiceForDoc(self.element)
+            .trigger(self.element, 'timeout', null, ActionTrust.HIGH);
         clearInterval(countDownTicker);
       }
       differentBetween -= delay;
       self.renderItems_(Object.assign(data, localeWordList));
     }, delay);
+
+    this.registerAction('timeout', this.timeout_.bind(this));
 
   }
 
@@ -124,6 +129,15 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     //console.log('epoch', epoch);
     return epoch;
+  }
+
+  /**
+   * Toggles the timeout_ state when timer hit 0.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @private
+   */
+  timeout_() {
+
   }
 
   /**
