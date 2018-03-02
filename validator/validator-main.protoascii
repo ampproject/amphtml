@@ -267,6 +267,8 @@ tags: {
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
+                 "https://use\\.fontawesome\\.com/releases/"
+                 "v([0-9]+\\.?)+/css/(all|brands|solids|fontawesome)\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: { name: "media" }
