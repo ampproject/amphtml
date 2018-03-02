@@ -29,6 +29,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
     this.boundRenderers_ = {};
 
+    /** @private {?./amp-ad-render.Validator} */
+    this.boundValidator_ = null;
+
     /** @private {!./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
@@ -69,6 +72,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   forceCollapse_() {
     super.attemptChangeSize(0, 0);
+  }
+
+  /**
+   * @return {string} The finalized ad request URL.
+   * @protected
+   */
+  getRequestUrl() {
+    return '';
   }
 
   /**
