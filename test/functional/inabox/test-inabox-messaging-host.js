@@ -405,7 +405,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
   });
 
-  describe.only('unregisterIframe', () => {
+  describe('unregisterIframe', () => {
     it('unregisters frames', () => {
       const iframeObjA = createNestedIframeMocks(6,3);
       const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
