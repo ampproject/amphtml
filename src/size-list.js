@@ -166,20 +166,18 @@ export class SizeList {
    * @return {!./layout.LengthDef|string}
    */
   select(win) {
-    for (let i = 0; i < this.sizes_.length - 1; i++) {
-      const option = this.sizes_[i];
-      if (option.mediaQuery && win.matchMedia(option.mediaQuery).matches) {
+    const sizes = this.sizes_;
+    const length = sizes.length - 1;
+
+    // Iterate all but the last size
+    for (let i = 0; i < length; i++) {
+      const option = sizes_[i];
+      if (win.matchMedia(option.mediaQuery).matches) {
         return option.size;
       }
     }
-    return this.getLast();
-  }
 
-  /**
-   * Returns the last size in the SizeList, which is the default.
-   * @return {!./layout.LengthDef|string}
-   */
-  getLast() {
-    return this.sizes_[this.sizes_.length - 1].size;
+    // Returns the last size in the SizeList, which is the default.
+    return sizes[length].size;
   }
 }
