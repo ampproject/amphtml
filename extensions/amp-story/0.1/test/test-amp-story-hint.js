@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryHint} from '../amp-story-hint';
+import {Services} from '../../../../src/services';
 
 const NOOP = () => {};
 
@@ -24,43 +25,54 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   beforeEach(() => {
     win = env.win;
+
+    sandbox.stub(Services, 'vsyncFor').callsFake(
+        () => ({mutate: task => task()}));
+    sandbox.stub(Services, 'timerFor').callsFake(
+        () => ({delay: NOOP, cancel: NOOP}));
+
     ampStoryHint = new AmpStoryHint(win);
   });
 
   it('should build the UI', () => {
-    const buildNavigationOverlayStub =
-        sandbox.stub(ampStoryHint, 'buildNavigationOverlay_' , NOOP);
-    ampStoryHint.buildHintContainer();
-    expect(ampStoryHint.hintContainer_).to.be.not.null;
-    expect(buildNavigationOverlayStub).to.be.calledOnce;
+    expect(ampStoryHint.buildHintContainer()).to.not.be.null;
   });
 
   it('should be able to show navigation help overlay', () => {
-    const fadeoutHintsStub =
-        sandbox.stub(ampStoryHint, 'fadeoutHints_' , NOOP);
-    ampStoryHint.buildHintContainer();
+    const hideAfterTimeoutStub =
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
+
+    const hintContainer = ampStoryHint.buildHintContainer();
+
     ampStoryHint.showNavigationOverlay();
-    expect(ampStoryHint.hintContainer_.className).to.contain(
-        'show-navigation-overlay');
-    expect(fadeoutHintsStub).to.be.calledOnce;
+
+    expect(hintContainer.className).to.contain('show-navigation-overlay');
+    expect(hintContainer.className).to.not.contain('show-first-page-overlay');
+    expect(hintContainer.className).to.not.contain('i-amphtml-hidden');
+    expect(hideAfterTimeoutStub).to.be.calledOnce;
   });
 
   it('should be able to show no previous page help overlay', () => {
-    const fadeoutHintsStub =
-    sandbox.stub(ampStoryHint, 'fadeoutHints_' , NOOP);
-    ampStoryHint.buildHintContainer();
+    const hideAfterTimeoutStub =
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
+
+    const hintContainer = ampStoryHint.buildHintContainer();
+
     ampStoryHint.showFirstPageHintOverlay();
-    expect(ampStoryHint.hintContainer_.className).to.contain(
-        'show-first-page-overlay');
-    expect(fadeoutHintsStub).to.be.calledOnce;
+
+    expect(hintContainer.className).to.contain('show-first-page-overlay');
+    expect(hintContainer.className).to.not.contain('show-navigation-overlay');
+    expect(hintContainer.className).to.not.contain('i-amphtml-hidden');
+    expect(hideAfterTimeoutStub).to.be.calledOnce;
   });
 
   it('should be able to hide shown hint', () => {
-    ampStoryHint.buildHintContainer();
+    const hintContainer = ampStoryHint.buildHintContainer();
+
     ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
-    expect(ampStoryHint.hintContainer_.className).to.not.contain(
-        'show-navigation-overlay');
+
+    expect(hintContainer.className).to.contain('i-amphtml-hidden');
   });
 });
 

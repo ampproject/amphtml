@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-playbuzz';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 function startsWith(string, searchString) {
@@ -127,8 +127,8 @@ describes.realWin('amp-playbuzz', {
 
   it('renders with item id when submitted both with item url & item id', () => {
     const src = createItemSrc()
-      .withUrl('https://www.playbuzz.com/bob/bobs-life')
-      .withItemId('some-item-id');
+        .withUrl('https://www.playbuzz.com/bob/bobs-life')
+        .withItemId('some-item-id');
 
     return getIns(src).then(ins => {
       const iframe = ins.querySelector('iframe');

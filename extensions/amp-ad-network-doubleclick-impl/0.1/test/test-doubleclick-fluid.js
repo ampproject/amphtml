@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -89,7 +90,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    impl.maybeRemoveListenerForFluid();
+    removeSafeframeListener();
+    if (impl.binding_.safeframeApi_) {
+      impl.binding_.safeframeApi_.destroy();
+    }
     impl = null;
   });
 
@@ -99,7 +103,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should be fluid enabled', () => {
-    expect(impl.isFluid_).to.be.true;
+    expect(impl.isFluid).to.be.true;
   });
 
   it('should have a supported layout', () => {
@@ -148,32 +152,28 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should style iframe/slot correctly on multi-size creative', () => {
     multiSizeImpl.buildCallback();
-    return utf8Encode('foo').then(creative => {
-      multiSizeImpl.sentinel = 'sentinel';
-      multiSizeImpl.adPromise_ = Promise.resolve();
-      multiSizeImpl.creativeBody_ = creative;
-      multiSizeImpl.returnedSize_ = {width: 250, height: 100};
-      return multiSizeImpl.layoutCallback().then(() => {
-        const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
-        const slotStyleString = multiSizeImpl.element.getAttribute('style');
-        expect(slotStyleString).to.match(/width: 250px/);
-        expect(iframeStyleString).to.match(/position: relative/);
-        expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
-      });
+    multiSizeImpl.sentinel = 'sentinel';
+    multiSizeImpl.adPromise_ = Promise.resolve();
+    multiSizeImpl.creativeBody_ = utf8Encode('foo');
+    multiSizeImpl.returnedSize_ = {width: 250, height: 100};
+    return multiSizeImpl.layoutCallback().then(() => {
+      const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
+      const slotStyleString = multiSizeImpl.element.getAttribute('style');
+      expect(slotStyleString).to.match(/width: 250px/);
+      expect(iframeStyleString).to.match(/position: relative/);
+      expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
     });
   });
 
   it('should have an iframe child with initial size 0x0', () => {
     impl.buildCallback();
-    return utf8Encode('foo').then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.adPromise_ = Promise.resolve();
-      impl.creativeBody_ = creative;
-      return impl.layoutCallback().then(() => {
-        const styleString = impl.iframe.getAttribute('style');
-        expect(styleString).to.match(/width: 0px/);
-        expect(styleString).to.match(/height: 0px/);
-      });
+    impl.sentinel = 'sentinel';
+    impl.adPromise_ = Promise.resolve();
+    impl.creativeBody_ = utf8Encode('foo');
+    return impl.layoutCallback().then(() => {
+      const styleString = impl.iframe.getAttribute('style');
+      expect(styleString).to.match(/width: 0px/);
+      expect(styleString).to.match(/height: 0px/);
     });
   });
 
@@ -191,6 +191,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               e: 'sentinel',
+              c: '1234',
             })), '*');
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
@@ -198,19 +199,22 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
               p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
             })), '*');
         </script>`;
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
-    return utf8Encode(rawCreative).then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.initiateAdRequest();
-      return impl.adPromise_.then(() => {
-        impl.creativeBody_ = creative;
-        return impl.layoutCallback().then(() => {
-          expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
-          expect(onFluidResizeSpy).to.be.calledOnce;
-        });
+    impl.sentinel = 'sentinel';
+    impl.initiateAdRequest();
+    impl.binding_.safeframeApi_ = new SafeframeHostApi(
+        impl, true, impl.initialSize_, impl.creativeSize_);
+    sandbox./*OK*/stub(impl.binding_.safeframeApi_, 'setupGeom_');
+    const connectMessagingChannelSpy =
+          sandbox./*OK*/spy(impl.binding_.safeframeApi_,
+              'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.binding_.safeframeApi_,
+        'onFluidResize_');
+    return impl.adPromise_.then(() => {
+      impl.creativeBody_ = utf8Encode(rawCreative);
+      return impl.layoutCallback().then(() => {
+        expect(connectMessagingChannelSpy).to.be.calledOnce;
+        expect(onFluidResizeSpy).to.be.calledOnce;
       });
     });
   });

@@ -27,10 +27,6 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
@@ -40,7 +36,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ima-video/">Annotated code example for amp-ima-video</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
   </tr>
 </table>
 
@@ -89,6 +85,10 @@ The URL of your video content. A relative URL or a URL that uses https protocol.
 
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
+
+##### data-delay-ad-request
+
+If true, delay the ad request until either the user scrolls the page, or for 3 seconds, whichever occurs first. Defaults to false.
 
 ##### common attributes
 

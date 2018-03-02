@@ -16,11 +16,11 @@
 
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
+import {Services} from './services';
 import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {Services} from './services';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
@@ -123,7 +123,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+  opt_preinstallCallback) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
@@ -478,8 +478,8 @@ export class FriendlyIframeEmbed {
    */
   getBodyElement() {
     return /** @type {!HTMLBodyElement} */ (
-        (this.iframe.contentDocument || this.iframe.contentWindow.document)
-            .body);
+      (this.iframe.contentDocument || this.iframe.contentWindow.document)
+          .body);
   }
 
   /**

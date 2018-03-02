@@ -20,7 +20,9 @@
  */
 
 const childProcess = require('child_process');
-const util = require('gulp-util');
+
+const shellCmd = (process.platform == 'win32') ? 'cmd' : '/bin/sh';
+const shellFlag = (process.platform == 'win32') ? '/C' : '-c';
 
 /**
  * Spawns the given command in a child process with the given options.
@@ -30,19 +32,26 @@ const util = require('gulp-util');
  * @return {<Object>} Process info.
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
+  return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
 }
 
 /**
- * Executes the provided command, and prints a message if the command fails.
+ * Executes the provided command.
  *
  * @param {string} cmd Command line to execute.
  */
 exports.exec = function(cmd) {
-  const p = spawnProcess(cmd, {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log(util.colors.yellow('\nCommand failed: ' + cmd));
-  }
+  spawnProcess(cmd, {'stdio': 'inherit'});
+};
+
+/**
+ * Executes the provided command in an asynchronous process.
+ *
+ * @param {string} cmd
+ * @param {<Object>} options
+ */
+exports.execAsync = function(cmd, options) {
+  return childProcess.spawn(shellCmd, [shellFlag, cmd], options);
 };
 
 /**
@@ -53,7 +62,6 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.error(util.colors.red('\nCommand failed: ' + cmd));
     process.exit(p.status);
   }
 };

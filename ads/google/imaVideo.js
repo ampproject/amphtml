@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {
   ImaPlayerData,
 } from './ima-player-data';
+import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -125,6 +125,9 @@ let adRequestFailed;
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
 
+// IMA SDK AdsRequest object.
+let adsRequest;
+
 // IMA SDK AdsLoader object.
 let adsLoader;
 
@@ -173,6 +176,12 @@ let imaSettings;
 
 // Player data used for video analytics.
 const playerData = new ImaPlayerData();
+
+// Flag used to track if ads have been requested or not.
+let adsRequested;
+
+// Flag that tracks if the user tapped and dragged on the big play button.
+let userTappedAndDragged;
 
 /**
  * Loads the IMA SDK library.
@@ -363,6 +372,7 @@ export function imaVideo(global, data) {
     playbackStarted = false;
     nativeFullscreen = false;
 
+    let mobileBrowser = false;
     interactEvent = 'click';
     mouseDownEvent = 'mousedown';
     mouseMoveEvent = 'mousemove';
@@ -370,12 +380,20 @@ export function imaVideo(global, data) {
     if (navigator.userAgent.match(/iPhone/i) ||
         navigator.userAgent.match(/iPad/i) ||
         navigator.userAgent.match(/Android/i)) {
+      mobileBrowser = true;
       interactEvent = 'touchend';
       mouseDownEvent = 'touchstart';
       mouseMoveEvent = 'touchmove';
       mouseUpEvent = 'touchend';
     }
-    bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    if (mobileBrowser) {
+      // Create our own tap listener that ignores tap and drag.
+      bigPlayDiv.addEventListener(mouseMoveEvent, onBigPlayTouchMove);
+      bigPlayDiv.addEventListener(mouseUpEvent, onBigPlayTouchEnd);
+      bigPlayDiv.addEventListener('tapwithoutdrag', onClick.bind(null, global));
+    } else {
+      bigPlayDiv.addEventListener(interactEvent, onClick.bind(null, global));
+    }
     playPauseDiv.addEventListener(interactEvent, onPlayPauseClick);
     progressBarWrapperDiv.addEventListener(mouseDownEvent, onProgressClick);
     fullscreenDiv.addEventListener(interactEvent,
@@ -436,15 +454,19 @@ export function imaVideo(global, data) {
 
     videoPlayer.addEventListener('ended', onContentEnded);
 
-    const adsRequest = new global.google.ima.AdsRequest();
+    adsRequest = new global.google.ima.AdsRequest();
     adsRequest.adTagUrl = data.tag;
     adsRequest.linearAdSlotWidth = videoWidth;
     adsRequest.linearAdSlotHeight = videoHeight;
     adsRequest.nonLinearAdSlotWidth = videoWidth;
     adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
 
-    adRequestFailed = false;
-    adsLoader.requestAds(adsRequest);
+    if (!data['delayAdRequest']) {
+      requestAds();
+    } else {
+      // Let amp-ima-video know that we are done set-up.
+      window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+    }
   });
 }
 
@@ -491,6 +513,35 @@ export function onClick(global) {
   playAds(global);
 }
 
+
+/**
+ * Triggered when the user ends a tap on the big play button.
+ */
+function onBigPlayTouchEnd() {
+  if (userTappedAndDragged) {
+    // Reset state and ignore this tap.
+    userTappedAndDragged = false;
+  } else {
+    const tapWithoutDragEvent = new Event('tapwithoutdrag');
+    bigPlayDiv.dispatchEvent(tapWithoutDragEvent);
+  }
+}
+
+
+/**
+ * Triggered when the user moves a tap on the big play button.
+ */
+function onBigPlayTouchMove() {
+  userTappedAndDragged = true;
+}
+
+
+export function requestAds() {
+  adsRequested = true;
+  adRequestFailed = false;
+  adsLoader.requestAds(adsRequest);
+}
+
 /**
  * Starts ad playback. If the ad request has not yte resolved, calls itself
  * again after 250ms.
@@ -498,7 +549,11 @@ export function onClick(global) {
  * @visibleForTesting
  */
 export function playAds(global) {
-  if (adsManager) {
+  if (!adsRequested) {
+    requestAds();
+    playAds(global);
+    return;
+  } else if (adsManager) {
     // Ad request resolved.
     try {
       adsManager.init(
@@ -754,10 +809,10 @@ function onProgressMove(event) {
 function getPagePosition(el) {
   let lx, ly;
   for (lx = 0, ly = 0;
-      el != null;
-      lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
-          el = el./*OK*/offsetParent)
-    {};
+    el != null;
+    lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
+    el = el./*OK*/offsetParent)
+  {}
   return {x: lx,y: ly};
 }
 
@@ -970,6 +1025,12 @@ function onMessage(global, event) {
             adsManagerWidthOnLoad = msg.args.width;
             adsManagerHeightOnLoad = msg.args.height;
           }
+        }
+        break;
+      case 'onFirstScroll':
+      case 'onAdRequestDelayTimeout':
+        if (!adsRequested) {
+          requestAds();
         }
         break;
     }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {sendRequest, sendRequestUsingIframe, Transport} from '../transport';
+import * as sinon from 'sinon';
+import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 
 adopt(window);
 
@@ -39,7 +39,7 @@ describe('amp-analytics.transport', () => {
   }
 
   function assertCallCounts(
-      expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
+    expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
     expect(Transport.sendRequestUsingBeacon.callCount,
         'sendRequestUsingBeacon call count').to.equal(expectedBeaconCalls);
     expect(Transport.sendRequestUsingXhr.callCount,

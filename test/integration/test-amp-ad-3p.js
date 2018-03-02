@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   createFixtureIframe,
   poll,
 } from '../../testing/iframe';
-import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {
-  toggleExperiment,
-  resetExperimentTogglesForTesting,
-} from '../../src/experiments';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {
@@ -47,6 +47,7 @@ function createIframeWithApis(fixture) {
       };
     });
   }).then(context => {
+    expect(context.canary).to.be.a('boolean');
     expect(context.canonicalUrl).to.equal(
         'https://www.example.com/doubleclick.html');
     expect(context.clientId).to.match(/amp-[a-zA-Z0-9\-_.]{22,24}/);
@@ -61,6 +62,7 @@ function createIframeWithApis(fixture) {
       valid: 'true',
       customValue: '123',
       'other_value': 'foo',
+      htmlAccessAllowed: '',
     });
 
     // make sure the context.data is the same instance as the data param passed
@@ -68,6 +70,7 @@ function createIframeWithApis(fixture) {
     expect(context.data).to.equal(
         iframe.contentWindow.networkIntegrationDataParamForTesting);
 
+    expect(context.domFingerprint).to.be.ok;
     expect(context.hidden).to.be.false;
     expect(context.initialLayoutRect).to.deep.equal({
       height: 250,
@@ -109,8 +112,21 @@ function createIframeWithApis(fixture) {
     // Nevertheless this only happens in test. In real world AMP will not
     // in srcdoc iframe.
     expect(context.sourceUrl).to.equal(platform.isEdge()
-        ? 'http://localhost:9876/context.html'
-        : 'about:srcdoc');
+      ? 'http://localhost:9876/context.html'
+      : 'about:srcdoc');
+
+    expect(context.tagName).to.equal('AMP-AD');
+
+    expect(context.addContextToIframe).to.be.a('function');
+    expect(context.getHtml).to.be.a('function');
+    expect(context.noContentAvailable).to.be.a('function');
+    expect(context.onResizeDenied).to.be.a('function');
+    expect(context.onResizeSuccess).to.be.a('function');
+    expect(context.renderStart).to.be.a('function');
+    expect(context.reportRenderedEntityIdentifier).to.be.a('function');
+    expect(context.requestResize).to.be.a('function');
+    expect(context.report3pError).to.be.a('function');
+    expect(context.computeInMasterFrame).to.be.a('function');
   }).then(() => {
     // test iframe will send out render-start to amp-ad
     return poll('render-start message received', () => {
@@ -147,7 +163,15 @@ function createIframeWithApis(fixture) {
     return poll('wait for new IO entry', () => {
       return lastIO != null;
     });
-  });
+  }).then(() => new Promise((resolve, reject) => {
+    iframe.contentWindow.context.getHtml('a', ['href'], content => {
+      if (content == '<a href="http://test.com/test">Test link</a>') {
+        resolve();
+      } else {
+        reject(new Error('Invalid getHtml result: ' + content));
+      }
+    });
+  }));
 }
 
 

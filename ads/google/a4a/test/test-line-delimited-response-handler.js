@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../line-delimited-response-handler';
-import * as sinon from 'sinon';
 
 describe('#line-delimited-response-handler', () => {
 
@@ -36,7 +36,7 @@ describe('#line-delimited-response-handler', () => {
     slotData.forEach(slot => {
       // TODO: escape creative returns
       const creative = slot.creative.replace(/\\/g, '\\\\')
-        .replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+          .replace(/\n/g, '\\n').replace(/\r/g, '\\r');
       slotDataString += `${JSON.stringify(slot.headers)}\n${creative}\n`;
     });
     return slotDataString;

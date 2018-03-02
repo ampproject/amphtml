@@ -15,6 +15,8 @@
 #
 tags: {  # amp-bind
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-bind"
@@ -29,6 +31,8 @@ tags: {  # amp-bind
 }
 tags: {  # <amp-state> (json)
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   requires_extension: "amp-bind"
@@ -50,6 +54,7 @@ tags: {  # <amp-state> (json)
 }
 tags: {  # <amp-state>
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "AMP-STATE"
   spec_name: "amp-state"
   requires_extension: "amp-bind"
@@ -64,6 +69,9 @@ tags: {  # <amp-state>
     mandatory: true
   }
   attrs: {
+    name: "overridable"
+  }
+  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "https"
@@ -75,6 +83,44 @@ tags: {  # <amp-state>
   attrs: { name: "[src]" }
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+}
+# AMP4EMAIL enforces the the same restrictions on the 'src' attribute of AMP-IMG
+# and AMP-LIST on the src attribute of AMP-STATE. Use of 'credential' is
+# disallowed.
+tags: {  # <amp-state>
+  html_format: AMP4EMAIL
+  tag_name: "AMP-STATE"
+  spec_name: "amp-state (AMP4EMAIL)"
+  requires_extension: "amp-bind"
+  disallowed_ancestor: "AMP-LIST"
+  disallowed_ancestor: "AMP-STATE"
+  attr_lists: "optional-src-amp4email"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+}
+tags: {  # <amp-bind-macro>
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-BIND-MACRO"
+  requires_extension: "amp-bind"
+  attrs: {
+    name: "arguments"
+  }
+  attrs: {
+    name: "expression"
+    mandatory: true
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }

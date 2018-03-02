@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.1/amp-mustache';
+import '../../../amp-selector/0.1/amp-selector';
+import * as sinon from 'sinon';
+import {AmpEvents} from '../../../../src/amp-events';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
-  setReportValiditySupportedForTesting,
-  setCheckValiditySupportedForTesting,
-} from '../form-validators';
-import {
   CONFIG_KEY,
 } from '../form-verifiers';
-import * as sinon from 'sinon';
-import '../../../amp-mustache/0.1/amp-mustache';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {Services} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
-import '../../../amp-selector/0.1/amp-selector';
+import {fromIterator} from '../../../../src/utils/array';
+import {
+  setCheckValiditySupportedForTesting,
+  setReportValiditySupportedForTesting,
+} from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
-import {AmpEvents} from '../../../../src/amp-events';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -48,7 +48,7 @@ describes.repeated('', {
     amp: {
       runtimeOn: false,
       ampdoc: variant.ampdoc,
-      extensions: ['amp-form', 'amp-selector'],  // amp-form is installed as service.
+      extensions: ['amp-form', 'amp-selector'], // amp-form is installed as service.
     },
   }, env => {
 
@@ -65,7 +65,7 @@ describes.repeated('', {
     }
 
     function getForm(doc = document, button1 = true, button2 = false,
-                     button3 = false) {
+      button3 = false) {
       const form = doc.createElement('form');
       form.setAttribute('method', 'POST');
 
@@ -528,7 +528,7 @@ describes.repeated('', {
       });
     });
 
-    it('should allow rendering responses through templates', () => {
+    it('should allow rendering responses through inlined templates', () => {
       return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
@@ -567,6 +567,50 @@ describes.repeated('', {
           // Check that form has a rendered div with class .submit-error-message.
           renderedTemplate = form.querySelector('[i-amphtml-rendered]');
           expect(renderedTemplate).to.not.be.null;
+        });
+      });
+    });
+
+    it('should allow rendering responses through referenced templates', () => {
+      return getAmpForm(getForm(env.win.document)).then(ampForm => {
+        const form = ampForm.form_;
+
+        const successTemplate = document.createElement('template');
+        successTemplate.id = 'successTemplate';
+        successTemplate.setAttribute('type', 'amp-mustache');
+        successTemplate.content.appendChild(
+            document.createTextNode('Hello, {{name}}'));
+        form.appendChild(successTemplate);
+
+        const messageContainer = document.createElement('div');
+        messageContainer.id = 'message';
+        messageContainer.setAttribute('submit-success', '');
+        messageContainer.setAttribute('template', 'successTemplate');
+        form.appendChild(messageContainer);
+
+        sandbox.stub(ampForm.xhr_, 'fetch')
+            .returns(Promise.resolve({
+              json: () => {
+                return Promise.resolve({'name': 'John Smith'});
+              },
+            }));
+        const renderedTemplate = document.createElement('div');
+        renderedTemplate.innerText = 'Hello, John Smith';
+        sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+            .returns(Promise.resolve(renderedTemplate));
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+        return whenCalled(ampForm.templates_.findAndRenderTemplate).then(() => {
+          return ampForm.renderTemplatePromiseForTesting();
+        }).then(() => {
+          expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
+          expect(ampForm.templates_.findAndRenderTemplate.calledWith(
+              messageContainer, {'name': 'John Smith'})).to.be.true;
+          expect(messageContainer.firstChild).to.equal(renderedTemplate);
         });
       });
     });
@@ -1512,6 +1556,7 @@ describes.repeated('', {
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });
+      let navigateTo;
 
       beforeEach(() => {
         form = getForm(env.win.document);
@@ -1519,6 +1564,9 @@ describes.repeated('', {
         sandbox.stub(form, 'checkValidity').returns(true);
         ampForm = new AmpForm(form);
         ampForm.target_ = '_top';
+
+        navigateTo = sandbox.spy();
+        sandbox.stub(Services, 'navigationForDoc').returns({navigateTo});
       });
 
       describe('AMP-Redirect-To', () => {
@@ -1527,8 +1575,12 @@ describes.repeated('', {
           redirectToValue = 'https://google.com/';
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+          expect(navigateTo).to.not.be.called;
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
-            expect(env.win.top.location.href).to.be.equal(redirectToValue);
+            expect(navigateTo).to.be.calledOnce;
+            const args = navigateTo.firstCall.args;
+            expect(args[1]).to.equal('https://google.com/');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
 
@@ -1540,8 +1592,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1553,8 +1604,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1567,8 +1617,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1578,11 +1627,16 @@ describes.repeated('', {
           const logSpy = sandbox.spy(user(), 'error');
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+          expect(navigateTo).to.not.be.called;
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(logSpy).to.be.calledOnce;
             const error = logSpy.getCall(0).args[1];
             expect(error).to.match(/Form submission failed/);
-            expect(env.win.top.location.href).to.be.equal(redirectToValue);
+
+            expect(navigateTo).to.be.calledOnce;
+            const args = navigateTo.firstCall.args;
+            expect(args[1]).to.equal('https://example2.com/hello');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
       });

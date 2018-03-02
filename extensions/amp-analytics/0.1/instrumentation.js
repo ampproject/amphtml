@@ -26,6 +26,7 @@ import {
   getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {
   getFriendlyIframeEmbedOptional,
@@ -36,7 +37,6 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {Services} from '../../../src/services';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -122,7 +122,7 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const tracker = /** @type {!CustomEventTracker} */ (
-        root.getTracker('custom', CustomEventTracker));
+      root.getTracker('custom', CustomEventTracker));
     tracker.trigger(event);
   }
 
@@ -192,7 +192,7 @@ export class InstrumentationService {
         width: size.width,
         height: size.height,
         relayoutAll: false,
-        velocity: 0,  // Hack for typing.
+        velocity: 0, // Hack for typing.
       });
     }
   }
@@ -408,7 +408,7 @@ export class AnalyticsGroup {
  */
 export function instrumentationServicePromiseForDoc(nodeOrDoc) {
   return /** @type {!Promise<InstrumentationService>} */ (
-      getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
+    getServicePromiseForDoc(nodeOrDoc, 'amp-analytics-instrumentation'));
 }
 
 /*

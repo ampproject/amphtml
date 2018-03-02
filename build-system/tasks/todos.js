@@ -16,11 +16,12 @@
 'use strict';
 
 const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
-const srcGlobs = require('../config').presubmitGlobs;
-const util = require('gulp-util');
-const through2 = require('through2');
+const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
+const srcGlobs = require('../config').presubmitGlobs;
+const through2 = require('through2');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
@@ -60,7 +61,7 @@ function findClosedTodosInFile(file) {
       return acc + v;
     }, 0);
   }).catch(function(error) {
-    util.log(util.colors.red('Failed in', file.path, error, error.stack));
+    log(colors.red('Failed in', file.path, error, error.stack));
     return 0;
   });
 }
@@ -81,7 +82,7 @@ function reportClosedIssue(file, issueId, todo) {
         const issue = JSON.parse(response.body);
         const value = issue.state == 'closed' ? 1 : 0;
         if (value) {
-          util.log(util.colors.red(todo, 'in', file.path));
+          log(colors.red(todo, 'in', file.path));
         }
         return value;
       });
@@ -130,7 +131,7 @@ function findClosedTodosTask() {
       }))
       .on('end', function() {
         if (foundCount > 0) {
-          util.log(util.colors.red('Found closed TODOs: ', foundCount));
+          log(colors.red('Found closed TODOs: ', foundCount));
           process.exit(1);
         }
       });

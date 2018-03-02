@@ -15,13 +15,18 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Pass} from '../../../src/pass';
+import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {dev, user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -36,20 +41,37 @@ export class AmpList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!function(!Array<!Element>)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
-    /** @const {!function(!Array<!Element>):!Promise<!Array<!Element>>} */
-    this.boundScanForBindings_ = this.scanForBindings_.bind(this);
-
     /** @private {?Element} */
     this.container_ = null;
 
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
 
+    /**
+     * Maintains invariant that only one fetch result may be processed for
+     * render at a time.
+     * @const @private {!../../../src/pass.Pass}
+     */
+    this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
+
+    /**
+     * FIFO queue of fetched items to render. Each queue item also includes
+     * the promise resolver and rejecter to be invoked on render success/fail.
+     * @const @private {!Array<{items:!Array, resolver:!Function, rejecter:!Function}>}
+     */
+    this.renderQueue_ = [];
+
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /**
+     * Has layoutCallback() been called yet?
+     * @private {boolean}
+     */
+    this.layoutCompleted_ = false;
+
+    /** @const @private {string} */
+    this.initialSrc_ = element.getAttribute('src');
   }
 
   /** @override */
@@ -79,6 +101,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutCompleted_ = true;
+
     const fetch = this.fetchList_();
     if (this.getFallback()) {
       fetch.then(() => {
@@ -102,17 +126,22 @@ export class AmpList extends AMP.BaseElement {
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
-        this.fetchList_();
+        // Defer to fetch in layoutCallback() before first layout.
+        if (this.layoutCompleted_) {
+          this.fetchList_();
+        }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
-        this.renderItems_(items);
+        this.scheduleRender_(items);
+        // Remove the 'src' now that local data is used to render the list.
+        this.element.setAttribute('src', '');
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
-      this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      this.scheduleRender_(items);
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 
@@ -145,11 +174,14 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_() {
+    if (!this.element.getAttribute('src')) {
+      return Promise.resolve();
+    }
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {
         user().assert(typeof items !== 'undefined' ,
-            'Response must contain an arrary or object at "%s". %s',
+            'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
         if (!isArray(items)) {
           items = [items];
@@ -162,21 +194,41 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.renderItems_(items);
+      return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     });
   }
 
   /**
+   * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
    * @return {!Promise}
    * @private
    */
-  renderItems_(items) {
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(this.boundScanForBindings_)
-        .then(this.boundRendered_);
+  scheduleRender_(items) {
+    let resolver;
+    let rejecter;
+    const promise = new Promise((resolve, reject) => {
+      resolver = resolve;
+      rejecter = reject;
+    });
+    this.renderQueue_.push({items, resolver, rejecter});
+    this.renderPass_.schedule();
+    return promise;
+  }
+
+  /**
+   * Dequeues a fetch result and renders it immediately.
+   * @private
+   */
+  doRenderPass_() {
+    dev().assert(this.renderQueue_.length > 0, 'Nothing queued to render.');
+    const {items, resolver, rejecter} = this.renderQueue_.shift();
+    this.templates_.findAndRenderTemplateArray(this.element, items)
+        .then(elements => this.updateBindings_(elements))
+        .then(elements => this.rendered_(elements))
+        .then(() => resolver(), () => rejecter());
   }
 
   /**
@@ -184,11 +236,11 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  scanForBindings_(elements) {
+  updateBindings_(elements) {
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return bind.rescanAndEvaluate(elements);
+        return bind.scanAndApply(elements, [this.container_]);
       }
     // Forward elements to chained promise on success or failure.
     }).then(forwardElements, forwardElements);
@@ -227,7 +279,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+    const ampdoc = this.getAmpDoc();
+    const src = this.element.getAttribute('src');
+
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (src == this.initialSrc_ ||
+      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
 }
 

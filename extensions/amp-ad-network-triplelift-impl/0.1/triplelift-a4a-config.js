@@ -19,7 +19,7 @@ const SRC_PREFIX_ = 'https://ib.3lift.com/';
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function tripleliftIsA4AEnabled(win, element, useRemoteHtml) {

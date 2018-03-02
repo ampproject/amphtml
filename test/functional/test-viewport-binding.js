@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
   ViewportBindingIosEmbedWrapper_,
@@ -22,6 +21,7 @@ import {
 import {
   ViewportBindingNatural_,
 } from '../../src/service/viewport/viewport-binding-natural';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
@@ -157,10 +157,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el);
-    expect(rect.left).to.equal(12);  // round(0 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(12); // round(0 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should offset client rect for layout and position passed in', () => {
@@ -173,10 +173,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el, 100, 200);
-    expect(rect.left).to.equal(112);  // round(100 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(112); // round(100 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
 
@@ -360,7 +360,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   it('should include padding top in contentHeight', () => {
     binding.updatePaddingTop(10);
     binding.setScrollTop(20); // should have no effect on height
-    expect(binding.getContentHeight()).to.equal(311);  // +1px for border-top.
+    expect(binding.getContentHeight()).to.equal(311); // +1px for border-top.
   });
 
   it('should update scrollTop on wrapper', () => {
@@ -385,9 +385,9 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el);
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should offset client rect for layout and position passed in', () => {
@@ -398,10 +398,10 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
       },
     };
     const rect = binding.getLayoutRect(el, 100, 200);
-    expect(rect.left).to.equal(112);  // round(100 + 11.5)
-    expect(rect.top).to.equal(213);  // round(200 + 12.5)
-    expect(rect.width).to.equal(14);  // round(13.5)
-    expect(rect.height).to.equal(15);  // round(14.5)
+    expect(rect.left).to.equal(112); // round(100 + 11.5)
+    expect(rect.top).to.equal(213); // round(200 + 12.5)
+    expect(rect.width).to.equal(14); // round(13.5)
+    expect(rect.height).to.equal(15); // round(14.5)
   });
 
   it('should call scroll event', () => {

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
-  installViewportServiceForDoc,
   Viewport,
+  installViewportServiceForDoc,
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
@@ -27,12 +28,12 @@ import {
   ViewportBindingDef,
 } from '../../src/service/viewport/viewport-binding-def';
 import {
-  ViewportBindingNatural_,
-} from '../../src/service/viewport/viewport-binding-natural';
-import {
   ViewportBindingIosEmbedWrapper_,
 } from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 
+import {
+  ViewportBindingNatural_,
+} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installDocumentStateService} from '../../src/service/document-state';
@@ -40,10 +41,9 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 const NOOP = () => {};
@@ -130,11 +130,12 @@ describes.fakeWin('Viewport', {}, env => {
     const vsync = Services.vsyncFor(window);
     vsyncTasks = [];
     sandbox.stub(vsync, 'canAnimate').returns(true);
-    sandbox.stub(vsync, 'createAnimTask', (unusedContextNode, task) => {
-      return () => {
-        vsyncTasks.push(task);
-      };
-    });
+    sandbox.stub(vsync, 'createAnimTask').callsFake(
+        (unusedContextNode, task) => {
+          return () => {
+            vsyncTasks.push(task);
+          };
+        });
   });
 
   afterEach(() => {
@@ -168,7 +169,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not set singledoc class', () => {
-      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
+      sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
     });
@@ -180,7 +181,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should set embedded class', () => {
-      sandbox.stub(viewer, 'isEmbedded', () => true);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-embedded');
       expect(root).to.not.have.class('i-amphtml-standalone');
@@ -203,7 +204,7 @@ describes.fakeWin('Viewport', {}, env => {
 
       beforeEach(() => {
         webviewParam = '1';
-        sandbox.stub(viewer, 'getParam', param => {
+        sandbox.stub(viewer, 'getParam').callsFake(param => {
           if (param == 'webview') {
             return webviewParam;
           }
@@ -211,7 +212,7 @@ describes.fakeWin('Viewport', {}, env => {
         });
         const platform = Services.platformFor(ampdoc.win);
         isIos = true;
-        sandbox.stub(platform, 'isIos', () => isIos);
+        sandbox.stub(platform, 'isIos').callsFake(() => isIos);
       });
 
       it('should set ios-webview class', () => {
@@ -241,7 +242,7 @@ describes.fakeWin('Viewport', {}, env => {
       viewport.size_ = null;
       errorStub = sandbox.stub(dev(), 'error');
       randomValue = 0.009;
-      sandbox.stub(Math, 'random', () => randomValue);
+      sandbox.stub(Math, 'random').callsFake(() => randomValue);
     });
 
     it('should be ok with non-zero dimensions', () => {
@@ -560,7 +561,7 @@ describes.fakeWin('Viewport', {}, env => {
     const enterOverlayModeStub = sandbox.stub(viewport, 'enterOverlayMode');
     const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
     const maybeEnterFieLightboxStub =
-        sandbox.stub(viewport, 'maybeEnterFieLightboxMode', NOOP);
+        sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(true).once();
 
@@ -583,7 +584,7 @@ describes.fakeWin('Viewport', {}, env => {
     const leaveOverlayModeStub = sandbox.stub(viewport, 'leaveOverlayMode');
     const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
     const maybeLeaveFieLightboxStub =
-        sandbox.stub(viewport, 'maybeLeaveFieLightboxMode', NOOP);
+        sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateLightboxMode').withArgs(false).once();
 
@@ -605,9 +606,9 @@ describes.fakeWin('Viewport', {}, env => {
       enterFullOverlayMode: sandbox.spy(),
     };
 
-    sandbox.stub(viewport, 'isLightboxExperimentOn', () => true);
+    sandbox.stub(viewport, 'isLightboxExperimentOn').callsFake(() => true);
 
-    sandbox.stub(viewport, 'getFriendlyIframeEmbed_', el => {
+    sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -623,7 +624,7 @@ describes.fakeWin('Viewport', {}, env => {
       leaveFullOverlayMode: sandbox.spy(),
     };
 
-    sandbox.stub(viewport, 'getFriendlyIframeEmbed_', el => {
+    sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -855,7 +856,7 @@ describes.fakeWin('Viewport', {}, env => {
         .returns(Promise.resolve(null));
     const el = document.createElement('div');
     el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
-    sandbox.stub(viewport.vsync_, 'measurePromise', cb => cb());
+    sandbox.stub(viewport.vsync_, 'measurePromise').callsFake(cb => cb());
     return viewport.getClientRectAsync(el).then(res => {
       expect(res).to.deep.equal(layoutRectLtwh(1, 2, 3, 4));
     });
@@ -867,7 +868,7 @@ describes.fakeWin('Viewport', {}, env => {
         .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5))).twice();
     const el = document.createElement('div');
     el.getBoundingClientRect = () => {return layoutRectLtwh(1, 2, 3, 4);};
-    sandbox.stub(viewport.vsync_, 'measurePromise', cb => cb());
+    sandbox.stub(viewport.vsync_, 'measurePromise').callsFake(cb => cb());
     return viewport.getClientRectAsync(el).then(res => {
       expect(res).to.deep.equal(layoutRectLtwh(6, 7, 3, 4));
     });
@@ -1350,7 +1351,7 @@ describe('createViewport', () => {
 
     it('should bind to "iOS embed" when iframed', () => {
       win.parent = {};
-      sandbox.stub(viewer, 'isEmbedded', () => true);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1359,7 +1360,7 @@ describe('createViewport', () => {
 
     it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
       win.parent = {};
-      sandbox.stub(viewer, 'isEmbedded', () => false);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1368,7 +1369,7 @@ describe('createViewport', () => {
 
     it('should bind to "iOS embed" when not iframed but in dev mode', () => {
       getMode(win).development = true;
-      sandbox.stub(viewer, 'isEmbedded', () => false);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1378,7 +1379,7 @@ describe('createViewport', () => {
     it('should bind to "iOS embed" when iframed but in test mode', () => {
       win.parent = {};
       getMode(win).test = true;
-      sandbox.stub(viewer, 'isEmbedded', () => false);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
@@ -1388,7 +1389,7 @@ describe('createViewport', () => {
     it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
       win.parent = {};
       getMode(win).development = true;
-      sandbox.stub(viewer, 'isEmbedded', () => false);
+      sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to

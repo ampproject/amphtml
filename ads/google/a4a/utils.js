@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
-import {makeCorrelator} from '../correlator';
-import {getBinaryType} from '../../../src/experiments';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
-import {parseUrl} from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {getBinaryType} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {makeCorrelator} from '../correlator';
+import {parseJson} from '../../../src/json';
+import {parseUrl} from '../../../src/url';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -71,7 +71,7 @@ export const QQID_HEADER = 'X-QQID';
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
  * added by a publisher page.
  *
- * @const {!string}
+ * @const {string}
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
@@ -79,6 +79,11 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 /** @typedef {{urls: !Array<string>}}
  */
 export let AmpAnalyticsConfigDef;
+
+/**
+ * @typedef {{instantLoad: boolean, writeInBody: boolean}}
+ */
+export let NameframeExperimentConfig;
 
 /**
  * @const {!./url-builder.QueryParameterDef}
@@ -113,7 +118,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   const googleCdnProxyRegex =
         /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-      !!googleCdnProxyRegex.test(win.location.origin) ||
+    !!googleCdnProxyRegex.test(win.location.origin) ||
         getMode(win).localDev || getMode(win).test);
 }
 
@@ -185,7 +190,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 /**
  * @param {!Window} win
  * @param {string} type matching typing attribute.
- * @param {!function(!Element):string} groupFn
+ * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
@@ -209,9 +214,11 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, nodeOrDoc, startTime) {
-  const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
-  return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
-      .then(clientId => referrerPromise.then(referrer => {
+  return Promise.all([
+    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+      .then(promiseResults => {
+        const clientId = promiseResults[0];
         const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
@@ -228,6 +235,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, clientId, nodeOrDoc),
+          'ga_cid': win.gaGlobal.cid || null,
+          'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
           'biw': viewportRect.width,
           'bih': viewportRect.height,
@@ -249,10 +258,10 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
-          null : win.location.href,
-          'ref': referrer,
+            null : win.location.href,
+          'ref': promiseResults[1] || null,
         };
-      }));
+      });
 }
 
 /**
@@ -266,7 +275,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
+  a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
@@ -424,7 +433,7 @@ export function additionalDimensions(win, viewportSize) {
     outerHeight,
     innerWidth,
     innerHeight].join();
-};
+}
 
 /**
  * Returns amp-analytics config for a new CSI trigger.
@@ -441,7 +450,7 @@ function csiTrigger(on, params) {
       // sampleOn spec so that the hash is orthogonal to any other sampling in
       // amp.
       'sampleOn': 'a4a-csi-${pageViewId}',
-      'threshold': 1,  // 1% sample
+      'threshold': 1, // 1% sample
     },
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
@@ -610,7 +619,7 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  qqid, isVerifiedAmpCreative, deltaTime, initTime) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
@@ -658,7 +667,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
 export function getEnclosingContainerTypes(adElement) {
   const containerTypeSet = {};
   for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
+    el && counter < 20; el = el.parentElement, counter++) {
     const tagName = el.tagName.toUpperCase();
     if (ValidAdContainerTypes[tagName]) {
       containerTypeSet[ValidAdContainerTypes[tagName]] = true;
@@ -725,7 +734,7 @@ export function getIdentityToken(win, nodeOrDoc) {
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
       executeIdentityTokenFetch(win, nodeOrDoc);
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
-};
+}
 
 /**
  * @param {!Window} win
@@ -736,7 +745,7 @@ export function getIdentityToken(win, nodeOrDoc) {
  * @return {!Promise<!IdentityToken>}
  */
 function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
-    domain = undefined, startTime = Date.now()) {
+  domain = undefined, startTime = Date.now()) {
   const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',
@@ -792,7 +801,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   const canonical =
     parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
-};
+}
 
 /**
  * Returns whether we are running on the AMP CDN.
@@ -803,4 +812,20 @@ export function isCdnProxy(win) {
   const googleCdnProxyRegex =
     /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return googleCdnProxyRegex.test(win.location.origin);
+}
+
+/**
+ * Populates the fields of the given Nameframe experiment config object.
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
+ * @param {!NameframeExperimentConfig} nameframeConfig
+ */
+export function setNameframeExperimentConfigs(headers, nameframeConfig) {
+  const nameframeExperimentHeader = headers.get('amp-nameframe-exp');
+  if (nameframeExperimentHeader) {
+    nameframeExperimentHeader.split(';').forEach(config => {
+      if (config == 'instantLoad' || config == 'writeInBody') {
+        nameframeConfig[config] = true;
+      }
+    });
+  }
 }

@@ -15,11 +15,12 @@
  */
 
 import {Observable} from '../../observable';
-import {layoutRectLtwh} from '../../layout-rect';
-import {dev} from '../../log';
 import {Services} from '../../services';
-import {px, setStyle} from '../../style';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {dev} from '../../log';
+import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
+import {px, setStyle} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -69,6 +70,9 @@ export class ViewportBindingNatural_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -131,12 +135,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   disableScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.add(
         'i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.remove(
         'i-amphtml-scroll-disabled');
   }
@@ -164,7 +170,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    const pageScrollTop = this.getScrollingElement_()./*OK*/scrollTop ||
+    const pageScrollTop = this.getScrollingElement()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
     const host = this.ampdoc.getRootNode().host;
     return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
@@ -179,12 +185,12 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollWidth() {
-    return this.getScrollingElement_()./*OK*/scrollWidth;
+    return this.getScrollingElement()./*OK*/scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.getScrollingElement_()./*OK*/scrollHeight;
+    return this.getScrollingElement()./*OK*/scrollHeight;
   }
 
   /** @override */
@@ -201,13 +207,17 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const scrollTop = opt_scrollTop != undefined
-        ? opt_scrollTop
-        : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-        ? opt_scrollLeft
-        : this.getScrollLeft();
     const b = el./*OK*/getBoundingClientRect();
+    if (this.useLayers_) {
+      return layoutRectLtwh(b.left, b.top, b.width, b.height);
+    }
+
+    const scrollTop = opt_scrollTop != undefined
+      ? opt_scrollTop
+      : this.getScrollTop();
+    const scrollLeft = opt_scrollLeft != undefined
+      ? opt_scrollLeft
+      : this.getScrollLeft();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -221,14 +231,11 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   setScrollTop(scrollTop) {
-    this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
+    this.getScrollingElement()./*OK*/scrollTop = scrollTop;
   }
 
-  /**
-   * @return {!Element}
-   * @private
-   */
-  getScrollingElement_() {
+  /** @override */
+  getScrollingElement() {
     const doc = this.win.document;
     if (doc./*OK*/scrollingElement) {
       return doc./*OK*/scrollingElement;

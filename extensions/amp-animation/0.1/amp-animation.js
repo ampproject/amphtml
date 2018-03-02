@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-import {Builder} from './web-animations';
 import {ActionTrust} from '../../../src/action-trust';
+import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
+import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
+import {WebAnimationService} from './web-animation-service';
 import {childElementByTag} from '../../../src/dom';
+import {clamp} from '../../../src/utils/math';
 import {getFriendlyIframeEmbedOptional}
-    from '../../../src/friendly-iframe-embed';
+  from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimations} from 'web-animations-js/web-animations.install';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
-import {isFiniteNumber} from '../../../src/types';
-import {clamp} from '../../../src/utils/math';
-import {WebAnimationService} from './web-animation-service';
 
 const TAG = 'amp-animation';
-const POLYFILLED = '__AMP_WA';
 
 
 export class AmpAnimation extends AMP.BaseElement {
@@ -450,16 +449,16 @@ export class AmpAnimation extends AMP.BaseElement {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
-        this.configJson_);
+      this.configJson_);
     const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
-        opt_args || null);
+      opt_args || null);
 
     // Ensure polyfill is installed.
-    ensurePolyfillInstalled(this.win);
+    installWebAnimationsIfNecessary(this.win);
 
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
-        ampdoc.whenReady();
+      ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
@@ -479,8 +478,8 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   getRootNode_() {
     return this.embed_ ?
-        this.embed_.win.document :
-        this.getAmpDoc().getRootNode();
+      this.embed_.win.document :
+      this.getAmpDoc().getRootNode();
   }
 
   /** @private */
@@ -501,15 +500,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-/**
- * @param {!Window} win
- */
-function ensurePolyfillInstalled(win) {
-  if (!win[POLYFILLED]) {
-    win[POLYFILLED] = true;
-    installWebAnimations(win);
-  }
-}
+
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);

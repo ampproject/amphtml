@@ -21,11 +21,11 @@ import {
 } from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Services} from '../../../../src/services';
-import {poll} from '../../../../testing/iframe';
 import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 
 
 describes.realWin('amp-iframe', {
@@ -86,7 +86,7 @@ describes.realWin('amp-iframe', {
     }
 
     function createAmpIframe(env, opt_attributes, opt_top, opt_height,
-        opt_translateY, opt_container) {
+      opt_translateY, opt_container) {
       const doc = env.win.document;
       env.win.innerHeight = opt_height;
       const attributes = opt_attributes || {

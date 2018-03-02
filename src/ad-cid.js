@@ -35,12 +35,15 @@ export function getAdCid(adElement) {
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc|!Node} ampDoc
- * @param {!string} clientIdScope
+ * @param {string} clientIdScope
  * @param {string=} opt_clientIdCookieName
+ * @param {number=} opt_timeout
  * @return {!Promise<string|undefined>} A promise for a CID or undefined.
  */
 export function getOrCreateAdCid(
-    ampDoc, clientIdScope, opt_clientIdCookieName) {
+  ampDoc, clientIdScope, opt_clientIdCookieName, opt_timeout) {
+  const timeout = isNaN(opt_timeout) || opt_timeout == null ?
+    1000 : opt_timeout;
   const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;
@@ -58,7 +61,7 @@ export function getOrCreateAdCid(
   // The CID should never be crucial for an ad. If it does not come within
   // 1 second, assume it will never arrive.
   return Services.timerFor(ampDoc.win)
-      .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
+      .timeoutPromise(timeout, cidPromise, 'cid timeout').catch(error => {
         // Timeout is not fatal.
         dev().warn('AD-CID', error);
         return undefined;

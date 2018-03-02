@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
+import * as log from '../../../../src/log';
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {variableServiceFor} from '../variables';
-import {
-  installUserNotificationManagerForTesting,
-} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {Services} from '../../../../src/services';
+import {cidServiceForDocForTesting} from
+  '../../../../src/service/cid-impl';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
+import {
+  installUserNotificationManagerForTesting,
+} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 import {map} from '../../../../src/utils/object';
-import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
-import * as log from '../../../../src/log';
+import {
+  newPerformanceResourceTiming,
+  newResourceTimingSpec,
+} from './test-resource-timing';
+import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -76,7 +81,7 @@ describes.realWin('amp-analytics', {
     resetServiceForTesting(win, 'xhr');
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
-        expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
+        expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
         } else {
@@ -184,11 +189,11 @@ describes.realWin('amp-analytics', {
       describe('analytics vendor: ' + vendor, function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
-              '. If this test fails update vendor-requests.json', () => {
+              '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                 Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
-            sandbox.stub(urlReplacements.getVariableSource(), 'get',
+            sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
 
@@ -207,60 +212,98 @@ describes.realWin('amp-analytics', {
 
             const variables = variableServiceFor(ampdoc.win);
             const encodeVars = variables.encodeVars;
-            sandbox.stub(variables, 'encodeVars', function(val, name) {
-              val = encodeVars.call(this, val, name);
-              if (val == '') {
-                return '$' + name;
-              }
-              return val;
-            });
+            sandbox.stub(variables, 'encodeVars').callsFake(
+                function(name, val) {
+                  val = encodeVars.call(this, name, val);
+                  if (val == '') {
+                    return '$' + name;
+                  }
+                  return val;
+                });
             analytics.createdCallback();
             analytics.buildCallback();
-            return analytics.layoutCallback().then(() => {
-              return analytics.handleEvent_({
-                request: name,
-              }, {
-                vars: Object.create(null),
-              }).then(urls => {
-                const url = urls[0];
-                const vendorData = VENDOR_REQUESTS[vendor];
-                if (!vendorData) {
-                  throw new Error('Add vendor ' + vendor +
-                      ' to vendor-requests.json');
-                }
-                const val = vendorData[name];
-                if (val == '<ignore for test>') {
-                  return;
-                }
-                if (val == null) {
-                  throw new Error('Define ' + vendor + '.' + name +
-                      ' in vendor-requests.json. Expected value: ' + url);
-                }
-                actualResults[vendor][name] = url;
-                // Write this out for easy copy pasting.
-                // top.document.documentElement.setAttribute('json',
-                //     JSON.stringify(actualResults, null, '  '));
-                expect(url).to.equal(val);
-              });
+            yield analytics.layoutCallback();
+
+            // Wait for event queue to clear and reset sendRequestSpy
+            // to avoid pageView pings.
+            yield macroTask();
+            sendRequestSpy.reset();
+
+
+            analytics.handleEvent_({
+              request: name,
+            }, {
+              vars: Object.create(null),
             });
+            yield macroTask();
+            expect(sendRequestSpy).to.be.calledOnce;
+            const url = sendRequestSpy.args[0][0];
+
+            expect(sendRequestSpy).to.be.calledOnce;
+            const vendorData = VENDOR_REQUESTS[vendor];
+            if (!vendorData) {
+              throw new Error('Add vendor ' + vendor +
+                  ' to vendor-requests.json');
+            }
+            const val = vendorData[name];
+            if (val == '<ignore for test>') {
+              return;
+            }
+            if (val == null) {
+              throw new Error('Define ' + vendor + '.' + name +
+                  ' in vendor-requests.json. Expected value: ' + url);
+            }
+            actualResults[vendor][name] = url;
+            // Write this out for easy copy pasting.
+            // top.document.documentElement.setAttribute('json',
+            //     JSON.stringify(actualResults, null, '  '));
+            expect(url).to.equal(val);
           });
         }
       });
     }
   });
 
-  it('preload script', function() {
+  it('does not unnecessarily preload iframe transport script', function() {
     const el = doc.createElement('amp-analytics');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
     analytics.buildCallback();
     analytics.preconnectCallback();
-    return Promise.resolve().then(() => {
-      const preloads = doc.querySelectorAll('link[rel=preload]');
-      expect(preloads).to.have.length(1);
-      expect(preloads[0]).to.have.property(
-          'href',
-          'http://localhost:9876/dist/iframe-transport-client-lib.js');
+    return analytics.layoutCallback().then(() => {
+      expect(preloadSpy).to.have.not.been.called;
+    });
+  });
+
+  it('preloads iframe transport script if relevant', function() {
+    const el = doc.createElement('amp-analytics');
+    el.setAttribute('type', 'foo');
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
+    analytics.predefinedConfig_['foo'] = {
+      'transport': {
+        'iframe': 'https://www.google.com',
+      },
+      'triggers': {
+        'sample_visibility_trigger': {
+          'on': 'visible',
+          'request': 'sample_visibility_request',
+        },
+      },
+      'requests': {
+        'sample_visibility_request': 'fake-request',
+      },
+    };
+    analytics.buildCallback();
+    analytics.preconnectCallback();
+    return analytics.layoutCallback().then(() => {
+      expect(preloadSpy.withArgs(
+          'http://localhost:9876/dist/iframe-transport-client-lib.js',
+          'script')).to.be.calledOnce;
     });
   });
 
@@ -298,7 +341,7 @@ describes.realWin('amp-analytics', {
     el.textContent = config;
     const whenFirstVisibleStub = sandbox.stub(
         viewer,
-        'whenFirstVisible', () => new Promise(function() {}));
+        'whenFirstVisible').callsFake(() => new Promise(function() {}));
     const analytics = new AmpAnalytics(el);
     el.getAmpDoc = () => ampdoc;
     analytics.buildCallback();
@@ -356,8 +399,10 @@ describes.realWin('amp-analytics', {
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
+    const spy = sandbox.spy(analytics, 'expandAndSendRequest_');
 
     return waitForNoSendRequest(analytics).then(() => {
+      expect(spy).to.have.not.been.called;
       expect(sendRequestSpy).to.have.not.been.called;
     });
   });
@@ -439,6 +484,34 @@ describes.realWin('amp-analytics', {
     });
   });
 
+  // TODO(lannka, #12476): Make this test work with sinon 4.0.
+  it.skip('fills internally provided trigger vars', function() {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'timer': 'https://e.com/start=${timerStart}&duration=${timerDuration}',
+        'visible': 'https://e.com/totalVisibleTime=${totalVisibleTime}',
+      },
+      'triggers': {
+        'timerTrigger': {
+          'on': 'timer',
+          'request': 'timer',
+          'timerSpec': {'interval': 1},
+        },
+        'visibility': {'on': 'visible', 'request': 'visible'},
+      },
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy).to.be.calledTwice;
+      const timerRequest = sendRequestSpy.args[0][0];
+      const visibleRequest = sendRequestSpy.args[1][0];
+      expect(visibleRequest).to.equal('https://e.com/totalVisibleTime=0');
+      expect(timerRequest).to.match(/duration=0/);
+      expect(timerRequest).to.not.match(/start=0/);
+      expect(timerRequest).to.match(/start=[0-9]+&duration/);
+    });
+  });
+
   describe('merges requests correctly', function() {
     it('inline and vendor both string', function() {
       const analytics = getAnalyticsTag({
@@ -461,7 +534,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag({
         'requests': {'foo': {
           'baseUrl': 'https://example.com/${bar}',
-          'maxDelay': 0,
+          'batchInterval': 0,
         }, 'bar': 'bar-i'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': 'xyz'});
@@ -471,7 +544,7 @@ describes.realWin('amp-analytics', {
             'foo': 'foo',
             'bar': {
               'baseUrl': 'bar-v',
-              'maxDelay': 2,
+              'batchInterval': 2,
             }},
         },
       };
@@ -479,11 +552,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-i',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-i',
-            'maxDelay': 2,
+            'batchInterval': 2,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -496,10 +569,10 @@ describes.realWin('amp-analytics', {
         'requests': {
           'foo': {
             'baseUrl': 'https://example.com/${bar}',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         },
         'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -509,7 +582,7 @@ describes.realWin('amp-analytics', {
           'requests': {
             'foo': {
               'baseUrl': 'foo',
-              'maxDelay': 5,
+              'batchInterval': 5,
             },
             'bar': {
               'baseUrl': 'bar-v',
@@ -520,11 +593,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-v',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-v',
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -551,7 +624,7 @@ describes.realWin('amp-analytics', {
 
     beforeEach(() => {
       errorSpy = sandbox.spy();
-      sandbox.stub(log, 'user', () => {
+      sandbox.stub(log, 'user').callsFake(() => {
         return {
           error: errorSpy,
           assert: () => {},
@@ -749,7 +822,7 @@ describes.realWin('amp-analytics', {
 
       const handlerSpy = sandbox.spy();
       analyticsGroup.addTrigger(
-        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
           handlerSpy);
       analyticsGroup.root_.getTrackerOptional('click')
           .clickObservable_.fire({target: el1});
@@ -857,7 +930,7 @@ describes.realWin('amp-analytics', {
         }]});
       const urlReplacements =
           Services.urlReplacementsForDoc(analytics.element);
-      sandbox.stub(urlReplacements.getVariableSource(), 'get',
+      sandbox.stub(urlReplacements.getVariableSource(), 'get').callsFake(
           function(name) {
             return {sync: param => {
               return '_' + name.toLowerCase() + '_' + param + '_';
@@ -1489,7 +1562,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {
@@ -1525,7 +1598,7 @@ describes.realWin('amp-analytics', {
         'data-consent-notification-id': 'amp-user-notification1',
       });
 
-      sandbox.stub(uidService, 'get', id => {
+      sandbox.stub(uidService, 'get').callsFake(id => {
         expect(id).to.equal('amp-user-notification1');
         return Promise.resolve();
       });
@@ -1544,7 +1617,7 @@ describes.realWin('amp-analytics', {
         'data-consent-notification-id': 'amp-user-notification1',
       });
 
-      sandbox.stub(uidService, 'get', id => {
+      sandbox.stub(uidService, 'get').callsFake(id => {
         expect(id).to.equal('amp-user-notification1');
         return Promise.reject();
       });
@@ -1594,7 +1667,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForNoSendRequest(analytics).then(() => {
-        expect(addStub).to.not.be.called;;
+        expect(addStub).to.not.be.called;
       });
     });
 
@@ -1643,8 +1716,8 @@ describes.realWin('amp-analytics', {
             'var2': 'test2',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1718,8 +1791,8 @@ describes.realWin('amp-analytics', {
             'var3': 'CLIENT_ID',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1818,7 +1891,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {
@@ -1841,6 +1914,91 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy).to.be.calledOnce;
         expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
       });
+    });
+  });
+
+  describe('resourceTiming', () => {
+    // NOTE: The following tests verify plumbing for resource timing variables.
+    // More tests for resource timing can be found in test-resource-timing.js.
+    const newConfig = function() {
+      return {
+        'requests': {
+          'pageview': 'https://ping.example.com/endpoint',
+        },
+        'triggers': [{
+          'on': 'ini-load',
+          'request': 'pageview',
+          'extraUrlParams': {
+            'rt': '${resourceTiming}',
+          },
+          'resourceTimingSpec': newResourceTimingSpec(),
+        }],
+      };
+    };
+
+    const runResourceTimingTest = function(entries, config, expectedPing) {
+      sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
+      });
+    };
+
+    it('should evaluate ${resourceTiming} to be empty by default', () => {
+      runResourceTimingTest(
+          [], newConfig(), 'https://ping.example.com/endpoint?rt=');
+    });
+
+    it('should capture multiple matching resources', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      runResourceTimingTest(
+          [entry1, entry2], newConfig(),
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar-script-100-500-7200~' +
+              'foo_bar-script-700-100-0');
+    });
+
+    it('should url encode variables', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      const config = newConfig();
+      const spec = config['triggers'][0]['resourceTimingSpec'];
+      spec['encoding']['entry'] = '${key}?${startTime},${duration}';
+      spec['encoding']['delim'] = ':';
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+    });
+
+
+    it('should ignore resourceTimingSpec outside of triggers', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const config = newConfig();
+      config['resourceTimingSpec'] =
+          config['triggers'][0]['resourceTimingSpec'];
+      delete config['triggers'][0]['resourceTimingSpec'];
+      runResourceTimingTest(
+          [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
+    });
+
+    it('should only report timings on ini-load', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const config = newConfig();
+      config['triggers'][0]['on'] = 'visible';
+      runResourceTimingTest(
+          [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });
 });

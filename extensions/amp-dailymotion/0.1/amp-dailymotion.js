@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {getData, listen} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {
-    parseQueryString,
-    addParamsToUrl,
-    addParamToUrl,
-} from '../../../src/url';
-import {
-  getDataParamsFromAttributes,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -108,7 +108,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -191,7 +191,7 @@ class AmpDailymotion extends AMP.BaseElement {
       return;
     }
     if (!getData(event) || !event.type || event.type != 'message') {
-      return;  // Event empty
+      return; // Event empty
     }
     const data = parseQueryString(/** @type {string} */ (getData(event)));
     if (data === undefined) {
@@ -217,7 +217,7 @@ class AmpDailymotion extends AMP.BaseElement {
       case DailymotionEvents.VOLUMECHANGE:
         if (this.playerState_ == DailymotionEvents.UNSTARTED
             || this.muted_ != (
-                data['volume'] == 0 || (data['muted'] == 'true'))) {
+              data['volume'] == 0 || (data['muted'] == 'true'))) {
           this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
           if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);

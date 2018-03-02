@@ -14,17 +14,17 @@
  * the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {dev, user} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
-import {WindowMessenger} from './window-messenger';
-import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/dom';
-import {parseUrl, parseQueryString} from '../../../src/url';
-import {TAG, WIDGET_TAG, NotificationPermission, StorageKeys} from './vars';
-import {WebPushWidgetVisibilities} from './amp-web-push-widget';
+import {NotificationPermission, StorageKeys, TAG, WIDGET_TAG} from './vars';
 import {Services} from '../../../src/services';
+import {WebPushWidgetVisibilities} from './amp-web-push-widget';
+import {WindowMessenger} from './window-messenger';
+import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent, openWindowDialog} from '../../../src/dom';
+import {getMode} from '../../../src/mode';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {parseQueryString, parseUrl} from '../../../src/url';
 
 /** @typedef {{
  *    isControllingFrame: boolean,
@@ -162,11 +162,11 @@ export class WebPushService {
               TAG,
               `Helper frame ${this.config_['helper-iframe-url']} ` +
             'DOM loaded. Connecting to the frame via postMessage()...'
-        );
+          );
           return this.frameMessenger_.connect(
               this.iframe_.getDomElement().contentWindow,
               parseUrl(this.config_['helper-iframe-url']).origin
-        );
+          );
         })
         .then(() => {
           if (this.isContinuingSubscriptionFromRedirect()) {
@@ -271,9 +271,9 @@ export class WebPushService {
             return replyPayload.result;
           } else {
             throw new Error(
-            `AMP page helper iframe query topic ${messageTopic} ` +
+                `AMP page helper iframe query topic ${messageTopic} ` +
               `and message ${message} failed with: ${replyPayload.error}`
-          );
+            );
           }
         });
   }
@@ -436,8 +436,10 @@ export class WebPushService {
    */
   setWidgetVisibilities(widgetCategoryName, isVisible) {
     const widgetDomElements = this.ampdoc
-      .getRootNode()
-      .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
+        .getRootNode()
+        .querySelectorAll(`${escapeCssSelectorIdent(WIDGET_TAG)}[visibility=${
+          escapeCssSelectorIdent(widgetCategoryName)
+        }]`);
     const invisibilityCssClassName = 'amp-invisible';
 
     for (let i = 0; i < widgetDomElements.length; i++) {
@@ -460,8 +462,10 @@ export class WebPushService {
    */
   doesWidgetCategoryMarkupExist_(widgetCategoryName) {
     const widgetDomElements = this.ampdoc
-      .getRootNode()
-      .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
+        .getRootNode()
+        .querySelectorAll(`${escapeCssSelectorIdent(WIDGET_TAG)}[visibility=${
+          escapeCssSelectorIdent(widgetCategoryName)
+        }]`);
 
     return widgetDomElements.length > 0;
   }
@@ -539,7 +543,7 @@ export class WebPushService {
           */
             return this.getCanonicalFrameStorageValue_(
                 StorageKeys.NOTIFICATION_PERMISSION
-          );
+            );
           } else {
           /*
             The site is running our initial AMP web push release and the helper
@@ -564,7 +568,7 @@ export class WebPushService {
               this.doesWidgetCategoryMarkupExist_(
                   WebPushWidgetVisibilities.BLOCKED
               )
-          ) {
+            ) {
               this.updateWidgetVisibilitiesBlocked_();
             } else {
               this.updateWidgetVisibilitiesUnsubscribed_();
@@ -578,7 +582,7 @@ export class WebPushService {
                     this.updateWidgetVisibilitiesUnsubscribed_();
                   }
                 }
-          );
+            );
           }
         });
   }
@@ -606,15 +610,15 @@ export class WebPushService {
                 this.setWidgetVisibilities(
                     WebPushWidgetVisibilities.UNSUBSCRIBED,
                     false
-              );
+                );
                 this.setWidgetVisibilities(
                     WebPushWidgetVisibilities.SUBSCRIBED,
                     true
-              );
+                );
                 this.setWidgetVisibilities(
                     WebPushWidgetVisibilities.BLOCKED,
                     false
-              );
+                );
               } else {
                 this.updateWidgetVisibilitiesUnsubscribed_();
               }
@@ -627,7 +631,7 @@ export class WebPushService {
               throw user().createError(
                   'The controlling service worker replied to amp-web-push ' +
                 'with an unexpected value.'
-            );
+              );
           }
         }),
         'The controlling service worker does not support amp-web-push.'
@@ -917,7 +921,7 @@ export class WebPushService {
         '',
         this.removePermissionPopupUrlFragmentFromUrl(
             this.ampdoc.win.location.href
-      )
+        )
     );
 
     this.queryNotificationPermission().then(permission => {

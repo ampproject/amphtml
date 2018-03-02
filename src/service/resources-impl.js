@@ -22,20 +22,20 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {areMarginsChanged} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {expandLayoutRect} from '../layout-rect';
-import {installInputService} from '../input';
-import {loadPromise} from '../event-helper';
-import {registerServiceBuilderForDoc} from '../service';
-import {isArray} from '../types';
+import {computedStyle} from '../style';
 import {dev} from '../log';
-import {dict} from '../utils/object';
-import {reportError} from '../error';
+import {dict, hasOwn} from '../utils/object';
+import {expandLayoutRect} from '../layout-rect';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
-import {areMarginsChanged} from '../layout-rect';
-import {computedStyle} from '../style';
+import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {isArray} from '../types';
+import {isExperimentOn} from '../experiments';
+import {loadPromise} from '../event-helper';
+import {registerServiceBuilderForDoc} from '../service';
+import {reportError} from '../error';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -47,7 +47,7 @@ const PRIORITY_BASE_ = 10;
 const PRIORITY_PENALTY_TIME_ = 1000;
 const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
-const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
+const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
 const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
@@ -143,7 +143,11 @@ export class Resources {
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
-    /** @private {number} */
+    /**
+     * TODO(jridgewell): relayoutTop should be replaced with parent layer
+     * dirtying.
+     * @private {number}
+     */
     this.relayoutTop_ = -1;
 
     /** @private {time} */
@@ -167,10 +171,19 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef):number} */
-    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
-   /**
+    let boundScorer;
+    if (this.useLayers_) {
+      boundScorer = this.calcTaskScoreLayers_.bind(this);
+    } else {
+      boundScorer = this.calcTaskScore_.bind(this);
+    }
+    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    this.boundTaskScorer_ = boundScorer;
+
+    /**
     * @private {!Array<!ChangeSizeRequestDef>}
     */
     this.requestsChangeSize_ = [];
@@ -204,7 +217,7 @@ export class Resources {
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
-      this.viewer_.getVisibilityState()
+        this.viewer_.getVisibilityState()
     );
     this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
@@ -221,6 +234,20 @@ export class Resources {
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
     });
+
+    if (this.useLayers_) {
+      const layers = Services.layersForDoc(this.ampdoc);
+
+      /** @private @const {!./layers-impl.LayoutLayers} */
+      this.layers_ = layers;
+
+      layers.onScroll((/* elements */) => {
+        this.schedulePass();
+      });
+
+      /** @private @const {function(number, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
+      this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
+    }
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
@@ -309,7 +336,7 @@ export class Resources {
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
-   * @param {!function(!Resource):boolean} filterFn
+   * @param {function(!Resource):boolean} filterFn
    * @return {!Promise<!Array<!Resource>>}
    */
   getMeasuredResources(hostWin, filterFn) {
@@ -355,7 +382,6 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
-    installInputService(this.win);
     const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
@@ -523,7 +549,7 @@ export class Resources {
    * @private
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
-      scheduleWhenBuilt = true) {
+    scheduleWhenBuilt = true) {
     const buildingEnabled = (this.isRuntimeOn_ || this.isBuildOn_);
 
     // During prerender mode, don't build elements that aren't allowed to be
@@ -907,6 +933,7 @@ export class Resources {
       mutate: () => {
         mutator();
 
+        // TODO(jridgewell): Mark parent layer as dirty, skip the rest of this.
         // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -959,7 +986,7 @@ export class Resources {
     });
   }
 
-    /**
+  /**
    * Collapses the element: ensures that it's `display:none`, notifies its
    * owner and updates the layout box.
    * @param {!Element} element
@@ -968,6 +995,7 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
+      // TODO setRelayoutTop_ is being deprecated.
       this.setRelayoutTop_(box.top);
     }
     resource.completeCollapse();
@@ -1100,6 +1128,15 @@ export class Resources {
    * @private
    */
   mutateWork_() {
+    if (this.useLayers_) {
+      this.mutateWorkViaLayers_();
+    } else {
+      this.mutateWorkViaResources_();
+    }
+  }
+
+  /** @private */
+  mutateWorkViaResources_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
     // in the active viewport. When not in prerendering, we also consider the
@@ -1132,6 +1169,8 @@ export class Resources {
       }
       this.maybeChangeHeight_ = true;
     }
+
+    // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
@@ -1270,7 +1309,7 @@ export class Resources {
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth, request.marginChange ?
-                      request.marginChange.newMargins : undefined);
+                    request.marginChange.newMargins : undefined);
               if (request.callback) {
                 request.callback(/* hasSizeChanged */true);
               }
@@ -1292,11 +1331,22 @@ export class Resources {
   }
 
   /**
+   * TODO(jridgewell): This will be Layer's bread and butter for speed
+   * optimizations.
+   * @private
+   */
+  mutateWorkViaLayers_() {
+    this.mutateWorkViaResources_();
+  }
+
+  /**
    * @param {number} relayoutTop
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
+    if (this.useLayers_) {
+      this.relayoutAll_ = true;
+    } else if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;
     } else {
       this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
@@ -1353,8 +1403,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
-        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
-            /* scheduleWhenBuilt */ false);
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll ||
               !r.hasBeenMeasured() ||
@@ -1465,7 +1514,7 @@ export class Resources {
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
-          i++) {
+        i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
             !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
@@ -1477,7 +1526,7 @@ export class Resources {
       // Phase 6: Idle layout: layout more if we are otherwise not doing much.
       // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
       for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
-          i++) {
+        i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
             !r.hasOwner() && r.isDisplayed()) {
@@ -1505,12 +1554,13 @@ export class Resources {
     const now = Date.now();
 
     let timeout = -1;
-    let task = this.queue_.peek(this.boundTaskScorer_);
+    const state = Object.create(null);
+    let task = this.queue_.peek(this.boundTaskScorer_, state);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev().fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
-          'score', this.boundTaskScorer_(task),
+          'score', this.boundTaskScorer_(task, state),
           'timeout', timeout);
       if (timeout > 16) {
         break;
@@ -1542,7 +1592,7 @@ export class Resources {
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_);
+      task = this.queue_.peek(this.boundTaskScorer_, state);
       timeout = -1;
     }
 
@@ -1582,10 +1632,15 @@ export class Resources {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
+   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task) {
+  calcTaskScore_(task, unusedCache) {
+    // TODO(jridgewell): these should be taking into account the active
+    // scroller, which may not be the root scroller. Maybe a weighted average
+    // of "scroller scrolls necessary" to see the element.
+    // Demo at https://output.jsbin.com/hicigom/quiet
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);
@@ -1594,6 +1649,51 @@ export class Resources {
     }
     posPriority = Math.abs(posPriority);
     return task.priority * PRIORITY_BASE_ + posPriority;
+  }
+
+  /**
+   * Calculates the task's score using the Layers service. A task with the
+   * lowest score will be dequeued from the queue the first.
+   *
+   * Refer to {@link calcTaskScore_} for basic explanation.
+   *
+   * Viewport priority is a function of the distance of the element from the
+   * currently visible viewports. The elements in the visible viewport get
+   * higher priority and further away from the viewport get lower priority.
+   *
+   * @param {!./task-queue.TaskDef} task
+   * @param {!Object<string, *>} cache
+   * @return {number}
+   * @private
+   */
+  calcTaskScoreLayers_(task, cache) {
+    const layerScore = this.layers_.iterateAncestry(task.resource.element,
+        this.boundCalcLayoutScore_, cache);
+    return task.priority * PRIORITY_BASE_ + layerScore;
+  }
+
+  /**
+   * Calculates the layout's distance from viewport score, using an iterative
+   * (and cacheable) calculation based on tree depth and distance.
+   *
+   * @param {number} currentScore
+   * @param {!./layers-impl.LayoutElement} layout
+   * @param {number} depth
+   * @param {!Object<string, *>} cache
+   * @return {number}
+   */
+  calcLayoutScore_(currentScore, layout, depth, cache) {
+    const id = layout.getId();
+    if (hasOwn(cache, id)) {
+      return dev().assertNumber(cache[id]);
+    }
+
+    const score = currentScore || 0;
+    const depthPenalty = 1 + (depth / 10);
+    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
+    const distance = layout.getHorizontalDistanceFromParent() +
+        layout.getVerticalDistanceFromParent();
+    return cache[id] = score + nonActivePenalty * depthPenalty * distance;
   }
 
   /**
@@ -1678,7 +1778,7 @@ export class Resources {
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, newMargins, force,
-      opt_callback) {
+    opt_callback) {
     if (resource.hasBeenMeasured() && !newMargins) {
       this.completeScheduleChangeSize_(resource, newHeight, newWidth,
           undefined, force, opt_callback);
@@ -1728,7 +1828,7 @@ export class Resources {
    * @private
    */
   completeScheduleChangeSize_(resource, newHeight, newWidth, marginChange,
-      force, opt_callback) {
+    force, opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getPageLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
@@ -1829,11 +1929,11 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
-      opt_forceOutsideViewport) {
+    opt_forceOutsideViewport) {
     dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
-        'Not ready for layout: %s (%s)',
-        resource.debugid, resource.getState());
+    'Not ready for layout: %s (%s)',
+    resource.debugid, resource.getState());
     const forceOutsideViewport = opt_forceOutsideViewport || false;
     if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
       return;
@@ -1901,12 +2001,12 @@ export class Resources {
    * @private
    */
   schedule_(
-      resource,
-      localId,
-      priorityOffset,
-      parentPriority,
-      forceOutsideViewport,
-      callback) {
+    resource,
+    localId,
+    priorityOffset,
+    parentPriority,
+    forceOutsideViewport,
+    callback) {
     const taskId = resource.getTaskId(localId);
 
     const task = {
@@ -1943,7 +2043,7 @@ export class Resources {
    * @private
    */
   updateInViewportForSubresources_(parentResource, subElements,
-      inLocalViewport) {
+    inLocalViewport) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.setInViewport(inViewport);
@@ -2126,7 +2226,7 @@ export class Resources {
  */
 function elements_(elements) {
   return /** @type {!Array<!Element>} */ (
-      isArray(elements) ? elements : [elements]);
+    isArray(elements) ? elements : [elements]);
 }
 
 
@@ -2146,4 +2246,4 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
-};
+}

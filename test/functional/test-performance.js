@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 
 describes.realWin('performance', {amp: true}, env => {
@@ -32,9 +32,14 @@ describes.realWin('performance', {amp: true}, env => {
     win = env.win;
     sandbox = env.sandbox;
     ampdoc = env.ampdoc;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   describe('when viewer is not ready', () => {
@@ -268,7 +273,8 @@ describes.realWin('performance', {amp: true}, env => {
       beforeEach(() => {
         tickDeltaStub = sandbox.stub(perf, 'tickDelta');
         firstVisibleTime = null;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => firstVisibleTime);
       });
 
       it('should always be zero before viewer is set', () => {
@@ -460,13 +466,13 @@ describes.realWin('performance', {amp: true}, env => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        perf.win,
-        sinon.match(arg =>
-                arg.left == 0 &&
+            perf.win,
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == perf.win.innerWidth &&
                 arg.height == perf.win.innerHeight),
-        /* inPrerender */ true)
+            /* inPrerender */ true)
         .returns(Promise.resolve([res1, res2]))
         .once();
 

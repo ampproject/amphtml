@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {startsWith, endsWith} from './string';
-import {user} from './log';
+import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
-import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {urls} from './config';
+import {user} from './log';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -117,7 +117,7 @@ export function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: null,  // Set below.
+    origin: null, // Set below.
   });
 
   // Some IE11 specific polyfills.
@@ -163,11 +163,11 @@ export function appendEncodedParamStringToUrl(url, paramString,
   const mainAndQuery = mainAndFragment[0].split('?', 2);
 
   let newUrl = mainAndQuery[0] + (
-      mainAndQuery[1]
-          ? (opt_addToFront
-              ? `?${paramString}&${mainAndQuery[1]}`
-              : `?${mainAndQuery[1]}&${paramString}`)
-          : `?${paramString}`);
+    mainAndQuery[1]
+      ? (opt_addToFront
+        ? `?${paramString}&${mainAndQuery[1]}`
+        : `?${mainAndQuery[1]}&${paramString}`)
+      : `?${paramString}`);
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
@@ -247,7 +247,7 @@ export function isSecureUrl(url) {
  * @return {string}
  */
 export function assertHttpsUrl(
-    urlString, elementContext, sourceName = 'source') {
+  urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
   // (erwinm, #4560): type cast necessary until #4560 is fixed.
@@ -368,7 +368,7 @@ function removeAmpJsParams(urlSearch) {
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
       .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
-      .replace(/^[?&]/, '');  // Removes first ? or &.
+      .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';
 }
 
@@ -398,8 +398,8 @@ export function getSourceUrl(url) {
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
-      ? 'https://' + decodeURIComponent(path[3])
-      : 'http://' + decodeURIComponent(domainOrHttpsSignal);
+    ? 'https://' + decodeURIComponent(path[3])
+    : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
   user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);

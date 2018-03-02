@@ -29,7 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>All. This element is hidden.</td>
+    <td>`nodisplay` or unspecified. The element is not presentational.</td>
   </tr>
 </table>
 
@@ -56,10 +56,10 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
       "vars": {
         "_clickArea": {
-          "defaultValue": "headline",
+          "defaultValue": "headline"
         }
       }
-    }
+    },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
       "filters": ["3sClick", "borderProtection"]
@@ -68,7 +68,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/bannetons",
       "trackingUrls": [
         "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
-        "https://tracker.adnetwork.example.com/?url=example.com",
+        "https://tracker.adnetwork.example.com/?url=example.com"
       ],
       "filters": ["3sClick", "borderProtection"]
     }
@@ -258,7 +258,13 @@ Custom variables must begin with an underscore. Define variables in the
 config alongside the navigation target. Variables should have a `"defaultValue"`
 property. The default value can be overridden in the `exit` action invocation:
 
-Variable values can also come from 3P analytics.
+Variable values can also come from 3P analytics. Use
+`<amp-analytics type='example-3p-vendor'>` to install a 3P analytics
+vendor iframe and reference it in the variable definition with the
+`"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
+`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
+is the name of the vendor and `collected-data` is a key in the message from the 
+vendor iframe. There must not be a space after the comma.
 
 Example:
 ```html
@@ -273,8 +279,7 @@ Example:
         },
         "_3pAnalytics": {
           "defaultValue": "no_response",
-          "vendorAnalyticsSource": "VendorXYZ",
-          "vendorAnalyticsResponseKey": "findings"
+          "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
          }
       }
     }

@@ -17,7 +17,6 @@
 import {
   fontStylesheetTimeout,
 } from '../../src/font-stylesheet-timeout';
-
 import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('font-stylesheet-timeout', {
@@ -68,6 +67,8 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"]')).to.have.length(1);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]')).to.equal(link);
+    expect(win.document.querySelectorAll(
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
   });
 
   it('should time out if style sheets do not load', () => {
@@ -81,7 +82,7 @@ describes.realWin('font-stylesheet-timeout', {
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     const after = win.document.querySelector(
         'link[rel="stylesheet"]');
-    expect(after).to.not.equal(link);
+    expect(after).to.equal(link);
     expect(after.href).to.equal(link.href);
     expect(after.media).to.equal('not-matching');
     after.href = immediatelyLoadingHref('/* make-it-load */');
@@ -106,7 +107,7 @@ describes.realWin('font-stylesheet-timeout', {
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(1);
     expect(win.document.querySelector(
-        'link[rel="stylesheet"]')).to.not.equal(link);
+        'link[rel="stylesheet"]')).to.equal(link);
     expect(win.document.querySelector(
         'link[rel="stylesheet"]').href).to.equal(link.href);
   });
@@ -124,12 +125,10 @@ describes.realWin('font-stylesheet-timeout', {
     clock.tick(1);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(2);
-    expect(win.document.querySelector(
-        'link[rel="stylesheet"]')).to.not.equal(link0);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"]')[0].href).to.equal(link0.href);
+        'link[rel="stylesheet"][i-amphtml-timeout]')[0]).to.equal(link0);
     expect(win.document.querySelectorAll(
-        'link[rel="stylesheet"]')[1].href).to.equal(link1.href);
+        'link[rel="stylesheet"][i-amphtml-timeout]')[1]).to.equal(link1);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"]')[2]).to.equal(cdnLink);
   });

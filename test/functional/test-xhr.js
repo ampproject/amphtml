@@ -15,16 +15,16 @@
  */
 
 import * as sinon from 'sinon';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  xhrServiceForTesting,
-  fetchPolyfill,
   FetchResponse,
   assertSuccess,
+  fetchPolyfill,
+  xhrServiceForTesting,
 } from '../../src/service/xhr-impl';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
+import {getCookie} from '../../src/cookies';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
@@ -164,15 +164,15 @@ describe.configure().skipSafari().run('XHR', function() {
         it('should inject source origin query parameter', () => {
           xhr.fetchJson('/get?k=v1#h1');
           return xhrCreated.then(xhr =>
-              expect(noOrigin(xhr.url)).to.equal(
-                  '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1'));
+            expect(noOrigin(xhr.url)).to.equal(
+                '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1'));
         });
 
         it('should inject source origin query parameter w/o query', () => {
           xhr.fetchJson('/get');
           return xhrCreated.then(xhr =>
-              expect(noOrigin(xhr.url)).to.equal(
-                  '/get?__amp_source_origin=https%3A%2F%2Facme.com'));
+            expect(noOrigin(xhr.url)).to.equal(
+                '/get?__amp_source_origin=https%3A%2F%2Facme.com'));
         });
 
         it('should defend against invalid source origin query ' +
@@ -468,7 +468,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.be.undefined;
-          expect(e.retriable === true).to.be.false;
+          expect(e.retriable).to.not.equal(true);
         });
       });
 
@@ -486,7 +486,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 
@@ -504,7 +504,7 @@ describe.configure().skipSafari().run('XHR', function() {
                 '<html></html>'));
         return promise.catch(e => {
           expect(e.retriable).to.exist;
-          expect(e.retriable === true).to.be.true;
+          expect(e.retriable).to.be.true;
         });
       });
 
@@ -537,7 +537,7 @@ describe.configure().skipSafari().run('XHR', function() {
           status: 200,
           responseText: TEST_TEXT,
         };
-        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
             () => Promise.resolve(new FetchResponse(mockXhr)));
       });
 
@@ -569,15 +569,15 @@ describe.configure().skipSafari().run('XHR', function() {
           setupMockXhr();
           const promise = xhr.fetch(
               '/index.html').then(response => {
-                expect(response.headers.get('X-foo-header')).to
-                    .equal('foo data');
-                expect(response.headers.get('X-bar-header')).to
-                    .equal('bar data');
-                response.arrayBuffer().then(
-                    bytes => utf8FromArrayBuffer(bytes)).then(text => {
-                      expect(text).to.equal(creative);
-                    });
-              });
+            expect(response.headers.get('X-foo-header')).to
+                .equal('foo data');
+            expect(response.headers.get('X-bar-header')).to
+                .equal('bar data');
+            response.arrayBuffer().then(
+                bytes => utf8FromArrayBuffer(bytes)).then(text => {
+              expect(text).to.equal(creative);
+            });
+          });
           xhrCreated.then(
               xhr => xhr.respond(
                   200, {
@@ -620,7 +620,7 @@ describe.configure().skipSafari().run('XHR', function() {
               xhr => expect(xhr.requestHeaders).to.deep.equal({
                 'Accept': 'application/json',
                 'Content-Type': 'text/plain;charset=utf-8',
-                'Other': 'another',  // Not removed when other headers set.
+                'Other': 'another', // Not removed when other headers set.
               }));
         });
       }
@@ -803,7 +803,7 @@ describe.configure().skipSafari().run('XHR', function() {
           href: `${origin}/path`,
         },
         fetch: () =>
-            Promise.resolve(new Response('', getDefaultResponseOptions())),
+          Promise.resolve(new Response('', getDefaultResponseOptions())),
       };
     });
 
@@ -873,8 +873,8 @@ describe.configure().skipSafari().run('XHR', function() {
 
       return xhr.fetch('https://cdn.ampproject.org')
           .then(() =>
-              expect(sendMessageStub).to.have.been.calledWithMatch(
-                  'xhr', sinon.match.any));
+            expect(sendMessageStub).to.have.been.calledWithMatch(
+                'xhr', sinon.match.any));
     });
 
     it('should post correct structurally-cloneable GET request', () => {
@@ -882,18 +882,18 @@ describe.configure().skipSafari().run('XHR', function() {
 
       return xhr.fetch('https://cdn.ampproject.org')
           .then(() =>
-              expect(sendMessageStub).to.have.been.calledWithMatch(
-                  sinon.match.any, {
-                    originalRequest: {
-                      input: 'https://cdn.ampproject.org' +
+            expect(sendMessageStub).to.have.been.calledWithMatch(
+                sinon.match.any, {
+                  originalRequest: {
+                    input: 'https://cdn.ampproject.org' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
-                      init: {
-                        headers: {},
-                        method: 'GET',
-                        requireAmpResponseSourceOrigin: true,
-                      },
+                    init: {
+                      headers: {},
+                      method: 'GET',
+                      requireAmpResponseSourceOrigin: true,
                     },
-                  }));
+                  },
+                }));
     });
 
     it('should post correct structurally-cloneable JSON request', () => {
@@ -906,22 +906,22 @@ describe.configure().skipSafari().run('XHR', function() {
             body: JSON.stringify({a: 42, b: [24, true]}),
           })
           .then(() =>
-              expect(sendMessageStub).to.have.been.calledWithMatch(
-                  sinon.match.any, {
-                    originalRequest: {
-                      input: 'https://cdn.ampproject.org' +
+            expect(sendMessageStub).to.have.been.calledWithMatch(
+                sinon.match.any, {
+                  originalRequest: {
+                    input: 'https://cdn.ampproject.org' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
-                      init: {
-                        headers: {
-                          'Content-Type':
+                    init: {
+                      headers: {
+                        'Content-Type':
                               'application/json;charset=utf-8',
-                        },
-                        body: '{"a":42,"b":[24,true]}',
-                        method: 'POST',
-                        requireAmpResponseSourceOrigin: true,
                       },
+                      body: '{"a":42,"b":[24,true]}',
+                      method: 'POST',
+                      requireAmpResponseSourceOrigin: true,
                     },
-                  }));
+                  },
+                }));
     });
 
     it('should post correct structurally-cloneable FormData request', () => {
@@ -938,22 +938,22 @@ describe.configure().skipSafari().run('XHR', function() {
             body: formData,
           })
           .then(() =>
-              expect(sendMessageStub).to.have.been.calledWithMatch(
-                  sinon.match.any, {
-                    originalRequest: {
-                      input: 'https://cdn.ampproject.org' +
+            expect(sendMessageStub).to.have.been.calledWithMatch(
+                sinon.match.any, {
+                  originalRequest: {
+                    input: 'https://cdn.ampproject.org' +
                           '?__amp_source_origin=https%3A%2F%2Facme.com',
-                      init: {
-                        headers: {
-                          'Content-Type':
+                    init: {
+                      headers: {
+                        'Content-Type':
                               'multipart/form-data;charset=utf-8',
-                        },
-                        body: [['a', '42'], ['b', '24'], ['b', 'true']],
-                        method: 'POST',
-                        requireAmpResponseSourceOrigin: true,
                       },
+                      body: [['a', '42'], ['b', '24'], ['b', 'true']],
+                      method: 'POST',
+                      requireAmpResponseSourceOrigin: true,
                     },
-                  }));
+                  },
+                }));
     });
 
     it('should be rejected when response undefined', () => {

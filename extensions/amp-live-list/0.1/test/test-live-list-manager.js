@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
+import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
@@ -44,7 +44,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     viewer = Services.viewerForDoc(ampdoc);
     manager = liveListManagerForDoc(ampdoc);
     liveList = getLiveList({'data-sort-time': '1111'});
-    sandbox.stub(liveList, 'getInterval', () => 5000);
+    sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
   });
 
   function setUpMockXhrs(sandbox) {
@@ -158,7 +158,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should get the amp_latest_update_time on doc ready', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
     const liveList2 = getLiveList({'data-sort-time': '2222'}, 'id-2');
     liveList.buildCallback();
@@ -320,7 +320,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should back off on transient 415 response', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
     liveList.buildCallback();
@@ -358,7 +358,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should back off on transient 500 response', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
     liveList.buildCallback();
@@ -396,7 +396,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should recover after transient 415 response', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     sandbox.stub(viewer, 'isVisible').returns(true);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
@@ -475,7 +475,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should fetch with url', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     sandbox.stub(viewer, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     ready();
@@ -514,7 +514,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should add amp_latest_update_time on requests', () => {
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     sandbox.stub(viewer, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     sandbox.stub(liveList, 'update').returns(2500);

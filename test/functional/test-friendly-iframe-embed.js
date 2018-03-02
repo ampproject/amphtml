@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -23,13 +24,12 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
+import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {
@@ -253,9 +253,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 0 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
                 arg.height == iframe.contentWindow.innerHeight))
@@ -271,7 +271,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -287,9 +287,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 10 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
                 arg.height == 200))
@@ -306,7 +306,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -725,7 +725,7 @@ describe('friendly-iframe-embed', () => {
       };
       iframe = document.createElement('iframe');
 
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
         right: x + w,
         left: x,
         top: y,
@@ -739,9 +739,9 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       }, Promise.resolve());
 
-      sandbox.stub(fie, 'getVsync', () => vsyncMock);
-      sandbox.stub(fie, 'getResources', () => resourcesMock);
-      sandbox.stub(fie, 'win', win);
+      sandbox.stub(fie, 'getVsync').callsFake(() => vsyncMock);
+      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
+      sandbox.stub(fie, 'win').callsFake(win);
     });
 
     it('should resize body and fixed container when entering', function* () {
@@ -749,7 +749,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
 
@@ -780,7 +780,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();

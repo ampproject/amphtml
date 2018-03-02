@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -48,10 +48,10 @@ export const PlacementState = {
  * @enum {number}
  */
 const Position = {
-  BEFORE: 1,  // Placement should be the sibling before the anchor element.
-  FIRST_CHILD: 2,  // Placement should be the first child of the anchor element.
-  LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
-  AFTER: 4,  // Placement should be the sibling after the anchor element.
+  BEFORE: 1, // Placement should be the sibling before the anchor element.
+  FIRST_CHILD: 2, // Placement should be the first child of the anchor element.
+  LAST_CHILD: 3, // Placement should be the last child of the anchor element.
+  AFTER: 4, // Placement should be the sibling after the anchor element.
 };
 
 /**
@@ -65,7 +65,7 @@ const BLACKLISTED_ANCESTOR_TAGS = [
 ];
 
 /**
- * @const {!Object<!Position, !function(!Element, !Element)>}
+ * @const {!Object<!Position, function(!Element, !Element)>}
  */
 const INJECTORS = {};
 INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
@@ -88,12 +88,12 @@ export class Placement {
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
-   * @param {!function(!Element, !Element)} injector
+   * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(ampdoc, resources, anchorElement, position, injector, attributes,
-      opt_margins) {
+    opt_margins) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -331,7 +331,7 @@ function getAnchorElements(rootElement, anchorObj) {
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
       position == Position.BEFORE || position == Position.AFTER ?
-          anchorElement.parentElement : anchorElement;
+        anchorElement.parentElement : anchorElement;
   if (!elementToCheckOrNull) {
     user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;

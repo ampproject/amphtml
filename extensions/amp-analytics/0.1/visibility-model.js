@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
+import {dev} from '../../../src/log';
 
 /**
  * This class implements visibility calculations based on the
@@ -50,6 +50,11 @@ export class VisibilityModel {
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
+    // Above, if visiblePercentageMax was not specified, assume 100%.
+    // Here, do allow 0% to be the value if that is what was specified.
+    if (String(spec['visiblePercentageMax']).trim() === '0') {
+      this.spec_.visiblePercentageMax = 0;
+    }
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -190,8 +195,6 @@ export class VisibilityModel {
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
-    // TODO(jonkeller): Investigate why dispose() can be called twice,
-    // necessitating this "if"
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.removeAll();
       this.onTriggerObservable_ = null;
@@ -213,7 +216,9 @@ export class VisibilityModel {
    * @param {function()} handler
    */
   onTriggerEvent(handler) {
-    this.onTriggerObservable_.add(handler);
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.add(handler);
+    }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
       handler();
@@ -234,7 +239,7 @@ export class VisibilityModel {
   /**
    * Sets that the model needs to wait on extra report ready promise
    * after all visibility conditions have been met to call report handler
-   * @param {!function():!Promise} callback
+   * @param {function():!Promise} callback
    */
   setReportReady(callback) {
     this.reportReady_ = false;
@@ -326,12 +331,8 @@ export class VisibilityModel {
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
         this.scheduledUpdateTimeoutId_ = setTimeout(() => {
-          this.update();
-          if (!this.eventResolver_) {
-            this.reset_();
-            this.setReady(true);
-          }
           this.scheduledUpdateTimeoutId_ = null;
+          this.update();
         }, timeToWait);
       }
     } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
@@ -348,11 +349,16 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
-    // TODO(jonkeller): Currently don't allow min=100%.
-    // One possible approach is:
-    // if (this.spec_.visiblePercentageMin == 1) {
-    //   return visibility == 1;
-    // }
+    // Special case: If visiblePercentageMin is 100%, then it doesn't make
+    // sense to do the usual (min, max] since that would never be true.
+    if (this.spec_.visiblePercentageMin == 1) {
+      return visibility == 1;
+    }
+    // Special case: If visiblePercentageMax is 0%, then we
+    // want to ping when the creative becomes not visible.
+    if (this.spec_.visiblePercentageMax == 0) {
+      return visibility == 0;
+    }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
   }
@@ -397,8 +403,8 @@ export class VisibilityModel {
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
           this.minVisiblePercentage_ > 0 ?
-          Math.min(this.minVisiblePercentage_, visibility) :
-          visibility;
+            Math.min(this.minVisiblePercentage_, visibility) :
+            visibility;
       this.maxVisiblePercentage_ =
           Math.max(this.maxVisiblePercentage_, visibility);
       this.lastVisibleTime_ = now;
@@ -413,7 +419,7 @@ export class VisibilityModel {
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
       this.totalVisibleTime_ += timeSinceLastUpdate;
-      this.continuousTime_ = 0;  // Clear only after max is calculated above.
+      this.continuousTime_ = 0; // Clear only after max is calculated above.
       this.lastVisibleTime_ = now;
     }
 

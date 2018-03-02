@@ -18,12 +18,12 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../../src/intersection-observer-polyfill';
+import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 
 class IntersectionObserverStub {
@@ -80,7 +80,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     clock.tick(1);
 
     viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getFirstVisibleTime', () => 1);
+    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
     viewport = win.services.viewport.obj;
     startVisibilityHandlerCount =
         viewer.visibilityObservable_.getHandlerCount();
@@ -105,7 +105,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
     expect(root.isBackgrounded()).to.be.true;
     expect(root.isBackgroundedAtStart()).to.be.true;
-    expect(root.children_).to.be.null;  // Don't take extra memory.
+    expect(root.children_).to.be.null; // Don't take extra memory.
 
     // Will be initialized lazily
     expect(root.intersectionObserver_).to.be.null;
@@ -131,7 +131,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should resolve root layout box', () => {
     const rootElement = win.document.documentElement;
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(0, 0, 101, 201);
       }
@@ -149,7 +149,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     win.AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
@@ -260,6 +260,38 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(1);
   });
 
+  it('creates model for 0 percent and 100 percent', () => {
+    let spec = {visiblePercentageThresholds: [[0, 0]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[100, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 0], [100, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(2);
+    root.dispose();
+    spec = {
+      visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]],
+    };
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(4);
+    root.dispose();
+  });
+
+  it('does not allow min==max, when they are neither 0 nor 100', () => {
+    let spec = {visiblePercentageThresholds: [[50, 50]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+  });
+
   it('should dispose everything', () => {
     const modelsDisposed = sandbox.spy();
     const modelsCalled = sandbox.spy();
@@ -338,10 +370,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(model.getVisibility_()).to.equal(0);
 
     // Trigger tick.
-    sandbox.stub(viewport, 'getRect', () => {
+    sandbox.stub(viewport, 'getRect').callsFake(() => {
       return layoutRectLtwh(0, 0, 100, 100);
     });
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(0, 50, 100, 100);
       }
@@ -362,7 +394,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const disposed = sandbox.spy();
     const spec = {totalTimeMin: 10};
     root.listenRoot(spec, null, null, eventResolver);
-    sandbox.stub(root, 'getRootLayoutBox',
+    sandbox.stub(root, 'getRootLayoutBox').callsFake(
         () => layoutRectLtwh(11, 21, 101, 201));
 
     expect(root.models_).to.have.length(1);
@@ -634,7 +666,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       },
     };
     const resources = win.services.resources.obj;
-    sandbox.stub(resources, 'getResourceForElementOptional',
+    sandbox.stub(resources, 'getResourceForElementOptional').callsFake(
         () => resource);
     const spec = {totalTimeMin: 10};
     root.listenElement(target, spec, null, null, eventResolver);
@@ -688,7 +720,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 
     viewport = parentWin.services.viewport.obj;
     viewer = parentWin.services.viewer.obj;
-    sandbox.stub(viewer, 'getFirstVisibleTime', () => 1);
+    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
 
     parentRoot = new VisibilityManagerForDoc(ampdoc);
     parentWin.IntersectionObserver = IntersectionObserverStub;
@@ -750,7 +782,7 @@ describes.realWin('EmbedAnalyticsRoot', {
   });
 
   it('should resolve root layout box', () => {
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == embed.host) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
@@ -918,7 +950,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       };
     };
     if (nativeIntersectionObserverSupported(ampdoc.win)) {
-      sandbox.stub(win, 'IntersectionObserver', inob);
+      sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
     } else {
       win.IntersectionObserver = inob;
       win.IntersectionObserverEntry = function() {};
@@ -940,8 +972,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     });
 
     const docState = Services.documentStateFor(win);
-    sandbox.stub(docState, 'isHidden', () => false);
-    sandbox.stub(viewer, 'getFirstVisibleTime', () => startTime);
+    sandbox.stub(docState, 'isHidden').callsFake(() => false);
+    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => startTime);
 
     ampElement = doc.createElement('amp-img');
     ampElement.id = 'abc';
@@ -966,7 +998,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
       const resource = resources.getResourceForElement(ampElement);
       scrollTop = 10;
-      sandbox.stub(resource, 'getLayoutBox',
+      sandbox.stub(resource, 'getLayoutBox').callsFake(
           () => layoutRectLtwh(0, scrollTop, 100, 100));
     });
   });
@@ -1100,8 +1132,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
           loadTimeVisibility: 5,
           maxVisiblePercentage: 25,
           minVisiblePercentage: 25,
-          totalVisibleTime: 0,  // duration metrics are always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
+          totalVisibleTime: 0, // duration metrics are always 0
+          maxContinuousVisibleTime: 0, // as it triggers immediately
         });
         expect(unobserveSpy).to.not.be.called;
 
@@ -1122,8 +1154,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
           loadTimeVisibility: 5,
           maxVisiblePercentage: 35,
           minVisiblePercentage: 35,
-          totalVisibleTime: 0,  // duration metrics is always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
+          totalVisibleTime: 0, // duration metrics is always 0
+          maxContinuousVisibleTime: 0, // as it triggers immediately
         });
       });
     }).then(() => {
@@ -1174,7 +1206,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       clock.tick(899); // not yet!
       expect(isModelResolved(model)).to.be.false;
       sandbox.stub(model, 'reset_');
-      clock.tick(1);  // now fire
+      clock.tick(1); // now fire
       expect(isModelResolved(model)).to.be.true;
       return eventPromise.then(state => {
         expect(state).to.contains({

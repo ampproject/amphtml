@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
-import {dev} from '../log';
 import {Services} from '../services';
-import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev} from '../log';
+import {getService, registerServiceBuilder} from '../service';
+import {stringToBytes, utf8Encode} from '../utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -79,15 +79,15 @@ export class Crypto {
       return this.subtle.digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
           .then(buffer => new Uint8Array(buffer),
-          e => {
+              e => {
                 // Chrome doesn't allow the usage of Crypto API under
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-            if (e.message && e.message.indexOf('secure origin') < 0) {
+                if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
-              dev().error(TAG, FALLBACK_MSG, e);
-            }
-            return this.loadPolyfill_().then(() => this.sha384(input));
-          });
+                  dev().error(TAG, FALLBACK_MSG, e);
+                }
+                return this.loadPolyfill_().then(() => this.sha384(input));
+              });
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
       return this.loadPolyfill_().then(() => this.sha384(input));
@@ -165,8 +165,8 @@ export class Crypto {
     dev().assert(this.isPkcsAvailable());
     // Safari 10 and earlier want this as an ArrayBufferView.
     const keyData = this.isLegacyWebkit_
-        ? utf8EncodeSync(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
-        : /** @type {!webCrypto.JsonWebKey} */ (jwk);
+      ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
+      : /** @type {!webCrypto.JsonWebKey} */ (jwk);
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
       this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
     );

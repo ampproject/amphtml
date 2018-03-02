@@ -19,13 +19,13 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
+import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
-import {isFiniteNumber, isArray} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {map} from '../../../src/utils/object';
 
 const TAG = 'VISIBILITY-MANAGER';
 
@@ -231,7 +231,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(
-      element, spec, readyPromise, createReportPromiseFunc, callback) {
+    element, spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
     return this.createModelAndListen_(calcVisibility, spec, readyPromise,
         createReportPromiseFunc, callback, element);
@@ -248,7 +248,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   createModelAndListen_(calcVisibility, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     if (spec['visiblePercentageThresholds'] &&
         spec['visiblePercentageMin'] == undefined &&
         spec['visiblePercentageMax'] == undefined) {
@@ -273,7 +273,13 @@ export class VisibilityManager {
         }
         const min = Number(percents[0]);
         const max = Number(percents[1]);
-        if (min < 0 || max > 100 || min >= max) {
+        // Min and max must be valid percentages. Min may not be more than max.
+        // Max is inclusive. Min is usually exclusive, but there are two
+        // special cases: if min and max are both 0, or both 100, then both
+        // are inclusive. Otherwise it would not be possible to trigger an
+        // event on exactly 0% or 100%.
+        if (min < 0 || max > 100 || min > max ||
+            (min == max && min != 100 && max != 0)) {
           user().error(TAG,
               'visiblePercentageThresholds entry invalid min/max value');
           continue;
@@ -306,7 +312,7 @@ export class VisibilityManager {
    * @private
    */
   listen_(model, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
@@ -337,8 +343,8 @@ export class VisibilityManager {
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
             resource ?
-            resource.getLayoutBox() :
-            Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              resource.getLayoutBox() :
+              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
         Object.assign(state, {

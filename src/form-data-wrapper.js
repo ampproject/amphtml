@@ -54,8 +54,8 @@ export class FormDataWrapper {
     /** @private @const {?Object<string, !Array<string>>} */
     this.fieldValues_ =
         this.formData_['entries'] ?
-            null :
-            (opt_form ? getFormAsObject(opt_form) : map());
+          null :
+          (opt_form ? getFormAsObject(opt_form) : map());
   }
 
   /**
@@ -100,7 +100,7 @@ export class FormDataWrapper {
 
     const fieldEntries = [];
     const fieldValues = /** @type {!Object<string, !Array<string>>} */ (
-        dev().assert(this.fieldValues_));
+      dev().assert(this.fieldValues_));
     Object.keys(fieldValues).forEach(name => {
       const values = fieldValues[name];
       values.forEach(value => fieldEntries.push([name, value]));
@@ -112,8 +112,8 @@ export class FormDataWrapper {
     return /** @type {!Iterator<!Array<string>>} */ ({
       next() {
         return nextIndex < fieldEntries.length ?
-            {value: fieldEntries[nextIndex++], done: false} :
-            {value: undefined, done: true};
+          {value: fieldEntries[nextIndex++], done: false} :
+          {value: undefined, done: true};
       },
     });
   }

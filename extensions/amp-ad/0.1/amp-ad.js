@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-ad-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {getA4ARegistry} from '../../../ads/_a4a-config';
-import {adConfig} from '../../../ads/_config';
-import {user} from '../../../src/log';
+import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
+import {adConfig} from '../../../ads/_config';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 
 /**
@@ -30,7 +28,7 @@ import {hasOwn} from '../../../src/utils/object';
  * omits the version number and '.js' suffix for the extension script, which
  * will be handled by the extension loader.
  *
- * @param {!string} type
+ * @param {string} type
  * @return !string
  * @private
  */
@@ -54,14 +52,13 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-        ? Services.userNotificationManagerForDoc(this.element)
-            .then(service => service.get(consentId))
-        : Promise.resolve();
+      ? Services.userNotificationManagerForDoc(this.element)
+          .then(service => service.get(consentId))
+      : Promise.resolve();
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
-      const isCustom = type === 'custom' && isExperimentOn(this.win,
-          'ad-type-custom');
+      const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
           || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
 
@@ -75,7 +72,7 @@ export class AmpAd extends AMP.BaseElement {
       this.element.setAttribute('data-amp-slot-index', slotId);
 
       const useRemoteHtml = (
-          !(adConfig[type] || {}).remoteHTMLDisabled &&
+        !(adConfig[type] || {}).remoteHTMLDisabled &&
             this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
       // TODO(a4a-cam): Shorten this predicate.
@@ -96,7 +93,7 @@ export class AmpAd extends AMP.BaseElement {
           .catch(error => {
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
-          // Report error and fallback to 3p
+            // Report error and fallback to 3p
             this.user().error(
                 TAG, 'Unable to load ad implementation for type ',
                 type, ', falling back to 3p, error: ', error);

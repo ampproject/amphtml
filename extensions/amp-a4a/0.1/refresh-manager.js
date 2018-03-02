@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -54,7 +54,7 @@ export function getPublisherSpecifiedRefreshInterval(element, win) {
   }
   let metaTag;
   const metaTagContent = ((metaTag = win.document
-        .getElementsByName(METATAG_NAME))
+      .getElementsByName(METATAG_NAME))
       && metaTag[0]
       && metaTag[0].getAttribute('content'));
   if (!metaTagContent) {
@@ -228,8 +228,8 @@ export class RefreshManager {
     threshold = String(threshold);
     return observers[threshold] ||
         (observers[threshold] = 'IntersectionObserver' in this.win_
-         ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-         : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
+          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
   }
 
   /**
@@ -327,7 +327,7 @@ export class RefreshManager {
   convertAndSanitizeConfiguration_(config) {
     dev().assert(config['visiblePercentageMin'] >= 0 &&
         config['visiblePercentageMin'] <= 100,
-        'visiblePercentageMin for refresh must be in the range [0, 100]');
+    'visiblePercentageMin for refresh must be in the range [0, 100]');
     // Convert seconds to milliseconds.
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;

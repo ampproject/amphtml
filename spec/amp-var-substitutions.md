@@ -36,7 +36,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <th width="25%"><strong>AMP Feature</strong></th>
     <th width="25%"><strong>URL limitations</strong></th>
-    <th width="25%"><strong>Requires per-use opt-in?</strong></th>
+    <th width="25%"><strong>Requires <a href="#per-use-opt-in">per-use opt-in</a>?</strong></th>
     <th width="25%"><strong>Restrictions</strong></th>
   </tr>
   <tr>
@@ -48,7 +48,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">No</td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
@@ -60,7 +60,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">No</td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
@@ -74,13 +74,13 @@ The following table lists the features that enable variable substitutions, as we
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
-    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
   <tr>
     <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
-    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
 </table>
 
@@ -219,6 +219,8 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Element Y](#element-y) | N/A | `${elementY}` |
 | [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
 | [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
+| [Intersection Ratio](#intersection-ratio) | N/A | `${intersectionRatio}` |
+| [Intersection Rect](#intersection-rect) | N/A | `${intersectionRect}` |
 | [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
 | [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
 | [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
@@ -227,6 +229,13 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Min Visible Percentage](#min-visible-percentage) | N/A | `${minVisiblePercentage}` |
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
+
+### Timers
+
+| Variable Name | Platform Variable | amp-analytics Variable |
+|---------------|-------------------|------------------------|
+| [Timer Duration](#timer-duration) | N/A | `${timerDuration}` |
+| [Timer Start Time](#timer-start) | N/A | `${timerStart}` |
 
 ### Miscellaneous
 
@@ -573,7 +582,7 @@ Provides the name of the error that triggered an user error event. This variable
 #### External Referrer
 
 Provides the referrer where the user came from. Similar to [Document Referrer](#document_referrer), but the value is empty if user is navigated from same domain or the corresponding CDN proxy domain.
-Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation. 
+Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation.
 
 * **platform variable**: `EXTERNAL_REFERRER`
   *  Example: <br>
@@ -611,6 +620,25 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${horizontalScrollBoundary}`
+
+#### Intersection Ratio
+
+Provides the fraction of the selected element that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${intersectionRatio}`
+
+#### Intersection Rect
+
+Provides the bounds of the rectangle defining the portion of the selected element that is visible. For more information, please see the [IntersectionObserverEntry.intersectionRect](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRect)  API documentation.
+
+Example value:
+```javascript
+{"left":0,"top":74,"width":256,"height":226,"bottom":300,"right":256,"x":0,"y":74}
+```
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${intersectionRect}`
 
 #### Last Seen Time
 
@@ -1013,6 +1041,20 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalVisibleTime}`
+
+#### Timer Duration
+
+Provides the duration of the triggered timer since last start or interval in milliseconds. For timers stopped before a full interval completes, this will report the partial time.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${timerDuration}`
+
+#### Timer Start Time
+
+Provides the start time of the triggered timer in milliseconds from epoch. Resets only on timer start.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${timerStart}`
 
 #### User Agent
 

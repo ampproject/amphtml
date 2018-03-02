@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sinon from 'sinon';
 import {
-  EXPERIMENT,
+  ANIMATIONS_DISABLED_CLASS,
+  AmpGwdRuntimeService,
+  CURRENT_LABEL_ANIMATION_ATTR,
+  GOTO_COUNTER_PROP,
+  GWD_PAGE_WRAPPER_CLASS,
+  GWD_SERVICE_NAME,
+  PlaybackCssClass,
+} from '../amp-gwd-animation-impl';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {
   GWD_PAGEDECK_ID,
   TAG,
   addAction,
 } from '../amp-gwd-animation';
-import {
-  ANIMATIONS_DISABLED_CLASS,
-  CURRENT_LABEL_ANIMATION_ATTR,
-  GWD_PAGE_WRAPPER_CLASS,
-  GWD_SERVICE_NAME,
-  PlaybackCssClass,
-  AmpGwdRuntimeService,
-} from '../amp-gwd-animation-impl';
-import {toggleExperiment} from '../../../../src/experiments';
-import {getServiceForDoc} from '../../../../src/service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
+import {getServiceForDoc} from '../../../../src/service';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**
@@ -99,9 +98,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
 
       beforeEach(() => {
-        // TODO(sklobovskaya): Remove experiment guard.
-        toggleExperiment(env.win, EXPERIMENT, true);
-
         ampdoc = env.ampdoc;
 
         ampdoc.getBody().innerHTML =
@@ -110,6 +106,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
                 <div>
                   <div id="not-an-event"></div>
+                  <div id="grandchild"></div>
                   <div id="event1" data-event-name="event-1"></div>
                   <div id="event2" data-event-name="event-2"></div>
                 </div>
@@ -178,20 +175,99 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
-      it('should set a page as current', () => {
+      it('should change the current page on pagedeck slideChange', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          // Set page 1 as current.
-          const page1 = ampdoc.getRootNode().getElementById('page1');
-          page1.classList.add(PlaybackCssClass.PLAY);
-
-          // Change to page 2.
           const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
-          runtime.setCurrentPage(1);
+          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
+          const page1 = ampdoc.getRootNode().getElementById('page1');
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+
+          // Activate page 1.
+          // TODO(sklobovskaya): This is normally done by initialize_, but is
+          // not done in the test environment due to initialize_ executing
+          // before beforeEach which sets up the test DOM. Would be nice to fix.
+          runtime.setCurrentPage(0);
+
+          // Trigger a setCurrentPage action as though it originated from a
+          // pagedeck slideChange event and verify that page 2 is activated.
+          const setCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 1},
+            source: pagedeck,
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(setCurrentPageInvocation);
 
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-
-          const page2 = ampdoc.getRootNode().getElementById('page2');
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Simulate setCurrentPage from a slideChange event which originated
+          // from some other carousel. There should be no page change.
+          const otherSetCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 0},
+            source: null,
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(otherSetCurrentPageInvocation);
+
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Remove the pagedeck element and verify that triggering
+          // setCurrentPage does not throw errors. Set a null source on the
+          // dummy invocation to test the comparison to a null pagedeck
+          // reference.
+          pagedeck.remove();
+          otherSetCurrentPageInvocation.source = null;
+          impl.executeAction(otherSetCurrentPageInvocation);
+        });
+      });
+
+      it('should activate and deactivate pages', () => {
+        return ampdoc.whenBodyAvailable().then(() => {
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
+          const page1 = ampdoc.getRootNode().getElementById('page1');
+          const grandchild = page1.querySelector('#grandchild');
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+
+          // Activate page 1.
+          runtime.setCurrentPage(0);
+
+          // Animations should be enabled on page1 only.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+
+          // Set an active label animation, goto counters, and a pause on
+          // several descendant elements and the page element itself to test
+          // that this state is reset when the page is deactivated.
+          page1.classList.add(PlaybackCssClass.PAUSE);
+          grandchild.classList.add(PlaybackCssClass.PAUSE);
+          page1[GOTO_COUNTER_PROP] = {};
+          grandchild[GOTO_COUNTER_PROP] = {};
+          page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
+          grandchild.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel2');
+
+          // Change to page 2.
+          runtime.setCurrentPage(1);
+
+          // Animations should be enabled on page2 only.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Pause, goto counters, and current label animation data should have
+          // been cleared from all elements under page1, including the page
+          // itself.
+          expect(page1.classList.contains(PlaybackCssClass.PAUSE)).to.be.false;
+          expect(grandchild.classList.contains(PlaybackCssClass.PAUSE))
+              .to.be.false;
+          expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(page1.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be.false;
+          expect(grandchild.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR))
+              .to.be.false;
         });
       });
 
@@ -384,7 +460,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
-            event: {eventName: 'event-2'},  // Different event.
+            event: {eventName: 'event-2'}, // Different event.
             satisfiesTrust: () => true,
           };
 
@@ -406,7 +482,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       it('should trigger timeline events', () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
-        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger',
+        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger').callsFake(
             (target, name, event) => {
               triggeredAmpEventNames.push(name);
               triggeredEvents.push(event);

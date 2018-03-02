@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
-import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
-import {
-  AmpAdNetworkDoubleclickImpl,
-} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {
+  AmpAdNetworkDoubleclickImpl,
+} from '../amp-ad-network-doubleclick-impl';
+import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
+import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
@@ -58,7 +60,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
   describe('#mergeRtcResponses_', () => {
     function testMergeRtcResponses(
-        rtcResponseArray, expectedParams, expectedJsonTargeting) {
+      rtcResponseArray, expectedParams, expectedJsonTargeting) {
       const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
       expect(rtcUrlParams).to.deep.equal(expectedParams);
       expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
@@ -200,13 +202,13 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     it('should properly merge mix of success and errors', () => {
       impl.jsonTargeting_ = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
-        categoryExclusions: ['sports']};
+      categoryExclusions: ['sports']};
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.TIMEOUT,
           callout: 'www.exampleA.com', rtcTime: 1500},
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
           categoryExclusions: ['health']},
-          callout: 'VendorFoo', rtcTime: 500},
+        callout: 'VendorFoo', rtcTime: 500},
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
           callout: 'www.exampleB.com', rtcTime: 100},
         {response: {targeting: {'a': [4,5,6], 'b': {x: [1,2]}}},
@@ -269,6 +271,98 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       };
       expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz'))
           .to.deep.equal(response);
+    });
+  });
+
+  describe('getCustomRealTimeConfigMacros', () => {
+    it('should return correct macros', () => {
+      const macros = {
+        'data-slot': '5678',
+        'height': '50',
+        'width': '200',
+        'DATA-MULTI-SIZE': '300x50,200x100',
+        'data-multi-size-validation': 'true',
+        'data-OVERRIDE-width': '250',
+        'data-override-HEIGHT': '75',
+      };
+      const json = {
+        'targeting': {'a': '123'},
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        width: macros['width'],
+        height: macros['height'],
+        type: 'doubleclick',
+        layout: 'fixed',
+        'data-slot': macros['data-slot'],
+        'data-multi-size': macros['DATA-MULTI-SIZE'],
+        'data-multi-size-validation': macros['data-multi-size-validation'],
+        'data-override-width': macros['data-OVERRIDE-width'],
+        'data-override-height': macros['data-override-HEIGHT'],
+        'json': JSON.stringify(json),
+      });
+      env.win.document.body.appendChild(element);
+      const docInfo = Services.documentInfoForDoc(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.HREF()).to.equal(env.win.location.href);
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
+      Object.keys(macros).forEach(macro => {
+        expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
+      });
+      return customMacros.ADCID().then(adcid => {
+        expect(adcid).to.not.be.null;
+      });
+    });
+
+    it('should return the same ADCID on multiple calls', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      let adcid;
+      return customMacros.ADCID().then(adcid1 => {
+        adcid = adcid1;
+        expect(adcid).to.not.be.null;
+        return customMacros.ADCID().then(adcid2 => {
+          expect(adcid2).to.equal(adcid);
+        });
+      });
+    });
+
+    it('should respect timeout for adcid', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      return customMacros.ADCID(0).then(adcid => {
+        expect(adcid).to.be.undefined;
+      });
+    });
+
+    it('should handle TGT macro when targeting not set', () => {
+      const json = {
+        'NOTTARGETING': {'a': '123'},
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'json': JSON.stringify(json),
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
     });
   });
 });

@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
+import '../amp-sticky-ad';
+import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
 
 describes.realWin('amp-sticky-ad 1.0 version', {
@@ -45,11 +46,14 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       ampStickyAd.build();
       impl = ampStickyAd.implementation_;
       addToFixedLayerPromise = Promise.resolve();
-      addToFixedLayerStub = sandbox.stub(impl.viewport_, 'addToFixedLayer',
-          () => addToFixedLayerPromise);
+      addToFixedLayerStub =
+          sandbox.stub(impl.viewport_, 'addToFixedLayer').callsFake(
+              () => addToFixedLayerPromise);
     });
 
-    it('should listen to scroll event', () => {
+    it('should listen to scroll event', function * () {
+      expect(impl.scrollUnlisten_).to.be.null;
+      yield macroTask();
       expect(impl.scrollUnlisten_).to.be.a('function');
     });
 
@@ -79,8 +83,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should display once user scroll', () => {
-      const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
-          () => {});
+      const scheduleLayoutSpy =
+          sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(
+              () => {});
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
 
@@ -132,7 +137,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
 
     it('should create a close button', () => {
       const addCloseButtonSpy = sandbox.spy(impl, 'addCloseButton_');
-      sandbox.stub(impl, 'scheduleLayoutForAd_', () => {});
+      sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
 
       impl.viewport_.getScrollTop = function() {
         return 100;
@@ -293,7 +298,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   let ampStickyAd;
   let impl;
   let addToFixedLayerPromise;
-  beforeEach(done => {
+  beforeEach(() => {
     win = env.win;
     ampStickyAd = win.document.createElement('amp-sticky-ad');
     ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -306,11 +311,9 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     ampStickyAd.build();
     impl = ampStickyAd.implementation_;
     addToFixedLayerPromise = Promise.resolve();
-    sandbox.stub(impl.viewport_, 'addToFixedLayer',
+    sandbox.stub(impl.viewport_, 'addToFixedLayer').callsFake(
         () => addToFixedLayerPromise);
-    return ampAd.implementation_.upgradeCallback().then(() => {
-      done();
-    });
+    return ampAd.implementation_.upgradeCallback();
   });
 
   it('close button should close ad and reset body borderBottom', () => {

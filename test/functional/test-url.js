@@ -19,11 +19,13 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
+  getCorsUrl,
   getSourceOrigin,
   getSourceUrl,
-  isProxyOrigin,
+  getWinOrigin,
   isLocalhostOrigin,
   isProtocolValid,
+  isProxyOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -31,8 +33,6 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-  getCorsUrl,
-  getWinOrigin,
 } from '../../src/url';
 
 describe('getWinOrigin', () => {
@@ -633,10 +633,10 @@ describe('getSourceOrigin/Url', () => {
       'http://o.com/foo/?f_amp_js_param=5&d=5');
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5?d=5',
-      'http://o.com/foo/');  // Treats amp_js_param=5?d=5 as one param.
+      'http://o.com/foo/'); // Treats amp_js_param=5?d=5 as one param.
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/&amp_js_param=5&d=5',
-      'http://o.com/foo/&amp_js_param=5&d=5');  // Treats &... as part of path.
+      'http://o.com/foo/&amp_js_param=5&d=5'); // Treats &... as part of path.
 
   // Removes google experimental queryString parameters.
   testOrigin(
@@ -665,10 +665,10 @@ describe('getSourceOrigin/Url', () => {
       'http://o.com/foo/?f_usqp=mq331AQCCAE&d=5');
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE?d=5',
-      'http://o.com/foo/');  // Treats amp_js_param=5?d=5 as one param.
+      'http://o.com/foo/'); // Treats amp_js_param=5?d=5 as one param.
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/&usqp=mq331AQCCAE&d=5',
-      'http://o.com/foo/&usqp=mq331AQCCAE&d=5');  // Treats &... as part of path.
+      'http://o.com/foo/&usqp=mq331AQCCAE&d=5'); // Treats &... as part of path.
 
   // Non-CDN.
   testOrigin(

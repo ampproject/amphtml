@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {makeCorrelator} from './correlator';
-import {validateData, loadScript} from '../../3p/3p';
 import {dev} from '../../src/log';
-import {setStyles} from '../../src/style';
 import {getMultiSizeDimensions} from './utils';
+import {loadScript, validateData} from '../../3p/3p';
+import {makeCorrelator} from './correlator';
+import {setStyles} from '../../src/style';
 
 /**
  * @param {!Window} global
@@ -71,7 +71,7 @@ function doubleClickWithGpt(global, data) {
           const googletag = global.googletag;
           const pubads = googletag.pubads();
           const slot = googletag.defineSlot(data.slot, dimensions, 'c')
-          .addService(pubads);
+              .addService(pubads);
 
           if (data['experimentId']) {
             const experimentIdList = data['experimentId'].split(',');
@@ -178,7 +178,7 @@ function doubleClickWithGlade(global, data) {
   const expIds = data['experimentId'];
   if (expIds) {
     jsonParameters.gladeEids = jsonParameters.gladeEids ?
-        jsonParameters.gladeEids + ',' + expIds : expIds;
+      jsonParameters.gladeEids + ',' + expIds : expIds;
   }
 
 
@@ -234,7 +234,7 @@ function centerAd(global) {
 export function writeAdScript(global, data) {
   if (data.useSameDomainRenderingUntilDeprecated != undefined
       || data.multiSize || (
-          global.context && global.context.location &&
+      global.context && global.context.location &&
             global.context.location.href &&
             global.context.location.href.indexOf('google_glade=0') > 0 &&
             global.context.location.href.indexOf('google_glade=1') < 0)) {

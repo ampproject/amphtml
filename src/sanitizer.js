@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {
+  checkCorsUrl,
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
-  checkCorsUrl,
 } from './url';
+import {dict, map} from './utils/object';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {parseSrcset} from './srcset';
-import {user} from './log';
-import {urls} from './config';
-import {map} from './utils/object';
 import {startsWith} from './string';
-
+import {urls} from './config';
+import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';
 
+/** @private @const {string} */
+const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
 
 /**
  * @const {!Object<string, boolean>}
  * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-const BLACKLISTED_TAGS = {
+const BLACKLISTED_TAGS = dict({
   'applet': true,
   'audio': true,
   'base': true,
   'embed': true,
-  'form': true,
   'frame': true,
   'frameset': true,
   'iframe': true,
@@ -55,13 +55,11 @@ const BLACKLISTED_TAGS = {
   // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
   // intention to keep this block for any longer than we have to.
   'svg': true,
-  'template': true,
   'video': true,
-};
-
+});
 
 /** @const {!Object<string, boolean>} */
-const SELF_CLOSING_TAGS = {
+const SELF_CLOSING_TAGS = dict({
   'br': true,
   'col': true,
   'hr': true,
@@ -78,8 +76,7 @@ const SELF_CLOSING_TAGS = {
   'link': true,
   'meta': true,
   'param': true,
-};
-
+});
 
 /** @const {!Array<string>} */
 const WHITELISTED_FORMAT_TAGS = [
@@ -101,7 +98,6 @@ const WHITELISTED_FORMAT_TAGS = [
   'u',
 ];
 
-
 /** @const {!Array<string>} */
 const WHITELISTED_ATTRS = [
   'fallback',
@@ -109,15 +105,33 @@ const WHITELISTED_ATTRS = [
   'on',
   'placeholder',
   'option',
+  'submit-success',
+  'submit-error',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
 ];
 
+/** @const {!Object<string, !Array<string>>} */
+const WHITELISTED_ATTRS_BY_TAGS = dict({
+  'a': [
+    'rel',
+  ],
+  'div': [
+    'template',
+  ],
+  'form': [
+    'action-xhr',
+    'custom-validation-reporting',
+    'target',
+  ],
+  'template': [
+    'type',
+  ],
+});
 
 /** @const {!RegExp} */
 const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
-
 
 /** @const {!Array<string>} */
 const WHITELISTED_TARGETS = ['_top', '_blank'];
@@ -132,12 +146,11 @@ const BLACKLISTED_ATTR_VALUES = [
 ];
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = {
+const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
     'type': /(?:image|file|password|button)/i,
   },
-};
-
+});
 
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
@@ -149,14 +162,12 @@ const BLACKLISTED_FIELDS_ATTR = [
   'formenctype',
 ];
 
-
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = {
+const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'input': BLACKLISTED_FIELDS_ATTR,
   'textarea': BLACKLISTED_FIELDS_ATTR,
   'select': BLACKLISTED_FIELDS_ATTR,
-};
-
+});
 
 /**
  * Sanitizes the provided HTML.
@@ -187,13 +198,13 @@ export function sanitizeHtml(html) {
         }
         return;
       }
-      const bindAttribsIndices = map();
-      // Special handling for attributes for amp-bind which are formatted as
-      // [attr]. The brackets are restored at the end of this function.
+      const isBinding = map();
+      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
+      // brackets before custom validation and readding them afterwards.
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          bindAttribsIndices[i] = true;
+          isBinding[i] = true;
           attribs[i] = attr.slice(1, -1);
         }
       }
@@ -215,6 +226,9 @@ export function sanitizeHtml(html) {
             if (WHITELISTED_ATTRS.includes(attrib)) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
+              attribs[i + 1] = savedAttribs[i + 1];
+            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -260,18 +274,24 @@ export function sanitizeHtml(html) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue)) {
+          user().error(TAG, `Removing "${attrName}" attribute with invalid `
+              + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;
         }
         emit(' ');
-        if (bindAttribsIndices[i]) {
+        if (isBinding[i]) {
           emit('[' + attrName + ']');
         } else {
           emit(attrName);
         }
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(
-              tagName, attrName, attrValue)));
+          // Rewrite attribute values unless this attribute is a binding.
+          // Bindings contain expressions not scalars and shouldn't be modified.
+          const rewrite = (isBinding[i])
+            ? attrValue
+            : rewriteAttributeValue(tagName, attrName, attrValue);
+          emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
       }
@@ -294,7 +314,6 @@ export function sanitizeHtml(html) {
   return output.join('');
 }
 
-
 /**
  * Sanitizes the provided formatting HTML. Only the most basic inline tags are
  * allowed, such as <b>, <i>, etc.
@@ -304,7 +323,17 @@ export function sanitizeHtml(html) {
  */
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, unusedAttrs) {
+      function(tagName, attribs) {
+        if (tagName == 'template') {
+          for (let i = 0; i < attribs.length; i += 2) {
+            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+              return {
+                tagName,
+                attribs: ['type', 'amp-mustache'],
+              };
+            }
+          }
+        }
         if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }
@@ -316,7 +345,6 @@ export function sanitizeFormattingHtml(html) {
   );
 }
 
-
 /**
  * Whether the attribute/value are valid.
  * @param {string} tagName
@@ -325,7 +353,6 @@ export function sanitizeFormattingHtml(html) {
  * @return {boolean}
  */
 export function isValidAttr(tagName, attrName, attrValue) {
-
   // "on*" attributes are not allowed.
   if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;
@@ -375,6 +402,45 @@ export function isValidAttr(tagName, attrName, attrValue) {
 }
 
 /**
+ * The same as rewriteAttributeValue() but actually updates the element and
+ * modifies other related attribute(s) for special cases, i.e. `target` for <a>.
+ * @param {!Element} element
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!Location=} opt_location
+ * @return {string}
+ */
+export function rewriteAttributesForElement(
+  element, attrName, attrValue, opt_location)
+{
+  const tag = element.tagName.toLowerCase();
+  const attr = attrName.toLowerCase();
+  const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
+  // When served from proxy (CDN), changing an <a> tag from a hash link to a
+  // non-hash link requires updating `target` attribute per cache modification
+  // rules. @see amp-cache-modifications.md#url-rewrites
+  const isProxy = isProxyOrigin(opt_location || self.location);
+  if (isProxy && tag === 'a' && attr === 'href') {
+    const oldValue = element.getAttribute(attr);
+    const newValueIsHash = rewrittenValue[0] === '#';
+    const oldValueIsHash = oldValue && oldValue[0] === '#';
+
+    if (newValueIsHash && !oldValueIsHash) {
+      // Save the original value of `target` so it can be restored (if needed).
+      if (!element[ORIGINAL_TARGET_VALUE]) {
+        element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
+      }
+      element.removeAttribute('target');
+    } else if (oldValueIsHash && !newValueIsHash) {
+      // Restore the original value of `target` or default to `_top`.
+      element.setAttribute('target', element[ORIGINAL_TARGET_VALUE] || '_top');
+    }
+  }
+  element.setAttribute(attr, rewrittenValue);
+  return rewrittenValue;
+}
+
+/**
  * If (tagName, attrName) is a CDN-rewritable URL attribute, returns the
  * rewritten URL value. Otherwise, returns the unchanged `attrValue`.
  * @see resolveUrlAttr for rewriting rules.
@@ -382,6 +448,7 @@ export function isValidAttr(tagName, attrName, attrValue) {
  * @param {string} attrName
  * @param {string} attrValue
  * @return {string}
+ * @private Visible for testing.
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
   const tag = tagName.toLowerCase();

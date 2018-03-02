@@ -17,8 +17,8 @@
 import {
   base64UrlDecodeToBytes,
 } from '../../../src/utils/base64';
-import {stringToBytes, utf8DecodeSync} from '../../../src/utils/bytes';
 import {pemToBytes} from '../../../src/utils/pem';
+import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {tryParseJson} from '../../../src/json';
 
 
@@ -92,7 +92,7 @@ export class JwtHelper {
       return this.importKey_(pemPromise).then(key => {
         const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
-          /* options */ {name: 'RSASSA-PKCS1-v1_5'},
+            /* options */ {name: 'RSASSA-PKCS1-v1_5'},
             key,
             sig,
             stringToBytes(decoded.verifiable)
@@ -127,8 +127,8 @@ export class JwtHelper {
     const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
     const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
     return {
-      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
-      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      header: tryParseJson(utf8Decode(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8Decode(payloadUtf8Bytes), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: parts[2],
     };
@@ -148,7 +148,7 @@ export class JwtHelper {
             hash: {name: 'SHA-256'},
           },
           /* extractable */ false,
-        /* uses */ ['verify']);
+          /* uses */ ['verify']);
     });
   }
 }

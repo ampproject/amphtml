@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
+import {allocateVariant} from './variant';
 import {dev, user} from '../../../src/log';
 import {parseJson} from '../../../src/json';
-import {Layout} from '../../../src/layout';
-import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant} from './variant';
 import {registerServiceBuilder} from '../../../src/service';
+import {waitForBodyPromise} from '../../../src/dom';
 
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
@@ -66,7 +66,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-        dev().assert(parseJson(children[0].textContent)));
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**

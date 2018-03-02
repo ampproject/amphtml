@@ -20,8 +20,9 @@
  * Invariant: Service getters never return null for registered services.
  */
 
-// Requires polyfills in immediate side effect.
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {dev} from './log';
 import {toWin} from './types';
 
@@ -105,12 +106,12 @@ export function getExistingServiceInEmbedScope(win, id, opt_fallbackToTopWin) {
  * @return {Object} The service.
  */
 export function getExistingServiceForDocInEmbedScope(
-    nodeOrDoc, id, opt_fallbackToTopWin) {
+  nodeOrDoc, id, opt_fallbackToTopWin) {
   // First, try to resolve via local (embed) window.
   if (nodeOrDoc.nodeType) {
     // If a node is passed, try to resolve via this node.
     const win = toWin(/** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const local = getLocalExistingServiceForEmbedWinOrNull(win, id);
     if (local) {
       return local;
@@ -164,9 +165,9 @@ function getLocalExistingServiceForEmbedWinOrNull(embedWin, id) {
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilder(win,
-                                       id,
-                                       constructor,
-                                       opt_instantiate) {
+  id,
+  constructor,
+  opt_instantiate) {
   win = getTopWindow(win);
   registerServiceInternal(win, win, id, constructor);
   if (opt_instantiate) {
@@ -184,9 +185,9 @@ export function registerServiceBuilder(win,
  * @param {boolean=} opt_instantiate Whether to immediately create the service
  */
 export function registerServiceBuilderForDoc(nodeOrDoc,
-                                             id,
-                                             constructor,
-                                             opt_instantiate) {
+  id,
+  constructor,
+  opt_instantiate) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
   registerServiceInternal(holder, ampdoc, id, constructor);
@@ -354,7 +355,7 @@ export function getParentWindowFrameElement(node, topWin) {
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
     const win = toWin(/** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
@@ -379,7 +380,7 @@ function getAmpdocServiceHolder(nodeOrDoc) {
  */
 function getAmpdocService(win) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-      getService(win, 'ampdoc'));
+    getService(win, 'ampdoc'));
 }
 
 

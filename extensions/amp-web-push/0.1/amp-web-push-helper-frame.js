@@ -14,11 +14,11 @@
  * the License.
  */
 
-import {parseQueryString} from '../../../src/url.js';
+import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
+import {parseQueryString} from '../../../src/url.js';
 import {user} from '../../../src/log';
-import {TAG} from './vars';
 
 /**
  * @typedef {{
@@ -225,9 +225,9 @@ export class AmpWebPushHelperFrame {
   onAmpPageMessageReceivedServiceWorkerRegistration_(message, replyToFrame) {
     if (!message || !message.workerUrl || !message.registrationOptions) {
       throw new Error(
-        'Expected arguments workerUrl and registrationOptions ' +
+          'Expected arguments workerUrl and registrationOptions ' +
           'in message, got:',
-        message
+          message
       );
     }
 
@@ -242,7 +242,7 @@ export class AmpWebPushHelperFrame {
               true,
               null,
               error ? error.message || error.toString() : null
-        );
+          );
         });
   }
 
@@ -357,14 +357,14 @@ export class AmpWebPushHelperFrame {
               } else {
                 this.window_.navigator.serviceWorker
                     .controller.addEventListener(
-                    'statechange',
-                    () => {
-                      if (this.isWorkerControllingPage_()) {
-                    // Service worker has been activated
-                        resolve();
-                      }
-                    }
-              );
+                        'statechange',
+                        () => {
+                          if (this.isWorkerControllingPage_()) {
+                            // Service worker has been activated
+                            resolve();
+                          }
+                        }
+                    );
               }
             }
         );

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
+import {computedStyle, toggle} from '../../../src/style';
 import {dev,user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
-import {toggle, computedStyle} from '../../../src/style';
 import {
-  setStyle,
   removeAlphaFromColor,
+  setStyle,
 } from '../../../src/style';
+import {removeElement} from '../../../src/dom';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -45,6 +45,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.scrollUnlisten_ = null;
+
+    /** @private {boolean} */
+    this.collapsed_ = false;
   }
 
   /** @override */
@@ -77,8 +80,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
-    this.scrollUnlisten_ =
+    this.win.setTimeout(() => {
+      this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.onScroll_());
+    });
   }
 
   /** @override */
@@ -112,6 +117,8 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback() {
+    this.collapsed_ = true;
+    this.visible_ = false;
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
@@ -149,6 +156,10 @@ class AmpStickyAd extends AMP.BaseElement {
   display_() {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
+      if (this.collapsed_) {
+        // It's possible that if an AMP ad collapse before its layoutCallback.
+        return;
+      }
       this.visible_ = true;
       this.addCloseButton_();
       this.viewport_.addToFixedLayer(

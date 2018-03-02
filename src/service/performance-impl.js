@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../layout-rect';
-import {registerServiceBuilder, getService} from '../service';
 import {Services} from '../services';
-import {whenDocumentComplete} from '../document-ready';
-import {getMode} from '../mode';
-import {isCanary} from '../experiments';
-import {throttle} from '../utils/rate-limit';
 import {dict, map} from '../utils/object';
+import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service';
+import {isCanary} from '../experiments';
+import {layoutRectLtwh} from '../layout-rect';
+import {throttle} from '../utils/rate-limit';
+import {whenDocumentComplete} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -96,6 +96,13 @@ export class Performance {
     this.enabledExperiments_ = map();
     /** @private {string} */
     this.ampexp_ = '';
+
+    /** @private {number|null} */
+    this.makeBodyVisible_ = null;
+    /** @private {number|null} */
+    this.firstContentfulPaint_ = null;
+    /** @private {number|null} */
+    this.firstViewportReady_ = null;
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -246,9 +253,9 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (this.win.Date.now() - docVisibleTime)
-            //  Prerender was complete before visibility.
-            : 0;
+          ? (this.win.Date.now() - docVisibleTime)
+          //  Prerender was complete before visibility.
+          : 0;
         this.viewer_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
@@ -313,6 +320,21 @@ export class Performance {
     // no delta (in which case it would not make sense).
     if (arguments.length == 1) {
       this.mark(label);
+    }
+
+    // Store certain page visibility metrics to be exposed as analytics variables.
+    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
+				 : value - this.initTime_);
+    switch (label) {
+      case 'fcp':
+        this.firstContentfulPaint_ = storedVal;
+        break;
+      case 'pc':
+        this.firstViewportReady_ = storedVal;
+        break;
+      case 'mbv':
+        this.makeBodyVisible_ = storedVal;
+        break;
     }
   }
 
@@ -438,6 +460,18 @@ export class Performance {
    */
   isPerformanceTrackingOn() {
     return this.isPerformanceTrackingOn_;
+  }
+
+  getFirstContentfulPaint() {
+    return this.firstContentfulPaint_;
+  }
+
+  getMakeBodyVisible() {
+    return this.makeBodyVisible_;
+  }
+
+  getFirstViewportReady() {
+    return this.firstViewportReady_;
   }
 }
 
