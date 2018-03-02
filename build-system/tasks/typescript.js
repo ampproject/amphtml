@@ -10,7 +10,7 @@ const tsickle_main = require('../../node_modules/tsickle/src/main.js');
 
 const EXTENSION_ROOT_FOLDER = path.resolve(__dirname, '..', '..', 'extensions');
 const TS_CONFIG_FILE_NAME = 'tsconfig.json';
-const USE_TSICKLE = false;
+const USE_TSICKLE = true;
 
 function reportDiagnostics(diagnostics) {
   diagnostics.forEach(diagnostic => {
@@ -155,5 +155,5 @@ function configurationsToProcess() {
 gulp.task(
     'typescript',
     'Leverages TypeScript compiler to transpile .ts files into .js',
-    compile()
+    compile
 );
