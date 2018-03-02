@@ -29,18 +29,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
     this.boundRenderers_ = {};
 
-    /** @private {?./amp-ad-render.Validator} */
-    this.boundValidator_ = null;
-
     /** @private {!./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = {
       // TODO(levitzky) handle non-numeric values.
       width: element.getAttribute('width'),
       height: element.getAttribute('height'),
     };
-
-    /** @private {string} @const */
-    this.networkType_ = element.getAttribute('type') || 'anon';
 
     /** @const @private {!AmpAdContext} */
     this.context_ = new AmpAdContext(this.win).setSize(this.initialSize_);
@@ -75,19 +69,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   forceCollapse_() {
     super.attemptChangeSize(0, 0);
-  }
-
-  /** @return {string} */
-  getNetworkType() {
-    return this.networkType_;
-  }
-
-  /**
-   * @return {string} The finalized ad request URL.
-   * @protected
-   */
-  getRequestUrl() {
-    return '';
   }
 
   /**
