@@ -68,7 +68,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
     let epoch = this.getEpoch_(); //1519776000000
     if (this.offsetSeconds_) {
-      epoch += this.offsetSeconds_;
+      epoch += this.offsetSeconds_ * 1000;
     }
     let differentBetween = new Date(epoch) - new Date();
     let data;
