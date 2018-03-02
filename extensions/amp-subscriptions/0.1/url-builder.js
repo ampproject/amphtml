@@ -22,7 +22,7 @@ export class UrlBuilder {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} readerIdPromise
+   * @param {!Promise<string>} readerIdPromise
    */
   constructor(ampdoc, readerIdPromise) {
     /** @private @const {!../../../src/service/url-replacements-impl.UrlReplacements} */
