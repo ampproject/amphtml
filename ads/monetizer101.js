@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import {ClickDelayFilter} from './click-delay';
-import {ClickLocationFilter} from './click-location';
-import {FilterType} from './filter';
-import {InactiveElementFilter} from './inactive-element';
+import {validateData, writeScript} from '../3p/3p';
 
-export function createFilter(name, spec, adExitElement) {
-  switch (spec.type) {
-    case FilterType.CLICK_DELAY:
-      return new ClickDelayFilter(name, spec);
-    case FilterType.CLICK_LOCATION:
-      return new ClickLocationFilter(name, spec, adExitElement);
-    case FilterType.INACTIVE_ELEMENT:
-      return new InactiveElementFilter(name, spec);
-    default:
-      return undefined;
-  }
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function monetizer101(global, data) {
+  validateData(data, ['widget', 'config']);
+  global.widget = data.widget;
+  global.config = data.config;
+  writeScript(global, 'https://link.monetizer101.com/widget/amp/amp.js');
 }
