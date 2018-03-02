@@ -114,7 +114,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('RANDOM', () => Math.random());
 
     // Provides a counter starting at 1 per given scope.
-    let counterStore = Object.create(null);
+    const counterStore = Object.create(null);
     this.set('COUNTER', scope => {
       return counterStore[scope] = (counterStore[scope] | 0) + 1;
     });
