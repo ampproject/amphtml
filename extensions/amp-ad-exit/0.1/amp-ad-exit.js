@@ -28,6 +28,7 @@ import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {makeClickDelaySpec} from './filters/click-delay';
+import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
 const TAG = 'amp-ad-exit';
@@ -87,12 +88,15 @@ export class AmpAdExit extends AMP.BaseElement {
   exit({args, event}) {
     const target = this.targets_[args['target']];
     user().assert(target, `Exit target not found: '${args['target']}'`);
+    user().assert(event, 'Unexpected null event');
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
+      event);
 
-    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
+    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
@@ -233,6 +237,9 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.defaultFilters_.push(
         createFilter('minDelay', makeClickDelaySpec(1000), this));
+    this.defaultFilters_.push(
+        createFilter('carouselBtns',
+            makeInactiveElementSpec('.amp-carousel-button'), this));
 
     const children = this.element.children;
     user().assert(children.length == 1,
