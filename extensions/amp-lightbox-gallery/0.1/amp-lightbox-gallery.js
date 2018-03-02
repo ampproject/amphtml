@@ -207,8 +207,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
     mask.classList.add('i-amphtml-lbg-mask');
-    // public css class for user styling
-    mask.classList.add('amp-lbg-mask');
     this.container_.appendChild(mask);
   }
 
@@ -330,15 +328,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
     this.descriptionBox_.classList.add('standard');
 
-    // public css api for styling the description box
-    this.descriptionBox_.classList.add('amp-lbg-desc-box');
-
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
     this.descriptionTextArea_.classList.add('non-expanded');
-
-    // public css api for styling the description text area
-    this.descriptionTextArea_.classList.add('amp-lbg-desc-text');
 
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
@@ -464,17 +456,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
     this.topBar_.classList.add('i-amphtml-lbg-controls');
 
-    // public css api for top control bar
-    this.topBar_.classList.add('amp-lbg-top-bar');
-
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Close', 'amp-lbg-button-close', close);
-    this.buildButton_('Gallery', 'amp-lbg-button-gallery', openGallery);
-    this.buildButton_('Content', 'amp-lbg-button-slide', closeGallery);
+    this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
+    this.buildButton_('Gallery', 'i-amphtml-lbg-button-gallery', openGallery);
+    this.buildButton_('Content', 'i-amphtml-lbg-button-slide', closeGallery);
 
     this.vsync_.mutate(() => {
       this.container_.appendChild(this.topBar_);
@@ -495,10 +484,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     button.setAttribute('aria-label', label);
 
     const icon = this.win.document.createElement('span');
-    icon.classList.add('amp-lbg-icon');
+    icon.classList.add('i-amphtml-lbg-icon');
     button.appendChild(icon);
     button.classList.add(className);
-    button.classList.add('amp-lbg-button');
+    button.classList.add('i-amphtml-lbg-button');
 
     button.addEventListener('click', event => {
       action();
