@@ -16,12 +16,14 @@
 
 import {AmpAdNetworkBase} from './amp-ad-network-base';
 import {
-  TestRenderer,
-  TestValidator,
+  TemplateRenderer,
+  TemplateValidator,
 } from './amp-ad-render';
 import {ValidatorResult} from './amp-ad-type-defs';
 
-const TAG = 'amp-ad-network-template-base';
+// These should be re-used for each instance.
+const validator = new TemplateValidator();
+const renderer = new TemplateRenderer();
 
 export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   /**
@@ -30,11 +32,7 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   constructor(element) {
     super(element);
 
-    this.bindValidator(new TestValidator());
-    this.bindRenderer(ValidatorResult.AMP, new TestRenderer());
+    this.bindValidator(validator);
+    this.bindRenderer(ValidatorResult.AMP, renderer);
   }
 }
-
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkTemplateBase);
-});

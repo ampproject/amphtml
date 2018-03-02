@@ -15,14 +15,15 @@
  */
 
 export class AmpAdContext {
-  constructor() {
+  /** @param {!Window} win */
+  constructor(win) {
     /**
      * The decoded arraybuffer post-validation.
      * @private {?string}
      */
     this.creative_ = null;
 
-    /** @private {?./amp-ad-utils.CreativeMetaDataDef} */
+    /** @private {?./amp-ad-type-defs.CreativeMetaDataDef} */
     this.creativeMetadata_ = null;
 
     /** @private {?./amp-ad-type-defs.CrossDomainDataDef} */
@@ -39,7 +40,7 @@ export class AmpAdContext {
 
     /**
      * Headers returned with XHR response.
-     * @private {?Headers}
+     * @private {?../../../src/service/xhr-impl.FetchResponseHeaders}
      */
     this.headers_ = null;
 
@@ -63,6 +64,9 @@ export class AmpAdContext {
 
     /** @private {?./amp-ad-type-defs.ValidatorResultType} */
     this.validatorResult_ = null;
+
+    /** @const @private {!Window} */
+    this.win_ = win;
   }
 
   /**
@@ -82,14 +86,14 @@ export class AmpAdContext {
   }
 
   /**
-   * @return {?./amp-ad-utils.CreativeMetaDataDef}
+   * @return {?./amp-ad-type-defs.CreativeMetaDataDef}
    */
   getCreativeMetadata() {
     return this.creativeMetadata_;
   }
 
   /**
-   * @param {!./amp-ad-utils.CreativeMetaDataDef} creativeMetadata
+   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} creativeMetadata
    * @return {AmpAdContext}
    */
   setCreativeMetadata(creativeMetadata) {
@@ -163,14 +167,14 @@ export class AmpAdContext {
   }
 
   /**
-   * @return {?Headers}
+   * @return {?../../../src/service/xhr-impl.FetchResponseHeaders}
    */
   getHeaders() {
     return this.headers_;
   }
 
   /**
-   * @param {!Headers} headers
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
    * @return {!AmpAdContext}
    */
   setHeaders(headers) {
@@ -272,5 +276,10 @@ export class AmpAdContext {
   setValidatorResult(validatorResult) {
     this.validatorResult_ = validatorResult;
     return this;
+  }
+
+  /** @return {!Window} */
+  getWindow() {
+    return this.win_;
   }
 }

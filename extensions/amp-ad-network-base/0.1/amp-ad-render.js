@@ -16,11 +16,7 @@
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
-import {
-  CreativeMetaDataDef,
-  LayoutInfoDef,
-  getAmpAdMetadata, // eslint-disable-line no-unused-vars
-} from './amp-ad-utils';
+import {Services} from '../../../src/services';
 import {ValidatorResult} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
@@ -200,15 +196,16 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
           const templateData = context.getTemplateData();
           const templateMacroValues = templateData && templateData.data;
           if (iframe && templateMacroValues) {
-            const ampAdTemplates = this.ampAdTemplates_ ||
-              new AmpAdTemplates(baseInstance.win);
-            ampAdTemplates.render(
+            this.ampAdTemplates_ = this.ampAdTemplates_ ||
+                new AmpAdTemplates(baseInstance.win);
+            this.ampAdTemplates_.render(
                 templateMacroValues,
                 iframe.contentWindow.document.body)
                 .then(renderedElement => {
                   const analytics = templateData && templateData.analytics;
                   if (analytics) {
-                    ampAdTemplates.insertAnalytics(renderedElement, analytics);
+                    this.ampAdTemplates_.insertAnalytics(
+                        renderedElement, analytics);
                   }
                   iframe.contentWindow.document.body./*OK*/innerHTML =
                     renderedElement./*OK*/innerHTML;
@@ -225,15 +222,47 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
  */
 export class TemplateValidator extends Validator {
 
-  /** @param {function(string):string=} parseOnFetch */
-  constructor(parseOnFetch = tmpl => tmpl) {
+  constructor() {
     super();
-
-    /** @const @private {function(string):string} */
-    this.parseOnFetch_ = parseOnFetch;
 
     /** @private {?AmpAdTemplates} */
     this.ampAdTemplates_ = null;
+  }
+
+  /**
+   * @param {string} templateString
+   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
+   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
+   * @private
+   */
+  getAmpAdMetadata_(templateString, parsedResponseBody) {
+    // TODO(levitzky) The following minification is for demo purposes only. Once
+    // launched this will either be performed server-side, or will be replaced
+    // by more sophisticated logic.
+    const minifiedCreative = templateString.replace(
+        /<script async.+?<\/script>/g, '');
+    const metadata = /** @type {?./amp-ad-type-defs.CreativeMetaDataDef} */ ({
+      minifiedCreative,
+      customElementExtensions: [],
+      extensions: [],
+    });
+    if (parsedResponseBody.analytics) {
+      pushIfNotExist(metadata['customElementExtensions'], 'amp-analytics');
+    }
+    pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
+    return metadata;
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @private
+   */
+  processMetadata_(metadata, context) {
+    const extensions = Services.extensionsFor(context.getWindow());
+    metadata.customElementExtensions.forEach(
+        extensionId => extensions.preloadExtension(extensionId));
+    // TODO(levitzky) Add preload logic for fonts / images.
   }
 
   /** @override */
@@ -249,47 +278,24 @@ export class TemplateValidator extends Validator {
       return Promise.resolve(context);
     }
 
-    const templateCreative =
+    const parsedResponseBody =
         /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
-    context.setCreativeMetadata(getAmpAdMetadataMock(body, '', ''));
-    context.setTemplateData(templateCreative);
+    this.ampAdTemplates_ = this.ampAdTemplates_ ||
+        new AmpAdTemplates(context.getWindow());
     return this.ampAdTemplates_
-        .fetch(templateCreative.templateUrl)
+        .fetch(parsedResponseBody.templateUrl)
         .then(template => {
+          const creativeMetadata =
+              this.getAmpAdMetadata_(template, parsedResponseBody);
+          this.processMetadata_(creativeMetadata, context);
           return context
-              .setTemplateData(templateCreative)
-              .setCreative(this.parseOnFetch_(template))
+              .setTemplateData(parsedResponseBody)
+              .setCreativeMetadata(creativeMetadata)
+              .setCreative(creativeMetadata.minifiedCreative)
               .setValidatorResult(ValidatorResult.AMP);
         });
   }
-}
-
-export class TestValidator extends Validator {
-  /** @override */
-  validate(context) {
-    const creative = utf8Decode(
-        /** @type {!ArrayBuffer} */ (context.getUnvalidatedBytes()));
-    return Promise.resolve(context
-        .setCreative(creative)
-        .setCreativeMetadata(getAmpAdMetadataMock(creative, '', ''))
-        .setValidatorResult(ValidatorResult.AMP));
-  }
-}
-
-export class TestRenderer extends TemplateRenderer {
-  render(context, unusedBaseInstance) {
-    dev().info('TEST', context.getCreativeMetadata().minifiedCreative);
-    return super.render(context, unusedBaseInstance);
-  }
-}
-
-function getAmpAdMetadataMock(creative, unusedTag, unusedType) {
-  return {
-    minifiedCreative: creative,
-    customElementExtensions: [],
-    extensions: [],
-  };
 }
 
 
@@ -327,3 +333,8 @@ function iframeRenderHelper(baseInstance, attributes, context) {
       .setCrossOriginIframeHandler(crossOriginIframeHandler);
 }
 
+function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
+}

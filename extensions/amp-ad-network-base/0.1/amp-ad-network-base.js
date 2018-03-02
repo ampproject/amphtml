@@ -16,11 +16,8 @@
 
 import {AmpAdContext} from './amp-ad-context';
 import {dev} from '../../../src/log';
-import {
-  getAmpAdMetadata, // eslint-disable-line no-unused-vars
-  sendXhrRequest, // eslint-disable-line no-unused-vars
-} from './amp-ad-utils';
-import {utf8Encode} from '../../../src/utils/bytes';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
 
@@ -46,7 +43,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.networkType_ = element.getAttribute('type') || 'anon';
 
     /** @const @private {!AmpAdContext} */
-    this.context_ = new AmpAdContext().setSize(this.initialSize_);
+    this.context_ = new AmpAdContext(this.win).setSize(this.initialSize_);
   }
 
   /**
@@ -80,6 +77,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     super.attemptChangeSize(0, 0);
   }
 
+  /** @return {string} */
+  getNetworkType() {
+    return this.networkType_;
+  }
+
   /**
    * @return {string} The finalized ad request URL.
    * @protected
@@ -92,23 +94,24 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * Processes the ad response as soon as the XHR request returns. This can be
    * overridden and used as a hook to perform any desired logic before passing
    * the response to the validator.
-   * @param {{bytes: !ArrayBuffer, headers: !Headers}} response
+   * @param {?../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
   handleAdResponse_(response) {
-    const unvalidatedBytes = response.bytes;
-    const headers = response.headers;
-    if (!unvalidatedBytes) {
+    if (!response.arrayBuffer) {
       // TODO(levitzky) Add error reporting.
       this.forceCollapse_();
       return;
     }
-    dev().assert(this.boundValidator_, 'Validator never bound!');
-    this.context_.setUnvalidatedBytes(unvalidatedBytes)
-        .setHeaders(headers);
-    this.boundValidator_.validate(this.context_)
-        .then(context => this.handleValidatorResponse_(context))
-        .catch(error => this.handleValidatorError_(error));
+    response.arrayBuffer().then(unvalidatedBytes => {
+      dev().assert(this.boundValidator_, 'Validator never bound!');
+      this.context_
+          .setUnvalidatedBytes(unvalidatedBytes)
+          .setHeaders(response.headers);
+      this.boundValidator_.validate(this.context_)
+          .then(context => this.handleValidatorResponse_(context))
+          .catch(error => this.handleValidatorError_(error));
+    });
   }
 
   /**
@@ -145,29 +148,16 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   onLayoutMeasure() {
     const url = this.getRequestUrl();
     this.context_.setRequestUrl(url);
-    sendXhrRequestMock(url)
+    sendXhrRequest(url, this.win)
         .then(response => this.handleAdResponse_(response))
         .catch(error => this.handleAdResponseError_(error));
   }
 }
-
-// Mocks for development. These will obviously go away.
-function sendXhrRequestMock(unusedAdUrl) {
-  return Promise.resolve({
-    bytes: utf8Encode(JSON.stringify(/** @type {!JsonObject} */ ({
-      templateUrl: 'www.fake.com',
-      data: {},
-    }))),
-    headers: () => {},
-  });
-}
-
-

@@ -25,6 +25,6 @@ export let NetworkRegistryDef;
 /** @const {!NetworkRegistryDef} */
 export const NetworkRegistry = {
   test: {
-    requestUrl: 'http://www.123fakestreet.com',
+    requestUrl: '/adzerk/0',
   },
 };

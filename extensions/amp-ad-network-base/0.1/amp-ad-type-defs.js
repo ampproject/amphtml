@@ -15,6 +15,14 @@
  */
 
 /** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
+
+/** @typedef {{
       templateUrl: string,
       data: (JsonObject|undefined),
       analytics: (JsonObject|undefined),
