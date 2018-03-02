@@ -1596,14 +1596,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should ignore loading-off if never created', () => {
       stubInA4A(false);
-      element.toggleLoading_(false);
+      element.toggleLoading(false);
       expect(vsyncTasks).to.be.empty;
     });
 
     it('should ignore loading-on if not allowed', () => {
       stubInA4A(false);
       element.setAttribute('noloading', '');
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       expect(vsyncTasks).to.be.empty;
     });
 
@@ -1611,21 +1611,21 @@ describes.realWin('CustomElement', {amp: true}, env => {
       stubInA4A(false);
       clock.tick(1);
       element.signals().signal('render-start');
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       expect(vsyncTasks).to.be.empty;
     });
 
     it('should ignore loading-on if already loaded', () => {
       stubInA4A(false);
       element.layoutCount_ = 1;
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       expect(vsyncTasks).to.be.empty;
     });
 
     it('should cancel loading on render-start', () => {
       stubInA4A(false);
       clock.tick(1);
-      const stub = sandbox.stub(element, 'toggleLoading_');
+      const stub = sandbox.stub(element, 'toggleLoading');
       element.renderStarted();
       expect(element.signals().get('render-start')).to.be.ok;
       expect(stub).to.be.calledOnce;
@@ -1634,7 +1634,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should create and turn on', () => {
       stubInA4A(false);
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       expect(vsyncTasks).to.have.length.of(1);
 
       vsyncTasks.shift()();
@@ -1650,7 +1650,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.prepareLoading_();
       const container = element.loadingContainer_;
       const indicator = element.loadingElement_;
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       expect(vsyncTasks).to.have.length.of(1);
 
       vsyncTasks.shift()();
@@ -1664,7 +1664,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should turn off', () => {
       stubInA4A(false);
       element.prepareLoading_();
-      element.toggleLoading_(false);
+      element.toggleLoading(false);
       expect(vsyncTasks).to.have.length.of(1);
 
       vsyncTasks.shift()();
@@ -1679,7 +1679,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       stubInA4A(false);
       element.prepareLoading_();
       resourcesMock.expects('deferMutate').once();
-      element.toggleLoading_(false, true);
+      element.toggleLoading(false, true);
 
       expect(vsyncTasks).to.have.length.of(1);
       vsyncTasks.shift()();
@@ -1687,18 +1687,31 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.loadingElement_).to.be.null;
     });
 
+    it('should NOT cleanup if re-used', () => {
+      stubInA4A(false);
+      element.prepareLoading_();
+      sandbox.stub(element.implementation_, 'doesReuseLoadingIndicator')
+          .callsFake(() => true);
+      element.toggleLoading(false, true);
+
+      expect(vsyncTasks).to.have.length.of(1);
+      vsyncTasks.shift()();
+      expect(element.loadingContainer_).to.not.be.null;
+      expect(element.loadingElement_).to.not.be.null;
+    });
+
     it('should ignore loading-off if never created', () => {
       stubInA4A(false);
       element.isInTemplate_ = true;
       expect(() => {
-        element.toggleLoading_(false);
+        element.toggleLoading(false);
       }).to.throw(/Must never be called in template/);
     });
 
     it('should turn off when exits viewport', () => {
       stubInA4A(false);
       element.isInViewport_ = true;
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.viewportCallback(false);
       expect(toggle).to.be.calledOnce;
       expect(toggle.firstCall.args[0]).to.equal(false);
@@ -1707,7 +1720,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should NOT turn off when exits viewport but already laid out', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.layoutCount_ = 1;
       element.viewportCallback(false);
       expect(toggle).to.have.not.been.called;
@@ -1715,7 +1728,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should turn on when enters viewport', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.viewportCallback(true);
       clock.tick(1000);
       expect(toggle).to.be.calledOnce;
@@ -1724,7 +1737,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should NOT turn on when enters viewport but already laid out', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.layoutCount_ = 1;
       element.viewportCallback(true);
       clock.tick(1000);
@@ -1734,7 +1747,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should start loading when measured if already in viewport', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.isInViewport_ = true;
       element.updateLayoutBox({top: 0, width: 300});
       expect(toggle).to.be.calledOnce;
@@ -1743,7 +1756,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should create loading when measured if in the top window', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       element.updateLayoutBox({top: 0, width: 300});
       expect(toggle).to.have.not.been.called;
       expect(vsyncTasks).to.have.length.of(1);
@@ -1755,7 +1768,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should toggle loading off after layout complete', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       container.appendChild(element);
       return element.buildingPromise_.then(() => {
         return element.layoutCallback();
@@ -1768,7 +1781,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should toggle loading off after layout failed', () => {
       stubInA4A(false);
-      const toggle = sandbox.spy(element, 'toggleLoading_');
+      const toggle = sandbox.spy(element, 'toggleLoading');
       sandbox.stub(element.implementation_, 'layoutCallback').callsFake(() => {
         return Promise.reject();
       });
@@ -1800,7 +1813,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }, () => {
         expect(element.layoutCount_).to.equal(1);
         expect(element.isLoadingEnabled_()).to.equal(false);
-        element.toggleLoading_(true);
+        element.toggleLoading(true);
         expect(prepareLoading).to.not.have.been.called;
       });
     });
@@ -1810,13 +1823,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
       resourcesMock.expects('deferMutate').once();
       container.appendChild(element);
       element.prepareLoading_();
-      element.toggleLoading_(true);
+      element.toggleLoading(true);
       return element.build().then(() => {
         return element.layoutCallback();
       }).then(() => {
         expect(vsyncTasks).to.have.length(2);
 
-        // The first mutate started by toggleLoading_(true), but it must
+        // The first mutate started by toggleLoading(true), but it must
         // immediately proceed to switch it to off.
         vsyncTasks.shift()();
         expect(element.loadingContainer_).to.have.class('amp-hidden');

@@ -545,7 +545,7 @@ function createBaseCustomElementClass(win) {
       if (this.isLoadingEnabled_()) {
         if (this.isInViewport_) {
           // Already in viewport - start showing loading.
-          this.toggleLoading_(true);
+          this.toggleLoading(true);
         } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD &&
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
@@ -1014,7 +1014,7 @@ function createBaseCustomElementClass(win) {
         }
         this.readyState = 'complete';
         this.layoutCount_++;
-        this.toggleLoading_(false, /* cleanup */ true);
+        this.toggleLoading(false, /* cleanup */ true);
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
         if (!this.isFirstLayoutCompleted_) {
@@ -1031,7 +1031,7 @@ function createBaseCustomElementClass(win) {
               CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
-        this.toggleLoading_(false, /* cleanup */ true);
+        this.toggleLoading(false, /* cleanup */ true);
         throw reason;
       });
     }
@@ -1068,7 +1068,7 @@ function createBaseCustomElementClass(win) {
       this.isInViewport_ = inViewport;
       if (this.layoutCount_ == 0) {
         if (!inViewport) {
-          this.toggleLoading_(false);
+          this.toggleLoading(false);
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
@@ -1079,7 +1079,7 @@ function createBaseCustomElementClass(win) {
             if (this.isInViewport_ &&
                 this.ownerDocument &&
                 this.ownerDocument.defaultView) {
-              this.toggleLoading_(true);
+              this.toggleLoading(true);
             }
           }, 100);
         }
@@ -1414,7 +1414,7 @@ function createBaseCustomElementClass(win) {
     renderStarted() {
       this.signals_.signal(CommonSignals.RENDER_START);
       this.togglePlaceholder(false);
-      this.toggleLoading_(false);
+      this.toggleLoading(false);
     }
 
     /**
@@ -1440,7 +1440,8 @@ function createBaseCustomElementClass(win) {
       }
       if (this.loadingDisabled_ || !isLoadingAllowed(this) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
-        this.layoutCount_ > 0 ||
+        (!this.implementation_.doesReuseLoadingIndicator() &&
+          this.layoutCount_ > 0) ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
         return false;
       }
@@ -1488,21 +1489,21 @@ function createBaseCustomElementClass(win) {
      * Turns the loading indicator on or off.
      * @param {boolean} state
      * @param {boolean=} opt_cleanup
-     * @private @final @this {!Element}
+     * @public @final @this {!Element}
      */
-    toggleLoading_(state, opt_cleanup) {
+    toggleLoading(state, opt_cleanup) {
       assertNotTemplate(this);
-      if (state &&
-          (this.layoutCount_ > 0 ||
-              this.signals_.get(CommonSignals.RENDER_START))) {
-        // Loading has already been canceled. Ignore.
-        return;
-      }
       this.loadingState_ = state;
       if (!state && !this.loadingContainer_) {
         return;
       }
 
+      if (state && !this.implementation_.doesReuseLoadingIndicator() &&
+          (this.layoutCount_ > 0 ||
+              this.signals_.get(CommonSignals.RENDER_START))) {
+        // Loading has already been canceled. Ignore.
+        return;
+      }
       // Check if loading should be shown.
       if (state && !this.isLoadingEnabled_()) {
         this.loadingState_ = false;
@@ -1526,7 +1527,8 @@ function createBaseCustomElementClass(win) {
         this.loadingContainer_.classList.toggle('amp-hidden', !state);
         this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && opt_cleanup) {
+        if (!state && opt_cleanup &&
+            !this.implementation_.doesReuseLoadingIndicator()) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;

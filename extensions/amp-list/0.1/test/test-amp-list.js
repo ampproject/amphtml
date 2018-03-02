@@ -70,8 +70,12 @@ describes.realWin('amp-list component', {
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
+    listMock.expects('togglePlaceholder').withExactArgs(true).once();
+    listMock.expects('toggleLoading').withExactArgs(true).once();
     listMock.expects('fetch_')
         .withExactArgs(opts.expr).returns(fetch).atLeast(1);
+    listMock.expects('toggleLoading').withExactArgs(false).once();
+    listMock.expects('togglePlaceholder').withExactArgs(false).once();
 
     let itemsToRender = fetched;
     if (opts.singleItem) {
@@ -234,6 +238,9 @@ describes.realWin('amp-list component', {
     const rendered = expectFetchAndRender(items, [foo]);
     const layout = list.layoutCallback();
 
+    listMock.expects('togglePlaceholder').withExactArgs(true).once();
+    listMock.expects('toggleLoading').withExactArgs(true).once();
+
     // Execute another fetch-triggering action immediately...
     element.setAttribute('src', 'https://new.com/list.json');
     list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
@@ -256,7 +263,10 @@ describes.realWin('amp-list component', {
   });
 
   it('should fail to load b/c data array is absent', () => {
+    listMock.expects('togglePlaceholder').withExactArgs(true).once();
+    listMock.expects('toggleLoading').withExactArgs(true).once();
     listMock.expects('fetch_').returns(Promise.resolve({})).once();
+    listMock.expects('toggleLoading').withExactArgs(false).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
         .rejectedWith(/Response must contain an array/);
@@ -264,7 +274,10 @@ describes.realWin('amp-list component', {
 
   it('should fail to load b/c data single-item object is absent', () => {
     element.setAttribute('single-item', 'true');
+    listMock.expects('togglePlaceholder').withExactArgs(true).once();
+    listMock.expects('toggleLoading').withExactArgs(true).once();
     listMock.expects('fetch_').returns(Promise.resolve()).once();
+    listMock.expects('toggleLoading').withExactArgs(false).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
     return expect(list.layoutCallback()).to.eventually.be
         .rejectedWith(/Response must contain an array or object/);
@@ -306,8 +319,11 @@ describes.realWin('amp-list component', {
   });
 
   it('should show placeholder on fetch failure (w/o fallback)', () => {
+    listMock.expects('toggleLoading').withExactArgs(true).once();
+    listMock.expects('togglePlaceholder').withExactArgs(true).once();
     // Stub fetch_() to fail.
     listMock.expects('fetch_').returns(Promise.reject()).once();
+    listMock.expects('toggleLoading').withExactArgs(false).once();
     listMock.expects('togglePlaceholder').never();
     return list.layoutCallback().catch(() => {});
   });
