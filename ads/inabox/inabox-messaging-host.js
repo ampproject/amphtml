@@ -65,6 +65,10 @@ class NamedObservable {
 
 export class InaboxMessagingHost {
 
+  /**
+   * @param win {!Window}
+   * @param iframes {!Array<!HTMLIFrameElement>}
+   */
   constructor(win, iframes) {
     this.win_ = win;
     this.iframes_ = iframes;
@@ -139,13 +143,13 @@ export class InaboxMessagingHost {
       return true;
     }
 
-    const positionObserverHandle = this.positionObserver_.observe(
+    const observeUnregisterFn = this.positionObserver_.observe(
         iframe, data => {
           this.sendPosition_(request, source, origin, data);
         }
     );
     this.registeredIframeSentinels_[request.sentinel] = {
-      iframe, positionObserverHandle};
+      iframe, observeUnregisterFn};
     return true;
   }
 
@@ -321,8 +325,7 @@ export class InaboxMessagingHost {
     // And the position observer listener.
     for (const sentinel in this.registeredIframeSentinels_) {
       if (iframe == this.registeredIframeSentinels_[sentinel].iframe) {
-        this.positionObserver_.stopObserving(
-            this.registeredIframeSentinels_[sentinel].positionObserverHandle);
+        this.registeredIframeSentinels_[sentinel].observeUnregisterFn();
         delete this.registeredIframeSentinels_[sentinel];
       }
     }
