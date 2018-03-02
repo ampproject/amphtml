@@ -269,8 +269,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const ctaText = CTA_TYPES[ctaType];
     if (!ctaType) {
-      user().error(ctaText, `${TAG}: the 'CTA Type' returned by the ad-server` +
-          'must be one of the predefined choices.');
+      user().error(TAG, 'invalid "CTA Type" in ad response');
       return false;
     }
 
