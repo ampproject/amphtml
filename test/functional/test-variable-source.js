@@ -129,7 +129,7 @@ describes.fakeWin('VariableSource', {
 
   describes.fakeWin('getTimingData', {}, env => {
     let win;
- 
+
     beforeEach(() => {
       win = env.win;
       win.performance = {
@@ -139,7 +139,7 @@ describes.fakeWin('VariableSource', {
         },
       };
     });
- 
+
     it('should wait for load event', () => {
       win.readyState = 'other';
       const p = getTimingDataAsync(win, 'navigationStart', 'loadEventStart');
