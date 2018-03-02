@@ -165,6 +165,31 @@ const LANDSCAPE_ORIENTATION_WARNING = [
   },
 ];
 
+const DESKTOP_SIZE_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({
+      'class': 'i-amphtml-story-no-rotation-overlay ' +
+          'i-amphtml-story-system-reset'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-desktop-size-icon'}),
+          },
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
+            text: 'Expand your window to view this experience',
+          },
+        ],
+      },
+    ],
+  },
+];
 
 const UNSUPPORTED_BROWSER_WARNING = [
   {
@@ -945,6 +970,16 @@ export class AmpStory extends AMP.BaseElement {
         this.desktopMedia_.matches;
   }
 
+  /**
+   * Return right overlay for mobile or desktop
+   */
+  viewportWarningOverlay_() {
+    const platform = Services.platformFor(this.win);
+
+    return (platform.isIos() || platform.isAndroid())
+      ? LANDSCAPE_ORIENTATION_WARNING
+      : DESKTOP_SIZE_WARNING;
+  }
 
   /**
    * Build overlay for Landscape mode mobile
@@ -953,11 +988,10 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.insertBefore(
           renderSimpleTemplate(this.win.document,
-              LANDSCAPE_ORIENTATION_WARNING),
+              this.viewportWarningOverlay_()),
           this.element.firstChild);
     });
   }
-
 
   /**
    * Build overlay for Landscape mode mobile
