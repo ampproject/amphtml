@@ -111,20 +111,12 @@ export class GlobalVariableSource extends VariableSource {
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
-    this.set('RANDOM', () => {
-      return Math.random();
-    });
+    this.set('RANDOM', () => Math.random());
 
     // Provides a counter starting at 1 per given scope.
-    let counterStore = null;
+    let counterStore = Object.create(null);
     this.set('COUNTER', scope => {
-      if (!counterStore) {
-        counterStore = Object.create(null);
-      }
-      if (!counterStore[scope]) {
-        counterStore[scope] = 0;
-      }
-      return ++counterStore[scope];
+      return counterStore[scope] = (counterStore[scope] | 0) + 1;
     });
 
     // Returns the canonical URL for this AMP document.
