@@ -634,8 +634,7 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via amp-story's service.
    * @param {string} property
    * @param {string} name
-   * @return {!Promise<T>}
-   * @template T
+   * @return {!AsyncResolverDef}
    * @private
    */
   getStoryValue_(property, name) {
