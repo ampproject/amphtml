@@ -18,6 +18,7 @@
 export const FilterType = {
   CLICK_DELAY: 'clickDelay',
   CLICK_LOCATION: 'clickLocation',
+  INACTIVE_ELEMENT: 'inactiveElement',
 };
 
 export class Filter {
@@ -36,7 +37,7 @@ export class Filter {
 
   /**
    * This function is expected to be called in the onLayoutMeasure function of
-   * AmpAdExit element to do any meaure work for the filter.
+   * AmpAdExit element to do any measure work for the filter.
    */
   onLayoutMeasure() {}
 }
