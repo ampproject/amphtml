@@ -65,6 +65,16 @@ function encodeValue(val) {
 }
 
 /**
+ * Returns a function that executes method on a new Date instance.
+ *
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function dateMethod(method) {
+  return () => new Date()[method]();
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
@@ -331,19 +341,13 @@ export class GlobalVariableSource extends VariableSource {
       }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
-    this.set('TIMESTAMP', () => {
-      return Date.now();
-    });
+    this.set('TIMESTAMP', dateMethod('getTime'));
 
     //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
-    this.set('TIMESTAMP_ISO', () => {
-      return new Date().toISOString();
-    });
+    this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
-    this.set('TIMEZONE', () => {
-      return new Date().getTimezoneOffset();
-    });
+    this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', () => viewport.getScrollTop());
