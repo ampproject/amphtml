@@ -23,6 +23,7 @@ import {
 } from './url';
 import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -212,6 +213,9 @@ export function sanitizeHtml(html) {
           attribs[i + 1] = savedAttribs[i + 1];
         } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
           attribs[i + 1] = savedAttribs[i + 1];
+        } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+                   WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+          attribs[i + 1] = savedAttribs[i + 1];
         }
       }
     }
@@ -245,12 +249,12 @@ export function sanitizeHtml(html) {
     }
   }
 
- /**
-  *  Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
-  * brackets before custom validation and reading them afterwards.
-  * @param {!Array<string>} attribs
-  * @param {!Array} bindAttribsIndices
-  */
+  /**
+    *  Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
+    * brackets before custom validation and reading them afterwards.
+    * @param {!Array<string>} attribs
+    * @param {!Array} bindAttribsIndices
+    */
   function handleAmpBindAttributes(attribs, bindAttribsIndices) {
     for (let i = 0; i < attribs.length; i += 2) {
       const attr = attribs[i];
@@ -270,7 +274,7 @@ export function sanitizeHtml(html) {
         return;
       }
       const isBinding = map();
-      handleAmpBindAttributes(attribs, bindAttribsIndices);
+      handleAmpBindAttributes(attribs, isBinding);
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
       } else if (!startsWith(tagName, 'amp-')) {
@@ -360,6 +364,14 @@ export function sanitizeFormattingHtml(html) {
 }
 
 /**
+ * @return {boolean} Whether inline-styles is enabled.
+ * @private
+ */
+function isInlineStylesEnabled_() {
+  return isExperimentOn(self.window, 'inline-styles');
+}
+
+/**
  * Whether the attribute/value are valid.
  * @param {string} tagName
  * @param {string} attrName
@@ -372,9 +384,12 @@ export function isValidAttr(tagName, attrName, attrValue) {
     return false;
   }
 
-  // Inline styles are not allowed.
+  // Inline styles are not allowed unless experiment is enabled and if so
+  // they are restricted.
   if (attrName == 'style') {
-    return false;
+    return isInlineStylesEnabled_()
+      ? !((/(^|\W)!important/i.test(attrValue)
+        || /(^|\s*)position:\s*fixed\s*;/i.test(attrValue))) : false;
   }
 
   // See validator-main.protoascii

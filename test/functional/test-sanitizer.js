@@ -21,7 +21,7 @@ import {
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
-
+import {toggleExperiment} from '../../src/experiments';
 
 describe('sanitizeHtml', () => {
 
@@ -220,6 +220,33 @@ describe('sanitizeHtml', () => {
     // Should not change "foo.bar" but should add target="_top".
     expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
         .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+  });
+
+  describe('should sanitize inline styles', () => {
+    beforeEach(() => {
+      toggleExperiment(
+          self.window,
+          'inline-styles',
+          true /* opt_on */,
+          true /* opt_transientExperiment */);
+    });
+
+    it('should clear invalid !important attribute',() => {
+      expect(sanitizeHtml('<div style="color:blue !important;">Test</div>'))
+          .to.equal('<div style="color: blue">Test</div>');
+    });
+
+    it('should clear invalid position fixed attribute', () => {
+      // Should clean up style if provided with an invalid value.
+      expect(sanitizeHtml('<div style="position:fixed;">Test</div>'))
+          .to.equal('<div style="">Test</div>');
+    });
+
+    it('should allow valid inline styles', () => {
+      // Should clean up style if provided with an invalid value.
+      expect(sanitizeHtml('<div style="background-color: blue">Test</div>'))
+          .to.equal('<div style="background-color: blue">Test</div>');
+    });
   });
 });
 
