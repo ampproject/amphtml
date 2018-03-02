@@ -1,0 +1,66 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-story-ad-link {
+  background-color: #FFFFFF !important;
+  border-radius: 20px !important;
+  bottom: 32px !important;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
+  color: #4285F4 !important;
+  font-size: 0px !important;
+  font-family: 'Roboto-Bold', sans-serif !important;
+  height: 36px !important;
+  left: 50% !important;
+  letter-spacing: 0.2px !important;
+  line-height: 36px;
+  margin-left: -60px !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  transform: scale(0) !important;
+  text-align: center;
+  text-decoration: none !important;
+  width: 120px !important;
+}
+
+amp-story-page[active] .i-amphtml-story-ad-link {
+  animation-delay: 100ms !important;
+  animation-duration: 300ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  animation-fill-mode: forwards !important;
+  animation-name: ad-cta !important;
+}
+
+@keyframes ad-cta {
+  from {
+    opacity: 0;
+    font-size: 0px;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    font-size: 13px;
+    transform: scale(1);
+  }
+}
+
+.i-amphtml-story-ad-attribution {
+  color: #FFFFFF !important;
+  font-size: 18px !important;
+  font-family: 'Roboto-Bold', sans-serif !important;
+  letter-spacing: 0.5px !important;
+}
+
