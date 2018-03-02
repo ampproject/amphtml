@@ -95,7 +95,7 @@ export class Actions {
   /**
    * @param {string} url
    * @param {string} eventLabel
-   * @return {!Promise<string>}
+   * @return {!Promise}
    * @private
    */
   execute_(url, eventLabel) {
