@@ -36,8 +36,9 @@ function documentContainsPolyfill(node) {
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.HTMLDocument.prototype.contains) {
-    win.Object.defineProperty(win.HTMLDocument.prototype, 'contains', {
+  const documentClass = win.HTMLDocument || win.Document;
+  if (!documentClass.prototype.contains) {
+    win.Object.defineProperty(documentClass.prototype, 'contains', {
       enumerable: false,
       configurable: true,
       writable: true,
