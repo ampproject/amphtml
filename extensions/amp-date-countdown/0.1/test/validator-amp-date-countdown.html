@@ -19,115 +19,125 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html">
-  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <title>amp-date-countdown example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
     amp-date-countdown {
-        display: block!important;
+      display: block;
     }
     h1{
-        color: #396;
-        font-weight: 100;
-        font-size: 20px;
+      color: #396;
+      font-weight: 100;
+      font-size: 20px;
     }
 
     #clockdiv{
-        font-family: sans-serif;
-        color: #fff;
-        display: inline-block;
-        font-weight: 100;
-        text-align: center;
-        font-size: 30px;
-        background: #00ECB9;
-        padding: 20px;
+      font-family: sans-serif;
+      color: #fff;
+      display: inline-block;
+      font-weight: 100;
+      text-align: center;
+      font-size: 30px;
+      background: #00ECB9;
+      padding: 20px;
     }
 
     #clockdiv > div{
-        padding: 10px;
-        border-radius: 3px;
-        background: #00BF96;
-        display: inline-block;
+      padding: 10px;
+      border-radius: 3px;
+      background: #00BF96;
+      display: inline-block;
     }
 
     #clockdiv div > span{
-        padding: 15px;
-        border-radius: 3px;
-        background: #00816A;
-        display: inline-block;
+      padding: 15px;
+      border-radius: 3px;
+      background: #00816A;
+      display: inline-block;
     }
 
     .smalltext{
-        padding-top: 5px;
-        font-size: 16px;
+      padding-top: 5px;
+      font-size: 16px;
     }
     .date-count-down {
-        color: blue;
+      color: blue;
     }
     .date-count-down span{
-        color: red;
+      color: red;
     }
-    </style>
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
-    <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js"></script>
+  </style>
+  <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-    <amp-date-countdown end-date="2020-06-01T00:00:00+08:00" biggest-unit="days" when-ended="stop" locale='en' width="600">
-        <template type="amp-mustache">
-        <h1>Countdown Clock</h1>
-        <div id="clockdiv">
-            {{#d}}
-                <div>
-                    <span class="d">{{d}}</span>
-                    <div class="smalltext">{{days}}</div>
-                </div>
-            {{/d}}
-            {{#h}}
-                <div>
-                    <span class="h">{{h}}</span>
-                    <div class="smalltext">{{hours}}</div>
-                </div>
-            {{/h}}
-            <div>
-                <span class="m">{{m}}</span>
-                <div class="smalltext">{{minutes}}</div>
-            </div>
-            <div>
-                <span class="s">{{s}}</span>
-                <div class="smalltext">{{seconds}}</div>
-            </div>
-        </div>
-        <div class="date-count-down">
-            {{#d}} {{dd}} <span>{{days}}</span> {{/d}}
-            {{#hh}} {{h}} <span>{{hours}}</span> {{/hh}}
-            {{#mm}} {{mm}} <span>{{minutes}}</span> {{/mm}}
-            {{ss}} <span>{{seconds}}</span>
+  <h1 id="sample">
+      When Timer hits 0, will hide the timer itself and hide this message.
+  </h1>
+  <h1 id="sample2" hidden>
+      When Timer hits 0, will hide the timer itself and display this message.
+  </h1>
+  <amp-date-countdown id="ampdate" end-date="2020-06-01T00:00:00+08:00" on="tap: sample.show; timeout: ampdate.hide, sample.hide, sample2.show;" biggest-unit="days" when-ended="stop" locale='en'>
+    <template type="amp-mustache">
+      <h1>Countdown Clock</h1>
+      <div id="clockdiv">
+        {{#d}}
+          <div>
+            <span class="d">{{d}}</span>
+            <div class="smalltext">{{days}}</div>
+          </div>
+        {{/d}}
+        {{#h}}
+          <div>
+            <span class="h">{{h}}</span>
+            <div class="smalltext">{{hours}}</div>
+          </div>
+        {{/h}}
+        <div>
+          <span class="m">{{m}}</span>
+          <div class="smalltext">{{minutes}}</div>
         </div>
         <div>
-            {{dd}} : {{hh}} : {{mm}} : {{ss}}
+          <span class="s">{{s}}</span>
+          <div class="smalltext">{{seconds}}</div>
         </div>
-        </template>
-    </amp-date-countdown>
-    <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' width="360">
-        <template type="amp-mustache">
-            <div class="date-count-down">
+      </div>
+      <div class="date-count-down">
+        {{#d}} {{dd}} <span>{{days}}</span> {{/d}}
+        {{#hh}} {{h}} <span>{{hours}}</span> {{/hh}}
+        {{#mm}} {{mm}} <span>{{minutes}}</span> {{/mm}}
+        {{ss}} <span>{{seconds}}</span>
+      </div>
+      <div>
+        {{dd}} : {{hh}} : {{mm}} : {{ss}}
+      </div>
+    </template>
+  </amp-date-countdown>
+  <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' width="360">
+      <template type="amp-mustache">
+        <div class="date-count-down">
+          {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+          {{h}} <span>{{hours}}</span>
+          {{m}} <span>{{minutes}}</span>
+          {{s}} <span>{{seconds}}</span>
+        </div>
+      </template>
+  </amp-date-countdown>
+  <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' width="360">
+    <template type="amp-mustache">
+        <div class="date-count-down">
             {{#d}} {{d}} <span>{{days}}</span> {{/d}}
             {{h}} <span>{{hours}}</span>
             {{m}} <span>{{minutes}}</span>
             {{s}} <span>{{seconds}}</span>
-            </div>
-        </template>
-    </amp-date-countdown>
-    <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' width="360">
-        <template type="amp-mustache">
-            <div class="date-count-down">
-                {{#d}} {{d}} <span>{{days}}</span> {{/d}}
-                {{h}} <span>{{hours}}</span>
-                {{m}} <span>{{minutes}}</span>
-                {{s}} <span>{{seconds}}</span>
-            </div>
-        </template>
-    </amp-date-countdown>
+          </div>
+    </template>
+  </amp-date-countdown>
+  <div class="content">
+   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga ipsam sequi, nostrum fugit, explicabo aliquam, quisquam modi animi praesentium voluptate accusantium expedita asperiores? Dolorum exercitationem, voluptatibus esse commodi perspiciatis voluptatum.</p>
+  </div>
 </body>
 </html>

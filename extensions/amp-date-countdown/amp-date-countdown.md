@@ -41,9 +41,9 @@ limitations under the License.
 
 ## Behavior
 
-Will return the following params as result and pass to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
-
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
+
+- The `amp-date-countdown` will return list of parameters as result and pass to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
 
 ##### Legends - Details
 
@@ -76,6 +76,9 @@ Format | Sample Output | Remarks
 
 
 ## Attributes
+
+##### on:timeout (events)
+- `amp-date-countdown` supports `timeout` actions and `when-ended` **must be** set to `stop` in order for this actions to be functioned. User can define any actions when the timer timeout.
 
 ##### end-date
 - An ISO formatted date to count down to. e.g. `2020-06-01T00:00:00+08:00`
