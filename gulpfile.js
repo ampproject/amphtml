@@ -986,12 +986,55 @@ function concatFilesToString(files) {
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+
+  let promise = Promise.resolve();
+
+  let entryPoint = srcDir + srcFilename;
   const destFilename = options.toName || srcFilename;
+  const outputFile = destDir + '/' + destFilename;
+
+  // For TS extensions, min builds requires the JS-transpiled max build first.
+  if (options.typeScript) {
+    promise = new Promise(resolve => {
+      const startTime = Date.now();
+      const tsConfig = {
+        'allowJs': true, // TS extensions can reference JS files in src/ folder.
+        'outDir': destDir,
+        'module': 'ESNext',
+        'sourceMap': true,
+        'target': 'es2017',
+      };
+      const config = ts.parseJsonConfigFileContent(tsConfig, ts.sys, srcDir);
+      if (config.errors.length > 0) {
+        log(red('TS config error:'), config.errors);
+      }
+      const {diagnostics} = tsickleMain.toClosureJS(config.options, [entryPoint],
+          {}, (filePath, contents) => {
+            fs.writeFileSync(outputFile, contents, {encoding: 'utf-8'});
+          });
+      if (diagnostics.length) {
+        log(colors.red('TS compile error:'),
+            tsickle.formatDiagnostics(diagnostics));
+      }
+      endBuildStep('Compiled', srcFilename, startTime);
+      resolve();
+    });
+
+    // TODO(willchou): TSickle's use of goog.module causes CC to fail.
+    // Contribute flag to remove this (see src/es5processor.ts in tsickle.
+
+    if (options.minify) {
+      // TODO(willchou): Explain.
+      entryPoint = outputFile;
+    } else {
+      return promise;
+    }
+  }
 
   if (options.minify) {
     const startTime = Date.now();
-    return closureCompile(
-        srcDir + srcFilename, destDir, options.minifiedName, options)
+    return promise.then(() =>
+      closureCompile(entryPoint, destDir, options.minifiedName, options))
         .then(function() {
           const destPath = destDir + '/' + options.minifiedName;
           appendToCompiledFile(srcFilename, destPath);
@@ -1007,37 +1050,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  if (options.typeScript) {
-    const startTime = Date.now();
-
-    const tsConfig = {
-      'allowJs': false,
-      'outDir': destDir,
-      'module': 'esnext',
-      'moduleResolution': 'node',
-      'sourceMap': true,
-      'target': 'es2017',
-    };
-
-    const config = ts.parseJsonConfigFileContent(tsConfig, ts.sys, srcDir);
-    if (config.errors.length > 0) {
-      console.error(config.errors);
-    }
-
-    const entryPoint = srcDir + srcFilename;
-    const {diagnostics} = tsickleMain.toClosureJS(config.options, [entryPoint], {}, (filePath, contents) => {
-      fs.writeFileSync(destDir + '/' + destFilename, contents, {encoding: 'utf-8'});
-    });
-    if (diagnostics.length) {
-      console.error(colors.red(tsickle.formatDiagnostics(diagnostics)));
-    }
-
-    // TODO(willchou): Continue here.
-
-    endBuildStep('Compiled', srcFilename, startTime);
-    return;
-  }
-
   const browsers = [];
   if (process.env.TRAVIS) {
     browsers.push('last 2 versions', 'safari >= 9');
@@ -1045,7 +1057,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     browsers.push('Last 4 Chrome versions');
   }
 
-  let bundler = browserify(srcDir + srcFilename, {debug: true})
+  let bundler = browserify(entryPoint, {debug: true})
       .transform(babel, {
         presets: [
           ['env', {
@@ -1091,7 +1103,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .pipe($$.rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
-              appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
+              appendToCompiledFile(srcFilename, outputFile);
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);
