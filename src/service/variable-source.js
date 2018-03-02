@@ -42,14 +42,9 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  const metric = getTimingDataSync(win, startEvent, endEvent);
-  if (metric === '') {
-    // Metric is not yet available. Retry after a delay.
-    return loadPromise(win).then(() => {
-      return getTimingDataSync(win, startEvent, endEvent);
-    });
-  }
-  return Promise.resolve(metric);
+  return loadPromise(win).then(() => {
+    return getTimingDataSync(win, startEvent, endEvent);
+  });
 }
 
 /**
@@ -75,11 +70,9 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     ? timingInfo[startEvent]
     : timingInfo[endEvent] - timingInfo[startEvent];
 
-  if (!isFiniteNumber(metric)) {
+  if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
     return;
-  } else if (metric < 0) {
-    return '';
   } else {
     return metric;
   }
