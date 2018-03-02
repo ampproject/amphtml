@@ -122,6 +122,12 @@ function appnexusAst(global, data) {
 
 function isAdAvailable(adObj) {
   global.context.renderStart({width: adObj.width, height: adObj.height});
+
+  /**
+   * render the ad for this tag
+   * @param {string} adObj.targetId the dom element id to render the ad into
+   * @param {Object} global.window
+   */
   global.apntag.showTag(adObj.targetId, global.window);
 }
 
