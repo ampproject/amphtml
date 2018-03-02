@@ -1,62 +1,43 @@
-.i-amphtml-story-ad-button {
+.i-amphtml-story-ad-link {
   background-color: #FFFFFF !important;
-  border: none !important;
-  border-radius: 20px;
+  border-radius: 20px !important;
   bottom: 32px !important;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
+  color: #4285F4 !important;
+  font-size: 0px !important;
+  font-family: 'Roboto-Bold', sans-serif !important;
   height: 36px !important;
   left: 50% !important;
+  letter-spacing: 0.2px !important;
+  line-height: 36px;
   margin-left: -60px !important;
   opacity: 0 !important;
   position: absolute !important;
   transform: scale(0) !important;
+  text-align: center;
+  text-decoration: none !important;
   width: 120px !important;
 }
 
-amp-story-page[active] .i-amphtml-story-ad-button,
-amp-story-page[active] .i-amphtml-story-ad-button-text {
+amp-story-page[active] .i-amphtml-story-ad-link {
   animation-delay: 100ms !important;
   animation-duration: 300ms !important;
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   animation-fill-mode: forwards !important;
+  animation-name: ad-cta !important;
 }
 
-amp-story-page[active] .i-amphtml-story-ad-button {
-  animation-name: ad-cta-btn !important;
-}
-
-.i-amphtml-story-ad-button-text {
-  color: #4285F4 !important;
-  font-size: 0px !important;
-  font-family: 'Roboto-Bold', sans-serif !important;
-  letter-spacing: 0.2px !important;
-}
-
-amp-story-page[active] .i-amphtml-story-ad-button-text {
-  animation-name: ad-cta-btn-text !important;
-}
-
-@keyframes ad-cta-btn {
-  from {
-    opacity: 0;
-    transform: scale(0)
-  }
-
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes ad-cta-btn-text {
+@keyframes ad-cta {
   from {
     opacity: 0;
     font-size: 0px;
+    transform: scale(0);
   }
 
   to {
     opacity: 1;
     font-size: 13px;
+    transform: scale(1);
   }
 }
 

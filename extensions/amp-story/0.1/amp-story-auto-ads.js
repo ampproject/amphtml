@@ -17,7 +17,6 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
-import {TapRecognizer} from '../../../src/gesture-recognizers';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
@@ -42,16 +41,26 @@ const AD_TAG = 'amp-ad';
 const MUSTACHE_TAG = 'amp-mustache';
 
 /** @const */
-const CTA_TYPE_ATTR = 'data-vars-ctatype';
+const TIMEOUT_LIMIT = 10000; // 10 seconds
 
 /** @const */
-const CTA_URL_ATTR = 'data-vars-ctaurl';
+const DATA_ATTR = {
+  CTA_TYPE: 'data-vars-ctatype',
+  CTA_URL: 'data-vars-ctaurl',
+};
 
 /** @const */
 const CTA_TYPES = {
   EXPLORE: 'Explore Now',
   SHOP: 'Shop Now',
   READ: 'Read Now',
+};
+
+/** @const */
+const AD_STATE = {
+  PENDING: 0,
+  PLACED: 1,
+  FAILED: 2,
 };
 
 
@@ -77,19 +86,22 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPageEls_ = [];
 
     /** @private {number} */
+    this.timeCurrentPageCreated_ = -Infinity;
+
+    /** @private {number} */
     this.adsPlaced_ = 0;
 
     /** @private {number} */
     this.adPagesCreated_ = 0;
+
+    /** @private {?Element} */
+    this.currentAdElement_ = null;
 
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
     /** @private {Object<string, string>} */
     this.config_ = {};
-
-    /** @private {?Element} */
-    this.currentAdElement_ = null;
   }
 
   /** @override */
@@ -171,6 +183,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     page.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
+      this.timeCurrentPageCreated_ = Date.now();
     });
   }
 
@@ -180,7 +193,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdPage_() {
-    // TODO(ccordry) add new <amp-story-cta-layer>
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
@@ -189,6 +201,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     gridLayer.appendChild(ampAd);
     ampStoryAdPage.appendChild(gridLayer);
 
+    this.currentAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
 
     // set up listener for ad-loaded event
@@ -196,7 +209,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const signals = impl.signals();
       return signals.whenSignal(CommonSignals.INI_LOAD);
     }).then(() => {
-      this.maybeCreateCtaLayer_(ampStoryAdPage);
       this.isCurrentAdLoaded_ = true;
     });
 
@@ -235,11 +247,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         defaultAttrs, configAttrs));
 
-    const adElement = createElementWithAttributes(
+    return createElementWithAttributes(
         document, 'amp-ad', attributes);
-
-    this.currentAdElement_ = adElement;
-    return adElement;
   }
 
 
@@ -249,18 +258,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   maybeCreateCtaLayer_(adPageElement) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.currentAdElement_.getAttribute(CTA_URL_ATTR);
-    const ctaType = this.currentAdElement_.getAttribute(CTA_TYPE_ATTR);
+    const ctaUrl = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_URL);
+    const ctaType = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
-      dev().error(TAG, 'Both "vars.ctaType" & "vars.ctaUrl" ' +
-          'are required in ad-server JSON response."');
+      user().error(TAG, 'Both CTA Type & CTA Url ' +
+          'are required in ad-server response."');
+      return false;
     }
 
     const ctaText = CTA_TYPES[ctaType];
-    dev().assert(ctaText, `${TAG}: the 'ctaType' returned by the ad-server` +
-        'must be one of the predefined choices.');
-    return this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
+    if (!ctaType) {
+      user().error(ctaText, `${TAG}: the 'CTA Type' returned by the ad-server` +
+          'must be one of the predefined choices.');
+      return false;
+    }
+
+    this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
+    return true;
   }
 
 
@@ -271,21 +286,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {string} ctaUrl
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
-    const button = document.createElement('button');
-    button.className = 'i-amphtml-story-ad-button';
-
-    const span = document.createElement('span');
-    span.className = 'i-amphtml-story-ad-button-text';
-    span.textContent = ctaText;
-
-    const gestures = Gestures.get(button, /* shouldNotPreventDefault */ false);
-    gestures.onGesture(TapRecognizer, () => {
-      window.open(ctaUrl, '_blank');
-    });
+    const a = document.createElement('a');
+    a.className = 'i-amphtml-story-ad-link';
+    a.setAttribute('target', '_blank');
+    a.href = ctaUrl;
+    a.textContent = ctaText;
 
     const ctaLayer = document.createElement('amp-story-cta-layer');
-    ctaLayer.appendChild(button);
-    button.appendChild(span);
+    ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
   }
 
@@ -317,9 +325,32 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.uniquePagesCount_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
-      this.tryToPlaceAdAfterPage_(pageId);
+      const adState = this.tryToPlaceAdAfterPage_(pageId);
+
+      if (adState === AD_STATE.PLACED) {
+        this.adsPlaced_++;
+        // start loading next ad
+        if (!this.allAdsPlaced_()) {
+          this.startNextPage_();
+        }
+      }
+
+      if (adState === AD_STATE.FAILED) {
+        this.startNextPage_();
+      }
     }
   }
+
+
+  /**
+   * start the process over
+   * @private
+   */
+  startNextPage_() {
+    this.uniquePagesCount_ = 0;
+    this.schedulePage_();
+  }
+
 
   /**
    * @return {boolean}
@@ -337,32 +368,37 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   tryToPlaceAdAfterPage_(currentPageId) {
     const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
-
-    if (!nextAdPageEl || !this.isCurrentAdLoaded_) {
-      return false;
+    if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
+      // timeout fail
+      return AD_STATE.FAILED;
     }
 
     const currentPage = this.ampStory_.getPageById(currentPageId);
     const nextPage = this.ampStory_.getNextPage(currentPage);
-    // we do not ever want two consecutive ads
-    if (currentPage.isAd() || nextPage.isAd()) {
-      return false;
+
+    if (!this.isCurrentAdLoaded_ || currentPage.isAd() || nextPage.isAd()) {
+      // if we are going to cause two consecutive ads or ad is still
+      // loading we will try again on next user interaction
+      return AD_STATE.PENDING;
     }
 
-    const inserted = this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
-    // failed insertion (consecutive ads, or no next page)
-    if (!inserted) {
-      return false;
+    const ctaCreated = this.maybeCreateCtaLayer_(nextAdPageEl);
+    if (!ctaCreated) {
+      // failed on ad-server response format
+      return AD_STATE.FAILED;
     }
 
-    this.adsPlaced_++;
-    this.uniquePagesCount_ = 0;
+    this.ampStory_.insertPage(currentPageId, nextAdPageEl.id);
+    return AD_STATE.PLACED;
+  }
 
 
-    if (!this.allAdsPlaced_()) {
-      // start loading next ad
-      this.schedulePage_();
-    }
+  /**
+   * @private
+   * @return {boolean}
+   */
+  adTimedOut_() {
+    return (Date.now() - this.timeCurrentPageCreated_) > TIMEOUT_LIMIT;
   }
 }
 
