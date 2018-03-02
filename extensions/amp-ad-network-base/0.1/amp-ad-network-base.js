@@ -39,9 +39,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       height: element.getAttribute('height'),
     };
 
-    /** @private {string} @const */
-    this.networkType_ = element.getAttribute('type') || 'anon';
-
     /** @const @private {!AmpAdContext} */
     this.context_ = new AmpAdContext(this.win).setSize(this.initialSize_);
   }
@@ -75,11 +72,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   forceCollapse_() {
     super.attemptChangeSize(0, 0);
-  }
-
-  /** @return {string} */
-  getNetworkType() {
-    return this.networkType_;
   }
 
   /**
