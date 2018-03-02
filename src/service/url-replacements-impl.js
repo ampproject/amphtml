@@ -141,13 +141,14 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl');
+    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
 
     // Returns the host of the canonical URL for this AMP document.
     this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl', 'hostname'));
+    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
+        'hostname'));
 
     // Returns the path of the canonical URL for this AMP document.
     this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
@@ -198,7 +199,7 @@ export class GlobalVariableSource extends VariableSource {
     this.setBoth('SOURCE_URL', () => {
       const docInfo = Services.documentInfoForDoc(this.ampdoc);
       return removeFragment(docInfo.sourceUrl);
-    }), () => {
+    }, () => {
       return getTrackImpressionPromise().then(() => {
         const docInfo = Services.documentInfoForDoc(this.ampdoc);
         return removeFragment(docInfo.sourceUrl);
@@ -217,7 +218,7 @@ export class GlobalVariableSource extends VariableSource {
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId');
+    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
