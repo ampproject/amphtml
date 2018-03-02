@@ -35,6 +35,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       {
         serviceId: 'local',
         authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
+        actions: {
+          subscribe: 'https://lipsum.com/subscribe',
+          login: 'https://lipsum.com/login',
+        },
       },
       {
         serviceId: 'google.subscription',
@@ -118,11 +122,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       const pushStub = sandbox.stub(
           subscriptionService.subscriptionPlatforms_, 'push');
       subscriptionService.initializeLocalPlatforms_(service, pageConfig);
-      expect(pushStub).to.be.calledWith(new LocalSubscriptionPlatform(
-          subscriptionService.ampdoc_,
-          service,
-          pageConfig
-      ));
+      expect(pushStub).to.be.calledOnce;
+      expect(pushStub.getCall(0).args[0]).to.be
+          .instanceOf(LocalSubscriptionPlatform);
     });
   });
 });

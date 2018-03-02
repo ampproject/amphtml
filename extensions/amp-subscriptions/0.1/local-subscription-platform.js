@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {Actions} from './actions';
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics} from './analytics';
+import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
@@ -53,6 +56,58 @@ export class LocalSubscriptionPlatform {
         ),
         'Authorization Url'
     );
+
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
+
+    /** @private {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+
+    user().assert(this.serviceConfig_['actions'],
+        'Actions have not been defined in the service config');
+
+    /** @private {!Actions} */
+    this.actions_ = new Actions(
+        this.ampdoc_, this.urlBuilder_,
+        this.subscriptionAnalytics_,
+        this.validateActionMap(this.serviceConfig_['actions'])
+    );
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+  }
+
+  /**
+   * Validates the action map
+   * @param {!JsonObject<string, string>} actionMap
+   * @returns {!JsonObject<string, string>}
+   */
+  validateActionMap(actionMap) {
+    user().assert(actionMap['login'],
+        'Action `Login` is not present in action map');
+    user().assert(actionMap['subscribe'],
+        'Action `Subscribe` is not present in action map');
+    return actionMap;
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            consent
+        );
+      });
+    }
+    return this.readerIdPromise_;
   }
 
   /** @override */
