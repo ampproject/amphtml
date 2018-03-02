@@ -521,15 +521,11 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
-          'STORY_PAGE_INDEX');
-    });
+    this.setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
+        'STORY_PAGE_INDEX'));
 
-    this.setAsync('STORY_PAGE_ID', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageId,
-          'STORY_PAGE_ID');
-    });
+    this.setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
+        'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
@@ -636,22 +632,21 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-story's service.
-   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
-   * @param {string} expr
+   * @param {string} property
+   * @param {string} name
    * @return {!Promise<T>}
    * @template T
    * @private
    */
-  getStoryValue_(getter, expr) {
-    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
-        .then(storyVariables => {
-          user().assert(storyVariables,
-              'To use variable %s amp-story should be configured',
-              expr);
-          return getter(
-              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
-              (storyVariables));
-        });
+  getStoryValue_(property, name) {
+    return () => {
+      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
+      return service.then(storyVariables => {
+        user().assert(storyVariables,
+          'To use variable %s amp-story should be configured', name);
+        return storyVariables[property];
+      });
+    };
   }
 }
 

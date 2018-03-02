@@ -16,6 +16,13 @@
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 
+/**
+ * @typedef {{
+ *   pageIndex: string,
+ *   pageId: number,
+ * }}
+ */
+export let StoryVariableDef;
 
 /**
  * Variable service for amp-story.
@@ -23,11 +30,14 @@ import {dev} from '../../../src/log';
  */
 export class AmpStoryVariableService {
   constructor() {
-    /** @private {?string} */
-    this.pageIndex_ = null;
+    /** @private {!StoryVariableDef} */
+    this.variables_ = {
+      pageIndex: '',
+      pageId: 0,
+    };
 
-    /** @private {?number} */
-    this.pageId_ = null;
+    /** @private {boolean} */
+    this.initialized_ = false;
   }
 
   /**
@@ -37,23 +47,20 @@ export class AmpStoryVariableService {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
         const {pageIndex, pageId} = stateChangeEvent.value;
-        this.pageIndex_ = pageIndex;
-        this.pageId_ = pageId;
+        const variables = this.variables_;
+        this.initialized_ = true;
+        variables.pageIndex = pageIndex;
+        variables.pageId = pageId;
         break;
     }
   }
 
   /**
-   * @return {number}
+   * @return {!StoryVariableDef}
    */
-  get pageIndex() {
-    return dev().assertNumber(this.pageIndex_);
-  }
-
-  /**
-   * @return {string}
-   */
-  get pageId() {
-    return dev().assertString(this.pageId_);
+  get() {
+    dev().assert(this.initialized_);
+    // TODO(newmius): You should probably Object.freeze this in development.
+    return this.variables_;
   }
 }
