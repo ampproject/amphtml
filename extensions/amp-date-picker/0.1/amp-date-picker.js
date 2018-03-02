@@ -111,8 +111,6 @@ const attributesToForward = [
   'orientation',
   'reopen-picker-on-clear-date',
   'with-full-screen-portal',
-  // 'with-portal',
-  'day-size',
   'month-format',
 ];
 
@@ -138,9 +136,9 @@ const DatePickerType = {
 
 /** @enum {string} */
 const DateFieldType = {
-  DATE: 'date',
-  START_DATE: 'start-date',
-  END_DATE: 'end-date',
+  DATE: 'input',
+  START_DATE: 'start-input',
+  END_DATE: 'end-input',
 };
 
 /** @enum {string} */
@@ -253,7 +251,8 @@ class AmpDatePicker extends AMP.BaseElement {
         DEFAULT_FIRST_DAY_OF_WEEK;
 
     /** @private @const */
-    this.daySize_ = this.element.getAttribute('day-size') || DEFAULT_DATE_SIZE;
+    this.daySize_ =
+        Number(this.element.getAttribute('day-size')) || DEFAULT_DATE_SIZE;
 
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
@@ -362,11 +361,21 @@ class AmpDatePicker extends AMP.BaseElement {
     this.setupTemplates_();
   }
 
-  /** @override */
-  pauseCallback() {
+  /**
+   * TODO(cvializ): Figure out how to keep the listeners when unlayout callback
+   * is triggered by a parent element e.g. amp-lightbox collapsing.
+   * @override
+   */
+  unlayoutCallback() {
     this.cleanupListeners_();
     this.cleanupSrcTemplates_();
     this.clearRenderedTemplates_();
+    return true;
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
   }
 
   /**
@@ -432,17 +441,14 @@ class AmpDatePicker extends AMP.BaseElement {
         `Experiment ${TAG} is disabled.`);
 
 
-    // NOTE(cvializ): There is no standard date format for just the first letter
-    // of the week-day. So we hack it in with this CSS class and don't apply the
-    // CSS class if there is a week-day-format specified.
-    const isDefaultWeekDayFormat =
-      this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT;
-
     this.vsync_.mutate(() => {
-      this.element.appendChild(this.container_);
-
+      // NOTE(cvializ): There is no standard date format for just the first letter
+      // of the week-day. So we hack it in with this CSS class and don't apply the
+      // CSS class if there is a week-day-format specified.
       this.element.classList.toggle(
-          DEFAULT_WEEK_DAY_FORMAT_CSS, isDefaultWeekDayFormat);
+          DEFAULT_WEEK_DAY_FORMAT_CSS,
+          this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
+      this.element.appendChild(this.container_);
     });
 
     if (this.type_ === DatePickerType.SINGLE) {
@@ -585,7 +591,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @return {?Element}
    */
   setupDateField_(type) {
-    const fieldSelector = this.element.getAttribute(`${type}-field`);
+    const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.ampdoc_.getRootNode().querySelector(
         fieldSelector);
     const form = this.element.closest('form');

@@ -1611,7 +1611,7 @@ function createBaseCustomElementClass(win) {
   return win.BaseCustomElementClass;
 }
 
-/** @param {!Element} */
+/** @param {!Element} element */
 function isInputPlaceholder(element) {
   return 'placeholder' in element;
 }
