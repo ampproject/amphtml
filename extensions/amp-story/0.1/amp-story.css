@@ -17,6 +17,7 @@
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
 @import './amp-story-hint.css';
+@import './amp-story-ads.css';
 
 /** Common */
 amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
