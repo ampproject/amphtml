@@ -168,8 +168,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const span = document.createElement('p');
     span.className = 'i-amphtml-story-ad-attribution';
     span.textContent = 'Ad';
-    span.style.visibility = 'hidden';
-    this.adLabelElement_ = span;
 
     container.appendChild(span);
     this.ampStory_.element.appendChild(container);
