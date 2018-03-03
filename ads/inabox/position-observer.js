@@ -52,8 +52,12 @@ export class PositionObserver {
   /**
    * Start to observe the target element's position change and trigger callback.
    * TODO: maybe take DOM mutation into consideration
+   *
+   * Returns function that can be called to stop obeserving this target.
+   *
    * @param element {!Element}
    * @param callback {function(!PositionEntryDef)}
+   * @returns {!UnlistenDef}
    */
   observe(element, callback) {
     if (!this.positionObservable_) {
@@ -68,7 +72,7 @@ export class PositionObserver {
     }
     // Send the 1st ping immediately
     callback(this.getPositionEntry_(element));
-    this.positionObservable_.add(() => {
+    return this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
   }
