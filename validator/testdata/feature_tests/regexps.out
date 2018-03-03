@@ -94,6 +94,22 @@ feature_tests/regexps.html:67:2 The attribute 'href' in tag 'link rel=stylesheet
 >>   ^~~~~~~~~
 feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |          href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+|    <!--
+|      New Font Awesome url format the first four are valid the last two are not.
+|    -->
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" rel="stylesheet">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:84:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/solid.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+|    <!-- invalid -->
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:86:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/other.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+|    <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
+>>   ^~~~~~~~~
+feature_tests/regexps.html:87:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/../css/solid.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |  
 |    <!--
 |    rel value_regex: lengthy, see protoascii
@@ -104,13 +120,13 @@ feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet
 |    <link rel="accessibility alternate archives">
 |    <link rel="import">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:86:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:96:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
 |    <link rel="accessibility subresource">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:87:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'accessibility subresource'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:97:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'accessibility subresource'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
 |    <link rel="manifest accessibility">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:88:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:98:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
 |  
 |    <!--
 |    name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
@@ -120,10 +136,10 @@ feature_tests/regexps.html:88:2 The attribute 'rel' in tag 'link rel=' is set to
 |    <meta name="validcontent-disposition" content="">
 |    <meta name="content-disposition" content="">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:96:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
+feature_tests/regexps.html:106:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
 |    <meta name="invalid content-disposition" content="">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:97:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'invalid content-disposition'. [DISALLOWED_HTML]
+feature_tests/regexps.html:107:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'invalid content-disposition'. [DISALLOWED_HTML]
 |  
 |    <!--
 |    css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
@@ -131,7 +147,7 @@ feature_tests/regexps.html:97:2 The attribute 'name' in tag 'meta name= and cont
 |    -->
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:103:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:113:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [AUTHOR_STYLESHEET_PROBLEM]
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }
@@ -151,10 +167,10 @@ feature_tests/regexps.html:103:2 The text inside tag 'style amp-custom' contains
 |    <div class="example-amp-font"></div>
 |    <div class="example-amp-font i-amphtml-hidden"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:121:2 The attribute 'class' in tag 'div' is set to the invalid value 'example-amp-font i-amphtml-hidden'. [DISALLOWED_HTML]
+feature_tests/regexps.html:131:2 The attribute 'class' in tag 'div' is set to the invalid value 'example-amp-font i-amphtml-hidden'. [DISALLOWED_HTML]
 |    <div class="i-amphtml-hidden example-amp-font"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:122:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'. [DISALLOWED_HTML]
+feature_tests/regexps.html:132:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'. [DISALLOWED_HTML]
 |  
 |    <!--
 |    id blacklisted_value_regex: lengthy, see protoascii
@@ -163,10 +179,10 @@ feature_tests/regexps.html:122:2 The attribute 'class' in tag 'div' is set to th
 |    <div id="exampe-amp-font"></div>
 |    <div id="i-amphtml-abc"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:129:2 The attribute 'id' in tag 'div' is set to the invalid value 'i-amphtml-abc'. [DISALLOWED_HTML]
+feature_tests/regexps.html:139:2 The attribute 'id' in tag 'div' is set to the invalid value 'i-amphtml-abc'. [DISALLOWED_HTML]
 |    <div id="AMP"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:130:2 The attribute 'id' in tag 'div' is set to the invalid value 'AMP'. [DISALLOWED_HTML]
+feature_tests/regexps.html:140:2 The attribute 'id' in tag 'div' is set to the invalid value 'AMP'. [DISALLOWED_HTML]
 |  
 |    <!--
 |    name blacklisted_value_regex: lengthy, see protoascii
@@ -176,17 +192,17 @@ feature_tests/regexps.html:130:2 The attribute 'id' in tag 'div' is set to the i
 |    <input name="email" />
 |    <input name="innerHTML" />
 >>   ^~~~~~~~~
-feature_tests/regexps.html:138:2 The attribute 'name' in tag 'input' is set to the invalid value 'innerHTML'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/regexps.html:148:2 The attribute 'name' in tag 'input' is set to the invalid value 'innerHTML'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    <input name="__amp_source_origin" />
 >>   ^~~~~~~~~
-feature_tests/regexps.html:139:2 The attribute 'name' in tag 'input' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/regexps.html:149:2 The attribute 'name' in tag 'input' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    <input name="webkitRequestFullscreen" />
 >>   ^~~~~~~~~
-feature_tests/regexps.html:140:2 The attribute 'name' in tag 'input' is set to the invalid value 'webkitRequestFullscreen'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/regexps.html:150:2 The attribute 'name' in tag 'input' is set to the invalid value 'webkitRequestFullscreen'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |  
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/regexps.html:143:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+feature_tests/regexps.html:153:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
 >>       ^~~~~~~~~
-feature_tests/regexps.html:143:6 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+feature_tests/regexps.html:153:6 The extension 'amp-hulu' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]

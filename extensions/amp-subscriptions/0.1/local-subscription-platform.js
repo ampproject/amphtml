@@ -65,16 +65,16 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private {UrlBuilder} */
+    /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
-    /** @private {SubscriptionAnalytics} */
+    /** @private {!SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = new SubscriptionAnalytics();
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
 
-    /** @private {Actions} */
+    /** @private {!Actions} */
     this.actions_ = new Actions(
         this.ampdoc_, this.urlBuilder_,
         this.subscriptionAnalytics_,
