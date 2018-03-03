@@ -16,6 +16,7 @@
 
 import {Actions} from './actions';
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionAnalytics} from './analytics';
@@ -83,7 +84,20 @@ export class LocalSubscriptionPlatform {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
+    /** @private {!LocalSubscriptionPlatformRenderer}*/
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
+
+    /** @private {?Entitlements}*/
+    this.entitlements_ = null;
+
     this.initializeListeners_();
+  }
+
+  /**
+   * @override
+   */
+  getServiceId() {
+    return 'local';
   }
 
   /**
@@ -116,12 +130,37 @@ export class LocalSubscriptionPlatform {
     return this.readerIdPromise_;
   }
 
+  /**
+   * Add event listener for the subscriptions action
+   * @private
+   */
   initializeListeners_() {
     this.document_.addEventListener('click', e => {
       const element = closestBySelector(e.target, '[subscriptions-action]');
       if (element) {
         const action = element.getAttribute('subscriptions-action');
-        this.actions_.execute(action);
+        this.executeAction(action);
+      }
+    });
+  }
+
+  /**
+   * Renders the platform specific UI
+   * @param {!Entitlement} entitlements
+   */
+  render(entitlements) {
+    this.renderer_.render(entitlements);
+  }
+
+  /**
+   * Executes action for the local platform.
+   * @param {string} action
+   */
+  executeAction(action) {
+    const actionExecution = this.actions_.execute(action);
+    actionExecution.then(result => {
+      if (result) {
+        this.getEntitlements();
       }
     });
   }
@@ -137,12 +176,14 @@ export class LocalSubscriptionPlatform {
         })
         .then(res => res.json())
         .then(resJson => {
-          return new Entitlements(
+          const entitlements = new Entitlements(
               this.serviceConfig_['serviceId'] || 'local',
               JSON.stringify(resJson),
               Entitlement.parseListFromJson(resJson),
               currentProductId
           );
+          this.entitlements_ = entitlements;
+          return entitlements;
         });
   }
 }

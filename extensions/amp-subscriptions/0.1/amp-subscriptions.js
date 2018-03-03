@@ -199,6 +199,15 @@ export class SubscriptionService {
 
       this.entitlementStore_.getGrantStatus()
           .then(grantState => {this.processGrantState_(grantState);});
+
+      this.entitlementStore_.selectPlatform()
+          .then(entitlements => {
+            this.subscriptionPlatforms_.forEach(platform => {
+              if (platform.getServiceId() == entitlements.service) {
+                platform.render();
+              }
+            });
+          });
     });
     return this;
   }

@@ -80,4 +80,8 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
           .equal(JSON.stringify((actionMap)));
     });
   });
+
+  it('initializeListeners_ should listen to clicks on document', () => {
+
+  });
 });
