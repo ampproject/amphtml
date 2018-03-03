@@ -105,6 +105,9 @@ const RETURN_TO_ATTR = 'i-amphtml-return-to';
 /** @private @const {string} */
 const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 
+/** @private @const {string} */
+const AD_SHOWING_ATTR = 'ad-showing';
+
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -817,8 +820,15 @@ export class AmpStory extends AMP.BaseElement {
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
-    // TODO(alanorozco): decouple this using NavigationState
-    if (!targetPage.isAd()) {
+    if (targetPage.isAd()) {
+      this.vsync_.mutate(() => {
+        this.element.setAttribute(AD_SHOWING_ATTR, '');
+      });
+    } else {
+      this.vsync_.mutate(() => {
+        this.element.removeAttribute(AD_SHOWING_ATTR);
+      });
+      // TODO(alanorozco): decouple this using NavigationState
       this.systemLayer_.setActivePageId(targetPageId);
     }
 
