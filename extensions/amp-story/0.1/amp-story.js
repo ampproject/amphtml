@@ -817,8 +817,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
-    // TODO(alanorozco): decouple this using NavigationState
-    if (!targetPage.isAd()) {
+    if (targetPage.isAd()) {
+      dispatch(this.element, EventType.SHOW_AD_UI, /* bubbles */ false);
+    } else {
+      this.maybeDispatchAdHidingEvent_(this.activePage_);
+      // TODO(alanorozco): decouple this using NavigationState
       this.systemLayer_.setActivePageId(targetPageId);
     }
 
@@ -864,6 +867,19 @@ export class AmpStory extends AMP.BaseElement {
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
     });
+  }
+
+
+  /**
+   * dispatch event if going from ad to non-ad
+   * @param {?./amp-story-page.AmpStoryPage} activePage
+   * @private
+   */
+  maybeDispatchAdHidingEvent_(activePage) {
+    if (!activePage || !activePage.isAd()) {
+      return;
+    }
+    dispatch(this.element, EventType.HIDE_AD_UI, /* bubbles */ false);
   }
 
 
@@ -1565,6 +1581,11 @@ export class AmpStory extends AMP.BaseElement {
       return null;
     }
     return this.getPageById(nextPageId);
+  }
+
+  /** @return {!Element} */
+  getProgressElement() {
+    return this.systemLayer_.getProgressBarRoot();
   }
 
 

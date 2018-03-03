@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {EventType} from './events';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -102,6 +103,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
+
+    /** @private {?Element} */
+    this.adLabelElement_ = null;
+
+    /** @private {?Element} */
+    this.progressRoot_ = null;
   }
 
   /** @override */
@@ -134,9 +141,40 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   layoutCallback() {
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
+          this.createAdOverlay_();
+          this.initializeListeners_();
           this.readConfig_();
           this.schedulePage_();
         });
+  }
+
+
+  /** @private */
+  initializeListeners_() {
+    this.ampStory_.element.addEventListener(EventType.SHOW_AD_UI,
+        this.showAdOverlay_.bind(this));
+    this.ampStory_.element.addEventListener(EventType.HIDE_AD_UI,
+        this.hideAdOverlay_.bind(this));
+  }
+
+
+  /**
+   * show the UI that marks the page as an ad
+   * @private
+   */
+  showAdOverlay_() {
+    if (!this.progressRoot_) {
+      this.progressRoot_ = this.ampStory_.getProgressElement();
+    }
+    this.progressRoot_.style.setProperty('visibility', 'hidden', 'important');
+    this.adLabelElement_.style.visibility = 'visible';
+  }
+
+
+  /** @private */
+  hideAdOverlay_() {
+    this.adLabelElement_.style.visibility = 'hidden';
+    this.progressRoot_.style.setProperty('visibility', 'visible', 'important');
   }
 
 
@@ -153,6 +191,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     this.config_ = parseJson(child.textContent);
     this.validateConfig_();
+  }
+
+
+  /**
+   * Create a hidden UI that will be shown when ad is displayed
+   * @private
+   */
+  createAdOverlay_() {
+    const container = document.createElement('aside');
+    container.className = 'i-amphtml-ad-overlay-container';
+
+    const span = document.createElement('p');
+    span.className = 'i-amphtml-story-ad-attribution';
+    span.textContent = 'Ad';
+    span.style.visibility = 'hidden';
+    this.adLabelElement_ = span;
+
+    container.appendChild(span);
+    this.ampStory_.element.appendChild(container);
   }
 
 
