@@ -1123,6 +1123,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
+ * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
+ * the same name `foo/bar.ts` and all direct and indirect TypeScript imports.
+ *
  * @param {string} srcDir
  * @param {string} srcFilename
  */
@@ -1164,6 +1167,7 @@ function transpileTs(srcDir, srcFilename) {
 
 /**
  * Removes all JS files in given directory and its subdirectories.
+ *
  * @param {string} dir
  */
 function removeJsFilesInDirectory(dir) {
