@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,37 +55,33 @@ export class AmpDateCountdown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const self = this;
     //Note: One of datetime, timestamp-ms, timestamp-seconds is required.
     this.endDate_ = this.element.getAttribute('end-date');
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
     this.timestampSeconds_
       = Number(this.element.getAttribute('timestamp-seconds'));
-    this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds'));
+    this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds')) || 0;
 
     const locale = this.element.getAttribute('locale') || 'en';
     const whenEnded = this.element.getAttribute('when-ended') || 'stop';
     this.biggestUnit_ = (this.element.getAttribute('biggest-unit')) || 'days';
 
-    let epoch = this.getEpoch_(); //1519776000000
-    if (this.offsetSeconds_) {
-      epoch += this.offsetSeconds_ * 1000;
-    }
+    const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
     let differentBetween = new Date(epoch) - new Date();
     let data;
     const localeWordList = this.getLocaleWord_(locale);
     const delay = 1000;
 
-    const countDownTicker = setInterval(function() {
-      //console.log('differentBetween', differentBetween);
-      data = self.getYDHMSFromMs_(differentBetween);
+    const countDownTicker = this.win.setInterval(() => {
+
+      data = this.getYDHMSFromMs_(differentBetween);
       if (whenEnded === 'stop' && differentBetween < 1000) {
-        Services.actionServiceForDoc(self.element)
-            .trigger(self.element, 'timeout', null, ActionTrust.HIGH);
-        clearInterval(countDownTicker);
+        Services.actionServiceForDoc(this.element)
+            .trigger(this.element, 'timeout', null, ActionTrust.HIGH);
+        this.win.clearInterval(countDownTicker);
       }
       differentBetween -= delay;
-      self.renderItems_(Object.assign(data, localeWordList));
+      this.renderItems_(Object.assign(data, localeWordList));
     }, delay);
 
     this.registerAction('timeout', this.timeout_.bind(this));
@@ -127,7 +123,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
           'One of end-date, timestamp-ms, timestamp-seconds is required');
     }
 
-    //console.log('epoch', epoch);
     return epoch;
   }
 
