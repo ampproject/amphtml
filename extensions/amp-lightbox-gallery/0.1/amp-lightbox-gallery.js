@@ -31,8 +31,8 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
+import {childElementByTag, closest, elementByTag, escapeCssSelectorIdent} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {closest, elementByTag, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
@@ -64,7 +64,7 @@ const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
-const EPSILON = 0.01; // precision for approx equals
+const EPSILON = 0.2; // precision for approx equals
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
@@ -738,16 +738,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-        this.element.ownerDocument.body.appendChild(transLayer);
-        const rect = layoutRectFromDomRect(sourceElement
+
+        const sourceImg = childElementByTag(sourceElement, 'img');
+        const rect = layoutRectFromDomRect(sourceImg
             ./*OK*/getBoundingClientRect());
-
         const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
-            .implementation_.getImageBoxWithOffset();
+            .implementation_.getImageBox();
 
-        const clone = sourceElement.cloneNode(true);
-        clone.className = '';
+        const clone = sourceImg.cloneNode(true);
+        clone.removeAttribute('style');
+        clone.removeAttribute('class');
+        clone.removeAttribute('id');
+        const objectFit = st.computedStyle(this.win, sourceImg)['object-fit'];
+
         st.setStyles(clone, {
+          objectFit,
           position: 'absolute',
           top: st.px(rect.top),
           left: st.px(rect.left),
@@ -756,12 +761,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           transformOrigin: 'top left',
           willChange: 'transform',
         });
+
         transLayer.appendChild(clone);
+        this.element.ownerDocument.body.appendChild(transLayer);
 
         // Move and resize the image to the location given by the lightbox.
         const dx = imageBox.left - rect.left;
         const dy = imageBox.top - rect.top;
         const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
+        const scaleY = rect.height != 0 ? imageBox.height / rect.height : 1;
 
         duration = this.getTransitionDuration_(dy);
 
@@ -775,7 +783,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         anim.add(0, tr.setStyles(clone, {
           transform: tr.concat([
             tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-            tr.scale(tr.numeric(1, scaleX)),
+            tr.scale(tr.numeric(1, scaleX), tr.numeric(1, scaleY)),
           ]),
         }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
@@ -824,20 +832,26 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
 
-        const imageBox = /**@type {?}*/ (currentElementMetadata.imageViewer)
-            .implementation_.getImageBoxWithOffset();
+        const sourceImg = childElementByTag(sourceElement, 'img');
+        const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+            .implementation_.getImageBox();
+        const rect = layoutRectFromDomRect(sourceImg
+            ./*OK*/getBoundingClientRect());
+
         const image = /**@type {?}*/ (currentElementMetadata.imageViewer)
             .implementation_.getImage();
 
         sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-        this.element.ownerDocument.body.appendChild(transLayer);
-
-        const rect = layoutRectFromDomRect(sourceElement
-            ./*OK*/getBoundingClientRect());
         const clone = image.cloneNode(true);
+        clone.removeAttribute('style');
+        clone.removeAttribute('class');
+        clone.removeAttribute('id');
+        const objectFit = st.computedStyle(this.win, sourceImg)['object-fit'];
+
         st.setStyles(clone, {
+          objectFit,
           position: 'absolute',
           top: st.px(imageBox.top),
           left: st.px(imageBox.left),
@@ -847,7 +861,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           transformOrigin: 'top left',
           willChange: 'transform',
         });
+
         transLayer.appendChild(clone);
+        this.element.ownerDocument.body.appendChild(transLayer);
 
         st.setStyles(dev().assertElement(this.carousel_), {
           opacity: 0,
@@ -861,11 +877,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const dx = rect.left - imageBox.left;
         const dy = rect.top - imageBox.top;
         const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
+        const scaleY = imageBox.height != 0 ? rect.height / imageBox.height : 1;
+
+        // Update the position and scale of the transLayer (img container)
         /** @const {!TransitionDef<void>} */
         const moveAndScale = tr.setStyles(clone, {
           transform: tr.concat([
             tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-            tr.scale(tr.numeric(1, scaleX)),
+            tr.scale(tr.numeric(1, scaleX), tr.numeric(1, scaleY)),
           ]),
         });
 

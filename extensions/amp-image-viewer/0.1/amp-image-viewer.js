@@ -226,7 +226,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Returns the boundaries of the image element.
+   * Returns the image element.
    * @return {?Element}
    */
   getImage() {
