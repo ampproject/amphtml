@@ -1,4 +1,6 @@
+import {greeting} from './utils';
+
 function hello(compiler: string) {
-    console.log(`Hello from ${compiler}`);
+    console.log(`${greeting} from ${compiler}`);
 }
 hello("TypeScript");

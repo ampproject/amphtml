@@ -43,7 +43,6 @@ const source = require('vinyl-source-stream');
 const touch = require('touch');
 const ts = require('typescript');
 const tsickle = require('tsickle');
-const tsickleMain = require('./node_modules/tsickle/src/main.js');
 const watchify = require('watchify');
 
 const argv = minimist(
@@ -517,8 +516,7 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     return Promise.resolve();
   }
   const path = 'extensions/' + name + '/' + version;
-  const fileExtension = options.typeScript ? '.ts' : '.js';
-  const jsPath = path + '/' + name + fileExtension;
+  const jsPath = path + '/' + name + '.js';
   const jsTestPath = path + '/test/test-' + name + '.js';
   if (argv.files && options.bundleOnlyIfListedInFiles) {
     const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
@@ -595,8 +593,7 @@ function buildExtensionCss(path, name, version, options) {
  * @return {!Promise}
  */
 function buildExtensionJs(path, name, version, options) {
-  const fileExtension = options.typeScript ? '.ts' : '.js';
-  const filename = options.filename || name + fileExtension;
+  const filename = options.filename || name + '.js';
   if (options.loadPriority && options.loadPriority != 'high') {
     throw new Error('Unsupported loadPriority: ' + options.loadPriority);
   }
@@ -987,54 +984,51 @@ function concatFilesToString(files) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
 
-  let promise = Promise.resolve();
+  const entryPoint = srcDir + srcFilename;
 
-  let entryPoint = srcDir + srcFilename;
-  const destFilename = options.toName || srcFilename;
-  const outputFile = destDir + '/' + destFilename;
-
-  // For TS extensions, min builds requires the JS-transpiled max build first.
+  // Transpile TS to Closure-annotated JS before actual compile.
   if (options.typeScript) {
-    promise = new Promise(resolve => {
-      const startTime = Date.now();
-      const tsConfig = {
-        'allowJs': true, // TS extensions can reference JS files in src/ folder.
-        'outDir': destDir,
-        'module': 'ESNext',
-        'sourceMap': true,
-        'target': 'es2017',
-      };
-      const config = ts.parseJsonConfigFileContent(tsConfig, ts.sys, srcDir);
-      if (config.errors.length > 0) {
-        log(red('TS config error:'), config.errors);
-      }
-      const {diagnostics} = tsickleMain.toClosureJS(config.options, [entryPoint],
-          {}, (filePath, contents) => {
-            fs.writeFileSync(outputFile, contents, {encoding: 'utf-8'});
-          });
-      if (diagnostics.length) {
-        log(colors.red('TS compile error:'),
-            tsickle.formatDiagnostics(diagnostics));
-      }
-      endBuildStep('Compiled', srcFilename, startTime);
-      resolve();
-    });
+    const startTime = Date.now();
 
-    // TODO(willchou): TSickle's use of goog.module causes CC to fail.
-    // Contribute flag to remove this (see src/es5processor.ts in tsickle.
-
-    if (options.minify) {
-      // TODO(willchou): Explain.
-      entryPoint = outputFile;
-    } else {
-      return promise;
+    const tsEntry = entryPoint.replace('.js', '.ts');
+    const tsConfig = ts.convertCompilerOptionsFromJson({
+      'allowJs': true, // TS extensions can reference JS files in `src` folder.
+      'module': 'ES6',
+      'target': 'ES6',
+    }, srcDir);
+    const tsOptions = tsConfig.options;
+    if (tsConfig.errors.length) {
+      log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
     }
+
+    const compilerHost = ts.createCompilerHost(tsOptions);
+    const program = ts.createProgram([tsEntry], tsOptions, compilerHost);
+
+    const transformerHost = {
+      shouldSkipTsickleProcessing: () => false,
+      transformTypesToClosure: true,
+      options: tsOptions,
+      host: compilerHost,
+    };
+    const emitResult = tsickle.emitWithTsickle(program, transformerHost,
+        compilerHost, tsOptions, undefined, (filePath, contents) => {
+          fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
+        });
+
+    const diagnostics =
+        ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+    if (diagnostics.length) {
+      log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+    }
+
+    endBuildStep('Transpiled', srcFilename, startTime);
+
+    // TODO(willchou): Next, try adding a ref to JS file from `src` folder.
   }
 
   if (options.minify) {
     const startTime = Date.now();
-    return promise.then(() =>
-      closureCompile(entryPoint, destDir, options.minifiedName, options))
+    return closureCompile(entryPoint, destDir, options.minifiedName, options)
         .then(function() {
           const destPath = destDir + '/' + options.minifiedName;
           appendToCompiledFile(srcFilename, destPath);
@@ -1085,6 +1079,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
+  const destFilename = options.toName || srcFilename;
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
@@ -1103,7 +1098,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .pipe($$.rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
-              appendToCompiledFile(srcFilename, outputFile);
+              appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);

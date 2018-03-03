@@ -236,9 +236,6 @@ function compile(entryModuleFilenames, outputDir,
             'export function deadCode() {}');
       }
     });
-    if (options.typeScript) {
-      srcs.push(entryModuleFilename);
-    }
 
     let externs = [
       'build-system/amp.extern.js',
