@@ -1577,6 +1577,7 @@ export class AmpStory extends AMP.BaseElement {
     return this.getPageById(nextPageId);
   }
 
+
   /**
    * @param {!Window} win
    * @return {boolean} true if the user's browser supports the features needed
