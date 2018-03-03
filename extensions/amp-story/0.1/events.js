@@ -67,12 +67,6 @@ export const EventType = {
 
   // Triggered when a page has loaded at least one frame of all of its media.
   PAGE_LOADED: 'ampstory:pageload',
-
-  // Triggered when a page getting shown is an ad
-  SHOW_AD_UI: 'ampstory:showadui',
-
-  // Triggered when a page getting shown is not an ad but previous page was
-  HIDE_AD_UI: 'ampstory:hideadui',
 };
 
 

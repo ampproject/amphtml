@@ -15,7 +15,6 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
-import {EventType} from './events';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -103,12 +102,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
-
-    /** @private {?Element} */
-    this.adLabelElement_ = null;
-
-    /** @private {?Element} */
-    this.progressRoot_ = null;
   }
 
   /** @override */
@@ -142,39 +135,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
           this.createAdOverlay_();
-          this.initializeListeners_();
           this.readConfig_();
           this.schedulePage_();
         });
-  }
-
-
-  /** @private */
-  initializeListeners_() {
-    this.ampStory_.element.addEventListener(EventType.SHOW_AD_UI,
-        this.showAdOverlay_.bind(this));
-    this.ampStory_.element.addEventListener(EventType.HIDE_AD_UI,
-        this.hideAdOverlay_.bind(this));
-  }
-
-
-  /**
-   * show the UI that marks the page as an ad
-   * @private
-   */
-  showAdOverlay_() {
-    if (!this.progressRoot_) {
-      this.progressRoot_ = this.ampStory_.getProgressElement();
-    }
-    this.progressRoot_.style.setProperty('visibility', 'hidden', 'important');
-    this.adLabelElement_.style.visibility = 'visible';
-  }
-
-
-  /** @private */
-  hideAdOverlay_() {
-    this.adLabelElement_.style.visibility = 'hidden';
-    this.progressRoot_.style.setProperty('visibility', 'visible', 'important');
   }
 
 

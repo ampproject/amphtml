@@ -71,5 +71,13 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   letter-spacing: 0.5px !important;
   margin: 0 0 0 16px !important;
   padding: 0 !important;
+  visibility: hidden !important;
 }
 
+amp-story[ad-showing] .i-amphtml-story-ad-attribution {
+  visibility: visible !important;
+}
+
+amp-story[ad-showing] .i-amphtml-story-progress-bar {
+  visibility: hidden !important;
+}

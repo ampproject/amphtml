@@ -313,9 +313,4 @@ export class SystemLayer {
 
     this.developerLog_.hide();
   }
-
-  /** @return {!Element} */
-  getProgressBarRoot() {
-    return this.progressBar_.getRoot();
-  }
 }

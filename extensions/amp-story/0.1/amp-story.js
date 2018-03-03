@@ -105,6 +105,9 @@ const RETURN_TO_ATTR = 'i-amphtml-return-to';
 /** @private @const {string} */
 const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 
+/** @private @const {string} */
+const AD_SHOWING_ATTR = 'ad-showing';
+
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -818,9 +821,13 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     if (targetPage.isAd()) {
-      dispatch(this.element, EventType.SHOW_AD_UI, /* bubbles */ false);
+      this.vsync_.mutate(() => {
+        this.element.setAttribute(AD_SHOWING_ATTR, '');
+      });
     } else {
-      this.maybeDispatchAdHidingEvent_(this.activePage_);
+      this.vsync_.mutate(() => {
+        this.element.removeAttribute(AD_SHOWING_ATTR);
+      });
       // TODO(alanorozco): decouple this using NavigationState
       this.systemLayer_.setActivePageId(targetPageId);
     }
@@ -867,19 +874,6 @@ export class AmpStory extends AMP.BaseElement {
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
     });
-  }
-
-
-  /**
-   * dispatch event if going from ad to non-ad
-   * @param {?./amp-story-page.AmpStoryPage} activePage
-   * @private
-   */
-  maybeDispatchAdHidingEvent_(activePage) {
-    if (!activePage || !activePage.isAd()) {
-      return;
-    }
-    dispatch(this.element, EventType.HIDE_AD_UI, /* bubbles */ false);
   }
 
 
@@ -1582,12 +1576,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     return this.getPageById(nextPageId);
   }
-
-  /** @return {!Element} */
-  getProgressElement() {
-    return this.systemLayer_.getProgressBarRoot();
-  }
-
 
   /**
    * @param {!Window} win
