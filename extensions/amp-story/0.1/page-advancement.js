@@ -19,6 +19,7 @@ import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
+import {map} from '../../../src/utils/object';
 
 
 /** @private @const {number} */
@@ -296,13 +297,27 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * We want clicks on certain elements to be exempted from normal page navigation
+   * @param {!Event} event
+   */
+  isProtectedTarget_(event) {
+    const protectedElements = map({
+      A: true,
+      BUTTON: true,
+    });
+
+    return protectedElements[event.target.tagName] || false;
+  }
+
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    * @private
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event)) {
+    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
