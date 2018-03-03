@@ -146,10 +146,9 @@ export class LocalSubscriptionPlatform {
 
   /**
    * Renders the platform specific UI
-   * @param {!Entitlement} entitlements
    */
-  render(entitlements) {
-    this.renderer_.render(entitlements);
+  render() {
+    this.renderer_.render();
   }
 
   /**
