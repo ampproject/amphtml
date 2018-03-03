@@ -37,6 +37,7 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
+const path = require('path');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
@@ -973,7 +974,10 @@ function concatFilesToString(files) {
 }
 
 /**
- * Compile a javascript file
+ * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ *
+ * If `options.typeScript` is true, transpiles from TypeScript into
+ * intermediary files before compilation and deletes them afterwards.
  *
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
@@ -986,44 +990,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   const entryPoint = srcDir + srcFilename;
 
-  // Transpile TS to Closure-annotated JS before actual compile.
+  // Transpile TS to Closure-annotated JS before actual bundling or compile.
   if (options.typeScript) {
-    const startTime = Date.now();
-
-    const tsEntry = entryPoint.replace('.js', '.ts');
-    const tsConfig = ts.convertCompilerOptionsFromJson({
-      'allowJs': true, // TS extensions can reference JS files in `src` folder.
-      'module': 'ES6',
-      'target': 'ES6',
-    }, srcDir);
-    const tsOptions = tsConfig.options;
-    if (tsConfig.errors.length) {
-      log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
-    }
-
-    const compilerHost = ts.createCompilerHost(tsOptions);
-    const program = ts.createProgram([tsEntry], tsOptions, compilerHost);
-
-    const transformerHost = {
-      shouldSkipTsickleProcessing: () => false,
-      transformTypesToClosure: true,
-      options: tsOptions,
-      host: compilerHost,
-    };
-    const emitResult = tsickle.emitWithTsickle(program, transformerHost,
-        compilerHost, tsOptions, undefined, (filePath, contents) => {
-          fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
-        });
-
-    const diagnostics =
-        ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-    if (diagnostics.length) {
-      log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-    }
-
-    endBuildStep('Transpiled', srcFilename, startTime);
-
-    // TODO(willchou): Next, try adding a ref to JS file from `src` folder.
+    transpileTs(srcDir, srcFilename);
   }
 
   if (options.minify) {
@@ -1041,6 +1010,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         })
         .then(() => {
           endBuildStep('Minified', srcFilename, startTime);
+
+          // Remove intemediary, transpiled JS files after compilation.
+          if (options.typeScript) {
+            removeJsFilesInDirectory(srcDir);
+          }
         });
   }
 
@@ -1102,6 +1076,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);
+
+          // Remove intemediary, transpiled JS files after compilation.
+          if (options.typeScript) {
+            removeJsFilesInDirectory(srcDir);
+          }
         })
         .then(() => {
           if (process.env.NODE_ENV === 'development') {
@@ -1139,6 +1118,63 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     // `gulp build` / `gulp dist` cases where options.watch is undefined.
     return rebundle(/* failOnError */ true);
   }
+}
+
+/**
+ * @param {string} srcDir
+ * @param {string} srcFilename
+ */
+function transpileTs(srcDir, srcFilename) {
+  const startTime = Date.now();
+
+  const tsEntry = (srcDir + srcFilename).replace('.js', '.ts');
+  const tsConfig = ts.convertCompilerOptionsFromJson({
+    'module': 'ES6',
+    'target': 'ES6',
+  }, srcDir);
+  const tsOptions = tsConfig.options;
+  if (tsConfig.errors.length) {
+    log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
+  }
+
+  const compilerHost = ts.createCompilerHost(tsOptions);
+  const program = ts.createProgram([tsEntry], tsOptions, compilerHost);
+
+  const transformerHost = {
+    shouldSkipTsickleProcessing: () => false,
+    transformTypesToClosure: true,
+    options: tsOptions,
+    host: compilerHost,
+  };
+  const emitResult = tsickle.emitWithTsickle(program, transformerHost,
+      compilerHost, tsOptions, undefined, (filePath, contents) => {
+        fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
+      });
+
+  const diagnostics =
+      ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+  if (diagnostics.length) {
+    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+  }
+
+  endBuildStep('Transpiled', srcFilename, startTime);
+}
+
+/**
+ * Removes all JS files in given directory and its subdirectories.
+ * @param {string} dir
+ */
+function removeJsFilesInDirectory(dir) {
+  const files = fs.readdirSync(dir);
+  files.forEach(file => {
+    const filename = path.join(dir, file);
+    const stat = fs.lstatSync(filename);
+    if (stat.isDirectory()) {
+      removeJsFilesInDirectory(filename);
+    } else if (filename.endsWith('.js')) {
+      fs.remove(filename);
+    }
+  });
 }
 
 /**
