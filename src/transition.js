@@ -201,11 +201,15 @@ export function translate(transitionX, opt_transitionY) {
 
 /**
  * A transition for "scale" of CSS "transform" property.
- * @param {!TransitionDef<number|string>} transition
+ * @param {!TransitionDef<number|string>} transitionX
+ * @param {!TransitionDef<number|string>|undefined=} opt_transitionY
  * @return {!TransitionDef<string>}
  */
-export function scale(transition) {
+export function scale(transitionX, opt_transitionY) {
   return time => {
-    return `scale(${transition(time)})`;
+    if (!opt_transitionY) {
+      return `scale(${transitionX(time)})`;
+    }
+    return `scale(${transitionX(time)}, ${opt_transitionY(time)})`;
   };
 }
