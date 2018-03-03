@@ -988,7 +988,7 @@ function concatFilesToString(files) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
 
-  const entryPoint = srcDir + srcFilename;
+  const entryPoint = path.join(srcDir, srcFilename);
 
   // Transpile TS to Closure-annotated JS before actual bundling or compile.
   if (options.typeScript) {
@@ -999,13 +999,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     const startTime = Date.now();
     return closureCompile(entryPoint, destDir, options.minifiedName, options)
         .then(function() {
-          const destPath = destDir + '/' + options.minifiedName;
+          const destPath = path.join(destDir, options.minifiedName);
           appendToCompiledFile(srcFilename, destPath);
-          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          fs.writeFileSync(
+              path.join(destDir, 'version.txt'), internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
                 destPath,
-                destDir + '/' + options.latestName);
+                path.join(destDir, options.latestName));
           }
         })
         .then(() => {
@@ -1072,7 +1073,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .pipe($$.rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
-              appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
+              appendToCompiledFile(srcFilename,
+                  path.join(destDir, destFilename));
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);
@@ -1127,7 +1129,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function transpileTs(srcDir, srcFilename) {
   const startTime = Date.now();
 
-  const tsEntry = (srcDir + srcFilename).replace('.js', '.ts');
+  const tsEntry = path.join(srcDir, srcFilename).replace('.js', '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson({
     'module': 'ES6',
     'target': 'ES6',
