@@ -89,6 +89,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.mediaId_ = null;
     /** @private {Array<Function>} */
     this.unlisteners_ = [];
+    /** @private {?IntersectionObserverApi} */
+    this.intersectionObserverApi_ = null;
   }
 
   /**
@@ -156,6 +158,15 @@ class AmpApesterMedia extends AMP.BaseElement {
   firstLayoutCompleted() {
     this.viewportCallback(this.isInViewport());
     // Do not hide placeholder
+  }
+
+  /**
+   * @override
+   */
+  onLayoutMeasure() {
+    if (this.intersectionObserverApi_) {
+      this.intersectionObserverApi_.fire();
+    }
   }
 
   /**
@@ -343,27 +354,31 @@ class AmpApesterMedia extends AMP.BaseElement {
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
             return this.loadPromise(iframe).then(() => {
-              return vsync.mutatePromise(() => {
-                this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
-                this.iframe_.contentWindow./*OK*/ postMessage(
-                    {type: 'campaigns', data: media['campaignData']},
-                    '*'
-                );
-                this.togglePlaceholder(false);
-                this.ready_ = true;
-                let height = 0;
-                if (media && media['data'] && media['data']['size']) {
-                  height = media['data']['size']['height'];
-                }
-                if (height != this.height_) {
-                  this.height_ = height;
-                  if (this.random_) {
-                    this./*OK*/ attemptChangeHeight(height);
-                  } else {
-                    this./*OK*/ changeHeight(height);
-                  }
-                }
-              });
+              return vsync
+                  .mutatePromise(() => {
+                    this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
+                    this.iframe_.contentWindow./*OK*/ postMessage(
+                        {type: 'campaigns', data: media['campaignData']},
+                        '*'
+                    );
+                    this.togglePlaceholder(false);
+                    this.ready_ = true;
+                    let height = 0;
+                    if (media && media['data'] && media['data']['size']) {
+                      height = media['data']['size']['height'];
+                    }
+                    if (height != this.height_) {
+                      this.height_ = height;
+                      if (this.random_) {
+                        this./*OK*/ attemptChangeHeight(height);
+                      } else {
+                        this./*OK*/ changeHeight(height);
+                      }
+                    }
+                  })
+                  .then(() => {
+                    return this.loadPromise(iframe);
+                  });
             });
           });
         },
