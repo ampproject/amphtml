@@ -143,27 +143,26 @@ export class AmpDateCountdown extends AMP.BaseElement {
   getLocaleWord_(locale) {
     //https://ctrlq.org/code/19899-google-translate-languages refer to google code
     const localeWord = {
-      'zh-CN': '年|月|天|小时|分钟|秒',
-      'zh-TW': '年|月|天|小時|分鐘|秒',
-      'de': 'Jahren|Monaten|Tagen|Stunden|Minuten|Sekunden',
-      'en': 'Years|Months|Days|Hours|Minutes|Seconds',
-      'es': 'años|meses|días|horas|minutos|segundos',
-      'fr': 'ans|mois|jours|heures|minutes|secondes',
-      'id': 'tahun|bulan|hari|jam|menit|detik',
-      'it': 'anni|mesi|giorni|ore|minuti|secondi',
-      'ja': '年|ヶ月|日|時間|分|秒',
-      'ko': '년|달|일|시간|분|초',
-      'nl': 'jaar|maanden|dagen|uur|minuten|seconden',
-      'pt': 'anos|meses|dias|horas|minutos|segundos',
-      'ru': 'год|месяц|день|час|минута|секунда',
-      'th': 'ปี|เดือน|วัน|ชั่วโมง|นาที|วินาที',
-      'tr': 'yıl|ay|gün|saat|dakika|saniye',
-      'vi': 'năm|tháng|ngày|giờ|phút|giây',
+      'zh-CN': ['年', '月', '天', '小时', '分钟', '秒'],
+      'zh-TW': ['年', '月', '天', '小時', '分鐘', '秒'],
+      'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],
+      'en': ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds'],
+      'es': ['años', 'meses', 'días', 'horas', 'minutos', 'segundos'],
+      'fr': ['ans', 'mois', 'jours', 'heures', 'minutes', 'secondes'],
+      'id': ['tahun', 'bulan', 'hari', 'jam', 'menit', 'detik'],
+      'it': ['anni', 'mesi', 'giorni', 'ore', 'minuti', 'secondi'],
+      'ja': ['年', 'ヶ月', '日', '時間', '分', '秒'],
+      'ko': ['년', '달', '일', '시간', '분', '초'],
+      'nl': ['jaar', 'maanden', 'dagen', 'uur', 'minuten', 'seconden'],
+      'pt': ['anos', 'meses', 'dias', 'horas', 'minutos', 'segundos'],
+      'ru': ['год', 'месяц', 'день', 'час', 'минута', 'секунда'],
+      'th': ['ปี', 'เดือน', 'วัน', 'ชั่วโมง', 'นาที', 'วินาที'],
+      'tr': ['yıl', 'ay', 'gün', 'saat', 'dakika', 'saniye'],
+      'vi': ['năm', 'tháng', 'ngày', 'giờ', 'phút', 'giây'],
     };
-    let result = {};
     if (localeWord[locale]) {
-      const localeWordList = (localeWord[locale]).split('|');
-      result = {
+      const localeWordList = localeWord[locale];
+      return {
         'years': localeWordList[0],
         'months': localeWordList[1],
         'days': localeWordList[2],
@@ -173,8 +172,8 @@ export class AmpDateCountdown extends AMP.BaseElement {
       };
     } else {
       user().error(TAG, `Invalid locale '${locale}', return empty locale word`);
+      return {};
     }
-    return result;
   }
 
   /**
