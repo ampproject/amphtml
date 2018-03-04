@@ -64,7 +64,7 @@ class NamedObservable {
 
 /** @typedef {{
       iframe: !HTMLIFrameElement,
-      measureableFrame: !HTMLIFrameElement,
+      measurableFrame: !HTMLIFrameElement,
       observeUnregisterFn: (!UnlistenDef|undefined),
   }} */
 let AdFrameDef;
@@ -252,18 +252,18 @@ export class InaboxMessagingHost {
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel].measureableFrame;
+      return this.iframeMap_[sentinel].measurableFrame;
     }
-    const measureableFrame =
+    const measurableFrame =
         /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
-    const measureableWin = measureableFrame.contentWindow;
+    const measurableWin = measurableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      for (let j = 0, tempWin = measureableWin;
+      for (let j = 0, tempWin = measurableWin;
         j < 10; j++, tempWin = tempWin.parent) {
         if (iframe.contentWindow == tempWin) {
-          this.iframeMap_[sentinel] = {iframe, measureableFrame};
-          return measureableFrame;
+          this.iframeMap_[sentinel] = {iframe, measurableFrame};
+          return measurableFrame;
         }
         if (tempWin == window.top) {
           break;

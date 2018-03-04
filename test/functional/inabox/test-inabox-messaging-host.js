@@ -413,9 +413,11 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
       const iframeObjC = createNestedIframeMocks(6,0);
       const frameMockC = iframeObjC.topWin.document.querySelectorAll()[0];
+      const observeUnregisterMock = sandbox.spy();
       host = new InaboxMessagingHost(win, [frameMockA, frameMockB, frameMockC]);
       host.getFrameElement_(iframeObjA.source, 'sentinelA');
       host.getFrameElement_(iframeObjB.source, 'sentinelB');
+      host.iframeMap_['sentinelB'].observeUnregisterFn = observeUnregisterMock;
       host.getFrameElement_(iframeObjC.source, 'sentinelC');
       expect(host.iframes_.length).to.equal(3);
       expect('sentinelA' in host.iframeMap_).to.be.true;
@@ -426,14 +428,17 @@ describes.realWin('inabox-host:messaging', {}, env => {
       expect('sentinelA' in host.iframeMap_).to.be.false;
       expect('sentinelB' in host.iframeMap_).to.be.true;
       expect('sentinelC' in host.iframeMap_).to.be.true;
+      expect(observeUnregisterMock).to.not.be.called;
       host.unregisterIframe(frameMockB);
       expect(host.iframes_.length).to.equal(1);
       expect('sentinelA' in host.iframeMap_).to.be.false;
       expect('sentinelB' in host.iframeMap_).to.be.false;
       expect('sentinelC' in host.iframeMap_).to.be.true;
+      expect(observeUnregisterMock).to.be.calledOnce;
       host.unregisterIframe(frameMockC);
       expect(host.iframes_).to.be.empty;
       expect(host.iframeMap_).to.be.empty;
+      expect(observeUnregisterMock).to.be.calledOnce;
     });
 
     it('no errors or effects if called with a non-registered iframe', () => {
