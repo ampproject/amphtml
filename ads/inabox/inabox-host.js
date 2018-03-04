@@ -58,7 +58,7 @@ export class InaboxHost {
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
-
+    win.AMP = win.AMP || {};
     if (win.AMP[INABOX_UNREGISTER_IFRAME]) {
       // It's already defined; log a debug message and assume the existing
       // implmentation is good.
