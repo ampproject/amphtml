@@ -17,8 +17,6 @@
 import {getSourceUrl} from '../src/url';
 import {validateData, writeScript} from '../3p/3p';
 
-/* global rubicontag: false */
-
 /**
  * @param {!Window} global
  * @param {!Object} data
