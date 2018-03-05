@@ -356,7 +356,8 @@ class AmpApesterMedia extends AMP.BaseElement {
             return this.loadPromise(iframe).then(() => {
               return vsync
                   .mutatePromise(() => {
-                    this.iframe_.classList.add('i-amphtml-apester-iframe-ready');
+                    this.iframe_.classList
+                        .add('i-amphtml-apester-iframe-ready');
                     this.iframe_.contentWindow./*OK*/ postMessage(
                         {type: 'campaigns', data: media['campaignData']},
                         '*'
