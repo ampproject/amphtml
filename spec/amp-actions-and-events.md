@@ -354,6 +354,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
+  </tr>
+</table>
+
 ### amp-live-list
 <table>
   <tr>
