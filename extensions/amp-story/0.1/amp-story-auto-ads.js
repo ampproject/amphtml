@@ -421,4 +421,3 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 AMP.registerElement(TAG, AmpStoryAutoAds);
 
-
