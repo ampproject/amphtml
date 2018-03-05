@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 
 export class AmpBodymovinPlayer extends AMP.BaseElement {
@@ -30,6 +31,17 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    if (!this.element.hasAttribute('data-animation-data')) {
+      const animationData = Services.xhrFor(this.win).fetchJson(
+        this.element.getAttribute('data-animation-path'), {
+          requireAmpResponseSourceOrigin: false
+      });
+      animationData.then(data => {
+        // We will get here when the data has been fetched from the server
+        this.element.setAttribute('data-animation-data', data.text());
+      });
+    }
   }
 
   /** @override */
@@ -43,7 +55,7 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js', opt_onLayout);
+    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', opt_onLayout);
   }
 
   /** @override */

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {user} from '../src/log';
  * @param {function(!Object)} cb
  */
 function getBodymovinPlayerSdk(global, cb) {
-  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js', function() {
+  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
     cb();
   });
 }
@@ -40,7 +40,9 @@ export function bodymovinplayer(global, data) {
       renderer: 'canvas',
       loop: loop,
       autoplay: data.noAutoplay !== undefined ? false : true,
-      path: data.animationPath, // the animation data
+      path: data.animationPath,
+      animationData: data.animationData,
+      name: data.name
     });
 
   });
