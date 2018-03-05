@@ -16,7 +16,7 @@
 
 export const DEFAULT_LOCALE = 'en';
 
-export const DEFAULT_FORMAT = '';
+export const DEFAULT_FORMAT = 'YYYY-MM-DD';
 
 export const FORMAT_STRINGS = [
   'M',
