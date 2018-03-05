@@ -180,16 +180,10 @@ let PropTypes = {};
 let ReactDates = {};
 
 /** @constructor */
-ReactDates.SingleDatePicker;
+ReactDates.DayPickerSingleDateController;
 
 /** @struct */
-ReactDates.SingleDatePickerShape;
-
-/** @constructor */
-ReactDates.DateRangePicker;
-
-/** @struct */
-ReactDates.DateRangePickerShape;
+ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
 ReactDates.isInclusivelyAfterDay;
