@@ -134,6 +134,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   layoutCallback() {
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
+          this.createAdOverlay_();
           this.readConfig_();
           this.schedulePage_();
         });
@@ -153,6 +154,23 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     this.config_ = parseJson(child.textContent);
     this.validateConfig_();
+  }
+
+
+  /**
+   * Create a hidden UI that will be shown when ad is displayed
+   * @private
+   */
+  createAdOverlay_() {
+    const container = document.createElement('aside');
+    container.className = 'i-amphtml-ad-overlay-container';
+
+    const span = document.createElement('p');
+    span.className = 'i-amphtml-story-ad-attribution';
+    span.textContent = 'Ad';
+
+    container.appendChild(span);
+    this.ampStory_.element.appendChild(container);
   }
 
 
