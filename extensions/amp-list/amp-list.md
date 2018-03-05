@@ -162,6 +162,19 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 </amp-list>
 ```
 
+### Refreshing data
+
+The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes. 
+
+```html
+<button on="tap:myList.refresh">Refresh List</button>
+<amp-list id="myList" src="https://foo.com/list.json">
+  <template type="amp-mustache">
+    <div>{{title}}</div>
+  </template>
+</amp-list>
+```
+
 ## Attributes
 
 ##### src (required)
