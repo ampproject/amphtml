@@ -98,20 +98,16 @@ const TAG = 'amp-date-picker';
 const DATE_SEPARATOR = ' ';
 
 const attributesToForward = [
-  'disabled',
-  'enable-outside-days',
-  'horizontal-margin',
   'initial-visible-month',
   'keep-open-on-date-select',
   'max',
   'min',
-  'minimum-nights',
+  'month-format',
   'month-format',
   'number-of-months',
   'orientation',
   'reopen-picker-on-clear-date',
   'with-full-screen-portal',
-  'month-format',
 ];
 
 /** @enum {string} */
@@ -345,37 +341,23 @@ class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.NODISPLAY;
+    // TODO(cvializ): Use layout fixed and then expand?
+    return layout == Layout.CONTAINER;
   }
 
   /** @override */
   layoutCallback() {
     this.setupTemplates_();
+    this.setupListeners_();
     // Make sure it's rendered and measured properly
     return this.render(this.state_);
   }
 
   /** @override */
-  resumeCallback() {
-    this.setupListeners_();
-    this.setupTemplates_();
-  }
-
-  /**
-   * TODO(cvializ): Figure out how to keep the listeners when unlayout callback
-   * is triggered by a parent element e.g. amp-lightbox collapsing.
-   * @override
-   */
-  unlayoutCallback() {
+  detachedCallback() {
     this.cleanupListeners_();
     this.cleanupSrcTemplates_();
     this.clearRenderedTemplates_();
-    return true;
-  }
-
-  /** @override */
-  unlayoutOnPause() {
-    return true;
   }
 
   /**
@@ -554,7 +536,6 @@ class AmpDatePicker extends AMP.BaseElement {
   }
 
 
-
   /**
    * Get the initial value for properties that change during the lifetime of
    * the AMP element.
@@ -673,7 +654,7 @@ class AmpDatePicker extends AMP.BaseElement {
   handleClick_(e) {
     const target = dev().assertElement(e.target);
     const clickWasInDatePicker = (
-      this.container_.contains(target) || this.isDateField_(target)
+      this.element.contains(target) || this.isDateField_(target)
     );
 
     if (!clickWasInDatePicker) {

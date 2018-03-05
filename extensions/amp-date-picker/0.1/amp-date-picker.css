@@ -257,10 +257,12 @@ amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
   border-radius: 3px;
 }
 
+/* Allow keyboard focus to trigger tooltip */
+.CalendarDay_button:focus [data-date-tooltip]::before,
+.CalendarDay_button:focus [data-date-tooltip]::after,
+/* Allow mouse hover to trigger tooltip */
 [data-date-tooltip]:hover::before,
-[data-date-tooltip]:focus::before,
-[data-date-tooltip]:hover::after,
-[data-date-tooltip]:focus::after {
+[data-date-tooltip]:hover::after {
   transform: translate(-50%, 0);
   pointer-events: auto;
   opacity: 1;

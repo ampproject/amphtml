@@ -47,7 +47,6 @@
   <amp-date-picker
     type="range"
     id="drp"
-    reopen-picker-on-clear-date
     on="
     select:
       AMP.setState({
@@ -56,16 +55,14 @@
       })"
     locale="en"
     format="DD/MM/YYYY"
-    blocked="2018-02-26"
-    highlighted="2018-01-29"
     number-of-months="1"
     day-size="50"
-    show-clear-dates
     keep-open-on-date-select
     start-input-selector="#start"
     end-input-selector="#end"
     mode="overlay"
     layout="container"
+    reopen-picker-on-clear-date
   >
     <div>
       <input type="tel" placeholder="Start date" id="start" />
@@ -145,7 +142,8 @@
             <input type="text" name="name" id="name3" required>
         </label>
         <span>Your date</span>
-        <amp-date-picker></amp-date-picker>
+        <input id="date" name="date">
+        <amp-date-picker input-selector="#date"></amp-date-picker>
         <input type="submit" value="Subscribe">
     </fieldset>
 
