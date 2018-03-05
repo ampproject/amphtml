@@ -39,11 +39,11 @@ const minimatch = require('minimatch');
 const minimist = require('minimist');
 const path = require('path');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+const removeJsFilesInDirectory = require('./build-system/typescript').removeJsFilesInDirectory;
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
-const ts = require('typescript');
-const tsickle = require('tsickle');
+const transpileTs = require('./build-system/typescript').transpileTs;
 const watchify = require('watchify');
 
 const argv = minimist(
@@ -599,18 +599,17 @@ function buildExtensionJs(path, name, version, options) {
   }
   const priority = options.loadPriority ? 'p:"high",' : '';
   return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
-    toName: name + '-' + version + '.max.js',
-    minifiedName: name + '-' + version + '.js',
-    latestName: name + '-latest.js',
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: `${name}-latest.js`,
     // Wrapper that either registers the extension or schedules it for
     // execution after the main binary comes back.
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
-        '.push({n:"' + name + '",' + priority +
-        'v:"' + internalRuntimeVersion + '",' +
-        'f:(function(AMP){<%= contents %>\n})});'),
+    wrapper: options.noWrapper ? ''
+      : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
+      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
   }));
 }
 
@@ -991,7 +990,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   // Transpile TS to Closure-annotated JS before actual bundling or compile.
   if (options.typeScript) {
+    const startTime = Date.now();
     transpileTs(srcDir, srcFilename);
+    endBuildStep('Transpiled', srcFilename, startTime);
   }
 
   if (options.minify) {
@@ -1119,67 +1120,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     // `gulp build` / `gulp dist` cases where options.watch is undefined.
     return rebundle(/* failOnError */ true);
   }
-}
-
-/**
- * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
- * the same name `foo/bar.ts` and all direct and indirect TypeScript imports.
- *
- * @param {string} srcDir
- * @param {string} srcFilename
- */
-function transpileTs(srcDir, srcFilename) {
-  const startTime = Date.now();
-
-  const tsEntry = path.join(srcDir, srcFilename).replace('.js', '.ts');
-  const tsConfig = ts.convertCompilerOptionsFromJson({
-    'module': 'ES6',
-    'target': 'ES6',
-  }, srcDir);
-  const tsOptions = tsConfig.options;
-  if (tsConfig.errors.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(tsConfig.errors));
-  }
-
-  const compilerHost = ts.createCompilerHost(tsOptions);
-  const program = ts.createProgram([tsEntry], tsOptions, compilerHost);
-
-  const transformerHost = {
-    shouldSkipTsickleProcessing: () => false,
-    transformTypesToClosure: true,
-    options: tsOptions,
-    host: compilerHost,
-  };
-  const emitResult = tsickle.emitWithTsickle(program, transformerHost,
-      compilerHost, tsOptions, undefined, (filePath, contents) => {
-        fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
-      });
-
-  const diagnostics =
-      ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-  if (diagnostics.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-  }
-
-  endBuildStep('Transpiled', srcFilename, startTime);
-}
-
-/**
- * Removes all JS files in given directory and its subdirectories.
- *
- * @param {string} dir
- */
-function removeJsFilesInDirectory(dir) {
-  const files = fs.readdirSync(dir);
-  files.forEach(file => {
-    const filename = path.join(dir, file);
-    const stat = fs.lstatSync(filename);
-    if (stat.isDirectory()) {
-      removeJsFilesInDirectory(filename);
-    } else if (filename.endsWith('.js')) {
-      fs.remove(filename);
-    }
-  });
 }
 
 /**
