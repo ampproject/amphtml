@@ -194,7 +194,7 @@ export function sanitizeHtml(html) {
 
   /**
    * @param {string} tagName
-   * @param {!Array{string}} attribs
+   * @param {!Array<string>} attribs
    */
   function handleNonAmpElement(tagName, attribs) {
     // Ask Caja to validate the element as well.
