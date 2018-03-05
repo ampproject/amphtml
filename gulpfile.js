@@ -144,7 +144,6 @@ declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
-declareExtension('amp-typescript-demo', '0.1', {typeScript: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
 declareExtension('amp-position-observer', '0.1');
