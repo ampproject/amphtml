@@ -27,10 +27,23 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 export class SubscriptionPlatform {
 
   /**
+   * Returns the service Id.
+   * @returns {string}
+   */
+  getServiceId() {
+  }
+
+  /**
    * Requests entitlement for a subscription platform.
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
+  }
+
+  /**
+   * Activates the subscription platform and hands over the control for rendering.
+   */
+  activate() {
   }
 }
 

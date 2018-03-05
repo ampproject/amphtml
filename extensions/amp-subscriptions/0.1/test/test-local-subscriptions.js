@@ -51,6 +51,16 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         .to.be.equals('include');
   });
 
+  it('initializeListeners_ should listen to clicks on rootNode', () => {
+    const domStub = sandbox.stub(localSubscriptionPlatform.rootNode_,
+        'addEventListener');
+
+    localSubscriptionPlatform.initializeListeners_();
+    expect(domStub).calledOnce;
+    expect(domStub.getCall(0).args[0])
+        .to.be.equals('click');
+  });
+
   describe('validateActionMap', () => {
     let actionMap;
     beforeEach(() => {
@@ -77,6 +87,31 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
           localSubscriptionPlatform.validateActionMap(actionMap);
       expect(JSON.stringify(returnedMap)).to.be
           .equal(JSON.stringify((actionMap)));
+    });
+  });
+
+  describe('executeAction', () => {
+    it('should call executeAction on actions_', () => {
+      const actionString = 'action';
+      const executeStub =
+        sandbox.stub(localSubscriptionPlatform.actions_, 'execute')
+            .callsFake(() => Promise.resolve(true));
+      const entitlementsStub =
+          sandbox.stub(localSubscriptionPlatform, 'getEntitlements');
+      localSubscriptionPlatform.executeAction(actionString);
+      expect(executeStub).to.be.calledWith(actionString);
+      return executeStub().then(() => {
+        expect(entitlementsStub).to.be.calledOnce;
+      });
+    });
+  });
+
+  describe('render', () => {
+    it('should call renderer\'s render method', () => {
+      const renderStub =
+        sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
+      localSubscriptionPlatform.activate();
+      expect(renderStub).to.be.calledOnce;
     });
   });
 });
