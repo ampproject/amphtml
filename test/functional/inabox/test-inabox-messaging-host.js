@@ -407,6 +407,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   describe('unregisterIframe', () => {
     it('unregisters frames', () => {
+      // Setup 3 frames with mock sentinel values.
       const iframeObjA = createNestedIframeMocks(6,3);
       const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
       const iframeObjB = createNestedIframeMocks(6,6);
@@ -423,6 +424,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       expect('sentinelA' in host.iframeMap_).to.be.true;
       expect('sentinelB' in host.iframeMap_).to.be.true;
       expect('sentinelC' in host.iframeMap_).to.be.true;
+      // Unregister each frame one at a time and verify state.
       host.unregisterIframe(frameMockA);
       expect(host.iframes_.length).to.equal(2);
       expect('sentinelA' in host.iframeMap_).to.be.false;
