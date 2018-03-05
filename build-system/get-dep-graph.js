@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var ClosureCompiler = require('google-closure-compiler').compiler;
 const babel = require('babelify');
 const browserify = require('browserify');
 const devnull = require('dev-null');
@@ -73,21 +74,11 @@ exports.getGraph = function(entryModules, config) {
     deps: true,
     detectGlobals: false,
   })
-      // We register 2 separate transforms. The initial stage are
-      // transforms that closure compiler does not support.
-      .transform(babel, {
-        babelrc: !!config.babel.babelrc,
-        plugins: config.babel.plugins || [
-          require.resolve('babel-plugin-transform-react-jsx'),
-        ],
-        presets: config.babel.presets,
-      })
-      // The second stage are transforms that closure compiler supports
-      // directly and which we don't want to apply during deps finding.
       .transform(babel, {
         babelrc: false,
+        presets: ['env'],
         plugins: [
-          require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
+          require.resolve("./babel-plugins/add-module-export/src"),
         ],
       });
 
@@ -135,21 +126,21 @@ exports.getGraph = function(entryModules, config) {
   // TODO: Replace with proper plugin system.
   const seenTransform = {};
   b.on('transform', function(tr) {
-    if (tr instanceof babel) {
-      tr.once('babelify', function(result, filename) {
-        if (seenTransform[filename]) {
-          return; // We only care about the first transform per file.
-        }
-        seenTransform[filename] = true;
-        filename = relativePath(process.cwd(), filename);
-        // Copy transformed code into shadow path. Files in this path
-        // have precedence over regular relative paths.
-        const target = './splittable-build/transformed/' + filename;
-        mkpath.sync(path.dirname(target));
-        fs.writeFileSync(target, result.code);
-        graph.transformed[filename] = target;
-      });
-    }
+    //if (tr instanceof babel) {
+      //tr.once('babelify', function(result, filename) {
+        //if (seenTransform[filename]) {
+          //return; // We only care about the first transform per file.
+        //}
+        //seenTransform[filename] = true;
+        //filename = relativePath(process.cwd(), filename);
+        //// Copy transformed code into shadow path. Files in this path
+        //// have precedence over regular relative paths.
+        //const target = './splittable-build/transformed/' + filename;
+        //mkpath.sync(path.dirname(target));
+        //fs.writeFileSync(target, result.code);
+        //graph.transformed[filename] = target;
+      //});
+    //}
   });
 
   // This gets us the actual deps. We collect them in an array, so
@@ -280,3 +271,231 @@ exports.maybeAddDotJs = function(id) {
   }
   return id;
 };
+
+exports.getFlags = function(config) {
+  let wrapper = '(function(){%output%})();';
+  // Reasonable defaults.
+  var flags = {
+    compilation_level: 'ADVANCED',
+    process_common_js_modules: true,
+    //module_resolution: 'NODE',
+    rewrite_polyfills: true,
+    create_source_map: '%outname%.map',
+    output_wrapper: wrapper,
+    //parse_inline_source_maps: true,
+    //apply_input_source_maps: true,
+    source_map_location_mapping: [
+      'splittable-build/transformed/|/',
+      'splittable-build/browser/|/',
+      '|/',
+    ],
+    //new_type_inf: true,
+    externs: config.externs,
+    language_in: 'ES6',
+    language_out: 'ES5',
+    rewrite_polyfills: false,
+    module_output_path_prefix: 'out/',
+    jscomp_off: [
+      'accessControls',
+      'globalThis',
+      'misplacedTypeAnnotation',
+      'nonStandardJsDocs',
+      'suspiciousCode',
+      'uselessCode',
+    ],
+  };
+
+  // Turn object into deterministically sorted array.
+  var flagsArray = [];
+  Object.keys(flags).sort().forEach(function(flag) {
+    var val = flags[flag];
+    if (val instanceof Array) {
+      val.forEach(function(item) {
+        flagsArray.push('--' + flag, item);
+      })
+    } else {
+      flagsArray.push('--' + flag, val);
+    }
+  });
+
+  return exports.getGraph(config.modules, {}).then(function(g) {
+    return flagsArray.concat(
+        exports.getBundleFlags(g, flagsArray));
+  });
+};
+
+exports.getBundleFlags = function(g) {
+  console.log(g);
+  var flagsArray = [];
+
+  // Write all the packages (directories with a package.json) as --js
+  // inputs to the flags. Closure compiler reads the packages to resolve
+  // non-relative module names.
+  var packageCount = 0;
+  //Object.keys(g.packages).sort().forEach(function(package) {
+    //flagsArray.push('--js', package);
+    //packageCount++;
+  //});
+  // Build up the weird flag structure that closure compiler calls
+  // modules and we call bundles.
+  var bundleKeys = Object.keys(g.bundles);
+  bundleKeys.sort().forEach(function(name) {
+    var isBase = name == '_base';
+    var extraModules = 0;
+    var bundle = g.bundles[name];
+    //if (isBase || bundleKeys.length == 1) {
+      //flagsArray.push('--js', relativePath(process.cwd(),
+          //require.resolve('./base.js')));
+      //extraModules++;
+      //Object.keys(g.browserMask).sort().forEach(function(mask) {
+        //flagsArray.push('--js', mask);
+        //extraModules++;
+      //});
+    //}
+    console.log(bundle.modules);
+    // In each bundle, first list JS files that belong into it.
+    bundle.modules.forEach(function(js) {
+      if (g.transformed[js]) {
+        js = g.transformed[js];
+      }
+      flagsArray.push('--js', js);
+    });
+    if (!isBase && bundleKeys.length > 1) {
+      flagsArray.push('--js', bundleTrailModule(bundle.name));
+      extraModules++;
+    }
+    // The packages count as inputs to the first module.
+    if (packageCount) {
+      extraModules += packageCount;
+      packageCount = 0;
+    }
+    // Replace directory separator with - in bundle filename
+    var name = bundle.name
+        .replace(/\.js$/g, '')
+        .replace(/[\/\\]/g, '-');
+    // And now build --module $name:$numberOfJsFiles:$bundleDeps
+    var cmd = name + ':' + (bundle.modules.length + extraModules);
+    // All non _base bundles depend on _base.
+    if (!isBase && g.bundles._base) {
+      cmd += ':_base';
+    }
+    flagsArray.push('--module', cmd);
+    if (bundleKeys.length > 1) {
+      if (isBase) {
+        flagsArray.push('--module_wrapper', name + ':' +
+            exports.baseBundleWrapper);
+      } else {
+        flagsArray.push('--module_wrapper', name + ':' +
+            exports.bundleWrapper);
+      }
+    } else {
+      flagsArray.push('--module_wrapper', name + ':' +
+            exports.defaultWrapper);
+    }
+  });
+  flagsArray.push('--js_module_root', './');
+  return flagsArray;
+}
+
+    let externs = [
+      'build-system/amp.extern.js',
+      //'third_party/closure-compiler/externs/intersection_observer.js',
+      'third_party/closure-compiler/externs/performance_observer.js',
+      //'third_party/closure-compiler/externs/shadow_dom.js',
+      //'third_party/closure-compiler/externs/streams.js',
+      'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/moment/moment.extern.js',
+      'third_party/react-externs/externs.js',
+    ];
+exports.getFlags({
+  modules: [
+    //'./src/amp.js',
+    './extensions/amp-audio/0.1/amp-audio.js',
+    './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
+  ],
+  writeTo: './sample/out/',
+  externs: externs,
+}).then(function(flagsArray) {
+  return new Promise(function(resolve, reject) {
+    console.log(flagsArray);
+    new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
+      if (exitCode == 0) {
+        resolve({
+          warnings: null,
+        });
+      } else {
+        reject(
+            new Error('Closure compiler compilation of bundles failed.\n' +
+                stdOut + '\n' +
+                stdErr));
+      }
+    });
+  })
+});
+
+var systemImport =
+    // Polyfill and/or monkey patch System.import.
+    '(self.System=self.System||{}).import=function(n){' +
+    // Always end names in .js
+    'n=n.replace(/\\.js$/g,"")+".js";' +
+    // Short circuit if the bundle is already loaded.
+    'return (self._S["//"+n]&&Promise.resolve(self._S["//"+n]))' +
+    // Short circuit if we are already loadind, otherwise create
+    // a promise (that will short circuit subsequent requests)
+    // and start loading.
+    '||self._S[n]||(self._S[n]=new Promise(function(r,t){' +
+    // Load via a script
+    'var s=document.createElement("script");' +
+    // Calculate the source URL using the same algorithms as used
+    // during bundle generation.
+    's.src=(self.System.baseURL||".")+"/"+n.replace(/[\\/\\\\]/g,"-");' +
+    // Fail promise on any error.
+    's.onerror=t;' +
+    // On success the trailing module in every bundle will have created
+    // the _S global representing the module object that is the root
+    // of the bundle. Resolve the promise with it.
+    's.onload=function(){r(self._S["//"+n])};' +
+    // Append the script tag.
+    '(document.head||document.documentElement).appendChild(s);' +
+    '})' +
+    ')};\n';
+
+var nodeEmulation = 'self.global=self;';
+
+exports.defaultWrapper = nodeEmulation + '%s\n' +
+     '//# sourceMappingURL=%basename%.map\n';
+
+// Don't wrap the bundle itself in a closure (other bundles need
+// to be able to see it), but add a little async executor for
+// scheduled functions.
+exports.baseBundleWrapper =
+    // Declaring a few variables that are used in node modules to increase
+    // compatiblity.
+    nodeEmulation +
+    '%s\n' +
+    systemImport +
+    // Runs scheduled non-base bundles in the _S array and overrides
+    // .push to immediately execute incoming bundles.
+    '(self._S=self._S||[]).push=function(f){f.call(self)};' +
+    '(function(f){while(f=self._S.shift()){f.call(self)}})();\n' +
+    '//# sourceMappingURL=%basename%.map\n';
+
+// Schedule or execute bundle via _S global.
+exports.bundleWrapper =
+    '(self._S=self._S||[]).push((function(){%s}));\n' +
+    '//# sourceMappingURL=%basename%.map\n';
+
+function bundleTrailModule(name) {
+  if (!fs.existsSync('./splittable-build')) {
+    fs.mkdirSync('./splittable-build');
+  }
+  var tmp = require('tmp').fileSync({
+    template: './splittable-build/tmp-XXXXXX.js'
+  });
+
+  var js = '// Generated code to get module ' + name + '\n' +
+      '(self["_S"]=self["_S"]||[])["//' + name + '"]=' +
+      'require("' + relativePath(path.dirname(tmp.name), name) + '")\n';
+  fs.writeFileSync(tmp.name, js, 'utf8');
+  return relativePath(process.cwd(), tmp.name);
+}
