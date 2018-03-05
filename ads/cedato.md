@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation. For additional details and support contact support@cedato.com
+For additional details and support contact support@cedato.com
 
 Supported parameters:
 -  (Required) data-id - the id of the player - supply ID
 -  (Optional) data-domain - page domain reported to the player
 -  (Optional) data-serving-domain - the domain from which the player is served
 -  (Optional) data-subid - player subid
--  (Optional) data-extra-params - additional player tag parameters can be set in the 'extra-params' query string 
+-  (Optional) data-version - version of the player that is being used
+-  (Optional) data-extra-params - additional player tag parameters can be set in the 'extra-params' query string, all parts have to be encoded

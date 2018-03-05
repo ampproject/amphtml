@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export function cedato(global, data) {
     return;
   }
 
-  const cb = (Math.random() * 10000 | 0);
+  const cb = Math.floor(Math.random() * 10000);
   const domain = data.domain || parseUrl(global.context.sourceUrl).origin;
 
   /* Create div for ad to target */
@@ -49,16 +49,19 @@ export function cedato(global, data) {
     height: '100%',
   });
   const playerScript = global.document.createElement('script');
+  const servingDomain = data.servingDomain ?
+    encodeURIComponent(data.servingDomain) :
+    'algovid.com';
   const srcParams = [
-    'https://p.' + (data.servingDomain || 'algovid.com') + '/player/player.js',
-    '?p=' + data.id,
+    'https://p.' + servingDomain + '/player/player.js',
+    '?p=' + encodeURIComponent(data.id),
     '&cb=' + cb,
-    '&w=' + data.width,
-    '&h=' + data.height,
-    (data.version ? '&pv=' + data.version : ''),
-    (data.subid ? '&subid=' + data.subid : ''),
+    '&w=' + encodeURIComponent(data.width),
+    '&h=' + encodeURIComponent(data.height),
+    (data.version ? '&pv=' + encodeURIComponent(data.version) : ''),
+    (data.subid ? '&subid=' + encodeURIComponent(data.subid) : ''),
     (domain ? '&d=' + encodeURIComponent(domain) : ''),
-    (data.extraParams || ''),
+    (data.extraParams || ''), // already encoded url query string
   ];
 
   playerScript.onload = () => {
