@@ -235,9 +235,12 @@ describes.realWin('amp-list component', {
     const rendered = expectFetchAndRender(items, [foo]);
     const layout = list.layoutCallback();
 
-    // Execute another fetch-triggering action immediately...
-    element.setAttribute('src', 'https://new.com/list.json');
-    list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    // Execute another fetch-triggering action immediately (actually on
+    // the next tick to avoid losing the layoutCallback() promise resolver).
+    Promise.resolve().then(() => {
+      element.setAttribute('src', 'https://new.com/list.json');
+      list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    });
 
     return layout.then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;

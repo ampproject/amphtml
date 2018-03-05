@@ -57,7 +57,7 @@ export class AmpList extends AMP.BaseElement {
     /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
-     * @const @private {{items:!Array, resolver:!Function, rejecter:!Function}}
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
      */
     this.renderItems_ = null;
 
