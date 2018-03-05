@@ -51,6 +51,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
       'firstViewportReady': 'FIRST_VIEWPORT_READY',
       'makeBodyVisible': 'MAKE_BODY_VISIBLE',
+      'htmlAttr': 'HTML_ATTR',
       'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',

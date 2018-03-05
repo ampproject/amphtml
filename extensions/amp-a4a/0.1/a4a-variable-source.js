@@ -68,6 +68,7 @@ const WHITELISTED_VARIABLES = [
   'FIRST_CONTENTFUL_PAINT',
   'FIRST_VIEWPORT_READY',
   'MAKE_BODY_VISIBLE',
+  'HTML_ATTR',
 ];
 
 /** Provides A4A specific variable substitution. */
@@ -137,32 +138,35 @@ export class A4AVariableSource extends VariableSource {
    */
   htmlAttrBinding_(cssSelector) {
     const HTML_ATTR_MAX_RETURN_SIZE = 10;
-    const result = [];
     const attributeNames = Array.prototype.slice.call(arguments, 1);
-    if (!cssSelector || !attributeNames || !attributeNames.length) {
-      return JSON.stringify(result);
+    if (!cssSelector || !attributeNames.length) {
+      return '[]';
     }
     cssSelector = decodeURI(cssSelector);
+    let elements;
     try {
-      const elements = this.win_.document.querySelectorAll(cssSelector);
-      for (let i = 0; i < elements.length &&
-      result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
-        const currentResult = {};
-        let foundAttr = false;
-        attributeNames.forEach(attributeName => {
-          if (elements[i].hasAttribute(attributeName)) {
-            currentResult[attributeName] =
-                elements[i].getAttribute(attributeName);
-            foundAttr = true;
-          }
-        });
-        if (foundAttr) {
-          result.push(currentResult);
-        }
-      }
+      elements = this.win_.document.querySelectorAll(cssSelector);
     } catch (e) {
       const TAG = 'A4AVariableSource';
       user().warn(TAG, `Invalid selector: ${cssSelector}`);
+      return '[]';
+    }
+    const result = [];
+    for (let i = 0; i < elements.length &&
+        result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+      const currentResult = {};
+      let foundAtLeastOneAttr = false;
+      for (let j=0; j<attributeNames.length; ++j) {
+        const attributeName = attributeNames[j];
+        if (elements[i].hasAttribute(attributeName)) {
+          currentResult[attributeName] =
+              elements[i].getAttribute(attributeName);
+          foundAtLeastOneAttr = true;
+        }
+      }
+      if (foundAtLeastOneAttr) {
+        result.push(currentResult);
+      }
     }
     return JSON.stringify(result);
   }
