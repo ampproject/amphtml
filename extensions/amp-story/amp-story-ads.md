@@ -1,6 +1,7 @@
 # Advertising support in AMP Stories 
 
 This document describes the principles and practices for including ads in AMP Stories.
+Please note that Advertising support in AMP Stories is highly experimental at the moment and could significantly change from what's described below. We look forward to your feedback as we build this model together.
 
 ## AMP Story Ad Principles
 
