@@ -166,12 +166,12 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
-   * @param {!Array<!Entitlements>} platforms
+   * @param {!Array<!Entitlements>} entitlements
    * @returns {!Entitlements}
    */
-  selectApplicablePlatform_(platforms) {
+  selectApplicablePlatform_(entitlements) {
     let chosenPlatform;
-    platforms.forEach(platform => {
+    entitlements.forEach(platform => {
       // TODO(@prateekbh): add metering logic here
       if (platform.enablesThis()) {
         chosenPlatform = platform;
