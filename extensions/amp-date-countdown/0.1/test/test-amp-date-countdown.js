@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-require('../amp-date-countdown');
+import '../amp-date-countdown';
 
 describes.realWin('amp-date-countdown', {
   amp: {
@@ -186,7 +185,7 @@ describes.realWin('amp-date-countdown', {
     const timeObj =
       Object.assign(
           impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate
-            + (- 24 * 60 * 60 * 1000)), // hours * minutes * seconds * ms
+            + (-1 * 24 * 60 * 60 * 1000)), // hours * minutes * seconds * ms
           impl.getLocaleWord_('en')); // English
     const itemElement = win.document.createElement('div');
     itemElement.textContent = timeObj.d + ' ' + timeObj.days + ' ' +
