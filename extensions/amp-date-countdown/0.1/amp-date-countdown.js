@@ -58,8 +58,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     //Note: One of datetime, timestamp-ms, timestamp-seconds is required.
     this.endDate_ = this.element.getAttribute('end-date');
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
-    this.timestampSeconds_
-      = Number(this.element.getAttribute('timestamp-seconds'));
+    this.timestampSeconds_ = Number(this.element.getAttribute('timestamp-seconds'));
     this.offsetSeconds_ = Number(this.element.getAttribute('offset-seconds')) || 0;
 
     const locale = this.element.getAttribute('locale') || 'en';
