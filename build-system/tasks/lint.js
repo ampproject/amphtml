@@ -127,7 +127,7 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  const stream = initializeStream(config.lintGlobs, {});
+  const stream = initializeStream(argv.file || config.lintGlobs, {});
   return runLinter('.', stream, options);
 }
 
