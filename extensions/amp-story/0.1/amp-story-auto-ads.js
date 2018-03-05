@@ -259,6 +259,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const configAttrs = this.config_['ad-attributes'];
 
+    ['height', 'width', 'layout'].forEach(attr => {
+      if (configAttrs[attr]) {
+        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+        delete configAttrs[attr];
+      }
+    });
+
     user().assert(this.isTypeAllowed_(configAttrs.type), `${TAG}: ` +
       `"${configAttrs.type}" ad type is not supported`);
 
