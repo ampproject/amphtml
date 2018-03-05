@@ -245,7 +245,7 @@ describes.realWin('amp-list component', {
       // Only one render pass should be invoked at a time.
       expect(doRenderPassSpy).to.be.calledOnce;
       // But the next render pass should be scheduled.
-      expect(scheduleRenderSpy).to.be.calledThrice;
+      expect(scheduleRenderSpy).to.be.calledTwice;
       expect(scheduleRenderSpy).to.be.calledWith(1);
     });
   });

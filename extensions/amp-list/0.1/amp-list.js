@@ -207,6 +207,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(items) {
+    // Add `items` to the render queue.
     let resolver;
     let rejecter;
     const promise = new Promise((resolve, reject) => {
@@ -214,7 +215,12 @@ export class AmpList extends AMP.BaseElement {
       rejecter = reject;
     });
     this.renderQueue_.push({items, resolver, rejecter});
-    this.renderPass_.schedule();
+
+    // Start the render pass if the queue was previously empty.
+    // The render pass will continue running until the queue is empty.
+    if (this.renderQueue_.length === 1) {
+      this.renderPass_.schedule();
+    }
     return promise;
   }
 
@@ -225,8 +231,9 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     dev().assert(this.renderQueue_.length > 0, 'Nothing queued for render.');
-    const {items, resolver, rejecter} = this.renderQueue_.shift();
+    const {items, resolver, rejecter} = this.renderQueue_[0];
     const scheduleNextPass = () => {
+      this.renderQueue_.shift();
       if (this.renderQueue_.length) {
         this.renderPass_.schedule(1); // Allow paint frame before next render.
       }
