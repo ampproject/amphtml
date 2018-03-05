@@ -204,7 +204,7 @@ export class SubscriptionService {
           .then(entitlements => {
             this.subscriptionPlatforms_.forEach(platform => {
               if (platform.getServiceId() == entitlements.service) {
-                platform.render();
+                platform.activate();
               }
             });
           });

@@ -28,6 +28,7 @@ export class SubscriptionPlatform {
 
   /**
    * Returns the service Id.
+   * @returns {string}
    */
   getServiceId() {
   }
@@ -40,10 +41,9 @@ export class SubscriptionPlatform {
   }
 
   /**
-   * Renders the UI specific to the platform
+   * Activates the subscription platform and hands over the control for rendering.
    */
-  render() {
-
+  activate() {
   }
 }
 

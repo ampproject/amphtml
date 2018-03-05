@@ -51,8 +51,8 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         .to.be.equals('include');
   });
 
-  it('initializeListeners_ should listen to clicks on document', () => {
-    const domStub = sandbox.stub(localSubscriptionPlatform.document_,
+  it('initializeListeners_ should listen to clicks on rootNode', () => {
+    const domStub = sandbox.stub(localSubscriptionPlatform.rootNode_,
         'addEventListener');
 
     localSubscriptionPlatform.initializeListeners_();
@@ -110,7 +110,7 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.render();
+      localSubscriptionPlatform.activate();
       expect(renderStub).to.be.calledOnce;
     });
   });

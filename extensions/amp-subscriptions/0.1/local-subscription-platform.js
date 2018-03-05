@@ -23,7 +23,7 @@ import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -42,7 +42,7 @@ export class LocalSubscriptionPlatform {
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
-    this.document_ = this.ampdoc_.win.document;
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = serviceConfig;
@@ -135,8 +135,9 @@ export class LocalSubscriptionPlatform {
    * @private
    */
   initializeListeners_() {
-    this.document_.addEventListener('click', e => {
-      const element = closestBySelector(e.target, '[subscriptions-action]');
+    this.rootNode_.addEventListener('click', e => {
+      const element = closestBySelector(dev().assertElement(e.target),
+          '[subscriptions-action]');
       if (element) {
         const action = element.getAttribute('subscriptions-action');
         this.executeAction(action);
@@ -147,8 +148,8 @@ export class LocalSubscriptionPlatform {
   /**
    * Renders the platform specific UI
    */
-  render() {
-    this.renderer_.render();
+  activate() {
+    this.renderer_.render(this.entitlements_);
   }
 
   /**
@@ -159,6 +160,7 @@ export class LocalSubscriptionPlatform {
     const actionExecution = this.actions_.execute(action);
     actionExecution.then(result => {
       if (result) {
+        // TODO(@prateekbh): Add a service interface and call reauthorize on it.
         this.getEntitlements();
       }
     });
