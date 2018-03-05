@@ -24,12 +24,8 @@ import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
 
-// TODO(ccordry) replace these constants with user config
 /** @const */
 const MIN_INTERVAL = 3;
-
-/** @const */
-const MAX_NUMBER = 2;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -341,15 +337,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.uniquePageIds_[pageId] = true;
     }
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+    if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.PLACED) {
         this.adsPlaced_++;
         // start loading next ad
-        if (!this.allAdsPlaced_()) {
-          this.startNextPage_();
-        }
+        this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
@@ -370,15 +364,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
-   * @return {boolean}
-   * @private
-   */
-  allAdsPlaced_() {
-    return this.adsPlaced_ >= MAX_NUMBER;
-  }
-
-
-  /**
    * Place ad based on user config
    * @param {string} currentPageId
    * @private
@@ -393,7 +378,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const currentPage = this.ampStory_.getPageById(currentPageId);
     const nextPage = this.ampStory_.getNextPage(currentPage);
 
-    if (!this.isCurrentAdLoaded_ || currentPage.isAd() || nextPage.isAd()) {
+    if (!this.isCurrentAdLoaded_ || currentPage.isAd() ||
+        (nextPage && nextPage.isAd())) {
       // if we are going to cause two consecutive ads or ad is still
       // loading we will try again on next user interaction
       return AD_STATE.PENDING;
