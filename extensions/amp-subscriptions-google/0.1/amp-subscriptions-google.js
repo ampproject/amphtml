@@ -69,6 +69,14 @@ export class GoogleSubscriptionsPlatform {
   getEntitlements() {
     return this.runtime_.getEntitlements();
   }
+
+  /** @override */
+  activate() {}
+
+  /** @override */
+  getServiceId() {
+    return PLATFORM_ID;
+  }
 }
 
 
