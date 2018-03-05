@@ -548,7 +548,8 @@ export class AmpStory extends AMP.BaseElement {
     const doc = this.element.ownerDocument;
 
     this.topBar_ = doc.createElement('div');
-    this.topBar_.classList.add('i-amphtml-story-top');
+    this.topBar_.classList.add(
+        'i-amphtml-story-top', 'i-amphtml-story-system-reset');
     this.topBar_.appendChild(this.buildTopBarShare_());
 
     this.element.insertBefore(this.topBar_, this.element.firstChild);
