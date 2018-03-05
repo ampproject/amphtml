@@ -156,7 +156,7 @@ export class A4AVariableSource extends VariableSource {
         result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
       const currentResult = {};
       let foundAtLeastOneAttr = false;
-      for (let j=0; j<attributeNames.length; ++j) {
+      for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
           currentResult[attributeName] =
