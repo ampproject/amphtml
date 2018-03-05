@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.18-1519411256378 */
+ /** Version: 0.1.19-1520269025428 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -25,7 +25,8 @@ const CallbackId = {
   ENTITLEMENTS: 1,
   SUBSCRIBE: 2,
   LOGIN_REQUEST: 3,
-  LINK_COMPLETE: 4,
+  LINK_PROGRESS: 4,
+  LINK_COMPLETE: 5,
 };
 
 
@@ -59,6 +60,13 @@ class Callbacks {
   }
 
   /**
+   * @return {boolean}
+   */
+  hasEntitlementsResponsePending() {
+    return !!this.resultBuffer_[CallbackId.ENTITLEMENTS];
+  }
+
+  /**
    * @param {function()} callback
    */
   setOnLoginRequest(callback) {
@@ -75,6 +83,34 @@ class Callbacks {
   /**
    * @param {function(!Promise)} callback
    */
+  setOnLinkProgress(callback) {
+    this.setCallback_(CallbackId.LINK_PROGRESS, callback);
+  }
+
+  /**
+   * @param {!Promise} promise
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerLinkProgress(promise) {
+    return this.trigger_(CallbackId.LINK_PROGRESS, promise);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasLinkProgressPending() {
+    return !!this.resultBuffer_[CallbackId.LINK_PROGRESS];
+  }
+
+  /**
+   */
+  resetLinkProgress() {
+    this.resetCallback_(CallbackId.LINK_PROGRESS);
+  }
+
+  /**
+   * @param {function(!Promise)} callback
+   */
   setOnLinkComplete(callback) {
     this.setCallback_(CallbackId.LINK_COMPLETE, callback);
   }
@@ -85,6 +121,13 @@ class Callbacks {
    */
   triggerLinkComplete(promise) {
     return this.trigger_(CallbackId.LINK_COMPLETE, promise);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasLinkCompletePending() {
+    return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
   }
 
   /**
@@ -120,7 +163,7 @@ class Callbacks {
     this.callbacks_[id] = callback;
     // If result already exist, execute the callback right away.
     if (id in this.resultBuffer_) {
-      this.executeCallback_(callback, this.resultBuffer_[id]);
+      this.executeCallback_(id, callback, this.resultBuffer_[id]);
     }
   }
 
@@ -134,20 +177,32 @@ class Callbacks {
     this.resultBuffer_[id] = data;
     const callback = this.callbacks_[id];
     if (callback) {
-      this.executeCallback_(callback, data);
+      this.executeCallback_(id, callback, data);
     }
     return !!callback;
   }
 
   /**
+   * @param {!CallbackId} id
+   * @private
+   */
+  resetCallback_(id) {
+    if (id in this.resultBuffer_) {
+      delete this.resultBuffer_[id];
+    }
+  }
+
+  /**
+   * @param {!CallbackId} id
    * @param {function(!Promise)} callback
    * @param {!Promise} data
    * @private
    */
-  executeCallback_(callback, data) {
+  executeCallback_(id, callback, data) {
     // Always execute callbacks in a microtask.
     Promise.resolve().then(() => {
       callback(data);
+      this.resetCallback_(id);
     });
   }
 }
@@ -735,7 +790,34 @@ class LoadingView {
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}.swg-close-action{position:absolute;left:0;top:0;padding:16px;margin:0;border:none;z-index:2147483647;width:16px;height:16px;background:transparent url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%23757575' d='M0 11L11 0M0 0l11 11'/%3E%3C/svg%3E\") no-repeat center center;background-size:12px;display:none;cursor:pointer}@-webkit-keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}@keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}.swg-loading{position:fixed!important;top:50%!important;left:50%!important;-webkit-transform:translate(-50%,-50%)!important;transform:translate(-50%,-50%)!important;z-index:2147483647!important}.swg-loading .swg-loading-bar{display:inline-block!important;width:5px!important;height:20px!important;border-radius:5px!important;margin-right:5px!important;-webkit-animation:swg-loading 1s ease-in-out infinite!important;animation:swg-loading 1s ease-in-out infinite!important}.swg-loading-bar:first-child{background-color:#4285f4!important;-webkit-animation-delay:0!important;animation-delay:0!important}.swg-loading-bar:nth-child(2){background-color:#0f9d58!important;-webkit-animation-delay:0.09s!important;animation-delay:0.09s!important}.swg-loading-bar:nth-child(3){background-color:#f4b400!important;-webkit-animation-delay:.18s!important;animation-delay:.18s!important}.swg-loading-bar:nth-child(4){background-color:#db4437!important;-webkit-animation-delay:.27s!important;animation-delay:.27s!important}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}@-webkit-keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}@keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}.swg-loading{position:fixed!important;top:50%!important;left:50%!important;-webkit-transform:translate(-50%,-50%)!important;transform:translate(-50%,-50%)!important;z-index:2147483647!important}.swg-loading .swg-loading-bar{display:inline-block!important;width:5px!important;height:20px!important;border-radius:5px!important;margin-right:5px!important;-webkit-animation:swg-loading 1s ease-in-out infinite!important;animation:swg-loading 1s ease-in-out infinite!important}.swg-loading-bar:first-child{background-color:#4285f4!important;-webkit-animation-delay:0!important;animation-delay:0!important}.swg-loading-bar:nth-child(2){background-color:#0f9d58!important;-webkit-animation-delay:0.09s!important;animation-delay:0.09s!important}.swg-loading-bar:nth-child(3){background-color:#f4b400!important;-webkit-animation-delay:.18s!important;animation-delay:.18s!important}.swg-loading-bar:nth-child(4){background-color:#db4437!important;-webkit-animation-delay:.27s!important;animation-delay:.27s!important}\n/*# sourceURL=/./src/ui/ui.css*/";
+
+
+
+/**
+ * Returns a promise which is resolved after the given duration of animation
+ * @param {!Element} el - Element to be observed.
+ * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {number} durationMillis - duration of animation.
+ * @param {string} curve - transition function for the animation.
+ * @return {!Promise} Promise which resolves once the animation is done playing.
+ */
+function transition(el, props, durationMillis, curve) {
+  const win = el.ownerDocument.defaultView;
+  const previousTransitionValue = el.style.transition || '';
+  return new Promise(resolve => {
+    win.setTimeout(() => {
+      win.setTimeout(resolve, durationMillis);
+      setImportantStyles(el, Object.assign({
+        'transition': `transform ${durationMillis}ms ${curve}`,
+      }, props));
+    });
+  }).then(() => {
+    setImportantStyles(el, {
+      'transition': previousTransitionValue,
+    });
+  });
+}
 
 
 
@@ -896,9 +978,8 @@ class Dialog {
    * @param {!Window} win
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
-   * @param {boolean=} showCloseAction
    */
-  constructor(win, importantStyles = {}, styles = {}, showCloseAction = true) {
+  constructor(win, importantStyles = {}, styles = {}) {
 
     this.win_ = win;
 
@@ -923,30 +1004,39 @@ class Dialog {
     /** @private {LoadingView} */
     this.loadingView_ = null;
 
-    /** @private @const {boolean} */
-    this.showCloseAction_ = showCloseAction;
-
-    /** @private {Element} */
-    this.closeButton_ = null;
-
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
     /** @private {?./view.View} */
     this.view_ = null;
+
+    /** @private {?Promise} */
+    this.animating_ = null;
   }
 
   /**
    * Opens the dialog and builds the iframe container.
+   * @param {boolean=} animated
    * @return {!Promise<!Dialog>}
    */
-  open() {
+  open(animated = true) {
     const iframe = this.iframe_;
     if (iframe.isConnected()) {
       throw new Error('already opened');
     }
     // Attach the invisible faded background to be used for some views.
     this.attachBackground_();
+
+    if (animated) {
+      this.animate_(() => {
+        setImportantStyles(iframe.getElement(), {
+          'transform': 'translateY(100%)',
+        });
+        return transition(iframe.getElement(), {
+          'transform': 'translateY(0)',
+        }, 300, 'ease-out');
+      });
+    }
 
     this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
     return iframe.whenReady().then(() => {
@@ -977,53 +1067,30 @@ class Dialog {
         createElement(iframeDoc, 'div', {'class': 'swg-container'});
     iframeBody.appendChild(this.container_);
     this.setPosition_();
-
-    // Inject the close button after the iframe for mouse click event to
-    // respond otherwisethe mouse click event is captured by iframe.
-    this.addCloseAction_(iframeDoc, iframeBody);
-  }
-
-  /**
-   * Adds close action button with event listener.
-   * @private
-   */
-  addCloseAction_(iframeDoc, iframeBody) {
-    if (this.closeButton_) {
-      return;
-    }
-    this.closeButton_ = this.createCloseButton_(iframeDoc);
-    iframeBody.appendChild(this.closeButton_);
-  }
-
-  /**
-   * Renders or hides the "Close" action button. For some flows, this button
-   * should be hidden.
-   * @param {boolean} show
-   */
-  showCloseAction(show) {
-    if (!this.closeButton_) {
-      return;
-    }
-    if (show) {
-      setStyles(this.closeButton_, {
-        'display': 'block',
-      });
-    } else {
-      setStyles(this.closeButton_, {
-        'display': 'none',
-      });
-    }
   }
 
   /**
    * Closes the dialog.
+   * @param {boolean=} animated
+   * @return {!Promise}
    */
-  close() {
-    this.doc_.body.removeChild(this.iframe_.getElement());
-    this.removePaddingToHtml_();
-
-    // Remove the faded background from the parent document.
-    this.doc_.body.removeChild(this.fadeBackground_);
+  close(animated = true) {
+    let animating;
+    if (animated) {
+      animating = this.animate_(() => {
+        return transition(this.getElement(), {
+          'transform': 'translateY(100%)',
+        }, 300, 'ease-out');
+      });
+    } else {
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.doc_.body.removeChild(this.iframe_.getElement());
+      this.removePaddingToHtml_();
+      // Remove the faded background from the parent document.
+      this.doc_.body.removeChild(this.fadeBackground_);
+    });
   }
 
   /**
@@ -1082,9 +1149,6 @@ class Dialog {
     }
     this.view_ = view;
 
-    if (view.shouldShowCloseAction()) {
-      this.showCloseAction(this.showCloseAction_);
-    }
     setImportantStyles(view.getElement(), resetViewStyles);
     this.setLoading(true);
     this.getContainer().appendChild(view.getElement());
@@ -1106,16 +1170,68 @@ class Dialog {
    * Resizes the dialog container.
    * @param {!./view.View} view
    * @param {number} height
+   * @param {boolean=} animated
+   * @return {?Promise}
    */
-  resizeView(view, height) {
+  resizeView(view, height, animated = true) {
     if (this.view_ != view) {
-      return;
+      return null;
     }
-    setImportantStyles(this.getElement(), {
-      'height': `${this.getMaxAllowedHeight_(height)}px`,
+    const newHeight = this.getMaxAllowedHeight_(height);
+
+    let animating;
+    if (animated) {
+      const oldHeight = this.getElement().offsetHeight;
+      if (newHeight >= oldHeight) {
+        // Expand.
+        animating = this.animate_(() => {
+          setImportantStyles(this.getElement(), {
+            'height': `${newHeight}px`,
+            'transform': `translateY(${newHeight - oldHeight}px)`,
+          });
+          return transition(this.getElement(), {
+            'transform': 'translateY(0)',
+          }, 300, 'ease-out');
+        });
+      } else {
+        // Collapse.
+        animating = this.animate_(() => {
+          return transition(this.getElement(), {
+            'transform': `translateY(${oldHeight - newHeight}px)`,
+          }, 300, 'ease-out').then(() => {
+            setImportantStyles(this.getElement(), {
+              'height': `${newHeight}px`,
+              'transform': 'translateY(0)',
+            });
+          });
+        });
+      }
+    } else {
+      setImportantStyles(this.getElement(), {
+        'height': `${newHeight}px`,
+      });
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.updatePaddingToHtml_(height);
+      view.resized();
     });
-    this.updatePaddingToHtml_(height);
-    view.resized();
+  }
+
+  /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
   }
 
   /**
@@ -1213,30 +1329,6 @@ class Dialog {
   }
 
   /**
-   * Adds the dialog close action button.
-   * @param {!Document} doc
-   * @return {!Element}
-   * @private
-   */
-  createCloseButton_(doc) {
-    const closeButton = createElement(doc, 'div', {
-      'class': 'swg-close-action',
-      'role': 'button',
-      'tabindex': '1',
-      'aria-label': 'Close dialog',
-    });
-
-    closeButton.addEventListener('click', () => this.close());
-    closeButton.addEventListener('keypress', event => {
-      const keyValue = (event.key || '').toUpperCase();
-      if (keyValue == 'ENTER') {
-        this.close();
-      }
-    });
-    return closeButton;
-  }
-
-  /**
    * Attaches the hidden faded background to the parent document.
    * @private
    */
@@ -1303,13 +1395,19 @@ class DialogManager {
    * @return {!Promise}
    */
   openView(view) {
+    view.whenComplete().catch(reason => {
+      if (reason.name === 'AbortError') {
+        this.completeView(view);
+      }
+      throw (reason);
+    });
     return this.openDialog().then(dialog => {
       return dialog.openView(view);
     });
   }
 
   /**
-   * @param {!./view.View} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -1668,9 +1766,151 @@ class JwtHelper {
   }
 }
 
+const CSS$2 = "body{padding:0;margin:0;font-family:'Google sans, sans-serif'}.swg-toast-container{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;width:100%}.swg-label{color:#fff;-webkit-box-flex:1;-ms-flex:auto;flex:auto;font-weight:300;padding-left:8px}.swg-detail{background:transparent;color:#0f0;border:none;cursor:pointer;font-size:inherit;outline:none;white-space:nowrap;-webkit-box-flex:initial;-ms-flex:initial;flex:initial;font-family:inherit}\n/*# sourceURL=/./src/ui/toast.css*/";
+
+
+
+/** @const {!Object<string, string|number>} */
+const toastImportantStyles = {
+  'height': '60px',
+  'position': 'fixed',
+  'bottom': 0,
+  'color': 'rgb(255, 255, 255)',
+  'font-size': '15px',
+  'padding': '20px 8px 0',
+  'z-index': '2147483647',
+  'border': 'none',
+  'box-shadow': 'gray 3px 3px, rgb(0, 0, 0) 0 0 1.4em',
+  'background-color': 'rgb(51, 51, 51)',
+  'box-sizing': 'border-box',
+  'font-family': 'Google sans, sans-serif',
+  'animation': 'swg-notify 1s ease-out normal backwards, '
+      + 'swg-notify-hide 1s ease-out 7s normal forwards',
+};
+
+
+/**
+ * The class Notification toast.
+ */
+class Toast {
+
+  /**
+   * @param {!Window} win
+   * @param {!ToastSpecDef} spec
+   */
+  constructor(win, spec) {
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!HTMLDocument} */
+    this.doc_ = win.document;
+
+    /** @private @const {!ToastSpecDef} */
+    this.spec_ = spec;
+
+    /** @private @const {!FriendlyIframe} */
+    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-toast'});
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    setImportantStyles(this.iframe_.getElement(), toastImportantStyles);
+    setStyles(this.iframe_.getElement(), topFriendlyIframePositionStyles);
+  }
+
+  /**
+   * Gets the attached iframe instance.
+   * @return {!FriendlyIframe}
+   */
+  getIframe() {
+    return this.iframe_;
+  }
+
+  /**
+   * Gets the Iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_.getElement();
+  }
+
+  /**
+   * Opens the notification toast.
+   * @return {!Promise}
+   */
+  open() {
+    const iframe = this.iframe_;
+    if (iframe.isConnected()) {
+      throw new Error('Already opened');
+    }
+    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
+
+    return iframe.whenReady().then(() => this.buildIframe_());
+  }
+
+  /**
+   * Closes the toast.
+   */
+  close() {
+    this.doc_.body.removeChild(this.iframe_.getElement());
+  }
+
+  /**
+   * Builds the iframe with content and the styling after iframe is loaded.
+   * @private
+   * @return {!Toast}
+   */
+  buildIframe_() {
+    const iframe = this.iframe_;
+    const iframeDoc = iframe.getDocument();
+    const iframeBody = iframe.getBody();
+
+    // Inject Google fonts in <HEAD> section of the iframe.
+    injectFontsLink(iframeDoc, googleFontsUrl);
+    injectStyleSheet(iframeDoc, CSS$2);
+
+    this.addItems_(iframeDoc, iframeBody);
+
+    return this;
+  }
+
+  /**
+   * Adds label and detail button.
+   * @param {!Document} iframeDoc
+   * @param {?Element} iframeBody
+   * @private
+   */
+  addItems_(iframeDoc, iframeBody) {
+    const childElements = [];
+
+    const label = createElement(iframeDoc, 'div', {
+      'class': 'swg-label',
+    }, this.spec_.text);
+    childElements.push(label);
+
+    if (this.spec_.action && this.spec_.action.label) {
+      const linkButton = createElement(iframeDoc, 'button', {
+        'class': 'swg-detail',
+        'aria-label': 'Details',
+      }, this.spec_.action.label);
+      linkButton.addEventListener('click', this.spec_.action.handler);
+      childElements.push(linkButton);
+    }
+
+    // Create container element and add 'label' and/or 'linkButton' to it.
+    this.container_ = createElement(iframeDoc, 'div', {
+      'class': 'swg-toast-container',
+    }, childElements);
+
+    iframeBody.appendChild(this.container_);
+  }
+}
+
 
 
 const SERVICE_ID = 'subscribe.google.com';
+const TOAST_STORAGE_KEY = 'toast';
 
 
 /**
@@ -1681,8 +1921,9 @@ class EntitlementsManager {
    * @param {!Window} win
    * @param {!../model/page-config.PageConfig} config
    * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
    */
-  constructor(win, config, fetcher) {
+  constructor(win, config, fetcher, deps) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -1692,11 +1933,29 @@ class EntitlementsManager {
     /** @private @const {!./fetcher.Fetcher} */
     this.fetcher_ = fetcher;
 
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper();
 
     /** @private {?Promise<!Entitlements>} */
     this.responsePromise_ = null;
+
+    /** @private {number} */
+    this.positiveRetries_ = 0;
+
+    /** @private @const {!./storage.Storage} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * @param {boolean=} opt_expectPositive
+   */
+  reset(opt_expectPositive) {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = Math.max(
+        this.positiveRetries_, opt_expectPositive ? 3 : 0);
   }
 
   /**
@@ -1704,15 +1963,115 @@ class EntitlementsManager {
    */
   getEntitlements() {
     if (!this.responsePromise_) {
-      this.responsePromise_ = this.fetch_();
+      this.responsePromise_ = this.getEntitlementsFlow_();
     }
     return this.responsePromise_;
   }
 
   /**
+   * @return {!Promise<!Entitlements>}
    */
-  reset() {
-    this.responsePromise_ = null;
+  fetchEntitlements() {
+    // TODO(dvoytenko): Replace retries with consistent fetch.
+    let positiveRetries = this.positiveRetries_;
+    this.positiveRetries_ = 0;
+    const attempt = () => {
+      positiveRetries--;
+      return this.fetch_().then(entitlements => {
+        if (entitlements.enablesThis() || positiveRetries <= 0) {
+          return entitlements;
+        }
+        return new Promise(resolve => {
+          this.win_.setTimeout(() => {
+            resolve(attempt());
+          }, 550);
+        });
+      });
+    };
+    return attempt();
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setToastShown(value) {
+    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlementsFlow_() {
+    return this.fetchEntitlements().then(entitlements => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  onEntitlementsFetched_(entitlements) {
+    // Skip any notifications and toast if other flows are ongoing.
+    // TODO(dvoytenko): what's the right action when pay flow was canceled?
+    const callbacks = this.deps_.callbacks();
+    if (callbacks.hasSubscribeResponsePending() ||
+        callbacks.hasLinkProgressPending() ||
+        callbacks.hasLinkCompletePending()) {
+      return;
+    }
+
+    // Notify on the received entitlements.
+    callbacks.triggerEntitlementsResponse(Promise.resolve(entitlements));
+
+    // Show a toast if needed.
+    this.maybeShowToast_(entitlements);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  maybeShowToast_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement) {
+      return Promise.resolve();
+    }
+
+    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
+      if (value == '1') {
+        // Already shown;
+        return;
+      }
+
+      this.setToastShown(true);
+      if (entitlement) {
+        this.showToast_(entitlement);
+      }
+    });
+  }
+
+  /**
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  showToast_(entitlement) {
+    const toast = new Toast(this.win_, {
+      text:
+          (entitlement.source || 'google') == 'google' ?
+          'Access via Google Subscriptions' :
+          // TODO(dvoytenko): display name instead.
+          'Access via [' + entitlement.source + ']',
+      action: {
+        label: 'View',
+        handler: function() {
+          // TODO(dparikh): Implementation.
+        },
+      },
+    });
+    toast.open();
   }
 
   /**
@@ -1722,7 +2081,7 @@ class EntitlementsManager {
   fetch_() {
     const url =
         'https://swg-staging.sandbox.google.com/_/v1/publication/' +
-        encodeURIComponent(this.config_.getPublisherId()) +
+        encodeURIComponent(this.config_.getPublicationId()) +
         '/entitlements';
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
       const signedData = json['signedEntitlements'];
@@ -1734,6 +2093,15 @@ class EntitlementsManager {
               SERVICE_ID,
               signedData,
               Entitlement.parseListFromJson(entitlementsClaim),
+              this.config_.getProductId());
+        }
+      } else {
+        const plainEntitlements = json['entitlements'];
+        if (plainEntitlements) {
+          return new Entitlements(
+              SERVICE_ID,
+              '',
+              Entitlement.parseListFromJson(plainEntitlements),
               this.config_.getProductId());
         }
       }
@@ -1839,17 +2207,6 @@ function parseUrlWithA(a, url) {
     info.origin = info.protocol + '//' + info.host;
   }
   return info;
-}
-
-
-/**
- * Returns the Url including the path and search, without fregment.
- * @param {string} url
- * @return {string}
- */
-function getHostUrl(url) {
-  const locationHref = parseUrl(url);
-  return locationHref.origin + locationHref.pathname + locationHref.search;
 }
 
 
@@ -2274,17 +2631,17 @@ class View {
     // Do nothing by default. Override if needed.
   }
 
-  /**
-   * @return {boolean}
-   * @abstract
+  /*
+   * Accept the result.
+   * @return {!Promise}
    */
-  shouldFadeBody() {}
+  whenComplete() {}
 
   /**
    * @return {boolean}
    * @abstract
    */
-  shouldShowCloseAction() {}
+  shouldFadeBody() {}
 }
 
 
@@ -2307,15 +2664,13 @@ class ActivityIframeView extends View {
    * @param {string} src
    * @param {!Object<string, ?string|number>=} args
    * @param {boolean=} shouldFadeBody
-   * @param {boolean=} showCloseAction
    */
   constructor(
       win,
       activityPorts,
       src,
       args,
-      shouldFadeBody = false,
-      showCloseAction = false) {
+      shouldFadeBody = false) {
     super();
 
     /** @private @const {!Window} */
@@ -2341,24 +2696,21 @@ class ActivityIframeView extends View {
     /** @private @const {boolean} */
     this.shouldFadeBody_ = shouldFadeBody;
 
-    /** @private @const {boolean} */
-    this.showCloseAction_ = showCloseAction;
-
     /** @private {?web-activities/activity-ports.ActivityIframePort} */
     this.port_ = null;
 
     /**
      * @private
-     * {?function((!web-activities/activity-ports.ActivityResult|!Promise))}
+     * {?function<!web-activities/activity-ports.ActivityIframePort|!Promise>}
      */
-    this.resolve_ = null;
+    this.portResolver_ = null;
 
     /**
      * @private @const
-     * {!Promise<!web-activities/activity-ports.ActivityResult>}
+     * {!Promise<!web-activities/activity-ports.ActivityIframePort>}
      */
-    this.promise_ = new Promise(resolve => {
-      this.resolve_ = resolve;
+    this.portPromise_ = new Promise(resolve => {
+      this.portResolver_ = resolve;
     });
   }
 
@@ -2382,28 +2734,45 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * Returns if document should fade for this view.
-   * @return {boolean}
-   */
-  shouldShowCloseAction() {
-    return this.showCloseAction_;
-  }
-
-  /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
    * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
     this.port_ = port;
+    this.portResolver_(port);
 
     this.port_.onResizeRequest(height => {
       dialog.resizeView(this, height);
     });
 
-    this.resolve_(this.port_.acceptResult());
-
     return this.port_.whenReady();
+  }
+
+  /**
+   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   */
+  port() {
+    return this.portPromise_;
+  }
+
+  /**
+   * @param {!Object} data
+   */
+  message(data) {
+    this.port().then(port => {
+      port.message(data);
+    });
+  }
+
+  /**
+   * Handles the message received by the port.
+   * @param {function(!Object<string, string|boolean>)} callback
+   */
+  onMessage(callback) {
+    this.port().then(port => {
+      port.onMessage(callback);
+    });
   }
 
   /**
@@ -2411,7 +2780,15 @@ class ActivityIframeView extends View {
    * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
   acceptResult() {
-    return this.promise_;
+    return this.port().then(port => port.acceptResult());
+  }
+
+  /**
+   * Completes the flow.
+   * @return {!Promise}
+   */
+  whenComplete() {
+    return this.acceptResult();
   }
 
   /** @override */
@@ -2424,22 +2801,48 @@ class ActivityIframeView extends View {
 
 
 
-const LINK_FRONT_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/linkfrontiframe';
+
+/**
+ * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {string} requireOrigin
+ * @param {boolean} requireOriginVerified
+ * @param {boolean} requireSecureChannel
+ * @return {!Promise<!Object>}
+ */
+function acceptPortResult(
+    port,
+    requireOrigin,
+    requireOriginVerified,
+    requireSecureChannel) {
+  return port.acceptResult().then(result => {
+    if (result.origin != requireOrigin ||
+        requireOriginVerified && !result.originVerified ||
+        requireSecureChannel && !result.secureChannel) {
+      throw new Error('channel mismatch');
+    }
+    return result.data;
+  });
+}
+
+
+
+const LINKBACK_URL =
+    'https://subscribe.sandbox.google.com/swglib/linkbackstart';
 
 const LINK_CONFIRM_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/linkconfirmiframe';
+    'https://subscribe.sandbox.google.com/u/$index$/swglib/linkconfirmiframe';
 
-const COMPLETE_LINK_REQUEST_ID = 'swg-link-continue';
+const CONTINUE_LINK_REQUEST_ID = 'swg-link-continue';
+const LINK_REQUEST_ID = 'swg-link';
 
 
 /**
- * The flow to initiate linking process.
+ * The flow to initiate linkback flow.
  */
-class LinkStartFlow {
+class LinkbackFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
@@ -2448,23 +2851,8 @@ class LinkStartFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        LINK_FRONT_IFRAME_URL,
-        {
-          'publisherId': deps.pageConfig().getPublisherId(),
-          'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
-          'requestId': COMPLETE_LINK_REQUEST_ID,
-          'returnUrl': getHostUrl(this.win_.location.href),
-        },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ false
-    );
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.pageConfig_ = deps.pageConfig();
   }
 
   /**
@@ -2472,31 +2860,11 @@ class LinkStartFlow {
    * @return {!Promise}
    */
   start() {
-    this.activityIframeView_.acceptResult().then(result => {
-      if (result.ok) {
-        this.openLoginForm_(/** @type {!Object} */ (result.data));
-      }
-    });
-    return this.dialogManager_.openView(this.activityIframeView_);
-  }
-
-
-  /**
-   * Opens the publisher's login page.
-   * @param {!Object} resp
-   * @private
-   */
-  openLoginForm_(resp) {
-    const redirectUrl = resp['redirectUrl'];
     this.activityPorts_.open(
-        COMPLETE_LINK_REQUEST_ID, redirectUrl, '_blank', null, {
-          // TODO(dvoytenko): Remove the debug code.
-          // Only keep request URL params for debugging URLs.
-          skipRequestInUrl: redirectUrl.indexOf('http://localhost') == -1,
-        });
-    // Disconnected flow: will proceed with LinkCompleteFlow once popup
-    // returns.
-    this.dialogManager_.completeView(this.activityIframeView_);
+        LINK_REQUEST_ID, LINKBACK_URL, '_blank', {
+          'publicationId': this.pageConfig_.getPublicationId(),
+        }, {});
+    return Promise.resolve();
   }
 }
 
@@ -2507,23 +2875,29 @@ class LinkStartFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
-    deps.activities().onResult(COMPLETE_LINK_REQUEST_ID, port => {
-      return port.acceptResult().then(result => {
-        if (result.ok) {
-          const flow = new LinkCompleteFlow(deps);
-          flow.start();
-        }
+    function handler(port) {
+      deps.callbacks().triggerLinkProgress(Promise.resolve());
+      const promise = acceptPortResult(
+          port,
+          parseUrl(LINK_CONFIRM_IFRAME_URL).origin,
+          /* requireOriginVerified */ false,
+          /* requireSecureChannel */ false);
+      return promise.then(response => {
+        const flow = new LinkCompleteFlow(deps, response);
+        flow.start();
       });
-    });
+    }    deps.activities().onResult(CONTINUE_LINK_REQUEST_ID, handler);
+    deps.activities().onResult(LINK_REQUEST_ID, handler);
   }
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
+   * @param {?Object} response
    */
-  constructor(deps) {
+  constructor(deps, response) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
@@ -2533,22 +2907,32 @@ class LinkCompleteFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!../runtime/callbacks.Callbacks} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
+    this.entitlementsManager_ = deps.entitlementsManager();
+
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
+    const index = response && response['index'] || '0';
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ =
         new ActivityIframeView(
             this.win_,
             this.activityPorts_,
-            LINK_CONFIRM_IFRAME_URL,
+            LINK_CONFIRM_IFRAME_URL.replace(/\$index\$/g, index),
             {
-              'publisherId': deps.pageConfig().getPublisherId(),
-              'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
             },
-            /* shouldFadeBody */ true,
-            /* showCloseAction */ false
-        );
+            /* shouldFadeBody */ true);
+
+    /** @private {?function()} */
+    this.completeResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.completePromise_ = new Promise(resolve => {
+      this.completeResolver_ = resolve;
+    });
   }
 
   /**
@@ -2556,12 +2940,42 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    this.callbacks_.triggerLinkComplete(Promise.resolve());
-    this.activityIframeView_.acceptResult().then(() => {
+    const promise = this.activityIframeView_.port().then(port => {
+      return acceptPortResult(
+          port,
+          parseUrl(LINK_CONFIRM_IFRAME_URL).origin,
+          /* requireOriginVerified */ true,
+          /* requireSecureChannel */ true);
+    });
+    promise.then(response => {
+      this.complete_(response);
+    }).catch(reason => {
+      // Rethrow async.
+      setTimeout(() => {
+        throw reason;
+      });
+    }).then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
     });
     return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {?Object} response
+   * @private
+   */
+  complete_(response) {
+    this.callbacks_.triggerLinkComplete(Promise.resolve());
+    this.callbacks_.resetLinkProgress();
+    this.entitlementsManager_.reset(response && response['success'] || false);
+    this.entitlementsManager_.setToastShown(true);
+    this.completeResolver_();
+  }
+
+  /** @return {!Promise} */
+  whenComplete() {
+    return this.completePromise_;
   }
 }
 
@@ -2632,14 +3046,17 @@ class SubscribeResponse {
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
+   * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData) {
+  constructor(raw, purchaseData, userData, completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
     /** @const {?UserData} */
     this.userData = userData;
+    /** @private @const {function():!Promise} */
+    this.completeHandler_ = completeHandler;
   }
 
   /**
@@ -2649,7 +3066,8 @@ class SubscribeResponse {
     return new SubscribeResponse(
         this.raw,
         this.purchaseData,
-        this.userData);
+        this.userData,
+        this.completeHandler_);
   }
 
   /**
@@ -2660,6 +3078,23 @@ class SubscribeResponse {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
     };
+  }
+
+  /**
+   * Allows the receiving site to complete/acknowledge that it registered
+   * the subscription purchase. The typical action would be to create an
+   * account (or match an existing one) and associated the purchase with
+   * that account.
+   *
+   * SwG will display progress indicator until this method is called and
+   * upon receiving this call will show the confirmation to the user.
+   * The promise returned by this method will yield once the user closes
+   * the confirmation.
+   *
+   * @return {!Promise}
+   */
+  complete() {
+    return this.completeHandler_();
   }
 }
 
@@ -2696,31 +3131,6 @@ class PurchaseData {
 
 
 
-
-/**
- * @param {!web-activities/activity-ports.ActivityPort} port
- * @param {string} requireOrigin
- * @param {boolean} requireOriginVerified
- * @param {boolean} requireSecureChannel
- * @return {!Promise<!Object>}
- */
-function acceptPortResult(
-    port,
-    requireOrigin,
-    requireOriginVerified,
-    requireSecureChannel) {
-  return port.acceptResult().then(result => {
-    if (result.origin != requireOrigin ||
-        requireOriginVerified && !result.originVerified ||
-        requireSecureChannel && !result.secureChannel) {
-      throw new Error('channel mismatch');
-    }
-    return result.data;
-  });
-}
-
-
-
 const PAY_URL =
     'https://subscribe.sandbox.google.com/swglib/pay';
 
@@ -2736,7 +3146,7 @@ const PAY_REQUEST_ID = 'swg-pay';
 class PayStartFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
   constructor(deps, sku) {
@@ -2763,9 +3173,10 @@ class PayStartFlow {
         PAY_REQUEST_ID, PAY_URL, '_blank', {
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
+          'environment': '',
+          'playEnvironment': '',
           'swg': {
-            'publicationId': this.pageConfig_.getPublisherId(),
-            // TODO(dvoytenko): use 'instant' for tests if necessary.
+            'publicationId': this.pageConfig_.getPublicationId(),
             'skuId': this.sku_,
           },
         }, {});
@@ -2780,24 +3191,29 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
-      const promise = validatePayResponse(port);
+      const flow = new PayCompleteFlow(deps);
+      const promise = validatePayResponse(
+          port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
-      return promise.then(() => {
-        new PayCompleteFlow(deps).start();
+      return promise.then(response => {
+        flow.start(response);
       });
     });
   }
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -2808,54 +3224,80 @@ class PayCompleteFlow {
     /** @private @const {!../runtime/callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
-    /** @private @const {!ActivityIframeView} */
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private {?SubscribeResponse} */
+    this.response_ = null;
+
+    /** @private {?Promise} */
+    this.readyPromise_ = null;
+  }
+
+  /**
+   * Starts the payments completion flow.
+   * @param {!SubscribeResponse} response
+   * @return {!Promise}
+   */
+  start(response) {
+    this.deps_.entitlementsManager().reset(true);
+    this.response_ = response;
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
         PAY_CONFIRM_IFRAME_URL,
         {
-          'publicationId': deps.pageConfig().getPublisherId(),
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'loginHint': response.userData && response.userData.email,
         },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ false
-    );
-  }
-
-  /**
-   * Starts the payments completion flow.
-   * @return {!Promise}
-   */
-  start() {
+        /* shouldFadeBody */ true);
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
     });
-    return this.dialogManager_.openView(this.activityIframeView_);
+    this.readyPromise_ = this.dialogManager_.openView(this.activityIframeView_);
+    return this.readyPromise_;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  complete() {
+    this.readyPromise_.then(() => {
+      this.activityIframeView_.message({'complete': true});
+    });
+    return this.activityIframeView_.acceptResult().catch(() => {
+      // Ignore errors.
+    }).then(() => {
+      this.deps_.entitlementsManager().setToastShown(true);
+    });
   }
 }
 
 
 /**
  * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
  * @package Visible for testing only.
  */
-function validatePayResponse(port) {
+function validatePayResponse(port, completeHandler) {
   return acceptPortResult(
       port,
       parseUrl(PAY_URL).origin,
       // TODO(dvoytenko): support payload decryption.
       /* requireOriginVerified */ false,
       /* requireSecureChannel */ false)
-      .then(data => parseSubscriptionResponse(data));
+      .then(data => parseSubscriptionResponse(data, completeHandler));
 }
 
 
 /**
  * @param {*} data
+ * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
  */
-function parseSubscriptionResponse(data) {
+function parseSubscriptionResponse(data, completeHandler) {
   let swgData = null;
   let raw = null;
   if (data) {
@@ -2886,7 +3328,8 @@ function parseSubscriptionResponse(data) {
   return new SubscribeResponse(
       raw,
       parsePurchaseData(swgData),
-      parseUserData(swgData));
+      parseUserData(swgData),
+      completeHandler);
 }
 
 
@@ -2928,11 +3371,11 @@ const OFFERS_URL =
 class OffersFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
 
-    /** @private @const {!../model/deps.DepsDef} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
@@ -2954,39 +3397,28 @@ class OffersFlow {
         OFFERS_URL,
         {
           'productId': deps.pageConfig().getProductId(),
-          'publisherId': deps.pageConfig().getPublisherId(),
-          'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
-          'label': deps.pageConfig().getProductId(),  // MIGRATE
+          'publicationId': deps.pageConfig().getPublicationId(),
         },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ true
-    );
-
-    PayCompleteFlow.configurePending(this.deps_);
+        /* shouldFadeBody */ true);
   }
 
   /**
-   * Starts the offers flow.
+   * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */
   start() {
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.acceptResult().then(result => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      assert(result.secureChannel, 'The channel is not secured');
-      const data = result.data;
-      if (!data) {
-        return;
-      }
-      if (data['alreadySubscribed']) {
+    this.activityIframeView_.onMessage(result => {
+      if (result['alreadySubscribed']) {
         this.deps_.callbacks().triggerLoginRequest();
         return;
       }
-      const skuId = data['sku'] || data['skuId'] || '';
+      const skuId = result.sku || '';
       if (skuId) {
-        return new PayStartFlow(this.deps_, skuId).start();
+        new PayStartFlow(this.deps_, skuId).start();
       }
     });
+
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 }
@@ -3063,146 +3495,74 @@ function whenDocumentReady(doc) {
 
 
 
-const CSS$2 = "body{padding:0;margin:0;font-family:'Google sans, sans-serif'}.swg-toast-container{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;width:100%}.swg-label{color:#fff;-webkit-box-flex:1;-ms-flex:auto;flex:auto;font-weight:300;padding-left:8px}.swg-detail{background:transparent;color:#0f0;border:none;cursor:pointer;font-size:inherit;outline:none;white-space:nowrap;-webkit-box-flex:initial;-ms-flex:initial;flex:initial;font-family:inherit}\n/*# sourceURL=/./src/ui/toast.css*/";
+const PREFIX = 'subscribe.google.com';
 
 
-
-/** @const {!Object<string, string|number>} */
-const toastImportantStyles = {
-  'height': '60px',
-  'position': 'fixed',
-  'bottom': 0,
-  'color': 'rgb(255, 255, 255)',
-  'font-size': '15px',
-  'padding': '20px 8px 0',
-  'z-index': '2147483647',
-  'border': 'none',
-  'box-shadow': 'gray 3px 3px, rgb(0, 0, 0) 0 0 1.4em',
-  'background-color': 'rgb(51, 51, 51)',
-  'box-sizing': 'border-box',
-  'font-family': 'Google sans, sans-serif',
-  'animation': 'swg-notify 1s ease-out normal backwards, '
-      + 'swg-notify-hide 1s ease-out 7s normal forwards',
-};
-
-
-/**
- * The class Notification toast.
- */
-class Toast {
+class Storage {
 
   /**
    * @param {!Window} win
-   * @param {!ToastSpecDef} spec
    */
-  constructor(win, spec) {
-
+  constructor(win) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = win.document;
-
-    /** @private @const {!ToastSpecDef} */
-    this.spec_ = spec;
-
-    /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-toast'});
-
-    /** @private {?Element} */
-    this.container_ = null;
-
-    setImportantStyles(this.iframe_.getElement(), toastImportantStyles);
-    setStyles(this.iframe_.getElement(), topFriendlyIframePositionStyles);
+    /** @private @const {!Object<string, !Promise<?string>>} */
+    this.values_ = {};
   }
 
   /**
-   * Gets the attached iframe instance.
-   * @return {!FriendlyIframe}
+   * @param {string} key
+   * @return {!Promise<?string>}
    */
-  getIframe() {
-    return this.iframe_;
+  get(key) {
+    if (!this.values_[key]) {
+      this.values_[key] = new Promise(resolve => {
+        if (this.win_.sessionStorage) {
+          try {
+            resolve(this.win_.sessionStorage.getItem(storageKey(key)));
+          } catch (e) {
+            // Ignore error.
+            resolve(null);
+          }
+        } else {
+          resolve(null);
+        }
+      });
+    }
+    return this.values_[key];
   }
 
   /**
-   * Gets the Iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_.getElement();
-  }
-
-  /**
-   * Opens the notification toast.
+   * @param {string} key
+   * @param {string} value
    * @return {!Promise}
    */
-  open() {
-    const iframe = this.iframe_;
-    if (iframe.isConnected()) {
-      throw new Error('Already opened');
-    }
-    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
-
-    return iframe.whenReady().then(() => this.buildIframe_());
-  }
-
-  /**
-   * Closes the toast.
-   */
-  close() {
-    this.doc_.body.removeChild(this.iframe_.getElement());
-  }
-
-  /**
-   * Builds the iframe with content and the styling after iframe is loaded.
-   * @private
-   * @return {!Toast}
-   */
-  buildIframe_() {
-    const iframe = this.iframe_;
-    const iframeDoc = iframe.getDocument();
-    const iframeBody = iframe.getBody();
-
-    // Inject Google fonts in <HEAD> section of the iframe.
-    injectFontsLink(iframeDoc, googleFontsUrl);
-    injectStyleSheet(iframeDoc, CSS$2);
-
-    this.addItems_(iframeDoc, iframeBody);
-
-    return this;
-  }
-
-  /**
-   * Adds label and detail button.
-   * @param {!Document} iframeDoc
-   * @param {?Element} iframeBody
-   * @private
-   */
-  addItems_(iframeDoc, iframeBody) {
-    const childElements = [];
-
-    const label = createElement(iframeDoc, 'div', {
-      'class': 'swg-label',
-    }, this.spec_.text);
-    childElements.push(label);
-
-    if (this.spec_.action && this.spec_.action.label) {
-      const linkButton = createElement(iframeDoc, 'button', {
-        'class': 'swg-detail',
-        'aria-label': 'Details',
-      }, this.spec_.action.label);
-      linkButton.addEventListener('click', this.spec_.action.handler);
-      childElements.push(linkButton);
-    }
-
-    // Create container element and add 'label' and/or 'linkButton' to it.
-    this.container_ = createElement(iframeDoc, 'div', {
-      'class': 'swg-toast-container',
-    }, childElements);
-
-    iframeBody.appendChild(this.container_);
+  set(key, value) {
+    this.values_[key] = Promise.resolve(value);
+    return new Promise(resolve => {
+      if (this.win_.sessionStorage) {
+        try {
+          this.win_.sessionStorage.setItem(storageKey(key), value);
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+      resolve();
+    });
   }
 }
+
+
+/**
+ * @param {string} key
+ * @return {string}
+ */
+function storageKey(key) {
+  return PREFIX + ':' + key;
+}
+
+
 
 
 
@@ -3233,9 +3593,8 @@ class ConfiguredRuntime {
     /** @private @const {!Fetcher} */
     this.fetcher_ = opt_integr && opt_integr.fetcher || new XhrFetcher(win);
 
-    /** @private @const {!EntitlementsManager} */
-    this.entitlementsManager_ =
-        new EntitlementsManager(this.win_, this.config_, this.fetcher_);
+    /** @private @const {!Storage} */
+    this.storage_ = new Storage(this.win_);
 
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(win);
@@ -3245,6 +3604,10 @@ class ConfiguredRuntime {
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
+
+    /** @private @const {!EntitlementsManager} */
+    this.entitlementsManager_ =
+        new EntitlementsManager(this.win_, this.config_, this.fetcher_, this);
 
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
@@ -3271,8 +3634,18 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  entitlementsManager() {
+    return this.entitlementsManager_;
+  }
+
+  /** @override */
   callbacks() {
     return this.callbacks_;
+  }
+
+  /** @override */
+  storage() {
+    return this.storage_;
   }
 
   /** @override */
@@ -3281,46 +3654,17 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  reset() {
+    this.entitlementsManager_.reset();
+  }
+
+  /** @override */
   start() {
     // No need to run entitlements without a product or for an unlocked page.
     if (!this.config_.getProductId() || !this.config_.isLocked()) {
       return Promise.resolve();
     }
-    // TODO(dvoytenko): is there a point in running entitlements at all before
-    // subscription response is discovered?
-    // TODO(dvoytenko): what's the right action when pay flow was canceled?
-    const promise = this.entitlementsManager_.getEntitlements();
-    return promise.catch(() => null).then(entitlements => {
-      if (this.callbacks_.hasSubscribeResponsePending()) {
-        return;
-      }
-      this.callbacks_.triggerEntitlementsResponse(promise);
-      if (!entitlements) {
-        return;
-      }
-      const entitlement = entitlements.getEntitlementForThis();
-      if (entitlement) {
-        const toast = new Toast(this.win_, {
-          text:
-              (entitlement.source || 'google') == 'google' ?
-              'Access via Google Subscriptions' :
-              // TODO(dvoytenko): display name instead.
-              'Access via [' + entitlement.source + ']',
-          action: {
-            label: 'View',
-            handler: function() {
-              // TODO(dparikh): Implementation.
-            },
-          },
-        });
-        toast.open();
-      }
-    });
-  }
-
-  /** @override */
-  reset() {
-    this.entitlementsManager_.reset();
+    this.getEntitlements();
   }
 
   /** @override */
@@ -3355,7 +3699,7 @@ class ConfiguredRuntime {
   /** @override */
   linkAccount() {
     return this.documentParsed_.then(() => {
-      return new LinkStartFlow(this).start();
+      return new LinkbackFlow(this).start();
     });
   }
 
