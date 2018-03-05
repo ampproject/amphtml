@@ -163,7 +163,7 @@ Refresh is currently not supported for SRA enabled slots. If a slot is enabled f
 The only AMP ad containers in which refresh is currently supported are amp-sticky-ad and amp-carousel container types.
 
 
-### SRA: Single Request Architecture (alpha)
+### SRA: Single Request Architecture (beta)
 Enabling SRA allows a publisher to make a single request for all ad slots on the AMP page which gives a publisher the ability to do roadblocking and competitive exclusions. This very similar to the behavior achieved on non-AMP pages when using [this](https://developers.google.com/doubleclick-gpt/reference#googletag.PubAdsService_enableSingleRequest) method in GPT.
 
 In order to use this feature, add the following meta tag to the head of the AMP page:
@@ -175,7 +175,7 @@ Note that SRA is not available in the following cases:
 3. The ad refresh feature is incompatible with SRA
 4. Publishers don't use the amp-ad attribute [`useSameDomainRenderingUntilDeprecated`](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md#temporary-use-of-usesamedomainrenderinguntildeprecated)
 
-### Fluid (alpha)
+### Fluid (beta)
 A fluid ad slot does not require a publisher to specify its size. Instead, the publisher may simply declare an ad slot with the attributes `layout="fluid" height="fluid"`, and a creative of indeterminate size will be returned. The actual size of the slot will be determined by the given creative at render time. It will always occupy the maximum available width, and its height will be determined relative to that width. One benefit of this feature is that, like multi-size, it increases monetization potential by increasing the available pool of creatives that may be rendered in a particular slot. Moreover, this feature relieves the publisher of having to worry about determining what size a slot should use.
 
 Note that due to AMP's no reflow policy, the fluid creative will not be rendered when the slot is within the viewport and it is therefore recommended that fluid be used for below the fold slots.
