@@ -19,7 +19,7 @@ import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
@@ -252,17 +252,35 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const defaultAttrs = {
+    const requiredAttrs = {
       'id': 'i-amphtml-story-ad',
       'layout': 'fill',
     };
 
     const configAttrs = this.config_['ad-attributes'];
+
+    user().assert(this.isTypeAllowed_(configAttrs.type), `${TAG}: ` +
+      `"${configAttrs.type}" ad type is not supported`);
+
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
-        defaultAttrs, configAttrs));
+        configAttrs, requiredAttrs));
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
+  }
+
+
+  /**
+   * @param {string} type
+   * @return {boolean}
+   * @private
+   */
+  isTypeAllowed_(type) {
+    const allowedTypes = map({
+      'custom': true,
+    });
+
+    return allowedTypes[type] || false;
   }
 
 
