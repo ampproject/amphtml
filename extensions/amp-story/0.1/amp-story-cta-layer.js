@@ -29,14 +29,9 @@
  * ...
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
-export class AmpStoryCtaLayer extends AMP.BaseElement {
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
-  }
+export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
