@@ -31,6 +31,10 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
+import {
+  AmpStoryStateService,
+  StateType,
+} from './amp-story-state-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -39,6 +43,7 @@ import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
 } from '../../../src/gesture-recognizers';
+import {EmbedMode} from './embed-mode';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -70,8 +75,10 @@ import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
+import {isEnumValue} from '../../../src/types';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {once} from '../../../src/utils/function';
+import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
@@ -253,6 +260,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(element, () => this.hasBookend_());
 
+    /** @private @const {!AmpStoryStateService} */
+    this.stateService_ = new AmpStoryStateService();
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
@@ -260,7 +270,7 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_ = new Bookend(this.win);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win);
+    this.systemLayer_ = new SystemLayer(this.win, this.stateService_);
 
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
@@ -321,14 +331,7 @@ export class AmpStory extends AMP.BaseElement {
     this.assertAmpStoryExperiment_();
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
-      const html = this.win.document.documentElement;
-      this.mutateElement(() => {
-        html.classList.add('i-amphtml-story-standalone');
-        // Lock body to prevent overflow.
-        this.lockBody_();
-        // Standalone CSS affects sizing of the entire page.
-        this.onResize();
-      }, html);
+      this.initializeStandaloneStory_();
     }
 
     if (this.isDesktop_()) {
@@ -352,6 +355,22 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+  }
+
+
+  /** @private */
+  initializeStandaloneStory_() {
+    const html = this.win.document.documentElement;
+    this.mutateElement(() => {
+      html.classList.add('i-amphtml-story-standalone');
+      // Lock body to prevent overflow.
+      this.lockBody_();
+      // Standalone CSS affects sizing of the entire page.
+      this.onResize();
+    }, html);
+
+    const embedMode = this.parseEmbedMode_(this.win.location.hash);
+    this.stateService_.initializeEmbedMode(embedMode);
   }
 
 
@@ -386,7 +405,11 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_BOOKEND, () => {
-      this.showBookend_();
+      this.hasBookend_().then(hasBookend => {
+        if (hasBookend) {
+          this.showBookend_();
+        }
+      });
     });
 
     this.element.addEventListener(EventType.CLOSE_BOOKEND, () => {
@@ -437,8 +460,13 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
+    const noPreviousPageHelpShown = this.stateService_
+        .getState(StateType.NO_PREVIOUS_PAGE_HELP_SHOWN);
+
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      this.ampStoryHint_.showFirstPageHintOverlay();
+      if (noPreviousPageHelpShown.isModifiable()) {
+        this.ampStoryHint_.showFirstPageHintOverlay();
+      }
     });
 
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
@@ -474,6 +502,12 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
         return;
       }
+      const navigationOverlayHintShown = this.stateService_
+          .getState(StateType.NAVIGATION_OVERLAY_HINT_SHOWN);
+      if (!navigationOverlayHintShown.isModifiable()) {
+        return;
+      }
+
       this.ampStoryHint_.showNavigationOverlay();
     });
   }
@@ -741,6 +775,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
+  /**
+   * @param {string} str
+   * @return {!EmbedMode}
+   * @private
+   */
+  parseEmbedMode_(str) {
+    const params = parseQueryString(str);
+    const unsanitizedEmbedMode = params['embedMode'];
+    const embedModeIndex = parseInt(unsanitizedEmbedMode, 10);
+
+    return isEnumValue(EmbedMode, embedModeIndex)
+      ? /** @type {!EmbedMode} */ (embedModeIndex)
+      : EmbedMode.NOT_EMBEDDED;
+  }
+
+
   /** @private */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
@@ -770,11 +820,7 @@ export class AmpStory extends AMP.BaseElement {
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
-      this.hasBookend_().then(hasBookend => {
-        if (hasBookend) {
-          dispatch(this.element, EventType.SHOW_BOOKEND);
-        }
-      });
+      dispatch(this.element, EventType.SHOW_BOOKEND);
     }
   }
 
@@ -1265,6 +1311,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
+    const bookendActive = this.stateService_.getState(StateType.BOOKEND_ACTIVE);
+    if (!bookendActive.isModifiable()) {
+      // Whether the bookend is active cannot be modified; its current value can
+      // be assumed.
+      return Promise.resolve(bookendActive.getValue());
+    }
+
+    // TODO(newmuis): Change this comment.
     // On mobile there is always a bookend. On desktop, the bookend will only
     // be shown if related articles have been configured.
     if (!this.isDesktop_()) {
@@ -1540,6 +1594,15 @@ export class AmpStory extends AMP.BaseElement {
     // TODO(ccordry): make sure this method moves to PageManager when implemented
     const pageToBeInserted = this.getPageById(pageToBeInsertedId);
     const pageToBeInsertedEl = pageToBeInserted.element;
+
+    const allowAutomaticAdInsertion = this.stateService_
+        .getState(StateType.ALLOW_AUTOMATIC_AD_INSERTION);
+
+    if (pageToBeInsertedEl.hasAttribute('ad') &&
+        !allowAutomaticAdInsertion.getValue()) {
+      dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
+      return false;
+    }
 
     const pageBefore = this.getPageById(pageBeforeId);
     const pageBeforeEl = pageBefore.element;
