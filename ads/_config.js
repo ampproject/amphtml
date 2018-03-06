@@ -684,6 +684,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  quoraad: {
+    prefetch: 'https://a.quora.com/amp_ad.js',
+    preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
   relap: {
     renderStartImplemented: true,
   },
