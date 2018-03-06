@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {dict} from '../../../src/utils/object';
+import {Entitlement} from './entitlement';
 import {evaluateExpr} from './expr';
 
 /**
@@ -38,17 +37,17 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!Entitlement} entitlement
    */
-  render(entitlements) {
-    this.renderActions_(entitlements);
+  render(entitlement) {
+    this.renderActions_(entitlement);
   }
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!Entitlement} entitlement
    */
-  renderActions_(entitlements) {
+  renderActions_(entitlement) {
     return this.ampdoc_.whenReady().then(() => {
       // Find the first matching dialog.
       const actionCandidates =
@@ -56,15 +55,7 @@ export class LocalSubscriptionPlatformRenderer {
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-
-        // TODO(@prateekbh): cleanup this forloop with Entitlements Wrapper
-        const entitlementsJson = entitlements.json();
-        /** @type {!JsonObject} */
-        const evaluationJson = dict();
-        for (const key in entitlementsJson) {
-          evaluationJson[key] = entitlementsJson[key];
-        }
-        if (expr && evaluateExpr(expr, evaluationJson)) {
+        if (expr && evaluateExpr(expr, entitlement.json())) {
           candidate.setAttribute('i-amphtml-subs-display', '');
         }
       }
@@ -76,6 +67,6 @@ export class LocalSubscriptionPlatformRenderer {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @VisibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }

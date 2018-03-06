@@ -38,9 +38,10 @@ export class ServiceAdapter {
 
   /**
    * Delegates actions to local platform
+   * @param {string} action
    */
   delegateToLocal(action) {
-    this.subscriptionService_.delegateToLocal(action);
+    this.subscriptionService_.delegateActionToLocal(action);
   }
 
   /**

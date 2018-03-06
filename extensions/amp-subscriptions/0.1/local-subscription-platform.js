@@ -15,7 +15,7 @@
  */
 
 import {Actions} from './actions';
-import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from './service-adapter';
@@ -91,8 +91,8 @@ export class LocalSubscriptionPlatform {
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
 
-    /** @private {?Entitlements}*/
-    this.entitlements_ = null;
+    /** @private {?Entitlement}*/
+    this.entitlement_ = null;
 
     this.initializeListeners_();
   }
@@ -153,12 +153,15 @@ export class LocalSubscriptionPlatform {
    * Renders the platform specific UI
    */
   activate() {
-    this.renderer_.render(this.entitlements_);
+    const entitlements = /** @type {!Entitlement} */ (dev().assert(
+        this.entitlement_,'Entitlement is not yet fetched'));
+    this.renderer_.render(entitlements);
   }
 
   /**
    * Executes action for the local platform.
-   * @param {!Promise<string>} action
+   * @param {string} action
+   * @returns {!Promise}
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
@@ -166,6 +169,7 @@ export class LocalSubscriptionPlatform {
       if (result) {
         this.serviceAdapter_.reAuthorizePlatform(this);
       }
+      return result;
     });
   }
 
@@ -180,14 +184,10 @@ export class LocalSubscriptionPlatform {
         })
         .then(res => res.json())
         .then(resJson => {
-          const entitlements = new Entitlements(
-              this.serviceConfig_['serviceId'] || 'local',
-              JSON.stringify(resJson),
-              Entitlement.parseListFromJson(resJson),
-              currentProductId
-          );
-          this.entitlements_ = entitlements;
-          return entitlements;
+          const entitlement = Entitlement.parseFromJson(resJson);
+          entitlement.setCurrentProduct(currentProductId);
+          this.entitlement_ = entitlement;
+          return entitlement;
         });
   }
 }

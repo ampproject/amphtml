@@ -15,8 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {Entitlement} from './entitlement';
 import {EntitlementStore} from './entitlement-store';
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
@@ -155,12 +155,11 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!Entitlements} entitlements
+   * @param {!Entitlement} entitlement
    * @private
    */
-  resolveEntitlementsToStore_(entitlements) {
-    this.entitlementStore_.resolveEntitlement(entitlements.service,
-        entitlements);
+  resolveEntitlementsToStore_(entitlement) {
+    this.entitlementStore_.resolveEntitlement(entitlement.service, entitlement);
   }
 
   /**
@@ -168,8 +167,8 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   fetchEntitlements_(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlements =>
-      this.resolveEntitlementsToStore_(entitlements));
+    subscriptionPlatform.getEntitlements().then(entitlement =>
+      this.resolveEntitlementsToStore_(entitlement));
   }
 
   /**
@@ -206,14 +205,13 @@ export class SubscriptionService {
   }
 
   selectAndActivatePlatform_() {
-    this.entitlementStore_.selectPlatform()
-        .then(entitlements => {
-          this.subscriptionPlatforms_.forEach(platform => {
-            if (platform.getServiceId() == entitlements.service) {
-              platform.activate();
-            }
-          });
-        });
+    this.entitlementStore_.selectPlatform().then(entitlement => {
+      this.subscriptionPlatforms_.forEach(platform => {
+        if (platform.getServiceId() == entitlement.service) {
+          platform.activate();
+        }
+      });
+    });
   }
 
   /**
@@ -238,9 +236,9 @@ export class SubscriptionService {
    * @param {string} action
    */
   delegateActionToLocal(action) {
-    /** @type {LocalSubscriptionPlatform} */
-    const localPlatform = dev().assert(this.subscriptionPlatforms_['local'],
-        'Local platform is not registered');
+    const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
+      dev().assert(this.subscriptionPlatforms_['local'],
+          'Local platform is not registered'));
     dev().assert(localPlatform.executeAction,
         'executeAction not found on local platform');
 
@@ -266,8 +264,8 @@ export function getPageConfigClassForTesting() {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @VisibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }
 
 

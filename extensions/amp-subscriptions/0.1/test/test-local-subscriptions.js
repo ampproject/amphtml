@@ -101,8 +101,9 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
       const executeStub =
         sandbox.stub(localSubscriptionPlatform.actions_, 'execute')
             .callsFake(() => Promise.resolve(true));
-      const entitlementsStub =
-          sandbox.stub(localSubscriptionPlatform, 'getEntitlements');
+      const entitlementsStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'reAuthorizePlatform');
       localSubscriptionPlatform.executeAction(actionString);
       expect(executeStub).to.be.calledWith(actionString);
       return executeStub().then(() => {

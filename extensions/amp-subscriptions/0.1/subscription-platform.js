@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {Entitlement} from './entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 
@@ -35,7 +35,7 @@ export class SubscriptionPlatform {
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
+   * @return {!Promise<!Entitlement>}
    */
   getEntitlements() {
   }
@@ -52,8 +52,8 @@ export class SubscriptionPlatform {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @visibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }
 
 /**
