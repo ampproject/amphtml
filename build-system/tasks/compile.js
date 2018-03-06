@@ -150,6 +150,7 @@ function compile(entryModuleFilenames, outputDir,
       // A4A has these cross extension deps.
       'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad-network-base/**/*.js',
+      'extensions/amp-ad-template-common/**/*.js',
       'extensions/amp-ad/**/*.js',
       'extensions/amp-a4a/**/*.js',
       // Currently needed for crypto.js and visibility.js.

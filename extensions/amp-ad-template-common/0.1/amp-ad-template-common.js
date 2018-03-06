@@ -18,7 +18,7 @@ import {AmpAdNetworkTemplateBase} from '../../amp-ad-network-base/0.1/amp-ad-net
 import {NetworkRegistry} from './config';
 import {dev} from '../../../src/log';
 
-const TAG = 'amp-ad-common';
+const TAG = 'amp-ad-template-common';
 
 export class AmpAdTemplateCommon extends AmpAdNetworkTemplateBase {
   /**

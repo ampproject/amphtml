@@ -261,7 +261,7 @@ export class TemplateValidator extends Validator {
   processMetadata_(metadata, context) {
     const extensions = Services.extensionsFor(context.getWindow());
     metadata.customElementExtensions.forEach(
-        extensionId => extensions.preloadExtension(extensionId));
+        extensionId => extensions./*OK*/preloadExtension(extensionId));
     // TODO(levitzky) Add preload logic for fonts / images.
   }
 
