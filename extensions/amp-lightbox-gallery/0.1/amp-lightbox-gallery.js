@@ -714,6 +714,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * It's possible for the current lightbox to be displaying an image that
+   * is not visible in the viewport. We should not transition those images.
+   * This function checks if the currently lightboxed image is the source image
+   * that we transitioned on (in which case it is guaranteed to be in viewport)
+   * or if it belongs to a carousel, in which case we sync the carousel.
    * @return {!Promise<boolean>}
    * @private
    */
@@ -721,13 +726,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const element = this.getCurrentElement_().sourceElement;
     return this.shouldAnimate_(element)
         .then(shouldAnimate => {
-          return shouldAnimate && (element == this.sourceElement_
-          || this.manager_.hasCarousel(this.currentLightboxGroupId_));
+          const transitionBackToSource = element == this.sourceElement_;
+          const belongsToCarousel =
+            this.manager_.hasCarousel(this.currentLightboxGroupId_);
+          return shouldAnimate && (transitionBackToSource || belongsToCarousel);
         });
   }
 
   /**
-   *
+   * Animates image from current location to its target location in the
+   * lightbox.
    * @param {!Element} sourceElement
    * @private
    * @returns {!Promise}
@@ -847,7 +855,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (shouldAnimate) {
             this.transitionIn_(sourceElement);
           } else {
-            this.fade_(0,1);
+            this.fade_(0, 1);
           }
         });
   }
@@ -959,7 +967,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (shouldExit) {
             return this.transitionOut_();
           } else {
-            return this.fade_(1,0);
+            return this.fade_(1, 0);
           }
         });
   }
