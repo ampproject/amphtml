@@ -32,7 +32,7 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   constructor(element) {
     super(element);
 
-    this.bindValidator(validator);
-    this.bindRenderer(ValidatorResult.AMP, renderer);
+    this.registerValidator(validator);
+    this.registerRenderer(ValidatorResult.AMP, renderer);
   }
 }
