@@ -36,8 +36,11 @@ function documentContainsPolyfill(node) {
  * @param {!Window} win
  */
 export function install(win) {
-  if (!win.HTMLDocument.prototype.contains) {
-    win.Object.defineProperty(win.HTMLDocument.prototype, 'contains', {
+  // HTMLDocument is undefined in Internet Explorer 10, but it has Document,
+  // so we use that as a fallback.
+  const documentClass = win.HTMLDocument || win.Document;
+  if (!documentClass.prototype.contains) {
+    win.Object.defineProperty(documentClass.prototype, 'contains', {
       enumerable: false,
       configurable: true,
       writable: true,
