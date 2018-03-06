@@ -384,7 +384,7 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.imageBox_.width * this.maxSeenScale_,
         this.sourceWidth_
     );
-    const src = this.srcset_.select(width, this.getDpr()).url;
+    const src = this.srcset_.select(width, this.getDpr());
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
