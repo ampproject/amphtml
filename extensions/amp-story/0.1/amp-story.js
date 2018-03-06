@@ -34,6 +34,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
@@ -104,6 +105,9 @@ const RETURN_TO_ATTR = 'i-amphtml-return-to';
 /** @private @const {string} */
 const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 
+/** @private @const {string} */
+const AD_SHOWING_ATTR = 'ad-showing';
+
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -165,6 +169,31 @@ const LANDSCAPE_ORIENTATION_WARNING = [
   },
 ];
 
+const DESKTOP_SIZE_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({
+      'class': 'i-amphtml-story-no-rotation-overlay ' +
+          'i-amphtml-story-system-reset'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-desktop-size-icon'}),
+          },
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
+            text: 'Expand your window to view this experience',
+          },
+        ],
+      },
+    ],
+  },
+];
 
 const UNSUPPORTED_BROWSER_WARNING = [
   {
@@ -606,6 +635,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   markStoryAsLoaded_() {
     dispatch(this.element, EventType.STORY_LOADED, true);
+    this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
@@ -785,13 +815,20 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    const targetPage = this.getPageById_(targetPageId);
+    const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
-    // TODO(alanorozco): decouple this using NavigationState
-    if (!targetPage.isAd()) {
+    if (targetPage.isAd()) {
+      this.vsync_.mutate(() => {
+        this.element.setAttribute(AD_SHOWING_ATTR, '');
+      });
+    } else {
+      this.vsync_.mutate(() => {
+        this.element.removeAttribute(AD_SHOWING_ATTR);
+      });
+      // TODO(alanorozco): decouple this using NavigationState
       this.systemLayer_.setActivePageId(targetPageId);
     }
 
@@ -945,6 +982,16 @@ export class AmpStory extends AMP.BaseElement {
         this.desktopMedia_.matches;
   }
 
+  /**
+   * Return right overlay for mobile or desktop
+   */
+  viewportWarningOverlay_() {
+    const platform = Services.platformFor(this.win);
+
+    return (platform.isIos() || platform.isAndroid())
+      ? LANDSCAPE_ORIENTATION_WARNING
+      : DESKTOP_SIZE_WARNING;
+  }
 
   /**
    * Build overlay for Landscape mode mobile
@@ -953,11 +1000,10 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.insertBefore(
           renderSimpleTemplate(this.win.document,
-              LANDSCAPE_ORIENTATION_WARNING),
+              this.viewportWarningOverlay_()),
           this.element.firstChild);
     });
   }
-
 
   /**
    * Build overlay for Landscape mode mobile
@@ -1131,7 +1177,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     map[pageId] = distance;
-    const page = this.getPageById_(pageId);
+    const page = this.getPageById(pageId);
     page.getAdjacentPageIds().forEach(adjacentPageId => {
       if (map[adjacentPageId] !== undefined
           && map[adjacentPageId] <= distance) {
@@ -1153,7 +1199,7 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
-          const page = this.getPageById_(pageId);
+          const page = this.getPageById(pageId);
           page.setDistance(distance);
         });
       });
@@ -1294,9 +1340,8 @@ export class AmpStory extends AMP.BaseElement {
    * @param {string} id The ID of the page to be retrieved.
    * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the
    *     specified ID.
-   * @private
    */
-  getPageById_(id) {
+  getPageById(id) {
     const pageIndex = this.getPageIndexById_(id);
     return dev().assert(this.pages_[pageIndex],
         `Page at index ${pageIndex} exists, but is missing from the array.`);
@@ -1487,33 +1532,51 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Insert a new page in navigation flow by changing the attr pointers
    * on amp-story-page elements
-   * @param {string} currentPageId
+   * @param {string} pageBeforeId
    * @param {string} pageToBeInsertedId
+   * @return {boolean} was page inserted
    */
-  insertPage(currentPageId, pageToBeInsertedId) {
+  insertPage(pageBeforeId, pageToBeInsertedId) {
     // TODO(ccordry): make sure this method moves to PageManager when implemented
-    const pageToBeInserted = this.getPageById_(pageToBeInsertedId);
+    const pageToBeInserted = this.getPageById(pageToBeInsertedId);
     const pageToBeInsertedEl = pageToBeInserted.element;
 
-    const currentPage = this.getPageById_(currentPageId);
-    const currentPageEl = currentPage.element;
+    const pageBefore = this.getPageById(pageBeforeId);
+    const pageBeforeEl = pageBefore.element;
 
-    const nextPageId = currentPage
-        .getNextPageId(true /*opt_isAutomaticAdvance */);
+    const nextPage = this.getNextPage(pageBefore);
 
-
-    if (nextPageId) {
-      currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
-      currentPageEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
-      pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
-
-      const nextPage = this.getPageById_(nextPageId);
-      const nextPageEl = nextPage.element;
-      pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
-      pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageEl.id);
-      nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+    if (!nextPage) {
+      return false;
     }
+
+    pageBeforeEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
+    pageBeforeEl.setAttribute(AUTO_ADVANCE_TO_ATTR, pageToBeInsertedId);
+    pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, pageBeforeId);
+
+    const nextPageEl = nextPage.element;
+    const nextPageId = nextPageEl.id;
+    pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageId);
+    pageToBeInsertedEl.setAttribute(AUTO_ADVANCE_TO_ATTR, nextPageId);
+    nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+
+    return true;
   }
+
+
+  /**
+   * Get next page object
+   * @param {!./amp-story-page.AmpStoryPage} page
+   * @return {?./amp-story-page.AmpStoryPage}
+   */
+  getNextPage(page) {
+    const nextPageId = page.getNextPageId(true /*opt_isAutomaticAdvance */);
+    if (!nextPageId) {
+      return null;
+    }
+    return this.getPageById(nextPageId);
+  }
+
 
   /**
    * @param {!Window} win

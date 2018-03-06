@@ -126,7 +126,7 @@ export class AmpAnim extends AMP.BaseElement {
         // The width should never be 0, but we fall back to the screen width
         // just in case.
         this.getViewport().getWidth() || this.win.screen.width,
-        this.getDpr()).url;
+        this.getDpr());
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }

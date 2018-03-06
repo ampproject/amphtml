@@ -584,6 +584,10 @@ export const adConfig = {
     ],
   },
 
+  monetizer101: {
+    renderStartImplemented: true,
+  },
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -677,6 +681,12 @@ export const adConfig = {
 
   purch: {
     prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
+  quoraad: {
+    prefetch: 'https://a.quora.com/amp_ad.js',
+    preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
   },
 

@@ -126,7 +126,7 @@ Example with fallback:
 There are 3 ways to monetize videos in AMP with video ads:
 1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-2. Use the [amp-ima-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/amp-ima-video.md) component that comes with a built-in IMA SDK and HTML5 video player
+2. Use the [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
 3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
@@ -276,6 +276,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
+- [Monetizer101](../../ads/monetizer101.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)

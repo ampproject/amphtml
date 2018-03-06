@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
+import {Actions} from './actions';
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics} from './analytics';
+import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {closestBySelector} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -35,6 +40,9 @@ export class LocalSubscriptionPlatform {
   constructor(ampdoc, serviceConfig, pageConfig) {
     /** @const */
     this.ampdoc_ = ampdoc;
+
+    /** @private @const */
+    this.rootNode_ = ampdoc.getRootNode();
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = serviceConfig;
@@ -53,6 +61,109 @@ export class LocalSubscriptionPlatform {
         ),
         'Authorization Url'
     );
+
+    /** @private @const {!Promise<!../../../src/service/cid-impl.Cid>} */
+    this.cid_ = Services.cidForDoc(ampdoc);
+
+    /** @private {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
+
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+
+    user().assert(this.serviceConfig_['actions'],
+        'Actions have not been defined in the service config');
+
+    /** @private {!Actions} */
+    this.actions_ = new Actions(
+        this.ampdoc_, this.urlBuilder_,
+        this.subscriptionAnalytics_,
+        this.validateActionMap(this.serviceConfig_['actions'])
+    );
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {!LocalSubscriptionPlatformRenderer}*/
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
+
+    /** @private {?Entitlements}*/
+    this.entitlements_ = null;
+
+    this.initializeListeners_();
+  }
+
+  /**
+   * @override
+   */
+  getServiceId() {
+    return 'local';
+  }
+
+  /**
+   * Validates the action map
+   * @param {!JsonObject<string, string>} actionMap
+   * @returns {!JsonObject<string, string>}
+   */
+  validateActionMap(actionMap) {
+    user().assert(actionMap['login'],
+        'Action `Login` is not present in action map');
+    user().assert(actionMap['subscribe'],
+        'Action `Subscribe` is not present in action map');
+    return actionMap;
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            consent
+        );
+      });
+    }
+    return this.readerIdPromise_;
+  }
+
+  /**
+   * Add event listener for the subscriptions action
+   * @private
+   */
+  initializeListeners_() {
+    this.rootNode_.addEventListener('click', e => {
+      const element = closestBySelector(dev().assertElement(e.target),
+          '[subscriptions-action]');
+      if (element) {
+        const action = element.getAttribute('subscriptions-action');
+        this.executeAction(action);
+      }
+    });
+  }
+
+  /**
+   * Renders the platform specific UI
+   */
+  activate() {
+    this.renderer_.render(this.entitlements_);
+  }
+
+  /**
+   * Executes action for the local platform.
+   * @param {string} action
+   */
+  executeAction(action) {
+    const actionExecution = this.actions_.execute(action);
+    actionExecution.then(result => {
+      if (result) {
+        // TODO(@prateekbh): Add a service interface and call reauthorize on it.
+        this.getEntitlements();
+      }
+    });
   }
 
   /** @override */
@@ -66,12 +177,14 @@ export class LocalSubscriptionPlatform {
         })
         .then(res => res.json())
         .then(resJson => {
-          return new Entitlements(
+          const entitlements = new Entitlements(
               this.serviceConfig_['serviceId'] || 'local',
               JSON.stringify(resJson),
               Entitlement.parseListFromJson(resJson),
               currentProductId
           );
+          this.entitlements_ = entitlements;
+          return entitlements;
         });
   }
 }
