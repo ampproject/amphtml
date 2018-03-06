@@ -253,6 +253,24 @@ describes.realWin('amp-list component', {
     });
   });
 
+  it('should refetch if refresh action is called', () => {
+    const items = [{title: 'foo'}];
+    const foo = doc.createElement('div');
+    const rendered = expectFetchAndRender(items, [foo]);
+
+    return list.layoutCallback().then(() => rendered).then(() => {
+      expect(list.container_.contains(foo)).to.be.true;
+
+      const renderedAgain = expectFetchAndRender(items, [foo]);
+
+      list.executeAction({
+        method: 'refresh',
+        satisfiesTrust: () => true,
+      });
+      return renderedAgain;
+    });
+  });
+
   it('fetch should resolve if `src` is empty', () => {
     const spy = sandbox.spy(list, 'fetchList_');
     element.setAttribute('src', '');

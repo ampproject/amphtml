@@ -1345,7 +1345,7 @@ function createBaseCustomElementClass(win) {
           // Blacklist elements that has a native placeholder property
           // like input and textarea. These are not allowed to be AMP
           // placeholders.
-          !('placeholder' in el);
+          !isInputPlaceholder(el);
       });
     }
 
@@ -1364,6 +1364,11 @@ function createBaseCustomElementClass(win) {
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
+          // Don't toggle elements with a native placeholder property
+          // e.g. input, textarea
+          if (isInputPlaceholder(placeholders[i])) {
+            continue;
+          }
           placeholders[i].classList.add('amp-hidden');
         }
       }
@@ -1606,6 +1611,11 @@ function createBaseCustomElementClass(win) {
   }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
+}
+
+/** @param {!Element} element */
+function isInputPlaceholder(element) {
+  return 'placeholder' in element;
 }
 
 

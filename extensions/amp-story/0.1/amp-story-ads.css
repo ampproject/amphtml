@@ -57,10 +57,27 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   }
 }
 
+.i-amphtml-ad-overlay-container {
+  height: 24px !important;
+  padding: 14px 0 0 !important;
+  position: absolute !important;
+  z-index: 5 !important;
+}
+
 .i-amphtml-story-ad-attribution {
   color: #FFFFFF !important;
   font-size: 18px !important;
   font-family: 'Roboto-Bold', sans-serif !important;
   letter-spacing: 0.5px !important;
+  margin: 0 0 0 16px !important;
+  padding: 0 !important;
+  visibility: hidden !important;
 }
 
+amp-story[ad-showing] .i-amphtml-story-ad-attribution {
+  visibility: visible !important;
+}
+
+amp-story[ad-showing] .i-amphtml-story-progress-bar {
+  visibility: hidden !important;
+}
