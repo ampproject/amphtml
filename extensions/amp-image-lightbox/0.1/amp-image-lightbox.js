@@ -322,7 +322,7 @@ export class ImageViewer {
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
+    const src = this.srcset_.select(width, this.lightbox_.getDpr());
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }

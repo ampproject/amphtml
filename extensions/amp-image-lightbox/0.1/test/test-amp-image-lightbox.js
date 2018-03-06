@@ -284,7 +284,6 @@ describes.realWin('amp-image-lightbox image viewer', {
 
     expect(imageViewer.sourceWidth_).to.equal(101);
     expect(imageViewer.sourceHeight_).to.equal(201);
-    expect(imageViewer.srcset_.getLast().url).to.equal('image1');
     expect(imageViewer.getImage().src).to.equal('');
   });
 
