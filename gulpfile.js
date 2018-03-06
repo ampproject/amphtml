@@ -106,6 +106,7 @@ declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
 declareExtension('amp-dynamic-css-classes', '0.1');
+declareExtension('amp-embedly', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
 declareExtension('amp-facebook-comments', '0.1');
