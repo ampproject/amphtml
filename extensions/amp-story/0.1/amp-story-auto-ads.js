@@ -59,6 +59,11 @@ const AD_STATE = {
   FAILED: 2,
 };
 
+/** @const */
+const ALLOWED_AD_TYPES = map({
+  'custom': true,
+});
+
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -253,20 +258,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   createAdElement_() {
     const requiredAttrs = {
-      'id': 'i-amphtml-story-ad',
+      'class': 'i-amphtml-story-ad',
       'layout': 'fill',
     };
 
     const configAttrs = this.config_['ad-attributes'];
 
     ['height', 'width', 'layout'].forEach(attr => {
-      if (configAttrs[attr]) {
+      if (configAttrs[attr] !== undefined) {
         user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
         delete configAttrs[attr];
       }
     });
 
-    user().assert(this.isTypeAllowed_(configAttrs.type), `${TAG}: ` +
+    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
       `"${configAttrs.type}" ad type is not supported`);
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
@@ -274,20 +279,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
-  }
-
-
-  /**
-   * @param {string} type
-   * @return {boolean}
-   * @private
-   */
-  isTypeAllowed_(type) {
-    const allowedTypes = map({
-      'custom': true,
-    });
-
-    return allowedTypes[type] || false;
   }
 
 
