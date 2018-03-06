@@ -197,7 +197,7 @@ describe('BindValidator', () => {
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
     });
 
     it('should support <amp-list>', () => {
