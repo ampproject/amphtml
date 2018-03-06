@@ -232,8 +232,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       // amp-ad element
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML = '.safeframe' +
-          '{height:250px!important;' +
-          'width:300px!important;' +
+          '{height:50px!important;' +
+          'width:50px!important;' +
           'background-color:blue!important;' +
           'display:block!important;}';
       doc.head.appendChild(css);
@@ -252,7 +252,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
               '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
-              '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
+              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
         expect(payload['uid']).to.equal(safeframeHost.uid_);
@@ -275,8 +275,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML = '.safeframe' +
-          '{height:50px!important;' +
-          'width:50px!important;' +
+          '{height:10px!important;' +
+          'width:10px!important;' +
           'background-color:blue!important;' +
           'display:block!important;}';
       doc.head.appendChild(css);
@@ -295,7 +295,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":50,' +
               '"frameCoords_b":50,"frameCoords_l":0,"styleZIndex":"",' +
-              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
+              '"allowedExpansion_r":490,"allowedExpansion_b":990,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
         expect(payload['uid']).to.equal(safeframeHost.uid_);
@@ -356,12 +356,12 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         bottom: 800,
       });
       const iframeBox = {
-        top: 200,
-        left: 100,
-        bottom: 800,
-        right: 400,
+        top: 300,
+        left: 200,
+        bottom: 1000,
+        right: 500,
         width: 300,
-        height: 600,
+        height: 700,
       };
       sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
         width: 500,
@@ -371,7 +371,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
         'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
         'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
-        'allowedExpansion_r': 200, 'allowedExpansion_b': 400,
+        'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
         'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
         'xInView': 1,
       };
