@@ -321,6 +321,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     a.href = ctaUrl;
     a.textContent = ctaText;
 
+    user().assert(['https:', 'http:'].includes(a.protocol),
+        'CTA url is not valid');
+
     const ctaLayer = document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
