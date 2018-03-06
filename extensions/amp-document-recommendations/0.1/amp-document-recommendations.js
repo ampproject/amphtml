@@ -24,6 +24,7 @@ import {isJsonScriptTag} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+
 import {user} from '../../../src/log';
 
 /** @const */
@@ -92,11 +93,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
-      Services.xhrFor(this.win)
-          .fetchDocument(next.ampUrl)
-          .then(
-              doc => {this.attachShadowDoc_(doc);},
-              () => {});
+      Services.xhrFor(this.win).fetchDocument(next.ampUrl).then(doc => {
+        this.attachShadowDoc_(doc);
+      }, () => {});
     }
   }
 
@@ -110,7 +109,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     let article = from;
 
     while (article < this.config_.recommendations.length &&
-        article - from < SEPARATOR_RECOS) {
+           article - from < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
@@ -121,14 +120,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       });
 
       const imageElement = doc.createElement('div');
-      imageElement.classList.add('i-amphtml-next-article-image',
-          'amp-document-recommendations-image');
+      imageElement.classList.add(
+          'i-amphtml-next-article-image', 'amp-document-recommendations-image');
       setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
-      titleElement.classList.add('i-amphtml-next-article-title',
-          'amp-document-recommendations-text');
+      titleElement.classList.add(
+          'i-amphtml-next-article-title', 'amp-document-recommendations-text');
 
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
@@ -172,8 +171,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
+    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
     if (activeInstance_ !== this) {
       return Promise.resolve();
@@ -181,11 +179,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     this.element.classList.add('i-amphtml-document-recommendations');
 
-    this.multidocManager_ = new MultidocManager(
-        this.win,
-        Services.ampdocServiceFor(this.win),
-        Services.extensionsFor(this.win),
-        Services.timerFor(this.win));
+    this.multidocManager_ =
+        new MultidocManager(this.win, Services.ampdocServiceFor(this.win),
+          Services.extensionsFor(this.win), Services.timerFor(this.win));
 
     // TODO(peterjosling): Read config from another source.
 
@@ -193,16 +189,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const scriptElement = children[0];
-    user().assert(
-        isJsonScriptTag(scriptElement),
+    user().assert(isJsonScriptTag(scriptElement),
         'The amp-document-recommendations config should ' +
-        'be inside a <script> tag with type="application/json"');
+            'be inside a <script> tag with type="application/json"');
 
-    const configJson = tryParseJson(
-        scriptElement.textContent, error => {
-          throw user().createError(
-              'failed to parse content discovery script', error);
-        });
+    const configJson = tryParseJson(scriptElement.textContent, error => {
+      throw user().createError(
+          'failed to parse content discovery script', error);
+    });
 
     const docInfo = Services.documentInfoForDoc(this.element);
     const host = parseUrl(docInfo.sourceUrl).host;
