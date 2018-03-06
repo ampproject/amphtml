@@ -124,6 +124,8 @@ export class AmpEmbedly extends AMP.BaseElement {
             this.readyState = 'complete';
           });
         };
+
+        break;
       }
 
       case resourceType.PHOTO: {
