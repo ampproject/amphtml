@@ -151,11 +151,10 @@ export class LocalSubscriptionPlatform {
 
   /**
    * Renders the platform specific UI
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  activate() {
-    // TODO(@prateekbh): replace this with RenderState
-    const entitlements = /** @type {!Entitlement} */ (this.entitlement_);
-    this.renderer_.render(entitlements);
+  activate(renderState) {
+    this.renderer_.render(renderState);
   }
 
   /**

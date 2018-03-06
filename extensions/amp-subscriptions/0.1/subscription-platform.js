@@ -17,7 +17,6 @@
 import {Entitlement} from './entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
-
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
@@ -42,8 +41,9 @@ export class SubscriptionPlatform {
 
   /**
    * Activates the subscription platform and hands over the control for rendering.
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  activate() {
+  activate(renderState) {
   }
 }
 
@@ -62,4 +62,12 @@ export function getEntitlementClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getRenderStateClassForTesting() {
+  return RenderState;
 }

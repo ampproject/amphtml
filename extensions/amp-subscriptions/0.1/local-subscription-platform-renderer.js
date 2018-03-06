@@ -37,17 +37,17 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    *
-   * @param {!Entitlement} entitlement
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  render(entitlement) {
-    this.renderActions_(entitlement);
+  render(renderState) {
+    this.renderActions_(renderState);
   }
 
   /**
    *
-   * @param {!Entitlement} entitlement
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  renderActions_(entitlement) {
+  renderActions_(renderState) {
     return this.ampdoc_.whenReady().then(() => {
       // Find the first matching dialog.
       const actionCandidates =
@@ -55,7 +55,8 @@ export class LocalSubscriptionPlatformRenderer {
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-        if (expr && evaluateExpr(expr, entitlement.json())) {
+        if (expr && evaluateExpr(expr,
+            /** @type {!JsonObject} */(renderState))) {
           candidate.setAttribute('i-amphtml-subs-display', '');
         }
       }

@@ -124,7 +124,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.subscriptionPlatforms_ = {};
       subscriptionService.initializeLocalPlatforms_(service);
-      expect(subscriptionService.subscriptionPlatforms_['local']).to.be.not.null;
+      expect(subscriptionService.subscriptionPlatforms_['local'])
+          .to.be.not.null;
       expect(subscriptionService.subscriptionPlatforms_['local']).to.be
           .instanceOf(LocalSubscriptionPlatform);
     });

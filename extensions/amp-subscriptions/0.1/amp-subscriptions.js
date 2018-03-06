@@ -23,11 +23,15 @@ import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {SubscriptionPlatform} from './subscription-platform';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
+/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !Entitlement}} */
+export let RenderState;
 
 export class SubscriptionService {
   /**
@@ -55,7 +59,7 @@ export class SubscriptionService {
     this.platformConfig_ = null;
 
     /** @private @const {!Object<string, !SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = [];
+    this.subscriptionPlatforms_ = dict();
 
     /** @private {?EntitlementStore} */
     this.entitlementStore_ = null;
@@ -65,6 +69,9 @@ export class SubscriptionService {
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
+
+    /** @private {boolean} */
+    this.grantState_ = false;
   }
 
   /**
@@ -144,6 +151,7 @@ export class SubscriptionService {
    * @private
    */
   processGrantState_(grantState) {
+    this.grantState_ = grantState;
     this.renderer_.toggleLoading(false);
     this.renderer_.setGrantState(grantState);
 
@@ -206,11 +214,20 @@ export class SubscriptionService {
 
   selectAndActivatePlatform_() {
     this.entitlementStore_.selectPlatform().then(entitlement => {
-      this.subscriptionPlatforms_.forEach(platform => {
-        if (platform.getServiceId() == entitlement.service) {
-          platform.activate();
-        }
-      });
+      /** @type {!RenderState} */
+      const renderState = {
+        entitlement,
+        loggedIn: false, // TODO (@prateekbh): ask how to derive this?
+        subscribed: false, // TODO (@prateekbh): ask how to derive this?
+        granted: this.grantState_,
+      };
+
+      const selectedPlatform = dev().assert(
+          this.subscriptionPlatforms_[entitlement.service],
+          'Selected service not registered'
+      );
+
+      selectedPlatform.activate(renderState);
     });
   }
 
