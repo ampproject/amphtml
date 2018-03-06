@@ -71,6 +71,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?Promise} */
+    this.storyImplPromise_ = null;
+
     /** @private {?./amp-story.AmpStory} */
     this.ampStory_ = null;
 
@@ -117,7 +120,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
         ampdoc, MUSTACHE_TAG);
 
-    ampStoryElement.getImpl().then(impl => {
+    this.storyImplPromise_ = ampStoryElement.getImpl().then(impl => {
       this.ampStory_ = impl;
       this.navigationState_ = this.ampStory_.getNavigationState();
       this.navigationState_.observe(this.handleStateChange_.bind(this));
@@ -133,7 +136,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
+    return this.storyImplPromise_.then(() =>
+      this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD))
         .then(() => {
           this.createAdOverlay_();
           this.readConfig_();
