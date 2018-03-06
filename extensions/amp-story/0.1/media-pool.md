@@ -4,7 +4,7 @@ Web browsers generally do not allow audio to be played by media elements, unless
 
 # High-Level Design
 
-Every story always starts muted.  Because muted autoplay of video is allowed by browsers, all videos are allowed to play.  We offer an audio control to users where tapping the control unmutes ALL of the media present in the story.  It then subsequently re-mutes all of the media, exept for any media on the current page that should have otherwise been unmuted.  We herein refer to this operation of umuting and immediately (conditionally) re-muting a media element in response to user gesture as "blessing" said media element.
+Every story always starts muted.  Because muted autoplay of video is allowed by browsers, all videos are allowed to play.  We offer an audio control to users where tapping the control unmutes ALL of the media present in the story.  It then subsequently re-mutes all of the media, except for any media on the current page that should have otherwise been unmuted.  We herein refer to this operation of umuting and immediately (conditionally) re-muting a media element in response to user gesture as "blessing" said media element.  Blessing a media element leverages the user gesture to unmute that media element, so that future unmute operations do not require a user gesture.
 
 # Detailed Design
 
