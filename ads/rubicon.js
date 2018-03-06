@@ -26,7 +26,7 @@ export function rubicon(global, data) {
   validateData(data, [], [
     'account', 'site', 'zone', 'size',
     'kw', 'visitor', 'inventory',
-    'type', 'method', 'callback',
+    'method', 'callback',
   ]);
 
   if (data.method === 'smartTag') {
