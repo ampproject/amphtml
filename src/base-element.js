@@ -19,6 +19,7 @@ import {Layout} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
 import {getData, listen} from './event-helper';
+import {getMode} from './mode';
 import {isArray, toWin} from './types';
 import {isExperimentOn} from './experiments';
 import {loadPromise} from './event-helper';
@@ -400,7 +401,9 @@ export class BaseElement {
    * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return 3;
+    // Inabox allow layout independent of viewport location.
+    return getMode(this.win).runtime == 'inabox' &&
+        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
   }
 
   /**

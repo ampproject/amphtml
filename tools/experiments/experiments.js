@@ -267,6 +267,10 @@ const EXPERIMENTS = [
     name: 'Docment level recommendations and infinte scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
+  {
+    id: 'inabox-rov',
+    name: 'Extensions layout independent of viewport location if inabox.',
+  },
 ];
 
 if (getMode().localDev) {
