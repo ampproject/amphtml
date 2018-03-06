@@ -218,47 +218,18 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should get current geometry when safeframe fills amp-ad', () => {
+      sandbox./*OK*/stub(safeframeHost.baseInstance_,
+          'getPageLayoutBox').returns({
+        top: 0,
+        left: 0,
+        right: 300,
+        bottom: 250,
+      });
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {
         'class': 'safeframe',
       });
       // Set the size of the safeframe to be the same as its containing
       // amp-ad element
-      const css = createElementWithAttributes(doc, 'style');
-      css.innerHTML = '.safeframe' +
-          '{height:250px!important;' +
-          'width:300px!important;' +
-          'background-color:blue!important;' +
-          'display:block!important;}';
-      doc.head.appendChild(css);
-      ampAd.appendChild(safeframeMock);
-      doubleclickImpl.iframe_ = safeframeMock;
-      safeframeHost.iframe_ = safeframeMock;
-
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-          'sendMessage_');
-      safeframeHost.updateGeometry_();
-
-      return Services.timerFor(env.win).promise(1000).then(() => {
-        const payload = sendMessageStub.firstCall.args[0];
-        const messageType = sendMessageStub.firstCall.args[1];
-        expect(payload['newGeometry']).to.equal(
-            '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
-              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
-              '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
-              '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
-              '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
-              '"xInView":1}');
-        expect(payload['uid']).to.equal(safeframeHost.uid_);
-        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
-      });
-    });
-
-    it('should get geometry when safeframe does not fill amp-ad', () => {
-      // In this case, the safeframe is smaller than its containing
-      // amp-ad element.
-      const safeframeMock = createElementWithAttributes(doc, 'iframe', {
-        'class': 'safeframe',
-      });
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML = '.safeframe' +
           '{height:50px!important;' +
@@ -279,9 +250,52 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         const messageType = sendMessageStub.firstCall.args[1];
         expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
+              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
+              '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
+              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
+              '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
+              '"xInView":1}');
+        expect(payload['uid']).to.equal(safeframeHost.uid_);
+        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+      });
+    });
+
+    it('should get geometry when safeframe does not fill amp-ad', () => {
+      sandbox./*OK*/stub(safeframeHost.baseInstance_,
+          'getPageLayoutBox').returns({
+        top: 0,
+        left: 0,
+        right: 50,
+        bottom: 50,
+      });
+      // In this case, the safeframe is smaller than its containing
+      // amp-ad element.
+      const safeframeMock = createElementWithAttributes(doc, 'iframe', {
+        'class': 'safeframe',
+      });
+      const css = createElementWithAttributes(doc, 'style');
+      css.innerHTML = '.safeframe' +
+          '{height:10px!important;' +
+          'width:10px!important;' +
+          'background-color:blue!important;' +
+          'display:block!important;}';
+      doc.head.appendChild(css);
+      ampAd.appendChild(safeframeMock);
+      doubleclickImpl.iframe_ = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
+
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.updateGeometry_();
+
+      return Services.timerFor(env.win).promise(1000).then(() => {
+        const payload = sendMessageStub.firstCall.args[0];
+        const messageType = sendMessageStub.firstCall.args[1];
+        expect(payload['newGeometry']).to.equal(
+            '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":50,' +
               '"frameCoords_b":50,"frameCoords_l":0,"styleZIndex":"",' +
-              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
+              '"allowedExpansion_r":490,"allowedExpansion_b":990,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
         expect(payload['uid']).to.equal(safeframeHost.uid_);
@@ -334,13 +348,20 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('formatGeom', () => {
     it('should build proper geometry update', () => {
-      const iframeBox = {
+      sandbox./*OK*/stub(safeframeHost.baseInstance_,
+          'getPageLayoutBox').returns({
         top: 200,
         left: 100,
-        bottom: 800,
         right: 400,
+        bottom: 800,
+      });
+      const iframeBox = {
+        top: 300,
+        left: 200,
+        bottom: 1000,
+        right: 500,
         width: 300,
-        height: 600,
+        height: 700,
       };
       sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
         width: 500,
@@ -350,7 +371,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
         'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
         'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
-        'allowedExpansion_r': 200, 'allowedExpansion_b': 400,
+        'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
         'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
         'xInView': 1,
       };
