@@ -92,7 +92,7 @@ If [custom ad](../../ads/custom.md) is used, templates can be inlined in the
 
 ```html
   <amp-story-auto-ads>
-    <script type=”application/json”>
+    <script type="application/json">
         {
           "ad-attributes": {
             "type": "custom",
