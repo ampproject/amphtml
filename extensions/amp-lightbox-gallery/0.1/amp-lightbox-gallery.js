@@ -636,20 +636,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
-      this.getViewport().enterLightboxMode();
-
-      this.vsync_.mutate(() => {
+      return this.vsync_.mutatePromise(() => {
+        toggle(this.element, true);
         st.setStyles(this.element, {
           opacity: 0,
           display: '',
         });
-
         st.setStyles(dev().assertElement(this.carousel_), {
           opacity: 0,
           display: '',
         });
       });
-
+    }).then(() => {
+      this.getViewport().enterLightboxMode();
       this.active_ = true;
 
       this.updateInViewport(dev().assertElement(this.container_), true);
