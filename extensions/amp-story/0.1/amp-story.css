@@ -202,7 +202,9 @@ amp-story[standalone]:fullscreen {
 
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
-.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right {
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right {
   display: none !important;
 }
 
