@@ -140,8 +140,11 @@ export class AmpList extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  doesReuseLoadingIndicator() {
+  /**
+   * amp-list reuses the loading indicator when the list is fetched again via bind mutation or refresh action
+   * @override
+   */
+  isLoadingReused() {
     return true;
   }
 
@@ -203,23 +206,22 @@ export class AmpList extends AMP.BaseElement {
       return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
-    })
-        .then(() => {
-          if (this.getFallback()) {
-            // Hide in case fallback was displayed for a previous fetch.
-            this.toggleFallbackInMutate_(false);
-          }
-          this.togglePlaceholder(false);
-          this.toggleLoading(false);
-        }, error => {
-          this.toggleLoading(false);
-          if (this.getFallback()) {
-            this.toggleFallbackInMutate_(true);
-            this.togglePlaceholder(false);
-          } else {
-            throw error;
-          }
-        });
+    }).then(() => {
+      if (this.getFallback()) {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }
+      this.togglePlaceholder(false);
+      this.toggleLoading(false);
+    }, error => {
+      this.toggleLoading(false);
+      if (this.getFallback()) {
+        this.toggleFallbackInMutate_(true);
+        this.togglePlaceholder(false);
+      } else {
+        throw error;
+      }
+    });
   }
 
   /**

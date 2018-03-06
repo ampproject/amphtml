@@ -706,11 +706,11 @@ export class BaseElement {
   }
 
   /**
-   * Returns is reused again after the render.
+   * Returns whether the loading indicator is reused again after the first render.
    * @return {boolean}
    * @public
    */
-  doesReuseLoadingIndicator() {
+  isLoadingReused() {
     return false;
   }
 

@@ -1445,7 +1445,7 @@ function createBaseCustomElementClass(win) {
       }
       if (this.loadingDisabled_ || !isLoadingAllowed(this) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
-        (!this.implementation_.doesReuseLoadingIndicator() &&
+        (!this.implementation_.isLoadingReused() &&
           this.layoutCount_ > 0) ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
         return false;
@@ -1498,17 +1498,17 @@ function createBaseCustomElementClass(win) {
      */
     toggleLoading(state, opt_cleanup) {
       assertNotTemplate(this);
-      this.loadingState_ = state;
-      if (!state && !this.loadingContainer_) {
-        return;
-      }
-
-      if (state && !this.implementation_.doesReuseLoadingIndicator() &&
+      if (state && !this.implementation_.isLoadingReused() &&
           (this.layoutCount_ > 0 ||
               this.signals_.get(CommonSignals.RENDER_START))) {
         // Loading has already been canceled. Ignore.
         return;
       }
+      this.loadingState_ = state;
+      if (!state && !this.loadingContainer_) {
+        return;
+      }
+
       // Check if loading should be shown.
       if (state && !this.isLoadingEnabled_()) {
         this.loadingState_ = false;
@@ -1533,7 +1533,7 @@ function createBaseCustomElementClass(win) {
         this.loadingElement_.classList.toggle('amp-active', state);
 
         if (!state && opt_cleanup &&
-            !this.implementation_.doesReuseLoadingIndicator()) {
+            !this.implementation_.isLoadingReused()) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
