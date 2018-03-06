@@ -192,7 +192,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace CANONICAL_HOST', () => {
-    debugger;
     return expandUrlAsync('?host=CANONICAL_HOST').then(res => {
       expect(res).to.equal('?host=pinterest.com%3A8080');
     });
