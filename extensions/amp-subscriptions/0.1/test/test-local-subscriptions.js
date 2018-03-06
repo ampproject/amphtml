@@ -16,6 +16,7 @@
 
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../service-adapter';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
@@ -34,11 +35,15 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
       },
     ],
   };
+  let serviceAdapter;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
+    serviceAdapter = new ServiceAdapter(null);
+    sandbox.stub(serviceAdapter, 'getPageConfig')
+        .callsFake(() => new PageConfig('example.org:basic', true));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], new PageConfig('example.org:basic', true));
+        serviceConfig.services[0], serviceAdapter);
   });
 
   it('should fetch the entitlements on getEntitlements', () => {

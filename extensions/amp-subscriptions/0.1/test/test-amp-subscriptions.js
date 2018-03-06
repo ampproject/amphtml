@@ -21,6 +21,7 @@ import {
   PageConfig,
   PageConfigResolver,
 } from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionService} from '../amp-subscriptions';
 
 
@@ -59,7 +60,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     pageConfig = new PageConfig('example.org:basic', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(() => Promise.resolve(pageConfig));
-    sandbox.stub(subscriptionService, 'getServiceConfig_')
+    sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
   });
 
@@ -71,19 +72,18 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     expect(initializeStub).to.be.calledOnce;
   });
 
-  it('should setup store and page on start', done => {
+  it('should setup store and page on start', () => {
 
     const renderLoadingStub =
         sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
     subscriptionService.start_();
-    subscriptionService.initialize_().then(() => {
+    return subscriptionService.initialize_().then(() => {
       // Should show loading on the page
       expect(renderLoadingStub).to.be.calledWith(true);
       // Should setup entitlement store
       expect(subscriptionService.entitlementStore_).to.be
           .instanceOf(EntitlementStore);
-      done();
     });
   });
 
@@ -100,14 +100,15 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     return subscriptionService.initialize_().then(() => {
       expect(factorySpy).to.be.calledOnce;
       expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceData);
-      expect(factorySpy.getCall(0).args[1]).to.be.equal(pageConfig);
+      expect(factorySpy.getCall(0).args[1]).to.be.equal(
+          subscriptionService.serviceAdapter_);
     });
   });
 
-  describe('getServiceConfig_', () => {
+  describe('getPlatformConfig_', () => {
     it('should return json inside script#amp-subscriptions tag ', done => {
-      subscriptionService.getServiceConfig_.restore();
-      subscriptionService.getServiceConfig_().then(config => {
+      subscriptionService.getPlatformConfig_.restore();
+      subscriptionService.getPlatformConfig_().then(config => {
         expect(JSON.stringify(config)).to.be.equal(
             JSON.stringify(serviceConfig));
         done();
@@ -119,9 +120,11 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     it('should put `LocalSubscriptionPlatform` for every service config'
         + ' with authorization Url', () => {
       const service = serviceConfig.services[0];
-      const pushStub = sandbox.stub(
-          subscriptionService.subscriptionPlatforms_, 'push');
-      subscriptionService.initializeLocalPlatforms_(service, pageConfig);
+      const pushStub = sandbox.stub(subscriptionService.subscriptionPlatforms_,
+          'push');
+      subscriptionService.serviceAdapter_ =
+        new ServiceAdapter(subscriptionService);
+      subscriptionService.initializeLocalPlatforms_(service);
       expect(pushStub).to.be.calledOnce;
       expect(pushStub.getCall(0).args[0]).to.be
           .instanceOf(LocalSubscriptionPlatform);

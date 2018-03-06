@@ -18,6 +18,7 @@ import {Actions} from './actions';
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
 import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
@@ -34,10 +35,10 @@ export class LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JsonObject} serviceConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!JsonObject} platformConfig
+   * @param {!ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, serviceConfig, pageConfig) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -45,10 +46,13 @@ export class LocalSubscriptionPlatform {
     this.rootNode_ = ampdoc.getRootNode();
 
     /** @const @private {!JsonObject} */
-    this.serviceConfig_ = serviceConfig;
+    this.serviceConfig_ = platformConfig;
+
+    /** @private @const {!ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
 
     /** @const @private {!PageConfig} */
-    this.pageConfig_ = pageConfig;
+    this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -107,9 +111,9 @@ export class LocalSubscriptionPlatform {
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
-        'Action `Login` is not present in action map');
+        'Action "login" is not present in action map');
     user().assert(actionMap['subscribe'],
-        'Action `Subscribe` is not present in action map');
+        'Action "subscribe" is not present in action map');
     return actionMap;
   }
 
@@ -154,14 +158,13 @@ export class LocalSubscriptionPlatform {
 
   /**
    * Executes action for the local platform.
-   * @param {string} action
+   * @param {!Promise<string>} action
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
-    actionExecution.then(result => {
+    return actionExecution.then(result => {
       if (result) {
-        // TODO(@prateekbh): Add a service interface and call reauthorize on it.
-        this.getEntitlements();
+        this.serviceAdapter_.reAuthorizePlatform(this);
       }
     });
   }
@@ -195,4 +198,8 @@ export class LocalSubscriptionPlatform {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
+}
+
+export function getServiceAdapterClassForTesting() {
+  return ServiceAdapter;
 }

@@ -20,10 +20,11 @@ import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
+import {ServiceAdapter} from './service-adapter';
 import {SubscriptionPlatform} from './subscription-platform';
+import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -51,9 +52,9 @@ export class SubscriptionService {
     this.pageConfig_ = null;
 
     /** @private {?JsonObject} */
-    this.serviceConfig_ = null;
+    this.platformConfig_ = null;
 
-    /** @private @const {!Array<!SubscriptionPlatform>} */
+    /** @private @const {!Object<string, !SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
 
     /** @private {?EntitlementStore} */
@@ -61,6 +62,9 @@ export class SubscriptionService {
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
+
+    /** @private {!ServiceAdapter} */
+    this.serviceAdapter_ = new ServiceAdapter(this);
   }
 
   /**
@@ -71,11 +75,11 @@ export class SubscriptionService {
     if (!this.initialized_) {
       const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
       this.initialized_ = Promise.all([
-        this.getServiceConfig_(),
+        this.getPlatformConfig_(),
         pageConfigResolver.resolveConfig(),
       ]).then(promiseValues => {
         /** @type {!JsonObject} */
-        this.serviceConfig_ = promiseValues[0];
+        this.platformConfig_ = promiseValues[0];
         /** @type {!PageConfig} */
         this.pageConfig_ = promiseValues[1];
       });
@@ -85,17 +89,14 @@ export class SubscriptionService {
 
   /**
    * @param {!JsonObject} serviceConfig
-   * @param {!PageConfig} pageConfig
    * @private
    */
-  initializeLocalPlatforms_(serviceConfig, pageConfig) {
+  initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
-      this.subscriptionPlatforms_.push(
-          new LocalSubscriptionPlatform(
-              this.ampdoc_,
-              serviceConfig,
-              pageConfig
-          )
+      this.subscriptionPlatforms_['local'] = new LocalSubscriptionPlatform(
+          this.ampdoc_,
+          serviceConfig,
+          this.serviceAdapter_
       );
     }
   }
@@ -104,7 +105,7 @@ export class SubscriptionService {
    * @private
    * @returns {!Promise<!JsonObject>}
    */
-  getServiceConfig_() {
+  getPlatformConfig_() {
     return new Promise((resolve, reject) => {
       const rawContent = tryParseJson(this.configElement_.textContent, e => {
         reject('Failed to parse "amp-subscriptions" JSON: ' + e);
@@ -117,22 +118,23 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !PageConfig):!SubscriptionPlatform} subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
-      const matchedServices = this.serviceConfig_['services'].filter(
-          service => service.serviceId === serviceId);
+      const matchedServices = this.platformConfig_['services'].filter(
+          service => (service.serviceId || 'local') === serviceId);
 
       const matchedServiceConfig = user().assert(matchedServices[0],
           'No matching services for the ID found');
 
       const subscriptionPlatform = subscriptionPlatformFactory(
           matchedServiceConfig,
-          /** @type {!PageConfig} */ (this.pageConfig_)
-      );
+          this.serviceAdapter_);
 
-      this.subscriptionPlatforms_.push(subscriptionPlatform);
+      this.subscriptionPlatforms_[subscriptionPlatform.getServiceId()] =
+          subscriptionPlatform;
+
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -171,27 +173,26 @@ export class SubscriptionService {
   }
 
   /**
-   * @return {!SubscriptionService}
-   * @private
+   * @return {!Promise}
    */
-  start_() {
-    this.initialize_().then(() => {
+  start() {
+    return this.initialize_().then(() => {
+
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
 
-      user().assert(this.serviceConfig_['services'],
+      user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
 
-      this.serviceConfig_['services'].forEach(service => {
-        this.initializeLocalPlatforms_(service,
-            /** @type {!PageConfig} */(this.pageConfig_));
-      });
-
-      const serviceIds = this.serviceConfig_['services'].map(service =>
+      const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
       this.entitlementStore_ = new EntitlementStore(serviceIds);
+
+      this.platformConfig_['services'].forEach(service => {
+        this.initializeLocalPlatforms_(service);
+      });
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         this.fetchEntitlements_(subscriptionPlatform);
@@ -200,16 +201,50 @@ export class SubscriptionService {
       this.entitlementStore_.getGrantStatus()
           .then(grantState => {this.processGrantState_(grantState);});
 
-      this.entitlementStore_.selectPlatform()
-          .then(entitlements => {
-            this.subscriptionPlatforms_.forEach(platform => {
-              if (platform.getServiceId() == entitlements.service) {
-                platform.activate();
-              }
-            });
-          });
+      this.selectAndActivatePlatform_();
     });
-    return this;
+  }
+
+  selectAndActivatePlatform_() {
+    this.entitlementStore_.selectPlatform()
+        .then(entitlements => {
+          this.subscriptionPlatforms_.forEach(platform => {
+            if (platform.getServiceId() == entitlements.service) {
+              platform.activate();
+            }
+          });
+        });
+  }
+
+  /**
+   * Returns Page config
+   * @returns {?PageConfig}
+   */
+  getPageConfig() {
+    return this.pageConfig_;
+  }
+
+  /**
+   * Re authorizes a platform
+   * @param {SubscriptionPlatform} subscriptionPlatform
+   */
+  reAuthorizePlatform(subscriptionPlatform) {
+    subscriptionPlatform.getEntitlements().then(() =>
+      this.selectAndActivatePlatform_());
+  }
+
+  /**
+   * Delegates an action to local platform
+   * @param {string} action
+   */
+  delegateActionToLocal(action) {
+    /** @type {LocalSubscriptionPlatform} */
+    const localPlatform = dev().assert(this.subscriptionPlatforms_['local'],
+        'Local platform is not registered');
+    dev().assert(localPlatform.executeAction,
+        'executeAction not found on local platform');
+
+    localPlatform.executeAction(action);
   }
 }
 
@@ -239,6 +274,6 @@ export function getEntitlementsClassForTesting() {
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc('subscriptions', function(ampdoc) {
-    return new SubscriptionService(ampdoc).start_();
+    return new SubscriptionService(ampdoc).start();
   });
 });

@@ -19,6 +19,7 @@ import {
   Fetcher,
 } from '../../../third_party/subscriptions-project/swg';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-subscriptions-google';
@@ -38,12 +39,12 @@ export class GoogleSubscriptionsPlatformService {
 
   /**
    * @param {!JsonObject} platformConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!ServiceAdapter} serviceAdapter
    * @return {!GoogleSubscriptionsPlatform}
    */
-  createPlatform(platformConfig, pageConfig) {
+  createPlatform(platformConfig, serviceAdapter) {
     return new GoogleSubscriptionsPlatform(this.ampdoc_,
-        platformConfig, pageConfig);
+        platformConfig, serviceAdapter);
   }
 }
 
@@ -56,13 +57,17 @@ export class GoogleSubscriptionsPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, platformConfig, pageConfig) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @private @const {!ConfiguredRuntime} */
-    this.runtime_ = new ConfiguredRuntime(ampdoc.win, pageConfig, {
-      fetcher: new AmpFetcher(ampdoc.win),
-    });
+    this.runtime_ = new ConfiguredRuntime(
+        ampdoc.win,
+        serviceAdapter.getPageConfig(),
+        {
+          fetcher: new AmpFetcher(ampdoc.win),
+        }
+    );
   }
 
   /** @override */
@@ -108,9 +113,12 @@ AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc('subscriptions-google', ampdoc => {
     const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
     Services.subscriptionsServiceForDoc(ampdoc).then(service => {
-      service.registerPlatform(PLATFORM_ID, (platformConfig, pageConfig) => {
-        return platformService.createPlatform(platformConfig, pageConfig);
-      });
+      service.registerPlatform(PLATFORM_ID,
+          (platformConfig, serviceAdapter) => {
+            return platformService.createPlatform(platformConfig,
+                serviceAdapter);
+          }
+      );
     });
     return platformService;
   });
@@ -131,4 +139,8 @@ export function getFetcherClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
+}
+
+export function getServiceAdapterClassForTesting() {
+  return ServiceAdapter;
 }
