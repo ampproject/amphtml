@@ -4486,6 +4486,16 @@ attr_lists: {
     value_casei: "parallax"
     requires_extension: "amp-fx-collection"
   }
+  # amp-lightbox-gallery specific attributes, see
+  # https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery
+  attrs: {
+    name: "lightbox"
+    requires_extension: "amp-lightbox-gallery"
+  }
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    requires_extension: "amp-lightbox-gallery"
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
