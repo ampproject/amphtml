@@ -46,6 +46,42 @@ export class AmpConsent extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
+
+  /**
+   * Read and parse consent instance config
+   */
+  parseConsentInstanceConfig_() {
+
+  }
+
+  /**
+   * Get localStored consent info, and send request to get consent from endpoint
+   */
+  getConsentFromEndpoint_() {
+
+  }
+
+  /**
+   * On consent update, inform endpoint
+   */
+  updateConsentToEndpoint_() {
+
+  }
+
+  /** Display UI */
+  promptUI_() {
+
+  }
+
+  /** On user action, update consent, update UI */
+  onUserAction(unusedUserAction) {
+
+  }
+
+  /** Display consent manger UI */
+  onDisplayConsentManagerUI() {
+
+  }
 }
 
 AMP.extension('amp-consent', '0.1', AMP => {

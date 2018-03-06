@@ -34,7 +34,7 @@ export class ConsentStateManager {
   /**
    * Update consent instance state
    * @param {string} unusedInstanceId
-   * @param {boolean} unusedConsentState
+   * @param {!Object} unusedConsentState
    */
   updateConsentInstanceState(unusedInstanceId, unusedConsentState) {
 
@@ -43,7 +43,7 @@ export class ConsentStateManager {
   /**
    * Get local consent instance state
    * @param {string} unusedInstanceId
-   * @return {boolean}
+   * @return {!Object}
    */
   getConsentInstanceState(unusedInstanceId) {
 
@@ -72,10 +72,28 @@ class ConsentInstance {
   }
 
   /**
-   * Update the local consent state list
-   * @param {boolean} unusedState
+   * Serialize the state to a string that stored in localStorage
+   * @param {!Object} unusedConsentState
+   * @return {string}
    */
-  update(unusedState) {
+  serializeState_(unusedConsentState) {
+
+  }
+
+  /**
+   * Deserialize a string and convert to consent items state
+   * @param {string} unusedStr
+   * @return {!Object}
+   */
+  deserializeState_(unusedStr) {
+
+  }
+
+  /**
+   * Update the local consent state list
+   * @param {!Object} unusedConsentState
+   */
+  update(unusedConsentState) {
 
   }
 
