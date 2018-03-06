@@ -17,6 +17,7 @@
 import {AmpAdContext} from './amp-ad-context';
 import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {map} from '../../../src/utils/object';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
@@ -27,20 +28,16 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     super(element);
 
     /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
-    this.boundRenderers_ = {};
+    this.registeredRenderers_ = map({});
 
     /** @private {?./amp-ad-render.Validator} */
-    this.boundValidator_ = null;
+    this.registeredValidator_ = null;
 
-    /** @private {!./amp-ad-type-defs.LayoutInfoDef} */
-    this.initialSize_ = {
-      // TODO(levitzky) handle non-numeric values.
-      width: element.getAttribute('width'),
-      height: element.getAttribute('height'),
-    };
+    /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
+    this.initialSize_ = null;
 
     /** @const @private {!AmpAdContext} */
-    this.context_ = new AmpAdContext(this.win).setSize(this.initialSize_);
+    this.context_ = new AmpAdContext(this.win);
   }
 
   /**
@@ -48,22 +45,23 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @param {!./amp-ad-render.Renderer} renderer
    * @final
    */
-  bindRenderer(resultType, renderer) {
-    if (this.boundRenderers_[resultType]) {
-      dev().warn(TAG, `Rendering mode already bound for type '${resultType}'`);
+  registerRenderer(resultType, renderer) {
+    if (this.registeredRenderers_[resultType]) {
+      dev().warn(TAG,
+          `Rendering mode already registered for type '${resultType}'`);
     }
-    this.boundRenderers_[resultType] = renderer;
+    this.registeredRenderers_[resultType] = renderer;
   }
 
   /**
    * @param {!./amp-ad-render.Validator} validator
    * @final
    */
-  bindValidator(validator) {
-    if (this.boundValidator_) {
-      dev().warn(TAG, 'Validator already bound.');
+  registerValidator(validator) {
+    if (this.registeredValidator_) {
+      dev().warn(TAG, 'Validator already registered.');
     }
-    this.boundValidator_ = validator;
+    this.registeredValidator_ = validator;
   }
 
   /**
@@ -71,7 +69,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @private
    */
   forceCollapse_() {
-    super.attemptChangeSize(0, 0);
+    this.attemptChangeSize(0, 0);
   }
 
   /**
@@ -96,11 +94,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       return;
     }
     response.arrayBuffer().then(unvalidatedBytes => {
-      dev().assert(this.boundValidator_, 'Validator never bound!');
+      dev().assert(this.registeredValidator_, 'Validator never registered!');
       this.context_
           .setUnvalidatedBytes(unvalidatedBytes)
           .setHeaders(response.headers);
-      this.boundValidator_.validate(this.context_)
+      this.registeredValidator_.validate(this.context_)
           .then(context => this.handleValidatorResponse_(context))
           .catch(error => this.handleValidatorError_(error));
     });
@@ -134,9 +132,19 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleValidatorResponse_(context) {
     const result = context.getValidatorResult();
-    dev().assert(this.boundRenderers_[result],
-        'Renderer for AMP creatives never bound!');
-    this.boundRenderers_[result].render(context, this);
+    dev().assert(this.registeredRenderers_[result],
+        'Renderer for AMP creatives never registered!');
+    this.registeredRenderers_[result].render(context, this);
+  }
+
+  /** @override */
+  buildCallback() {
+    this.initialSize_ = {
+      // TODO(levitzky) handle non-numeric values.
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+    };
+    this.context_.setSize(this.initialSize_);
   }
 
   /** @override */
