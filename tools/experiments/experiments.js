@@ -268,7 +268,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'aminabox-rov',
+    id: 'inabox-rov',
     name: 'Extensions layout independent of viewport location if inabox.',
   },
 ];
