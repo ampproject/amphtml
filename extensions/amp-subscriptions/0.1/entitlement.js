@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -74,6 +75,7 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
+    dev().assert(this.product_, 'Current product is not set');
     return this.enables(this.product_);
   }
 

@@ -34,7 +34,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   const serviceConfig = {
     services: [
       {
-        serviceId: 'local',
         authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
@@ -120,13 +119,13 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     it('should put `LocalSubscriptionPlatform` for every service config'
         + ' with authorization Url', () => {
       const service = serviceConfig.services[0];
-      const pushStub = sandbox.stub(subscriptionService.subscriptionPlatforms_,
-          'push');
       subscriptionService.serviceAdapter_ =
         new ServiceAdapter(subscriptionService);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.subscriptionPlatforms_ = {};
       subscriptionService.initializeLocalPlatforms_(service);
-      expect(pushStub).to.be.calledOnce;
-      expect(pushStub.getCall(0).args[0]).to.be
+      expect(subscriptionService.subscriptionPlatforms_['local']).to.be.not.null;
+      expect(subscriptionService.subscriptionPlatforms_['local']).to.be
           .instanceOf(LocalSubscriptionPlatform);
     });
   });

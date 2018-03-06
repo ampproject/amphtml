@@ -153,8 +153,8 @@ export class LocalSubscriptionPlatform {
    * Renders the platform specific UI
    */
   activate() {
-    const entitlements = /** @type {!Entitlement} */ (dev().assert(
-        this.entitlement_,'Entitlement is not yet fetched'));
+    // TODO(@prateekbh): replace this with RenderState
+    const entitlements = /** @type {!Entitlement} */ (this.entitlement_);
     this.renderer_.render(entitlements);
   }
 
