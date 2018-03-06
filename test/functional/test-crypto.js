@@ -16,6 +16,7 @@
 
 import {Crypto} from '../../src/service/crypto-impl';
 import {Platform} from '../../src/service/platform-impl';
+import {Services} from '../../src/services';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
@@ -23,7 +24,6 @@ import {installDocService} from '../../src/service/ampdoc-impl';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {Services} from '../../src/services';
 
 
 describes.realWin('crypto-impl', {}, env => {

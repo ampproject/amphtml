@@ -192,6 +192,40 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'umenganalytics': {
+    'vars': {
+      'siteid': '',
+      'initial_view_time': '',
+      'eventName': '',
+      'eventProps': '',
+    },
+    'requests': {
+      'base': 'https://b.cnzz.com/utrack?' +
+      '&_siteid=${siteid}' +
+      '&_distinct_id=${clientId(umeng_amp_id)}' +
+      '&_t=${timestamp}' +
+      '&_s=google' +
+      '&_b=web' +
+      '&_r=${externalReferrer}' +
+      '&_h=${screenHeight}' +
+      '&_w=${screenWidth}' +
+      '&_ivt=${initial_view_time}',
+      'pageview': '${base}&_ename=$w_page_view&_eprops=${eventProps}',
+      'event': '${base}&_ename=${eventName}&_eprops=${eventProps}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'baiduanalytics': {
     'requests': {
       'host': 'https://hm.baidu.com',
@@ -1153,6 +1187,55 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'mobify': {
+    'vars': {
+      'projectSlug': 'mobify-project-id',
+      'templateName': 'page-type',
+    },
+    'requests': {
+      '_host': 'https://engagement-collector.mobify.net',
+      '_dimensions': [
+        '%22platform%22%3a%22AMP%22',
+        '%22client_id%22%3a%22${clientId(sandy-client-id)}%22',
+        '%22title%22%3a%22${title}%22',
+        '%22location%22%3a%22${sourceUrl}%22',
+        '%22page%22%3a%22${sourcePath}%22',
+        '%22src_location%22%3a%22${ampdocUrl}%22',
+        '%22referrer%22%3a%22${documentReferrer}%22',
+        '%22templateName%22%3a%22${templateName}%22',
+      ].join('%2c'),
+      '_basePrefix': '${_host}/s.gif?' +
+        'slug=${projectSlug}&' +
+        'timestamp_local=${timestamp}&' +
+        'channel=web&' +
+        'dimensions=%7b${_dimensions}%7d',
+      'ampstart': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22ampStart%22%2c%22value%22' +
+        '%3a${navTiming(navigationStart,domLoading)}%7d',
+      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
+      'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
+      'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22DOMContentLoaded%22%2c%22value%22' +
+        '%3a${contentLoadTime}%7d',
+    },
+    'triggers': {
+      'triggerName': {
+        'on': 'visible',
+        'request': ['ampstart', 'pageload', 'pagedcl'],
+      },
+      'pageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': true,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'mparticle': {
     'vars': {
       'eventType': 'Unknown',
@@ -1346,13 +1429,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'defaultPageview': {
         'on': 'visible',
         'request': 'pageview',
-      },
-      'heartbeat': {
-        'on': 'timer',
-        'timerSpec': {
-          'interval': 5,
-        },
-        'request': 'heartbeat',
       },
     },
     'transport': {
@@ -1635,6 +1711,35 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'treasuredata': {
+    'vars': {
+      'host': 'in.treasuredata.com',
+      'writeKey': '',
+      'database': '',
+      'table': 'events',
+    },
+    'requests': {
+      'base': 'https://${host}/postback/v3/event/${database}',
+      'baseParams': 'td_write_key=${writeKey}' +
+        '&td_global_id=td_global_id' +
+        '&td_client_id=CLIENT_ID(td_client_id)' +
+        '&td_charset=DOCUMENT_CHARSET' +
+        '&td_language=BROWSER_LANGUAGE' +
+        '&td_color=SCREEN_COLOR_DEPTH' +
+        '&td_screen=${screenWidth}x${scrollHeight}' +
+        '&td_viewport=${availableScreenWidth}x${availableScreenHeight}' +
+        '&td_title=TITLE' +
+        '&td_url=SOURCE_URL' +
+        '&td_user_agent=USER_AGENT' +
+        '&td_host=SOURCE_HOST' +
+        '&td_path=SOURCE_PATH' +
+        '&td_referrer=DOCUMENT_REFERRER' +
+        '&td_ip=td_ip',
+      'pageview': '${base}/${table}?${baseParams}',
+      'event': '${base}/${table}?${baseParams}',
     },
   },
 

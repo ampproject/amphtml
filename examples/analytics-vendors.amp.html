@@ -71,6 +71,7 @@
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
+      <option>mobify</option>
       <option>mparticle</option>
       <option>mpulse</option>
       <option>newrelic</option>
@@ -88,6 +89,8 @@
       <option>snowplow</option>
       <option>top100</option>
       <option>topmailru</option>
+      <option>umenganalytics</option>
+      <option>treasuredata</option>
       <option>webtrekk</option>
     </select>
     <input type="submit" value="Go">
@@ -637,6 +640,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Mediator.media example -->
 
+<!-- Mobify tracking -->
+<amp-analytics type="mobify" id="mobify">
+<script type="application/json">
+  {
+    "vars": {
+      "projectSlug": "merlins",
+      "templateName": "pdp"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Mobify example -->
+
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
 -->
@@ -949,6 +965,44 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End SOASTA mPulse example -->
 
+<!-- Treasure Data example -->
+<amp-analytics type="treasuredata" id="treasuredata">
+<script type="application/json">
+  {
+    "vars": {
+      "host": "in.treasuredata.com",
+      "writeKey": "1/deadbeaf",
+      "database": "testdb"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview",
+        "vars": {
+          "table": "pageviews"
+        },
+        "extraUrlParams": {
+          "foo": "123"
+        }
+      },
+      "trackClick": {
+        "on": "click",
+        "request": "event",
+        "selector": "#test1",
+        "vars": {
+          "table": "events"
+        },
+        "extraUrlParams": {
+          "type": "click",
+          "bar": 789
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Treasure Data example -->
+
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk" id="webtrekk">
 <script type="application/json">
@@ -1007,6 +1061,27 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
 
+<!-- Umeng+ Analytics Example -->
+<amp-analytics type="umenganalytics" id="umenganalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "siteid": "123456789"
+      },
+      "triggers": {
+        "event": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventName": "login"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Umeng Analytics example -->
 </div>
 
 <div class="logo"></div>

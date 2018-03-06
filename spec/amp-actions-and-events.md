@@ -187,6 +187,25 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-lightbox
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>lightboxOpen</code></td>
+    <td>Fired when lightbox is fully visible.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>lightboxClose</code></td>
+    <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>
@@ -203,21 +222,6 @@ event.index</pre></td>
     <td><code>sidebarClose</code></td>
     <td>Fired when sidebar is fully closed after transition has ended.</td>
     <td>None</td>
-  </tr>
-</table>
-
-### amp-carousel[type="slides"]
-<table>
-  <tr>
-    <th width="25%">Event</th>
-    <th width="35%">Description</th>
-    <th width="40%">Data</th>
-  </tr>
-  <tr>
-    <td><code>slideChange</code></td>
-    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
-    <td><pre>// Slide number.
-event.index</pre></td>
   </tr>
 </table>
 
@@ -350,6 +354,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
+  </tr>
+</table>
+
 ### amp-live-list
 <table>
   <tr>
@@ -359,6 +375,26 @@ event.response</pre></td>
   <tr>
     <td><code>update (default)</code></td>
     <td>Updates the DOM items to show updated content.</td>
+  </tr>
+</table>
+
+### amp-selector
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>selectUp(delta=INTEGER)</code></td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+  </tr>
+  <tr>
+    <td><code>selectDown(delta=INTEGER)</code></td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+  </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
   </tr>
 </table>
 

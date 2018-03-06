@@ -180,16 +180,10 @@ let PropTypes = {};
 let ReactDates = {};
 
 /** @constructor */
-ReactDates.SingleDatePicker;
+ReactDates.DayPickerSingleDateController;
 
 /** @struct */
-ReactDates.SingleDatePickerShape;
-
-/** @constructor */
-ReactDates.DateRangePicker;
-
-/** @struct */
-ReactDates.DateRangePickerShape;
+ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
 ReactDates.isInclusivelyAfterDay;
@@ -265,6 +259,12 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.showFacepile;
+data.showText;
 
 // 3p code
 var twttr;

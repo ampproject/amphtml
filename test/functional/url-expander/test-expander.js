@@ -16,6 +16,7 @@
 
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
+import {createElementWithAttributes} from '../../../src/dom';
 
 describes.realWin('Expander', {
   amp: {
@@ -81,6 +82,41 @@ describes.realWin('Expander', {
     it('should handle keywords next to each other', () => {
       const url = 'http://www.google.com/?test=ABCDRANDOM';
       const expected = 'http://www.google.com/?test=four0.1234';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal(expected);
+    });
+  });
+
+  describe('Whitelist of variables', () => {
+    let variableSource;
+    let expander;
+
+    const mockBindings = {
+      RANDOM: () => 0.1234,
+      ABC: () => 'three',
+      ABCD: () => 'four',
+    };
+    beforeEach(() => {
+      env.win.document.head.appendChild(
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-allowed-url-macros',
+            content: 'ABC,ABCD,CANONICAL',
+          }));
+
+      variableSource = new GlobalVariableSource(env.ampdoc);
+      expander = new Expander(variableSource);
+    });
+
+    it('should not replace unwhitelisted RANDOM', () => {
+      const url = 'http://www.google.com/?test=RANDOM';
+      const expected = 'http://www.google.com/?test=RANDOM';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal(expected);
+    });
+
+    it('should replace whitelisted ABCD', () => {
+      const url = 'http://www.google.com/?test=ABCD';
+      const expected = 'http://www.google.com/?test=four';
       return expect(expander.expand(url, mockBindings))
           .to.eventually.equal(expected);
     });
@@ -191,6 +227,13 @@ describes.realWin('Expander', {
       const url = 'CONCAT(`hello)`,UPPERCASE(world)';
       return expect(expander.expand(url, mockBindings))
           .to.eventually.equal('hello)WORLD');
+    });
+
+    it('throws on bad input with back ticks', () => {
+      const url = 'CONCAT(bad`hello`, world)';
+      expect(() => {
+        expander.expand(url, mockBindings);
+      }).to.throw(/bad/);
     });
   });
 });

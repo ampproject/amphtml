@@ -14,50 +14,49 @@
  * limitations under the License.
  */
 
+import {A4AVariableSource} from './a4a-variable-source';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
-import {
-  is3pThrottled,
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-} from '../../amp-ad/0.1/concurrent-load';
-import {createElementWithAttributes} from '../../../src/dom';
-import {cancellation, isCancellation} from '../../../src/error';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {utf8Decode} from '../../../src/utils/bytes';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {setStyle} from '../../../src/style';
 import {
   assertHttpsUrl,
   isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {handleClick} from '../../../ads/alp/handler';
+import {cancellation, isCancellation} from '../../../src/error';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  getDefaultBootstrapBaseUrl,
   generateSentinel,
+  getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {getBinaryType} from '../../../src/experiments';
+import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getMode} from '../../../src/mode';
+// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
+import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
-import {A4AVariableSource} from './a4a-variable-source';
-// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
-import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -82,6 +81,9 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
+
+/** @type {string} @visibileForTesting */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -186,6 +188,15 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
 };
 
 /**
+ * The sandboxing flags to use when applying the "sandbox" attribute to ad
+ * iframes. See http://go/mdn/HTML/Element/iframe#attr-sandbox.
+ * @const {string} @visibleForTesting
+ */
+export const IFRAME_SANDBOXING_FLAGS = 'allow-forms allow-pointer-lock ' +
+    'allow-popups allow-popups-to-escape-sandbox allow-same-origin ' +
+    'allow-scripts allow-top-navigation-by-user-activation';
+
+/**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided or handler throws, error is swallowed and
  * undefined is returned).
@@ -220,7 +231,7 @@ export function protectFunctionWrapper(
       return undefined;
     }
   };
-};
+}
 
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
@@ -285,6 +296,13 @@ export class AmpA4A extends AMP.BaseElement {
         this.getNonAmpCreativeRenderingMethod();
 
     /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
+
+    /**
      * Gets a notion of current time, in ms.  The value is not necessarily
      * absolute, so should be used only for computing deltas.  When available,
      * the performance system will be used; otherwise Date.now() will be
@@ -332,7 +350,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @protected {string} */
+    /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
@@ -450,6 +468,14 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isValidElement() {
     return true;
+  }
+
+  /**
+   * Returns the creativeSize, which is the size extracted from the ad response.
+   * @return {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
+   */
+  getCreativeSize() {
+    return this.creativeSize_;
   }
 
   /**
@@ -603,15 +629,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
       return;
     }
-    // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
-    // to go via 3p.
-    if (getMode().localDev &&
-        this.element.getAttribute('type') == 'fake' &&
-        this.element.getAttribute('force3p') == 'true') {
-      this.adUrl_ = this.getAdUrl();
-      this.adPromise_ = Promise.resolve();
-      return;
-    }
 
     // Increment unique promise ID so that if its value changes within the
     // promise chain due to cancel from unlayout, the promise will be rejected.
@@ -701,6 +718,10 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
+          const browserSupportsSandbox = this.win.HTMLIFrameElement &&
+              'sandbox' in this.win.HTMLIFrameElement.prototype;
+          this.shouldSandbox_ = browserSupportsSandbox &&
+              fetchResponse.headers.get(SANDBOX_HEADER) == 'true';
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
@@ -814,18 +835,21 @@ export class AmpA4A extends AMP.BaseElement {
     this.handleLifecycleStage_('adResponseValidateStart');
     const checkStillCurrent = this.verifyStillCurrent();
     return this.keysetPromise_
-        .then(() => signatureVerifierFor(this.win)
-            .verify(bytes, headers, (eventName, extraVariables) => {
-              this.handleLifecycleStage_(
-                  eventName, extraVariables);
-            }))
+        .then(() => {
+          if (this.element.getAttribute('type') == 'fake' &&
+              !this.element.getAttribute('checksig')) {
+            // do not verify signature for fake type ad, unless the ad
+            // specfically requires via 'checksig' attribute
+            return Promise.resolve(VerificationStatus.OK);
+          }
+          return signatureVerifierFor(this.win)
+              .verify(bytes, headers, (eventName, extraVariables) => {
+                this.handleLifecycleStage_(
+                    eventName, extraVariables);
+              });
+        })
         .then(status => {
           checkStillCurrent();
-          if (getMode().localDev &&
-              this.element.getAttribute('type') == 'fake') {
-            // do not verify signature for fake type ad
-            status = VerificationStatus.OK;
-          }
           this.handleLifecycleStage_('adResponseValidateEnd', {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
@@ -1371,8 +1395,6 @@ export class AmpA4A extends AMP.BaseElement {
       const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
-      // Bubble phase click handlers on the ad.
-      this.registerAlpHandler_(friendlyIframeEmbed.win);
       // Capture timing info for friendly iframe load completion.
       getTimingDataAsync(
           friendlyIframeEmbed.win,
@@ -1414,6 +1436,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
+    }
+    if (this.shouldSandbox_) {
+      mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
     }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
@@ -1504,7 +1529,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel,
-          this.getAdditionalContextMetadata());
+          this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME));
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
@@ -1607,22 +1632,6 @@ export class AmpA4A extends AMP.BaseElement {
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       return null;
     }
-  }
-
-  /**
-   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
-   * viewer navigates to an AMP destination on our behalf.
-   * @param {!Window} iframeWin
-   */
-  registerAlpHandler_(iframeWin) {
-    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
-      return;
-    }
-    iframeWin.document.documentElement.addEventListener('click', event => {
-      handleClick(event, url => {
-        Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
   }
 
   /**
@@ -1734,11 +1743,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
-   * @return {?Object<string,
-   *   !../../../src/service/variable-source.SyncResolverDef>}
+   * @return {!Object<string,
+   *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
   getCustomRealTimeConfigMacros_() {
-    return null;
+    return {};
   }
 
   /**
@@ -1769,11 +1778,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Returns base object that will be written to cross-domain iframe name
    * attribute.
-   * @return {!JsonObject}
+   * @param {boolean=} opt_isSafeframe Whether creative is rendering into
+   *   a safeframe.
+   * @return {!JsonObject|undefined}
    */
-  getAdditionalContextMetadata() {
-    return /** @type {!JsonObject} */ ({});
-  }
+  getAdditionalContextMetadata(opt_isSafeframe) {}
 }
 
 /**
@@ -1791,7 +1800,7 @@ export function assignAdUrlToError(error, adUrl) {
   }
   (error.args || (error.args = {}))['au'] =
     adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
-};
+}
 
 /**
  * Returns the signature verifier for the given window. Lazily creates it if it

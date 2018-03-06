@@ -15,25 +15,25 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {PositionObserver} from './position-observer';
 import {
-  serializeMessage,
-  deserializeMessage,
   MessageType,
+  deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
+import {PositionObserver} from './position-observer';
 import {dev} from '../../src/log';
-import {getData} from '../../src/event-helper';
 import {dict} from '../../src/utils/object';
+import {getData} from '../../src/event-helper';
 import {layoutRectFromDomRect} from '../../src/layout-rect';
+
 /** @const */
 const TAG = 'InaboxMessagingHost';
-
-
 
 /** Simple helper for named callbacks. */
 class NamedObservable {
 
   constructor() {
+    /** @private {!Object<string, !Function>} */
     this.map_ = {};
   }
 
@@ -62,16 +62,37 @@ class NamedObservable {
   }
 }
 
+/** @typedef {{
+      iframe: !HTMLIFrameElement,
+      measurableFrame: !HTMLIFrameElement,
+      observeUnregisterFn: (!UnlistenDef|undefined),
+  }} */
+let AdFrameDef;
 
 export class InaboxMessagingHost {
 
+  /**
+   * @param {!Window} win
+   * @param {!Array<!HTMLIFrameElement>} iframes
+   */
   constructor(win, iframes) {
+
+    /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {!Array<!HTMLIFrameElement>} */
     this.iframes_ = iframes;
+
+    /** @private {!Object<string,!AdFrameDef>} */
     this.iframeMap_ = Object.create(null);
-    this.registeredIframeSentinels_ = Object.create(null);
+
+    /** @private {!PositionObserver} */
     this.positionObserver_ = new PositionObserver(win);
+
+    /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();
+
+    /** @private {!FrameOverlayManager} */
     this.frameOverlayManager_ = new FrameOverlayManager(win);
 
     this.msgObservable_.listen(
@@ -134,15 +155,11 @@ export class InaboxMessagingHost {
       'targetRect': targetRect,
     }));
 
-    // To prevent double tracking for the same requester.
-    if (this.registeredIframeSentinels_[request.sentinel]) {
-      return true;
-    }
-
-    this.registeredIframeSentinels_[request.sentinel] = true;
-    this.positionObserver_.observe(iframe, data => {
-      this.sendPosition_(request, source, origin, data);
-    });
+    dev().assert(this.iframeMap_[request.sentinel]);
+    this.iframeMap_[request.sentinel].observeUnregisterFn =
+        this.iframeMap_[request.sentinel].observeUnregisterFn ||
+        this.positionObserver_.observe(iframe, data =>
+          this.sendPosition_(request, source, origin, data));
     return true;
   }
 
@@ -235,18 +252,18 @@ export class InaboxMessagingHost {
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel];
+      return this.iframeMap_[sentinel].measurableFrame;
     }
-    const measureableFrame =
+    const measurableFrame =
         /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
-    const measureableWin = measureableFrame.contentWindow;
+    const measurableWin = measurableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      for (let j = 0, tempWin = measureableWin;
+      for (let j = 0, tempWin = measurableWin;
         j < 10; j++, tempWin = tempWin.parent) {
         if (iframe.contentWindow == tempWin) {
-          this.iframeMap_[sentinel] = measureableFrame;
-          return measureableFrame;
+          this.iframeMap_[sentinel] = {iframe, measurableFrame};
+          return measurableFrame;
         }
         if (tempWin == window.top) {
           break;
@@ -264,7 +281,7 @@ export class InaboxMessagingHost {
    * is found. Then, it returns the frame element for that window.
    * For when win is friendly framed, returns the frame element for win.
    * @param {!Window} win
-   * @return {?Element}
+   * @return {?HTMLIFrameElement}
    * @visibleForTesting
    */
   getMeasureableFrame(win) {
@@ -287,13 +304,37 @@ export class InaboxMessagingHost {
       for (let k = 0, frame = iframes[k]; k < iframes.length;
         k++, frame = iframes[k]) {
         if (frame.contentWindow == topXDomainWin) {
-          return frame;
+          return /** @type {!HTMLIFrameElement} */(frame);
         }
       }
     }
     // If topXDomainWin does not exist, then win is friendly, and we can
     // just return its frameElement directly.
-    return win.frameElement;
+    return /** @type {!HTMLIFrameElement} */(win.frameElement);
+  }
+
+  /**
+   * Removes an iframe from the set of iframes we watch, along with executing
+   * any necessary cleanup.  Available at win.AMP.inaboxUnregisterIframe().
+   *
+   * @param {!HTMLIFrameElement} iframe
+   */
+  unregisterIframe(iframe) {
+    // Remove iframe from the list of iframes we're watching.
+    const iframeIndex = this.iframes_.indexOf(iframe);
+    if (iframeIndex != -1) {
+      this.iframes_.splice(iframeIndex, 1);
+    }
+    // Also remove it and all of its descendents from our sentinel cache.
+    // TODO(jeffkaufman): save more info so we don't have to walk the dom here.
+    for (const sentinel in this.iframeMap_) {
+      if (this.iframeMap_[sentinel].iframe == iframe) {
+        if (this.iframeMap_[sentinel].observeUnregisterFn) {
+          this.iframeMap_[sentinel].observeUnregisterFn();
+        }
+        delete this.iframeMap_[sentinel];
+      }
+    }
   }
 }
 
@@ -307,10 +348,9 @@ export class InaboxMessagingHost {
  */
 function canInspectWindow_(win) {
   try {
-    const /* eslint no-unused-vars: 0 */ unused =
-      !!win.location.href && win['test'];
+    const unused = !!win.location.href && win['test']; // eslint-disable-line no-unused-vars
     return true;
-  } catch (unusedErr) {
+  } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }
 }

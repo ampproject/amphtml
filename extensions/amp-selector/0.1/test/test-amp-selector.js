@@ -324,7 +324,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       yield ampSelector.build();
-      expect(impl.inputs_.length).to.equal(0);;
+      expect(impl.inputs_.length).to.equal(0);
 
       ampSelector = getSelector({
         attributes: {
@@ -631,6 +631,84 @@ describes.realWin('amp-selector', {
       expect(setInputsSpy).calledTwice;
     });
 
+    it('should trigger `toggle` action even when no `value` argument is' +
+      ' provided to the function', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are different
+      let args = {'index': 2};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are the same
+      args = {'index': 2};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+    });
+
+    it('should trigger `toggle` action even with specified `value`' +
+      ' argument', () => {
+      const ampSelector = getSelector({
+        config: {
+          count: 5,
+          selectedCount: 1,
+        },
+      });
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are different
+      let args = {'index': 2, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be `selected` and the currently
+      // selected element are the same
+      args = {'index': 2, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // Test the case where the element to be removed as `selected` and
+      // the currently selected element are the same
+      args = {'index': 2, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+
+      // Test the case where the element to be removed as `selected`
+      // is different from the currently `selected` element
+      ampSelector.children[0].setAttribute('selected', '');
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      args = {'index': 2, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+    });
+
     it('should trigger `select` action when user selects an option', () => {
       const ampSelector = getSelector({
         config: {
@@ -649,6 +727,95 @@ describes.realWin('amp-selector', {
           sandbox.match.has('detail', sandbox.match.has('targetOption', '3'));
       expect(triggerSpy).to.have.been.calledWith(
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with default delta value of 1', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      impl.executeAction({method: 'selectDown', satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
+
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with user specified delta value', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      let args = {'delta': 2};
+      impl.executeAction(
+          {method: 'selectDown', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      args = {'delta': 2};
+      impl.executeAction(
+          {method: 'selectUp', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with user specified delta value ' +
+      '(test large values)', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 5,
+        },
+      });
+      ampSelector.children[1].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      let args = {'delta': 1001};
+      impl.executeAction(
+          {method: 'selectDown', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      args = {'delta': 1001};
+      impl.executeAction(
+          {method: 'selectUp', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
     });
 
     describe('keyboard-select-mode', () => {

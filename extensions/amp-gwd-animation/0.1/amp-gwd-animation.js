@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {ActionTrust} from '../../../src/action-trust';
 import {
+  AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-  AmpGwdRuntimeService,
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {ActionTrust} from '../../../src/action-trust';
+import {Services} from '../../../src/services';
+import {getServiceForDoc} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
-import {getServiceForDoc} from '../../../src/service';
-import {Services} from '../../../src/services';
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
@@ -77,12 +77,10 @@ export class GwdAnimation extends AMP.BaseElement {
     this.getAmpDoc().getRootNode().addEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
 
-    // If the document has a GWD page deck, automatically generate listeners
-    // for `slideChange` events, on which the active animations context must be
+    // If the document has a GWD pagedeck, automatically generate listeners for
+    // `slideChange` events, on which the active animations context must be
     // switched from the old page to the new.
-    const gwdPageDeck = this.getAmpDoc().getRootNode().querySelector(
-        `amp-carousel#${GWD_PAGEDECK_ID}`);
-
+    const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
       user().assert(this.element.id, `The ${TAG} element must have an id.`);
 
@@ -93,31 +91,68 @@ export class GwdAnimation extends AMP.BaseElement {
     }
 
     // Register handlers for supported actions.
+    const handler = this.actionHandler_.bind(this);
     for (const name in ACTION_IMPL_ARGS) {
-      this.registerAction(name, this.createAction_(name));
+      this.registerAction(name, handler);
     }
   }
 
   /**
-   * Returns a registrable AMP action function which invokes the corresponding
-   * GWD runtime method with arguments extracted from the invocation object
-   * (@see getActionImplArgs).
-   * @param {string} actionName Name of the action to invoke (currently
-   *     identical to the corresponding service method name).
-   * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
+   * Returns the GWD pagedeck element if one exists in the document.
+   * @return {?Element}
    * @private
    */
-  createAction_(actionName) {
-    return invocation => {
-      const service = user().assert(
-          getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
-          'Cannot execute action because the GWD service is not registered.');
+  getGwdPageDeck_() {
+    return this.getAmpDoc().getRootNode().getElementById(GWD_PAGEDECK_ID);
+  }
 
-      const argPaths = ACTION_IMPL_ARGS[actionName];
-      const actionArgs =
-        argPaths.map(argPath => getValueForExpr(invocation, argPath));
-      service[actionName].apply(service, actionArgs);
-    };
+  /**
+   * General handler for all actions invoked on the extension.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  actionHandler_(invocation) {
+    if (this.shouldExecuteInvocation_(invocation)) {
+      this.executeInvocation_(invocation);
+    }
+  }
+
+  /**
+   * Returns whether the given action invocation should be executed.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  shouldExecuteInvocation_(invocation) {
+    if (invocation.method == 'setCurrentPage') {
+      // The setCurrentPage invocation may be triggered as a result of a
+      // slideChange event emitted by any amp-carousel. Execute the invocation
+      // only if the event originated from the page deck carousel.
+      const gwdPageDeck = this.getGwdPageDeck_();
+      const isFromPageDeck = gwdPageDeck && invocation.source == gwdPageDeck;
+      return isFromPageDeck;
+    }
+
+    return true;
+  }
+
+  /**
+   * Executes an invocation by invoking the corresponding GWD runtime method
+   * with arguments extracted from the invocation object.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  executeInvocation_(invocation) {
+    const service = user().assert(
+        getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
+        'Cannot execute action because the GWD service is not registered.');
+
+    const argPaths = ACTION_IMPL_ARGS[invocation.method];
+    const invocationObj = /** @type {!JsonObject} */ (
+      Object.assign({}, invocation));
+    const actionArgs =
+        argPaths.map(argPath => getValueForExpr(invocationObj, argPath));
+
+    service[invocation.method].apply(service, actionArgs);
   }
 
   /**
@@ -180,7 +215,7 @@ export function addAction(ampdoc, element, event, actionStr) {
 
   // Reset the element's actions with the new actions string.
   Services.actionServiceForDoc(ampdoc).setActions(element, newActionsStr);
-};
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);

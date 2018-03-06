@@ -19,9 +19,9 @@
  * its embed AMP content (such as an ad created in AMP).
  */
 
+import {InaboxMessagingHost} from './inabox-messaging-host';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
-import {InaboxMessagingHost} from './inabox-messaging-host';
 
 /** @const {string} */
 const TAG = 'inabox-host';
@@ -31,6 +31,8 @@ const AMP_INABOX_INITIALIZED = 'ampInaboxInitialized';
 const PENDING_MESSAGES = 'ampInaboxPendingMessages';
 /** @const {string} */
 const INABOX_IFRAMES = 'ampInaboxIframes';
+/** @const {string} */
+const INABOX_UNREGISTER_IFRAME = 'inaboxUnregisterIframe';
 
 /**
  * Class for initializing host script and consuming queued messages.
@@ -56,7 +58,14 @@ export class InaboxHost {
       win[INABOX_IFRAMES] = [];
     }
     const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
-
+    win.AMP = win.AMP || {};
+    if (win.AMP[INABOX_UNREGISTER_IFRAME]) {
+      // It's already defined; log a debug message and assume the existing
+      // implmentation is good.
+      dev().info(TAG, `win.AMP[${INABOX_UNREGISTER_IFRAME}] already defined}`);
+    } else {
+      win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
+    }
     const queuedMsgs = win[PENDING_MESSAGES];
     if (queuedMsgs) {
       if (Array.isArray(queuedMsgs)) {

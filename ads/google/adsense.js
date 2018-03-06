@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {validateData} from '../../3p/3p';
-import {user} from '../../src/log';
-import {setStyles} from '../../src/style';
-import {camelCaseToDash} from '../../src/string';
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
+import {camelCaseToDash} from '../../src/string';
+import {setStyles} from '../../src/style';
+import {user} from '../../src/log';
+import {validateData} from '../../3p/3p';
 
 /**
  * Make an adsense iframe.
@@ -31,12 +31,15 @@ export function adsense(global, data) {
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
 
-  user().assert(
-      data['autoFormat'] != 'rspv'
-        || data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
-      `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
+  if (data['autoFormat'] == 'rspv') {
+    user().assert(data.hasOwnProperty('fullWidth'),
+        'Responsive AdSense ad units require the attribute data-full-width.');
+
+    user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+        `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
       `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
       'responsive AdSense ad units.');
+  }
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.

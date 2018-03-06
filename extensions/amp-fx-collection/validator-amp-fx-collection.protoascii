@@ -14,14 +14,17 @@
 # limitations under the license.
 #
 tags: {  # amp-fx-collection
-  # Accepted amp-fx-collection attributes can be found in validator-main.protoascii
+  # Accepted amp-fx-collection attributes can be found in
+  # validator-main.protoascii
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-fx-collection"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    # amp-fx-parallax has no associated tag which indicates usage of the extension.
+    # amp-fx-parallax has no associated tag which indicates usage of the
+    # extension.
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"

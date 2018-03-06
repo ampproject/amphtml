@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
+import {
+  AsyncResolverDef,
+  ResolverReturnDef,
+  SyncResolverDef,
+  VariableSource,
+  getNavigationData,
+  getTimingDataAsync,
+  getTimingDataSync,
+} from './variable-source';
+import {Expander} from './url-expander/expander';
 import {Services} from '../services';
-import {dev, user, rethrowAsync} from '../log';
+import {WindowInterface} from '../window-interface';
+import {
+  addParamsToUrl,
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
+import {dev, rethrowAsync, user} from '../log';
+import {getTrackImpressionPromise} from '../impression.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {
-  parseUrl,
-  removeFragment,
-  parseQueryString,
-  addParamsToUrl,
-  getSourceUrl,
-} from '../url';
-import {getTrackImpressionPromise} from '../impression.js';
-import {
-  VariableSource,
-  AsyncResolverDef,
-  ResolverReturnDef,
-  SyncResolverDef,
-  getNavigationData,
-  getTimingDataSync,
-  getTimingDataAsync,
-} from './variable-source';
-import {isProtocolValid} from '../url';
-import {WindowInterface} from '../window-interface';
-import {Expander} from './url-expander/expander';
 import {isExperimentOn} from '../experiments';
+import {isProtocolValid} from '../url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -62,17 +62,27 @@ function encodeValue(val) {
     return '';
   }
   return encodeURIComponent(/** @type {string} */(val));
-};
+}
+
+/**
+ * Returns a function that executes method on a new Date instance.
+ *
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function dateMethod(method) {
+  return () => new Date()[method]();
+}
 
 /**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
-
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
-    super();
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    super(ampdoc);
 
     /**
      * @private
@@ -111,20 +121,12 @@ export class GlobalVariableSource extends VariableSource {
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
-    this.set('RANDOM', () => {
-      return Math.random();
-    });
+    this.set('RANDOM', () => Math.random());
 
     // Provides a counter starting at 1 per given scope.
-    let counterStore = null;
+    const counterStore = Object.create(null);
     this.set('COUNTER', scope => {
-      if (!counterStore) {
-        counterStore = Object.create(null);
-      }
-      if (!counterStore[scope]) {
-        counterStore[scope] = 0;
-      }
-      return ++counterStore[scope];
+      return counterStore[scope] = (counterStore[scope] | 0) + 1;
     });
 
     // Returns the canonical URL for this AMP document.
@@ -331,19 +333,13 @@ export class GlobalVariableSource extends VariableSource {
       }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
-    this.set('TIMESTAMP', () => {
-      return Date.now();
-    });
+    this.set('TIMESTAMP', dateMethod('getTime'));
 
     //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
-    this.set('TIMESTAMP_ISO', () => {
-      return new Date().toISOString();
-    });
+    this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
-    this.set('TIMEZONE', () => {
-      return new Date().getTimezoneOffset();
-    });
+    this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', () => viewport.getScrollTop());
@@ -1025,6 +1021,25 @@ export class UrlReplacements {
     return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
 
+  /**
+   * Collects substitutions in the `src` attribute of the given element
+   * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
+   * @param {!Element} element
+   * @return {!Promise<!Array<string>>}
+   */
+  collectUnwhitelistedVars(element) {
+    const url = element.getAttribute('src');
+    return this.collectVars(url).then(vars => {
+      const whitelist = this.getWhitelistForElement_(element);
+      const varNames = Object.keys(vars);
+      if (whitelist) {
+        return varNames.filter(v => !whitelist[v]);
+      } else {
+        // All vars are unwhitelisted if the element has no whitelist.
+        return varNames;
+      }
+    });
+  }
 
   /**
    * Ensures that the protocol of the original url matches the protocol of the

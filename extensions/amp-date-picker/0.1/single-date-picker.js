@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {DayPickerPhrases} from './defaultPhrases';
+import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-import {map, omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
@@ -24,135 +25,67 @@ import {withDatePickerCommon} from './date-picker-common';
  * @return {function(new:React.Component, !Object)} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const React = requireExternal('react');
-  const moment = requireExternal('moment');
   const {
-    ANCHOR_LEFT,
+    DAY_SIZE,
     HORIZONTAL_ORIENTATION,
   } = requireExternal('react-dates/constants');
-  const {
-    SingleDatePicker: DatePicker,
-  } = requireExternal('react-dates');
-
-  React.options.syncComponentUpdates = false;
+  const {DayPickerSingleDateController} = requireExternal('react-dates');
 
   const defaultProps = map({
-    // example props for the demo
-    autoFocus: false,
-    initialDate: null,
-    onDateChange: () => {},
+    date: null,
+    onDateChange() {},
 
-    // input related props
-    id: 'date',
-    placeholder: 'Date',
-    disabled: false,
-    required: false,
-    screenReaderInputMessage: '',
-    showClearDate: false,
-    showDefaultInputIcon: false,
-    customInputIcon: null,
+    focused: false,
+    onFocusChange() {},
+    onClose() {},
 
-    // calendar presentation and interaction related props
-    renderMonth: null,
-    orientation: HORIZONTAL_ORIENTATION,
-    anchorDirection: ANCHOR_LEFT,
-    horizontalMargin: 0,
-    withPortal: false,
-    withFullScreenPortal: false,
-    initialVisibleMonth: null,
-    numberOfMonths: 2,
     keepOpenOnDateSelect: false,
-    reopenPickerOnClearDate: false,
-    isRTL: false,
-    firstDayOfWeek: 1,
+    isOutsideRange() {},
+    isDayBlocked() {},
+    isDayHighlighted() {},
 
-    // navigation related props
+    // DayPicker props
+    renderMonth: null,
+    enableOutsideDays: false,
+    numberOfMonths: 1,
+    orientation: HORIZONTAL_ORIENTATION,
+    withPortal: false,
+    hideKeyboardShortcutsPanel: false,
+    initialVisibleMonth: null,
+    firstDayOfWeek: null,
+    daySize: DAY_SIZE,
+    verticalHeight: null,
+    noBorder: false,
+    transitionDuration: undefined,
+
     navPrev: null,
     navNext: null,
-    onPrevMonthClick: () => {},
-    onNextMonthClick: () => {},
 
-    // day presentation and interaction related props
+    onPrevMonthClick() {},
+    onNextMonthClick() {},
+    onOutsideClick: null,
+
     renderDay: null,
-    enableOutsideDays: false,
+    renderCalendarInfo: null,
 
-    // internationalization props
-    displayFormat: () => moment.localeData().longDateFormat('L'),
+    // accessibility
+    onBlur() {},
+    isFocused: false,
+    showKeyboardShortcuts: false,
+
+    // i18n
     monthFormat: 'MMMM YYYY',
+    weekDayFormat: 'dd',
+    phrases: DayPickerPhrases,
 
-    registerAction: null,
+    isRTL: false,
   });
 
-  class SingleDatePickerBase extends React.Component {
-    /**
-     * @param {!Object} props
-     */
-    constructor(props) {
-      super(props);
-      this.state = {
-        focused: props.autoFocus,
-        date: props.initialDate && moment(props.initialDate),
-      };
+  const WrappedDayPickerSingleDateController =
+      withDatePickerCommon(DayPickerSingleDateController);
+  WrappedDayPickerSingleDateController.defaultProps = defaultProps;
 
-      if (this.props.registerAction) {
-        this.props.registerAction('setDate', invocation => {
-          const {date} = invocation.args;
-          this.setState({date: moment(date)});
-        });
-        this.props.registerAction('clear', () => {
-          this.setState({date: null});
-        });
-      }
-
-      this.onDateChange = this.onDateChange.bind(this);
-      this.onFocusChange = this.onFocusChange.bind(this);
-    }
-
-    /**
-     * Respond to date changes.
-     * @param {!moment} date
-     */
-    onDateChange(date) {
-      const {onDateChange} = this.props;
-
-      this.setState({date});
-
-      if (onDateChange) {
-        onDateChange({date});
-      }
-    }
-
-    /**
-     * Respond to focus changes.
-     * @param {!JsonObject} details
-     */
-    onFocusChange(details) {
-      const focused = details['focused'];
-      this.setState({focused});
-    }
-
-    /** @override */
-    render() {
-      const {focused, date} = this.state;
-      // autoFocus and initialDate are helper props for the example wrapper but are not
-      // props on the SingleDatePicker itself and thus, have to be omitted.
-      const props = omit(this.props, [
-        'autoFocus',
-        'initialDate',
-      ]);
-
-      return React.createElement(DatePicker, Object.assign({}, props, {
-        date,
-        focused,
-        onDateChange: this.onDateChange,
-        onFocusChange: this.onFocusChange,
-      }));
-    }
-  }
-
-  SingleDatePickerBase.defaultProps = defaultProps;
-
-  return withDatePickerCommon(SingleDatePickerBase);
+  return WrappedDayPickerSingleDateController;
 }
 
 

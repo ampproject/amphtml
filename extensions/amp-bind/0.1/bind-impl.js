@@ -17,25 +17,23 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {BindingDef} from './bind-evaluator';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {
-  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
-} from '../../../src/dom';
+import {rewriteAttributesForElement} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
 
@@ -380,8 +378,7 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    const elements =
-        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
         /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
@@ -397,7 +394,14 @@ export class Bind {
     if (macros.length == 0) {
       return Promise.resolve(0);
     } else {
-      return this.ww_('bind.addMacros', [macros]).then(() => macros.length);
+      return this.ww_('bind.addMacros', [macros]).then(errors => {
+        // Report macros that failed to parse (e.g. expression size exceeded).
+        errors.forEach((e, i) => {
+          this.reportWorkerError_(
+              e, `${TAG}: Parsing amp-bind-macro failed.`, elements[i]);
+        });
+        return macros.length;
+      });
     }
   }
 
@@ -454,12 +458,9 @@ export class Bind {
           Object.keys(parseErrors).forEach(expressionString => {
             const elements = this.expressionToElements_[expressionString];
             if (elements.length > 0) {
-              const parseError = parseErrors[expressionString];
-              const userError = user().createError(
-                  `${TAG}: Expression compile error in "${expressionString}". `
-                  + parseError.message);
-              userError.stack = parseError.stack;
-              reportError(userError, elements[0]);
+              this.reportWorkerError_(parseErrors[expressionString],
+                  `${TAG}: Expression compile error in "${expressionString}".`,
+                  elements[0]);
             }
           });
           dev().fine(TAG, 'Finished parsing expressions with ' +
@@ -675,12 +676,8 @@ export class Bind {
     }).then(returnValue => {
       const {result, error} = returnValue;
       if (error) {
-        const userError = user().createError(`${TAG}: Expression eval failed `
-            + `with error: ${error.message}`);
-        userError.stack = error.stack;
-        reportError(userError);
-
-        throw userError; // Reject promise.
+        // Throw to reject promise.
+        throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
         return result;
       }
@@ -866,13 +863,15 @@ export class Bind {
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
+    const tag = element.tagName;
+
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)
-        if (element.tagName == 'TEXTAREA') {
+        if (tag == 'TEXTAREA') {
           element.value = String(newValue);
         }
         break;
@@ -902,8 +901,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty =
-            element.tagName == 'INPUT' && property in element;
+        const updateProperty = (tag == 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -922,24 +920,11 @@ export class Bind {
             mutated = true;
           }
         } else if (newValue !== oldValue) {
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let rewrittenNewValue;
-          try {
-            rewrittenNewValue = rewriteAttributeValue(
-                element.tagName, property, String(newValue));
-          } catch (e) {
-            const err = user().createError(`${TAG}: "${newValue}" is not a ` +
-                `valid result for [${property}]`, e);
-            reportError(err, element);
-          }
-          // Rewriting can fail due to e.g. invalid URL.
-          if (rewrittenNewValue !== undefined) {
-            // TODO(choumx): Don't bother setting for bind-only attrs.
-            element.setAttribute(property, rewrittenNewValue);
+          const rewrittenValue =
+              this.rewriteAttributes_(element, property, String(newValue));
+          if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
             if (updateProperty) {
-              element[property] = rewrittenNewValue;
+              element[property] = rewrittenValue;
             }
             mutated = true;
           }
@@ -954,6 +939,30 @@ export class Bind {
   }
 
   /**
+   * Performs CDN rewrites for the given mutation and updates the element.
+   * Returns the rewrite of `value` on success. Otherwise, returns undefined.
+   * @see amp-cache-modifications.md#url-rewrites
+   * @param {!Element} element
+   * @param {string} property
+   * @param {string} value
+   * @return {string|undefined}
+   * @private
+   */
+  rewriteAttributes_(element, property, value) {
+    // Rewrite attributes if necessary. Not done in worker since it relies on
+    // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
+    let rewrittenValue;
+    try {
+      rewrittenValue = rewriteAttributesForElement(element, property, value);
+    } catch (e) {
+      const error = user().createError(`${TAG}: "${value}" is not a ` +
+          `valid result for [${property}]`, e);
+      reportError(error, element);
+    }
+    return rewrittenValue;
+  }
+
+  /**
    * If current bound element state equals `expectedValue`, returns true.
    * Otherwise, returns false.
    * @param {!BoundPropertyDef} boundProperty
@@ -962,11 +971,12 @@ export class Bind {
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const property = boundProperty.property;
+    const {property, expressionString} = boundProperty;
+    const tagName = element.tagName;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
-    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
       return;
     }
@@ -1023,11 +1033,11 @@ export class Bind {
     }
 
     if (!match) {
-      const err = user().createError(`${TAG}: ` +
-        `Default value for [${property}] does not match first expression ` +
-        `result (${expectedValue}). This can result in unexpected behavior ` +
-        'after the next state change.');
-      reportError(err, element);
+      user().warn(TAG,
+          `Default value for <${tagName} [${property}]="${expressionString}"> `
+          + `does not match first result (${expectedValue}). We recommend `
+          + 'writing expressions with matching default values, but this can be '
+          + 'safely ignored if intentional.');
     }
   }
 
@@ -1059,6 +1069,20 @@ export class Bind {
    */
   ww_(method, opt_args) {
     return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
+  }
+
+  /**
+   * @param {{message: string, stack:string}} e
+   * @param {string} message
+   * @param {!Element=} opt_element
+   * @return {!Error}
+   * @private
+   */
+  reportWorkerError_(e, message, opt_element) {
+    const userError = user().createError(message + ' ' + e.message);
+    userError.stack = e.stack;
+    reportError(userError, opt_element);
+    return userError;
   }
 
   /**

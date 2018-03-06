@@ -15,15 +15,15 @@
  */
 
 import '../../src/polyfills';
+import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
@@ -129,7 +129,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-viewer',
+    id: 'amp-lightbox-gallery',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
@@ -139,21 +139,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
   {
     id: 'ios-embed-wrapper',
@@ -199,12 +188,6 @@ const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'slidescroll-disable-css-snap',
-    name: 'Slidescroll disable css snap',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
-    spec: 'https://github.com/ampproject/amphtml/issues/7670',
   },
   {
     id: '3p-use-ampcontext',
@@ -272,6 +255,17 @@ const EXPERIMENTS = [
     name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/12965',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
+  },
+  {
+    id: 'a4a-doubleclick-disable-sf',
+    name: 'Disables Doubleclick Safeframe Host API for soft-rollback.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13594',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13591',
+  },
+  {
+    id: 'amp-document-recommendations',
+    name: 'Docment level recommendations and infinte scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
 ];
 

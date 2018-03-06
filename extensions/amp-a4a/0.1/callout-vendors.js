@@ -38,8 +38,13 @@ let RtcVendorDef;
 export const RTC_VENDORS = {
   // Add vendors here
   medianet: {
-    url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&purl=HREF',
+    url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
     macros: ['CID'],
+    disableKeyAppend: true,
+  },
+  prebidappnexus: {
+    url: 'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID',
+    macros: ['PLACEMENT_ID'],
     disableKeyAppend: true,
   },
 };
@@ -54,4 +59,4 @@ if (getMode().localDev || getMode().test) {
     url: 'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
     disableKeyAppend: true,
   });
-};
+}

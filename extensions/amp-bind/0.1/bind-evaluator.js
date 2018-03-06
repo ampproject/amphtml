@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BindMacro} from './bind-macro';
 import {BindExpression} from './bind-expression';
+import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
 
@@ -101,9 +101,9 @@ export class BindEvaluator {
    * @return {!Object<string, EvaluatorErrorDef>}
    */
   addMacros(macros) {
-    const errors = Object.create(null);
+    const errors = [];
     // Create BindMacro objects from AmpBindMacroDef.
-    macros.forEach(macro => {
+    macros.forEach((macro, index) => {
       // Only allow a macro to reference macros defined before it to prevent
       // cycles and recursion.
       // TODO(willchou): Would be better if cycle/recursion errors are thrown
@@ -112,7 +112,7 @@ export class BindEvaluator {
       try {
         this.macros_[macro.id] = new BindMacro(macro, referableMacros);
       } catch (e) {
-        errors[macro.id] = {message: e.message, stack: e.stack};
+        errors[index] = {message: e.message, stack: e.stack};
       }
     });
     return errors;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
 import {map, omit} from '../../../src/utils/object';
+import {requireExternal} from '../../../src/module';
 
 
 /**
@@ -71,22 +71,14 @@ export function withDatePickerCommon(WrappedComponent) {
     initialVisibleMonth: '',
     max: '',
     min: '',
-    registerAction: null,
-    src: '',
   });
 
   class Component extends React.Component {
     constructor(props) {
       super(props);
 
-      const {min, max, blocked, highlighted} = this.props;
-
-      this.state = {
-        blocked,
-        highlighted,
-        max,
-        min: min || getDefaultMinDate(max),
-      };
+      /** @private @const */
+      this.min_ = this.props.min || getDefaultMinDate(this.props.max);
 
       this.isDayBlocked = this.isDayBlocked.bind(this);
       this.isDayHighlighted = this.isDayHighlighted.bind(this);
@@ -95,8 +87,8 @@ export function withDatePickerCommon(WrappedComponent) {
 
     /** @override */
     componentDidMount() {
-      if (this.props.emitUpdate) {
-        this.props.emitUpdate();
+      if (this.props.onMount) {
+        this.props.onMount();
       }
     }
 
@@ -105,7 +97,7 @@ export function withDatePickerCommon(WrappedComponent) {
      * @return {boolean}
      */
     isDayBlocked(day) {
-      return this.state.blocked.contains(day);
+      return this.props.blocked.contains(day);
     }
 
     /**
@@ -113,7 +105,7 @@ export function withDatePickerCommon(WrappedComponent) {
      * @return {boolean}
      */
     isDayHighlighted(day) {
-      return this.state.highlighted.contains(day);
+      return this.props.highlighted.contains(day);
     }
 
     /**
@@ -121,7 +113,7 @@ export function withDatePickerCommon(WrappedComponent) {
      * @return {boolean}
      */
     isOutsideRange(day) {
-      return isOutsideRange(this.state.min, this.state.max, day);
+      return isOutsideRange(this.min_, this.props.max, day);
     }
 
     /** @override */
@@ -135,13 +127,12 @@ export function withDatePickerCommon(WrappedComponent) {
 
       return React.createElement(WrappedComponent, Object.assign({}, props, {
         daySize: Number(props.daySize),
-        registerAction: this.props.registerAction,
         isDayBlocked: this.isDayBlocked,
         isDayHighlighted: this.isDayHighlighted,
         isOutsideRange: this.isOutsideRange,
       }));
     }
-  };
+  }
 
   Component.defaultProps = defaultProps;
 

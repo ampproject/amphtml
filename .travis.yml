@@ -9,23 +9,16 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 before_install:
-  - export CHROME_BIN=google-chrome
+  - export CHROME_BIN=google-chrome-stable
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
-  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  - sudo dpkg -i google-chrome*.deb
-  # Required due to https://github.com/greenkeeperio/greenkeeper-lockfile/issues/98#issuecomment-352087908
-  - export PATH="`yarn global bin`:$PATH"
-  - yarn global add greenkeeper-lockfile@1
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara phantomjs poltergeist
-  # Poltergeist requires an absolute path to find phantomjs. See #10305.
-  - export PATH="`pwd`/node_modules/.bin:$PATH"
-  - greenkeeper-lockfile-update
+  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
+  - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
-after_script: greenkeeper-lockfile-upload
+after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
 branches:
   only:
     - master
@@ -38,6 +31,7 @@ env:
     - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
 addons:
+  chrome: stable
   sauce_connect:
     username: "amphtml"
   jwt:

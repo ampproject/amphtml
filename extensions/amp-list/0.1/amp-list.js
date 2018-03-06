@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
+import {Pass} from '../../../src/pass';
+import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {dev, user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -42,6 +48,20 @@ export class AmpList extends AMP.BaseElement {
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
 
+    /**
+     * Maintains invariant that only one fetch result may be processed for
+     * render at a time.
+     * @const @private {!../../../src/pass.Pass}
+     */
+    this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
+
+    /**
+     * Latest fetched items to render and the promise resolver and rejecter
+     * to be invoked on render success or fail, respectively.
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
+     */
+    this.renderItems_ = null;
+
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
@@ -50,6 +70,15 @@ export class AmpList extends AMP.BaseElement {
      * @private {boolean}
      */
     this.layoutCompleted_ = false;
+
+    /** @const @private {string} */
+    this.initialSrc_ = element.getAttribute('src');
+
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.fetchList_();
+      }
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
@@ -110,7 +139,7 @@ export class AmpList extends AMP.BaseElement {
         }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
-        this.renderItems_(items);
+        this.scheduleRender_(items);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
       } else {
@@ -118,8 +147,8 @@ export class AmpList extends AMP.BaseElement {
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
-      this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      this.scheduleRender_(items);
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 
@@ -172,21 +201,60 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.renderItems_(items);
+      return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
     });
   }
 
   /**
+   * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
    * @return {!Promise}
    * @private
    */
-  renderItems_(items) {
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
+  scheduleRender_(items) {
+    let resolver;
+    let rejecter;
+    const promise = new Promise((resolve, reject) => {
+      resolver = resolve;
+      rejecter = reject;
+    });
+    // If there's nothing currently being rendered, schedule a render pass.
+    if (!this.renderItems_) {
+      this.renderPass_.schedule();
+    }
+    this.renderItems_ = {items, resolver, rejecter};
+    return promise;
+  }
+
+  /**
+   * Renders the items stored in `this.renderItems_`. If its value changes
+   * by the time render completes, schedules another render pass.
+   * @private
+   */
+  doRenderPass_() {
+    dev().assert(this.renderItems_, 'Nothing to render.');
+    const current = this.renderItems_;
+    const scheduleNextPass = () => {
+      // If there's a new `renderItems_`, schedule it for render.
+      if (this.renderItems_ !== current) {
+        this.renderPass_.schedule(1); // Allow paint frame before next render.
+        user().error(TAG, 'New renderItems_, continuing render pass...');
+      } else {
+        this.renderItems_ = null;
+      }
+    };
+    this.templates_.findAndRenderTemplateArray(this.element, current.items)
         .then(elements => this.updateBindings_(elements))
-        .then(elements => this.rendered_(elements));
+        .then(elements => this.rendered_(elements))
+        .then(/* onFulfilled */ () => {
+          scheduleNextPass();
+          current.resolver();
+        }, /* onRejected */ () => {
+          scheduleNextPass();
+          current.rejecter();
+        });
   }
 
   /**
@@ -237,7 +305,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+    const ampdoc = this.getAmpDoc();
+    const src = this.element.getAttribute('src');
+
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (src == this.initialSrc_ ||
+      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
 }
 

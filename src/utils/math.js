@@ -51,7 +51,33 @@ export function mapRange(val, min1, max1, min2, max2) {
   }
 
   return (val - min1) * (max2 - min2) / (max1 - min1) + min2;
-};
+}
+
+/**
+ * Computes the modulus of values `a` and `b`.
+ *
+ * This is needed because the % operator in JavaScript doesn't implement
+ * modulus behaviour as can be seen by the spec here:
+ * http://www.ecma-international.org/ecma-262/5.1/#sec-11.5.3.
+ * It instead is used to obtain the remainder of a division.
+ * This function uses the remainder (%) operator to determine the modulus.
+ * Derived from here:
+ * https://stackoverflow.com/questions/25726760/javascript-modular-arithmetic/47354356#47354356
+ *
+ * @param {number} a
+ * @param {number} b
+ * @returns {number} returns the modulus of the two numbers.
+ * @example
+ *
+ * _.min(10, 5);
+ * // => 0
+ *
+ * _.mod(-1, 5);
+ * // => 4
+ */
+export function mod(a, b) {
+  return a > 0 && b > 0 ? a % b : ((a % b) + b) % b;
+}
 
 /**
  * Restricts a number to be in the given min/max range.
@@ -68,4 +94,4 @@ export function mapRange(val, min1, max1, min2, max2) {
  */
 export function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
-};
+}
