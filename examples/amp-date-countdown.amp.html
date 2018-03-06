@@ -10,11 +10,6 @@
   See the License for the specific language governing permissions and
   limitations under the license.
 -->
-<!--
-  Test Description:
-  This is the minimum valid AMP document; it includes all of the required
-  fields from the spec, but nothing else.
--->
 <!doctype html>
 <html ⚡>
 <head>
@@ -80,7 +75,7 @@
   <h1 id="sample2" hidden>
       When Timer hits 0, will hide the timer itself and display this message.
   </h1>
-  <amp-date-countdown id="ampdate" end-date="2018-03-03T15:32:50+08:00" on="tap: sample.show; timeout: ampdate.hide, sample.hide, sample2.show;" biggest-unit="days" when-ended="stop" locale='en'>
+  <amp-date-countdown id="ampdate" end-date="2018-03-07T00:00:00+08:00" on="tap: sample.show; timeout: ampdate.hide, sample.hide, sample2.show;" when-ended="continue" locale='en'>
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">
