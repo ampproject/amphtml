@@ -47,6 +47,11 @@ export const RTC_VENDORS = {
     macros: ['PLACEMENT_ID'],
     disableKeyAppend: true,
   },
+  prebidrubicon: {
+    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID',
+    macros: ['REQUEST_ID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
