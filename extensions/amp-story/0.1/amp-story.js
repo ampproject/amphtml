@@ -43,7 +43,6 @@ import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
 } from '../../../src/gesture-recognizers';
-import {EmbedMode} from './embed-mode';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -75,10 +74,9 @@ import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
-import {isEnumValue} from '../../../src/types';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {once} from '../../../src/utils/function';
-import {parseQueryString} from '../../../src/url';
+import {parseEmbedMode} from './embed-mode';
 import {registerServiceBuilder} from '../../../src/service';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
@@ -369,7 +367,7 @@ export class AmpStory extends AMP.BaseElement {
       this.onResize();
     }, html);
 
-    const embedMode = this.parseEmbedMode_(this.win.location.hash);
+    const embedMode = parseEmbedMode(this.win.location.hash);
     this.stateService_.initializeEmbedMode(embedMode);
   }
 
@@ -772,22 +770,6 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(errorEl);
 
     user().error(TAG, 'enable amp-story experiment');
-  }
-
-
-  /**
-   * @param {string} str
-   * @return {!EmbedMode}
-   * @private
-   */
-  parseEmbedMode_(str) {
-    const params = parseQueryString(str);
-    const unsanitizedEmbedMode = params['embedMode'];
-    const embedModeIndex = parseInt(unsanitizedEmbedMode, 10);
-
-    return isEnumValue(EmbedMode, embedModeIndex)
-      ? /** @type {!EmbedMode} */ (embedModeIndex)
-      : EmbedMode.NOT_EMBEDDED;
   }
 
 

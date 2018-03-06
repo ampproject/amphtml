@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {isEnumValue} from '../../../src/types';
+import {parseQueryString} from '../../../src/url';
 
 
 /**
@@ -37,3 +39,19 @@ export const EmbedMode = {
    */
   NAME_TBD: 1,
 };
+
+
+/**
+ * @param {string} str
+ * @return {!EmbedMode}
+ * @private
+ */
+export function parseEmbedMode(str) {
+  const params = parseQueryString(str);
+  const unsanitizedEmbedMode = params['embedMode'];
+  const embedModeIndex = parseInt(unsanitizedEmbedMode, 10);
+
+  return isEnumValue(EmbedMode, embedModeIndex)
+    ? /** @type {!EmbedMode} */ (embedModeIndex)
+    : EmbedMode.NOT_EMBEDDED;
+}

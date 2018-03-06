@@ -25,6 +25,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
+import {parseEmbedMode} from './embed-mode';
 import {parseJson} from '../../../src/json';
 
 
@@ -109,7 +110,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const embedMode = this.parseEmbedMode_(this.win.location.hash);
+    const embedMode = parseEmbedMode(this.win.location.hash);
     this.stateService_.initializeEmbedMode(embedMode);
     if (!this.isAutomaticAdInsertionAllowed_()) {
       return;
