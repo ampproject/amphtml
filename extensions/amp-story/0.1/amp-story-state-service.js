@@ -16,12 +16,15 @@
 import {EmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
+import {map} from '../../../src/utils/object';
 
 
 /** @typedef {{type: !StateType, value: *}} */
 export let StateChangeEventDef;
+
+/** @typedef {!Object<!StateType, !State>} */
+export let StatesMap;
 
 /** @private @const @enum {string} */
 export const StateType = {
@@ -41,7 +44,27 @@ export class AmpStoryStateService {
   // it can be retrieved from other classes (e.g. AmpStoryPage) without directly
   // passing it.
   constructor() {
-    this.states_ = dict({});
+    /** @private {!StatesMap} */
+    this.states_ = map({});
+
+    /** @private {!StatesMap} */
+    this.defaultStates_ = map({});
+
+    // Initialize default states.
+    this.initializeState(this.defaultStates_, [
+      new State(StateType.BOOKEND_ACTIVE,
+          false /* defaultValue */, true /* isModifiable */),
+      new State(StateType.NAVIGATION_OVERLAY_HINT_SHOWN,
+          false /* defaultValue */, true /* isModifiable */),
+      new State(StateType.NO_PREVIOUS_PAGE_HELP_SHOWN,
+          false /* defaultValue */, true /* isModifiable */),
+      new State(StateType.ALLOW_AUTOMATIC_AD_INSERTION,
+          true /* defaultValue */, true /* isModifiable */),
+      new State(StateType.SYSTEM_LAYER_BUTTONS_SHOWN,
+          true /* defaultValue */, true /* isModifiable */),
+      new State(StateType.MUTE_AUDIO_BY_DEFAULT,
+          true /* defaultValue */, true /* isModifiable */),
+    ]);
   }
 
   /**
@@ -49,30 +72,36 @@ export class AmpStoryStateService {
    * @return {!State}
    */
   getState(stateType) {
-    return dev().assert(this.states_[stateType], `Unknown state ${stateType}.`);
+    return dev().assert(
+        this.states_[stateType] || this.defaultStates_[stateType],
+        `Unknown state ${stateType}.`);
   }
 
   /**
-   * @param {!State|!Array<!State>} stateOrArr
+   * @param {!StatesMap} statesMap The map to be populated with states.
+   * @param {!State|!Array<!State>} stateOrArr The state or list of states to
+   *     populate.
    */
-  initializeState(stateOrArr) {
+  initializeState(statesMap, stateOrArr) {
     if (isArray(stateOrArr)) {
       stateOrArr.forEach(state => {
-        this.initializeSinglevalue_(state);
+        this.initializeSingleValue_(statesMap, state);
       });
     } else {
-      this.initializeSinglevalue_(/** @type {!State} */ (stateOrArr));
+      this.initializeSingleValue_(statesMap,
+          /** @type {!State} */ (stateOrArr));
     }
   }
 
   /**
-   * @param {!State} state
+   * @param {!StatesMap} statesMap The map to be populated with states.
+   * @param {!State} state The state to populate.
    * @private
    */
-  initializeSinglevalue_(state) {
-    dev().assert(!this.states_[state.type],
+  initializeSingleValue_(statesMap, state) {
+    dev().assert(!statesMap[state.type],
         `Duplicate entries for state ${state.type}.`);
-    this.states_[state.type] = state;
+    statesMap[state.type] = state;
   }
 
   /**
@@ -81,7 +110,7 @@ export class AmpStoryStateService {
   initializeEmbedMode(embedMode) {
     switch (embedMode) {
       case EmbedMode.NAME_TBD:
-        this.initializeState([
+        this.initializeState(this.states_, [
           new State(StateType.BOOKEND_ACTIVE,
               false /* defaultValue */, false /* isModifiable */),
           new State(StateType.NAVIGATION_OVERLAY_HINT_SHOWN,
@@ -94,23 +123,6 @@ export class AmpStoryStateService {
               false /* defaultValue */, false /* isModifiable */),
           new State(StateType.MUTE_AUDIO_BY_DEFAULT,
               false /* defaultValue */, false /* isModifiable */),
-        ]);
-        break;
-
-      default:
-        this.initializeState([
-          new State(StateType.BOOKEND_ACTIVE,
-              false /* defaultValue */, true /* isModifiable */),
-          new State(StateType.NAVIGATION_OVERLAY_HINT_SHOWN,
-              false /* defaultValue */, true /* isModifiable */),
-          new State(StateType.NO_PREVIOUS_PAGE_HELP_SHOWN,
-              false /* defaultValue */, true /* isModifiable */),
-          new State(StateType.ALLOW_AUTOMATIC_AD_INSERTION,
-              true /* defaultValue */, true /* isModifiable */),
-          new State(StateType.SYSTEM_LAYER_BUTTONS_SHOWN,
-              true /* defaultValue */, true /* isModifiable */),
-          new State(StateType.MUTE_AUDIO_BY_DEFAULT,
-              true /* defaultValue */, true /* isModifiable */),
         ]);
         break;
     }
