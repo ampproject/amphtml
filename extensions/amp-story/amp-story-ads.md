@@ -121,12 +121,12 @@ Here is a full example using `amp-story-auto-ads` together with some templates i
 <amp-story>
   <amp-story-auto-ads>
      <script type=”application/json”>
-      {
+        {
           "ad-attributes": {
             "type": "custom",
             "data-url": "https://adserver.com/getad?slot=abcd1234"
           }
-       }
+        }
      </script>
 
      <template type="amp-mustache" id="template-1">
