@@ -149,6 +149,7 @@ export class DoubleclickA4aEligibility {
     const urlExperimentId = extractUrlExperimentId(win, element);
     if (hasUSDRD || (useRemoteHtml &&
                      !element.getAttribute('rtc-config') &&
+                     urlExperimentId &&
                      URL_EXPERIMENT_MAPPING[urlExperimentId] !=
                      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT)) {
       return false;
