@@ -316,7 +316,7 @@ https://publisher.com/amp-access.json?
   &url=SOURCE_URL
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
- - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
+ - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]). This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
  - The property values can only be one of the types: string, number, boolean.
  - Values can also be nested as objects with values of the same types: string, number, boolean.
  - The total size of the serialized authorization response cannot exceed 500 bytes.
@@ -455,7 +455,7 @@ The integration with *amp-analytics* is documented in the [amp-access-analytics.
 ## CORS Origin Security
 
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
-[AMP CORS Security Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+[AMP CORS Security Spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 ## Metering
 
@@ -497,7 +497,7 @@ As usual, the Reader ID should be included in the call to Login Page and can be 
  - **Google AMP Cache** - the proxying cache for AMP documents.
  - **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
  - **Publisher.com** - the site of an AMP publisher.
- - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for how such requests can be secured.
+ - **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](ttps://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
  - **Reader** - the actual person viewing AMP documents.
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 
