@@ -75,6 +75,17 @@ function dateMethod(method) {
 }
 
 /**
+ * Returns a function that returns property of screen.
+ *
+ * @param {!Screen} screen
+ * @param {string} property
+ * @return {!SyncResolverDef}
+ */
+function screenProperty(screen, property) {
+  return () => screen[property];
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
@@ -359,23 +370,22 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the viewport width.
     this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
 
+
+    const screen = this.ampdoc.win.screen;
     // Returns screen.width.
-    this.set('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
+    this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
     // Returns screen.height.
-    this.set('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
+    this.set('SCREEN_HEIGHT', screenProperty(screen, 'height'));
 
     // Returns screen.availHeight.
-    this.set('AVAILABLE_SCREEN_HEIGHT',
-        () => this.ampdoc.win.screen.availHeight);
+    this.set('AVAILABLE_SCREEN_HEIGHT', screenProperty(screen, 'availHeight'));
 
     // Returns screen.availWidth.
-    this.set('AVAILABLE_SCREEN_WIDTH',
-        () => this.ampdoc.win.screen.availWidth);
+    this.set('AVAILABLE_SCREEN_WIDTH', screenProperty(screen, 'availWidth'));
 
     // Returns screen.ColorDepth.
-    this.set('SCREEN_COLOR_DEPTH',
-        () => this.ampdoc.win.screen.colorDepth);
+    this.set('SCREEN_COLOR_DEPTH', screenProperty(screen, 'colorDepth'));
 
     // Returns document characterset.
     this.set('DOCUMENT_CHARSET', () => {
