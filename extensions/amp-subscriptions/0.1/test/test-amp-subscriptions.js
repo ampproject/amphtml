@@ -67,7 +67,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should call `initialize_` on start', () => {
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    subscriptionService.start_();
+    subscriptionService.start();
 
     expect(initializeStub).to.be.calledOnce;
   });
@@ -77,7 +77,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     const renderLoadingStub =
         sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
-    subscriptionService.start_();
+    subscriptionService.start();
     return subscriptionService.initialize_().then(() => {
       // Should show loading on the page
       expect(renderLoadingStub).to.be.calledWith(true);

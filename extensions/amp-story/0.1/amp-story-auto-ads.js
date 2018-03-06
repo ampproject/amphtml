@@ -19,17 +19,13 @@ import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
 
-// TODO(ccordry) replace these constants with user config
 /** @const */
 const MIN_INTERVAL = 3;
-
-/** @const */
-const MAX_NUMBER = 2;
 
 /** @const */
 const TAG = 'amp-story-auto-ads';
@@ -62,6 +58,11 @@ const AD_STATE = {
   PLACED: 1,
   FAILED: 2,
 };
+
+/** @const */
+const ALLOWED_AD_TYPES = map({
+  'custom': true,
+});
 
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
@@ -256,14 +257,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdElement_() {
-    const defaultAttrs = {
-      'id': 'i-amphtml-story-ad',
+    const requiredAttrs = {
+      'class': 'i-amphtml-story-ad',
       'layout': 'fill',
     };
 
     const configAttrs = this.config_['ad-attributes'];
+
+    ['height', 'width', 'layout'].forEach(attr => {
+      if (configAttrs[attr] !== undefined) {
+        user().warn(TAG, `ad-attribute "${attr}" is not allowed`);
+        delete configAttrs[attr];
+      }
+    });
+
+    user().assert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
+      `"${configAttrs.type}" ad type is not supported`);
+
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
-        defaultAttrs, configAttrs));
+        configAttrs, requiredAttrs));
 
     return createElementWithAttributes(
         document, 'amp-ad', attributes);
@@ -341,15 +353,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.uniquePageIds_[pageId] = true;
     }
 
-    if (this.uniquePagesCount_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+    if (this.uniquePagesCount_ > MIN_INTERVAL) {
       const adState = this.tryToPlaceAdAfterPage_(pageId);
 
       if (adState === AD_STATE.PLACED) {
         this.adsPlaced_++;
         // start loading next ad
-        if (!this.allAdsPlaced_()) {
-          this.startNextPage_();
-        }
+        this.startNextPage_();
       }
 
       if (adState === AD_STATE.FAILED) {
@@ -370,15 +380,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
-   * @return {boolean}
-   * @private
-   */
-  allAdsPlaced_() {
-    return this.adsPlaced_ >= MAX_NUMBER;
-  }
-
-
-  /**
    * Place ad based on user config
    * @param {string} currentPageId
    * @private
@@ -393,7 +394,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const currentPage = this.ampStory_.getPageById(currentPageId);
     const nextPage = this.ampStory_.getNextPage(currentPage);
 
-    if (!this.isCurrentAdLoaded_ || currentPage.isAd() || nextPage.isAd()) {
+    if (!this.isCurrentAdLoaded_ || currentPage.isAd() ||
+        (nextPage && nextPage.isAd())) {
       // if we are going to cause two consecutive ads or ad is still
       // loading we will try again on next user interaction
       return AD_STATE.PENDING;
@@ -420,5 +422,4 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 }
 
 AMP.registerElement(TAG, AmpStoryAutoAds);
-
 
