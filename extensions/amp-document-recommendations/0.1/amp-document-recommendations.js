@@ -203,7 +203,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
               'failed to parse content discovery script', error);
         });
 
-    this.config_ = assertConfig(configJson);
+    this.config_ = assertConfig(configJson, this.win.document.location.host);
 
     this.mutateElement(() => {
       this.appendDivision_();
