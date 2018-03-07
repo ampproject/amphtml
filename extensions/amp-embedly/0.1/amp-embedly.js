@@ -20,6 +20,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadScript} from '../../../3p/3p';
 import {user} from '../../../src/log';
 
+/** @const {RegExp} */
+const SRC_REGEXP = /src="([^"]+)"/;
+
 /**
  * Embedly resource types.
  * @const {Readonly<{PHOTO: string, VIDEO: string, LINK: string, RICH: string}>}
@@ -107,7 +110,12 @@ export class AmpEmbedly extends AMP.BaseElement {
       // For these types, embedly returns an iframe or html + script that must be loaded.
       case resourceType.VIDEO:
       case resourceType.RICH: {
-        const match = data.html.match(/src="([^"]+)"/);
+        const match = data.html.match(SRC_REGEXP);
+
+        user().assert(
+            match, `src not found in embedly response: "${data.html}"`
+        );
+
         const srcUrl = `https:${match[1]}`;
 
         if (data.html.startsWith('<iframe')) {
