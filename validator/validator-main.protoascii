@@ -4495,6 +4495,9 @@ attr_lists: {
   attrs: {
     name: "lightbox-thumbnail-id"
     requires_extension: "amp-lightbox-gallery"
+    trigger: {
+      also_requires_attr: "lightbox"
+    }
   }
   attrs: {
     name: "lightbox-exclude"
