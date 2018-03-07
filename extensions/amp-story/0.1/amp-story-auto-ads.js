@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryStateService,
+  StateType,
+} from './amp-story-state-service';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
@@ -21,6 +25,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
+import {parseEmbedMode} from './embed-mode';
 import {parseJson} from '../../../src/json';
 
 
@@ -103,10 +108,19 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
+
+    /** @private @const {!AmpStoryStateService} */
+    this.stateService_ = new AmpStoryStateService();
   }
 
   /** @override */
   buildCallback() {
+    const embedMode = parseEmbedMode(this.win.location.hash);
+    this.stateService_.initializeEmbedMode(embedMode);
+    if (!this.isAutomaticAdInsertionAllowed_()) {
+      return;
+    }
+
     const ampStoryElement = this.element.parentElement;
     user().assert(ampStoryElement.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
@@ -133,6 +147,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.isAutomaticAdInsertionAllowed_()) {
+      return Promise.resolve();
+    }
+
     return this.ampStory_.signals().whenSignal(CommonSignals.INI_LOAD)
         .then(() => {
           this.createAdOverlay_();
@@ -141,6 +159,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         });
   }
 
+
+  isAutomaticAdInsertionAllowed_() {
+    const allowAutomaticAdInsertion = this.stateService_
+        .getState(StateType.ALLOW_AUTOMATIC_AD_INSERTION);
+
+    return allowAutomaticAdInsertion.getValue();
+  }
 
   /**
    * load in config from child <script> element
