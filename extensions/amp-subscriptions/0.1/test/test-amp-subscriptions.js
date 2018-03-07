@@ -132,23 +132,26 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   describe('selectAndActivatePlatform_', () => {
-    beforeEach(() => {
-      return subscriptionService.start();
-    });
-    it('should wait for grantStatus and selectPlatform promise', () => {
+    it('should wait for grantStatus and selectPlatform promise', done => {
       const products = ['scenic-2017.appspot.com:news',
         'scenic-2017.appspot.com:product2'];
-      sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
-          .callsFake(() => Promise.resolve());
-      sandbox.stub(subscriptionService.entitlementStore_, 'selectPlatform')
-          .callsFake(() => Promise.resolve(
-              new Entitlement('local', 'raw', 'local', products, 'token', false)
-          ));
-      const localPlatform = subscriptionService.subscriptionPlatforms_['local'];
-      expect(localPlatform).to.be.not.null;
-      const activateStub = sandbox.stub(localPlatform, 'activate');
-      return subscriptionService.selectAndActivatePlatform_().then(() => {
-        expect(activateStub).to.be.calledOnce;
+      subscriptionService.start();
+      subscriptionService.initialize_().then(() => {
+        sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+            .callsFake(() => Promise.resolve());
+        sandbox.stub(subscriptionService.entitlementStore_, 'selectPlatform')
+            .callsFake(() => Promise.resolve(
+                new Entitlement('local', 'raw', 'local',
+                    products, 'token', false)
+            ));
+        const localPlatform =
+          subscriptionService.subscriptionPlatforms_['local'];
+        expect(localPlatform).to.be.not.null;
+        const activateStub = sandbox.stub(localPlatform, 'activate');
+        subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(activateStub).to.be.calledOnce;
+          done();
+        });
       });
     });
   });
