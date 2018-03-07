@@ -17,6 +17,7 @@ import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'
 import {EventType, dispatch} from './events';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
+import {StateType} from './amp-story-state-service';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -88,8 +89,9 @@ const TEMPLATE = {
 export class SystemLayer {
   /**
    * @param {!Window} win
+   * @param {!./amp-story-state-service.AmpStoryStateService} stateService
    */
-  constructor(win) {
+  constructor(win, stateService) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -116,6 +118,9 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
+
+    /** @private {!./amp-story-state-service.AmpStoryStateService} */
+    this.stateService_ = stateService;
   }
 
   /**
@@ -140,6 +145,15 @@ export class SystemLayer {
     this.buildForDevelopmentMode_();
 
     this.addEventHandlers_();
+
+    const systemLayerButtonsShown = this.stateService_
+        .getState(StateType.SYSTEM_LAYER_BUTTONS_SHOWN);
+
+    // TODO(newmuis): Observe this value.
+    if (!systemLayerButtonsShown.getValue() &&
+        !systemLayerButtonsShown.isModifiable()) {
+      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+    }
 
     return this.getRoot();
   }
