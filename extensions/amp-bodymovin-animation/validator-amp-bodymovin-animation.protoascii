@@ -14,18 +14,18 @@
 # limitations under the license.
 #
 
-tags: {  # amp-bodymovin-player
+tags: {  # amp-bodymovin-animation
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-bodymovin-player"
+    name: "amp-bodymovin-animation"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-bodymovin-player>
-  tag_name: "AMP-BODYMOVIN-PLAYER"
-  requires_extension: "amp-bodymovin-player"
+tags: {  # <amp-bodymovin-animation>
+  tag_name: "AMP-BODYMOVIN-ANIMATION"
+  requires_extension: "amp-bodymovin-animation"
 
   attrs: {
     name: "loop"
@@ -36,7 +36,7 @@ tags: {  # <amp-bodymovin-player>
     mandatory: true
   }
 ]
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

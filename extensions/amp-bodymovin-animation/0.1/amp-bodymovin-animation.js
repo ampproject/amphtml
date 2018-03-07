@@ -23,9 +23,9 @@ import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
-const TAG = 'amp-bodymovin-player';
+const TAG = 'amp-bodymovin-animation';
 
-export class AmpBodymovinPlayer extends AMP.BaseElement {
+export class AmpBodymovinAnimation extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -64,7 +64,7 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
     this.loop_ = this.element.getAttribute('loop') ?
       this.element.getAttribute('loop') : this.loop_;
     user().assert(this.element.hasAttribute('src'),
-        'The src attribute must be specified for <amp-bodymovin-player>');
+        'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     this.src_ = this.element.getAttribute('src');
   }
@@ -78,12 +78,12 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
       this.element.setAttribute('data-animation-data', JSON.stringify(data));
       //should become return vsync.mutatePromise(..
       return Services.vsyncFor(this.win).mutatePromise(() => {
-        const iframe = getIframe(this.win, this.element, 'bodymovinplayer');
+        const iframe = getIframe(this.win, this.element, 'bodymovinanimation');
         this.applyFillContent(iframe);
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        return this.loadPromise(iframe);
+        return this.loadPromise(iframe_);
       });
     });
   }
@@ -99,5 +99,5 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpBodymovinPlayer);
+  AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

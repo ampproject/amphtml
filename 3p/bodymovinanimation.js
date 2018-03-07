@@ -18,23 +18,23 @@ import {isFiniteNumber} from '../src/types';
 import {loadScript} from './3p';
 
 /**
- * Produces the AirBnB Bodymovin player SDK object for the passed in callback.
+ * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
  * @param {!Window} global
  * @param {function(!Object)} cb
  */
-function getBodymovinPlayerSdk(global, cb) {
+function getBodymovinAnimationSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
     cb(global.bodymovin);
   });
 }
 
-export function bodymovinplayer(global, data) {
+export function bodymovinanimation(global, data) {
   const animatingContainer = global.document.createElement('div');
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = data.loop == 'true';
   const loop = isFiniteNumber(data.loop) ? parseInt(data.loop, 10) : shouldLoop;
 
-  getBodymovinPlayerSdk(global, function() {
+  getBodymovinAnimationSdk(global, function() {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
