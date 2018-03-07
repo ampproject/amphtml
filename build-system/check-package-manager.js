@@ -16,7 +16,9 @@
 'use strict';
 
 const getStdout = require('./exec').getStdout;
+
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
+const nodeScheduleUrl = 'https://raw.githubusercontent.com/nodejs/Release/master/schedule.json';
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -27,6 +29,27 @@ function yellow(text) {return '\x1b[33m' + text + '\x1b[0m';}
 /**
  * @fileoverview Makes sure that packages are being installed via yarn
  */
+
+function getNodeLatestLtsMajorVersion() {
+  const schedule = getStdout('curl -L ' + nodeScheduleUrl).trim();
+  const scheduleJson = JSON.parse(schedule);
+  const versions = Object.keys(scheduleJson);
+  let latestLtsMajorVersion = '';
+  versions.forEach(version => {
+    const lts = scheduleJson[version]['lts'];
+    const maintenance = scheduleJson[version]['maintenance'];
+    if (lts && maintenance) {
+      const ltsDate = Date.parse(lts);
+      const maintenanceDate = Date.parse(maintenance);
+      const today = new Date();
+      if (today >= ltsDate && today < maintenanceDate) {
+        latestLtsMajorVersion = version;
+      }
+    }
+  });
+  return latestLtsMajorVersion;
+}
+
 function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
@@ -55,19 +78,22 @@ function main() {
     return 1;
   }
 
-  // Perform a node version check and print a warning if it is < v8.
+  // Check the node version and print a warning if it is not the latest LTS.
+  const latestLtsMajorVersion = getNodeLatestLtsMajorVersion();
   const nodeVersion = getStdout('node --version').trim();
-  let majorVersion = nodeVersion.split('.')[0];
-  if (majorVersion.charAt(0) === 'v') {
-    majorVersion = majorVersion.slice(1);
+  const nodeMajorVersion = nodeVersion.split('.')[0];
+  if (latestLtsMajorVersion === '') {
+    console.log(yellow('WARNING: Something went wrong. ' +
+        'Could not determine latest LTS node version.'));
   }
-  majorVersion = parseInt(majorVersion, 10);
-  if (majorVersion < 8) {
+  if (latestLtsMajorVersion !== '' &&
+      nodeMajorVersion !== latestLtsMajorVersion) {
     console.log(yellow('WARNING: Detected node version'),
-        cyan(nodeVersion) + yellow('. Recommended version is'),
-        cyan('v8') + yellow('.'));
+        cyan(nodeMajorVersion) +
+        yellow('. Recommended (latest LTS) version is'),
+        cyan(latestLtsMajorVersion) + yellow('.'));
     console.log(yellow('To fix this, run'),
-        cyan('"nvm install 8"'), yellow('or see'),
+        cyan('"nvm install --lts"'), yellow('or see'),
         cyan('https://nodejs.org/en/download/package-manager'),
         yellow('for instructions.'));
   } else {
