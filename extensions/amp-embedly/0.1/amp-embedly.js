@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {addParamsToUrl} from '../../../src/url';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
@@ -97,12 +98,17 @@ export class AmpEmbedly extends AMP.BaseElement {
 
   /**
    * Fetches oEmbed data from embedly's api.
-   * @return {!Promise<!JsonObject>}
+   * @return {!Promise}
    * */
   getOembedData_() {
-    const query = `key=${this.key_}&url=${encodeURIComponent(this.url_)}`;
+    /** @type {JsonObject} */
+    const params = {
+      key: this.key_,
+      url: this.url_,
+    };
+    const url = addParamsToUrl(BASE_API_URL, params);
 
-    return this.xhr_.fetchJson(BASE_API_URL + query, {
+    return this.xhr_.fetchJson(url, {
       requireAmpResponseSourceOrigin: false,
     }).then(res => res.json());
   }
@@ -110,8 +116,8 @@ export class AmpEmbedly extends AMP.BaseElement {
   /**
    * Gets component iframe with set source based on data type.
    *
-   * @param {!JsonObject} data
-   * @returns {?Promise<!JsonObject>}
+   * @param {!JsonObject<{html: string, type: string, url: string}>} data
+   * @returns {?Promise<!JsonObject|null>}
    * @private
    */
   getIframe_(data) {
@@ -153,15 +159,11 @@ export class AmpEmbedly extends AMP.BaseElement {
       }
 
       case resourceType.PHOTO: {
-        const {url, height, width} = data;
-        const html = `<img src="${url}" height="${height}" width="${width}">`;
+        const html = `
+          <img src="${data.url}" height="${data.height}" width="${data.width}">
+        `;
 
         src = this.createObjectUrl_(html);
-        break;
-      }
-
-      case resourceType.LINK: {
-        // TODO
         break;
       }
     }
