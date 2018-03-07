@@ -20,11 +20,20 @@ For instructions on how to set the rtc-config attribute on the amp-ad, refer to 
 ## Available URL Macros
 Doubleclick's RTC implementation has made many macros available for RTC url expansion. Please note that the time to expand the URL is counted against the RTC timeout. Additionally, note that all RTC URLs are truncated at 16384 characters, so keep possible truncation in mind when determining which macros to include, and which order to include them in your URL. Currently available macros are as follows:
 
-* **PAGEVIEWID**: pageViewId for the amp-ad element.
-* **HREF**: window.location.href
-* **TGT**: The JSON stringified targeting parameter extracted from the JSON attribute on the amp-ad element.
-* **ADCID**: The adClientId that corresponds to the given publisher page and DoubleClick. This adCid should be the same as used by AMP Analytics. IMPORTANT NOTE: This is an asynchronous call to use this macro, and can be slow. To impose a strict timeout, can pass an optional timeout. This is done in the url like: `https://www.foo.com/?adcid=ADCID(10)` where the passed timeout is in milliseconds.
-* **ATTR**: Makes various attributes on the amp-ad element available, by calling as ATTR(attribute).If the attribute does not exist, returns empty string. Currently available attributes are: height, width, data-slot, data-multi-size, data-multi-size-validation, data-override-width, data-override-height.
+- **PAGEVIEWID** - pageViewId
+- **HREF** - equivalent to window.context.location.href
+- **ATTR(height)** - Height attribute of the amp-ad element
+- **ATTR(width)** - Width attribute of the amp-ad element
+- **ATTR(data-slot)** - data-slot attribute of the amp-ad element
+- **ATTR(data-multi-size)** - data-multi-size attribute of the amp-ad element
+- **ATTR(data-multi-size-validation)** - data-multi-size-validation attribute of the amp-ad element
+- **ATTR(data-override-width)** - data-override-width attribute of the amp-ad element
+- **ATTR(data-override-height)** - data-override-height attribute of the amp-ad element
+- **ATTR(data-json)** -  data-json attribute of the amp-ad element
+- **ADCID** - adClientId 
+- **TGT** - Just the targeting piece of data-json
+- **CANONICAL_URL** - The canonical URL of the page. 
+- **TIMEOUT** - The publisher-specified timeout for the RTC callout. 
 
 
 ## Response and Endpoint Specification
