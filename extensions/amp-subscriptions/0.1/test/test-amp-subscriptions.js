@@ -161,8 +161,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     it('should start grantStatus and platform selection', () => {
       subscriptionService.entitlementStore_ = new EntitlementStore(products);
       const getGrantStatusStub =
-          sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus').callsFake(
-              () => Promise.resolve());
+          sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+              .callsFake(() => Promise.resolve());
       const selectAndActivateStub =
           sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
       subscriptionService.startUnblockingDocument_();

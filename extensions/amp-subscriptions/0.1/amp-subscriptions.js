@@ -213,7 +213,7 @@ export class SubscriptionService {
         }
       }
 
-      this.selectAndActivatePlatform_();
+      this.startUnblockingDocument_();
     });
     return this;
   }
