@@ -163,7 +163,11 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
-    entitlement.setCurrentProduct(this.pageConfig_.getProductId());
+    const productId = /** @type {string} */ (dev().assert(
+        this.pageConfig_.getProductId(),
+        'Product id is null'
+    ));
+    entitlement.setCurrentProduct(productId);
     this.entitlementStore_.resolveEntitlement(serviceId, entitlement);
   }
 
@@ -259,7 +263,11 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     subscriptionPlatform.getEntitlements().then(entitlement => {
-      entitlement.setCurrentProduct(this.pageConfig_.getProductId());
+      const productId = /** @type {string} */ (dev().assert(
+          this.pageConfig_.getProductId(),
+          'Product id is null'
+      ));
+      entitlement.setCurrentProduct(productId);
       this.entitlementStore_.resolveEntitlement(
           subscriptionPlatform.getServiceId(),
           entitlement
