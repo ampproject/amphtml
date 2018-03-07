@@ -172,7 +172,7 @@ export function toggle(element, opt_display) {
  * @return {string}
  */
 export function px(value) {
-  return value + 'px';
+  return `${value} px`;
 }
 
 /**
@@ -181,7 +181,7 @@ export function px(value) {
  * @return {string}
  */
 export function deg(value) {
-  return value + 'deg';
+  return `${value} deg`;
 }
 
 /**
