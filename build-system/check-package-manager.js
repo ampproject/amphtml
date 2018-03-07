@@ -55,19 +55,19 @@ function main() {
     return 1;
   }
 
-  // Perform a node version check and print a warning if it is < v6 or == v7.
+  // Perform a node version check and print a warning if it is < v8.
   const nodeVersion = getStdout('node --version').trim();
   let majorVersion = nodeVersion.split('.')[0];
   if (majorVersion.charAt(0) === 'v') {
     majorVersion = majorVersion.slice(1);
   }
   majorVersion = parseInt(majorVersion, 10);
-  if (majorVersion < 6 || majorVersion == 7) {
+  if (majorVersion < 8) {
     console.log(yellow('WARNING: Detected node version'),
         cyan(nodeVersion) + yellow('. Recommended version is'),
-        cyan('v6') + yellow('.'));
+        cyan('v8') + yellow('.'));
     console.log(yellow('To fix this, run'),
-        cyan('"nvm install 6"'), yellow('or see'),
+        cyan('"nvm install 8"'), yellow('or see'),
         cyan('https://nodejs.org/en/download/package-manager'),
         yellow('for instructions.'));
   } else {

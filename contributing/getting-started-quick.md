@@ -25,7 +25,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [Node.js](https://nodejs.org/) version >= 6 (which includes npm); [NVM](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux
+* Install [Node.js](https://nodejs.org/) version >= 8 (which includes npm); [NVM](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux
 
 * Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
