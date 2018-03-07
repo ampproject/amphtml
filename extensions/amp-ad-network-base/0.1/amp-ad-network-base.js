@@ -15,6 +15,7 @@
  */
 
 import {AmpAdContext} from './amp-ad-context';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {map} from '../../../src/utils/object';
@@ -38,6 +39,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
     /** @const @private {!AmpAdContext} */
     this.context_ = new AmpAdContext(this.win);
+
+    /**
+     * When true, indicates that the renderer and validator should not be
+     * freed (e.g., for refreshable implementations).
+     * @private {boolean}
+     */
+    this.isReusable_ = false;
   }
 
   /**
@@ -101,6 +109,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       this.registeredValidator_.validate(this.context_)
           .then(context => this.handleValidatorResponse_(context))
           .catch(error => this.handleValidatorError_(error));
+      if (!this.isReusable_) {
+        this.registeredValidator_ = null;
+      }
     });
   }
 
@@ -135,6 +146,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     dev().assert(this.registeredRenderers_[result],
         'Renderer for AMP creatives never registered!');
     this.registeredRenderers_[result].render(context, this);
+    if (!this.isReusable_) {
+      this.registeredRenderers_ = map({});
+    }
+  }
+
+  /** @param {boolean} isReusable */
+  setIsReusable(isReusable) {
+    this.isReusable_ = isReusable;
   }
 
   /** @override */
@@ -154,11 +173,13 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    const url = this.getRequestUrl();
-    this.context_.setRequestUrl(url);
-    sendXhrRequest(url, this.win)
-        .then(response => this.handleAdResponse_(response))
-        .catch(error => this.handleAdResponseError_(error));
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      const url = this.getRequestUrl();
+      this.context_.setRequestUrl(url);
+      sendXhrRequest(url, this.win)
+          .then(response => this.handleAdResponse_(response))
+          .catch(error => this.handleAdResponseError_(error));
+    });
   }
 }
 
