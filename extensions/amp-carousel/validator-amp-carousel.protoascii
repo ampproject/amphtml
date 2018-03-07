@@ -53,8 +53,17 @@ tags: {  # <amp-carousel>
     name: "type"
     value_regex: "slides|carousel"
   }
+  # <amp-lightbox-gallery>
+  attrs: {
+    name: "lightbox-exclude"
+    requires_extension: "amp-lightbox-gallery"
+    value: ""
+  }
   # <amp-bind>
   attrs: { name: "[slide]" }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL [lightbox]"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
@@ -66,4 +75,16 @@ tags: {  # <amp-carousel>
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-CAROUSEL lightbox"
+  attrs: {
+    name: "lightbox-exclude"
+    requires_extension: "amp-lightbox-gallery"
+    value: ""
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery"
 }
