@@ -71,9 +71,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?Promise} */
-    this.storyImplPromise_ = null;
-
     /** @private {?./amp-story.AmpStory} */
     this.ampStory_ = null;
 
