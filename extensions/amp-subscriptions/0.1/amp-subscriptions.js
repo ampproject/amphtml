@@ -212,11 +212,18 @@ export class SubscriptionService {
         }
       }
 
-      this.entitlementStore_.getGrantStatus()
-          .then(grantState => {this.processGrantState_(grantState);});
-
       this.selectAndActivatePlatform_();
     });
+  }
+
+  /**
+   * Unblock document based on grant state and selected platform
+   */
+  startUnblockingDocument_() {
+    this.entitlementStore_.getGrantStatus()
+        .then(grantState => {this.processGrantState_(grantState);});
+
+    this.selectAndActivatePlatform_();
   }
 
   /** @private */
@@ -272,10 +279,9 @@ export class SubscriptionService {
           subscriptionPlatform.getServiceId(),
           entitlement
       );
-      // TODO (@prateekbh): Implement reset
-      // this.entitlementStore_.getGrantStatus()
-      //     .then(grantState => this.processGrantState_(grantState));
-      // this.selectAndActivatePlatform_();
+
+      this.entitlementStore_.clearGrantStatus();
+      this.startUnblockingDocument_();
     });
   }
 
