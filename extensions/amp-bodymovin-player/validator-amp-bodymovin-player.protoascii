@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ tags: {  # amp-bodymovin-player
     name: "amp-bodymovin-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -31,14 +29,7 @@ tags: {  # <amp-bodymovin-player>
 
   attrs: {
     name: "loop"
-    value_regex: "true|false|[0-9]+"
-  }
-  attrs: {
-    name: "no-autoplay"
-    value_regex: "true|false"
-  }
-  attrs: {
-    name: "name"
+    value_regex: "|[0-9]+"
   }
   attrs: {
     name: "src"
@@ -51,7 +42,6 @@ tags: {  # <amp-bodymovin-player>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
-    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

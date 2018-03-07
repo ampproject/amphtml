@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isFiniteNumber} from '../src/types';
 import {loadScript} from './3p';
 
 /**
@@ -30,16 +31,16 @@ function getBodymovinPlayerSdk(global, cb) {
 export function bodymovinplayer(global, data) {
   const animatingContainer = global.document.createElement('div');
   global.document.getElementById('c').appendChild(animatingContainer);
-  const shouldLoop = (data.loop === 'true' || data.loop === 'false') ?
-    data.loop === 'true' : parseInt(data.loop, 10);
+  const shouldLoop = data.loop == 'true';
+  const loop = isFiniteNumber(data.loop) ? parseInt(data.loop, 10) : shouldLoop;
+
   getBodymovinPlayerSdk(global, function() {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
-      loop: shouldLoop,
-      autoplay: data.autoplay === 'true',
+      loop,
+      autoplay: true,
       animationData: JSON.parse(data.animationData),
-      name: data.name,
     });
   });
 }

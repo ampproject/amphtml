@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-const TAG = 'amp-bodymovin-player';
-
 import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
+
+const TAG = 'amp-bodymovin-player';
 
 export class AmpBodymovinPlayer extends AMP.BaseElement {
 
@@ -32,8 +33,16 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
 
     /** @private @const */
     this.ampdoc_ = Services.ampdoc(this.element);
+
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {string} */
+    this.loop_ = true;
+
+    /** @private {string} */
+    this.src_ = null;
+
   }
 
   /** @override */
@@ -51,37 +60,32 @@ export class AmpBodymovinPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    this.element.setAttribute('data-loop', this.element.getAttribute('loop'));
-    this.element.setAttribute('data-autoplay',
-        this.element.hasAttribute('no-autoplay') ? false : true);
-
-    user().assert(
-        !this.element.hasAttribute('src'),
+  buildCallback() {
+    this.loop_ = this.element.getAttribute('loop') ?
+      this.element.getAttribute('loop') : this.loop_;
+    user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-player>');
-    if (this.element.hasAttribute('src')) {
-      const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-      return animData.then(data => {
-        // We will get here when the data has been fetched from the server
-        this.element.setAttribute('data-animation-data', JSON.stringify(data));
-        Services.vsyncFor(this.win).mutate(() => {
-          const iframe = getIframe(this.win, this.element, 'bodymovinplayer');
-          this.applyFillContent(iframe);
-          // Triggered by context.updateDimensions() inside the iframe.
-          listenFor(iframe, 'embed-size', data => {
-            this./*OK*/changeHeight(data['height']);
-          }, /* opt_is3P */true);
-          this.element.appendChild(iframe);
-          this.iframe_ = iframe;
-          return this.loadPromise(iframe);
-        });
-      });
-    }
+    assertHttpsUrl(this.element.getAttribute('src'), this.element);
+    this.src_ = this.element.getAttribute('src');
   }
 
   /** @override */
-  unlayoutOnPause() {
-    return true;
+  layoutCallback() {
+    this.element.setAttribute('data-loop', this.loop_);
+    const animData = batchFetchJsonFor(this.ampdoc_, this.element);
+    return animData.then(data => {
+      // We will get here when the data has been fetched from the server
+      this.element.setAttribute('data-animation-data', JSON.stringify(data));
+      //should become return vsync.mutatePromise(..
+      return Services.vsyncFor(this.win).mutatePromise(() => {
+        const iframe = getIframe(this.win, this.element, 'bodymovinplayer');
+        this.applyFillContent(iframe);
+        this.element.appendChild(iframe);
+        this.iframe_ = iframe;
+      }).then(() => {
+        return this.loadPromise(iframe);
+      });
+    });
   }
 
   /** @override */

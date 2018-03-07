@@ -35,10 +35,12 @@ describes.realWin('amp-bodymovin-player', {
     for (const key in attributes) {
       ampBP.setAttribute(key, attributes[key]);
     }
-    console.log(ampBP)
+    console.log(ampBP);
     doc.body.appendChild(ampBP);
     return ampBP;
   }
+
+  // add test for https only
 
   it('`src` attribute is mandatory', () => {
     const attrs = {
@@ -49,8 +51,8 @@ describes.realWin('amp-bodymovin-player', {
 
   it.only('Test that animation autoplays by default', () => {
     const attrs = {'src': 'https://nainar.github.io/loader.json'};
-    const ampBP =  getAmpBodymovinPlayer(attrs);
-    console.log(ampBP)
+    const ampBP = getAmpBodymovinPlayer(attrs);
+    console.log(ampBP);
     expect(ampBP.hasAttribute('no-autoplay')).to.be.false;
     expect(ampBP.hasAttribute('data-autoplay')).to.be.true;
   });
@@ -61,7 +63,7 @@ describes.realWin('amp-bodymovin-player', {
       'loop': 'false',
     };
     const ampBP = getAmpBodymovinPlayer(attrs);
-    console.log(ampBP)
+    console.log(ampBP);
     expect(ampBP.getAttribute('loop')).to.equal('false');
     expect(ampBP.getAttribute('data-loop')).to.equal('false');
   });
@@ -76,17 +78,5 @@ describes.realWin('amp-bodymovin-player', {
     expect(ampBP.getAttribute('loop')).to.equal('10');
     expect(ampBP.getAttribute('data-loop')).to.equal('10');
   });
-
-  it('Test that animation doesn\'t autoplay when `no-autoplay` ' +
-    'is set', () => {
-    const attrs = {
-      'src': 'https://nainar.github.io/loader.json',
-      'no-autoplay': '',
-    };
-    const ampBP = getAmpBodymovinPlayer(attrs);
-    expect(ampBP.hasAttribute('no-autoplay')).to.be.true;
-    expect(ampBP.getAttribute('data-autoplay')).to.be.false;
-  });
-
 
 });
