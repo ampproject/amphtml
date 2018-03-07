@@ -39,7 +39,7 @@ const minimatch = require('minimatch');
 const minimist = require('minimist');
 const path = require('path');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
-const removeJsFilesInDirectory = require('./build-system/typescript').removeJsFilesInDirectory;
+const rimraf = require('rimraf');
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
@@ -1014,7 +1014,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
-            removeJsFilesInDirectory(srcDir);
+            rimraf.sync(path.join(srcDir, '**/*.js'));
           }
         });
   }
@@ -1081,7 +1081,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
           // Remove intemediary, transpiled JS files after compilation.
           if (options.typeScript) {
-            removeJsFilesInDirectory(srcDir);
+            rimraf.sync(path.join(srcDir, '**/*.js'));
           }
         })
         .then(() => {

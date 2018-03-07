@@ -30,7 +30,7 @@ const tsickle = require('tsickle');
  * @param {string} srcFilename
  */
 exports.transpileTs = function(srcDir, srcFilename) {
-  const tsEntry = path.join(srcDir, srcFilename).replace('.js', '.ts');
+  const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson({
     'module': 'ES6',
     'target': 'ES6',
@@ -43,11 +43,23 @@ exports.transpileTs = function(srcDir, srcFilename) {
   const compilerHost = ts.createCompilerHost(tsOptions);
   const program = ts.createProgram([tsEntry], tsOptions, compilerHost);
 
+  // TODO(choumx): This was partially copy-pasta'd from tsickle. Add a default
+  // to tsickle so this can be an optional param.
+  const pathToModuleName = (context, fileName) => {
+    fileName = fileName.replace(/\.js$/, '');
+    if (fileName[0] === '.') {
+      // './foo' or '../foo'.
+      // Resolve the path against the dirname of the current module.
+      fileName = path.join(path.dirname(context), fileName);
+    }
+    return fileName;
+  };
   const transformerHost = {
+    host: compilerHost,
+    options: tsOptions,
+    pathToModuleName,
     shouldSkipTsickleProcessing: () => false,
     transformTypesToClosure: true,
-    options: tsOptions,
-    host: compilerHost,
   };
   const emitResult = tsickle.emitWithTsickle(program, transformerHost,
       compilerHost, tsOptions, undefined, (filePath, contents) => {
@@ -59,22 +71,4 @@ exports.transpileTs = function(srcDir, srcFilename) {
   if (diagnostics.length) {
     log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
   }
-};
-
-/**
- * Removes all JS files in given directory and its subdirectories.
- *
- * @param {string} dir
- */
-exports.removeJsFilesInDirectory = function removeJsFilesInDirectory(dir) {
-  const files = fs.readdirSync(dir);
-  files.forEach(file => {
-    const filename = path.join(dir, file);
-    const stat = fs.lstatSync(filename);
-    if (stat.isDirectory()) {
-      removeJsFilesInDirectory(filename);
-    } else if (filename.endsWith('.js')) {
-      fs.remove(filename);
-    }
-  });
 };
