@@ -33,6 +33,6 @@ Please visit our website (https://adpicker.net) for more details
 Supported parameters:
 
 **Required**
-- width:        required by amp
-- height:       required by amp
+- width:        width of ad area
+- height:       height of ad area
 - data-ph:      the placement id
