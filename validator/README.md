@@ -65,3 +65,19 @@ testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height'
 testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
 ...
 ```
+
+### Building on MacOS
+On MacOS, download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/). Then use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py). If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+
+To verify that you have the necessary prerequisites, run and verify:
+```
+$ protoc --version
+libprotoc 3.5.1
+```
+and
+```
+$ python
+>>> import google.protobuf
+>>>
+```
+Now `cd amphtml/validator` and run `python build.py`.
