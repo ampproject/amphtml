@@ -99,6 +99,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         this.insertIframe_();
       }
     }
+    return Promise.resolve();
   }
 
   /** @override */
