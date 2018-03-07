@@ -115,9 +115,7 @@ export class AmpEmbedly extends AMP.BaseElement {
           break;
         }
 
-        // data.html doesn't contain an iframe, load as html and its script as external.
-        const fileParts = new Blob([data.html], {type: 'text/html'});
-        src = URL.createObjectURL(fileParts);
+        src = this.createObjectUrl_(data.html);
 
         iframe.onload = function() {
           loadScript(this.contentWindow.window, srcUrl, () => {
@@ -129,7 +127,10 @@ export class AmpEmbedly extends AMP.BaseElement {
       }
 
       case resourceType.PHOTO: {
-        src = data.url;
+        const {url, height, width} = data;
+        const html = `<img src="${url}" height="${height}" width="${width}">`;
+
+        src = this.createObjectUrl_(html);
         break;
       }
 
@@ -142,6 +143,16 @@ export class AmpEmbedly extends AMP.BaseElement {
     iframe.src = src;
 
     return Promise.resolve(iframe);
+  }
+
+  /**
+   * Gets object url from given html.
+   * @param {string} html
+   * @private
+   */
+  createObjectUrl_(html) {
+    const fileParts = new Blob([html], {type: 'text/html'});
+    return URL.createObjectURL(fileParts);
   }
 }
 
