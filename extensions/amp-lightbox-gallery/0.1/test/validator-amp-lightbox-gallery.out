@@ -46,9 +46,7 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:41:2 The attri
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 >>   ^~~~~~~~~
 amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:43:2 The attribute 'lightbox' in tag 'amp-img' is missing or incorrect, but required by attribute 'lightbox-thumbnail-id'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
-|    <!-- Invalid: cannot have lightbox-exclude on an item that isn't in a carousel -->
-|    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
-|  
+|    
 |    <!-- Valid -->
 |    <amp-video
 |      lightbox
