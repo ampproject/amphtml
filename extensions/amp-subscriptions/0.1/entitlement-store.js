@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {Observable} from '../../../src/observable';
 
-/** @typedef {{serviceId: string, entitlements: !Entitlements}} */
+/** @typedef {{serviceId: string, entitlement: !./entitlement.Entitlement}} */
 export let EntitlementChangeEventDef;
 
 
@@ -31,7 +30,7 @@ export class EntitlementStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @const {!Object<string, !Entitlements>} */
+    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
@@ -40,7 +39,7 @@ export class EntitlementStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private {?Promise<!Array<!Entitlements>>} */
+    /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
   }
@@ -56,13 +55,13 @@ export class EntitlementStore {
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {!Entitlements} entitlements
+   * @param {!./entitlement.Entitlement} entitlement
    */
-  resolveEntitlement(serviceId, entitlements) {
-    this.entitlements_[serviceId] = entitlements;
-
+  resolveEntitlement(serviceId, entitlement) {
+    entitlement.service = serviceId;
+    this.entitlements_[serviceId] = entitlement;
     // Call all onChange callbacks.
-    this.onChangeCallbacks_.fire({serviceId, entitlements});
+    this.onChangeCallbacks_.fire({serviceId, entitlement});
   }
 
   /**
@@ -77,8 +76,8 @@ export class EntitlementStore {
 
       // Check if current entitlements unblocks the reader
       for (const key in this.entitlements_) {
-        const entitlements = (this.entitlements_[key]);
-        if (entitlements.enablesThis()) {
+        const entitlement = (this.entitlements_[key]);
+        if (entitlement.enablesThis()) {
           return resolve(true);
         }
       }
@@ -88,8 +87,8 @@ export class EntitlementStore {
         return resolve(false);
       } else {
         // Listen if any upcoming entitlements unblock the reader
-        this.onChange(({entitlements}) => {
-          if (entitlements.enablesThis()) {
+        this.onChange(({entitlement}) => {
+          if (entitlement.enablesThis()) {
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
             resolve(false);
@@ -104,7 +103,7 @@ export class EntitlementStore {
   /**
    * Returns entitlements when all services are done fetching them.
    * @private
-   * @returns {!Promise<!Array<!Entitlements>>}
+   * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements_() {
     if (this.allResolvedPromise_) {
@@ -131,7 +130,7 @@ export class EntitlementStore {
   /**
    * Returns entitlements for resolved platforms.
    * @private
-   * @returns {!Array<!Entitlements>}
+   * @returns {!Array<!./entitlement.Entitlement>}
    */
   getAvailablePlatformsEntitlements_() {
     const entitlements = [];
@@ -145,7 +144,7 @@ export class EntitlementStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<!Entitlements>}
+   * @returns {!Promise<!./entitlement.Entitlement>}
    */
   selectPlatform() {
     return this.getAllPlatformsEntitlements_().then(entitlements => {
@@ -166,8 +165,8 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
-   * @param {!Array<!Entitlements>} entitlements
-   * @returns {!Entitlements}
+   * @param {!Array<!./entitlement.Entitlement>} entitlements
+   * @returns {!./entitlement.Entitlement}
    */
   selectApplicablePlatform_(entitlements) {
     let chosenPlatform;
@@ -179,10 +178,4 @@ export class EntitlementStore {
     });
     return chosenPlatform;
   }
-}
-
-
-/** @package @visibleForTesting */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
 }

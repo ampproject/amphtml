@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {dict} from '../../../src/utils/object';
+import {Entitlement} from './entitlement';
 import {evaluateExpr} from './expr';
 
 /**
@@ -38,17 +37,17 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  render(entitlements) {
-    this.renderActions_(entitlements);
+  render(renderState) {
+    this.renderActions_(renderState);
   }
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  renderActions_(entitlements) {
+  renderActions_(renderState) {
     return this.ampdoc_.whenReady().then(() => {
       // Find the first matching dialog.
       const actionCandidates =
@@ -56,15 +55,8 @@ export class LocalSubscriptionPlatformRenderer {
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-
-        // TODO(@prateekbh): cleanup this forloop with Entitlements Wrapper
-        const entitlementsJson = entitlements.json();
-        /** @type {!JsonObject} */
-        const evaluationJson = dict();
-        for (const key in entitlementsJson) {
-          evaluationJson[key] = entitlementsJson[key];
-        }
-        if (expr && evaluateExpr(expr, evaluationJson)) {
+        if (expr && evaluateExpr(expr,
+            /** @type {!JsonObject} */(renderState))) {
           candidate.setAttribute('i-amphtml-subs-display', '');
         }
       }
@@ -76,6 +68,6 @@ export class LocalSubscriptionPlatformRenderer {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @VisibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }
