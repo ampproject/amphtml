@@ -4495,6 +4495,7 @@ attr_lists: {
   attrs: {
     name: "lightbox-thumbnail-id"
     requires_extension: "amp-lightbox-gallery"
+    value_regex: "^[a-zA-Z][\w:.-]*$"
     trigger: {
       also_requires_attr: "lightbox"
     }
