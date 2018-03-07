@@ -15,31 +15,86 @@
  */
 
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {ConsentPolicyManager} from './consent-policy-manager';
-import {ConsentStateManager} from './consent-state-manager';
+import {
+  CONSENT_ITEM_STATE,
+  ConsentStateManager,
+} from './consent-state-manager';
+import {dict} from '../../../src/utils/object';
+import {
+  ConsentPolicyManager,
+} from './consent-policy-manager';
+import {isEnumValue} from '../../../src/types';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
+import {
+  childElementsByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
+import {parseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANGER = 'consentPolicyManager';
 const AMP_CONSENT_EXPERIMENT = 'amp-consent';
+const TAG = 'amp-consent';
 
 
 export class AmpConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.ampdoc = null;
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
 
-    this.checkConsentHref_ = null;
-
+    /** @private {?./consent-state-manager.ConsentStateManager} */
     this.consentStateManager_ = null;
+
+    /** @private {?./consent-policy-manager.ConsentPolicyManager} */
+    this.consentPolicyManager_ = null;
+
+    /** @private {?Promise} */
+    this.cidPromise_ = null;
+
+    /** @private {!JsonObject} */
+    this.consentConfig_ = dict();
+
+    /** @private {!JsonObject} */
+    this.policyConfig_ = dict();
+
+    /** @private {!Object} */
+    this.consentUIRequired_ = {};
   }
 
   buildCallback() {
-    if (!isExperimentOn(this.ampdoc.win, AMP_CONSENT_EXPERIMENT)) {
+    this.ampdoc_ = this.getAmpDoc();
+
+    if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
     }
+
+    // TODO: Decide what to do with incorrect configuration.
+    this.assertAndParseConfig_();
+
+    getServicePromiseForDoc(this.ampdoc_, CONSENT_POLICY_MANGER)
+        .then(manager => {
+          this.consentPolicyManager_ = manager;
+          this.generateDefaultPolicy_();
+          const policyKeys = Object.keys(this.policyConfig_);
+          for (let i = 0; i < policyKeys.length; i++) {
+            this.consentPolicyManager_.registerConsentPolicyInstance(
+                policyKeys[i], this.policyConfig_[policyKeys[i]]);
+          }
+        });
+
+    getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER)
+        .then(manager => {
+          this.consentStateManager_ = manager;
+          this.init_();
+        });
+
   }
 
   /** @override */
@@ -48,39 +103,130 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Read and parse consent instance config
+   * Init the amp-consent by registering and initiate consent instance.
    */
-  parseConsentInstanceConfig_() {
+  init_() {
+    this.cidPromise_ = Services.cidForDoc(this.element).then(cid => {
+      // Note: do not wait for consent of the cid used for amp-consent
+      return cid.get({
+        scope: TAG,
+        createCookieIfNotPresent: true,
+      }, Promise.resolve());
+    });
 
+    const instanceKeys = Object.keys(this.consentConfig_);
+    for (let i = 0; i < instanceKeys.length; i++) {
+      const instanceId = instanceKeys[i];
+      this.consentStateManager_.registerConsentInstance(instanceId);
+      this.getConsentRemote_(instanceId).then(response => {
+        this.parseConsentResponse_(instanceId, response);
+        this.handleUI_(instanceId);
+      }).catch(unusedError => {
+        // TODO: Handle errors
+      });
+    }
+  }
+
+  /**
+   * Generate default consent policy if not defined
+   */
+  generateDefaultPolicy_() {
+    if (this.policyConfig_ && this.policyConfig_['default']) {
+      return;
+    }
+    // Generate default policy
+    const instanceKeys = Object.keys(this.consentConfig_);
+    const defaultWaitForItems = {};
+    for (let i = 0; i < instanceKeys.length; i++) {
+      // TODO: Need to support an array.
+      defaultWaitForItems[instanceKeys[i]] = undefined;
+    }
+    const defaultPolicy = {
+      'itemsToWait': defaultWaitForItems,
+    };
+    this.policyConfig_['default'] = defaultPolicy;
   }
 
   /**
    * Get localStored consent info, and send request to get consent from endpoint
+   * @param {string} instanceId
+   * @return {!Promise<!JsonObject>}
    */
-  getConsentFromEndpoint_() {
+  getConsentRemote_(instanceId) {
+    return this.consentStateManager_.getConsentInstanceState(instanceId)
+        .then(localState => {
+          return this.cidPromise_.then(ampUserId => {
+            const request = /** @type {!JsonObject} */ ({
+              'ampUserId': ampUserId,
+              'consentInstanceId': instanceId,
+              'consentState': localState,
+            });
 
+            // TODO: Decide which request method/Content Type to use.
+            const init = {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              method: 'POST',
+              body: request,
+              requireAmpResponseSourceOrigin: false,
+            };
+            const href =
+                this.consentConfig_[instanceId]['check-consent-href'];
+            assertHttpsUrl(href, this.element);
+            return Services.xhrFor(this.win)
+                .fetchJson(href, init)
+                .then(res => res.json());
+          });
+        });
+  }
+
+
+  /**
+   * Read and parse consent instance config
+   */
+  assertAndParseConfig_() {
+    // All consent config within the amp-consent component. There will be only
+    // one single amp-consent allowed in page.
+    const scripts = childElementsByTag(this.element, 'script');
+    user().assert(scripts.length == 1,
+        `${TAG} should have (only) one <script> child`);
+    const script = scripts[0];
+    user().assert(isJsonScriptTag(script),
+        `${TAG} consent instance config should be put in a <script>` +
+        'tag with type= "application/json"');
+    const config = parseJson(script.textContent);
+    const consents = config['consents'];
+    user().assert(consents, `${TAG}: consents config is required`);
+    this.consentConfig_ = consents;
   }
 
   /**
-   * On consent update, inform endpoint
+   * Parse response from server endpoint
+   * @param {string} instanceId
+   * @param {?JsonObject} response
    */
-  updateConsentToEndpoint_() {
-
+  parseConsentResponse_(instanceId, response) {
+    if (!response || !response['consentRequired']) {
+      //Do not need to block.
+      this.consentUIRequired_[instanceId] = false;
+      this.consentStateManager_.ignoreConsentInstance(instanceId);
+      return;
+    }
+    this.consentUIRequired_[instanceId] = !!response['prompt'];
   }
 
-  /** Display UI */
-  promptUI_() {
-
-  }
-
-  /** On user action, update consent, update UI */
-  onUserAction(unusedUserAction) {
-
-  }
-
-  /** Display consent manger UI */
-  onDisplayConsentManagerUI() {
-
+  /**
+   * Handle UI.
+   * @param {string} instanceId
+   */
+  handleUI_(instanceId) {
+    // Prompt UI based on other UI on display and promptList for the instance.
+    if (!this.consentUIRequired_[instanceId]) {
+      return;
+    }
+    this.consentStateManager_.updateConsentInstanceState(instanceId, 2);
   }
 }
 

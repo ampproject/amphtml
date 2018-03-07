@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+import {
+  CONSENT_ITEM_STATE,
+  ConsentStateManager,
+} from './consent-state-manager';
+import {getServicePromiseForDoc} from '../../../src/service';
+
+
+const CONSENT_STATE_MANAGER = 'consentStateManager';
+
+
 /**
  * Possible consent policy state to proceed with.
  * @enum {number}
@@ -28,17 +38,39 @@ export class ConsentPolicyManager {
   constructor(ampdoc) {
     this.ampdoc_ = ampdoc;
 
-    this.defaultPolicy_ = null;
+    this.policyPromise_ = {};
 
-    this.policyInstances_ = {};
+    this.policyResolver_ = {};
+
+    this.ConsentStateManagerPromise_ =
+        getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
   }
 
   /**
    * Register the policy instance
-   * @param {string} unusedPolicyId
+   * @param {string} policyId
+   * @param {!JsonObject} config
    */
-  registerConsentPolicyInstance(unusedPolicyId) {
+  registerConsentPolicyInstance(policyId, config) {
+    if (this.policyPromise_[policyId]) {
+      return;
+    }
+    this.policyPromise_ = new Promise(resolve => {
+      this.policyResolver_[policyId] = resolve;
+    });
 
+    this.initPolicy_(config);
+  }
+
+  initPolicy_(config) {
+    this.ConsentStateManagerPromise_.then(manager => {
+      const itemsToWait = Object.keys(config['itemsToWait']);
+      for (let i = 0; i < itemsToWait.length; i++) {
+        manager.onConsentStateChange(itemsToWait[i], state => {
+          this.consentStateChangeHandler_(state);
+        });
+      }
+    });
   }
 
   /**
