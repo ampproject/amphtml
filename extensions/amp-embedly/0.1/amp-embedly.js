@@ -35,7 +35,7 @@ const SRC_REGEXP = /src="([^"]+)"/;
 
 /**
  * oEmbed resource types.
- * @const {Readonly<{PHOTO: string, VIDEO: string, LINK: string, RICH: string}>}
+ * @const {Object<{PHOTO: string, VIDEO: string, LINK: string, RICH: string}>}
  */
 const resourceType = Object.freeze({
   PHOTO: 'photo',
