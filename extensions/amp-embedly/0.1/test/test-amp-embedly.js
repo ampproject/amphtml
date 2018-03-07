@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpEmbedly} from '../amp-embedly';
+// import {AmpEmbedly} from '../amp-embedly';
 
 describes.realWin('amp-embedly', {
   amp: {
     extensions: ['amp-embedly'],
-  }
+  },
 }, env => {
 
   let win;
