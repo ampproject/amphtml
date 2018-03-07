@@ -4084,6 +4084,24 @@ attr_lists: {
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
 }
+
+# Lightboxable Elements
+attr_lists: {
+  name: "lightboxable-elements"
+  attrs: { name: "lightbox" }
+  attrs: { 
+    name: "lightbox-thumbnail-id" 
+    value_regex: "^[a-zA-Z][a-zA-Z\d_-]*"
+    trigger: {
+      also_requires_attr: "lightbox"
+    }
+  }
+  attrs: { 
+    name: "lightbox-exclude" 
+    value: ""
+  }
+}
+
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
@@ -4099,6 +4117,7 @@ tags: {  # <amp-img>
   attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
+  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
@@ -4485,20 +4504,6 @@ attr_lists: {
     name: "amp-fx"
     value_casei: "parallax"
     requires_extension: "amp-fx-collection"
-  }
-  # amp-lightbox-gallery specific attributes, see
-  # https://www.ampproject.org/docs/reference/components/amp-lightbox-gallery
-  attrs: {
-    name: "lightbox"
-    requires_extension: "amp-lightbox-gallery"
-  }
-  attrs: {
-    name: "lightbox-thumbnail-id"
-    requires_extension: "amp-lightbox-gallery"
-    value_regex: "^[a-zA-Z][a-zA-Z\d_-]*"
-    trigger: {
-      also_requires_attr: "lightbox"
-    }
   }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
