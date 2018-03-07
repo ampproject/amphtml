@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <!-- Responsive Ad -->
 <amp-ad width="20" height="3"
-    type="sogou_ad"
+    type="sogouad"
     layout="responsive"
     data-slot="854370"
     data-w="20"
@@ -30,7 +30,7 @@ limitations under the License.
 
 <!-- Fixed-height Ad -->
 <amp-ad height="69"
-    type="sogou_ad"
+    type="sogouad"
     layout="fixed-height"
     data-slot="854366"
     data-w="100%"
