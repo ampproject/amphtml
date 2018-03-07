@@ -17,14 +17,24 @@
 import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadScript} from '../../../3p/3p';
 import {user} from '../../../src/log';
 
-/** @const {RegExp} */
+/** @private @const {string} */
+const TAG = 'amp-embedly';
+
+/**
+ * @const {string}
+ */
+const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
+
+/**
+ * Regex used to extract src from returned oEmbed data.
+ * @const {RegExp}
+ * */
 const SRC_REGEXP = /src="([^"]+)"/;
 
 /**
- * Embedly resource types.
+ * oEmbed resource types.
  * @const {Readonly<{PHOTO: string, VIDEO: string, LINK: string, RICH: string}>}
  */
 const resourceType = Object.freeze({
@@ -34,8 +44,11 @@ const resourceType = Object.freeze({
   RICH: 'rich',
 });
 
+/**
+ * Implementation of the amp-embedly component.
+ * See {@link ../amp-embedly.md} for the spec.
+ */
 export class AmpEmbedly extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -59,17 +72,17 @@ export class AmpEmbedly extends AMP.BaseElement {
   buildCallback() {
     this.key_ = user().assert(
         this.element.getAttribute('data-key'),
-        'The data-key attribute is required for <amp-embedly> %s',
+        `The data-key attribute is required for <${TAG}> %s`,
         this.element
     );
 
     this.url_ = user().assert(
         this.element.getAttribute('data-url'),
-        'The data-url attribute is required for <amp-embedly> %s',
+        `The data-url attribute is required for <${TAG}> %s`,
         this.element
     );
 
-    return this.getEmbedlyData_().then(this.getIframe_).then(iframe => {
+    return this.getOembedData_().then(this.getIframe_).then(iframe => {
       this.iframe_ = iframe;
       this.element.appendChild(iframe);
 
@@ -82,12 +95,14 @@ export class AmpEmbedly extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @return {!Promise<!JsonObject>}  */
-  getEmbedlyData_() {
-    const baseUrl = 'https://api.embedly.com/1/oembed?';
+  /**
+   * Fetches oEmbed data from embedly's api.
+   * @return {!Promise<!JsonObject>}
+   * */
+  getOembedData_() {
     const query = `key=${this.key_}&url=${encodeURIComponent(this.url_)}`;
 
-    return this.xhr_.fetchJson(baseUrl + query, {
+    return this.xhr_.fetchJson(BASE_API_URL + query, {
       requireAmpResponseSourceOrigin: false,
     }).then(res => res.json());
   }
@@ -126,9 +141,12 @@ export class AmpEmbedly extends AMP.BaseElement {
         src = this.createObjectUrl_(data.html);
 
         iframe.onload = function() {
-          loadScript(this.contentWindow.window, srcUrl, () => {
-            this.readyState = 'complete';
-          });
+          const win = this.contentWindow.window;
+          const script = win.document.createElement('script');
+          script.src = srcUrl;
+          win.document.body.appendChild(script);
+
+          iframe.readyState = 'complete';
         };
 
         break;
@@ -164,4 +182,4 @@ export class AmpEmbedly extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-embedly', AmpEmbedly);
+AMP.registerElement(TAG, AmpEmbedly);
