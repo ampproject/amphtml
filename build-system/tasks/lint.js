@@ -127,7 +127,10 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
-  const stream = initializeStream(argv.files || config.lintGlobs, {});
+  if (argv.files) {
+    config.lintGlobs[config.lintGlobs.indexOf('**/*.js')] = argv.files;
+  }
+  const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
 }
 
