@@ -105,14 +105,17 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.vsync_.mutate = function(callback) {
         callback();
       };
+      impl.adReadyPromise_ = Promise.resolve();
 
       impl.onScroll_();
       expect(removeOnScrollListenerSpy).to.have.been.called;
       // Layout on ad is called only after fixed layer is done.
       expect(scheduleLayoutSpy).to.not.have.been.called;
-      expect(addToFixedLayerStub).to.have.been.calledOnce;
-      return addToFixedLayerPromise.then(() => {
-        expect(scheduleLayoutSpy).to.have.been.calledOnce;
+      return impl.adReadyPromise_.then(() => {
+        expect(addToFixedLayerStub).to.have.been.calledOnce;
+        return addToFixedLayerPromise.then(() => {
+          expect(scheduleLayoutSpy).to.have.been.calledOnce;
+        });
       });
     });
 
@@ -155,15 +158,18 @@ describes.realWin('amp-sticky-ad 1.0 version', {
         callback();
       };
 
+      impl.adReadyPromise_ = Promise.resolve();
       impl.display_();
-      expect(addCloseButtonSpy).to.be.called;
-      expect(impl.element.children[0]).to.be.not.null;
-      expect(impl.element.children[0].classList.contains(
-          'amp-sticky-ad-top-padding')).to.be.true;
-      expect(impl.element.children[0].tagName).to.equal(
-          'AMP-STICKY-AD-TOP-PADDING');
-      expect(impl.element.children[2]).to.be.not.null;
-      expect(impl.element.children[2].tagName).to.equal('BUTTON');
+      return impl.adReadyPromise_.then(() => {
+        expect(addCloseButtonSpy).to.be.called;
+        expect(impl.element.children[0]).to.be.not.null;
+        expect(impl.element.children[0].classList.contains(
+            'amp-sticky-ad-top-padding')).to.be.true;
+        expect(impl.element.children[0].tagName).to.equal(
+            'AMP-STICKY-AD-TOP-PADDING');
+        expect(impl.element.children[2]).to.be.not.null;
+        expect(impl.element.children[2].tagName).to.equal('BUTTON');
+      });
     });
 
     it('should wait for built and load-end signals', () => {
