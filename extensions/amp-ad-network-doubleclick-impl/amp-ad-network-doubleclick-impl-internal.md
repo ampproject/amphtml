@@ -139,7 +139,7 @@ Optionally, a network may override AmpA4a's `refresh` method, which would allow 
 
 Refresh may be enabled across all eligible slots for a set of opted-in network on a page by adding the following metadata tag:
 
-`<meta name="amp-ad-refresh" content=”network1=refresh_interval1,network2=refresh_interval2,...">`
+`<meta name="amp-ad-refresh" content="network1=refresh_interval1,network2=refresh_interval2,...">`
 
 Where `refresh_interval` is the time, in seconds, in between refresh cycles. This value must be numeric and no less than 30. Individual slots may be opted-out of refresh by adding `data-enable-refresh=false` to the slot.
 
