@@ -15,7 +15,6 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
-import {Entitlement} from './entitlement';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
@@ -30,7 +29,7 @@ import {tryParseJson} from '../../../src/json';
 /** @const */
 const TAG = 'amp-subscriptions';
 
-/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !Entitlement}} */
+/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject}} */
 export let RenderState;
 
 export class SubscriptionService {
@@ -163,7 +162,7 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!Entitlement} entitlement
+   * @param {!./entitlement.Entitlement} entitlement
    * @private
    */
   resolveEntitlementsToStore_(entitlement) {
@@ -175,8 +174,10 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   fetchEntitlements_(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlement =>
-      this.resolveEntitlementsToStore_(entitlement));
+    subscriptionPlatform.getEntitlements().then(entitlement => {
+      entitlement.service = subscriptionPlatform.getServiceId();
+      this.resolveEntitlementsToStore_(entitlement);
+    });
   }
 
   /**
@@ -216,9 +217,9 @@ export class SubscriptionService {
     this.entitlementStore_.selectPlatform().then(entitlement => {
       /** @type {!RenderState} */
       const renderState = {
-        entitlement,
+        entitlement: entitlement.json(),
         loggedIn: false, // TODO (@prateekbh): ask how to derive this?
-        subscribed: false, // TODO (@prateekbh): ask how to derive this?
+        subscribed: !!entitlement.subscriptionToken,
         granted: this.grantState_,
       };
 
@@ -233,15 +234,17 @@ export class SubscriptionService {
 
   /**
    * Returns Page config
-   * @returns {?PageConfig}
+   * @returns {!PageConfig}
    */
   getPageConfig() {
-    return this.pageConfig_;
+    const pageConfig = dev().assert(this.pageConfig_,
+        'Page config is not yet fetched');
+    return /** @type {!PageConfig} */(pageConfig);
   }
 
   /**
    * Re authorizes a platform
-   * @param {SubscriptionPlatform} subscriptionPlatform
+   * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   reAuthorizePlatform(subscriptionPlatform) {
     subscriptionPlatform.getEntitlements().then(() =>
@@ -256,8 +259,6 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.subscriptionPlatforms_['local'],
           'Local platform is not registered'));
-    dev().assert(localPlatform.executeAction,
-        'executeAction not found on local platform');
 
     localPlatform.executeAction(action);
   }
@@ -275,14 +276,6 @@ export function getPlatformClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @VisibleForTesting
- */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
 }
 
 

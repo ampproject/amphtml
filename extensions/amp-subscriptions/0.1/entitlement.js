@@ -31,11 +31,11 @@ export class Entitlement {
    */
   constructor(source, raw, service, products, subscriptionToken) {
     /** @const {string} */
-    this.service = service;
-    /** @const {string} */
     this.raw = raw;
     /** @const {string} */
     this.source = source;
+    /** {string} */
+    this.service = service;
     /** @const {!Array<string>} */
     this.products = products;
     /** @private {?string} */
@@ -50,9 +50,9 @@ export class Entitlement {
    */
   json() {
     const entitlementJson = dict({
-      'service': this.service,
       'raw': this.raw,
       'source': this.source,
+      'service': this.service,
       'products': this.products,
       'subscriptionToken': this.subscriptionToken,
     });
@@ -95,11 +95,11 @@ export class Entitlement {
     if (!json) {
       json = dict();
     }
-    const service = json['service'] || '';
     const raw = JSON.stringify(json);
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
-    return new Entitlement(source, raw, service, products, subscriptionToken);
+    return new Entitlement(source, raw, /* service */ '',
+        products, subscriptionToken);
   }
 }

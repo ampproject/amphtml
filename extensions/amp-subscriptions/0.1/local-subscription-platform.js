@@ -18,7 +18,6 @@ import {Actions} from './actions';
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
 import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
@@ -36,7 +35,7 @@ export class LocalSubscriptionPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
-   * @param {!ServiceAdapter} serviceAdapter
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @const */
@@ -48,7 +47,7 @@ export class LocalSubscriptionPlatform {
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = platformConfig;
 
-    /** @private @const {!ServiceAdapter} */
+    /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
     /** @const @private {!PageConfig} */
@@ -197,8 +196,4 @@ export class LocalSubscriptionPlatform {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
-}
-
-export function getServiceAdapterClassForTesting() {
-  return ServiceAdapter;
 }

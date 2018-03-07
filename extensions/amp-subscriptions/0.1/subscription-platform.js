@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 /**
@@ -33,7 +32,7 @@ export class SubscriptionPlatform {
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlement>}
+   * @return {!Promise<!./entitlement.Entitlement>}
    */
   getEntitlements() {}
 
@@ -42,15 +41,6 @@ export class SubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} unusedRenderState
    */
   activate(unusedRenderState) {}
-}
-
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
 }
 
 /**

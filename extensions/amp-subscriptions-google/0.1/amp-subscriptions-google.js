@@ -19,7 +19,6 @@ import {
   Fetcher,
 } from '../../../third_party/subscriptions-project/swg';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-subscriptions-google';
@@ -39,7 +38,7 @@ export class GoogleSubscriptionsPlatformService {
 
   /**
    * @param {!JsonObject} platformConfig
-   * @param {!ServiceAdapter} serviceAdapter
+   * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    * @return {!GoogleSubscriptionsPlatform}
    */
   createPlatform(platformConfig, serviceAdapter) {
@@ -57,7 +56,7 @@ export class GoogleSubscriptionsPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
-   * @param {!ServiceAdapter} serviceAdapter
+   * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @private @const {!ConfiguredRuntime} */
@@ -139,8 +138,4 @@ export function getFetcherClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
-}
-
-export function getServiceAdapterClassForTesting() {
-  return ServiceAdapter;
 }

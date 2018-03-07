@@ -50,12 +50,12 @@ env => {
     });
   });
 
-  describe('delegateToLocal', () => {
-    it('should call delegateToLocal of subscription service', () => {
+  describe('delegateActionToLocal', () => {
+    it('should call delegateActionToLocal of subscription service', () => {
       const pageConfigStub = sandbox.stub(subscriptionService,
           'delegateActionToLocal');
       const action = 'action';
-      serviceAdapter.delegateToLocal(action);
+      serviceAdapter.delegateActionToLocal(action);
       expect(pageConfigStub).to.be.calledWith(action);
     });
   });

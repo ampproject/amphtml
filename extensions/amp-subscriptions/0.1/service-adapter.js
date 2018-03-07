@@ -15,8 +15,6 @@
  */
 
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {SubscriptionPlatform} from './subscription-platform';
-import {dev} from '../../../src/log';
 
 export class ServiceAdapter {
 
@@ -32,30 +30,24 @@ export class ServiceAdapter {
    * @returns {!PageConfig}
    */
   getPageConfig() {
-    const pageConfig = dev().assert(this.subscriptionService_.getPageConfig());
-    return /** @type {!PageConfig} */(pageConfig);
+    return this.subscriptionService_.getPageConfig();
   }
 
   /**
    * Delegates actions to local platform
    * @param {string} action
    */
-  delegateToLocal(action) {
+  delegateActionToLocal(action) {
     this.subscriptionService_.delegateActionToLocal(action);
   }
 
   /**
    * Reauthorize platforms
-   * @param {SubscriptionPlatform} subscriptionPlatform
+   * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */
   reAuthorizePlatform(subscriptionPlatform) {
     this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
   }
-}
-
-/** @package @VisibleForTesting */
-export function getSubscriptionPlatformForTesting() {
-  return SubscriptionPlatform;
 }
 
 /** @package @VisibleForTesting */

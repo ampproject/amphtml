@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 
-/** @typedef {{serviceId: string, entitlement: !Entitlement}} */
+/** @typedef {{serviceId: string, entitlement: !./entitlement.Entitlement}} */
 export let EntitlementChangeEventDef;
 
 
@@ -31,7 +30,7 @@ export class EntitlementStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @const {!Object<string, !Entitlement>} */
+    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
@@ -40,7 +39,7 @@ export class EntitlementStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private {?Promise<!Array<!Entitlement>>} */
+    /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
   }
@@ -56,7 +55,7 @@ export class EntitlementStore {
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {!Entitlement} entitlement
+   * @param {!./entitlement.Entitlement} entitlement
    */
   resolveEntitlement(serviceId, entitlement) {
     this.entitlements_[serviceId] = entitlement;
@@ -104,7 +103,7 @@ export class EntitlementStore {
   /**
    * Returns entitlements when all services are done fetching them.
    * @private
-   * @returns {!Promise<!Array<!Entitlement>>}
+   * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
    */
   getAllPlatformsEntitlements_() {
     if (this.allResolvedPromise_) {
@@ -131,7 +130,7 @@ export class EntitlementStore {
   /**
    * Returns entitlements for resolved platforms.
    * @private
-   * @returns {!Array<!Entitlement>}
+   * @returns {!Array<!./entitlement.Entitlement>}
    */
   getAvailablePlatformsEntitlements_() {
     const entitlements = [];
@@ -145,7 +144,7 @@ export class EntitlementStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<!Entitlement>}
+   * @returns {!Promise<!./entitlement.Entitlement>}
    */
   selectPlatform() {
     return this.getAllPlatformsEntitlements_().then(entitlements => {
@@ -166,8 +165,8 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
-   * @param {!Array<!Entitlement>} entitlements
-   * @returns {!Entitlement}
+   * @param {!Array<!./entitlement.Entitlement>} entitlements
+   * @returns {!./entitlement.Entitlement}
    */
   selectApplicablePlatform_(entitlements) {
     let chosenPlatform;
@@ -179,10 +178,4 @@ export class EntitlementStore {
     });
     return chosenPlatform;
   }
-}
-
-
-/** @package @visibleForTesting */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
 }
