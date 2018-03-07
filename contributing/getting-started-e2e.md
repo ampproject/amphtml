@@ -160,7 +160,7 @@ Now that you have all of the files copied locally you can actually build the cod
 
 amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [Node.js](https://nodejs.org/) version >= 6 (which includes npm).
+* Install [Node.js](https://nodejs.org/) version >= 8 (which includes npm).
 
   [NVM](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux, especially if you have other projects that require different versions of Node.
 
