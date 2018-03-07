@@ -33,7 +33,9 @@ export class AmpAdUIHandler {
 
     if (!baseInstance.getFallback()) {
       const fallback = this.addDefaultUiComponent_('fallback');
-      this.baseInstance_.element.appendChild(fallback);
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
   }
 
