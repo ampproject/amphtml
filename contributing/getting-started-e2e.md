@@ -160,7 +160,7 @@ Now that you have all of the files copied locally you can actually build the cod
 
 amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [Node.js](https://nodejs.org/) version >= 6 (which includes npm).
+* Install [Node.js](https://nodejs.org/) version >= 8 (which includes npm).
 
   [NVM](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux, especially if you have other projects that require different versions of Node.
 
@@ -515,7 +515,7 @@ git push -d origin <branch name>
 
 If your change affected internal documentation, tests, the build process, etc. you can generally see your changes right after they're merged.  If your change was to the code that runs on AMP pages across the web you'll have to wait for the change to be included in a release.
 
-In general we cut a release of amphtml on Wednesdays during working hours (Pacific time) and push it to the AMP Dev Channel the next day.  After verifying there are no issues, we push that build to 1% of AMP pages the following Monday and complete the push to all AMP pages a few days later on Thursday.  That is:  on Thursday we will typically push last week's build to all AMP pages and this week's build to the Dev Channel.
+AMP is pushed to production after undergoing testing. Generally, it takes about 1-2 weeks for a change to be live for all users. For more specific details on the timing of production releases, reference our [release schedule](release-schedule.md).
 
 **Once the push of the build that includes your change is complete all users of AMP will be using the code you contributed!**
 

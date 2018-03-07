@@ -69,36 +69,41 @@ export class AmpAd extends AMP.BaseElement {
 
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
-      this.element.setAttribute('data-amp-slot-index', slotId);
 
-      const useRemoteHtml = (
-        !(adConfig[type] || {}).remoteHTMLDisabled &&
-            this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
-      // TODO(tdrl): Check amp-ad registry to see if they have this already.
-      // TODO(a4a-cam): Shorten this predicate.
-      if (!a4aRegistry[type] ||
-          // Note that predicate execution may have side effects.
-          !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
-        // Either this ad network doesn't support Fast Fetch, its Fast Fetch
-        // implementation has explicitly opted not to handle this tag, or this
-        // page uses remote.html which is inherently incompatible with Fast
-        // Fetch. Fall back to Delayed Fetch.
-        return new AmpAd3PImpl(this.element);
-      }
+      return new Promise(resolve => {
+        this.getVsync().mutate(() => {
+          this.element.setAttribute('data-amp-slot-index', slotId);
 
-      const extensionTagName = networkImplementationTag(type);
-      this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
-          .then(ctor => new ctor(this.element))
-          .catch(error => {
-          // Work around presubmit restrictions.
-            const TAG = this.element.tagName;
-            // Report error and fallback to 3p
-            this.user().error(
-                TAG, 'Unable to load ad implementation for type ',
-                type, ', falling back to 3p, error: ', error);
-            return new AmpAd3PImpl(this.element);
-          });
+          const useRemoteHtml = (!(adConfig[type] || {}).remoteHTMLDisabled &&
+              this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
+          // TODO(tdrl): Check amp-ad registry to see if they have this already.
+          // TODO(a4a-cam): Shorten this predicate.
+          if (!a4aRegistry[type] ||
+              // Note that predicate execution may have side effects.
+              !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
+            // Either this ad network doesn't support Fast Fetch, its Fast
+            // Fetch implementation has explicitly opted not to handle this
+            // tag, or this page uses remote.html which is inherently
+            // incompatible with Fast Fetch. Fall back to Delayed Fetch.
+            return resolve(new AmpAd3PImpl(this.element));
+          }
+
+          const extensionTagName = networkImplementationTag(type);
+          this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+          resolve(Services.extensionsFor(this.win)
+              .loadElementClass(extensionTagName)
+              .then(ctor => new ctor(this.element))
+              .catch(error => {
+              // Work around presubmit restrictions.
+                const TAG = this.element.tagName;
+                // Report error and fallback to 3p
+                this.user().error(
+                    TAG, 'Unable to load ad implementation for type ',
+                    type, ', falling back to 3p, error: ', error);
+                return new AmpAd3PImpl(this.element);
+              }));
+        });
+      });
     });
   }
 }

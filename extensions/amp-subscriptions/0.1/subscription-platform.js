@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 
 /**
  * This interface is intended to be implemented by Subscription platforms to
@@ -27,20 +25,22 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 export class SubscriptionPlatform {
 
   /**
-   * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
+   * Returns the service Id.
+   * @returns {string}
    */
-  getEntitlements() {
-  }
-}
+  getServiceId() {}
 
+  /**
+   * Requests entitlement for a subscription platform.
+   * @return {!Promise<!./entitlement.Entitlement>}
+   */
+  getEntitlements() {}
 
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+  /**
+   * Activates the subscription platform and hands over the control for rendering.
+   * @param {!./amp-subscriptions.RenderState} unusedRenderState
+   */
+  activate(unusedRenderState) {}
 }
 
 /**

@@ -116,7 +116,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
 ## Actions
-`amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](../../spec/amp-actions-and-events.md).
+`amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
 ## Events
 `amp-form` exposes the following events:
@@ -127,7 +127,7 @@ For details on valid inputs and fields, see [amp-form rules](https://github.com/
 * **valid**: Emitted whenever the form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
 * **invalid**: Emitted whenever the form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
 
-These events can be used through the [`on` attribute](../../spec/amp-html-format.md#on).
+These events can be used through the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on).
 For example, the following listens to both `submit-success` and `submit-error` and shows different lightboxes depending on the event.
 
 ```html
@@ -138,7 +138,7 @@ For example, the following listens to both `submit-success` and `submit-error` a
 See the [full example here](../../examples/forms.amp.html).
 
 #### Input Events
-AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](../../spec/amp-html-format.md#on) to execute an action on any element when an input value changes.
+AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on) to execute an action on any element when an input value changes.
 
 For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page, etc.).
 
@@ -209,7 +209,7 @@ When the `amp-form-submit` event fires, it generates the following variables con
 * `formFields[comment]`
 
 ## Success/Error Response Rendering
-`amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
+`amp-form` allows publishers to render the responses using [Extended Templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates).
 
 Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it, or a `template="id_of_other_template"` attribute, to render the response in it.
 
@@ -281,7 +281,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 You can redirect users to a new page after a successful `amp-form` submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur.  HTTP response headers are configured via your server. 
 
-Make sure to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.  Learn more about these headers in [CORS Security in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+Make sure to update your `Access-Control-Expose-Headers` response header to include `AMP-Redirect-To` to the list of allowed headers.  Learn more about these headers in [CORS Security in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 *Example response headers:*
 
@@ -469,11 +469,11 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 ## Security Considerations
 
 {% call callout('Important', type='caution') %}
-Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your XHR endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 ### Protecting against XSRF
-In addition to following the details in the AMP CORS spec, please pay extra attention to the section on ["Verifying state changing requests" ](../../spec/amp-cors-requests.md#verify-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+In addition to following the details in the AMP CORS spec, please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
 
 In general, keep in mind the following points when accepting input from the user:
 

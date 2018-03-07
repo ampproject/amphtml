@@ -62,7 +62,7 @@ function initializeStream(globs, streamOptions) {
  * @param {string} message
  */
 function logOnSameLine(message) {
-  if (!process.env.TRAVIS) {
+  if (!process.env.TRAVIS && process.stdout.isTTY) {
     process.stdout.moveCursor(0, -1);
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
@@ -126,6 +126,9 @@ function runLinter(path, stream, options) {
 function lint() {
   if (argv.fix) {
     options.fix = true;
+  }
+  if (argv.files) {
+    config.lintGlobs[config.lintGlobs.indexOf('**/*.js')] = argv.files;
   }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);

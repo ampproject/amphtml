@@ -118,12 +118,7 @@ Example:
 ```
 
 
-### Unsupported DFP Features & Formats
-
-#### Unsupported Features:
-- Guaranteed Roadblocks. Non-guaranteed roadblocks (As many as possible, One or More) delivery is supported
-
-#### Unsupported Formats/Creatives:
+### Unsupported DFP Formats
 - Interstitials
 - Expandables. Although expandables on interaction/click is a format that is work in progress.
 - Flash
