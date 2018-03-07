@@ -1379,8 +1379,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
-                    get: name => headersObj[name],
-                    has: name => !!headersObj[name],
+                    get: name => headersObj[name.toLowerCase()],
+                    has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
