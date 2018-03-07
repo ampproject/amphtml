@@ -244,12 +244,15 @@ describes.realWin('Ad loader', {amp: true}, env => {
         ampAd = new AmpAd(ampAdElement);
         const upgradePromise = ampAd.upgradeCallback();
         Promise.resolve().then(() => {
-          const zortInstance = {};
-          const zortConstructor = function() { return zortInstance; };
-          const extensions = Services.extensionsFor(win);
-          extensions.registerExtension_('amp-ad-network-zort-impl', () => {
-            extensions.addElement_('amp-ad-network-zort-impl', zortConstructor);
-          }, {});
+          Services.vsyncFor(win).mutate(() => {
+            const zortInstance = {};
+            const zortConstructor = function() { return zortInstance; };
+            const extensions = Services.extensionsFor(win);
+            extensions.registerExtension_('amp-ad-network-zort-impl', () => {
+              extensions.addElement_('amp-ad-network-zort-impl',
+                  zortConstructor);
+            }, {});
+          });
         });
         return upgradePromise.then(element => {
           expect(element).to.not.be.null;
