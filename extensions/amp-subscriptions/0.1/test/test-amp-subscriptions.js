@@ -149,7 +149,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       const activateStub = sandbox.stub(localPlatform, 'activate');
       return subscriptionService.selectAndActivatePlatform_().then(() => {
         expect(activateStub).to.be.calledOnce;
-        expect(activateStub.getCall(0).args[0]).calledOnce;
       });
     });
   });

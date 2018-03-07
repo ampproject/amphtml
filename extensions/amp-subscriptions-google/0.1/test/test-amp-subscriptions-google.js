@@ -18,6 +18,7 @@ import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
 } from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 
 
@@ -25,13 +26,16 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
   let pageConfig;
   let platform;
+  let serviceAdapter;
   let xhr;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
-    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, pageConfig);
+    serviceAdapter = new ServiceAdapter(null);
+    sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
   it('should proxy fetch via AMP fetcher', () => {
