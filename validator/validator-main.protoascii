@@ -4496,6 +4496,11 @@ attr_lists: {
     name: "lightbox-thumbnail-id"
     requires_extension: "amp-lightbox-gallery"
   }
+  attrs: {
+    name: "lightbox-exclude"
+    requires_extension: "amp-lightbox-gallery"
+    value: ""
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }

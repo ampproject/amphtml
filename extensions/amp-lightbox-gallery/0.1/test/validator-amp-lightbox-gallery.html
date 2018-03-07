@@ -29,8 +29,41 @@
 </head>
 <body>
   <!-- Valid -->
-  <amp-lightbox-gallery layout="nodisplay"></amp-lightbox-gallery>
-  <!-- Invalid: invalid layout -->
-  <amp-lightbox-gallery layout="responsive" height="400" width="400"></amp-lightbox-gallery>
+  <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+  <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
+  <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
+
+  <!-- Invalid: missing value for lightbox-thumbnail-id -->
+  <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
+  <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
+  <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
+  <!-- Invalid: cannot have lightbox-exclude on an item that isn't in a carousel -->
+  <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+
+  <!-- Valid -->
+  <amp-video
+    lightbox
+    src="../av/ForBiggerJoyrides-short.mp4"
+    width="720"
+    height="405"
+    layout="responsive"
+    controls></amp-video>
+  <amp-youtube
+    lightbox
+    data-videoid="lBTCB7yLs8Y"
+    width="358"
+    height="204"
+    layout="responsive"></amp-youtube>
+
+  <!-- Valid -->
+  <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
+  <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
+      <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+      <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+  </amp-carousel>
+  <amp-carousel width=400 height=300 layout=responsive type=slides>
+      <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
+      <amp-img src="/awesome.png" width="300" height="300"></amp-img>
+  </amp-carousel>
 </body>
 </html>
