@@ -1335,6 +1335,23 @@ describes.repeated('', {
       });
     });
 
+    it.only('should handle clear action and restore initial values', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+
+      const ampForm = new AmpForm(form);
+      const initalFormValues = ampForm.getFormAsObject_();
+
+      ampForm.form_.elements.name.value = 'new value';
+
+      sandbox.spy(ampForm, 'handleClearAction_');
+      ampForm.actionHandler_({method: 'anything'});
+      expect(ampForm.handleClearAction_).to.have.not.been.called;
+      ampForm.actionHandler_({method: 'clear'});
+      expect(ampForm.handleClearAction_).to.have.been.called;
+      expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
+    });
+
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
