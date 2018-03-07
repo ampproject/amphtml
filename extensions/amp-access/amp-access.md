@@ -497,7 +497,7 @@ As usual, the Reader ID should be included in the call to Login Page and can be 
  - **Google AMP Cache** - the proxying cache for AMP documents.
  - **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
  - **Publisher.com** - the site of an AMP publisher.
- - **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](ttps://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
+ - **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
  - **Reader** - the actual person viewing AMP documents.
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 
