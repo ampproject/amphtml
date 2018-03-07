@@ -29,22 +29,19 @@ export class SubscriptionPlatform {
    * Returns the service Id.
    * @returns {string}
    */
-  getServiceId() {
-  }
+  getServiceId() {}
 
   /**
    * Requests entitlement for a subscription platform.
    * @return {!Promise<!Entitlement>}
    */
-  getEntitlements() {
-  }
+  getEntitlements() {}
 
   /**
    * Activates the subscription platform and hands over the control for rendering.
-   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!./amp-subscriptions.RenderState} unusedRenderState
    */
-  activate(renderState) {
-  }
+  activate(unusedRenderState) {}
 }
 
 
@@ -62,12 +59,4 @@ export function getEntitlementClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getRenderStateClassForTesting() {
-  return RenderState;
 }
