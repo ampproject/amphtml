@@ -420,10 +420,10 @@ describes.sandboxed('Navigation', {}, () => {
 
       it('should use escaped css selectors with quotes', () => {
         anchor.href =
-            'https://www.google.com/some-path?hello=world#test"hello';
-        anchorWithName.setAttribute('name', 'test"hello');
+            'https://www.google.com/some-path?hello=world#test%22hello';
+        anchorWithName.setAttribute('name', 'test%22hello');
         handler.handle_(event);
-        expect(replaceStateForTargetStub).to.be.calledWith('#test"hello');
+        expect(replaceStateForTargetStub).to.be.calledWith('#test%22hello');
         return replaceStateForTargetPromise.then(() => {
           expect(scrollIntoViewStub).to.be.calledWith(anchorWithName);
         });
