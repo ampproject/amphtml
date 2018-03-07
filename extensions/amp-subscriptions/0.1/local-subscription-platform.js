@@ -173,9 +173,6 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    const currentProductId = user().assertString(
-        this.pageConfig_.getProductId(), 'Current Product ID is null');
-
     return this.xhr_
         .fetchJson(this.authorizationUrl_, {
           credentials: 'include',
@@ -183,7 +180,6 @@ export class LocalSubscriptionPlatform {
         .then(res => res.json())
         .then(resJson => {
           const entitlement = Entitlement.parseFromJson(resJson);
-          entitlement.setCurrentProduct(currentProductId);
           this.entitlement_ = entitlement;
           return entitlement;
         });

@@ -68,9 +68,6 @@ export class SubscriptionService {
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
-
-    /** @private {boolean} */
-    this.grantState_ = false;
   }
 
   /**
@@ -150,7 +147,6 @@ export class SubscriptionService {
    * @private
    */
   processGrantState_(grantState) {
-    this.grantState_ = grantState;
     this.renderer_.toggleLoading(false);
     this.renderer_.setGrantState(grantState);
 
@@ -167,6 +163,7 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
+    entitlement.setCurrentProduct(this.pageConfig_.getProductId());
     this.entitlementStore_.resolveEntitlement(serviceId, entitlement);
   }
 
@@ -176,7 +173,8 @@ export class SubscriptionService {
    */
   fetchEntitlements_(subscriptionPlatform) {
     subscriptionPlatform.getEntitlements().then(entitlement => {
-      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(), entitlement);
+      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
+          entitlement);
     });
   }
 
@@ -217,18 +215,27 @@ export class SubscriptionService {
     });
   }
 
+  /** @private */
   selectAndActivatePlatform_() {
-    this.entitlementStore_.selectPlatform().then(entitlement => {
+    const requireValuesPromise = Promise.all([
+      this.entitlementStore_.getGrantStatus(),
+      this.entitlementStore_.selectPlatform(),
+    ]);
+
+    return requireValuesPromise.then(resolvedValues => {
+      const grantState = resolvedValues[0];
+      const selectedEntitlement = resolvedValues[1];
+
       /** @type {!RenderState} */
       const renderState = {
-        entitlement: entitlement.json(),
-        loggedIn: false, // TODO (@prateekbh): ask how to derive this?
-        subscribed: !!entitlement.subscriptionToken,
-        granted: this.grantState_,
+        entitlement: selectedEntitlement.json(),
+        loggedIn: selectedEntitlement.loggedIn,
+        subscribed: !!selectedEntitlement.subscriptionToken,
+        granted: grantState,
       };
 
       const selectedPlatform = dev().assert(
-          this.subscriptionPlatforms_[entitlement.service],
+          this.subscriptionPlatforms_[selectedEntitlement.service],
           'Selected service not registered'
       );
 
@@ -252,15 +259,15 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     subscriptionPlatform.getEntitlements().then(entitlement => {
+      entitlement.setCurrentProduct(this.pageConfig_.getProductId());
       this.entitlementStore_.resolveEntitlement(
           subscriptionPlatform.getServiceId(),
           entitlement
       );
-      // TODO (@prateekbh): May be shoa loader here again
-      // Redo grant state and select platform
-      this.entitlementStore_.getGrantStatus()
-          .then(grantState => this.processGrantState_(grantState));
-      this.selectAndActivatePlatform_();
+      // TODO (@prateekbh): Implement reset
+      // this.entitlementStore_.getGrantStatus()
+      //     .then(grantState => this.processGrantState_(grantState));
+      // this.selectAndActivatePlatform_();
     });
   }
 

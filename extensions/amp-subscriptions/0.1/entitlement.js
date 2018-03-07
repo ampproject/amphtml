@@ -28,8 +28,10 @@ export class Entitlement {
    * @param {string} service
    * @param {!Array<string>} products
    * @param {string} subscriptionToken
+   * @param {boolean} loggedIn
    */
-  constructor(source, raw, service, products, subscriptionToken) {
+  constructor(source, raw, service, products,
+    subscriptionToken, loggedIn = false) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -42,6 +44,8 @@ export class Entitlement {
     this.product_ = null;
     /** @const {string} */
     this.subscriptionToken = subscriptionToken;
+    /** @const {boolean} */
+    this.loggedIn = loggedIn;
   }
 
   /**
@@ -54,6 +58,7 @@ export class Entitlement {
       'source': this.source,
       'service': this.service,
       'products': this.products,
+      'loggedIn': this.loggedIn,
       'subscriptionToken': this.subscriptionToken,
     });
 
@@ -99,7 +104,8 @@ export class Entitlement {
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
+    const loggedIn = json['loggedIn'];
     return new Entitlement(source, raw, /* service */ '',
-        products, subscriptionToken);
+        products, subscriptionToken, loggedIn);
   }
 }

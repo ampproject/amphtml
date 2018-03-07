@@ -23,17 +23,18 @@ describes.realWin('entitlements', {}, () => {
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
   const subscriptionToken = 'token';
-
+  const loggedIn = true;
   it('should give json representation of the object', () => {
     const raw = 'raw';
     const entitlement = new Entitlement(source, raw, service, products,
-        subscriptionToken);
+        subscriptionToken, loggedIn);
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
       raw,
       products,
       subscriptionToken,
+      loggedIn,
     });
   });
 
@@ -43,19 +44,20 @@ describes.realWin('entitlements', {}, () => {
       source,
       products,
       subscriptionToken,
+      loggedIn,
     };
     const entitlement = Entitlement.parseFromJson(json);
-    expect(entitlement.service).to.be.equal(service);
     expect(entitlement.source).to.be.equal(source);
     expect(entitlement.products).to.be.equal(products);
     expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
     expect(entitlement.raw).to.be.equal(JSON.stringify(json));
+    expect(entitlement.loggedIn).to.be.equal(loggedIn);
   });
 
   it('should tell if current product is enabled', () => {
     const raw = 'raw';
     const entitlement = new Entitlement(source, raw, service, products,
-        subscriptionToken);
+        subscriptionToken, loggedIn);
     entitlement.setCurrentProduct(products[0]);
     expect(entitlement.enablesThis()).to.be.true;
     entitlement.setCurrentProduct('lipsum');
