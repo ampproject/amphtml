@@ -32,7 +32,10 @@ export class AmpAdUIHandler {
     this.doc_ = baseInstance.win.document;
 
     if (!baseInstance.getFallback()) {
-      this.addDefaultUiComponent_('fallback');
+      const fallback = this.addDefaultUiComponent_('fallback');
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
   }
 
@@ -93,7 +96,6 @@ export class AmpAdUIHandler {
     content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
-    this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
   }
 
