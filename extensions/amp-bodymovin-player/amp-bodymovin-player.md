@@ -55,19 +55,19 @@ Examples:
 
 ## Attributes
 
-##### data-animation-path
+##### src
 
 The path to the exported Bodymovin animation object
 
-##### data-anim-loop (optional)
+##### loop (optional)
 
 Whether the animation should be looping or not. `true` by default. Values can be: `true`|`false`|`number`
 
-##### data-no-autoplay
+##### no-autoplay (optional)
 
 Animations autoplay by default. This attribute specifies that the animation shouldn't be autoplayed.
 
-##### data-name
+##### name
 
 Animation name for future reference
 

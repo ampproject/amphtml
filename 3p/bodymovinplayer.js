@@ -15,7 +15,6 @@
  */
 
 import {loadScript} from './3p';
-import {user} from '../src/log';
 
 /**
  * Produces the AirBnB Bodymovin player SDK object for the passed in callback.
@@ -24,26 +23,23 @@ import {user} from '../src/log';
  */
 function getBodymovinPlayerSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
-    cb();
+    cb(global.bodymovin);
   });
 }
 
 export function bodymovinplayer(global, data) {
-  const container = global.document.createElement('div');
-  global.document.getElementById('c').appendChild(container);
-
+  const animatingContainer = global.document.createElement('div');
+  global.document.getElementById('c').appendChild(animatingContainer);
+  const shouldLoop = (data.loop === 'true' || data.loop === 'false') ?
+    data.loop === 'true' : parseInt(data.loop, 10);
   getBodymovinPlayerSdk(global, function() {
-    const loop = (data.animLoop == 'true' || data.animLoop == 'false') ?
-    data.animLoop == 'true' : parseInt(data.animLoop);
     bodymovin.loadAnimation({
-      container: container,
-      renderer: 'canvas',
-      loop: loop,
-      autoplay: data.noAutoplay !== undefined ? false : true,
-      path: data.animationPath,
-      animationData: data.animationData,
-      name: data.name
+      container: animatingContainer,
+      renderer: 'svg',
+      loop: shouldLoop,
+      autoplay: data.autoplay === 'true',
+      animationData: JSON.parse(data.animationData),
+      name: data.name,
     });
-
   });
 }
