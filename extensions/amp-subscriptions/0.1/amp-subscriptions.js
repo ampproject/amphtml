@@ -202,9 +202,13 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
-        this.fetchEntitlements_(subscriptionPlatform);
-      });
+      for (const platformKey in this.subscriptionPlatforms_) {
+        if (this.subscriptionPlatforms_.hasOwnProperty(platformKey)) {
+          const subscriptionPlatform =
+            this.subscriptionPlatforms_[platformKey];
+          this.fetchEntitlements_(subscriptionPlatform);
+        }
+      }
 
       this.entitlementStore_.getGrantStatus()
           .then(grantState => {this.processGrantState_(grantState);});
