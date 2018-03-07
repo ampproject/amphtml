@@ -183,10 +183,11 @@ export class SubscriptionService {
   }
 
   /**
-   * @return {!Promise}
+   * Starts the amp-subscription Service
+   * @returns {SubscriptionService}
    */
   start() {
-    return this.initialize_().then(() => {
+    this.initialize_().then(() => {
 
       this.renderer_.toggleLoading(true);
 
@@ -214,6 +215,7 @@ export class SubscriptionService {
 
       this.selectAndActivatePlatform_();
     });
+    return this;
   }
 
   /**
