@@ -47,6 +47,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint`                                                             | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
+| `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided.                                         |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
 | `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
 | `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
