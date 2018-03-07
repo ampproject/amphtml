@@ -75,11 +75,11 @@
   <h1 id="sample2" hidden>
       When Timer hits 0, will hide the timer itself and display this message.
   </h1>
-  <amp-date-countdown id="ampdate" end-date="2018-03-07T00:00:00+08:00" on="tap: sample.show; timeout: ampdate.hide, sample.hide, sample2.show;" when-ended="continue" locale='en'>
+  <amp-date-countdown id="ampdate" end-date="2018-03-07T00:00:00+08:00" on="tap: timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="continue" locale='en'>
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">
-        {{#d}}
+          {{#d}}
           <div>
             <span class="d">{{d}}</span>
             <div class="smalltext">{{days}}</div>
@@ -111,7 +111,7 @@
       </div>
     </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' width="360">
+  <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' height="50" width="360">
       <template type="amp-mustache">
         <div class="date-count-down">
           {{#d}} {{d}} <span>{{days}}</span> {{/d}}
@@ -121,7 +121,7 @@
         </div>
       </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' width="360">
+  <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' height="50" width="360">
     <template type="amp-mustache">
         <div class="date-count-down">
             {{#d}} {{d}} <span>{{days}}</span> {{/d}}

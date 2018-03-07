@@ -77,9 +77,6 @@ Format | Sample Output | Remarks
 
 ## Attributes
 
-##### on:timeout (events)
-- `amp-date-countdown` supports `timeout` actions and `when-ended` **must be** set to `stop` in order for this actions to be functioned. User can define any actions when the timer timeout.
-
 ##### end-date
 - An ISO formatted date to count down to. e.g. `2020-06-01T00:00:00+08:00`
 
@@ -133,6 +130,12 @@ vi | Vietnamese
 * Supported values: `days`, `hours`, `minutes`, `seconds`
 * Default: `days`
 
+## Actions
+The `amp-date-countdown` exposes the following actions you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+
+Action | Description
+-- | --
+`timeout` |  `amp-date-countdown` supports `timeout` actions and `when-ended` **must be** set to `stop` in order for this actions to be functioned. User can define any actions when the timer timeout. ![ezgif com-video-to-gif 2](https://user-images.githubusercontent.com/4065175/36954871-c05f8b0e-205f-11e8-944a-cbfff96fcb29.gif)
 
 ## Validation
 See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.

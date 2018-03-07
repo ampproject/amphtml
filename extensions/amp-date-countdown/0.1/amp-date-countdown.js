@@ -15,9 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
-import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -32,7 +30,7 @@ const DEFAULT_LOCALE = 'en';
 const DEFAULT_WHEN_ENDED = 'stop';
 
 /** @const {string} */
-const DEFAULT_BIGGEST_UNIT = 'days';
+const DEFAULT_BIGGEST_UNIT = 'DAYS';
 
 /** @const {number} */
 const DEFAULT_OFFSET_SECONDS = 0;
@@ -100,19 +98,23 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.whenEnded_ = (this.element.getAttribute('when-ended')) || DEFAULT_WHEN_ENDED;
 
     /** @private {string} */
-    this.biggestUnit_ = (this.element.getAttribute('biggest-unit')) || DEFAULT_BIGGEST_UNIT;
+    this.biggestUnit_ = (this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT).toUpperCase();
 
     /** @private {!Object} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
+
+    /** @private {!Object} */
+    this.countDownTimer_ = null;
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
   }
 
   /** @override */
-  buildCallback() {
+  renderOutsideViewport() {
     const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
     this.tickCountDown_(new Date(epoch) - new Date());
+    return true;
   }
 
   /** @override */
@@ -120,10 +122,11 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
     let differentBetween = new Date(epoch) - new Date() - 1000; //substract 1000 here because of buildCallback show the initial time
     const delay = 1000;
-    return Promise.resolve(this.countDownTimer_ = this.win.setInterval(() => {
+    this.countDownTimer_ = this.win.setInterval(() => {
       this.tickCountDown_(differentBetween);
       differentBetween -= delay;
-    }, delay));
+    }, delay);
+    return Promise.resolve();
   }
 
   /** @override */
@@ -155,7 +158,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const data = this.getYDHMSFromMs_(differentBetween);
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
-          .trigger(this.element, 'timeout', null, ActionTrust.HIGH);
+          .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
     this.renderItems_(Object.assign(data, this.localeWordList_));
@@ -211,27 +214,28 @@ export class AmpDateCountdown extends AMP.BaseElement {
    */
   getYDHMSFromMs_(ms) {
 
-    const priorityList = {
-      days: 1,
-      hours: 2,
-      minutes: 3,
-      seconds: 4,
+    /** @enum {number} */
+    const TimeUnit = {
+      DAYS: 1,
+      HOURS: 2,
+      MINUTES: 3,
+      SECONDS: 4,
     };
 
-    const d = priorityList[this.biggestUnit_] == 1
+    const d = TimeUnit[this.biggestUnit_] == TimeUnit.DAYS
       ? (Math.trunc((ms) / MILLISECONDS_IN_DAY))
       : 0;
-    const h = priorityList[this.biggestUnit_] == 2
+    const h = TimeUnit[this.biggestUnit_] == TimeUnit.HOURS
       ? (Math.trunc((ms) / MILLISECONDS_IN_HOUR))
-      : priorityList[this.biggestUnit_] < 2
+      : TimeUnit[this.biggestUnit_] < TimeUnit.HOURS
         ? (Math.trunc((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR))
         : 0;
-    const m = priorityList[this.biggestUnit_] == 3
+    const m = TimeUnit[this.biggestUnit_] == TimeUnit.MINUTES
       ? (Math.trunc((ms) / MILLISECONDS_IN_MINUTE))
-      : priorityList[this.biggestUnit_] < 3
+      : TimeUnit[this.biggestUnit_] < TimeUnit.MINUTES
         ? (Math.trunc((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE))
         : 0;
-    const s = priorityList[this.biggestUnit_] == 4
+    const s = TimeUnit[this.biggestUnit_] == TimeUnit.SECONDS
       ? (Math.trunc((ms) / MILLISECONDS_IN_SECOND))
       : (Math.trunc((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND));
 
@@ -267,14 +271,13 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   rendered_(element) {
-    const template = this.element.firstElementChild;
-    removeChildren(this.element);
-    this.element.appendChild(template);
-    this.element.appendChild(element);
-
-    const event = createCustomEvent(this.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
-    this.element.dispatchEvent(event);
+    const vsync = Services.vsyncFor(this.win);
+    vsync.mutate(() => {
+      const template = this.element.firstElementChild;
+      removeChildren(this.element);
+      this.element.appendChild(template);
+      this.element.appendChild(element);
+    });
   }
 }
 
