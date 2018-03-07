@@ -17,6 +17,7 @@
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
 import {isArray} from './types';
+import {LRUCache} from './utils/lru-cache';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 import {urls} from './config';
