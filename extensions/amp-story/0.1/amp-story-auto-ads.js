@@ -131,7 +131,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
         ampdoc, MUSTACHE_TAG);
 
-    ampStoryElement.getImpl().then(impl => {
+    return ampStoryElement.getImpl().then(impl => {
       this.ampStory_ = impl;
       this.navigationState_ = this.ampStory_.getNavigationState();
       this.navigationState_.observe(this.handleStateChange_.bind(this));
