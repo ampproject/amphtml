@@ -58,8 +58,8 @@ export class EntitlementStore {
    * @param {!./entitlement.Entitlement} entitlement
    */
   resolveEntitlement(serviceId, entitlement) {
+    entitlement.service = serviceId;
     this.entitlements_[serviceId] = entitlement;
-
     // Call all onChange callbacks.
     this.onChangeCallbacks_.fire({serviceId, entitlement});
   }

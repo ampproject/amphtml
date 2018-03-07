@@ -162,11 +162,12 @@ export class SubscriptionService {
   }
 
   /**
+   * @param {string} serviceId
    * @param {!./entitlement.Entitlement} entitlement
    * @private
    */
-  resolveEntitlementsToStore_(entitlement) {
-    this.entitlementStore_.resolveEntitlement(entitlement.service, entitlement);
+  resolveEntitlementsToStore_(serviceId, entitlement) {
+    this.entitlementStore_.resolveEntitlement(serviceId, entitlement);
   }
 
   /**
@@ -175,8 +176,7 @@ export class SubscriptionService {
    */
   fetchEntitlements_(subscriptionPlatform) {
     subscriptionPlatform.getEntitlements().then(entitlement => {
-      entitlement.service = subscriptionPlatform.getServiceId();
-      this.resolveEntitlementsToStore_(entitlement);
+      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(), entitlement);
     });
   }
 
@@ -251,8 +251,17 @@ export class SubscriptionService {
    * @param {!SubscriptionPlatform} subscriptionPlatform
    */
   reAuthorizePlatform(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(() =>
-      this.selectAndActivatePlatform_());
+    subscriptionPlatform.getEntitlements().then(entitlement => {
+      this.entitlementStore_.resolveEntitlement(
+          subscriptionPlatform.getServiceId(),
+          entitlement
+      );
+      // TODO (@prateekbh): May be shoa loader here again
+      // Redo grant state and select platform
+      this.entitlementStore_.getGrantStatus()
+          .then(grantState => this.processGrantState_(grantState));
+      this.selectAndActivatePlatform_();
+    });
   }
 
   /**
