@@ -111,21 +111,63 @@
     </amp-youtube>
   </amp-carousel>
 
-  <h1>Lightbox Carousel Social Share Test</h1>
-  <amp-carousel height="300"
-  width="400"
-  layout="fixed"
-  type="slides"
-  lightbox>
+  <h1>Lightbox Carousel Social Share Tests</h1>
+  <h2>Instagram Layout Test</h2>
+  <p>This carousel includes amp-instagram with the following layouts: </p>
+  <ul>
+    <li>Responsive</li>
+    <li>Fill</li>
+    <li>Fixed Height</li>
+    <li>Fixed</li>
+  </ul>
+  <amp-carousel 
+    height="600"
+    width="800"
+    layout="fixed"
+    type="slides"
+    lightbox>
     <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
-      width="400"
-      height="300"
+      width="800"
+      height="600"
       alt="a beautiful cat"></amp-img>
     <amp-instagram data-shortcode="1totVhIFXl"
       width="400"
       height="400"
       layout="responsive">
     </amp-instagram>
+    <amp-instagram data-shortcode="1totVhIFXl"
+      width="400"
+      height="400"
+      layout="fill">
+    </amp-instagram>
+    <amp-instagram data-shortcode="1totVhIFXl"
+      height="400"
+      layout="fixed-height">
+    </amp-instagram>
+    <amp-instagram data-shortcode="1totVhIFXl"
+      width="400"
+      height="400"
+      layout="fixed">
+    </amp-instagram>
+  </amp-carousel>
+
+  <h2>Facebook Layout Test</h2>
+  <p>This carousel includes amp-facebook with the following layouts: </p>
+  <ul>
+    <li>Responsive</li>
+    <li>Fill</li>
+    <li>Fixed Height</li>
+    <li>Fixed</li>
+  </ul>
+  <amp-carousel height="600"
+    width="800"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="800"
+      height="600"
+      alt="a beautiful cat"></amp-img>
     <amp-facebook
       lightbox-thumbnail-id="fb-thumbnail-img"
       width="552"
@@ -133,15 +175,71 @@
       layout="responsive"
       data-href="https://www.facebook.com/zuck/posts/10102593740125791">
     </amp-facebook>
-    <amp-facebook width="552"
+    <amp-facebook
+      lightbox-thumbnail-id="fb-thumbnail-img"
+      width="552"
+      height="303"
+      layout="fill"
+      data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    </amp-facebook>
+    <amp-facebook
+      lightbox-thumbnail-id="fb-thumbnail-img"
+      width="552"
+      height="303"
+      layout="fixed"
+      data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    </amp-facebook>
+    <amp-facebook
+      lightbox-thumbnail-id="fb-thumbnail-img"
+      height="303"
+      layout="fixed-height"
+      data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    </amp-facebook>
+  </amp-carousel>
+
+  <h2>Facebook Video Post Layout Test</h2>
+  <p>This carousel includes amp-facebook data-embed-as="video" with the following layouts: </p>
+  <ul>
+    <li>Responsive</li>
+    <li>Fill</li>
+    <li>Fixed Height</li>
+    <li>Fixed</li>
+  </ul>
+  <amp-carousel height="600"
+    width="800"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="800"
+      height="600"
+      alt="a beautiful cat"></amp-img>
+    <amp-facebook 
+      width="552"
       height="310"
       layout="responsive"
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
-      <amp-img
-        src="https://scontent-sjc3-1.xx.fbcdn.net/v/t15.0-10/cp0/e15/q65/p173x172/12104343_10102509276925721_413295500_n.jpg?oh=3ab5d6e109a83d59a7dec75cfc310bcd&oe=5B028D9E"
-        placeholder
-        layout="fill"/>
+    </amp-facebook>
+    <amp-facebook 
+      width="552"
+      height="310"
+      layout="fill"
+      data-embed-as="video"
+      data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    </amp-facebook>
+    <amp-facebook 
+      height="310"
+      layout="fixed-height"
+      data-embed-as="video"
+      data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    </amp-facebook>
+    <amp-facebook 
+      width="552"
+      height="310"
+      layout="fixed"
+      data-embed-as="video"
+      data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
     </amp-facebook>
   </amp-carousel>
 
