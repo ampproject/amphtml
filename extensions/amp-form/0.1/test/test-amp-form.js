@@ -1335,7 +1335,7 @@ describes.repeated('', {
       });
     });
 
-    it.only('should handle clear action and restore initial values', () => {
+    it('should handle clear action and restore initial values', () => {
       const form = getForm();
       document.body.appendChild(form);
 
