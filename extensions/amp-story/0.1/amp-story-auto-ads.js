@@ -328,8 +328,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return false;
     }
 
-    this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
-    return true;
+    return this.createCtaLayer_(adPageElement, ctaText, ctaUrl);
   }
 
 
@@ -338,6 +337,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {!Element} adPageElement
    * @param {string} ctaText
    * @param {string} ctaUrl
+   * @return {boolean}
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
     const a = document.createElement('a');
@@ -346,9 +346,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     a.href = ctaUrl;
     a.textContent = ctaText;
 
+    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+      return false;
+    }
+
     const ctaLayer = document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
+    return true;
   }
 
 
