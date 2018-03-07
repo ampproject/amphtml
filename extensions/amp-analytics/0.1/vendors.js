@@ -1725,7 +1725,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'base': 'https://${host}/postback/v3/event/${database}',
       'baseParams': 'td_write_key=${writeKey}' +
         '&td_global_id=td_global_id' +
-        '&td_client_id=CLIENT_ID(td_client_id)' +
+        '&td_client_id=CLIENT_ID(_td)' +
         '&td_charset=DOCUMENT_CHARSET' +
         '&td_language=BROWSER_LANGUAGE' +
         '&td_color=SCREEN_COLOR_DEPTH' +
