@@ -386,7 +386,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
-      'extensions/amp-consent/0.1/amp-consent.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'localStorage': {
