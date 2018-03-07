@@ -29,10 +29,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     super(element);
 
     /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
-    this.registeredRenderers_ = map({});
+    this.renderers_ = map({});
 
-    /** @private {?./amp-ad-render.Validator} */
-    this.registeredValidator_ = null;
+    /** @private {Object<string, !./amp-ad-render.Validator>} */
+    this.validators_ = map({});
 
     /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = null;
@@ -54,22 +54,23 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @final
    */
   registerRenderer(resultType, renderer) {
-    if (this.registeredRenderers_[resultType]) {
+    if (this.renderers_[resultType]) {
       dev().warn(TAG,
           `Rendering mode already registered for type '${resultType}'`);
     }
-    this.registeredRenderers_[resultType] = renderer;
+    this.renderers_[resultType] = renderer;
   }
 
   /**
    * @param {!./amp-ad-render.Validator} validator
+   * @param {string=} type
    * @final
    */
-  registerValidator(validator) {
-    if (this.registeredValidator_) {
-      dev().warn(TAG, 'Validator already registered.');
+  registerValidator(validator, type = 'default') {
+    if (this.validators_[type]) {
+      dev().warn(TAG, `${type} validator already registered.`);
     }
-    this.registeredValidator_ = validator;
+    this.validators_[type] = validator;
   }
 
   /**
@@ -102,15 +103,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       return;
     }
     response.arrayBuffer().then(unvalidatedBytes => {
-      dev().assert(this.registeredValidator_, 'Validator never registered!');
+      const validatorType = response.headers.get('validator-type') || 'default';
+      dev().assert(this.validators_[validatorType],
+          'Validator never registered!');
       this.context_
           .setUnvalidatedBytes(unvalidatedBytes)
           .setHeaders(response.headers);
-      this.registeredValidator_.validate(this.context_)
+      this.validators_[validatorType].validate(this.context_)
           .then(context => this.handleValidatorResponse_(context))
           .catch(error => this.handleValidatorError_(error));
       if (!this.isReusable_) {
-        this.registeredValidator_ = null;
+        this.validators_ = map({});
       }
     });
   }
@@ -143,11 +146,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleValidatorResponse_(context) {
     const result = context.getValidatorResult();
-    dev().assert(this.registeredRenderers_[result],
+    dev().assert(this.renderers_[result],
         'Renderer for AMP creatives never registered!');
-    this.registeredRenderers_[result].render(context, this);
+    this.renderers_[result].render(context, this);
     if (!this.isReusable_) {
-      this.registeredRenderers_ = map({});
+      this.renderers_ = map({});
     }
   }
 
@@ -182,4 +185,3 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     });
   }
 }
-
