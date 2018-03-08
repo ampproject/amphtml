@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../../../../third_party/subscriptions-project/apis';
+import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
@@ -29,7 +29,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     const currentProduct = 'currentProductId';
     const sampleEntitlement1 =
       new Entitlement(serviceIds[0], ['currentProductId'], '');
-    entitlementsForService1 = new Entitlements(
+    entitlementsForService1 = new Entitlement(
         serviceIds[0], '', [sampleEntitlement1], currentProduct);
   });
 
