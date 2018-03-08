@@ -72,9 +72,10 @@ export function metaJsonCreativeGrouper(callback) {
   let first;
   return function(line, done) {
     if (first) {
-      const metadata = /** @type {!Object<string, *>} */(tryParseJson(first) || {});
-      let m = {}
-      for (key in metadata) {
+      const metadata =
+          /** @type {!Object<string, *>} */(tryParseJson(first) || {});
+      const m = {};
+      for (const key in metadata) {
         m[key.toLowerCase()] = metadata[key];
       }
       callback(
