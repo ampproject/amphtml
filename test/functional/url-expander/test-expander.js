@@ -235,6 +235,13 @@ describes.realWin('Expander', {
         expander.expand(url, mockBindings);
       }).to.throw(/bad/);
     });
+
+    it('should handle tokens with parenthesis next to each other', () => {
+      const url = 'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
+      const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal(expected);
+    });
   });
 });
 
