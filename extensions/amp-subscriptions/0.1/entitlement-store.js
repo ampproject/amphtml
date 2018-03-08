@@ -101,6 +101,13 @@ export class EntitlementStore {
   }
 
   /**
+   * Clears the grant status
+   */
+  reset() {
+    this.grantStatusPromise_ = null;
+  }
+
+  /**
    * Returns entitlements when all services are done fetching them.
    * @private
    * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
