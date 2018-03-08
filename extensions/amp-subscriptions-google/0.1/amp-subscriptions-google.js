@@ -18,7 +18,6 @@ import {
   ConfiguredRuntime,
   Fetcher,
 } from '../../../third_party/subscriptions-project/swg';
-import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 
@@ -72,9 +71,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.runtime_.getEntitlements().then(entitlement => {
-      return Entitlement.parseFromJson(entitlement.json());
-    });
+    return this.runtime_.getEntitlements();
   }
 
   /** @override */
