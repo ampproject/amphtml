@@ -59,7 +59,6 @@ export function rotateAndTranslate(startX, startY, endX, endY, direction) {
   ];
 }
 
-
 /**
  * Gradually shows and grows the element while translating it on the 2d plane.
  * @export
