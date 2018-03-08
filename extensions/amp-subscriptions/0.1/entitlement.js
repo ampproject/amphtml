@@ -45,7 +45,7 @@ export class Entitlement {
    * @param {boolean} loggedIn
    */
   constructor(source, raw, service, products,
-      subscriptionToken, loggedIn = false) {
+    subscriptionToken, loggedIn = false) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */

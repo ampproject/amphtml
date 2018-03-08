@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   ConfiguredRuntime,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
+import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
 import {
   PageConfig,
 } from '../../../../third_party/subscriptions-project/config';
@@ -58,7 +58,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
-    },
+    };
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
@@ -97,7 +97,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should proxy fetch empty response', () => {
-    sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
+    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
