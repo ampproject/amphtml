@@ -76,14 +76,23 @@
   </amp-carousel>
 
   <h1>Lightbox Carousel with Video Test</h1>
-  <amp-carousel height="300"
-  width="400"
+  <h2>AMP-VIDEO Layout Test</h2>
+  <p>This carousel includes amp-video with the following layouts: </p>
+  <ul>
+    <li>Responsive</li>
+    <li>Responsive with autoplay</li>
+    <li>Fill</li>
+    <li>Fixed Height</li>
+    <li>Fixed</li>
+  </ul>
+  <amp-carousel height="600"
+  width="800"
   layout="fixed"
   type="slides"
   lightbox>
     <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
-      width="400"
-      height="300"
+      width="800"
+      height="600"
       alt="a beautiful cat"></amp-img>
     <amp-video
       src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
@@ -93,6 +102,58 @@
       poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
       controls>
     </amp-video>
+    <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="responsive"
+      autoplay
+      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+      controls>
+    </amp-video>
+    <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="fill"
+      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+      controls>
+  </amp-video>
+  <amp-video
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    height="204"
+    layout="fixed-height"
+    poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+    controls>
+  </amp-video>
+  <amp-video
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    width="358"
+    height="204"
+    layout="fixed"
+    poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+    controls>
+  </amp-video>
+  </amp-carousel>
+
+  <h2>AMP-YOUTUBE Layout Test</h2>
+  <p>This carousel includes amp-video with the following layouts: </p>
+  <ul>
+    <li>Responsive</li>
+    <li>Responsive with autoplay</li>
+    <li>Fill</li>
+    <li>Fixed Height</li>
+    <li>Fixed</li>
+  </ul>
+  <amp-carousel height="600"
+    width="800"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="800"
+      height="600"
+      alt="a beautiful cat"></amp-img>
     <amp-youtube width="480"
       height="270"
       layout="responsive"
@@ -109,6 +170,54 @@
         layout="fill"
         />
     </amp-youtube>
+    <amp-youtube width="480"
+      height="270"
+      layout="fill"
+      data-videoid="lBTCB7yLs8Y">
+    </amp-youtube>
+    <amp-youtube
+      height="270"
+      layout="fixed-height"
+      data-videoid="lBTCB7yLs8Y">
+    </amp-youtube>
+    <amp-youtube width="480"
+      height="270"
+      layout="fixed"
+      data-videoid="lBTCB7yLs8Y">
+    </amp-youtube>
+  </amp-carousel>
+
+  <h1>Lightbox Carousel Ads Support Test</h1>
+  <amp-carousel height="600"
+    width="800"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="800"
+      height="600"
+      alt="a beautiful cat"></amp-img>
+    <amp-ad width="300"
+      height="250"
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="test123"
+      data-aax_src="302">
+    </amp-ad>
+    <amp-ad data-slot="/30497360/a4a/a4a_native"
+      height="250"
+      type="doubleclick"
+      width="300">
+    </amp-ad>
+    <amp-ad width="500" height="60"
+      type="custom"
+      data-url="/examples/custom.ad.example.single.json">
+      <template type="amp-mustache" id="amp-template-id-no-slot">
+        <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+          <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+        </a>
+      </template>
+    </amp-ad>
   </amp-carousel>
 
   <h1>Lightbox Carousel Social Share Tests</h1>
@@ -241,39 +350,6 @@
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
     </amp-facebook>
-  </amp-carousel>
-
-<h1>Lightbox Carousel Ad Support Test</h1>
-  <amp-carousel height="300"
-    width="400"
-    layout="fixed"
-    type="slides"
-    lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
-      width="400"
-      height="300"
-      alt="a beautiful cat"></amp-img>
-    <amp-ad width="300"
-      height="250"
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="test123"
-      data-aax_src="302">
-    </amp-ad>
-    <amp-ad data-slot="/30497360/a4a/a4a_native"
-      height="250"
-      type="doubleclick"
-      width="300">
-    </amp-ad>
-    <amp-ad width="500" height="60"
-      type="custom"
-      data-url="/examples/custom.ad.example.single.json">
-      <template type="amp-mustache" id="amp-template-id-no-slot">
-        <a href="{{href}}" target="_blank" rel="noopener noreferrer">
-          <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
-        </a>
-      </template>
-    </amp-ad>
   </amp-carousel>
 
   <amp-img id="fb-thumbnail-img"
