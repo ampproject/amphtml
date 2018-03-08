@@ -81,7 +81,10 @@ export class AmpEmbedly extends AMP.BaseElement {
         `The data-url attribute is required for <${TAG}> %s`,
         this.element
     );
+  }
 
+  /** @override */
+  layoutCallback() {
     return this.getOembedData_()
         .then(this.getIframe_.bind(this))
         .then(iframe => {
