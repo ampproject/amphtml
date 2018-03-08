@@ -79,9 +79,6 @@ describe('amp-live-list', () => {
         cb();
       });
     };
-    liveList.deferMutate = cb => {
-      cb();
-    };
     return elem;
   }
 

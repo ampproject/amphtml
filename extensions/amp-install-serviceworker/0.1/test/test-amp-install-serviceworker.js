@@ -356,11 +356,11 @@ describes.fakeWin('url rewriter', {
   });
 
   describe('start shell preload', () => {
-    let deferMutateStub;
+    let mutateElementStub;
     let preloadStub;
 
     beforeEach(() => {
-      deferMutateStub = sandbox.stub(implementation, 'deferMutate').callsFake(
+      mutateElementStub = sandbox.stub(implementation, 'deferMutate').callsFake(
           callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');
@@ -388,7 +388,7 @@ describes.fakeWin('url rewriter', {
         return viewer.whenFirstVisible();
       }).then(() => {
         expect(preloadStub).to.be.calledOnce;
-        expect(deferMutateStub).to.be.calledOnce;
+        expect(mutateElementStub).to.be.calledOnce;
       });
     });
   });
