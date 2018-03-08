@@ -26,7 +26,7 @@
  * </code>
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -72,7 +72,7 @@ const TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
-export class AmpStoryGridLayer extends AMP.BaseElement {
+export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -85,6 +85,7 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    super.buildCallback();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -155,11 +156,6 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
         element.removeAttribute(attributeName);
       }
     }
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
   }
 }
 
