@@ -31,6 +31,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let element;
   let pageConfig;
   let subscriptionService;
+  const products = ['scenic-2017.appspot.com:news',
+    'scenic-2017.appspot.com:product2'];
+
   const serviceConfig = {
     services: [
       {
@@ -133,8 +136,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
-      const products = ['scenic-2017.appspot.com:news',
-        'scenic-2017.appspot.com:product2'];
       subscriptionService.start();
       subscriptionService.initialize_().then(() => {
         sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
@@ -153,6 +154,20 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           done();
         });
       });
+    });
+  });
+
+  describe('startAuthorizationFlow_', () => {
+    it('should start grantStatus and platform selection', () => {
+      subscriptionService.entitlementStore_ = new EntitlementStore(products);
+      const getGrantStatusStub =
+          sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+              .callsFake(() => Promise.resolve());
+      const selectAndActivateStub =
+          sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+      subscriptionService.startAuthorizationFlow_();
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.be.calledOnce;
     });
   });
 });
