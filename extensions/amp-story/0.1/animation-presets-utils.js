@@ -19,14 +19,12 @@
  * presets.
  */
 
-import {
-  px,
-  deg,
-  scale,
-  rotate,
-  translate
-} from '../../../src/style';
 import {KeyframesDef} from './animation-types';
+import {
+  rotate,
+  scale,
+  translate,
+} from '../../../src/style';
 
 /**
  * Translates the element on the 2d plane according to the given points.
@@ -56,7 +54,7 @@ export function translate2d(startX, startY, endX, endY) {
  */
 export function rotateAndTranslate(startX, startY, endX, endY, direction) {
   return [
-    {transform: translate(startX, startY) + ' ' + rotate(deg(direction * 360))},
+    {transform: translate(startX, startY) + ' ' + rotate(direction * 360)},
     {transform: translate(endX, endY) + ' ' + rotate(0)},
   ];
 }
@@ -75,7 +73,7 @@ export function whooshIn(startX, startY, endX, endY) {
   return [
     {
       opacity: 0,
-      transform:  translate(startX, startY) + ' ' + scale(0.15),
+      transform: translate(startX, startY) + ' ' + scale(0.15),
     },
     {
       opacity: 1,

@@ -232,6 +232,9 @@ export function scale(value) {
  * @return {string}
  */
 export function rotate(value) {
+  if (typeof value == 'number') {
+    value = deg(value);
+  }
   return `rotate(${value})`;
 }
 

@@ -17,9 +17,9 @@
 import {StoryAnimationPresetDef} from './animation-types';
 import {px} from '../../../src/style';
 import {
-  translate2d,
   rotateAndTranslate,
-  whooshIn
+  translate2d,
+  whooshIn,
 } from './animation-presets-utils';
 
 
