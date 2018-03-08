@@ -177,7 +177,7 @@ feature_tests/forms.html:136:2 The mandatory attribute 'action' is missing in ta
 |      <div submit-success template="submit_success_template">
 |        <template type="amp-mustache">Success in inlined inlined</template>
 >>       ^~~~~~~~~
-feature_tests/forms.html:153:6 The tag 'template' may not appear as a descendant of tag 'form > div [submit-success][template]'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+feature_tests/forms.html:153:6 The parent tag of tag 'amp-story-auto-ads > template' is 'div', but it can only be 'amp-story-auto-ads'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |    </form>
 |  </body>
