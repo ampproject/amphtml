@@ -4085,23 +4085,6 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 
-# Lightboxable Elements
-attr_lists: {
-  name: "lightboxable-elements"
-  attrs: { name: "lightbox" }
-  attrs: { 
-    name: "lightbox-thumbnail-id" 
-    value_regex: "^[a-zA-Z][a-zA-Z\d_-]*"
-    trigger: {
-      also_requires_attr: "lightbox"
-    }
-  }
-  attrs: { 
-    name: "lightbox-exclude" 
-    value: ""
-  }
-}
-
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
