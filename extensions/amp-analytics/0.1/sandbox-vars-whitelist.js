@@ -33,7 +33,6 @@ export const SANDBOX_AVAILABLE_VARS = {
   'SOURCE_PATH': true,
   'TIMESTAMP': true,
   'TIMEZONE': true,
-  'TIMEZONE_CODE': true,
   'VIEWPORT_HEIGHT': true,
   'VIEWPORT_WIDTH': true,
   'SCREEN_WIDTH': true,

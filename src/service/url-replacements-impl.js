@@ -400,15 +400,6 @@ export class GlobalVariableSource extends VariableSource {
           .toLowerCase();
     });
 
-    // Returns the IANA timezone code
-    this.set('TIMEZONE_CODE', () => {
-      if (Intl && typeof Intl === 'object') {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone;
-      } else {
-        return '';
-      }
-    });
-
     // Returns the user agent.
     this.set('USER_AGENT', () => {
       const nav = this.ampdoc.win.navigator;

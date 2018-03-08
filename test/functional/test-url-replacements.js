@@ -758,12 +758,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace TIMEZONE_CODE', () => {
-    return expandUrlAsync('?sh=TIMEZONE_CODE').then(res => {
-      expect(res).to.match(/sh=\w+/);
-    });
-  });
-
   it('should replace USER_AGENT', () => {
     return expandUrlAsync('?sh=USER_AGENT').then(res => {
       expect(res).to.match(/sh=\w+/);

@@ -193,7 +193,6 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
 | [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
 | [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
-| [TimezoneCode](#timezoneCode)       | `TIMEZONE_CODE`   | `${timezoneCode}`   |
 | [User Agent](#user-agent)           | `USER_AGENT`      | `${userAgent}`      |
 | [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
 | [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
@@ -1020,19 +1019,6 @@ Provides the user's time-zone offset from UTC, in minutes.
   ```
 * **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
-
-#### Timezone Code
-
-Provides the user's IANA time-zone code (if supported by your browser).
-
-* **platform variable**: `TIMEZONE_CODE`
-  *  Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?tz=TIMEZONE_CODE"></amp-pixel>
-  ```
-* **amp-analytics variable**: `${timezoneCode}`
-  * Example value: `Europe/Rome`.
-
 
 #### Total Engaged Time
 
