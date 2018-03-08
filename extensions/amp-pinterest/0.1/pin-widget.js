@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {Util} from './util';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
@@ -57,10 +57,11 @@ export class PinWidget {
     const href = el.getAttribute('data-pin-href');
     const log = el.getAttribute('data-pin-log');
     if (href) {
+      assertAbsoluteHttpOrHttpsUrl(href);
       if (shouldPop) {
-        openWindowDialog(window, encodeURI(href), '_pinit', POP);
+        openWindowDialog(window, href, '_pinit', POP);
       } else {
-        openWindowDialog(window, encodeURI(href+'?amp=1&guid=$'+Util.guid), '_blank');
+        openWindowDialog(window, `${href}?amp=1&guid=${Util.guid}`, '_blank');
       }
     }
     if (log) {
