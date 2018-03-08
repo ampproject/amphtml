@@ -26,6 +26,7 @@ import {
   rotate,
   translate
 } from '../../../src/style';
+import {KeyframesDef} from './animation-types';
 
 /**
  * Translates the element on the 2d plane according to the given points.
@@ -34,7 +35,7 @@ import {
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
- * @return {KeframesDef} Keyframes that make up the animation.
+ * @return {KeyframesDef} Keyframes that make up the animation.
  */
 export function translate2d(startX, startY, endX, endY) {
   return [
@@ -51,7 +52,7 @@ export function translate2d(startX, startY, endX, endY) {
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
  * @param {number} direction -1 for left, 1 for right
- * @return {KeframesDef} Keyframes that make up the animation.
+ * @return {KeyframesDef} Keyframes that make up the animation.
  */
 export function rotateAndTranslate(startX, startY, endX, endY, direction) {
   return [
@@ -68,7 +69,7 @@ export function rotateAndTranslate(startX, startY, endX, endY, direction) {
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
  * @param {number} endY Ending point in the ordinate.
- * @return {KeframesDef} Keyframes that make up the animation.
+ * @return {KeyframesDef} Keyframes that make up the animation.
  */
 export function whooshIn(startX, startY, endX, endY) {
   return [
