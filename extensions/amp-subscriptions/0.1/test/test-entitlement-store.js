@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Entitlement,
-  Entitlements,
-} from '../../../../third_party/subscriptions-project/apis';
+import {Entitlement} from '../entitlement';
 
 import {EntitlementStore} from '../entitlement-store';
 
@@ -25,14 +22,14 @@ describes.realWin('entitlement-store', {}, () => {
   let entitlementStore;
   const serviceIds = ['service1', 'service2'];
   const currentProduct = 'currentProductId';
-  const sampleEntitlement1 =
-    new Entitlement(serviceIds[0], ['currentProductId'], '');
-  const sampleEntitlement2 =
-    new Entitlement(serviceIds[1], ['product3'], '');
-  const entitlementsForService1 = new Entitlements(
-      serviceIds[0], '', [sampleEntitlement1], currentProduct);
-  const entitlementsForService2 = new Entitlements(
-      serviceIds[1], '', [sampleEntitlement2], currentProduct);
+  const entitlementsForService1 =
+    new Entitlement(serviceIds[0], '', serviceIds[0], ['currentProductId'],
+        '', false);
+  const entitlementsForService2 =
+    new Entitlement(serviceIds[1], '', serviceIds[1], ['product3'],
+        '', false);
+  entitlementsForService1.setCurrentProduct(currentProduct);
+  entitlementsForService2.setCurrentProduct(currentProduct);
 
   beforeEach(() => {
     entitlementStore = new EntitlementStore(serviceIds);
@@ -80,10 +77,9 @@ describes.realWin('entitlement-store', {}, () => {
     });
 
     it('should resolve false for negative entitlement', done => {
-      const negativeEntitlement1 =
-          new Entitlement(serviceIds[0], ['product1'], '');
-      const negativeEntitlements = new Entitlements(
-          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+      const negativeEntitlements = new Entitlement(serviceIds[0], '',
+          serviceIds[0], ['product1'], '', false);
+      negativeEntitlements.setCurrentProduct(currentProduct);
       entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
       entitlementStore.getGrantStatus()
@@ -98,10 +94,9 @@ describes.realWin('entitlement-store', {}, () => {
 
     it('should resolve false if all future entitlement '
         + 'are also negative ', done => {
-      const negativeEntitlement1 =
-          new Entitlement(serviceIds[0], ['product1'], '');
-      const negativeEntitlements = new Entitlements(
-          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+      const negativeEntitlements = new Entitlement(serviceIds[0], '',
+          serviceIds[0], ['product1'], '', false);
+      negativeEntitlements.setCurrentProduct(currentProduct);
       entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       entitlementStore.getGrantStatus()
           .then(entitlements => {
