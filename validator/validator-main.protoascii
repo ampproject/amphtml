@@ -1518,6 +1518,7 @@ tags: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "hreflang" }
+  attrs: { name: "referrerpolicy" }
   attrs: {
     name: "rel"
     # There are a wide variety of link rel attribute values used in the wild as
