@@ -4084,6 +4084,7 @@ attr_lists: {
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
 }
+
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
@@ -4099,6 +4100,7 @@ tags: {  # <amp-img>
   attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
+  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
