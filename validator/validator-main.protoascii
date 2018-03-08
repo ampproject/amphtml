@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 579
+spec_file_revision: 580
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4098,6 +4098,7 @@ tags: {  # <amp-img>
   attrs: { name: "[src]" }
   attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
+  attr_lists: "lightboxable-elements"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   amp_layout: {

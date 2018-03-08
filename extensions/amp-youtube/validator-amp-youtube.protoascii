@@ -52,6 +52,7 @@ tags: {  # <amp-youtube>
   # <amp-bind>
   attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
+  attr_lists: "lightboxable-elements"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
