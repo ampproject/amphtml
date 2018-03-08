@@ -22,25 +22,35 @@ import {loadScript} from './3p';
  * @param {!Window} global
  * @param {function(!Object)} cb
  */
+
 function getBodymovinAnimationSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
     cb(global.bodymovin);
   });
 }
 
-export function bodymovinanimation(global, data) {
+function loadAnimationOnEvent(event) {
+  const dataReceived = JSON.parse(event.data);
+  const dataLoop = dataReceived['loop'];
+  const animationData = dataReceived['animationData'];
   const animatingContainer = global.document.createElement('div');
+
   global.document.getElementById('c').appendChild(animatingContainer);
-  const shouldLoop = data.loop == 'true';
-  const loop = isFiniteNumber(data.loop) ? parseInt(data.loop, 10) : shouldLoop;
+  const shouldLoop = dataLoop == 'true';
+  const loop = isFiniteNumber(dataLoop) ? parseInt(dataLoop, 10) : shouldLoop;
 
   getBodymovinAnimationSdk(global, function() {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
-      loop,
+      loop: loop,
       autoplay: true,
-      animationData: JSON.parse(data.animationData),
+      animationData: animationData,
     });
   });
+}
+
+window.addEventListener('message', loadAnimationOnEvent, false);
+
+export function bodymovinanimation(global, data) {
 }

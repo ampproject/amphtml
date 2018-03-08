@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
+import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
@@ -38,7 +39,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {string} */
-    this.loop_ = true;
+    this.loop_ = 'true';
 
     /** @private {string} */
     this.src_ = null;
@@ -76,14 +77,20 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     return animData.then(data => {
       // We will get here when the data has been fetched from the server
       this.element.setAttribute('data-animation-data', JSON.stringify(data));
-      //should become return vsync.mutatePromise(..
+
       return Services.vsyncFor(this.win).mutatePromise(() => {
         const iframe = getIframe(this.win, this.element, 'bodymovinanimation');
         this.applyFillContent(iframe);
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        return this.loadPromise(iframe_);
+        return this.loadPromise(this.iframe_).then(() => {
+          const message = JSON.stringify(dict({
+            'loop': this.loop_,
+            'animationData': data,
+          }));
+          this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        });
       });
     });
   }
