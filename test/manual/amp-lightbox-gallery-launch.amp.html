@@ -343,6 +343,55 @@
     </amp-facebook>
   </amp-carousel>
 
+  <h1>Lightbox API Tests</h1>
+  <h2>Lightbox Group Test</h2>
+  <h3>Test 1</h3>
+  <p>The following image and youtube video should belong to the same lightbox group. The lightbox group should include a third image from the carousel in Test 3 below. </p>
+  <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    width="400"
+    height="300"
+    lightbox="group-1"
+    alt="a beautiful cat"></amp-img>
+  <amp-youtube lightbox="group-1"
+    width="480"
+    height="270"
+    layout="fixed"
+    data-videoid="lBTCB7yLs8Y">
+  </amp-youtube>
+  <h3>Test 2</h3>
+  <p>The following image should belong to its own lightbox group. </p>
+  <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+    width="400"
+    height="300"
+    lightbox
+    aria-label="Aria labels are cool."></amp-img>
+  <h3>Test 3</h3>
+  <p>In the following carousel, images 2 and 4 should be excluded from the lightbox. Image 4 should belong to the lightbox group in Test 1.</p>
+  <amp-carousel height="300"
+    width="400"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="400"
+      height="300"
+      alt="a beautiful cat"></amp-img>
+    <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+      width="400"
+      height="300"
+      lightbox-exclude
+      aria-label="Aria labels are cool."></amp-img>
+    <amp-img src="https://images.unsplash.com/photo-1482066490729-6f26115b60dc"
+      width="400"
+      height="300"
+      aria-describedby="my-aria-describe"></amp-img>
+    <amp-img src="https://images.unsplash.com/photo-1511275539165-cc46b1ee89bf"
+      width="400"
+      height="300"
+      lightbox="group-1"
+      aria-labelledby="my-aria-label"></amp-img>
+  </amp-carousel>
+
   <amp-img id="fb-thumbnail-img"
     width="200"
     height="200"
@@ -350,11 +399,11 @@
     src="https://picsum.photos/200/200?image=1074">
   </amp-img>
 
-  <div id='my-aria-describe'>
+  <div id='my-aria-describe' layout="nodisplay">
     This is an aria described by a div. <br/>
     I have a linebreak.
   </div>
-  <div id='my-aria-label'>
+  <div id='my-aria-label' layout="nodisplay">
     This is an aria labelled by a div. <br/>
     I also have a newline.
   </div>
