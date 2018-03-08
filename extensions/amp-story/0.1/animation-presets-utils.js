@@ -28,7 +28,6 @@ import {
 
 /**
  * Translates the element on the 2d plane according to the given points.
- * @export
  * @param {number} startX Starting point in the abscissa.
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
@@ -44,7 +43,6 @@ export function translate2d(startX, startY, endX, endY) {
 
 /**
  * Translates and rotates the element on the 2d plane.
- * @export
  * @param {number} startX Starting point in the abscissa.
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
@@ -61,7 +59,6 @@ export function rotateAndTranslate(startX, startY, endX, endY, direction) {
 
 /**
  * Gradually shows and grows the element while translating it on the 2d plane.
- * @export
  * @param {number} startX Starting point in the abscissa.
  * @param {number} startY Starting point in the ordinate.
  * @param {number} endX Ending point in the abscissa.
