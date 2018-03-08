@@ -56,6 +56,7 @@ import {ShareWidget} from './share';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
+  childElement,
   closest,
   escapeCssSelectorIdent,
   matches,
@@ -301,6 +302,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
 
+    /** @private {?HTMLMediaElement} */
+    this.backgroundAudioEl_ = null;
+
     /** @private {?./pagination-buttons.PaginationButtons} */
     this.paginationButtons_ = null;
 
@@ -348,8 +352,6 @@ export class AmpStory extends AMP.BaseElement {
 
     // Mute `amp-story` in beginning.
     this.mute_();
-
-    upgradeBackgroundAudio(this.element);
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
@@ -897,6 +899,11 @@ export class AmpStory extends AMP.BaseElement {
             PRE_ACTIVE_PAGE_ATTRIBUTE_NAME);
       }
 
+      // If first navigation.
+      if (!oldPage) {
+        this.registerAndPreloadBackgroundAudio_();
+      }
+
       this.preloadPagesByDistance_();
       this.reapplyMuting_();
       this.forceRepaintForSafari_();
@@ -1236,6 +1243,35 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
+   * Handles a background-audio attribute set on an <amp-story> tag.
+   * @private
+   */
+  registerAndPreloadBackgroundAudio_() {
+    let backgroundAudioEl = upgradeBackgroundAudio(this.element);
+
+    if (!backgroundAudioEl) {
+      return;
+    }
+
+    // Once the media pool is ready, registers and preloads the background
+    // audio, and then gets the swapped element from the DOM to mute/unmute/play
+    // it programmatically later.
+    this.activePage_.whenLoaded()
+        .then(() => {
+          backgroundAudioEl =
+            /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
+          this.mediaPool_.register(backgroundAudioEl);
+          return this.mediaPool_.preload(backgroundAudioEl);
+        }).then(() => {
+          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */
+              (childElement(this.element, el => {
+                return el.tagName.toLowerCase() === 'audio';
+              }));
+        });
+  }
+
+
+  /**
    * Preloads the bookend config if on the last page.
    * @private
    */
@@ -1401,10 +1437,12 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
+   * Retrieves the page containing the element, or null. A background audio
+   * set on the <amp-story> tag would not be contained in a page.
    * @param {!Element} element The element whose containing AmpStoryPage should
    *     be retrieved
-   * @return {!./amp-story-page.AmpStoryPage} The AmpStoryPage containing the
-   *     specified element.
+   * @return {?./amp-story-page.AmpStoryPage} The AmpStoryPage containing the
+   *     specified element, if any.
    */
   getPageContainingElement_(element) {
     const pageIndex = findIndex(this.pages_, page => {
@@ -1415,29 +1453,42 @@ export class AmpStory extends AMP.BaseElement {
       return !!pageEl;
     });
 
-    return dev().assert(this.pages_[pageIndex],
-        'Element not contained on any amp-story-page');
+    return this.pages_[pageIndex] || null;
   }
 
 
   /** @override */
   getElementDistance(element) {
     const page = this.getPageContainingElement_(element);
+
+    // An element not contained in a page is likely to be global to the story,
+    // like a background audio. Setting the distance to -1 ensures it will not
+    // get evicted from the media pool.
+    if (!page) {
+      return -1;
+    }
+
     return page.getDistance();
   }
 
 
   /** @override */
   getMaxMediaElementCounts() {
-    const audioMediaElements =
-        this.element.querySelectorAll('amp-audio, [background-audio]');
-    const videoMediaElements = this.element.querySelectorAll('amp-video');
+    let audioMediaElementsCount =
+        this.element.querySelectorAll('amp-audio, [background-audio]').length;
+    const videoMediaElementsCount =
+        this.element.querySelectorAll('amp-video').length;
+
+    // The root element (amp-story) might have a background-audio as well.
+    if (this.element.hasAttribute('background-audio')) {
+      audioMediaElementsCount++;
+    }
 
     return {
       [MediaType.AUDIO]: Math.min(
-          audioMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
+          audioMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
       [MediaType.VIDEO]: Math.min(
-          videoMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
+          videoMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
     };
   }
 
@@ -1452,6 +1503,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   mute_() {
+    if (this.backgroundAudioEl_) {
+      this.mediaPool_.mute(this.backgroundAudioEl_);
+    }
     this.pages_.forEach(page => {
       page.muteAllMedia();
     });
@@ -1463,7 +1517,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    const unmuteAllMedia = () => this.activePage_.unmuteAllMedia();
+    const unmuteAllMedia = () => {
+      if (this.backgroundAudioEl_) {
+        this.mediaPool_.unmute(this.backgroundAudioEl_);
+        this.mediaPool_.play(this.backgroundAudioEl_);
+      }
+      this.activePage_.unmuteAllMedia();
+    };
+
     this.mediaPool_.blessAll()
         .then(unmuteAllMedia, unmuteAllMedia);
     this.toggleMutedAttribute_(false);
