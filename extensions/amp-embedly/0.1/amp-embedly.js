@@ -113,6 +113,11 @@ export class AmpEmbedly extends AMP.BaseElement {
   /**
    * Gets component iframe with set source based on data type.
    *
+   * For RICH and VIDEO types, when oEmbed response contains:
+   * - html iframe tag: we render its source as the src of our 3p iframe.
+   * - html with a script tag: we render the html and add the script to the
+   *   3p iframe document.
+   *
    * @param {!JsonObject<{type: string, html: string, url: string}>} data
    * @returns {Element}
    * @private
@@ -125,7 +130,6 @@ export class AmpEmbedly extends AMP.BaseElement {
     let src;
 
     switch (data['type']) {
-      // For these types, embedly returns an iframe or html + script that must be loaded.
       case resourceType.VIDEO:
       case resourceType.RICH: {
         const match = data['html'].match(SRC_REGEXP);
