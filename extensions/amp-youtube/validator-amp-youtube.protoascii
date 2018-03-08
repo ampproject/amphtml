@@ -15,6 +15,9 @@
 #
 
 tags: {  # amp-youtube
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-youtube"
@@ -26,6 +29,9 @@ tags: {  # amp-youtube
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-youtube>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-YOUTUBE"
   requires_extension: "amp-youtube"
   attrs: { name: "autoplay" }
@@ -46,7 +52,6 @@ tags: {  # <amp-youtube>
   # <amp-bind>
   attrs: { name: "[data-videoid]" }
   attr_lists: "extended-amp-global"
-  attr_lists: "lightboxable-elements"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
