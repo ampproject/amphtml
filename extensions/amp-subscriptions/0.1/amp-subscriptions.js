@@ -213,18 +213,23 @@ export class SubscriptionService {
         }
       }
 
-      this.entitlementStore_.getGrantStatus()
-          .then(grantState => {this.processGrantState_(grantState);});
-
-      this.selectAndActivatePlatform_();
+      this.startAuthorizationFlow_();
     });
     return this;
   }
 
   /**
+   * Unblock document based on grant state and selected platform
    * @private
-   * @returns {!Promise}
    */
+  startAuthorizationFlow_() {
+    this.entitlementStore_.getGrantStatus()
+        .then(grantState => {this.processGrantState_(grantState);});
+
+    this.selectAndActivatePlatform_();
+  }
+
+  /** @private */
   selectAndActivatePlatform_() {
     const requireValuesPromise = Promise.all([
       this.entitlementStore_.getGrantStatus(),
@@ -277,10 +282,9 @@ export class SubscriptionService {
           subscriptionPlatform.getServiceId(),
           entitlement
       );
-      // TODO (@prateekbh): Implement reset
-      // this.entitlementStore_.getGrantStatus()
-      //     .then(grantState => this.processGrantState_(grantState));
-      // this.selectAndActivatePlatform_();
+
+      this.entitlementStore_.reset();
+      this.startAuthorizationFlow_();
     });
   }
 
