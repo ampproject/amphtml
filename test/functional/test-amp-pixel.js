@@ -147,7 +147,7 @@ describes.realWin('amp-pixel in embed', {
 
   class TestVariableSource extends VariableSource {
     constructor() {
-      super();
+      super(env.ampdoc);
     }
     initialize() {
       this.set('TEST', () => 'value1');

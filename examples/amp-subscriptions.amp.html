@@ -26,7 +26,11 @@
     {
       "services": [
         {
-          "authorizationUrl": "/subscription/2/entitlements"
+          "authorizationUrl": "//localhost:8000/subscription/2/entitlements",
+          "actions":{
+            "login": "//lipsum.com/login",
+            "subscribe": "//lipsum.com/subscribe"
+          }
         },
         {
           "serviceId": "subscribe.google.com"
@@ -203,7 +207,7 @@
         </div>
 
         <section subscriptions-section="actions" class="login-section">
-          TODO: login and other actions will be here
+          <div subscriptions-action="login" subscriptions-display="EXPR">Login</div>
         </section>
 
         <section subscriptions-section="content-not-granted">

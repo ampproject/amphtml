@@ -26,6 +26,7 @@ require 'net/http'
 require 'percy/capybara'
 require 'capybara'
 require 'selenium/webdriver'
+require 'rspec/retry'
 
 
 ENV['PERCY_DEBUG'] = '0'
@@ -224,8 +225,21 @@ def load_visual_tests_config_json
 end
 
 
+# Make the visual tests more resilient to Selenium read timeouts. See #13700.
+def configure_browser_timeout
+  RSpec.configure do |config|
+    if ARGV.include? '--chrome_debug'
+      config.verbose_retry = true
+    end
+    config.default_retry_count = 2
+    config.exceptions_to_retry = [Net::ReadTimeout]
+  end
+end
+
+
 # Configures the Chrome browser (optionally in headless mode)
 def configure_browser
+  configure_browser_timeout
   if ARGV.include? '--headless'
     chrome_args = %w[--no-sandbox --disable-extensions --headless --disable-gpu]
   else

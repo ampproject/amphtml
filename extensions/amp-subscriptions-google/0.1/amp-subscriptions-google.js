@@ -38,12 +38,12 @@ export class GoogleSubscriptionsPlatformService {
 
   /**
    * @param {!JsonObject} platformConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    * @return {!GoogleSubscriptionsPlatform}
    */
-  createPlatform(platformConfig, pageConfig) {
+  createPlatform(platformConfig, serviceAdapter) {
     return new GoogleSubscriptionsPlatform(this.ampdoc_,
-        platformConfig, pageConfig);
+        platformConfig, serviceAdapter);
   }
 }
 
@@ -56,18 +56,30 @@ export class GoogleSubscriptionsPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, platformConfig, pageConfig) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @private @const {!ConfiguredRuntime} */
-    this.runtime_ = new ConfiguredRuntime(ampdoc.win, pageConfig, {
-      fetcher: new AmpFetcher(ampdoc.win),
-    });
+    this.runtime_ = new ConfiguredRuntime(
+        ampdoc.win,
+        serviceAdapter.getPageConfig(),
+        {
+          fetcher: new AmpFetcher(ampdoc.win),
+        }
+    );
   }
 
   /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements();
+  }
+
+  /** @override */
+  activate() {}
+
+  /** @override */
+  getServiceId() {
+    return PLATFORM_ID;
   }
 }
 
@@ -100,9 +112,12 @@ AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc('subscriptions-google', ampdoc => {
     const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
     Services.subscriptionsServiceForDoc(ampdoc).then(service => {
-      service.registerPlatform(PLATFORM_ID, (platformConfig, pageConfig) => {
-        return platformService.createPlatform(platformConfig, pageConfig);
-      });
+      service.registerPlatform(PLATFORM_ID,
+          (platformConfig, serviceAdapter) => {
+            return platformService.createPlatform(platformConfig,
+                serviceAdapter);
+          }
+      );
     });
     return platformService;
   });

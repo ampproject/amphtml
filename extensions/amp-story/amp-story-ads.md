@@ -1,6 +1,7 @@
-# Advertising support in AMP Stories 
+# Advertising support in AMP Stories
 
 This document describes the principles and practices for including ads in AMP Stories.
+Please note that Advertising support in AMP Stories is highly experimental at the moment and could significantly change from what's described below. We look forward to your feedback as we build this model together.
 
 ## AMP Story Ad Principles
 
@@ -9,9 +10,9 @@ The current ad formats of banners and boxes doesn't integrate well with the rest
 The following principles will apply to AMP Story ads:
 
 * *Visual first*:  Inviting, bold, context-driven invitation state.
-* *Native*: The ad page has the same dimensions as an organic story page. 
+* *Native*: The ad page has the same dimensions as an organic story page.
 * *Same interaction model*: User can continue to the next screen just like they would with an organic story page.
-* *Fast*: The ad never appears to a user in a half-loaded state. 
+* *Fast*: The ad never appears to a user in a half-loaded state.
 
 As a result, one key difference from regular web pages is that the AMP stories runtime determines the right placement of the ad page amidst the AMP story. These mechanics are explained as part of [amp-story-auto-ads](./amp-story-auto-ads.md).
 
@@ -22,27 +23,27 @@ There are two type of ad formats supported as part of AMP Stories:
 * **Single page ad** : Where the ad appears as a single page inside of an AMP story.
 * **Sponsored story ad**: Where the ad is a stand-alone multi-page story.
 
-### Single page ad 
+### Single page ad
 
-In-line with the principles, a single page ad appears in between organic story content as a full page. 
+In-line with the principles, a single page ad appears in between organic story content as a full page.
 Single page ads have a predefined set of call to action buttons and those call to action buttons take a web landing page URL where the user is navigated to, on click.
 
 ![Story Page Ad](img/story-page-ad.png)
 
-### Sponsored story ad 
- A sponsored story ad is just an URL on the web. Therefore you can drive user traffic to a sponsored story ad from the CTA URL button of a single page ad. In the future, there may be the ability to inline the entire sponsored story inside a regular AMP story, but that's pending user experimentation. 
+### Sponsored story ad
+ A sponsored story ad is just an URL on the web. Therefore you can drive user traffic to a sponsored story ad from the CTA URL button of a single page ad. In the future, there may be the ability to inline the entire sponsored story inside a regular AMP story, but that's pending user experimentation.
 
 ![Sponsored Story Ad](img/sponsored-story-ad.png)
 
 ## Consistent UX
 
-The ad label and the call to action (CTA) buttons on the ads must be consistent across all publishers and ad networks. Therefore, the AMP stories runtime takes responsibility of rendering those in a consistent manner. 
+The ad label and the call to action (CTA) buttons on the ads must be consistent across all publishers and ad networks. Therefore, the AMP stories runtime takes responsibility of rendering those in a consistent manner.
 
 ![Consistent Ad UX](img/consistent-ux.png)
 
 
-## Publisher placed ads 
-This is an option for publishers who would like to place single page ads amidst AMP story content they produce. This is meant as a stop-gap until more robust ad server support is available. 
+## Publisher placed ads
+This is an option for publishers who would like to place single page ads amidst AMP story content they produce. This is meant as a stop-gap until more robust ad server support is available.
 
 This is done using the mechanism in [Custom ad](../../ads/custom.md) extension. The ads are rendered with inlined templates in the story document
 and the data for the templates is fetched remotely.
@@ -53,12 +54,12 @@ For example:
 
 ```html
 <template type="amp-mustache" id="template-1">
-  <amp-img src="{{imgSrc}}"></amp-img>
+  <amp-img layout="fill" src="{{imgSrc}}"></amp-img>
   <amp-pixel src="{{impressionUrl}}"></amp-pixel>
 </template>
 ```
 
-A few important things to note: 
+A few important things to note:
 
 * Templates need to be inlined in the AMP story, as direct children of a `<amp-story-auto-ads>` element.
 * An element ID is required, so that the template can be referenced by the ad response.
@@ -76,7 +77,7 @@ amp-ad[template=template-2] {
 ```
 - The CTA (call-to-action) button should NOT
 be included in the template. Story defines a list of CTA buttons to select from.
-For details, read the ["CTA ad" section](#cta-ad) below. 
+For details, read the ["CTA ad" section](#cta-ad) below.
 
 ### Ad response
 
@@ -120,12 +121,12 @@ Here is a full example using `amp-story-auto-ads` together with some templates i
 <amp-story>
   <amp-story-auto-ads>
      <script type=”application/json”>
-      {
+        {
           "ad-attributes": {
             "type": "custom",
             "data-url": "https://adserver.com/getad?slot=abcd1234"
           }
-       }
+        }
      </script>
 
      <template type="amp-mustache" id="template-1">
@@ -146,7 +147,7 @@ At runtime, an `amp-ad` element is dynamically inserted:
 
 ```html
 <amp-ad type="custom"
-  data-src="https://adserver.com/getad?slot=abcd1234"
+  data-url="https://adserver.com/getad?slot=abcd1234"
 </amp-ad>
 ```
 
@@ -154,11 +155,11 @@ And an ad request is made to this URL: `https://adserver.com/getad?slot=abcd1234
 Each story can only have one `amp-story-auto-ads` element.
 
 ### CTA ad
-To provide a consistent user experience, the AMP story runtime is responsible for rendering 
-the button of a CTA ad. The URL and button text is provided in the `var` 
+To provide a consistent user experience, the AMP story runtime is responsible for rendering
+the button of a CTA ad. The URL and button text is provided in the `var`
 object of the ad response.
 
-*  `ctaType`: the CTA button type, of which the value is an `enum` 
+*  `ctaType`: the CTA button type, of which the value is an `enum`
    * EXPLORE: "Explore Now"
    * SHOP: "Shop Now"
    * READ: "Read Now"
@@ -171,8 +172,8 @@ Each story page that has a dynamically inserted ad is assigned a system-generate
 Also, ad response can leverage the `var` object to set data attributes to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md#variables-as-data-attribute).
 
 
-## Ad server support for AMP story ads 
-Ad servers that would like to support advertising for AMP stories should open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new), and we'll be in touch. 
+## Ad server support for AMP story ads
+Ad servers that would like to support advertising for AMP stories should open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new), and we'll be in touch.
 
-If you are a publisher, please reach out to your ad server regarding ad support for stories. 
+If you are a publisher, please reach out to your ad server regarding ad support for stories.
 

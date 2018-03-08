@@ -6,6 +6,7 @@
   <link rel="canonical" href="animations-presets.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+  <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
@@ -34,6 +35,9 @@
     .circle {
       border-radius: 80px;
     }
+    .fill-img img {
+      object-fit: cover;
+    }
     </style>
 </head>
 <body>
@@ -49,16 +53,8 @@
       </script>
 
       <template type="amp-mustache" id="template-1">
-        <amp-img layout="fill" src="{{imgSrc}}"></amp-img>
-        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-      </template>
-
-      <!-- TODO(ccordry) make a example server that returns different payloads
-      and can take advantage of multiple templates. -->
-      <template type="amp-mustache" id="template-2">
-        <div class="creative-line-1">{{creativeLine1}}</div>
-        <div class="creative-line-2">{{creativeLine2}}</div>
-        <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+            <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
+            <amp-pixel src="{{impressionUrl}}"></amp-pixel>
       </template>
     </amp-story-auto-ads>
 
