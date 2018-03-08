@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
@@ -65,8 +66,6 @@ export class AmpEmbedly extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.iframe_ = null;
-
-    this.getIframe_ = this.getIframe_.bind(this);
   }
 
   /** @override */
@@ -83,12 +82,14 @@ export class AmpEmbedly extends AMP.BaseElement {
         this.element
     );
 
-    return this.getOembedData_().then(this.getIframe_).then(iframe => {
-      this.iframe_ = iframe;
-      this.element.appendChild(iframe);
+    return this.getOembedData_()
+        .then(this.getIframe_.bind(this))
+        .then(iframe => {
+          this.iframe_ = iframe;
+          this.element.appendChild(iframe);
 
-      return this.loadPromise(iframe);
-    });
+          return this.loadPromise(iframe);
+        });
   }
 
   /** @override */
@@ -101,11 +102,7 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @return {!Promise}
    * */
   getOembedData_() {
-    /** @type {JsonObject} */
-    const params = {
-      key: this.key_,
-      url: this.url_,
-    };
+    const params = dict({'key': this.key_, 'url': this.url_});
     const url = addParamsToUrl(BASE_API_URL, params);
 
     return this.xhr_.fetchJson(url, {
@@ -116,8 +113,8 @@ export class AmpEmbedly extends AMP.BaseElement {
   /**
    * Gets component iframe with set source based on data type.
    *
-   * @param {!JsonObject<{html: string, type: string, url: string}>} data
-   * @returns {?Promise<!JsonObject|null>}
+   * @param {!JsonObject<{type: string, html: string, url: string}>} data
+   * @returns {Element}
    * @private
    */
   getIframe_(data) {
@@ -127,24 +124,24 @@ export class AmpEmbedly extends AMP.BaseElement {
     /** @type {string} */
     let src;
 
-    switch (data.type) {
+    switch (data['type']) {
       // For these types, embedly returns an iframe or html + script that must be loaded.
       case resourceType.VIDEO:
       case resourceType.RICH: {
-        const match = data.html.match(SRC_REGEXP);
+        const match = data['html'].match(SRC_REGEXP);
 
         user().assert(
-            match, `src not found in embedly response: "${data.html}"`
+            match, `src not found in embedly response: "${data['html']}"`
         );
 
         const srcUrl = `https:${match[1]}`;
 
-        if (data.html.startsWith('<iframe')) {
+        if (data['html'].startsWith('<iframe')) {
           src = srcUrl;
           break;
         }
 
-        src = this.createObjectUrl_(data.html);
+        src = this.createObjectUrl_(data['html']);
 
         iframe.onload = function() {
           const win = this.contentWindow.window;
@@ -160,7 +157,9 @@ export class AmpEmbedly extends AMP.BaseElement {
 
       case resourceType.PHOTO: {
         const html = `
-          <img src="${data.url}" height="${data.height}" width="${data.width}">
+          <img src="${data['url']}" 
+            height="${data['height']}" 
+            width="${data['width']}">
         `;
 
         src = this.createObjectUrl_(html);
@@ -170,7 +169,7 @@ export class AmpEmbedly extends AMP.BaseElement {
 
     iframe.src = src;
 
-    return Promise.resolve(iframe);
+    return iframe;
   }
 
   /**
