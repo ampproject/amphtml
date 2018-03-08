@@ -360,8 +360,8 @@ describes.fakeWin('url rewriter', {
     let preloadStub;
 
     beforeEach(() => {
-      mutateElementStub = sandbox.stub(implementation, 'deferMutate').callsFake(
-          callback => callback());
+      mutateElementStub = sandbox.stub(implementation, 'mutateElement')
+          .callsFake(callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');
     });

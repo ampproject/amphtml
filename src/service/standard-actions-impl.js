@@ -342,8 +342,12 @@ export class StandardActions {
     });
 
     this.resources_.mutateElement(target, () => {
-      toggle(target, true);
-      target.removeAttribute('hidden');
+      if (target.classList.contains('i-amphtml-element')) {
+        target./*OK*/expand();
+      } else {
+        toggle(target, true);
+        target.removeAttribute('hidden');
+      }
     });
 
     return null;
