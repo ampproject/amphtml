@@ -43,9 +43,9 @@ function loadAnimationOnEvent(event) {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
-      loop: loop,
+      loop,
       autoplay: true,
-      animationData: animationData,
+      animationData,
     });
   });
 }

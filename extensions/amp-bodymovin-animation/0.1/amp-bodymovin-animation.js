@@ -20,7 +20,6 @@ import {batchFetchJsonFor} from '../../../src/batched-json';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
