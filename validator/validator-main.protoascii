@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 573
+spec_file_revision: 574
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -267,8 +267,6 @@ tags: {
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/"
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
-                 "https://use\\.fontawesome\\.com/releases/"
-                 "v([0-9]+\\.?)+/css/(all|brands|solids|fontawesome)\\.css|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
   attrs: { name: "media" }
@@ -1492,7 +1490,6 @@ tags: {
       allow_relative: true
       allowed_protocol: "ftp"
       allowed_protocol: "geo"
-      allowed_protocol: "maps"
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
@@ -1518,7 +1515,6 @@ tags: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "hreflang" }
-  attrs: { name: "referrerpolicy" }
   attrs: {
     name: "rel"
     # There are a wide variety of link rel attribute values used in the wild as
@@ -4085,7 +4081,6 @@ attr_lists: {
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
 }
-
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
@@ -4101,7 +4096,6 @@ tags: {  # <amp-img>
   attrs: { name: "[srcset]" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
