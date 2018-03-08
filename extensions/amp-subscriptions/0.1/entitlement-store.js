@@ -103,7 +103,7 @@ export class EntitlementStore {
   /**
    * Clears the grant status
    */
-  clearGrantStatus() {
+  reset() {
     this.grantStatusPromise_ = null;
   }
 

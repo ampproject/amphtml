@@ -213,15 +213,16 @@ export class SubscriptionService {
         }
       }
 
-      this.startUnblockingDocument_();
+      this.startAuthorizationFlow_();
     });
     return this;
   }
 
   /**
    * Unblock document based on grant state and selected platform
+   * @private
    */
-  startUnblockingDocument_() {
+  startAuthorizationFlow_() {
     this.entitlementStore_.getGrantStatus()
         .then(grantState => {this.processGrantState_(grantState);});
 
@@ -282,8 +283,8 @@ export class SubscriptionService {
           entitlement
       );
 
-      this.entitlementStore_.clearGrantStatus();
-      this.startUnblockingDocument_();
+      this.entitlementStore_.reset();
+      this.startAuthorizationFlow_();
     });
   }
 

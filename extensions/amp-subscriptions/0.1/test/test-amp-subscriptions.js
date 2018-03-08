@@ -157,7 +157,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     });
   });
 
-  describe('startUnblockingDocument_', () => {
+  describe('startAuthorizationFlow_', () => {
     it('should start grantStatus and platform selection', () => {
       subscriptionService.entitlementStore_ = new EntitlementStore(products);
       const getGrantStatusStub =
@@ -165,7 +165,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               .callsFake(() => Promise.resolve());
       const selectAndActivateStub =
           sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
-      subscriptionService.startUnblockingDocument_();
+      subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
     });
