@@ -341,17 +341,10 @@ export class StandardActions {
       }
     });
 
-    // deferMutate will only work on AMP elements
-    if (target.classList.contains('i-amphtml-element')) {
-      this.resources_.deferMutate(target, () => {
-        target./*OK*/expand();
-      });
-    } else {
-      this.resources_.mutateElement(target, () => {
-        toggle(target, true);
-        target.removeAttribute('hidden');
-      });
-    }
+    this.resources_.mutateElement(target, () => {
+      toggle(target, true);
+      target.removeAttribute('hidden');
+    });
 
     return null;
   }
