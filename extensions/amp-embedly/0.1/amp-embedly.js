@@ -91,6 +91,8 @@ export class AmpEmbedly extends AMP.BaseElement {
           this.iframe_ = iframe;
           this.element.appendChild(iframe);
 
+          this.getVsync().mutate(() => this.element.appendChild(iframe));
+
           return this.loadPromise(iframe);
         });
   }
