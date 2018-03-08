@@ -153,6 +153,8 @@
     "through2": "2.0.3",
     "touch": "3.1.0",
     "traverse": "0.6.6",
+    "tsickle": "^0.27.2",
+    "typescript": "^2.7.2",
     "uglifyify": "4.0.5",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
