@@ -67,8 +67,8 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 ```
 
 ### Building on MacOS
-* Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/). 
-* Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py). 
+* Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+* Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
 * If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
 
 To verify that you have the necessary prerequisites, run and verify:

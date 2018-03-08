@@ -51,6 +51,9 @@ tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
+  # <templates> tags inside <amp-story-auto-ads> have additional requirements
+  # as specified in the <amp-story-auto-ads rule> file.
+  disallowed_ancestor: "AMP-STORY-AUTO-ADS"
   disallowed_ancestor: "FORM > DIV [submit-success][template]"
   disallowed_ancestor: "FORM > DIV [submit-error][template]"
   requires_extension: "amp-mustache"
