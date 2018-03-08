@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>responsive, fill, fixed, flex-item, nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -57,6 +57,8 @@ Example:
 ```
 
 If the Instagram is not square you will need to enter the actual dimensions of the image.
+
+Due to the [instagram API](https://www.instagram.com/developer/embedding/) not accepting a `max-height`, `layout="responsive"` will size the `<amp-instagram>` component to the width of its container. This means that if the container aspect ratio has a shorter relative height than the actual instagram component, `<amp-instagram>` will overflow its container. This is worth noting in context of embedding `<amp-instagram>` in landscape components like `<amp-carousel>`. 
 
 When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
 
