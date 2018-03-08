@@ -37,14 +37,14 @@ const SRC_REGEXP = /src="([^"]+)"/;
 
 /**
  * oEmbed resource types.
- * @const {Object<{PHOTO: string, VIDEO: string, LINK: string, RICH: string}>}
+ * @const @enum {string}
  */
-const resourceType = Object.freeze({
-  PHOTO: 'photo',
-  VIDEO: 'video',
+const ResourceType = {
   LINK: 'link',
+  PHOTO: 'photo',
   RICH: 'rich',
-});
+  VIDEO: 'video',
+};
 
 /**
  * Implementation of the amp-embedly component.
@@ -130,8 +130,8 @@ export class AmpEmbedly extends AMP.BaseElement {
     let src;
 
     switch (data['type']) {
-      case resourceType.VIDEO:
-      case resourceType.RICH: {
+      case ResourceType.VIDEO:
+      case ResourceType.RICH: {
         const match = data['html'].match(SRC_REGEXP);
 
         user().assert(
@@ -159,7 +159,7 @@ export class AmpEmbedly extends AMP.BaseElement {
         break;
       }
 
-      case resourceType.PHOTO: {
+      case ResourceType.PHOTO: {
         const html = `
           <img src="${data['url']}" 
             height="${data['height']}" 
