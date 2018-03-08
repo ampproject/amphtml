@@ -140,7 +140,7 @@ export class AmpEmbedly extends AMP.BaseElement {
 
         const srcUrl = `https:${match[1]}`;
 
-        if (data['html'].startsWith('<iframe')) {
+        if (data['html'].indexOf('<iframe') !== -1) {
           src = srcUrl;
           break;
         }
