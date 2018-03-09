@@ -169,10 +169,15 @@ function enableLocalDev(config, target, configJson) {
   }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
+    const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//) ?
+      TESTING_HOST : 'http://' + TESTING_HOST;
+    const TESTING_HOST_NO_PROTOCOL =
+      TESTING_HOST.replace(/^https?:\/\//, '');
+
     LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
-      thirdPartyUrl: 'http://' + TESTING_HOST,
-      thirdPartyFrameHost: TESTING_HOST,
-      thirdPartyFrameRegex: TESTING_HOST,
+      thirdPartyUrl: TESTING_HOST_FULL_URL,
+      thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
+      thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
     });
     if (!process.env.TRAVIS) {
       log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
