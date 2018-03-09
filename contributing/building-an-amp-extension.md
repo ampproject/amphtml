@@ -442,7 +442,7 @@ image directly from instagram media endpoint.
 
 ```javascript
 class AmpInstagram extends AMP.BaseElement {
-  // ...  
+  // ...
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('div');
@@ -527,7 +527,7 @@ embedded when `unlayoutCallback` is called.
 unlayoutCallback() {
   if (this.iframe_) {
     removeElement(this.iframe_);
-    this.iframe_ = null;    
+    this.iframe_ = null;
     this.iframePromise_ = null;
     setStyles(this.placeholderWrapper_, {
       'display': '',
@@ -542,7 +542,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, deferMutate and changeSize
+### vsync, mutateElement, and changeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and
@@ -628,7 +628,7 @@ in EXPERIMENTS variable.
 const EXPERIMENTS = [
   // ...
   {
-    id: 'amp-my-element',  
+    id: 'amp-my-element',
     name: 'AMP My Element',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-my-element/amp-my-element.md',
@@ -665,7 +665,7 @@ Class AmpMyElement extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {  
+  buildCallback() {
     if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
       user.warn('Experiment %s is not turned on.', EXPERIMENT);
       return;
