@@ -920,15 +920,6 @@ export class BaseElement {
   }
 
   /**
-   * Schedules callback to be complete within the next batch. This call is
-   * intended for heavy DOM mutations that typically cause re-layouts.
-   * @param {!Function} callback
-   */
-  deferMutate(callback) {
-    this.element.getResources().deferMutate(this.element, callback);
-  }
-
-  /**
    * Called every time an owned AmpElement collapses itself.
    * See {@link collapse}.
    * @param {!AmpElement} unusedElement Child element that was collapsed.

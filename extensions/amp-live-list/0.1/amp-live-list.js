@@ -269,7 +269,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // We prefer user interaction if we have pending items to insert at the
     // top of the component.
     if (this.pendingItemsInsert_.length > 0) {
-      this.deferMutate(() => {
+      this.mutateElement(() => {
         this.toggleUpdateButton_(true);
         this.viewport_.updateFixedLayer();
       });

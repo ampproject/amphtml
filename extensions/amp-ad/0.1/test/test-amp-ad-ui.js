@@ -78,7 +78,7 @@ describes.realWin('amp-ad-ui handler', {
           () => {
             return Promise.reject();
           });
-      sandbox.stub(uiHandler.baseInstance_, 'deferMutate').callsFake(
+      sandbox.stub(uiHandler.baseInstance_, 'mutateElement').callsFake(
           callback => {
             callback();
             resolve();
@@ -101,7 +101,7 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
         return Promise.reject();
       });
-      sandbox.stub(adImpl, 'deferMutate').callsFake(callback => {
+      sandbox.stub(adImpl, 'mutateElement').callsFake(callback => {
         callback();
         resolve();
       });
