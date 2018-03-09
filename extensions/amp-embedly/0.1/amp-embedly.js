@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -85,16 +85,17 @@ export class AmpEmbedly extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.getOembedData_()
-        .then(this.getIframe_.bind(this))
-        .then(iframe => {
-          this.iframe_ = iframe;
-          this.element.appendChild(iframe);
+    const iframe = getIframe(this.win, this.element, 'embedly');
+    this.iframe_ = iframe;
 
-          this.getVsync().mutate(() => this.element.appendChild(iframe));
+    return this.getOembedData_().then(data => {
+      iframe.src = this.getIframeSrc_(data);
+      this.applyFillContent(iframe);
 
-          return this.loadPromise(iframe);
-        });
+      this.getVsync().mutate(() => this.element.appendChild(iframe));
+
+      return this.loadPromise(iframe);
+    });
   }
 
   /** @override */
@@ -107,7 +108,12 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @return {!Promise}
    * */
   getOembedData_() {
-    const params = dict({'key': this.key_, 'url': this.url_});
+    const params = dict({
+      'key': this.key_,
+      'url': this.url_,
+      'secure': true, // To serve requested embeds with a SSL connection
+      'scheme': 'https', // Request https embeds as default is protocol-less (//)
+    });
     const url = addParamsToUrl(BASE_API_URL, params);
 
     return this.xhr_.fetchJson(url, {
@@ -116,79 +122,70 @@ export class AmpEmbedly extends AMP.BaseElement {
   }
 
   /**
-   * Gets component iframe with set source based on data type.
-   *
-   * For RICH and VIDEO types, when oEmbed response contains:
-   * - html iframe tag: we render its source as the src of our 3p iframe.
-   * - html with a script tag: we render the html and add the script to the
-   *   3p iframe document.
+   * Gets the appropriate iframe source based on the oEmbed data resource type.
    *
    * @param {!JsonObject<{type: string, html: string, url: string}>} data
-   * @returns {Element}
+   * @returns {string}
    * @private
    */
-  getIframe_(data) {
-    const iframe = getIframe(this.win, this.element, 'embedly');
-    this.applyFillContent(iframe);
-
-    /** @type {string} */
-    let src;
-
+  getIframeSrc_(data) {
     switch (data['type']) {
       case ResourceType.VIDEO:
-      case ResourceType.RICH: {
-        const match = data['html'].match(SRC_REGEXP);
-
-        user().assert(
-            match, `src not found in embedly response: "${data['html']}"`
-        );
-
-        const srcUrl = `https:${match[1]}`;
-
-        if (data['html'].indexOf('<iframe') !== -1) {
-          src = srcUrl;
-          break;
-        }
-
-        src = this.createObjectUrl_(data['html']);
-
-        iframe.onload = function() {
-          const win = this.contentWindow.window;
-          const script = win.document.createElement('script');
-          script.src = srcUrl;
-          win.document.body.appendChild(script);
-
-          iframe.readyState = 'complete';
-        };
-
-        break;
-      }
-
-      case ResourceType.PHOTO: {
-        const html = `
-          <img src="${data['url']}" 
-            height="${data['height']}" 
-            width="${data['width']}">
-        `;
-
-        src = this.createObjectUrl_(html);
-        break;
-      }
+        return this.getVideoSrc_(data['html']);
+      case ResourceType.RICH:
+        return this.getRichSrc_(data['html']);
+      case ResourceType.PHOTO:
+        return this.getPhotoSrc_(data['url'], data['width'], data['height']);
     }
-
-    iframe.src = src;
-
-    return iframe;
   }
 
   /**
-   * Gets object url from given html.
-   * @param {string} html
+   * Get source for photo oEmbed resource type.
+   *
+   * @param {string} url
+   * @param {string}width
+   * @param {string} height
+   * @returns {*}
    * @private
    */
-  createObjectUrl_(html) {
-    const fileParts = new Blob([html], {type: 'text/html'});
-    return URL.createObjectURL(fileParts);
+  getPhotoSrc_(url, width, height) {
+    assertHttpsUrl(url, this.element);
+    const html = `<img src="${url}" height="${width}" width="${height}">`;
+
+    return URL.createObjectURL(new Blob([html], {type: 'text/html'}));
+  }
+
+  /**
+   * Get source for rich oEmbed resource type.
+   *
+   * @param {string} htmlData
+   * @returns {string}
+   * @private
+   */
+  getRichSrc_(htmlData) {
+    let html = htmlData;
+    if (html.indexOf('src="//') !== -1) {
+      html = html.replace('src="//', 'src="https://');
+    }
+
+    return URL.createObjectURL(new Blob([html], {type: 'text/html'}));
+  }
+
+  /**
+   * Get source for video oEmbed resource type.
+   *
+   * @param {string} html
+   * @returns {string}
+   * @private
+   */
+  getVideoSrc_(html) {
+    const match = user().assert(
+        html.match(SRC_REGEXP),
+        'src not found in embedly html response: %s',
+        html
+    );
+
+    return assertHttpsUrl(match[1], this.element);
   }
 }
 
