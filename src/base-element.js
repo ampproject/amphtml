@@ -179,8 +179,12 @@ export class BaseElement {
   }
 
   /**
-  * This is the priority of loading elements (layoutCallback).
+  * This is the priority of loading elements (layoutCallback). Used only to
+  * determine layout timing and preloading priority. Does not affect build time,
+  * etc.
+  *
   * The lower the number, the higher the priority.
+  *
   * The default priority for base elements is 0.
   * @return {number}
   */
