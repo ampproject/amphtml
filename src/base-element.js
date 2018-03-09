@@ -702,7 +702,7 @@ export class BaseElement {
    * @public @final
    */
   toggleLoading(state) {
-    this.element.toggleLoading(state);
+    this.element.toggleLoading(state, {force: true});
   }
 
   /**

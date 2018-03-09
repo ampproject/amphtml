@@ -1679,7 +1679,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       stubInA4A(false);
       element.prepareLoading_();
       resourcesMock.expects('deferMutate').once();
-      element.toggleLoading(false, true);
+      element.toggleLoading(false, {cleanup: true});
 
       expect(vsyncTasks).to.have.length.of(1);
       vsyncTasks.shift()();
@@ -1692,7 +1692,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.prepareLoading_();
       sandbox.stub(element.implementation_, 'isLoadingReused')
           .callsFake(() => true);
-      element.toggleLoading(false, true);
+      element.toggleLoading(false, {cleanup: true});
 
       expect(vsyncTasks).to.have.length.of(1);
       vsyncTasks.shift()();
@@ -1775,7 +1775,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }).then(() => {
         expect(toggle).to.be.calledOnce;
         expect(toggle.firstCall.args[0]).to.equal(false);
-        expect(toggle.firstCall.args[1]).to.equal(true);
+        expect(toggle.firstCall.args[1].cleanup).to.equal(true);
       });
     });
 
@@ -1793,7 +1793,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       }, () => {
         expect(toggle).to.be.calledOnce;
         expect(toggle.firstCall.args[0]).to.equal(false);
-        expect(toggle.firstCall.args[1]).to.equal(true);
+        expect(toggle.firstCall.args[1].cleanup).to.equal(true);
       });
     });
 

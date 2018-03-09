@@ -1014,7 +1014,7 @@ function createBaseCustomElementClass(win) {
         }
         this.readyState = 'complete';
         this.layoutCount_++;
-        this.toggleLoading(false, /* cleanup */ true);
+        this.toggleLoading(false, {cleanup: true});
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
         if (!this.isFirstLayoutCompleted_) {
@@ -1031,7 +1031,7 @@ function createBaseCustomElementClass(win) {
               CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
-        this.toggleLoading(false, /* cleanup */ true);
+        this.toggleLoading(false, {cleanup: true});
         throw reason;
       });
     }
@@ -1445,8 +1445,7 @@ function createBaseCustomElementClass(win) {
       }
       if (this.loadingDisabled_ || !isLoadingAllowed(this) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING ||
-        (!this.implementation_.isLoadingReused() &&
-          this.layoutCount_ > 0) ||
+        this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
         return false;
       }
@@ -1493,10 +1492,12 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {boolean=} opt_cleanup
+     * @param {{cleanup:boolean,force:boolean}=} opt_options
      * @public @final @this {!Element}
      */
-    toggleLoading(state, opt_cleanup) {
+    toggleLoading(state, opt_options) {
+      const cleanup = opt_options && opt_options.cleanup;
+      const force = opt_options && opt_options.force;
       assertNotTemplate(this);
       if (state && !this.implementation_.isLoadingReused() &&
           (this.layoutCount_ > 0 ||
@@ -1510,7 +1511,7 @@ function createBaseCustomElementClass(win) {
       }
 
       // Check if loading should be shown.
-      if (state && !this.isLoadingEnabled_()) {
+      if (state && !force && !this.isLoadingEnabled_()) {
         this.loadingState_ = false;
         return;
       }
@@ -1519,7 +1520,7 @@ function createBaseCustomElementClass(win) {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
-        if (state && !this.isLoadingEnabled_()) {
+        if (state && !force && !this.isLoadingEnabled_()) {
           state = false;
         }
         if (state) {
@@ -1532,7 +1533,7 @@ function createBaseCustomElementClass(win) {
         this.loadingContainer_.classList.toggle('amp-hidden', !state);
         this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && opt_cleanup &&
+        if (!state && cleanup &&
             !this.implementation_.isLoadingReused()) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
