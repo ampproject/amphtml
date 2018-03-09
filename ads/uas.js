@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../src/log';
 import {loadScript, validateData} from '../3p/3p';
 import {setStyles} from '../src/style';
 
