@@ -40,12 +40,54 @@ export let CrossDomainDataDef;
 export let LayoutInfoDef;
 
 /** @typedef {string} */
-export let ValidatorResultType;
+export let FailureType;
 
-/** @enum {ValidatorResultType} */
-export const ValidatorResult = {
-  AMP: 'amp',
-  NON_AMP: 'non-amp',
+/** @enum {FailureType} */
+export const FailureTypes = {
+  SENDXHR: 'SENDXHR',
+  MISSING_ARRAYBUFFER: 'MISSING_ARRAYBUFFER',
+  EMPTY_ARRAYBUFFER: 'EMPTY_ARRAYBUFFER',
+  VALIDATOR_ERROR: 'VALIDATOR_ERROR',
+  RENDERER_ERROR: 'RENDERER_ERROR',
 };
 
+/** @typedef {string} */
+export let RecoveryModeType;
+
+/** @typedef {{
+      type: !RecoveryModeType,
+      retryTimer: (number|undefined),
+      fallback: (string|undefined),
+    }} */
+export let RecoveryMode;
+
+/** @enum {RecoveryModeType} */
+export const RecoveryModeTypes = {
+  COLLAPSE: 'COLLAPSE',
+  RETRY: 'RETRY',
+  VALIDATOR_FALLBACK: 'VALIDATOR_FALLBACK',
+  FORCE_RENDERER: 'FORCE_RENDERER',
+  RENDERER_FALLBACK: 'RENDERER_FALLBACK',
+};
+
+/** @type {Object<FailureType, !Array<!RecoveryMode>>} */
+export const ValidRecoveryModeTypes = {
+  SENDXHR: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
+  MISSING_ARRAYBUFFER: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
+  EMPTY_ARRAYBUFFER: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
+  VALIDATOR_ERROR: [RecoveryModeTypes.VALIDATOR_FALLBACK,
+    RecoveryModeTypes.FORCE_RENDERER,
+    RecoveryModeTypes.COLLAPSE],
+  RENDERER_FALLBACK: [RecoveryModeTypes.RENDERER_FALLBACK,
+    RecoveryModeTypes.COLLAPSE],
+};
+
+/** @typedef {string} */
+export let ValidatorResultType;
+
+/** @enu, {ValidatorResultType} */
+export const ValidatorResult = {
+  AMP: 'amp',
+  NON_AMP: 'non_amp',
+};
 
