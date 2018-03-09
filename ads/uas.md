@@ -23,7 +23,7 @@ limitations under the License.
 <amp-ad width=728 height=90
     type="uas"
     json='{"accountId": "132109", "adUnit": "10002912", "sizes": [[728, 90]]}'>
-</amp-ad> 
+</amp-ad>
 ```
 
 ### Multi-size Ad
@@ -32,7 +32,7 @@ limitations under the License.
 <amp-ad width=728 height=90
     type="uas"
     json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90], [700, 90], [700, 60]]}'>
-</amp-ad> 
+</amp-ad>
 ```
 Note that the `width` and `height` mentioned should be maximum of the width-hight combinations mentioned in `json.sizes`.
 
@@ -58,7 +58,7 @@ Note that the `width` and `height` mentioned should be maximum of the width-high
 
 ### Sample tag
 ```html
-<amp-ad 
+<amp-ad
     width=300 height=250
     type="uas"
     json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "http://mydomain.com"}'>
