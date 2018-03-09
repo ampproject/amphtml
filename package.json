@@ -130,7 +130,7 @@
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
     "mocha": "5.0.1",
-    "moment": "2.20.1",
+    "moment": "2.21.0",
     "morgan": "1.9.0",
     "nodemon": "1.15.0",
     "path": "0.12.7",
