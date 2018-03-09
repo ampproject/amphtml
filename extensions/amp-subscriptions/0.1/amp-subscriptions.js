@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
+import {Entitlement} from './entitlement';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
@@ -176,13 +177,17 @@ export class SubscriptionService {
   }
 
   /**
-   *
    * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @return {!Promise<!./entitlement.Entitlement>}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlement => {
+    return subscriptionPlatform.getEntitlements().then(entitlement => {
+      if (!entitlement) {
+        entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
+      }
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
+      return entitlement;
     });
   }
 
@@ -262,8 +267,7 @@ export class SubscriptionService {
 
       const selectedPlatform = dev().assert(
           this.subscriptionPlatforms_[selectedEntitlement.service],
-          'Selected service not registered'
-      );
+          'Selected service not registered');
 
       selectedPlatform.activate(renderState);
     });
@@ -282,19 +286,10 @@ export class SubscriptionService {
   /**
    * Re authorizes a platform
    * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @return {!Promise}
    */
   reAuthorizePlatform(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlement => {
-      const productId = /** @type {string} */ (dev().assert(
-          this.pageConfig_.getProductId(),
-          'Product id is null'
-      ));
-      entitlement.setCurrentProduct(productId);
-      this.entitlementStore_.resolveEntitlement(
-          subscriptionPlatform.getServiceId(),
-          entitlement
-      );
-
+    return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.entitlementStore_.reset();
       this.startAuthorizationFlow_();
     });
