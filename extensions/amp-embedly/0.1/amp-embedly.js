@@ -139,6 +139,8 @@ export class AmpEmbedly extends AMP.BaseElement {
         return this.getRichSrc_(data['html']);
       case ResourceType.PHOTO:
         return this.getPhotoSrc_(data['url'], data['width'], data['height']);
+      default:
+        return 'about:blank';
     }
   }
 
