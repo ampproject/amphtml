@@ -188,9 +188,6 @@ export class Resources {
     */
     this.requestsChangeSize_ = [];
 
-    /** @private {!Array<!Function>} */
-    this.deferredMutates_ = [];
-
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
 
@@ -894,16 +891,6 @@ export class Resources {
   }
 
   /**
-   * Requests mutate callback to executed at the earliest possibility.
-   * @param {!Element} element
-   * @param {!Function} callback
-   */
-  deferMutate(element, callback) {
-    this.scheduleDeferredMutate_(Resource.forElement(element), callback);
-    this.schedulePassVsync();
-  }
-
-  /**
    * Runs the specified mutation on the element and ensures that measures
    * and layouts performed for the affected elements.
    *
@@ -1119,8 +1106,7 @@ export class Resources {
    * @private
    */
   hasMutateWork_() {
-    return (this.deferredMutates_.length > 0 ||
-        this.requestsChangeSize_.length > 0);
+    return (this.requestsChangeSize_.length > 0);
   }
 
   /**
@@ -1159,16 +1145,6 @@ export class Resources {
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-
-    if (this.deferredMutates_.length > 0) {
-      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      const deferredMutates = this.deferredMutates_;
-      this.deferredMutates_ = [];
-      for (let i = 0; i < deferredMutates.length; i++) {
-        deferredMutates[i]();
-      }
-      this.maybeChangeHeight_ = true;
-    }
 
     // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
@@ -1873,16 +1849,6 @@ export class Resources {
       });
     }
     this.schedulePassVsync();
-  }
-
-  /**
-   * Schedules deferred mutate.
-   * @param {!Resource} resource
-   * @param {!Function} callback
-   * @private
-   */
-  scheduleDeferredMutate_(resource, callback) {
-    this.deferredMutates_.push(callback);
   }
 
   /**

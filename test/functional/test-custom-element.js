@@ -1678,7 +1678,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should turn off and cleanup', () => {
       stubInA4A(false);
       element.prepareLoading_();
-      resourcesMock.expects('deferMutate').once();
+      resourcesMock.expects('mutateElement').once();
       element.toggleLoading_(false, true);
 
       expect(vsyncTasks).to.have.length.of(1);
@@ -1807,7 +1807,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('should ignore loading "on" if layout completed before vsync', () => {
       stubInA4A(false);
-      resourcesMock.expects('deferMutate').once();
+      resourcesMock.expects('mutateElement').once();
       container.appendChild(element);
       element.prepareLoading_();
       element.toggleLoading_(true);

@@ -38,7 +38,7 @@ export class MockA4AImpl extends AmpA4A {
     // Do nothing.
   }
 
-  deferMutate(callback) {
+  mutateElement(callback) {
     callback();
   }
 
