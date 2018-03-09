@@ -41,11 +41,11 @@ limitations under the License.
 
 ## Behavior
 
+The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific attributes in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the legend list below for each returned t.
+
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
 
-- The `amp-date-countdown` will return list of parameters as result and pass to `amp-mustache` template for rendering, please refer to the legend list below for each returned params elaboration.
-
-##### Legends - Details
+### Returned time parameters
 
 Format | Meaning
 -- | --
@@ -77,31 +77,26 @@ Format | Sample Output | Remarks
 
 ## Attributes
 
-##### end-date
-- An ISO formatted date to count down to. e.g. `2020-06-01T00:00:00+08:00`
+You must specify at least one of these required attributes: `end-date`, `timestamp-ms`, `timestamp-seconds`.
 
-Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
+##### end-date
+An ISO formatted date to count down to. For example, `2020-06-01T00:00:00+08:00`
 
 ##### timestamp-ms
-- POSIX epoch value in milliseconds - will be assumed to be UTC timezone.
-
-Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
+A POSIX epoch value in milliseconds; assumed to be UTC timezone.
 
 ##### timestamp-seconds
-- POSIX epoch value in seconds - will be assumed to be UTC timezone.
-
-Note: One of `end-date`, `timestamp-ms`, `timestamp-seconds` is required.
+A POSIX epoch value in seconds; assumed to be UTC timezone.
 
 ##### offset-seconds (optional)
-- Negative or positive number of seconds to add/substract from end-date.
+A positive or negative numbe that represents the number of seconds to add or subtract from the end-date.
 
 ##### when-ended (optional)
-- `stop` will set the timer to stop at 0 seconds and will not pass the final date.
-- default is `stop`
+If specified with the value `stop`, this sets the timer to stop at 0 seconds and will not pass the final date. The default value is `stop`.
 
 ##### locale (optional)
-- the i18n language string for each timer unit.
-* Supported value up-to-date:
+A i18n language string for each timer unit. The default value is `en` (for English).
+Supported values:
 
 Code | Language
 -- | --
@@ -122,11 +117,9 @@ th | Thai
 tr | Turkish
 vi | Vietnamese
 
-* Default: `en`, which stands for **English**
-
 ##### biggest-unit (optional)
-- this will allow `amp-date-countdown` component to calculate the time difference based on biggest-unit set.
-  - Example: assume there are `50 days 10 hours` left, if the `biggest-unit` is set as `hours`, it will display `1210 hours` left.
+Allows the `amp-date-countdown` component to calculate the time difference based on the `biggest-unit` value that's specified. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set as `hours`, it displays `1210 hours` left.
+
 * Supported values: `days`, `hours`, `minutes`, `seconds`
 * Default: `days`
 
