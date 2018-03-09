@@ -15,6 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -22,33 +23,28 @@ export const TAG = 'amp-embedly-key';
 
 /**
  * Implementation of the amp-embedly-key component.
+ *
+ * Gets api key from user input and sets it in the service
+ * to be used with subsequent api requests.
+ *
  * See {@link ../amp-embedly-key.md} for the spec.
  */
 export class AmpEmbedlyKey extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /**
-     * Embedly api key.
-     *
-     * @type {?string}
-     * @private
-     */
-    this.key_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.key_ = user().assert(
+    const apiKey = user().assert(
         this.element.getAttribute('value'),
         `The value attribute is required for <${TAG}> %s`,
         this.element
     );
-  }
 
-  /** @override */
-  layoutCallback() {
+    return Services.embedlyServiceForDoc(this.element)
+        .then(service => service.key = apiKey);
   }
 
   /** @override */

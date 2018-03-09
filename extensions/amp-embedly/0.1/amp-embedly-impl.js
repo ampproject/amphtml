@@ -15,19 +15,13 @@
  */
 
 import {Services} from '../../../src/services';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
+import {assertHttpsUrl} from '../../../src/url';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-embedly';
-
-/**
- * @const {string}
- */
-const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
 
 /**
  * Regex used to extract src from returned oEmbed data.
@@ -55,12 +49,6 @@ export class AmpEmbedlyMain extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
-    this.xhr_ = Services.xhrFor(this.win);
-
-    /** @private {?string}  */
-    this.key_ = null;
-
     /** @private {?string}  */
     this.url_ = null;
 
@@ -82,7 +70,7 @@ export class AmpEmbedlyMain extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'embedly');
     this.iframe_ = iframe;
 
-    return this.getOembedData_().then(data => {
+    return Services.embedlyServiceForDoc(this.element).then(data => {
       iframe.src = this.getIframeSrc_(data);
       this.applyFillContent(iframe);
 
@@ -95,26 +83,6 @@ export class AmpEmbedlyMain extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
-  }
-
-  /**
-   * Fetches oEmbed data from embedly's api.
-   * @return {!Promise}
-   * @private
-   * @visibleForTesting
-   * */
-  getOembedData_() {
-    const params = dict({
-      'key': this.key_,
-      'url': this.url_,
-      'secure': true, // To serve requested embeds with a SSL connection
-      'scheme': 'https', // Request https embeds as default is protocol-less (//)
-    });
-    const url = addParamsToUrl(BASE_API_URL, params);
-
-    return this.xhr_.fetchJson(url, {
-      requireAmpResponseSourceOrigin: false,
-    }).then(res => res.json());
   }
 
   /**
