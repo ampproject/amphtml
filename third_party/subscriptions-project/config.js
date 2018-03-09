@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.17-1518718881304 */
+ /** Version: 0.1.21-1520486283200 */
 'use strict';
 
 
@@ -23,26 +23,26 @@
 class PageConfig {
 
   /**
-   * @param {string} productOrPublisherId
+   * @param {string} productOrPublicationId
    * @param {boolean} locked
    */
-  constructor(productOrPublisherId, locked) {
-    let publisherId, productId, label;
-    const div = productOrPublisherId.indexOf(':');
+  constructor(productOrPublicationId, locked) {
+    let publicationId, productId, label;
+    const div = productOrPublicationId.indexOf(':');
     if (div != -1) {
       // The argument is a product id.
-      productId = productOrPublisherId;
-      publisherId = productId.substring(0, div);
+      productId = productOrPublicationId;
+      publicationId = productId.substring(0, div);
       label = productId.substring(div + 1);
     } else {
-      // The argument is a publisher id.
-      publisherId = productOrPublisherId;
+      // The argument is a publication id.
+      publicationId = productOrPublicationId;
       productId = null;
       label = null;
     }
 
     /** @private @const {string} */
-    this.publisherId_ = publisherId;
+    this.publicationId_ = publicationId;
     /** @private @const {?string} */
     this.productId_ = productId;
     /** @private @const {?string} */
@@ -54,8 +54,8 @@ class PageConfig {
   /**
    * @return {string}
    */
-  getPublisherId() {
-    return this.publisherId_;
+  getPublicationId() {
+    return this.publicationId_;
   }
 
   /**

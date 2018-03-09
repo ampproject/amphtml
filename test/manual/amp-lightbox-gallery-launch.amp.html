@@ -14,6 +14,8 @@
   <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
   <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <style amp-custom>
@@ -35,12 +37,12 @@
     }, 1000);
   </script>
 
-  <h1>Lightbox Carousel Test</h1>
+  <h1>Lightbox Carousel Description Test</h1>
   <amp-carousel height="300"
-  width="400"
-  layout="fixed"
-  type="slides"
-  lightbox>
+    width="400"
+    layout="fixed"
+    type="slides"
+    lightbox>
     <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
       width="400"
       height="300"
@@ -71,6 +73,18 @@
       width="400"
       height="300"
       aria-labelledby="my-aria-label"></amp-img>
+  </amp-carousel>
+
+  <h1>Lightbox Carousel with Video Test</h1>
+  <amp-carousel height="300"
+  width="400"
+  layout="fixed"
+  type="slides"
+  lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="400"
+      height="300"
+      alt="a beautiful cat"></amp-img>
     <amp-video
       src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
       width="358"
@@ -83,11 +97,6 @@
       height="270"
       layout="responsive"
       data-videoid="lBTCB7yLs8Y">
-      <amp-img
-        src="https://i.ytimg.com/vi/UKsAoboS-Wc/mqdefault.jpg"
-        placeholder
-        layout="fill"
-        />
     </amp-youtube>
     <amp-youtube width="480"
       height="270"
@@ -100,16 +109,28 @@
         layout="fill"
         />
     </amp-youtube>
+  </amp-carousel>
+
+  <h1>Lightbox Carousel Social Share Test</h1>
+  <amp-carousel height="300"
+  width="400"
+  layout="fixed"
+  type="slides"
+  lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="400"
+      height="300"
+      alt="a beautiful cat"></amp-img>
     <amp-instagram data-shortcode="1totVhIFXl"
       width="400"
       height="400"
-      layout="fixed">
+      layout="responsive">
     </amp-instagram>
     <amp-facebook
       lightbox-thumbnail-id="fb-thumbnail-img"
       width="552"
       height="303"
-      layout="fixed"
+      layout="responsive"
       data-href="https://www.facebook.com/zuck/posts/10102593740125791">
     </amp-facebook>
     <amp-facebook width="552"
@@ -118,11 +139,22 @@
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
       <amp-img
-      src="https://scontent-sjc3-1.xx.fbcdn.net/v/t15.0-10/cp0/e15/q65/p173x172/12104343_10102509276925721_413295500_n.jpg?oh=3ab5d6e109a83d59a7dec75cfc310bcd&oe=5B028D9E"
-      placeholder
-      layout="fill"
-      />
+        src="https://scontent-sjc3-1.xx.fbcdn.net/v/t15.0-10/cp0/e15/q65/p173x172/12104343_10102509276925721_413295500_n.jpg?oh=3ab5d6e109a83d59a7dec75cfc310bcd&oe=5B028D9E"
+        placeholder
+        layout="fill"/>
     </amp-facebook>
+  </amp-carousel>
+
+<h1>Lightbox Carousel Ad Support Test</h1>
+  <amp-carousel height="300"
+    width="400"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+      width="400"
+      height="300"
+      alt="a beautiful cat"></amp-img>
     <amp-ad width="300"
       height="250"
       type="a9"
@@ -130,7 +162,28 @@
       data-aax_pubname="test123"
       data-aax_src="302">
     </amp-ad>
-
+    <amp-ad data-slot="/30497360/a4a/a4a_native"
+      height="250"
+      type="doubleclick"
+      width="300">
+    </amp-ad>
+    <amp-ad width="500" height="60"
+      type="custom"
+      data-url="/examples/custom.ad.example.single.json">
+      <template type="amp-mustache" id="amp-template-id-no-slot">
+        <a href="{{href}}" target="_blank" rel="noopener noreferrer">
+          <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
+        </a>
+      </template>
+    </amp-ad>
+    <amp-ad width=480 height=75
+      type="doubleclick"
+      data-slot="/30497360/samfrank_native_v2_a4a"
+      data-multi-size="320x50"
+      >
+      <div placeholder></div>
+      <div fallback></div>
+    </amp-ad>
   </amp-carousel>
 
   <amp-img id="fb-thumbnail-img"
@@ -148,7 +201,5 @@
     This is an aria labelled by a div. <br/>
     I also have a newline.
   </div>
-
-
 </body>
 </html>

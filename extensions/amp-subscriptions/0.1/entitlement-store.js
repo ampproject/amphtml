@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {Observable} from '../../../src/observable';
 
-/** @typedef {{serviceId: string, entitlements: !Entitlements}} */
+/** @typedef {{serviceId: string, entitlement: !./entitlement.Entitlement}} */
 export let EntitlementChangeEventDef;
 
 
@@ -31,7 +30,7 @@ export class EntitlementStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @const {!Object<string, !Entitlements>} */
+    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
@@ -40,8 +39,9 @@ export class EntitlementStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private {?Promise<!Object<string, !Entitlements>>} */
+    /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
+
   }
 
   /**
@@ -55,13 +55,13 @@ export class EntitlementStore {
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {!Entitlements} entitlements
+   * @param {!./entitlement.Entitlement} entitlement
    */
-  resolveEntitlement(serviceId, entitlements) {
-    this.entitlements_[serviceId] = entitlements;
-
+  resolveEntitlement(serviceId, entitlement) {
+    entitlement.service = serviceId;
+    this.entitlements_[serviceId] = entitlement;
     // Call all onChange callbacks.
-    this.onChangeCallbacks_.fire({serviceId, entitlements});
+    this.onChangeCallbacks_.fire({serviceId, entitlement});
   }
 
   /**
@@ -73,24 +73,25 @@ export class EntitlementStore {
     }
 
     this.grantStatusPromise_ = new Promise(resolve => {
-      const entitlementsResolved = Object.keys(this.entitlements_).length;
 
       // Check if current entitlements unblocks the reader
       for (const key in this.entitlements_) {
-        const entitlements = (this.entitlements_[key]);
-        if (entitlements.enablesThis()) {
+        const entitlement = (this.entitlements_[key]);
+        if (entitlement.enablesThis()) {
           return resolve(true);
         }
       }
 
-      if (entitlementsResolved === this.serviceIds_.length) {
+      if (this.areAllPlatformsResolved_()) {
         // Resolve with null if non of the entitlements unblocks the reader
         return resolve(false);
       } else {
         // Listen if any upcoming entitlements unblock the reader
-        this.onChange(({entitlements}) => {
-          if (entitlements.enablesThis()) {
+        this.onChange(({entitlement}) => {
+          if (entitlement.enablesThis()) {
             resolve(true);
+          } else if (this.areAllPlatformsResolved_()) {
+            resolve(false);
           }
         });
       }
@@ -100,16 +101,88 @@ export class EntitlementStore {
   }
 
   /**
-   * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<Entitlements>}
+   * Clears the grant status
    */
-  getAllPlatformsEntitlement() {
-    // TODO(@prateekbh): implement this.
+  reset() {
+    this.grantStatusPromise_ = null;
   }
-}
 
+  /**
+   * Returns entitlements when all services are done fetching them.
+   * @private
+   * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
+   */
+  getAllPlatformsEntitlements_() {
+    if (this.allResolvedPromise_) {
+      return this.allResolvedPromise_;
+    }
 
-/** @package @visibleForTesting */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+    this.allResolvedPromise_ = new Promise(resolve => {
+      if (this.areAllPlatformsResolved_()) {
+        // Resolve with null if non of the entitlements unblocks the reader
+        return resolve(this.getAvailablePlatformsEntitlements_());
+      } else {
+        // Listen if any upcoming entitlements unblock the reader
+        this.onChange(() => {
+          if (this.areAllPlatformsResolved_()) {
+            resolve(this.getAvailablePlatformsEntitlements_());
+          }
+        });
+      }
+    });
+
+    return this.allResolvedPromise_;
+  }
+
+  /**
+   * Returns entitlements for resolved platforms.
+   * @private
+   * @returns {!Array<!./entitlement.Entitlement>}
+   */
+  getAvailablePlatformsEntitlements_() {
+    const entitlements = [];
+    for (const platform in this.entitlements_) {
+      if (this.entitlements_.hasOwnProperty(platform)) {
+        entitlements.push(this.entitlements_[platform]);
+      }
+    }
+    return entitlements;
+  }
+
+  /**
+   * Returns entitlements when all services are done fetching them.
+   * @returns {!Promise<!./entitlement.Entitlement>}
+   */
+  selectPlatform() {
+    return this.getAllPlatformsEntitlements_().then(entitlements => {
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlements.
+      return this.selectApplicablePlatform_(entitlements);
+    });
+  }
+
+  /**
+   * Returns the number of entitlements resolved
+   * @returns {boolean}
+   * @private
+   */
+  areAllPlatformsResolved_() {
+    const entitlementsResolved = Object.keys(this.entitlements_).length;
+    return entitlementsResolved === this.serviceIds_.length;
+  }
+
+  /**
+   * Returns most qualified platform
+   * @param {!Array<!./entitlement.Entitlement>} entitlements
+   * @returns {!./entitlement.Entitlement}
+   */
+  selectApplicablePlatform_(entitlements) {
+    let chosenPlatform;
+    entitlements.forEach(platform => {
+      // TODO(@prateekbh): add metering logic here
+      if (platform.enablesThis()) {
+        chosenPlatform = platform;
+      }
+    });
+    return chosenPlatform;
+  }
 }
