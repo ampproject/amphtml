@@ -60,7 +60,7 @@ describes.realWin('amp-list component', {
     listMock.verify();
   });
 
-  const DEFAULT_LIST_OPTS = {expr: 'items', maxItems: 0, singleItem: false};
+  const DEFAULT_LIST_OPTS = {expr: 'items', maxItems: 0, singleItem: false, resetOnRefresh: false};
 
   /**
    * @param {!Array|!Object} fetched
@@ -70,8 +70,10 @@ describes.realWin('amp-list component', {
    */
   function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
-    listMock.expects('togglePlaceholder').withExactArgs(true).once();
-    listMock.expects('toggleLoading').withExactArgs(true).once();
+    if (opts.resetOnRefresh) {
+      listMock.expects('togglePlaceholder').withExactArgs(true).once();
+      listMock.expects('toggleLoading').withExactArgs(true).once();
+    }
     listMock.expects('fetch_')
         .withExactArgs(opts.expr).returns(fetch).atLeast(1);
     listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -239,12 +241,11 @@ describes.realWin('amp-list component', {
     const rendered = expectFetchAndRender(items, [foo]);
     const layout = list.layoutCallback();
 
-    listMock.expects('togglePlaceholder').withExactArgs(true).once();
-    listMock.expects('toggleLoading').withExactArgs(true).once();
-
     // Execute another fetch-triggering action immediately (actually on
     // the next tick to avoid losing the layoutCallback() promise resolver).
     Promise.resolve().then(() => {
+      listMock.expects('toggleLoading').withExactArgs(false).once();
+      listMock.expects('togglePlaceholder').withExactArgs(false).once();
       element.setAttribute('src', 'https://new.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
     });
@@ -278,6 +279,27 @@ describes.realWin('amp-list component', {
     });
   });
 
+  it('should should placeholder and loading while refreshing when reset-on-refresh is set', () => {
+    element.setAttribute('reset-on-refresh', 'true');
+    const items = [{title: 'foo'}];
+    const foo = doc.createElement('div');
+    let opts = {expr: 'items', resetOnRefresh: true};
+    const rendered = expectFetchAndRender(items, [foo], opts);
+
+    return list.layoutCallback().then(() => rendered).then(() => {
+      expect(list.container_.contains(foo)).to.be.true;
+
+      const renderedAgain = expectFetchAndRender(items, [foo], opts);
+
+      list.executeAction({
+        method: 'refresh',
+        satisfiesTrust: () => true,
+      });
+      return renderedAgain;
+    });
+  });
+
+
   it('fetch should resolve if `src` is empty', () => {
     const spy = sandbox.spy(list, 'fetchList_');
     element.setAttribute('src', '');
@@ -288,8 +310,6 @@ describes.realWin('amp-list component', {
   });
 
   it('should fail to load b/c data array is absent', () => {
-    listMock.expects('togglePlaceholder').withExactArgs(true).once();
-    listMock.expects('toggleLoading').withExactArgs(true).once();
     listMock.expects('fetch_').returns(Promise.resolve({})).once();
     listMock.expects('toggleLoading').withExactArgs(false).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
@@ -299,8 +319,6 @@ describes.realWin('amp-list component', {
 
   it('should fail to load b/c data single-item object is absent', () => {
     element.setAttribute('single-item', 'true');
-    listMock.expects('togglePlaceholder').withExactArgs(true).once();
-    listMock.expects('toggleLoading').withExactArgs(true).once();
     listMock.expects('fetch_').returns(Promise.resolve()).once();
     listMock.expects('toggleLoading').withExactArgs(false).once();
     templatesMock.expects('findAndRenderTemplateArray').never();
@@ -344,8 +362,6 @@ describes.realWin('amp-list component', {
   });
 
   it('should show placeholder on fetch failure (w/o fallback)', () => {
-    listMock.expects('toggleLoading').withExactArgs(true).once();
-    listMock.expects('togglePlaceholder').withExactArgs(true).once();
     // Stub fetch_() to fail.
     listMock.expects('fetch_').returns(Promise.reject()).once();
     listMock.expects('toggleLoading').withExactArgs(false).once();
