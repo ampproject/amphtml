@@ -28,6 +28,8 @@ export class ConsentPolicyManager {
   constructor(ampdoc) {
     this.ampdoc_ = ampdoc;
 
+    this.defaultPolicy_ = null;
+
     this.policyInstances_ = {};
   }
 
@@ -36,14 +38,6 @@ export class ConsentPolicyManager {
    * @param {string} unusedPolicyId
    */
   registerConsentPolicyInstance(unusedPolicyId) {
-
-  }
-
-  /**
-   * Handler to check policy instance state on consent state changed.
-   * @param {!Object} unusedConsentState
-   */
-  consentStateChangeHandler_(unusedConsentState) {
 
   }
 

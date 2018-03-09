@@ -31,15 +31,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.ampdoc = null;
 
-    this.elementId_ = null;
-
     this.checkConsentHref_ = null;
 
-    this.updateConsentHref_ = null;
-
     this.consentStateManager_ = null;
-
-    this.promptItems_ = [];
   }
 
   buildCallback() {
@@ -51,32 +45,6 @@ export class AmpConsent extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /**
-   * Read and parse consent instance config
-   */
-  parseConsentInstanceConfig_() {
-
-  }
-
-  /**
-   * Get localStored consent info, and send request to get consent from endpoint
-   */
-  getConsentFromEndpoint_() {
-
-  }
-
-  /**
-   * On consent update, inform endpoint
-   */
-  updateConsentToEndpoint_() {
-
-  }
-
-  /** Display UI */
-  promptUI_() {
-
   }
 
   /** On user action, update consent, update UI */
