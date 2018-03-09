@@ -160,6 +160,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-form/**/*.js',
       // Needed for AccessService
       'extensions/amp-access/**/*.js',
+      // Needed for EmbedlyService
+      'extensions/amp-embedly/**/*.js',
       // Needed for AmpStoryVariableService
       'extensions/amp-story/**/*.js',
       // Needed for SubscriptionsService

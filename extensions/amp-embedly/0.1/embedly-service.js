@@ -56,7 +56,7 @@ export class EmbedlyService {
 
   /**
    * Getter for embedly's api key.
-   * @returns {*}
+   * @returns {string}
    */
   get key() {
     return dev().assertString(this.key_);

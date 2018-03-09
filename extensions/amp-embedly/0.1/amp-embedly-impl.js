@@ -72,7 +72,7 @@ export class AmpEmbedly extends AMP.BaseElement {
 
     return Services.embedlyServiceForDoc(this.element)
         .then(service => {
-          service.fetchOembedData(this.url_).then(data => {
+          service.fetchOembedData(/**@type {string}*/(this.url_)).then(data => {
             iframe.src = this.getIframeSrc_(data);
             this.applyFillContent(iframe);
 
