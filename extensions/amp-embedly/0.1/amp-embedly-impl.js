@@ -18,6 +18,8 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -72,15 +74,30 @@ export class AmpEmbedly extends AMP.BaseElement {
 
     return Services.embedlyServiceForDoc(this.element)
         .then(service => {
-          service.fetchOembedData(/**@type {string}*/(this.url_)).then(data => {
-            iframe.src = this.getIframeSrc_(data);
-            this.applyFillContent(iframe);
+          return service.fetchOembedData(/**@type {string}*/(this.url_));
+        })
+        .then(oEmbed => {
+          iframe.src = this.getIframeSrc_(oEmbed);
 
-            this.getVsync().mutate(() => this.element.appendChild(iframe));
+          const opt_is3P = true;
+          listenFor(iframe, 'embed-size', data => {
+            this.changeHeight(data['height']);
+          }, opt_is3P);
 
-            return this.loadPromise(iframe);
-          });
+          this.applyFillContent(iframe);
+          this.getVsync().mutate(() => this.element.appendChild(iframe));
+
+          return this.loadPromise(iframe);
         });
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 
   /** @override */
@@ -121,7 +138,7 @@ export class AmpEmbedly extends AMP.BaseElement {
    */
   getPhotoSrc_(url, width, height) {
     assertHttpsUrl(url, this.element);
-    const html = `<img src="${url}" height="${width}" width="${height}">`;
+    const html = `<img src="${url}" width="${width}" height="${height}">`;
 
     return URL.createObjectURL(new Blob([html], {type: 'text/html'}));
   }
@@ -159,5 +176,9 @@ export class AmpEmbedly extends AMP.BaseElement {
     );
 
     return assertHttpsUrl(match[1], this.element);
+  }
+
+  handleResize_() {
+
   }
 }
