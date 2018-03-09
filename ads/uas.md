@@ -32,23 +32,45 @@ limitations under the License.
 ```html
 <amp-ad width=728 height=90
     type="uas"
-    json='{"accountId": "132109", "adUnit": "10002912", "sizes": [[728, 90], [700, 90], [700, 60]]}'>
+    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90], [700, 90], [700, 60]]}'>
+</amp-ad>
+```
+Note that the `width` and `height` mentioned should be maximum of the width-hight combinations mentioned in `json.sizes`.
+
+### Setting Targetings
+```html
+<amp-ad width=728 height=90
+    type="uas"
+    json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90]], "targetings": {"country": ["India", "USA"], "car": "Civic"}}'>
 </amp-ad>
 ```
 
-
 ### Supported parameters via `json` attribute:
 
-- `targeting`
+- `accId` Account Id (mandatory)
+- `adUnit` AdUnitId (mandatory)
+- `sizes` Array of sizes (mandatory)
+- `locLat` Geo-location lattitude
+- `locLon` Geo-location longitude
+- `locSrc` Geo-location source
+- `pageURL` Set custom page URL
+- `targetings` key-value pairs
+- `extraParams` key-value pairs to be passed to PubMatic SSP
+
+### Sample tag
+```html
+<amp-ad width=300 height=250
+      type="uas"
+      json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "http://mydomain.com"}'
+      >
+  </amp-ad>
+```
 
 ### Unsupported Ad Formats
 - Interstitials
-- Expandables. Although expandables on interaction/click is a format that is work in progress.
+- Expandables. Work is in progress
 - Flash
-- Anchor Ads / Adhesion Units
-- Creatives served over HTTP.
-
-
+- Creatives served over HTTP
 
 
 

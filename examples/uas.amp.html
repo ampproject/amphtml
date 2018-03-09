@@ -41,27 +41,16 @@
   </style>
 </head>
 <body>
-  <h1>A4A Examples</h1>
+  <h1>UAS Example</h1>
 
-  <h2>Doubleclick</h2>
-  <div style="height: 600px;"></div>
-  <h2>Doubleclick 3p (most likely)</h2>
+  <h2>UAS</h2>
+  <div style="height: 200px;"></div>
   <amp-ad width=300 height=250
       type="uas"
-      json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]]}'
+      json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "mydomain.com"}'
       >
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
-
-  <!--h2>Doubleclick A4A (guaranteed)</h2>
-  <amp-ad width=480 height=75
-      type="doubleclick"
-      data-slot="/30497360/samfrank_native_v2_a4a"
-      data-multi-size="320x50"
-      >
-    <div placeholder></div>
-    <div fallback></div>
-  </amp-ad-->
 </body>
 </html>
