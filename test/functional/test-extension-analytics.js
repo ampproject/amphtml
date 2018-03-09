@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {
-    getServiceForDoc,
-    registerServiceBuilderForDoc,
-    resetServiceForTesting,
-} from '../../src/service';
-import {
-    insertAnalyticsElement,
-    useAnalyticsInSandbox,
-    CustomEventReporterBuilder,
-} from '../../src/extension-analytics';
-import {registerElement} from '../../src/service/custom-element-registry';
-import {Services} from '../../src/services';
-import {BaseElement} from '../../src/base-element';
-import {macroTask} from '../../testing/yield';
 import * as sinon from 'sinon';
+import {BaseElement} from '../../src/base-element';
+import {
+  CustomEventReporterBuilder,
+  insertAnalyticsElement,
+  useAnalyticsInSandbox,
+} from '../../src/extension-analytics';
+import {Services} from '../../src/services';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../src/service';
+import {macroTask} from '../../testing/yield';
+import {registerElement} from '../../src/service/custom-element-registry';
 
 
 describes.realWin('extension-analytics', {
@@ -41,7 +41,7 @@ describes.realWin('extension-analytics', {
   describe('insertAnalyticsElement', () => {
     let sandbox;
     class MockInstrumentation {
-    };
+    }
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
@@ -60,7 +60,7 @@ describes.realWin('extension-analytics', {
       const baseEle = new BaseElement(ele);
       registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-            // Force instantiation
+      // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       const config = {
         'requests': {
@@ -160,7 +160,7 @@ describes.realWin('extension-analytics', {
       } catch (e) {
         expect(e.message).to.equal(
             'customEventReporterBuilder should not track same eventType twice');
-      };
+      }
     });
 
     it('should return a customEventReporter instance', () => {
@@ -194,7 +194,7 @@ describes.realWin('extension-analytics', {
       resetServiceForTesting(env.win, 'amp-analytics-instrumentation');
       registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-            // Force instantiation
+      // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
 
       registerElement(env.win, 'amp-test', BaseElement);
@@ -293,7 +293,7 @@ describes.realWin('extension-analytics', {
         yield macroTask();
         expect(parentEle.querySelector('amp-analytics')).to.be.null;
         parentEle.layoutCallback();
-                //parentEle.signals().signal(CommonSignals.LOAD_START);
+        //parentEle.signals().signal(CommonSignals.LOAD_START);
         yield macroTask();
         expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
       });

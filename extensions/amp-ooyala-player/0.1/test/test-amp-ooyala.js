@@ -30,7 +30,7 @@ describes.realWin('amp-ooyala-player', {
   });
 
   function getOoyalaElement(embedCode, playerId, pCode, opt_version,
-      opt_config, opt_placeholder) {
+    opt_config, opt_placeholder) {
     const player = doc.createElement('amp-ooyala-player');
     if (embedCode) {
       player.setAttribute('data-embedcode', embedCode);
@@ -58,18 +58,18 @@ describes.realWin('amp-ooyala-player', {
     return player.build()
         .then(() => player.layoutCallback())
         .then(() => player);
-  };
+  }
 
   it('renders a V3 player', () => {
     return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X').then(player => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal('https://player.ooyala.com/iframe.html' +
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal('https://player.ooyala.com/iframe.html' +
         '?platform=html5-priority&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
         '&pbid=6440813504804d76ba35c8c787a4b33c');
-        });
+    });
   });
 
   it('renders a V4 player', () => {
@@ -77,14 +77,14 @@ describes.realWin('amp-ooyala-player', {
         '6440813504804d76ba35c8c787a4b33c',
         '5zb2wxOlZcNCe_HVT3a6cawW298X',
         'V4').then(player => {
-          const playerIframe = player.querySelector('iframe');
-          expect(playerIframe).to.not.be.null;
-          expect(playerIframe.src).to.equal('https://player.ooyala.com/static/v4/sandbox/' +
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal('https://player.ooyala.com/static/v4/sandbox/' +
           'amp_iframe/skin-plugin/amp_iframe.html' +
           '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
           '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
           '&pbid=6440813504804d76ba35c8c787a4b33c');
-        });
+    });
   });
 
   it('fails without an embed code', () => {

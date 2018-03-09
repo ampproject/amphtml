@@ -17,23 +17,23 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {BindingDef} from './bind-evaluator';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
-import {recursiveEquals} from '../../../src/json';
+import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {waitForBodyPromise} from '../../../src/dom';
+import {rewriteAttributesForElement} from '../../../src/sanitizer';
 
 const TAG = 'amp-bind';
 
@@ -122,6 +122,9 @@ export class Bind {
     /** @private {!../../../src/service/history-impl.History} */
     this.history_ = Services.historyForDoc(ampdoc);
 
+    /** @private {!Array<string>} */
+    this.overridableKeys_ = [];
+
     /**
      * Upper limit on number of bindings for performance.
      * @private {number}
@@ -145,11 +148,12 @@ export class Bind {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
+    this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
     const bodyPromise = (opt_win)
-        ? waitForBodyPromise(opt_win.document)
-            .then(() => dev().assertElement(opt_win.document.body))
-        : ampdoc.whenBodyAvailable();
+      ? waitForBodyPromise(opt_win.document)
+          .then(() => dev().assertElement(opt_win.document.body))
+      : ampdoc.whenBodyAvailable();
 
     /**
      * Resolved when the service finishes scanning the document for bindings.
@@ -237,10 +241,10 @@ export class Bind {
       // so that we can restore them on history-pop.
       const oldState = map();
       Object.keys(result).forEach(variable => {
-        const s = map();
         const value = this.state_[variable];
-        s[variable] = (value === undefined) ? null : value;
-        deepMerge(oldState, s, MAX_MERGE_DEPTH);
+        // Store a deep copy of `value` to make sure `oldState` isn't
+        // modified by subsequent setState() actions.
+        oldState[variable] = this.copyJsonObject_(value);
       });
 
       const onPop = () => this.setState(oldState);
@@ -251,28 +255,29 @@ export class Bind {
   }
 
   /**
-   * Rescans elements for bindings, evaluates corresponding expressions
-   * and applies the results to only those elements. Does _not_ mutate other
-   * elements in the document.
+   * Removes bindings from `removed` elements and scans `added` for bindings.
+   * Then, evaluates all expressions and applies results to `added` elements.
+   * Does _not_ mutate any other elements.
    *
-   * Returned promise is resolved when rescan and evaluation complete.
-   * If it doesn't complete within `timeout` ms, the promise is rejected.
+   * Returned promise is resolved when all operations complete.
+   * If they don't complete within `timeout` ms, the promise is rejected.
    *
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!Element>} added
+   * @param {!Array<!Element>} removed
    * @param {number} timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  rescanAndEvaluate(elements, timeout = 2000) {
-    const rescan = this.removeBindingsForNodes_(elements)
-        .then(() => this.addBindingsForNodes_(elements))
+  scanAndApply(added, removed, timeout = 2000) {
+    const promise = this.removeBindingsForNodes_(removed)
+        .then(() => this.addBindingsForNodes_(added))
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-                this.applyElements_(results, elements));
+              this.applyElements_(results, added));
           }
         });
-    return this.timer_.timeoutPromise(timeout, rescan,
+    return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
 
@@ -283,8 +288,11 @@ export class Bind {
    * @private
    */
   initialize_(rootNode) {
-    dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNodes_([rootNode]).then(() => {
+    dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    let promise = Promise.all([
+      this.addMacros_(),
+      this.addBindingsForNodes_([rootNode])]
+    ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
@@ -328,6 +336,76 @@ export class Bind {
   }
 
   /**
+   * Calls setState(s), where s is data.state with the non-overridable keys removed.
+   * @param {*} data
+   * @return {!Promise}
+   * @private
+   */
+  premutate_(data) {
+    const ignoredKeys = [];
+    return this.initializePromise_.then(() => {
+      Object.keys(data.state).forEach(key => {
+        if (!this.overridableKeys_.includes(key)) {
+          delete data.state[key];
+          ignoredKeys.push(key);
+        }
+      });
+      if (ignoredKeys.length > 0) {
+        user().warn(TAG, 'Some state keys could not be premutated ' +
+              'because they are missing the overridable attribute: ' +
+              ignoredKeys.join(', '));
+      }
+      return this.setState(data.state);
+    });
+  }
+
+  /**
+   * Marks the given key as overridable so that it can be overriden by
+   * a premutate message from the viewer.
+   * @param {string} key
+   */
+  makeStateKeyOverridable(key) {
+    this.overridableKeys_.push(key);
+  }
+
+  /**
+   * Scans the document for <amp-bind-macro> elements, and adds them to the
+   * bind-evaluator.
+   *
+   * Returns a promise that resolves after macros have been added.
+   *
+   * @return {!Promise<number>}
+   * @private
+   */
+  addMacros_() {
+    const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
+    const macros =
+        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    iterateCursor(elements, element => {
+      const argumentNames = (element.getAttribute('arguments') || '')
+          .split(',')
+          .map(s => s.trim());
+      macros.push({
+        id: element.getAttribute('id'),
+        argumentNames,
+        expressionString: element.getAttribute('expression'),
+      });
+    });
+    if (macros.length == 0) {
+      return Promise.resolve(0);
+    } else {
+      return this.ww_('bind.addMacros', [macros]).then(errors => {
+        // Report macros that failed to parse (e.g. expression size exceeded).
+        errors.forEach((e, i) => {
+          this.reportWorkerError_(
+              e, `${TAG}: Parsing amp-bind-macro failed.`, elements[i]);
+        });
+        return macros.length;
+      });
+    }
+  }
+
+  /**
    * For each node in an array, scans it and its descendants for bindings.
    * This function is not idempotent.
    *
@@ -342,8 +420,8 @@ export class Bind {
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
         const {
@@ -352,9 +430,6 @@ export class Bind {
 
         this.boundElements_ = this.boundElements_.concat(boundElements);
         Object.assign(this.expressionToElements_, expressionToElements);
-
-        dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
-            `${boundElements.length} elements.`);
 
         if (limitExceeded) {
           user().error(TAG, 'Maximum number of bindings reached ' +
@@ -372,6 +447,8 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
+      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
+          `${nodes.length} elements and their descendants.`);
       if (bindings.length == 0) {
         return bindings.length;
       } else {
@@ -381,12 +458,9 @@ export class Bind {
           Object.keys(parseErrors).forEach(expressionString => {
             const elements = this.expressionToElements_[expressionString];
             if (elements.length > 0) {
-              const parseError = parseErrors[expressionString];
-              const userError = user().createError(
-                  `${TAG}: Expression compile error in "${expressionString}". `
-                  + parseError.message);
-              userError.stack = parseError.stack;
-              reportError(userError, elements[0]);
+              this.reportWorkerError_(parseErrors[expressionString],
+                  `${TAG}: Expression compile error in "${expressionString}".`,
+                  elements[0]);
             }
           });
           dev().fine(TAG, 'Finished parsing expressions with ' +
@@ -408,6 +482,7 @@ export class Bind {
    * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
+    const before = (getMode().development) ? this.numberOfBindings() : 0;
     // Eliminate bound elements that are descendants of `nodes`.
     filterSplice(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
@@ -417,7 +492,11 @@ export class Bind {
       }
       return true;
     });
-
+    const after = (getMode().development) ? this.numberOfBindings() : 0;
+    if (after < before) {
+      dev().fine(TAG, `Removed ${before - after} bindings from ${nodes.length} `
+          + 'elements and their descendants.');
+    }
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
@@ -597,12 +676,8 @@ export class Bind {
     }).then(returnValue => {
       const {result, error} = returnValue;
       if (error) {
-        const userError = user().createError(`${TAG}: Expression eval failed `
-            + `with error: ${error.message}`);
-        userError.stack = error.stack;
-        reportError(userError);
-
-        throw userError; // Reject promise.
+        // Throw to reject promise.
+        throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
         return result;
       }
@@ -788,13 +863,15 @@ export class Bind {
    */
   applyBinding_(boundProperty, element, newValue) {
     const property = boundProperty.property;
+    const tag = element.tagName;
+
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)
-        if (element.tagName == 'TEXTAREA') {
+        if (tag == 'TEXTAREA') {
           element.value = String(newValue);
         }
         break;
@@ -809,9 +886,9 @@ export class Bind {
           }
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
-          element.className = ampClasses.concat(newValue).join(' ');
+          element.setAttribute('class', ampClasses.concat(newValue).join(' '));
         } else if (newValue === null) {
-          element.className = ampClasses.join(' ');
+          element.setAttribute('class', ampClasses.join(' '));
         } else {
           const err = user().createError(
               `${TAG}: "${newValue}" is not a valid result for [class].`);
@@ -824,8 +901,7 @@ export class Bind {
         // Once the user interacts with these elements, the JS properties
         // underlying these attributes must be updated for the change to be
         // visible to the user.
-        const updateProperty =
-            element.tagName == 'INPUT' && property in element;
+        const updateProperty = (tag == 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -844,24 +920,11 @@ export class Bind {
             mutated = true;
           }
         } else if (newValue !== oldValue) {
-          // TODO(choumx): Perform in worker with URL API.
-          // Rewrite attribute value if necessary. This is not done in the
-          // worker since it relies on `url#parseUrl`, which uses DOM APIs.
-          let rewrittenNewValue;
-          try {
-            rewrittenNewValue = rewriteAttributeValue(
-                element.tagName, property, String(newValue));
-          } catch (e) {
-            const err = user().createError(`${TAG}: "${newValue}" is not a ` +
-                `valid result for [${property}]`, e);
-            reportError(err, element);
-          }
-          // Rewriting can fail due to e.g. invalid URL.
-          if (rewrittenNewValue !== undefined) {
-            // TODO(choumx): Don't bother setting for bind-only attrs.
-            element.setAttribute(property, rewrittenNewValue);
+          const rewrittenValue =
+              this.rewriteAttributes_(element, property, String(newValue));
+          if (rewrittenValue) { // Rewriting can fail due to e.g. invalid URL.
             if (updateProperty) {
-              element[property] = rewrittenNewValue;
+              element[property] = rewrittenValue;
             }
             mutated = true;
           }
@@ -876,6 +939,30 @@ export class Bind {
   }
 
   /**
+   * Performs CDN rewrites for the given mutation and updates the element.
+   * Returns the rewrite of `value` on success. Otherwise, returns undefined.
+   * @see amp-cache-modifications.md#url-rewrites
+   * @param {!Element} element
+   * @param {string} property
+   * @param {string} value
+   * @return {string|undefined}
+   * @private
+   */
+  rewriteAttributes_(element, property, value) {
+    // Rewrite attributes if necessary. Not done in worker since it relies on
+    // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
+    let rewrittenValue;
+    try {
+      rewrittenValue = rewriteAttributesForElement(element, property, value);
+    } catch (e) {
+      const error = user().createError(`${TAG}: "${value}" is not a ` +
+          `valid result for [${property}]`, e);
+      reportError(error, element);
+    }
+    return rewrittenValue;
+  }
+
+  /**
    * If current bound element state equals `expectedValue`, returns true.
    * Otherwise, returns false.
    * @param {!BoundPropertyDef} boundProperty
@@ -884,17 +971,18 @@ export class Bind {
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const property = boundProperty.property;
+    const {property, expressionString} = boundProperty;
+    const tagName = element.tagName;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
-    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
       return;
     }
 
     let initialValue;
-    let match = true;
+    let match;
 
     switch (property) {
       case 'text':
@@ -945,11 +1033,11 @@ export class Bind {
     }
 
     if (!match) {
-      const err = user().createError(`${TAG}: ` +
-        `Default value for [${property}] does not match first expression ` +
-        `result (${expectedValue}). This can result in unexpected behavior ` +
-        'after the next state change.');
-      reportError(err, element);
+      user().warn(TAG,
+          `Default value for <${tagName} [${property}]="${expressionString}"> `
+          + `does not match first result (${expectedValue}). We recommend `
+          + 'writing expressions with matching default values, but this can be '
+          + 'safely ignored if intentional.');
     }
   }
 
@@ -957,9 +1045,17 @@ export class Bind {
    * @param {!Event} event
    */
   onDomUpdate_(event) {
-    const templateContainer = dev().assertElement(event.target);
-    this.removeBindingsForNodes_([templateContainer]).then(() => {
-      return this.addBindingsForNodes_([templateContainer]);
+    const target = dev().assertElement(event.target);
+
+    // Skip amp-list since there's already a custom integration for it.
+    const parent = target.parentNode;
+    if (parent && parent.tagName == 'AMP-LIST') {
+      dev().info(TAG, 'Skipping DOM_UPDATE rescan of:', target);
+      return;
+    }
+
+    this.removeBindingsForNodes_([target]).then(() => {
+      return this.addBindingsForNodes_([target]);
     }).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
@@ -973,6 +1069,20 @@ export class Bind {
    */
   ww_(method, opt_args) {
     return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
+  }
+
+  /**
+   * @param {{message: string, stack:string}} e
+   * @param {string} message
+   * @param {!Element=} opt_element
+   * @return {!Error}
+   * @private
+   */
+  reportWorkerError_(e, message, opt_element) {
+    const userError = user().createError(message + ' ' + e.message);
+    userError.stack = e.stack;
+    reportError(userError, opt_element);
+    return userError;
   }
 
   /**
@@ -994,6 +1104,25 @@ export class Bind {
       }
     }
     return true;
+  }
+
+  /**
+   * Copies an object containing JSON data and returns it.
+   * Returns null if input object contains invalid JSON (e.g. undefined or
+   * circular references).
+   * @param {?JsonObject|undefined} o
+   * @return {?JsonObject}
+   */
+  copyJsonObject_(o) {
+    if (o === undefined) {
+      return null;
+    }
+    try {
+      return parseJson(JSON.stringify(o));
+    } catch (e) {
+      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+    }
+    return null;
   }
 
   /**

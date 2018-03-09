@@ -15,8 +15,8 @@
  */
 
 import {Observable} from './observable';
-import {dev} from './log';
 import {Services} from './services';
+import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {registerServiceBuilder} from './service';
 
@@ -86,7 +86,7 @@ export class Input {
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
       this.boundOnMouseMove_ =
-          /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
+        /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }

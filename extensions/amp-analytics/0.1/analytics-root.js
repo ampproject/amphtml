@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
@@ -27,7 +28,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
 import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
 
 const TAG = 'amp-analytics';
@@ -210,13 +210,18 @@ export class AnalyticsRoot {
       let found;
       let result = null;
       // Query search based on the selection method.
-      if (selectionMethod == 'scope') {
-        found = scopedQuerySelector(context, selector);
-      } else if (selectionMethod == 'closest') {
-        found = closestBySelector(context, selector);
-      } else {
-        found = this.getRoot().querySelector(selector);
+      try {
+        if (selectionMethod == 'scope') {
+          found = scopedQuerySelector(context, selector);
+        } else if (selectionMethod == 'closest') {
+          found = closestBySelector(context, selector);
+        } else {
+          found = this.getRoot().querySelector(selector);
+        }
+      } catch (e) {
+        user().assert(false, `Invalid query selector ${selector}`);
       }
+
       // DOM search can "look" outside the boundaries of the root, thus make
       // sure the result is contained.
       if (found && this.contains(found)) {
@@ -260,7 +265,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(
-      listener, context, selector, selectionMethod = null) {
+    listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
@@ -455,7 +460,7 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
 
 /**
  * @param  {!Element} el
- * @param  {!string} selector
+ * @param  {string} selector
  * @return {boolean}
  */
 function matchesNoInline(el, selector) {

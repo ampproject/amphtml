@@ -15,28 +15,31 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const glob = require('glob');
-const Karma = require('karma').Server;
-const config = require('../config');
-const applyConfig = require('./prepend-global/index.js').applyConfig;
-const removeConfig = require('./prepend-global/index.js').removeConfig;
-const fs = require('fs');
-const path = require('path');
-const util = require('gulp-util');
-const webserver = require('gulp-webserver');
 const app = require('../test-server').app;
+const applyConfig = require('./prepend-global/index.js').applyConfig;
+const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
+const config = require('../config');
+const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
+const exec = require('../exec').exec;
+const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
+const fs = require('fs');
+const gulp = require('gulp-help')(require('gulp'));
+const Karma = require('karma').Server;
 const karmaDefault = require('./karma.conf');
-const shuffleSeed = require('shuffle-seed');
+const log = require('fancy-log');
+const path = require('path');
+const removeConfig = require('./prepend-global/index.js').removeConfig;
+const webserver = require('gulp-webserver');
 
 
-const green = util.colors.green;
-const yellow = util.colors.yellow;
-const cyan = util.colors.cyan;
-const red = util.colors.red;
+const green = colors.green;
+const yellow = colors.yellow;
+const cyan = colors.cyan;
+const red = colors.red;
 
-const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
+const preTestTasks =
+    argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';
 
 
@@ -56,6 +59,10 @@ function getConfig() {
   }
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
+  }
+  if (argv.headless) {
+    return Object.assign({}, karmaDefault,
+        {browsers: ['Chrome_no_extensions_headless']});
   }
   if (argv.saucelabs || argv.saucelabs_lite) {
     if (!process.env.SAUCE_USERNAME) {
@@ -123,6 +130,11 @@ function getAdTypes() {
   return adTypes;
 }
 
+// Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+// by refreshing the wd cache so that Karma can launch without an error.
+function refreshKarmaWdCache() {
+  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
+}
 
 /**
  * Prints help messages for args if tests are being run for local development.
@@ -134,59 +146,80 @@ function printArgvMessages() {
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
-    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.',  // eslint-disable-line google-camelcase/google-camelcase
+    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
     watch: 'Enabling watch mode. Editing and saving a file will cause the' +
         ' tests for that file to be re-run in the same browser instance.',
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    integration: 'Running only the integration tests. Requires ' +
-        cyan('gulp build') + ' to have been run first.',
-    unit: 'Running only the unit tests. Requires ' +
-        cyan('gulp css') + ' to have been run first.',
-    randomize: 'Randomizing the order in which tests are run.',
+    integration: 'Running only the integration tests. Prerequisite: ' +
+        cyan('gulp build'),
+    unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
-    seed: 'Randomizing test order with seed ' + cyan(argv.seed) + '.',
     compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".',
+    coverage: 'Running tests in code coverage mode.',
+    headless: 'Running tests in a headless Chrome window.',
   };
   if (!process.env.TRAVIS) {
-    util.log(green('Run', cyan('gulp help'),
-        'to see a list of all test flags. (Use', cyan('--nohelp'),
-        'to silence these messages.)'));
-    if (!argv.unit && !argv.integration && !argv.files) {
-      util.log(green('Running all tests. Use',
-          cyan('--unit'), 'or', cyan('--integration'),
-          'to run just the unit tests or integration tests.'));
+    log(green('Run'), cyan('gulp help'),
+        green('to see a list of all test flags.'));
+    log(green('⤷ Use'), cyan('--nohelp'),
+        green('to silence these messages.)'));
+    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
+      log(green('Running all tests.'));
+      log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
+          green('to run just the unit tests or integration tests.'));
+    }
+    if (!argv.testnames && !argv.files) {
+      log(green('⤷ Use'), cyan('--testnames'),
+          green('to see the names of all tests being run.'));
+    }
+    if (!argv.headless) {
+      log(green('⤷ Use'), cyan('--headless'),
+          green('to run tests in a headless Chrome window.'));
     }
     if (!argv.compiled) {
-      util.log(green('Running tests against unminified code.'));
+      log(green('Running tests against unminified code.'));
     }
-    util.log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
-        util.log(yellow('--' + arg + ':'), green(message));
+        log(yellow('--' + arg + ':'), green(message));
       }
     });
   }
 }
 
 /**
- * Applies the prod or canary AMP config to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Applies the prod or canary AMP config to the AMP runtime.
+ * @return {Promise}
+ */
+function applyAmpConfig() {
+  if (argv.unit || argv.a4a) {
+    return Promise.resolve();
+  }
+  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  return writeConfig('dist/amp.js').then(() => {
+    return writeConfig('dist/v0.js');
+  });
+}
+
+/**
+ * Writes the prod or canary AMP config to file.
  * @param {string} targetFile File to which the config is to be written.
  * @return {Promise}
  */
-function applyAmpConfig(targetFile) {
+function writeConfig(targetFile) {
   const configFile =
       'build-system/global-configs/' + ampConfig + '-config.json';
   if (fs.existsSync(targetFile)) {
     return removeConfig(targetFile).then(() => {
       return applyConfig(
-          ampConfig, targetFile, configFile, /* opt_local */ true);
+          ampConfig, targetFile, configFile,
+          /* opt_localDev */ true, /* opt_localBranch */ true);
     });
   } else {
     return Promise.resolve();
@@ -201,6 +234,13 @@ function runTests() {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
 
+  if (argv.saucelabs && !argv.integration) {
+    log(red('ERROR:'), 'Only integration tests may be run on the full set of ' +
+        'Sauce Labs browsers');
+    log('Use', cyan('--saucelabs'), 'with', cyan('--integration'));
+    process.exit();
+  }
+
   const c = getConfig();
 
   if (argv.watch || argv.w) {
@@ -213,14 +253,6 @@ function runTests() {
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
-  }
-
-  if (argv.saucelabs && !argv.integration) {
-    util.log(red('Only integration tests may be run on the full set of ' +
-        'Sauce Labs browsers'));
-    util.log(
-        red('Use'), cyan('--saucelabs'), red('with'), cyan('--integration'));
-    process.exit();
   }
 
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
@@ -240,30 +272,8 @@ function runTests() {
     } else {
       c.files = c.files.concat(config.unitTestPaths);
     }
-
-  } else if (argv.randomize || argv.glob || argv.a4a) {
-    const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
-
-    let testFiles = [];
-    for (const index in testPaths) {
-      testFiles = testFiles.concat(glob.sync(testPaths[index]));
-    }
-
-    if (argv.randomize || argv.a4a) {
-      const seed = argv.seed || Math.random();
-      util.log(
-          yellow('Randomizing:'),
-          cyan('Seeding with value', seed));
-      util.log(
-          yellow('To rerun same ordering, append'),
-          cyan(`--seed=${seed}`),
-          yellow('to your invocation of'),
-          cyan('gulp test'));
-      testFiles = shuffleSeed.shuffle(testFiles, seed);
-    }
-
-    testFiles.splice(testFiles.indexOf('test/_init_tests.js'), 1);
-    c.files = c.files.concat(config.commonTestPaths.concat(testFiles));
+  } else if (argv.a4a) {
+    c.files = c.files.concat(config.a4aTestPaths);
   } else {
     c.files = c.files.concat(config.testPaths);
   }
@@ -295,10 +305,10 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    util.log(cyan('Including code coverage tests'));
+    c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
-    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    c.reporters = c.reporters.concat(['coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
     }
@@ -331,24 +341,30 @@ function runTests() {
         directoryListing: true,
         middleware: [app],
       })
-      .on('kill', function() {
-        util.log(yellow(
-            'Shutting down test responses server on localhost:31862'));
-        process.nextTick(function() {
-          process.exit();
-        });
-      }));
-  util.log(yellow(
+          .on('kill', function() {
+            log(yellow(
+                'Shutting down test responses server on localhost:31862'));
+            process.nextTick(function() {
+              process.exit();
+            });
+          }));
+  log(yellow(
       'Started test responses server on localhost:31862'));
+
+  // Listen for Ctrl + C to cancel testing
+  const handlerProcess = createCtrlcHandler('test');
+
+  // Avoid Karma startup errors
+  refreshKarmaWdCache();
 
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
-      util.log(
+      log(
           red('ERROR:'),
-          yellow('Karma test failed with exit code', exitCode));
+          yellow('Karma test failed with exit code ' + exitCode));
       process.exit(exitCode);
     } else {
       resolver();
@@ -356,8 +372,8 @@ function runTests() {
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
       console./* OK*/log(green(
-          'Running tests in parallel on', c.browsers.length,
-          'Sauce Labs browser(s)...'));
+          'Running tests in parallel on ' + c.browsers.length +
+          ' Sauce Labs browser(s)...'));
     } else {
       console./* OK*/log(green('Running tests locally...'));
     }
@@ -376,7 +392,7 @@ function runTests() {
       console./* OK*/log(message);
     }
   }).start();
-  return deferred;
+  return deferred.then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -387,9 +403,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     printArgvMessages();
   }
 
-  return applyAmpConfig('dist/amp.js').then(() => {
-    return applyAmpConfig('dist/v0.js');
-  }).then(() => {
+  return applyAmpConfig().then(() => {
     return runTests();
   });
 }, {
@@ -410,13 +424,10 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
         'binaries for execution',
     'grep': '  Runs tests that match the pattern',
     'files': '  Runs tests for specific files',
-    'randomize': '  Runs entire test suite in random order',
-    'seed': '  Seeds the test order randomization. Use with --randomize ' +
-        'or --a4a',
-    'glob': '  Explicitly expands test paths using glob before passing ' +
-        'to Karma',
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
+    'coverage': '  Run tests in code coverage mode',
+    'headless': '  Run tests in a headless Chrome window',
   },
 });

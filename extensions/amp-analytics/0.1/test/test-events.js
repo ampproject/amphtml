@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,
@@ -25,8 +27,6 @@ import {
   VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
-import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 
 describes.realWin('Events', {amp: 1}, env => {
@@ -86,8 +86,9 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add listener', () => {
       const selUnlisten = function() {};
-      const selListenerStub = sandbox.stub(root, 'createSelectiveListener',
-          () => selUnlisten);
+      const selListenerStub =
+          sandbox.stub(root, 'createSelectiveListener').callsFake(
+              () => selUnlisten);
       tracker.add(analyticsElement, 'click',
           {selector: '*', selectionMethod: 'scope'}, handler);
       expect(tracker.clickObservable_.getHandlerCount()).to.equal(1);
@@ -95,15 +96,15 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(selListenerStub).to.be.calledOnce;
       const args = selListenerStub.args[0];
       expect(args[0]).to.be.a('function');
-      expect(args[1]).to.equal(win.document.body);  // Parent element of amp-analytics.
+      expect(args[1]).to.equal(win.document.body); // Parent element of amp-analytics.
       expect(args[2]).to.equal('*');
-      expect(args[3]).to.equal('scope');  // Default selection method.
+      expect(args[3]).to.equal('scope'); // Default selection method.
     });
 
     it('should add listener with default selection method', () => {
       const selListenerStub = sandbox.stub(root, 'createSelectiveListener');
       tracker.add(analyticsElement, 'click', {selector: '*'}, handler);
-      expect(selListenerStub.args[0][3]).to.be.null;  // Default selection method.
+      expect(selListenerStub.args[0][3]).to.be.null; // Default selection method.
     });
 
     it('should handle click on target', () => {
@@ -462,7 +463,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {}, resolver);
       return promise.then(event => {
@@ -477,7 +478,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {selector: ':root'}, resolver);
       return promise.then(event => {
@@ -492,7 +493,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
       return promise.then(event => {
@@ -541,8 +542,12 @@ describes.realWin('Events', {amp: 1}, env => {
     let tracker;
 
     beforeEach(() => {
-      clock = lolex.install(root.ampdoc.win);
+      clock = lolex.install({target: root.ampdoc.win});
       tracker = root.getTracker('timer', TimerEventTracker);
+    });
+
+    afterEach(() => {
+      clock.uninstall();
     });
 
     function countIntervals() {
@@ -557,10 +562,10 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
 
       tracker.dispose();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
     });
 
     it('should validate timerSpec', () => {
@@ -606,12 +611,113 @@ describes.realWin('Events', {amp: 1}, env => {
           maxTimerLength: 0,
         }}, handler);
       }).to.throw(/Bad maxTimerLength specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+	  interval: 1,
+	  startSpec: {on: 'timer', selector: '.target'},
+        }}, handler);
+      }).to.throw(/Cannot track timer start/);
 
       expect(handler).to.not.be.called;
       expect(() => {
         tracker.add(analyticsElement, 'timer',
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
+
+      const clickTracker = root.getTracker('click', ClickEventTracker);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer',
+            {
+	      timerSpec: {
+	        startSpec: {on: 'click', selector: '.target'},
+	        stopSpec: {on: 'click', selector: '.target'},
+	        interval: 1},
+	    }, handler, function(unused) { return clickTracker; });
+      }).to.not.throw();
+    });
+
+    it('timers start and stop by tracking different events', () => {
+      const fn1 = sandbox.stub();
+      const clickTracker = root.getTracker('click', ClickEventTracker);
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1, function(unused) { return clickTracker; });
+      expect(fn1).to.have.not.been.called;
+
+      clock.tick(5 * 1000); // 5 seconds
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+      expect(fn1.args[0][0].target).to.equal(root.getRootElement());
+      expect(fn1.args[0][0].type).to.equal('timer');
+      target.click(); // Stop timer.
+
+      const fn2 = sandbox.stub();
+      const customTracker = root.getTracker('custom', CustomEventTracker);
+      const getElementSpy = sandbox.spy(root, 'getElement');
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        startSpec: {on: 'custom-event-start', selector: '.target'},
+        stopSpec: {on: 'custom-event-stop', selector: '.target'},
+      }}, fn2, function(unused) { return customTracker; });
+      expect(fn2).to.have.not.been.called;
+      customTracker.trigger(new AnalyticsEvent(target, 'custom-event-start'));
+
+      expect(getElementSpy.returnValues.length).to.equal(1);
+      return getElementSpy.returnValues[0].then(() => {
+        expect(fn2).to.be.calledOnce;
+        expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+        expect(fn2.args[0][0].target).to.equal(root.getRootElement());
+        expect(fn2.args[0][0].type).to.equal('timer');
+        customTracker.trigger(new AnalyticsEvent(target, 'custom-event-stop'));
+
+        expect(getElementSpy.returnValues.length).to.equal(2);
+        getElementSpy.returnValues[1].then(() => {
+          // Timers have genuinely stopped.
+          clock.tick(5 * 1000); // 5 seconds
+          expect(fn1).to.have.callCount(1);
+          expect(fn2).to.have.callCount(1);
+        });
+      });
+    });
+
+    it('timers started and stopped by the same event on the same target'
+        + ' do not have race condition problems', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        immediate: false,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1);
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.have.not.been.called;
+      target.click(); // Stop timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Stop timer.
+      expect(fn1).to.be.calledTwice;
+      clock.tick(5);
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledTwice;
+      target.click(); // Stop timer.
+      expect(fn1).to.be.calledThrice;
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledThrice;
+      target.click(); // Stop timer.
+      expect(fn1).to.have.callCount(4);
+      target.click(); // Start timer.
+      expect(fn1).to.have.callCount(4);
+
+      clock.tick(3 * 1000); // 3 seconds
+      expect(fn1).to.have.callCount(7); // 4 timer stops + 3.005 seconds
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {
@@ -704,29 +810,52 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn3);
       expect(fn3).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(3);
+      const fn4 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+        maxTimerLength: 20,
+      }}, fn4);
+
+      const fn5 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn5);
+
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 10 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(2);
-      expect(tracker.trackers_).to.have.length(3);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(2);
+      expect(fn5).to.have.callCount(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 20 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(4);
+      expect(fn5).to.have.callCount(3);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       clock.tick(10 * 1000); // 30 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(4);
+      expect(fn5).to.have.callCount(4);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
-      expect(fn3).to.have.callCount(3);
+      expect(fn3).to.have.callCount(4); // Hit maxTimerLength and stopped.
+      expect(fn5).to.have.callCount(1084);
 
-      // All timers removed.
-      expect(tracker.trackers_).to.have.length(0);
+      // All timers removed except the one that never ends.
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
     });
 
     it('should unlisten tracker', () => {
@@ -744,15 +873,15 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn2);
       expect(fn2).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
       expect(countIntervals()).to.equal(2);
 
       u1();
-      expect(tracker.trackers_).to.have.length(1);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
       expect(countIntervals()).to.equal(1);
 
       u2();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
       expect(countIntervals()).to.equal(0);
     });
 
@@ -775,6 +904,51 @@ describes.realWin('Events', {amp: 1}, env => {
 
       tracker.dispose();
       expect(countIntervals()).to.equal(0);
+    });
+
+    it('should create events with timer vars', () => {
+      const handler = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 3,
+        immediate: false,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, handler);
+      expect(handler).to.have.not.been.called;
+
+      // Fake out the time since clock.tick will not actually advance the time.
+      let fakeTime = 1000; // 1 second past epoch
+      sandbox.stub(Date, 'now').callsFake(() => { return fakeTime; });
+      target.click();
+      fakeTime = 1600; // Must set fake time before advancing the interval.
+      clock.tick(600); // Not a full second.
+      target.click();
+      expect(handler).to.be.calledOnce;
+      const stopEvent1 = handler.args[0][0];
+      expect(stopEvent1).to.be.instanceOf(AnalyticsEvent);
+      expect(stopEvent1.vars.timerStart).to.equal(1000);
+      expect(stopEvent1.vars.timerDuration).to.equal(600);
+
+      target.click();
+      expect(handler).to.be.calledOnce;
+      fakeTime = 4600;
+      clock.tick(3000); // 3 seconds.
+      expect(handler).to.have.callCount(2);
+      const intervalEvent = handler.args[1][0];
+      expect(intervalEvent).to.be.instanceOf(AnalyticsEvent);
+      expect(intervalEvent.vars.timerStart).to.equal(1600);
+      expect(intervalEvent.vars.timerDuration).to.equal(3000);
+
+      fakeTime = 6200;
+      clock.tick(1600); // 4.6 seconds.
+      target.click();
+
+      expect(handler).to.have.callCount(3);
+      const stopEvent2 = handler.args[2][0];
+      expect(stopEvent2).to.be.instanceOf(AnalyticsEvent);
+      // Report partial interval time on timer stop between intervals.
+      expect(stopEvent2.vars.timerDuration).to.equal(1600);
+      expect(stopEvent2.vars.timerStart).to.equal(1600);
     });
   });
 
@@ -842,10 +1016,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-          matchEmptySpec,
-          /* readyPromise */ null,
-          /* createReadyReportPromiseFunc */ null,
-          saveCallback)
+              matchEmptySpec,
+              /* readyPromise */ null,
+              /* createReadyReportPromiseFunc */ null,
+              saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
@@ -870,10 +1044,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-          matchEmptySpec,
-          readyPromise,
-          null,
-          saveCallback)
+              matchEmptySpec,
+              readyPromise,
+              null,
+              saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -899,10 +1073,10 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenRoot')
           .withExactArgs(
-          config.visibilitySpec,
-          readyPromise,
-          /* createReadyReportPromiseFunc */ null,
-          saveCallback)
+              config.visibilitySpec,
+              readyPromise,
+              /* createReadyReportPromiseFunc */ null,
+              saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -929,11 +1103,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-          target,
-          config.visibilitySpec,
-          readyPromise,
-          /* createReadyReportPromiseFunc */ null,
-          saveCallback)
+              target,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReadyReportPromiseFunc */ null,
+              saveCallback)
           .returns(unlisten)
           .once();
       const res = tracker.add(analyticsElement,
@@ -973,11 +1147,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-          target,
-          matchEmptySpec,
-          readyPromise,
-          /* createReadyReportPromiseFunc */ null,
-          saveCallback)
+              target,
+              matchEmptySpec,
+              readyPromise,
+              /* createReadyReportPromiseFunc */ null,
+              saveCallback)
           .returns(unlisten)
           .once();
       tracker.add(analyticsElement, 'visible', config, eventResolver);
@@ -996,11 +1170,11 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
           .expects('listenElement')
           .withExactArgs(
-          target,
-          config.visibilitySpec,
-          /* readyPromise */ null,
-          /* createReadyReportPromiseFunc */ matchFunc,
-          saveCallback)
+              target,
+              config.visibilitySpec,
+              /* readyPromise */ null,
+              /* createReadyReportPromiseFunc */ matchFunc,
+              saveCallback)
           .returns(null)
           .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
@@ -1104,7 +1278,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct readyReportPromise', () => {
       it('with viewer hidden', () => {
-        const stub = sandbox.stub(tracker.root, 'getViewer', () => {
+        const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
           return {
             isVisible: () => {return false;},
           };

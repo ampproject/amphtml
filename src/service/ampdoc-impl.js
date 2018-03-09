@@ -419,8 +419,8 @@ export class AmpDocSingle extends AmpDoc {
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body ?
-        Promise.resolve(this.win.document.body) :
-        waitForBodyPromise(this.win.document).then(() => this.getBody());
+      Promise.resolve(this.win.document.body) :
+      waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);
@@ -609,4 +609,4 @@ export function installDocService(win, isSingleDoc) {
       function() {
         return new AmpDocService(win, isSingleDoc);
       });
-};
+}

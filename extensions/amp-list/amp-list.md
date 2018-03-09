@@ -43,7 +43,7 @@ using a supplied template.</td>
 The `amp-list` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 You can specify a template in one of two ways:
@@ -162,6 +162,19 @@ Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/
 </amp-list>
 ```
 
+### Refreshing data
+
+The `amp-list` element exposes a `refresh` action that other elements can reference in `on="tap:..."` attributes. 
+
+```html
+<button on="tap:myList.refresh">Refresh List</button>
+<amp-list id="myList" src="https://foo.com/list.json">
+  <template type="amp-mustache">
+    <div>{{title}}</div>
+  </template>
+</amp-list>
+```
+
 ## Attributes
 
 ##### src (required)
@@ -170,7 +183,7 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `amp-list`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 ##### credentials (optional)
@@ -180,7 +193,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Supported values: `omit`, `include`
 * Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 Here's an example that specifies including credentials to display personalized content in a list:
 

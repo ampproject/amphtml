@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../experiments';
 import {Services} from '../services';
 import {dev, user} from '../log';
+import {isExperimentOn} from '../experiments';
 
 /** @const {number} */
 const NTH_FRAME = 200;
@@ -181,7 +181,7 @@ function isJankMeterEnabled(win) {
  * @param {!Window} win
  * @returns {boolean}
  */
-function isLongTaskApiSupported(win) {
+export function isLongTaskApiSupported(win) {
   return !!win.PerformanceObserver
       && !!win.TaskAttributionTiming
       && ('containerName' in win.TaskAttributionTiming.prototype);

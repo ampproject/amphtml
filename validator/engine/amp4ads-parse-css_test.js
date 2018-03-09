@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@ goog.require('json_testutil.makeJsonKeyCmpFn');
 goog.require('json_testutil.renderJSON');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.parseAStylesheet');
-goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
 
@@ -33,16 +32,6 @@ goog.require('parse_css.validateAmp4AdsCss');
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
-
-describe('stripVendorPrefix', () => {
-  it('removes typical vendor prefixes', () => {
-    assertStrictEqual('foo', parse_css.stripVendorPrefix('-moz-foo'));
-    assertStrictEqual('foo', parse_css.stripVendorPrefix('foo'));
-    assertStrictEqual('foo-foo', parse_css.stripVendorPrefix('foo-foo'));
-    assertStrictEqual('foo-foo', parse_css.stripVendorPrefix('-d-foo-foo'));
-    assertStrictEqual('-foo', parse_css.stripVendorPrefix('-foo'));
-  });
-});
 
 /**
  * For emitting json output with keys in logical order for ErrorToken.
@@ -68,10 +57,6 @@ const amp4AdsCssParsingSpec = {
   'font-face': parse_css.BlockType.PARSE_AS_DECLARATIONS,
   'media': parse_css.BlockType.PARSE_AS_RULES,
   'keyframes': parse_css.BlockType.PARSE_AS_RULES,
-  '-webkit-keyframes': parse_css.BlockType.PARSE_AS_RULES,
-  '-moz-keyframes': parse_css.BlockType.PARSE_AS_RULES,
-  '-o-keyframes': parse_css.BlockType.PARSE_AS_RULES,
-  '-ms-keyframes': parse_css.BlockType.PARSE_AS_RULES,
 };
 
 describe('validateAmp4AdsCss', () => {
@@ -194,7 +179,7 @@ describe('validateAmp4AdsCss', () => {
            errors);
      });
 
-  it('reports when .amp-animate is missing', () => {
+  it('No longer an error when .amp-animate is missing', () => {
     const css = '.box { ' +
         '    transform: rotate(180deg); ' +
         '    transition: transform 2s; ' +
@@ -206,15 +191,7 @@ describe('validateAmp4AdsCss', () => {
         errors);
     assertJSONEquals([], errors);
     parse_css.validateAmp4AdsCss(sheet, errors);
-    assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 0,
-          'tokenType': 'ERROR',
-          'code': 'CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION',
-          'params': ['style', 'transition', '.amp-animate']
-        }],
-        errors);
+    assertJSONEquals([], errors);
   });
 
   it('allows only opacity and transform to be transitioned', () => {

@@ -16,7 +16,7 @@
 
 import {ancestorElementsByTag} from './dom';
 
- /** @const {string} */
+/** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**

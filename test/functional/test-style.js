@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as st from '../../src/style';
 import * as sinon from 'sinon';
+import * as st from '../../src/style';
 
 describe('Style', () => {
 

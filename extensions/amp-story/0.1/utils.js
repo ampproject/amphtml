@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestBySelector} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -51,4 +52,35 @@ export function hasTapAction(el) {
   // service race conditions. This is good enough for our use case.
   return el.hasAttribute('on') &&
       !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+}
+
+
+/**
+ * Calculates a client rect without applying scaling transformations.
+ * @note Must be run in a vsync measure context.
+ * @param {!Element} el
+ * @return {!ClientRect}
+ */
+export function unscaledClientRect(el) {
+  const {width, height, left, top} = el./*OK*/getBoundingClientRect();
+
+  const scaleFactorX = width == 0 ? 1 : width / el./*OK*/offsetWidth;
+  const scaleFactorY = height == 0 ? 1 : height / el./*OK*/offsetHeight;
+
+  return /** @type {!ClientRect} */ ({
+    left: left / scaleFactorX,
+    top: top / scaleFactorY,
+    width: width / scaleFactorX,
+    height: height / scaleFactorY,
+  });
+}
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+export function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
 }

@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  isObject,
-  toArray,
-  toWin,
-} from '../../../src/types';
-import {
-  getData,
-  listen,
-} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   fullscreenEnter,
@@ -40,10 +26,23 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {user, dev} from '../../../src/log';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {
+  getData,
+  listen,
+} from '../../../src/event-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isEnumValue} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  isObject,
+  toArray,
+  toWin,
+} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';
@@ -60,6 +59,9 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -69,11 +71,17 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectSource_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectTrack_ = null;
+
+    /**
+     * Maps events to their unlisteners.
+     * @private {!Object<string, function()>}
+     */
+    this.unlisteners_ = {};
 
     /** @private {!ImaPlayerData} */
     this.playerData_ = new ImaPlayerData();
@@ -81,8 +89,18 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        'Experiment ' + TAG + ' is disabled.');
+    this.viewport_ = this.getViewport();
+    if (this.element.getAttribute('data-delay-ad-request') === 'true') {
+      this.unlisteners_['onFirstScroll'] =
+          this.viewport_.onScroll(() => {
+            this.sendCommand_('onFirstScroll');
+          });
+      // Request ads after 3 seconds, if something else doesn't trigger an ad
+      // request before that.
+      Services.timerFor(this.win).delay(
+          () => { this.sendCommand_('onAdRequestDelayTimeout'); }, 3000);
+
+    }
 
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
@@ -198,7 +216,9 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the player through postMessage.
+   * Sends a command to the player through postMessage. NOTE: All commands sent
+   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * fires.
    * @param {string} command
    * @param {Object=} opt_args
    * @private
@@ -213,6 +233,10 @@ class AmpImaVideo extends AMP.BaseElement {
           'args': opt_args || '',
         })), '*');
       });
+    }
+    // If we have an unlistener for this command, call it.
+    if (this.unlisteners_[command]) {
+      this.unlisteners_[command]();
     }
   }
 

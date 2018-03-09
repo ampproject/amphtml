@@ -18,10 +18,10 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {removeFragment} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {tryFocus} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
+import {removeFragment} from '../../../src/url';
+import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
 
@@ -43,6 +43,9 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.sessionOptOut_ = false;
+
+    /** @private {Element} */
+    this.sections_ = null;
   }
 
   /** @override */
@@ -59,8 +62,8 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    const sections = this.getRealChildren();
-    sections.forEach((section, index) => {
+    this.sections_ = this.getRealChildren();
+    this.sections_.forEach((section, index) => {
       user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
@@ -80,7 +83,48 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
 
-
+      this.registerAction('toggle', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.toggle_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.toggle_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('expand', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.expand_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.expand_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('collapse', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.collapse_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.collapse_(this.sections_[i]);
+          }
+        }
+      });
 
       if (this.currentState_[contentId]) {
         section.setAttribute('expanded', '');
@@ -97,7 +141,7 @@ class AmpAccordion extends AMP.BaseElement {
 
       const header = sectionComponents[0];
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'heading');
+      header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded',
           section.hasAttribute('expanded').toString());
@@ -135,9 +179,9 @@ class AmpAccordion extends AMP.BaseElement {
           this.win./*OK*/sessionStorage.getItem(
               dev().assertString(this.sessionId_));
       return sessionStr
-          ? /** @type {!JsonObject} */ (
-              dev().assert(parseJson(dev().assertString(sessionStr))))
-          : dict();
+        ? /** @type {!JsonObject} */ (
+          dev().assert(parseJson(dev().assertString(sessionStr))))
+        : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return dict();
@@ -162,6 +206,63 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
+   * Toggles section between expanded or collapsed.
+   * @private
+   */
+  toggle_(section, opt_forceExpand = undefined) {
+    const sectionComponents = section.children;
+    const header = sectionComponents[0];
+    const content = sectionComponents[1];
+    const contentId = content.getAttribute('id');
+    const isSectionClosedAfterClick = section.hasAttribute('expanded');
+    this.mutateElement(() => {
+      let toExpand;
+      if (opt_forceExpand === true) {
+        toExpand = true;
+      } else if (opt_forceExpand === false) {
+        toExpand = false;
+      } else {
+        toExpand = !section.hasAttribute('expanded');
+      }
+
+      if (toExpand) {
+        section.setAttribute('expanded', '');
+        header.setAttribute('aria-expanded', 'true');
+        // if expand-single-section is set, only allow one <section> to be expanded at a time
+        if (this.element.hasAttribute('expand-single-section')) {
+          this.sections_.forEach(sectionIter => {
+            if (sectionIter != section) {
+              sectionIter.removeAttribute('expanded');
+              sectionIter.children[0].setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+      } else {
+        section.removeAttribute('expanded');
+        header.setAttribute('aria-expanded', 'false');
+      }
+    }, section);
+    this.currentState_[contentId] = !isSectionClosedAfterClick;
+    this.setSessionState_();
+  }
+
+  /**
+   * Force expands the accordion.
+   * @private
+   */
+  expand_(section) {
+    this.toggle_(section, true);
+  }
+
+  /**
+   * Force collapses the accordion.
+   * @private
+   */
+  collapse_(section) {
+    this.toggle_(section, false);
+  }
+
+  /**
    * Handles accordion header activation, through clicks or enter/space presses.
    * @param {!Event} event 'click' or 'keydown' event.
    * @private
@@ -170,21 +271,7 @@ class AmpAccordion extends AMP.BaseElement {
     event.preventDefault();
     const header = dev().assertElement(event.currentTarget);
     const section = header.parentElement;
-    const sectionComponents = section.children;
-    const content = sectionComponents[1];
-    const contentId = content.getAttribute('id');
-    const isSectionClosedAfterClick = section.hasAttribute('expanded');
-    this.mutateElement(() => {
-      if (section.hasAttribute('expanded')) {
-        section.removeAttribute('expanded');
-        header.setAttribute('aria-expanded', 'false');
-      } else {
-        section.setAttribute('expanded', '');
-        header.setAttribute('aria-expanded', 'true');
-      }
-    }, section);
-    this.currentState_[contentId] = !isSectionClosedAfterClick;
-    this.setSessionState_();
+    this.toggle_(section);
   }
 
   /**

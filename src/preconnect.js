@@ -20,10 +20,10 @@
  */
 
 
-import {getService, registerServiceBuilder} from './service';
-import {parseUrl} from './url';
 import {Services} from './services';
 import {dev} from './log';
+import {getService, registerServiceBuilder} from './service';
+import {parseUrl} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -142,8 +142,8 @@ class PreconnectService {
     // If we are about to use the connection, don't re-preconnect for
     // 180 seconds.
     const timeout = opt_alsoConnecting
-        ? ACTIVE_CONNECTION_TIMEOUT_MS
-        : PRECONNECT_TIMEOUT_MS;
+      ? ACTIVE_CONNECTION_TIMEOUT_MS
+      : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
     // If we know that preconnect is supported, there is no need to do
     // dedicated dns-prefetch.

@@ -16,10 +16,10 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {AmpEvents} from '../../../../src/amp-events';
 
 adopt(window);
 
@@ -78,9 +78,6 @@ describe('amp-live-list', () => {
       return Promise.resolve().then(() => {
         cb();
       });
-    };
-    liveList.deferMutate = cb => {
-      cb();
     };
     return elem;
   }
@@ -393,7 +390,9 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([{id: 'id0'}]);
       expect(spy).to.have.not.been.called;
       liveList.update(fromServer1);
-      expect(spy).to.have.been.calledOnce;
+      return Promise.resolve().then(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
     });
 
     it('no items slot on update should be a no op update', () => {
@@ -530,9 +529,11 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       expect(liveList.pendingItemsInsert_).to.have.length(1);
-      expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
+      return Promise.resolve().then(() => {
+        expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
 
-      return liveList.updateAction_(fromServer1).then(() => {
+        return liveList.updateAction_(fromServer1);
+      }).then(() => {
         expect(liveList.updateSlot_).to.have.class('amp-hidden');
       });
     });

@@ -29,6 +29,11 @@ tags: {  # <amp-story>
   tag_name: "AMP-STORY"
   requires_extension: "amp-story"
   mandatory_parent: "BODY"
+  # Mandate that at least one of the children is an amp-story-page.
+  # TODO(gregable): This global requires/satisfies approach only works because
+  # there is only one <amp-story standalone> in a document. We really want this
+  # requirement to be expressed on the <amp-story> children, however.
+  requires: "amp-story-page"
   attrs: {
     name: "standalone"
     mandatory: true
@@ -53,6 +58,7 @@ tags: {  # <amp-story>
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-PAGE"
   }
 }
@@ -61,6 +67,7 @@ tags: {  # <amp-story-page>
   tag_name: "AMP-STORY-PAGE"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
+  satisfies: "amp-story-page"
   attrs: {
     name: "id"
     mandatory: true
@@ -89,7 +96,7 @@ tags: {  # <amp-story-grid-layer>
     value_regex: "(fill|horizontal|vertical|thirds)"
     mandatory: true
   }
-  descendant_tag_lists: "amp-story-grid-layer-allowed-descendants"
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
   }
@@ -202,7 +209,81 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
-descendant_tag_lists: {
+tags: {  # <amp-story-cta-layer>
+  html_format: AMP
+  tag_name: "AMP-STORY-CTA-LAYER"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  descendant_tag_list: "amp-story-cta-layer-allowed-descendants"
+  mandatory_last_child: true
+}
+descendant_tag_list: {
+  name: "amp-story-cta-layer-allowed-descendants"
+  allowed_tags: "A"
+  allowed_tags: "ABBR"
+  allowed_tags: "ADDRESS"
+  allowed_tags: "AMP-CALL-TRACKING"
+  allowed_tags: "AMP-FIT-TEXT"
+  allowed_tags: "AMP-FONT"
+  allowed_tags: "AMP-IMG"
+  allowed_tags: "AMP-TIMEAGO"
+  allowed_tags: "B"
+  allowed_tags: "BDI"
+  allowed_tags: "BDO"
+  allowed_tags: "BLOCKQUOTE"
+  allowed_tags: "BR"
+  allowed_tags: "BUTTON"
+  allowed_tags: "CAPTION"
+  allowed_tags: "CITE"
+  allowed_tags: "CODE"
+  allowed_tags: "DATA"
+  allowed_tags: "DEL"
+  allowed_tags: "DFN"
+  allowed_tags: "DIV"
+  allowed_tags: "EM"
+  allowed_tags: "FIGCAPTION"
+  allowed_tags: "FIGURE"
+  allowed_tags: "FOOTER"
+  allowed_tags: "H1"
+  allowed_tags: "H2"
+  allowed_tags: "H3"
+  allowed_tags: "H4"
+  allowed_tags: "H5"
+  allowed_tags: "H6"
+  allowed_tags: "HEADER"
+  allowed_tags: "HGROUP"
+  allowed_tags: "HR"
+  allowed_tags: "I"
+  allowed_tags: "INS"
+  allowed_tags: "KBD"
+  allowed_tags: "LI"
+  allowed_tags: "MAIN"
+  allowed_tags: "MARK"
+  allowed_tags: "NAV"
+  allowed_tags: "NOSCRIPT"
+  allowed_tags: "OL"
+  allowed_tags: "P"
+  allowed_tags: "PRE"
+  allowed_tags: "Q"
+  allowed_tags: "RP"
+  allowed_tags: "RT"
+  allowed_tags: "RTC"
+  allowed_tags: "RUBY"
+  allowed_tags: "S"
+  allowed_tags: "SAMP"
+  allowed_tags: "SECTION"
+  allowed_tags: "SMALL"
+  allowed_tags: "SPAN"
+  allowed_tags: "STRONG"
+  allowed_tags: "SUB"
+  allowed_tags: "SUP"
+  allowed_tags: "TIME"
+  allowed_tags: "TR"
+  allowed_tags: "U"
+  allowed_tags: "UL"
+  allowed_tags: "VAR"
+  allowed_tags: "WBR"
+}
+descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
   allowed_tags: "ABBR"
   allowed_tags: "ADDRESS"

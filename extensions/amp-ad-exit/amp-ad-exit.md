@@ -29,7 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>All. This element is hidden.</td>
+    <td>`nodisplay` or unspecified. The element is not presentational.</td>
   </tr>
 </table>
 
@@ -56,10 +56,10 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
       "vars": {
         "_clickArea": {
-          "defaultValue": "headline",
+          "defaultValue": "headline"
         }
       }
-    }
+    },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
       "filters": ["3sClick", "borderProtection"]
@@ -68,7 +68,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/bannetons",
       "trackingUrls": [
         "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
-        "https://tracker.adnetwork.example.com/?url=example.com",
+        "https://tracker.adnetwork.example.com/?url=example.com"
       ],
       "filters": ["3sClick", "borderProtection"]
     }
@@ -109,7 +109,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
 Filters are specified in the `filters` section of the config. Targets reference
 filters by their property name in the `filters` section.
 
-There are two types of filters: location-based and time-based. Other filters (such as a confirmation prompt) could be added as needed. 
+There are three types of filters: location-based, time-based, and element-based. Other filters (such as a confirmation prompt) could be added as needed. 
 
 ### clickLocation filter
 
@@ -162,6 +162,23 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
     <td class="col-thirty"><code>delay</code></td>
     <td class="col-twenty"><code>number</code></td>
     <td>Time in ms to reject any clicks after entering the viewport.</td>
+  </tr>
+</table>
+
+### inactiveElement filter
+
+The `inactiveElement` filter type specifies elements that should not cause exits when they are the source of an event. The `amp-ad-exit` element ignores clicks on the previous/next buttons of an `amp-carousel` by default. The `inactiveElement` filter requires the following properties:
+
+<table>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>selector</code></td>
+    <td class="col-twenty"><code>string</code></td>
+    <td>A CSS selector. If the event that triggers an exit has a `target` that matches the selector, the exit will not be performed.</td>
   </tr>
 </table>
 
@@ -258,7 +275,13 @@ Custom variables must begin with an underscore. Define variables in the
 config alongside the navigation target. Variables should have a `"defaultValue"`
 property. The default value can be overridden in the `exit` action invocation:
 
-Variable values can also come from 3P analytics.
+Variable values can also come from 3P analytics. Use
+`<amp-analytics type='example-3p-vendor'>` to install a 3P analytics
+vendor iframe and reference it in the variable definition with the
+`"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
+`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
+is the name of the vendor and `collected-data` is a key in the message from the 
+vendor iframe. There must not be a space after the comma.
 
 Example:
 ```html
@@ -273,8 +296,7 @@ Example:
         },
         "_3pAnalytics": {
           "defaultValue": "no_response",
-          "vendorAnalyticsSource": "VendorXYZ",
-          "vendorAnalyticsResponseKey": "findings"
+          "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
          }
       }
     }

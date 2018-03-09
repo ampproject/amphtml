@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, LogLevel} from '../../../src/log';
+import {LogLevel, dev} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 
 
@@ -97,7 +97,7 @@ const LogType = {
   /** Warnings */
   IMAGES_MAX_720P_OR_SRCSET: {
     message: 'Images should not be larger than 720p.  If you wish to use' +
-        'images that are larger than 720p, you should specify a srcset.',
+        ' images that are larger than 720p, you should specify a srcset.',
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: el => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
@@ -198,8 +198,8 @@ function getLogEntriesForType(rootElement, logType) {
   const precondition = logType.precondition || (unusedEl => true);
 
   const elements = logType.selector ?
-      [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
-      [rootElement];
+    [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
+    [rootElement];
 
   return elements
       .filter(precondition)

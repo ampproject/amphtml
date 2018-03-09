@@ -79,8 +79,8 @@ export class BindValidator {
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
    * @note `tag` and `property` are case-sensitive.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @return {boolean}
    */
   canBind(tag, property) {
@@ -90,8 +90,8 @@ export class BindValidator {
   /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @param {?string} value
    * @return {boolean}
    */
@@ -124,8 +124,7 @@ export class BindValidator {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
         }
-        const sources = srcset.getSources();
-        urls = sources.map(source => source.url);
+        urls = srcset.getUrls();
       } else {
         urls = [value];
       }
@@ -246,6 +245,7 @@ function createElementRules_() {
       'state': null,
     },
     'AMP-SELECTOR': {
+      'disabled': null,
       'selected': null,
     },
     'AMP-STATE': {

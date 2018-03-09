@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getCurve} from './curve';
 import * as st from './style';
+import {getCurve} from './curve';
 
 
 

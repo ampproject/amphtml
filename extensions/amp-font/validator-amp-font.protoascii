@@ -17,6 +17,7 @@
 tags: {  # amp-font
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-font"
@@ -30,6 +31,7 @@ tags: {  # amp-font
 tags: {  # <amp-font>
   html_format: AMP
   html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-FONT"
   requires_extension: "amp-font"
   attrs: {

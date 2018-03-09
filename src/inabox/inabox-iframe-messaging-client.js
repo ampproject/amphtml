@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {getService, registerServiceBuilder} from '../service';
 import {tryParseJson} from '../json';
 
 /**
@@ -24,7 +24,7 @@ import {tryParseJson} from '../json';
  */
 export function iframeMessagingClientFor(win) {
   return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */(
-      getService(win, 'iframeMessagingClient'));
+    getService(win, 'iframeMessagingClient'));
 }
 
 /**

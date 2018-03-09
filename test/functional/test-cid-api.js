@@ -15,11 +15,10 @@
  */
 
 import {GoogleCidApi} from '../../src/service/cid-api';
-import {installTimerService} from '../../src/service/timer-impl';
-import {stubService, mockWindowInterface} from '../../testing/test-helper';
 import {getCookie, setCookie} from '../../src/cookies';
+import {mockWindowInterface, stubService} from '../../testing/test-helper';
 
-describes.realWin('test-cid-api', {}, env => {
+describes.realWin('test-cid-api', {amp: true}, env => {
 
   let win;
   let api;
@@ -35,11 +34,10 @@ describes.realWin('test-cid-api', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    installTimerService(win);
     removeCookie('AMP_TOKEN');
     removeCookie('scope-a');
     fetchJsonStub = stubService(env.sandbox, win, 'xhr', 'fetchJson');
-    api = new GoogleCidApi(win);
+    api = new GoogleCidApi(env.ampdoc);
   });
 
   afterEach(() => {
@@ -69,6 +67,7 @@ describes.realWin('test-cid-api', {}, env => {
               mode: 'cors',
               body: {
                 originScope: 'scope-a',
+                canonicalOrigin: 'http://localhost:9876',
               },
             });
       });
@@ -96,6 +95,7 @@ describes.realWin('test-cid-api', {}, env => {
               body: {
                 originScope: 'scope-a',
                 securityToken: 'amp-token-123',
+                canonicalOrigin: 'http://localhost:9876',
               },
             });
       });

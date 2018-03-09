@@ -89,7 +89,7 @@ export function startsWith(string, prefix) {
  * returned from the given getter function.
  *
  * @param {string} template The template string to expand.
- * @param {!function(string):*} getter Function used to retrieve a value for a
+ * @param {function(string):*} getter Function used to retrieve a value for a
  *   placeholder. Returns values will be coerced into strings.
  * @param {number=} opt_maxIterations Number of times to expand the template.
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
@@ -126,4 +126,4 @@ export function stringHash32(str) {
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
-};
+}

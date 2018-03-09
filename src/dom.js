@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -136,7 +136,7 @@ export function removeChildren(parent) {
  * are deeply cloned. Notice, that this method should be used with care and
  * preferably on smaller subtrees.
  * @param {!Element} from
- * @param {!Element} to
+ * @param {!Element|!DocumentFragment} to
  */
 export function copyChildren(from, to) {
   const frag = to.ownerDocument.createDocumentFragment();
@@ -144,6 +144,26 @@ export function copyChildren(from, to) {
     frag.appendChild(n.cloneNode(true));
   }
   to.appendChild(frag);
+}
+
+/**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element|!ShadowRoot} root
+ * @param {!Element} element
+ * @param {?Node} after
+ */
+export function insertAfterOrAtStart(root, element, after) {
+  if (after) {
+    if (after.nextSibling) {
+      root.insertBefore(element, after.nextSibling);
+    } else {
+      root.appendChild(element);
+    }
+  } else {
+    // Add at the start.
+    root.insertBefore(element, root.firstChild);
+  }
 }
 
 /**
@@ -277,7 +297,7 @@ export function closestBySelector(element, selector) {
 /**
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
- * @param  {!string} selector The selector to check against
+ * @param  {string} selector The selector to check against
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
@@ -289,7 +309,7 @@ export function matches(el, selector) {
   if (matcher) {
     return matcher.call(el, selector);
   }
-  return false;  // IE8 always returns false.
+  return false; // IE8 always returns false.
 }
 
 /**
@@ -312,7 +332,7 @@ export function elementByTag(element, tagName) {
  */
 export function childElement(parent, callback) {
   for (let child = parent.firstElementChild; child;
-      child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -330,7 +350,7 @@ export function childElement(parent, callback) {
 export function childElements(parent, callback) {
   const children = [];
   for (let child = parent.firstElementChild; child;
-       child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       children.push(child);
     }
@@ -347,7 +367,7 @@ export function childElements(parent, callback) {
  */
 export function lastChildElement(parent, callback) {
   for (let child = parent.lastElementChild; child;
-       child = child.previousElementSibling) {
+    child = child.previousElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -365,7 +385,7 @@ export function lastChildElement(parent, callback) {
 export function childNodes(parent, callback) {
   const nodes = [];
   for (let child = parent.firstChild; child;
-       child = child.nextSibling) {
+    child = child.nextSibling) {
     if (callback(child)) {
       nodes.push(child);
     }
@@ -388,13 +408,19 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * Test that the :scope selector is supported and behaves correctly.
  * @param {!Element} parent
  * @return {boolean}
  */
 function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
   try {
-    parent.ownerDocument.querySelector(':scope');
-    return true;
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }
@@ -407,7 +433,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  return scopedQuerySelector(parent, `> [${attr}]`);
+  return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -431,7 +457,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  return scopedQuerySelectorAll(parent, `> [${attr}]`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -442,7 +468,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  return scopedQuerySelector(parent, `> ${tagName}`);
+  return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -453,7 +479,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
-  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -560,7 +586,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
 export function ancestorElements(child, predicate) {
   const ancestors = [];
   for (let ancestor = child.parentElement; ancestor;
-       ancestor = ancestor.parentElement) {
+    ancestor = ancestor.parentElement) {
     if (predicate(ancestor)) {
       ancestors.push(ancestor);
     }
@@ -583,13 +609,32 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
+ * Returns a clone of the content of a template element.
+ *
+ * Polyfill to replace .content access for browsers that do not support
+ * HTMLTemplateElements natively.
+ *
+ * @param {!HTMLTemplateElement|!Element} template
+ * @return {!DocumentFragment}
+ */
+export function templateContentClone(template) {
+  if ('content' in template) {
+    return template.content.cloneNode(true);
+  } else {
+    const content = template.ownerDocument.createDocumentFragment();
+    copyChildren(template, content);
+    return content;
+  }
+}
+
+/**
  * Iterate over an array-like. Some collections like NodeList are
  * lazily evaluated in some browsers, and accessing `length` forces full
  * evaluation. We can improve performance by iterating until an element is
  * `undefined` to avoid checking the `length` property.
  * Test cases: https://jsperf.com/iterating-over-collections-of-elements
  * @param {!IArrayLike<T>} iterable
- * @param {!function(T, number)} cb
+ * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {
@@ -667,18 +712,27 @@ export function isRTL(doc) {
  *
  * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
  *
- * @param {!Window} win
  * @param {string} ident
  * @return {string}
  */
-export function escapeCssSelectorIdent(win, ident) {
-  if (win.CSS && win.CSS.escape) {
-    return win.CSS.escape(ident);
-  }
-  // Polyfill.
+export function escapeCssSelectorIdent(ident) {
   return cssEscape(ident);
 }
 
+/**
+ * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
+ *
+ * See https://github.com/w3c/csswg-drafts/issues/2306.
+ *
+ * @param {string|number} ident
+ * @return {string}
+ */
+export function escapeCssSelectorNth(ident) {
+  const escaped = String(ident);
+  // Ensure it doesn't close the nth-child psuedo class.
+  dev().assert(escaped.indexOf(')') === -1);
+  return escaped;
+}
 
 /**
  * Escapes `<`, `>` and other HTML charcaters with their escaped forms.

@@ -85,7 +85,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const script = document.createElement('script');
     script.setAttribute('custom-element', 'amp-element2');
     head.appendChild(script);
-    sandbox.stub(ampdoc, 'getHeadNode', () => head);
+    sandbox.stub(ampdoc, 'getHeadNode').callsFake(() => head);
 
     stubElementsForDoc(ampdoc);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
@@ -222,7 +222,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     });
 
     it('should repeat stubbing when body is not available', () => {
-      doc.body = null;  // Body not available
+      doc.body = null; // Body not available
 
       stubElementsForDoc(ampdoc);
 
@@ -281,7 +281,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       copyElementToChildWindow(win, childWin, 'amp-test2');
       expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(registerElement.callCount > firstCallCount).to.be.true;
+      expect(registerElement.callCount).to.be.above(firstCallCount);
       expect(registerElement.getCall(registerElement.callCount - 1).args[0])
           .to.equal('amp-test2');
     });

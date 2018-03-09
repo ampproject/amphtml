@@ -228,3 +228,31 @@ requirement: {
   # We would have to fix this to property obfuscated the 3p frame code.
   whitelist: 'ads/google/doubleclick.js'
 }
+
+# Cookies
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'Document.prototype.cookie'
+  whitelist: 'src/cookies.js'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'module$src$cookies.getCookie'
+  value: 'module$src$cookies.setCookie'
+  whitelist: 'src/cookies.js'
+  whitelist: 'src/experiments.js'
+  whitelist: 'src/service/cid-api.js'
+  whitelist: 'src/service/cid-impl.js'
+}
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
+}

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {preconnectForElement, setPreconnectFeaturesForTesting} from
-    '../../src/preconnect';
-import * as sinon from 'sinon';
-import * as lolex from 'lolex';
+  '../../src/preconnect';
 
 describe('preconnect', () => {
 
@@ -37,7 +37,7 @@ describe('preconnect', () => {
 
   function getPreconnectIframe(detectFeatures = false) {
     return createIframePromise().then(iframe => {
-      iframeClock = lolex.install(iframe.win);
+      iframeClock = lolex.install({target: iframe.win});
       if (detectFeatures) {
         setPreconnectFeaturesForTesting(null);
       } else {
@@ -58,7 +58,7 @@ describe('preconnect', () => {
       preconnect.viewer_ = {
         whenFirstVisible: () => {},
       };
-      sandbox.stub(preconnect.viewer_, 'whenFirstVisible', () => {
+      sandbox.stub(preconnect.viewer_, 'whenFirstVisible').callsFake(() => {
         return visible;
       });
       return iframe;

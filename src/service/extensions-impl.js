@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../services';
-import {declareExtension} from './ampdoc-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -23,30 +22,33 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
+import {calculateExtensionScriptUrl} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+import {declareExtension} from './ampdoc-impl';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import installCustomElements from
-    'document-register-element/build/document-register-element.node';
-import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
+import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
+import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
-import {calculateExtensionScriptUrl} from './extension-location';
 import {map} from '../utils/object';
 import {toWin} from '../types';
+import installCustomElements from
+  'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
+const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
@@ -90,6 +92,9 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+export function isTemplateExtension(extensionId) {
+  return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
+}
 
 /**
  * Install extensions service.
@@ -140,7 +145,7 @@ export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
  * @restricted
  */
 export function addElementToExtension(
-    extensions, name, implementationClass, css) {
+  extensions, name, implementationClass, css) {
   extensions.addElement_(name, implementationClass, css);
 }
 
@@ -245,14 +250,16 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Promise<!ExtensionDef>}
    */
-  preloadExtension(extensionId) {
+  preloadExtension(extensionId, opt_extensionVersion) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder,
+        opt_extensionVersion);
     return this.waitFor_(holder);
   }
 
@@ -261,9 +268,10 @@ export class Extensions {
    * loaded. If necessary, adds the extension script to the page.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Promise<!ExtensionDef>}
    */
-  installExtensionForDoc(ampdoc, extensionId) {
+  installExtensionForDoc(ampdoc, extensionId, opt_extensionVersion) {
     const rootNode = ampdoc.getRootNode();
     let extLoaders = rootNode[LOADER_PROP];
     if (!extLoaders) {
@@ -273,7 +281,8 @@ export class Extensions {
       return extLoaders[extensionId];
     }
     stubElementIfNotKnown(ampdoc.win, extensionId);
-    return extLoaders[extensionId] = this.preloadExtension(extensionId)
+    return extLoaders[extensionId] = this.preloadExtension(
+        extensionId, opt_extensionVersion)
         .then(() => this.installExtensionInDoc_(ampdoc, extensionId));
   }
 
@@ -447,7 +456,7 @@ export class Extensions {
    * @restricted
    */
   installExtensionsInChildWindow(childWin, extensionIds,
-      opt_preinstallCallback) {
+    opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
@@ -595,11 +604,13 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
+   * @param {string=} opt_extensionVersion
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder) {
+  insertExtensionScriptIfNeeded_(extensionId, holder, opt_extensionVersion) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement = this.createExtensionScript_(extensionId);
+      const scriptElement =
+          this.createExtensionScript_(extensionId, opt_extensionVersion);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
     }
@@ -627,13 +638,16 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Element} Script object
    * @private
    */
-  createExtensionScript_(extensionId) {
+  createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute('custom-element', extensionId);
+    scriptElement.setAttribute(
+        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+        extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
@@ -641,7 +655,7 @@ export class Extensions {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev);
+        opt_extensionVersion, getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -655,6 +669,7 @@ export class Extensions {
 export function installBuiltinElements(win) {
   installImg(win);
   installPixel(win);
+  installLayout(win);
 }
 
 
@@ -700,7 +715,7 @@ function adoptStandardServicesForEmbed(childWin) {
   // to pass the "embeddable" flag if this set becomes too unwieldy.
   adoptServiceForEmbed(childWin, 'action');
   adoptServiceForEmbed(childWin, 'standard-actions');
-  adoptServiceForEmbed(childWin, 'clickhandler');
+  adoptServiceForEmbed(childWin, 'navigation');
 }
 
 

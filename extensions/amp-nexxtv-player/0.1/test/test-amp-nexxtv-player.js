@@ -15,8 +15,8 @@
  */
 
 import '../amp-nexxtv-player';
-import {listenOncePromise} from '../../../../src/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
+import {listenOncePromise} from '../../../../src/event-helper';
 
 
 describes.realWin('amp-nexxtv-player', {
@@ -57,28 +57,27 @@ describes.realWin('amp-nexxtv-player', {
   }
 
   it('renders nexxtv video player', () => {
-    return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
+    return getNexxtv('71QQG852413DU7J', '761').then(nexxtv => {
       const playerIframe = nexxtv.querySelector('iframe');
 
       expect(playerIframe).to.not.be.null;
-      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/583/'
-            + 'PTPFEC4U184674?start=0&datamode=static&amp=1');
+      expect(playerIframe.src).to.equal('https://embed.nexx.cloud/761/'
+            + '71QQG852413DU7J?dataMode=static&platform=amp');
     });
   });
 
   it('fails without mediaid', () => {
-    return getNexxtv(null, '583').should.eventually.be.rejectedWith(
+    return getNexxtv(null, '761').should.eventually.be.rejectedWith(
         /The data-mediaid attribute is required/);
   });
 
   it('fails without client', () => {
-    return getNexxtv('PTPFEC4U184674', null).should.eventually.be.rejectedWith(
+    return getNexxtv('71QQG852413DU7J', null).should.eventually.be.rejectedWith(
         /The data-client attribute is required/);
   });
 
-
   it('should forward events from nexxtv-player to the amp element', () => {
-    return getNexxtv('PTPFEC4U184674', '583').then(nexxtv => {
+    return getNexxtv('71QQG852413DU7J', '761').then(nexxtv => {
       const iframe = nexxtv.querySelector('iframe');
 
       return Promise.resolve()

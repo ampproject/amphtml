@@ -440,8 +440,8 @@ export class CssLengthNode extends CssNumericNode {
     // Font-based: em/rem.
     if (this.units_ == 'em' || this.units_ == 'rem') {
       const fontSize = this.units_ == 'em' ?
-          context.getCurrentFontSize() :
-          context.getRootFontSize();
+        context.getCurrentFontSize() :
+        context.getRootFontSize();
       return new CssLengthNode(this.num_ * fontSize, 'px');
     }
 
@@ -649,10 +649,10 @@ export class CssTranslateNode extends CssFuncNode {
   constructor(suffix, args) {
     super(`translate${suffix.toUpperCase()}`, args,
         suffix == '' ? ['w', 'h'] :
-        suffix == 'x' ? ['w'] :
-        suffix == 'y' ? ['h'] :
-        suffix == 'z' ? ['z'] :
-        suffix == '3d' ? ['w', 'h', 'z'] : null);
+          suffix == 'x' ? ['w'] :
+            suffix == 'y' ? ['h'] :
+              suffix == 'z' ? ['z'] :
+                suffix == '3d' ? ['w', 'h', 'z'] : null);
     /** @const @private {string} */
     this.suffix_ = suffix;
   }
@@ -692,8 +692,8 @@ export class CssDimSizeNode extends CssNode {
   calc(context) {
     const size =
         this.selector_ ?
-        context.getElementSize(this.selector_, this.selectionMethod_) :
-        context.getCurrentElementSize();
+          context.getElementSize(this.selector_, this.selectionMethod_) :
+          context.getCurrentElementSize();
     return new CssLengthNode(getDimSide(this.dim_, size), 'px');
   }
 }

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
-import * as imaVideoObj from '../../../../ads/google/imaVideo';
 import '../amp-ima-video';
+import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
 
 describes.realWin('amp-ima-video', {
@@ -32,7 +31,6 @@ describes.realWin('amp-ima-video', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    toggleExperiment(win, 'amp-ima-video', true);
   });
 
   it('adds ad container', () => {
@@ -88,6 +86,8 @@ describes.realWin('amp-ima-video', {
     const initSpy = sandbox.spy(adDisplayContainerMock, 'initialize');
     const videoPlayerMock = {load() {}};
     const loadSpy = sandbox.spy(videoPlayerMock, 'load');
+    const mockAdsLoader = {requestAds() {}};
+    imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     //const playAdsSpy = sandbox.spy(imaVideoObj, 'playAds');
     //const playAdsFunc = imaVideoObj.playAds;
     //const playAdsSpy = sandbox.spy(playAdsFunc);

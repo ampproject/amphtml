@@ -50,9 +50,6 @@ tags: {  # <amp-nexxtv-player>
     }
   }
   attrs: {
-    name: "data-seek-to"
-  }
-  attrs: {
     name: "data-streamtype"
     value_regex: "album|audio|live|playlist|playlist-marked|video"
   }

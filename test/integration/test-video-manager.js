@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
-import {isLayoutSizeDefined} from '../../src/layout';
+import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
+import {Services} from '../../src/services';
 import {
+  clearSupportsAutoplayCacheForTesting,
   installVideoManagerForDoc,
   supportsAutoplay,
-  clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../src/layout';
+import {listenOncePromise} from '../../src/event-helper';
 import {
   runVideoPlayerIntegrationTests,
 } from './test-video-players-helper';
-import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
@@ -220,33 +220,33 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     it(`no autoplay - should be paused if the
         user pressed pause after playing`, () => {
 
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
+          videoManager.register(impl);
+          const entry = videoManager.getEntryForVideo_(impl);
+          entry.isVisible_ = false;
 
-      impl.play();
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        impl.pause();
-        listenOncePromise(video, VideoEvents.PAUSE).then(() => {
-          const curState = videoManager.getPlayingState(impl);
-          expect(curState).to.equal(PlayingStates.PAUSED);
+          impl.play();
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            impl.pause();
+            listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+              const curState = videoManager.getPlayingState(impl);
+              expect(curState).to.equal(PlayingStates.PAUSED);
+            });
+          });
         });
-      });
-    });
 
     it(`no autoplay - should be playing manual
         whenever video is playing`, () => {
 
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
+          videoManager.register(impl);
+          const entry = videoManager.getEntryForVideo_(impl);
+          entry.isVisible_ = false;
 
-      impl.play();
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-      });
-    });
+          impl.play();
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+          });
+        });
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
