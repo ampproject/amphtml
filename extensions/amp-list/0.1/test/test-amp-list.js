@@ -231,7 +231,8 @@ describes.realWin('amp-list component', {
   });
 
   it('should only process one fetch result at a time for rendering', () => {
-    const spy = sandbox.spy(list, 'doRenderPass_');
+    const doRenderPassSpy = sandbox.spy(list, 'doRenderPass_');
+    const scheduleRenderSpy = sandbox.spy(list.renderPass_, 'schedule');
 
     const items = [{title: 'foo'}];
     const foo = doc.createElement('div');
@@ -241,15 +242,21 @@ describes.realWin('amp-list component', {
     listMock.expects('togglePlaceholder').withExactArgs(true).once();
     listMock.expects('toggleLoading').withExactArgs(true).once();
 
-    // Execute another fetch-triggering action immediately...
-    element.setAttribute('src', 'https://new.com/list.json');
-    list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    // Execute another fetch-triggering action immediately (actually on
+    // the next tick to avoid losing the layoutCallback() promise resolver).
+    Promise.resolve().then(() => {
+      element.setAttribute('src', 'https://new.com/list.json');
+      list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    });
 
     return layout.then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;
 
-      // Only one render pass should be scheduled at a time.
-      expect(spy).to.be.calledOnce;
+      // Only one render pass should be invoked at a time.
+      expect(doRenderPassSpy).to.be.calledOnce;
+      // But the next render pass should be scheduled.
+      expect(scheduleRenderSpy).to.be.calledTwice;
+      expect(scheduleRenderSpy).to.be.calledWith(1);
     });
   });
 

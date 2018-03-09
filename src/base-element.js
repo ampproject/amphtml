@@ -19,6 +19,7 @@ import {Layout} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
 import {getData, listen} from './event-helper';
+import {getMode} from './mode';
 import {isArray, toWin} from './types';
 import {isExperimentOn} from './experiments';
 import {loadPromise} from './event-helper';
@@ -400,7 +401,9 @@ export class BaseElement {
    * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return 3;
+    // Inabox allow layout independent of viewport location.
+    return getMode(this.win).runtime == 'inabox' &&
+        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
   }
 
   /**
@@ -933,15 +936,6 @@ export class BaseElement {
   mutateElement(mutator, opt_element) {
     return this.element.getResources().mutateElement(
         opt_element || this.element, mutator);
-  }
-
-  /**
-   * Schedules callback to be complete within the next batch. This call is
-   * intended for heavy DOM mutations that typically cause re-layouts.
-   * @param {!Function} callback
-   */
-  deferMutate(callback) {
-    this.element.getResources().deferMutate(this.element, callback);
   }
 
   /**

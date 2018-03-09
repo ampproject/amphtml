@@ -292,6 +292,10 @@ export const adConfig = {
     preconnect: 'https://ad.caprofitx.adtdp.com',
   },
 
+  cedato: {
+    renderStartImplemented: true,
+  },
+
   chargeads: {},
 
   colombia: {
@@ -681,6 +685,12 @@ export const adConfig = {
 
   purch: {
     prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
+  quoraad: {
+    prefetch: 'https://a.quora.com/amp_ad.js',
+    preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
   },
 

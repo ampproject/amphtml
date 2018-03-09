@@ -645,7 +645,7 @@ function createBaseCustomElementClass(win) {
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
-          this.resources_.deferMutate(this, () => {
+          this.resources_.mutateElement(this, () => {
             dom.removeElement(sizer);
           });
         }
@@ -1538,7 +1538,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().deferMutate(this, () => {
+          this.getResources().mutateElement(this, () => {
             dom.removeElement(loadingContainer);
           });
         }

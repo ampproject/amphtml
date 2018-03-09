@@ -56,11 +56,11 @@ export class AmpList extends AMP.BaseElement {
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
     /**
-     * FIFO queue of fetched items to render. Each queue item also includes
-     * the promise resolver and rejecter to be invoked on render success/fail.
-     * @const @private {!Array<{items:!Array, resolver:!Function, rejecter:!Function}>}
+     * Latest fetched items to render and the promise resolver and rejecter
+     * to be invoked on render success or fail, respectively.
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
      */
-    this.renderQueue_ = [];
+    this.renderItems_ = null;
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
@@ -239,22 +239,41 @@ export class AmpList extends AMP.BaseElement {
       resolver = resolve;
       rejecter = reject;
     });
-    this.renderQueue_.push({items, resolver, rejecter});
-    this.renderPass_.schedule();
+    // If there's nothing currently being rendered, schedule a render pass.
+    if (!this.renderItems_) {
+      this.renderPass_.schedule();
+    }
+    this.renderItems_ = {items, resolver, rejecter};
     return promise;
   }
 
   /**
-   * Dequeues a fetch result and renders it immediately.
+   * Renders the items stored in `this.renderItems_`. If its value changes
+   * by the time render completes, schedules another render pass.
    * @private
    */
   doRenderPass_() {
-    dev().assert(this.renderQueue_.length > 0, 'Nothing queued to render.');
-    const {items, resolver, rejecter} = this.renderQueue_.shift();
-    this.templates_.findAndRenderTemplateArray(this.element, items)
+    dev().assert(this.renderItems_, 'Nothing to render.');
+    const current = this.renderItems_;
+    const scheduleNextPass = () => {
+      // If there's a new `renderItems_`, schedule it for render.
+      if (this.renderItems_ !== current) {
+        this.renderPass_.schedule(1); // Allow paint frame before next render.
+        user().error(TAG, 'New renderItems_, continuing render pass...');
+      } else {
+        this.renderItems_ = null;
+      }
+    };
+    this.templates_.findAndRenderTemplateArray(this.element, current.items)
         .then(elements => this.updateBindings_(elements))
         .then(elements => this.rendered_(elements))
-        .then(() => resolver(), () => rejecter());
+        .then(/* onFulfilled */ () => {
+          scheduleNextPass();
+          current.resolver();
+        }, /* onRejected */ () => {
+          scheduleNextPass();
+          current.rejecter();
+        });
   }
 
   /**
