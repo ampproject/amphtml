@@ -1734,7 +1734,7 @@ browserify-zlib@~0.2.0:
   dependencies:
     pako "~1.0.5"
 
-browserify@16.1.0:
+browserify@16.1.0, browserify@^16.1.0:
   version "16.1.0"
   resolved "https://registry.yarnpkg.com/browserify/-/browserify-16.1.0.tgz#00b86844f89482bbd0d5d1b584b324762ef3f698"
   dependencies:
@@ -1787,7 +1787,7 @@ browserify@16.1.0:
     vm-browserify "~0.0.1"
     xtend "^4.0.0"
 
-browserify@^14.0.0, browserify@^14.5.0:
+browserify@^14.5.0:
   version "14.5.0"
   resolved "https://registry.yarnpkg.com/browserify/-/browserify-14.5.0.tgz#0bbbce521acd6e4d1d54d8e9365008efb85a9cc5"
   dependencies:
@@ -10806,12 +10806,12 @@ watch@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/watch/-/watch-0.11.0.tgz#e8dba091b7456799a3af57978b986e77e1320406"
 
-watchify@3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/watchify/-/watchify-3.9.0.tgz#f075fd2e8a86acde84cedba6e5c2a0bedd523d9e"
+watchify@3.11.0:
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/watchify/-/watchify-3.11.0.tgz#03f1355c643955e7ab8dcbf399f624644221330f"
   dependencies:
     anymatch "^1.3.0"
-    browserify "^14.0.0"
+    browserify "^16.1.0"
     chokidar "^1.0.0"
     defined "^1.0.0"
     outpipe "^1.1.0"
