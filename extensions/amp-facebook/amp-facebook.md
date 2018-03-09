@@ -29,7 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -40,6 +40,9 @@ limitations under the License.
 ## Overview 
 
 You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
+
+### Layout Behavior
+Due to the [instagram API](https://developers.facebook.com/docs/plugins/embedded-posts) not accepting a `height`, `layout="responsive"` will size the `<amp-facebook>` component to the width of its container. This means that if the container aspect ratio has a shorter relative height than the actual facebook post component, `<amp-facebook>` will overflow its container. This is worth noting in context of embedding `<amp-facebook>` in landscape components like `<amp-carousel>`. 
 
 #### Example: Embedding a post
 

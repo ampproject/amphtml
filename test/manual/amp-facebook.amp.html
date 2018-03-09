@@ -2,34 +2,26 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP #0</title>
+  <title>AMP Facebook Manual Tests</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
   <style amp-custom>
     body {
-      max-width: 527px;
       font-family: 'Questrial', Arial;
     }
 
-    amp-instagram iframe {
-      margin: 30px;
-      padding: 30px;
-      border: 10px solid red;
-    }
-
     .portrait-fixed {
-      position: absolute; 
       width: 400px;
-      height: 300px;
+      height: 200px;
       overflow: hidden;
     }
 
     .portrait-container {
       position: relative;
       width: 100%;
-      padding-bottom: 75%;
+      padding-bottom: 25%;
     }
 
     .portrait-container > div {
@@ -44,44 +36,50 @@
 </head>
 <body>
   <h1>amp #0</h1>
-  <amp-instagram
-    data-shortcode="fBwFP"
-    alt="Malte Ubl computing on a couch."
-    width="320"
-    height="392"
-    layout="responsive">
-  </amp-instagram>
-  <h2>Layout Responsive with Aspect Ratio Portrait</h2>
+  <amp-facebook width="552" height="310"
+    layout="responsive"
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+  </amp-facebook>
+
+  <h2>Layout Responsive with Aspect Ratio Landscape</h2>
+  <h3>Fixed Size </h3>
   <div class="portrait-fixed">
-    <amp-instagram
-      data-shortcode="fBwFP"
-      alt="Malte Ubl computing on a couch."
-      width="320"
-      height="392"
-      layout="responsive">
-    </amp-instagram>
+      <amp-facebook width="552" height="310"
+        layout="responsive"
+        data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+      </amp-facebook>
   </div>
+  <h3>Fluid Size</h3>
   <div class="portrait-container">
     <div>
-      <amp-instagram
-        data-shortcode="fBwFP"
-        alt="Malte Ubl computing on a couch."
-        width="320"
-        height="392"
-        layout="responsive">
-      </amp-instagram>
+      <amp-facebook width="552" height="310"
+        layout="responsive"
+        data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+    </amp-facebook>
     </div>
   </div>
   <h2>Layout Fill with Aspect Ratio Portrait</h2>
+  <h3>Fixed Size</h3>
   <div class="portrait-fixed">
-    <amp-instagram
-      data-shortcode="fBwFP"
-      alt="Malte Ubl computing on a couch."
-      width="320"
-      height="392"
-      layout="fill">
-    </amp-instagram>
+    <amp-facebook width="552" height="310"
+      layout="responsive"
+      data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+    </amp-facebook>
   </div>
-  
+  <h3>Fluid Size</h3>
+  <div class="portrait-container">
+    <div>
+      <amp-facebook width="552" height="310"
+        layout="fill"
+        data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+      </amp-facebook>
+    </div>
+  </div>
+  <h2>Layout Fixed Height</h2>
+  <amp-facebook height="310"
+        layout="fixed-height"
+        data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+    </amp-facebook>
+
 </body>
 </html>
