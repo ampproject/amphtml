@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BASE_API_URL} from './embedly-service';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
@@ -45,6 +46,14 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
 
     return Services.embedlyServiceForDoc(this.element)
         .then(service => service.key = apiKey);
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url(BASE_API_URL, opt_onLayout);
   }
 
   /** @override */

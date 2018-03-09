@@ -28,7 +28,7 @@ export const SERVICE_NAME = 'embedly';
 /**
  * @const {string}
  */
-const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
+export const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
 
 /**
  * Provides the api key used with the embedly xhr requests.
