@@ -34,6 +34,12 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
+/** @const */
+const PROTECTED_ELEMENTS = map({
+  A: true,
+  BUTTON: true,
+});
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -302,12 +308,7 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    const protectedElements = map({
-      A: true,
-      BUTTON: true,
-    });
-
-    return protectedElements[event.target.tagName] || false;
+    return !!PROTECTED_ELEMENTS[event.target.tagName];
   }
 
 
