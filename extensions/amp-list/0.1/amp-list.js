@@ -180,11 +180,13 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-    this.togglePlaceholder(true);
-    this.toggleLoading(true);
-    this.toggleFallbackInMutate_(false);
-    // Remove any previous items before the reload
-    removeChildren(dev().assertElement(this.container_));
+    if (this.element.hasAttribute('reset-on-refresh')) {
+      this.togglePlaceholder(true);
+      this.toggleLoading(true);
+      this.toggleFallbackInMutate_(false);
+      // Remove any previous items before the reload
+      removeChildren(dev().assertElement(this.container_));
+    }
 
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {

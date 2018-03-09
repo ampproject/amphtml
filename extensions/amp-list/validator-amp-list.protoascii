@@ -46,6 +46,7 @@ tags: {  # <amp-list>
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
+  attrs: { name: "reset-on-refresh" }
   attrs: {
     name: "src"
     mandatory: true

@@ -40,6 +40,12 @@
             [src]="foo.bar" [state]="baz.qux">
     <div></div>
   </amp-list>
+  <!-- Valid amp-list with reset-on-refresh attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            reset-on-refresh>
+    <div></div>
+  </amp-list>
   <!-- Invalid: width is mistyped. -->
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
             wdith=10 height=10>
