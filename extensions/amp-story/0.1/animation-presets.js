@@ -179,4 +179,56 @@ export const PRESETS = {
       return whooshIn(offsetX, 0, 0, 0);
     },
   },
+  'pan-left': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight / 2;
+      return translate2d(offsetX, offsetY, 0, offsetY);
+    }
+  },
+  'pan-right': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight / 2
+      return translate2d(0, offsetY, offsetX, offsetY);
+    }
+  },
+  'pan-down': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+      return translate2d(offsetX, 0, offsetX, offsetY);
+    },
+  },
+  'pan-up': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes(dimensions) {
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+      return translate2d(offsetX, offsetY, offsetX, 0);
+    }
+  },
+  'zoom-in': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes: [
+      {transform: 'scale(1,1)'},
+      {transform: 'scale(3,3)'}
+    ],
+  },
+  'zoom-out': {
+    duration: 30000,
+    easing: 'linear',
+    keyframes: [
+      {transform: 'scale(3,3)'},
+      {transform: 'scale(1,1)'}
+    ],
+  },
 };

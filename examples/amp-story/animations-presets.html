@@ -12,12 +12,19 @@
     body {
       font-family: sans-serif;
     }
-    h1 {
+    h1, p {
       font-family: Menlo, Monaco, monospace;
-      font-weight: bold;
-      font-size: 24px;
       width: 100%;
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 24px;
+      z-index: 1;
       text-align: left;
+    }
+    p {
+      font-size: 18px;
+      text-align: right;
     }
     amp-story-page {
       background: #ddd;
@@ -33,6 +40,9 @@
     }
     .circle {
       border-radius: 80px;
+    }
+    .img-container {
+      position: absolute;
     }
     </style>
 </head>
@@ -146,6 +156,42 @@
             animate-in="whoosh-in-right">
         </div>
       </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="ken-burns-effect">
+      <amp-story-grid-layer template="vertical">
+        <h1>ken-burns-effect</h1>
+        <div animate-in="zoom-in" class="img-container">
+            <amp-img id="img-city1"
+               src="img-city1.jpeg"
+               animate-in="pan-left"
+               layout="fixed"
+               width="2255"
+               height="1494">
+            </amp-img>
+        </div>
+        <div animate-in="fade-in" animate-in-after="img-city1" animate-in-delay="0.25s" animate-in-duration="1s">
+          <div
+            animate-in="zoom-out"
+            class="img-container"
+            animate-in-after="img-city1">
+            <amp-img
+              src="img-city2.jpeg"
+              layout="fixed"
+              width="1000"
+              height="1250"
+              animate-in="pan-down"
+              animate-in-after="img-city1"
+              id="img-city2">
+            </amp-img>
+          </div>
+        </div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <p>Image credits</p>
+        <p>First image <a href="https://unsplash.com/@jessedo81">Jesse Orrico</a></p>
+        <p>Second image <a href="https://unsplash.com/@omgitsyeshi">Yeshi Kangrang</a></p>
+      </amp-story-cta-layer>
     </amp-story-page>
   </amp-story>
 </body>
