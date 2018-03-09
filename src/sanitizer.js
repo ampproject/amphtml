@@ -131,7 +131,7 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
 });
 
 /** @const {!RegExp} */
-const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
+const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /** @const {!Array<string>} */
 const WHITELISTED_TARGETS = ['_top', '_blank'];
