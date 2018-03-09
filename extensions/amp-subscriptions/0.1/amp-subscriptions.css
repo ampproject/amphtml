@@ -61,21 +61,13 @@ html.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
-/** Action: login. Only show when logged out. */
-html:not(.i-amphtml-subs-loggedin-no) [subscriptions-action="login"] {
+[subscriptions-action] {
   display: none !important;
 }
 
-/** Action: logout. Only show when logged in. */
-html:not(.i-amphtml-subs-loggedin-yes) [subscriptions-action="logout"] {
-  display: none !important;
+[i-amphtml-subs-display][subscriptions-action] {
+  display: block !important;
 }
-
-/** Action: subscribe. Only show when not a subscriber. */
-html:not(.i-amphtml-subs-subscriber-no) [subscriptions-action="subscribe"] {
-  display: none !important;
-}
-
 
 /** Dialog. */
 amp-subscriptions-dialog {
