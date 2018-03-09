@@ -161,7 +161,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.removeOnScrollListener_();
     this.adReadyPromise_.then(() => {
       // Wait for ad build ready. For example user dismiss user notification.
-      this.deferMutate(() => {
+      this.mutateElement(() => {
         if (this.collapsed_) {
           // It's possible that if an AMP ad collapse before its layoutCallback.
           return;

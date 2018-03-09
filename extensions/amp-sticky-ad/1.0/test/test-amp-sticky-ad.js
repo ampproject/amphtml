@@ -99,7 +99,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
           sandbox.stub(impl.viewport_, 'getScrollHeight');
       getScrollHeightStub.returns(300);
 
-      impl.deferMutate = function(callback) {
+      impl.mutateElement = function(callback) {
         callback();
       };
       impl.vsync_.mutate = function(callback) {
@@ -151,7 +151,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       impl.viewport_.getScrollHeight = function() {
         return 300;
       };
-      impl.deferMutate = function(callback) {
+      impl.mutateElement = function(callback) {
         callback();
       };
       impl.vsync_.mutate = function(callback) {
@@ -332,7 +332,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     impl.viewport_.getScrollHeight = function() {
       return 300;
     };
-    impl.deferMutate = function(callback) {
+    impl.mutateElement = function(callback) {
       callback();
     };
     impl.vsync_.mutate = function(callback) {
@@ -372,7 +372,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     impl.viewport_.getScrollHeight = function() {
       return 300;
     };
-    impl.deferMutate = function(callback) {
+    impl.mutateElement = function(callback) {
       callback();
     };
     impl.vsync_.mutate = function(callback) {

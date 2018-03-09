@@ -25,7 +25,6 @@ import {setParentWindow} from '../../src/service';
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
   let mutateElementStub;
-  let deferMutateStub;
   let scrollStub;
   let ampdoc;
 
@@ -66,8 +65,8 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function expectAmpElementToHaveBeenShown(element) {
-    expect(deferMutateStub).to.be.calledOnce;
-    expect(deferMutateStub.firstCall.args[0]).to.equal(element);
+    expect(mutateElementStub).to.be.calledOnce;
+    expect(mutateElementStub.firstCall.args[0]).to.equal(element);
     expect(element.expand).to.be.calledOnce;
   }
 
@@ -80,7 +79,6 @@ describes.sandboxed('StandardActions', {}, () => {
     ampdoc = new AmpDocSingle(window);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
-    deferMutateStub = stubMutate('deferMutate');
     scrollStub = sandbox.stub(
         standardActions.viewport_,
         'animateScrollIntoView');

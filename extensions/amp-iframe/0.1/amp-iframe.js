@@ -383,7 +383,7 @@ export class AmpIframe extends AMP.BaseElement {
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
         Services.timerFor(this.win).delay(() => {
-          this.deferMutate(() => {
+          this.mutateElement(() => {
             this.container_.classList.add('amp-active');
           });
         }, 1000);

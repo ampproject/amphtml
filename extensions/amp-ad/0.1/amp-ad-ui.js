@@ -58,8 +58,8 @@ export class AmpAdUIHandler {
       return;
     }
     // The order here is collapse > user provided fallback > default fallback
-    this.baseInstance_.attemptCollapse().then(() => {}, () => {
-      this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.attemptCollapse().catch(() => {
+      this.baseInstance_.mutateElement(() => {
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
       });
@@ -71,7 +71,7 @@ export class AmpAdUIHandler {
    * Note: No need to togglePlaceholder here, unlayout show it by default.
    */
   applyUnlayoutUI() {
-    this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.mutateElement(() => {
       this.baseInstance_.toggleFallback(false);
     });
   }
