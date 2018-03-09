@@ -23,11 +23,25 @@ import {dict} from '../../../src/utils/object';
 export class Entitlement {
 
   /**
+   * @param {string} service
+   * @return {!Entitlement}
+   */
+  static empty(service) {
+    return new Entitlement(
+        /* source */ '',
+        /* raw */ '',
+        service,
+        /* products */ [],
+        /* subscriptionToken */ null,
+        /* loggedIn */ false);
+  }
+
+  /**
    * @param {string} source
    * @param {string} raw
    * @param {string} service
    * @param {!Array<string>} products
-   * @param {string} subscriptionToken
+   * @param {?string} subscriptionToken
    * @param {boolean} loggedIn
    */
   constructor(source, raw, service, products,
@@ -40,12 +54,13 @@ export class Entitlement {
     this.service = service;
     /** @const {!Array<string>} */
     this.products = products;
-    /** @private {?string} */
-    this.product_ = null;
-    /** @const {string} */
+    /** @const {?string} */
     this.subscriptionToken = subscriptionToken;
     /** @const {boolean} */
     this.loggedIn = loggedIn;
+
+    /** @private {?string} */
+    this.product_ = null;
   }
 
   /**
@@ -61,7 +76,6 @@ export class Entitlement {
       'loggedIn': this.loggedIn,
       'subscriptionToken': this.subscriptionToken,
     });
-
     return (entitlementJson);
   }
 
