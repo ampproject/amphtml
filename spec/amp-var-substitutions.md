@@ -1023,12 +1023,12 @@ Provides the user's time-zone offset from UTC, in minutes.
 
 #### Timezone Code
 
-Provides the user's IANA time-zone code (if supported by your browser).
+Provides the user's IANA time-zone code.
 
 * **platform variable**: `TIMEZONE_CODE`
   *  Example: <br>
   ```html
-  <amp-pixel src="https://foo.com/pixel?tz=TIMEZONE_CODE"></amp-pixel>
+  <amp-pixel src="https://foo.com/pixel?tz_code=TIMEZONE_CODE"></amp-pixel>
   ```
 * **amp-analytics variable**: `${timezoneCode}`
   * Example value: `Europe/Rome`.
