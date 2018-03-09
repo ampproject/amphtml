@@ -213,6 +213,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
+import {uas} from '../ads/uas'
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -415,6 +416,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);
