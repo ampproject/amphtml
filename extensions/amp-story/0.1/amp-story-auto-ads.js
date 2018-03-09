@@ -155,7 +155,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    return this.store_.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION);
+    return this.store_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
   }
 
   /**

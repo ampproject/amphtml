@@ -31,11 +31,12 @@ export let Action;
 
 /**
  * @typedef {{
- *    allowautomaticadinsertion: boolean,
+ *    caninsertautomaticad: boolean,
  *    canshowbookend: boolean,
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
  *    canshowsystemlayerbuttons: boolean,
+ *    bookendstate: boolean,
  * }}
  */
 export let State;
@@ -43,11 +44,21 @@ export let State;
 
 /** @private @const @enum {string} */
 export const StateProperty = {
-  ALLOW_AUTOMATIC_AD_INSERTION: 'allowautomaticadinsertion',
+  // Embed options.
+  CAN_INSERT_AUTOMATIC_AD: 'caninsertautomaticad',
   CAN_SHOW_BOOKEND: 'canshowbookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
+
+  // App States.
+  BOOKEND_STATE: 'bookendstate',
+};
+
+
+/** @private @const @enum {string} */
+export const ActionType = {
+  TOGGLE_BOOKEND: 'togglebookend',
 };
 
 
@@ -59,11 +70,11 @@ export const StateProperty = {
  */
 const actions = (state, {type, payload}) => {
   switch (type) {
-    case 'toggleBookend':
+    case ActionType.TOGGLE_BOOKEND:
       return Object.assign(
-          {}, state, {[StateProperty.CAN_SHOW_BOOKEND]: payload});
+          {}, state, {[StateProperty.BOOKEND_STATE]: !!payload});
     default:
-      dev().error('amp-story', `Action not implemented ${action}.`);
+      dev().error('amp-story', `Unknown action ${type}.`);
       break;
   }
 };
@@ -131,11 +142,13 @@ export class Store {
    */
   getDefaultState_() {
     return {
-      [StateProperty.ALLOW_AUTOMATIC_AD_INSERTION]: true,
+      [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.BOOKEND_STATE]: false,
+      [StateProperty.MUTED_STATE]: true,
     };
   }
 
@@ -150,7 +163,7 @@ export class Store {
     switch (embedMode) {
       case EmbedMode.NAME_TBD:
         return {
-          [StateProperty.ALLOW_AUTOMATIC_AD_INSERTION]: false,
+          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,

@@ -1625,7 +1625,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageToBeInsertedEl = pageToBeInserted.element;
 
     if (pageToBeInserted.isAd() &&
-        !this.store_.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION)) {
+        !this.store_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD)) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;
     }

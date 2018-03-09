@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {StateProperty, Store} from '../amp-story-store';
+import {ActionType, StateProperty, Store} from '../amp-story-store';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
 
@@ -22,7 +22,7 @@ describes.fakeWin('amp-story-store', {}, env => {
   let store;
 
   beforeEach(() => {
-    // Making sure we always get a fresh instance to isolate tests.
+    // Making sure we always get a new instance to isolate each test.
     store = new Store();
   });
 
@@ -32,16 +32,16 @@ describes.fakeWin('amp-story-store', {}, env => {
 
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = sandbox.spy();
-    store.subscribe(StateProperty.CAN_SHOW_BOOKEND, listenerSpy);
-    store.dispatch({type: 'toggleBookend', payload: false});
+    store.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    store.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
     expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(false);
+    expect(listenerSpy).to.have.been.calledWith(true);
   });
 
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = sandbox.spy();
     store.subscribe(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP, listenerSpy);
-    store.dispatch({type: 'toggleBookend', payload: false});
+    store.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
     expect(listenerSpy).to.have.callCount(0);
   });
 
@@ -52,11 +52,11 @@ describes.fakeWin('amp-story-store', {}, env => {
 
     // Subscribing from one store and dispatching from the other works since it
     // actually returned the same global instance.
-    firstStore.subscribe(StateProperty.CAN_SHOW_BOOKEND, listenerSpy);
-    secondStore.dispatch({type: 'toggleBookend', payload: false});
+    firstStore.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    secondStore.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
 
     expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(false);
+    expect(listenerSpy).to.have.been.calledWith(true);
   });
 });
 
