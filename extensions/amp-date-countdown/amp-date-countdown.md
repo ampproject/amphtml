@@ -43,6 +43,8 @@ The `amp-date-countdown` provides countdown time data that you can render in you
 
 ### Returned time parameters
 
+This table lists the format you can specify in your Mustache template:
+
 Format | Meaning
 -- | --
 d | day - 0, 1, 2,...12, 13..Infinity
@@ -58,7 +60,9 @@ hours | i18n string for hour or hours
 minutes | i18n string for minute or minutes
 seconds | i18n string for second or seconds
 
-##### Examples :
+### Examples
+
+This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
 
 Format | Sample Output | Remarks
 -- | -- | -
@@ -79,19 +83,19 @@ You must specify at least one of these required attributes: `end-date`, `timesta
 An ISO formatted date to count down to. For example, `2020-06-01T00:00:00+08:00`
 
 ##### timestamp-ms
-A POSIX epoch value in milliseconds; assumed to be UTC timezone.
+A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `timestamp-ms="1521880470000"`.
 
 ##### timestamp-seconds
-A POSIX epoch value in seconds; assumed to be UTC timezone.
+A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
 
 ##### offset-seconds (optional)
-A positive or negative numbe that represents the number of seconds to add or subtract from the end-date.
+A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
 
 ##### when-ended (optional)
-If specified with the value `stop`, this sets the timer to stop at 0 seconds and will not pass the final date. The default value is `stop`.
+Specifies whether to stop or continue the timer when it reaches 0 seconds. The value can be set to `stop` (default) or `continue`. If `stop`, the timer stops at 0 seconds and will not pass the final date.
 
 ##### locale (optional)
-A i18n language string for each timer unit. The default value is `en` (for English).
+An i18n language string for each timer unit. The default value is `en` (for English).
 Supported values:
 
 Code | Language
@@ -114,7 +118,7 @@ tr | Turkish
 vi | Vietnamese
 
 ##### biggest-unit (optional)
-Allows the `amp-date-countdown` component to calculate the time difference based on the `biggest-unit` value that's specified. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set as `hours`, it displays `1210 hours` left.
+Allows the `amp-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
 
 * Supported values: `days`, `hours`, `minutes`, `seconds`
 * Default: `days`
@@ -124,7 +128,7 @@ The `amp-date-countdown` exposes the following actions you can use [AMP on-synta
 
 Action | Description
 -- | --
-`timeout` |  `amp-date-countdown` supports `timeout` actions and `when-ended` **must be** set to `stop` in order for this actions to be functioned. User can define any actions when the timer timeout. ![ezgif com-video-to-gif 2](https://user-images.githubusercontent.com/4065175/36954871-c05f8b0e-205f-11e8-944a-cbfff96fcb29.gif)
+`timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can  define any actions when the timer times out. ![ezgif com-video-to-gif 2](https://user-images.githubusercontent.com/4065175/36954871-c05f8b0e-205f-11e8-944a-cbfff96fcb29.gif)
 
 ## Validation
 See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.
