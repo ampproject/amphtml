@@ -336,7 +336,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the IANA timezone code
     this.set('TIMEZONE_CODE', () => {
-      if (Intl && typeof Intl === 'object') {
+      if (Intl && typeof Intl === 'object' && typeof Intl.DateTimeFormat().resolvedOptions().timeZone !== 'undefined') {
         return new Intl.DateTimeFormat().resolvedOptions().timeZone;
       } else {
         return '';
