@@ -479,6 +479,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace TIMEZONE_CODE', () => {
+    return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
+      expect(res).to.match(/tz_code=\w+/);
+    });
+  });
+
   it('should replace SCROLL_TOP', () => {
     return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       expect(res).to.match(/scrollTop=\d+/);
@@ -754,12 +760,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace BROWSER_LANGUAGE', () => {
     return expandUrlAsync('?sh=BROWSER_LANGUAGE').then(res => {
-      expect(res).to.match(/sh=\w+/);
-    });
-  });
-
-  it('should replace TIMEZONE_CODE', () => {
-    return expandUrlAsync('?sh=TIMEZONE_CODE').then(res => {
       expect(res).to.match(/sh=\w+/);
     });
   });

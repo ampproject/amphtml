@@ -352,6 +352,15 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
+    // Returns the IANA timezone code
+    this.set('TIMEZONE_CODE', () => {
+      if (Intl && typeof Intl === 'object') {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+      } else {
+        return '';
+      }
+    });
+
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', () => viewport.getScrollTop());
 
@@ -398,15 +407,6 @@ export class GlobalVariableSource extends VariableSource {
       const nav = this.ampdoc.win.navigator;
       return (nav.language || nav.userLanguage || nav.browserLanguage || '')
           .toLowerCase();
-    });
-
-    // Returns the IANA timezone code
-    this.set('TIMEZONE_CODE', () => {
-      if (Intl && typeof Intl === 'object') {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone;
-      } else {
-        return '';
-      }
     });
 
     // Returns the user agent.
