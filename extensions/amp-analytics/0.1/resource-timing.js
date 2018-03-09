@@ -256,7 +256,7 @@ export function serializeResourceTiming(resourceTimingSpec, win, after) {
     return Promise.resolve('');
   }
   const entries = getResourceTimingEntries(win)
-      .filter(e => e.startTime + duration >= after);
+      .filter(e => e.startTime + e.duration >= after);
   if (!entries.length) {
     return Promise.resolve('');
   }

@@ -63,7 +63,7 @@ const WHITELIST_EVENT_IN_SANDBOX = [
  */
 function now() {
   return window.performance && window.performance.now ? window.performance.now()
-                                                      : 0;
+    : 0;
 }
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -689,9 +689,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns the last time resource timing was reported for the spec and
    * updates the time for future calls.
    * Note that the timestamp is stored on the resourceTimingSpec.
-   * @param {!JsonObject} resourceTimingSpec;
+   * @param {!JsonObject} resourceTimingSpec
+   * @private
    */
-  getAndUpdateLastReportedTime(resourceTimingSpec) {
+  getAndUpdateLastReportedTime_(resourceTimingSpec) {
     const lastReportedVariable = 'lastReported';
     const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
     resourceTimingSpec[lastReportedVariable] = now();
