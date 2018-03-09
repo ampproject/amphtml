@@ -906,22 +906,52 @@ export class BaseElement {
   }
 
   /**
-  * Runs the specified mutation on the element and ensures that measures
-  * and layouts performed for the affected elements.
-  *
-  * This method should be called whenever a significant mutations are done
-  * on the DOM that could affect layout of elements inside this subtree or
-  * its siblings. The top-most affected element should be specified as the
-  * first argument to this method and all the mutation work should be done
-  * in the mutator callback which is called in the "mutation" vsync phase.
-  *
-  * @param {function()} mutator
-  * @param {Element=} opt_element
-  * @return {!Promise}
-  */
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {
+    return this.element.getResources().measureElement(measurer);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
   mutateElement(mutator, opt_element) {
-    return this.element.getResources().mutateElement(
-        opt_element || this.element, mutator);
+    return this.runElement(null, mutator, opt_element);
+  }
+
+  /**
+   * Runs the specified measure, then runs the mutation on the element and
+   * ensures that remeasures and layouts performed for the affected elements.
+   *
+   * This method should be called whenever a measure and significant mutations
+   * are done on the DOM that could affect layout of elements inside this
+   * subtree or its siblings. The top-most affected element should be specified
+   * as the first argument to this method and all the mutation work should be
+   * done in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
+  runElement(measurer, mutator, opt_element) {
+    return this.element.getResources().runElement(
+        opt_element || this.element, measurer, mutator);
   }
 
   /**
