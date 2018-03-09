@@ -57,10 +57,11 @@ export const StateProperty = {
  * @param  {!Action} action
  * @return {!State} new state
  */
-const actions = (state, action) => {
-  switch (action.type) {
+const actions = (state, {type, payload}) => {
+  switch (type) {
     case 'toggleBookend':
-      return Object.assign({}, state, {bookendEnabled: action.payload});
+      return Object.assign(
+          {}, state, {[StateProperty.CAN_SHOW_BOOKEND]: payload});
     default:
       dev().error('amp-story', `Action not implemented ${action}.`);
       break;
@@ -118,7 +119,7 @@ export class Store {
 
     Object.keys(this.listeners_).forEach(key => {
       if (oldState[key] !== this.state_[key]) {
-        this.listeners_[key].fire(this.state_);
+        this.listeners_[key].fire(this.state_[key]);
       }
     });
   }
