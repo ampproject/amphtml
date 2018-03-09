@@ -29,6 +29,7 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 import {toggle} from '../../../src/style';
+import {LayoutPriority} from '../../../src/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -111,7 +112,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override  */
   getLayoutPriority() {
-    return 3;
+    return LayoutPriority.BACKGROUND;
   }
 
   /** @private */
