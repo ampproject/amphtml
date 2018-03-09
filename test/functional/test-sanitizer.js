@@ -76,6 +76,12 @@ describe('sanitizeHtml', () => {
         'a<a on="tap">b</a>');
   });
 
+  it('should output "data-, aria-, and role" attributes', () => {
+    expect(
+        sanitizeHtml('<a data-foo="bar" aria-label="bar" role="button">b</a>'))
+        .to.be.equal('<a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
         'a<a href="http://acme.com/" target="_top">b</a>');
