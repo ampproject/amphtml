@@ -106,6 +106,8 @@ export class AmpEmbedly extends AMP.BaseElement {
   /**
    * Fetches oEmbed data from embedly's api.
    * @return {!Promise}
+   * @private
+   * @visibleForTesting
    * */
   getOembedData_() {
     const params = dict({
@@ -127,6 +129,7 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @param {!JsonObject<{type: string, html: string, url: string}>} data
    * @returns {string}
    * @private
+   * @visibleForTesting
    */
   getIframeSrc_(data) {
     switch (data['type']) {
@@ -145,8 +148,9 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @param {string} url
    * @param {string}width
    * @param {string} height
-   * @returns {*}
+   * @returns {string}
    * @private
+   * @visibleForTesting
    */
   getPhotoSrc_(url, width, height) {
     assertHttpsUrl(url, this.element);
@@ -161,6 +165,7 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @param {string} htmlData
    * @returns {string}
    * @private
+   * @visibleForTesting
    */
   getRichSrc_(htmlData) {
     let html = htmlData;
@@ -177,6 +182,7 @@ export class AmpEmbedly extends AMP.BaseElement {
    * @param {string} html
    * @returns {string}
    * @private
+   * @visibleForTesting
    */
   getVideoSrc_(html) {
     const match = user().assert(
