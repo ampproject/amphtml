@@ -54,7 +54,7 @@ export class ServiceAdapter {
    * @returns {!./dialog.Dialog}
    */
   getDialog() {
-    this.subscriptionService_.getDialog();
+    return this.subscriptionService_.getDialog();
   }
 }
 
