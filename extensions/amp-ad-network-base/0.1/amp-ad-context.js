@@ -62,7 +62,10 @@ export class AmpAdContext {
      */
     this.unvalidatedBytes_ = null;
 
-    /** @private {?./amp-ad-type-defs.ValidatorResultType} */
+    /**
+     * Indicates the type of renderer to use.
+     * @private {?string}
+     */
     this.validatorResult_ = null;
 
     /** @const @private {!Window} */
@@ -263,14 +266,14 @@ export class AmpAdContext {
   }
 
   /**
-   * @return {?./amp-ad-type-defs.ValidatorResultType}
+   * @return {?string}
    */
   getValidatorResult() {
     return this.validatorResult_;
   }
 
   /**
-   * @param {!./amp-ad-type-defs.ValidatorResultType} validatorResult
+   * @param {string} validatorResult
    * @return {!AmpAdContext}
    */
   setValidatorResult(validatorResult) {

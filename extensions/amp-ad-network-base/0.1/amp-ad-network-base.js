@@ -15,6 +15,11 @@
  */
 
 import {AmpAdContext} from './amp-ad-context';
+import {
+  FailureTypes,
+  RecoveryModeTypes,
+  ValidRecoveryModeTypes,
+} from './amp-ad-type-defs';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -28,11 +33,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<./amp-ad-type-defs.ValidatorResultType, !./amp-ad-render.Renderer>} */
+    /** @private {Object<string, !./amp-ad-render.Renderer>} */
     this.renderers_ = map({});
 
     /** @private {Object<string, !./amp-ad-render.Validator>} */
     this.validators_ = map({});
+
+    /** @private {Object<./amp-ad-type-defs.FailureType, !./amp-ad-type-defs.RecoveryMode>} */
+    this.recoveryModes_ = map({});
 
     /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = null;
@@ -46,10 +54,73 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isReusable_ = false;
+
+    // Register default error modes.
+    for (const failureType in FailureTypes) {
+      this.recoveryModes_[failureType] = RecoveryModeTypes.COLLAPSE;
+    }
   }
 
   /**
-   * @param {./amp-ad-type-defs.ValidatorResultType} resultType
+   * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {*=} error
+   */
+  handleFailure_(failureType, error) {
+    const recoveryMode = this.recoveryModes_[failureType];
+    if (error) {
+      dev().warn(TAG, error);
+    }
+    switch (recoveryMode.type) {
+      case RecoveryModeTypes.COLLAPSE:
+        this.forceCollapse_();
+        break;
+      case RecoveryModeTypes.RETRY:
+        Services.timerFor(this.win).delay(
+            () => this.sendRequest_(), recoveryMode.retryTimer || 0);
+        break;
+      case RecoveryModeTypes.VALIDATOR_FALLBACK:
+        dev().assert(recoveryMode.fallback,
+            'Fallback validator never specified for recovery mode!');
+        this.invokeValidator_(recoveryMode.fallback);
+        break;
+      case RecoveryModeTypes.FORCE_RENDERER:
+      case RecoveryModeTypes.RENDERER_FALLBACK:
+        dev().assert(recoveryMode.fallback,
+            'Fallback renderer never specified for recovery mode!');
+        this.invokeRenderer_(recoveryMode.fallback, this.context_);
+        break;
+      default:
+        dev().error(TAG, 'Invalid recovery mode!');
+    }
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.FailureType} type
+   * @param {!./amp-ad-type-defs.RecoveryMode} mode
+   */
+  checkAndSetRecoveryMode_(type, mode) {
+    dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
+        `Recovery mode ${mode.type} not allowed for failure type ${type}!`);
+    this.recoveryModes_[type] = mode;
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
+   * @param {number=} retryTimer
+   * @param {string=} fallback Validator/Renderer fallback.
+   */
+  registerRecoveryMode(failureType, recoveryType, retryTimer, fallback) {
+    if (this.recoveryModes_[failureType]) {
+      dev().warn(TAG,
+          `Recovery mode for failure type ${failureType} already registered!`);
+    }
+    this.checkAndSetRecoveryMode_(
+        failureType, {type: recoveryType, retryTimer, fallback});
+  }
+
+  /**
+   * @param {string} resultType
    * @param {!./amp-ad-render.Renderer} renderer
    * @final
    */
@@ -98,44 +169,34 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleAdResponse_(response) {
     if (!response.arrayBuffer) {
-      // TODO(levitzky) Add error reporting.
-      this.forceCollapse_();
+      this.handleFailure_(FailureTypes.MISSING_ARRAYBUFFER);
       return;
     }
     response.arrayBuffer().then(unvalidatedBytes => {
       const validatorType = response.headers.get('validator-type') || 'default';
-      dev().assert(this.validators_[validatorType],
-          'Validator never registered!');
       this.context_
           .setUnvalidatedBytes(unvalidatedBytes)
           .setHeaders(response.headers);
-      this.validators_[validatorType].validate(this.context_)
-          .then(context => this.handleValidatorResponse_(context))
-          .catch(error => this.handleValidatorError_(error));
-      if (!this.isReusable_) {
-        this.validators_ = map({});
-      }
+      this.invokeValidator_(validatorType);
     });
   }
 
-  /**
-   * Invoked whenever the ad response errors out for any reason whatsoever.
-   * @param {*} error
-   * @private
-   */
-  handleAdResponseError_(error) {
-    // TODO(levitzky) add actual error processing logic.
-    dev().warn(TAG, error);
-  }
-
-  /**
-   * Invoked whenever the validator encounters an error.
-   * @param {*} error
-   * @private
-   */
-  handleValidatorError_(error) {
-    // TODO(levitzky) add actual error processing logic.
-    dev().warn(TAG, error);
+  /** @param {string} validatorType */
+  invokeValidator_(validatorType) {
+    const unvalidatedBytes = this.context_.getUnvalidatedBytes();
+    dev().assert(this.validators_[validatorType],
+        'Validator never registered!');
+    dev().assert(unvalidatedBytes,
+        'Validator invoked before ad response received!');
+    this.validators_[validatorType].validate(this.context_)
+        .then(context => {
+          this.handleValidatorResponse_(context);
+          if (!this.isReusable_) {
+            this.validators_ = map({});
+          }
+        })
+        .catch(error =>
+          this.handleFailure_(FailureTypes.VALIDATOR_ERROR, error));
   }
 
   /**
@@ -145,13 +206,40 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @private
    */
   handleValidatorResponse_(context) {
-    const result = context.getValidatorResult();
-    dev().assert(this.renderers_[result],
-        'Renderer for AMP creatives never registered!');
-    this.renderers_[result].render(context, this);
-    if (!this.isReusable_) {
-      this.renderers_ = map({});
-    }
+    const rendererType = context.getValidatorResult();
+    this.invokeRenderer_(/** @type {string} */ (rendererType), context);
+  }
+
+  /**
+   * @param {string} rendererType
+   * @param {!AmpAdContext} context
+   */
+  invokeRenderer_(rendererType, context) {
+    const renderer = this.renderers_[rendererType];
+
+    dev().assert(renderer, 'Renderer for AMP creatives never registered!');
+    renderer.render(context, this)
+        .then(unusedContext => {
+          if (!this.isReusable_) {
+            this.renderers_ = map({});
+          }
+        })
+        .catch(error =>
+          this.handleFailure_(FailureTypes.RENDERER_ERROR, error));
+  }
+
+  /**
+   * Sends ad request.
+   * @private
+   */
+  sendRequest_() {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      const url = this.getRequestUrl();
+      this.context_.setRequestUrl(url);
+      sendXhrRequest(url, this.win)
+          .then(response => this.handleAdResponse_(response))
+          .catch(error => this.handleFailure_(FailureTypes.SENDXHR, error));
+    });
   }
 
   /** @param {boolean} isReusable */
@@ -176,13 +264,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      const url = this.getRequestUrl();
-      this.context_.setRequestUrl(url);
-      sendXhrRequest(url, this.win)
-          .then(response => this.handleAdResponse_(response))
-          .catch(error => this.handleAdResponseError_(error));
-    });
+    this.sendRequest_();
   }
 }
 
