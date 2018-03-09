@@ -85,7 +85,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
     // If this promise has no URL yet, create one for it.
-    if (!(fullUrl in ampCustomadXhrPromises)) {
+    if (this.slot_ === null || !(fullUrl in ampCustomadXhrPromises)) {
       // Here is a promise that will return the data for this URL
       ampCustomadXhrPromises[fullUrl] =
           Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
