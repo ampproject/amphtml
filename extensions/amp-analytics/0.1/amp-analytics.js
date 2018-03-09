@@ -57,6 +57,14 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
+/**
+ * @return {number} A timestamp relative to navigationStart or 0 if the
+ *     Navigation Timing API is not supported.
+ */
+function now() {
+  return window.performance && window.performance.now ? window.performance.now()
+                                                      : 0;
+}
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -678,6 +686,19 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Returns the last time resource timing was reported for the spec and
+   * updates the time for future calls.
+   * Note that the timestamp is stored on the resourceTimingSpec.
+   * @param {!JsonObject} resourceTimingSpec;
+   */
+  getAndUpdateLastReportedTime(resourceTimingSpec) {
+    const lastReportedVariable = 'lastReported';
+    const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
+    resourceTimingSpec[lastReportedVariable] = now();
+    return lastTime;
+  }
+
+  /**
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Object<string, (string|!Promise<string>|function(): string)>}
@@ -687,22 +708,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const on = trigger['on'];
-      if (on == 'ini-load') {
-        const binding = 'RESOURCE_TIMING';
-        const analyticsVar = 'resourceTiming';
-        // TODO(warrengm): Consider limiting resource timings to avoid
-        // duplicates by excluding timings that were previously reported.
-        dynamicBindings[binding] =
-            serializeResourceTiming(resourceTimingSpec, this.win);
-        expansionOptions.vars[analyticsVar] = binding;
-      } else {
-        // TODO(warrengm): Instead of limiting resource timing to ini-load,
-        // analytics should have throttling or de-dupe timings that have already
-        // been reported.
-        user().warn(
-            TAG, 'resource timing is only allowed on ini-load triggers');
-      }
+      const binding = 'RESOURCE_TIMING';
+      const analyticsVar = 'resourceTiming';
+      const after = this.getAndUpdateLastReportedTime(resourceTimingSpec);
+      dynamicBindings[binding] =
+          serializeResourceTiming(resourceTimingSpec, this.win, after);
+      expansionOptions.vars[analyticsVar] = binding;
     }
     return dynamicBindings;
   }
