@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.19-1520269025428 */
+ /** Version: 0.1.21-1520489720127 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -23,10 +23,11 @@ import { ActivityPorts } from 'web-activities/activity-ports';
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
-  SUBSCRIBE: 2,
-  LOGIN_REQUEST: 3,
-  LINK_PROGRESS: 4,
-  LINK_COMPLETE: 5,
+  SUBSCRIBE_REQUEST: 2,
+  SUBSCRIBE_RESPONSE: 3,
+  LOGIN_REQUEST: 4,
+  LINK_PROGRESS: 5,
+  LINK_COMPLETE: 6,
 };
 
 
@@ -37,9 +38,9 @@ class Callbacks {
   /**
    */
   constructor() {
-    /** @private @const {!Object<number, function(!Promise)>} */
+    /** @private @const {!Object<CallbackId, function(*)>} */
     this.callbacks_ = {};
-    /** @private @const {!Object<number, !Promise>} */
+    /** @private @const {!Object<CallbackId, *>} */
     this.resultBuffer_ = {};
   }
 
@@ -67,39 +68,32 @@ class Callbacks {
   }
 
   /**
-   * @param {function()} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLoginRequest() {
-    return this.trigger_(CallbackId.LOGIN_REQUEST, Promise.resolve());
+  triggerLoginRequest(request) {
+    return this.trigger_(CallbackId.LOGIN_REQUEST, request);
   }
 
   /**
-   * @param {function(!Promise)} callback
+   * @param {function()} callback
    */
   setOnLinkProgress(callback) {
     this.setCallback_(CallbackId.LINK_PROGRESS, callback);
   }
 
   /**
-   * @param {!Promise} promise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLinkProgress(promise) {
-    return this.trigger_(CallbackId.LINK_PROGRESS, promise);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasLinkProgressPending() {
-    return !!this.resultBuffer_[CallbackId.LINK_PROGRESS];
+  triggerLinkProgress() {
+    return this.trigger_(CallbackId.LINK_PROGRESS, true);
   }
 
   /**
@@ -109,18 +103,17 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise)} callback
+   * @param {function()} callback
    */
   setOnLinkComplete(callback) {
     this.setCallback_(CallbackId.LINK_COMPLETE, callback);
   }
 
   /**
-   * @param {!Promise} promise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLinkComplete(promise) {
-    return this.trigger_(CallbackId.LINK_COMPLETE, promise);
+  triggerLinkComplete() {
+    return this.trigger_(CallbackId.LINK_COMPLETE, true);
   }
 
   /**
@@ -131,10 +124,31 @@ class Callbacks {
   }
 
   /**
+   * @param {function()} callback
+   */
+  setOnSubscribeRequest(callback) {
+    this.setCallback_(CallbackId.SUBSCRIBE_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerSubscribeRequest() {
+    return this.trigger_(CallbackId.SUBSCRIBE_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasSubscribeRequestCallback() {
+    return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
+  }
+
+  /**
    * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
-    this.setCallback_(CallbackId.SUBSCRIBE, callback);
+    this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
@@ -143,7 +157,7 @@ class Callbacks {
    */
   triggerSubscribeResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.SUBSCRIBE,
+        CallbackId.SUBSCRIBE_RESPONSE,
         responsePromise.then(res => res.clone()));
   }
 
@@ -151,12 +165,12 @@ class Callbacks {
    * @return {boolean}
    */
   hasSubscribeResponsePending() {
-    return !!this.resultBuffer_[CallbackId.SUBSCRIBE];
+    return !!this.resultBuffer_[CallbackId.SUBSCRIBE_RESPONSE];
   }
 
   /**
    * @param {!CallbackId} id
-   * @param {function(!Promise)} callback
+   * @param {function(?)} callback
    * @private
    */
   setCallback_(id, callback) {
@@ -169,7 +183,7 @@ class Callbacks {
 
   /**
    * @param {!CallbackId} id
-   * @param {!Promise} data
+   * @param {*} data
    * @return {boolean}
    * @private
    */
@@ -194,8 +208,8 @@ class Callbacks {
 
   /**
    * @param {!CallbackId} id
-   * @param {function(!Promise)} callback
-   * @param {!Promise} data
+   * @param {function(*)} callback
+   * @param {*} data
    * @private
    */
   executeCallback_(id, callback, data) {
@@ -1340,8 +1354,7 @@ class Dialog {
       'right': 0,
       'bottom': 0,
       'left': 0,
-      'background-color': '#fff',
-      'opacity': '.5',
+      'background-color': 'rgba(0, 0, 0, .4)',
       'z-index': 2147483646,  /** 1 less than SwG dialog */
     });
     this.doc_.body.appendChild(this.fadeBackground_);
@@ -1945,6 +1958,9 @@ class EntitlementsManager {
     /** @private {number} */
     this.positiveRetries_ = 0;
 
+    /** @private {boolean} */
+    this.blockNextNotification_ = false;
+
     /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
   }
@@ -1999,6 +2015,18 @@ class EntitlementsManager {
   }
 
   /**
+   */
+  blockNextNotification() {
+    this.blockNextNotification_ = true;
+  }
+
+  /**
+   */
+  unblockNextNotification() {
+    this.blockNextNotification_ = false;
+  }
+
+  /**
    * @return {!Promise<!Entitlements>}
    */
   getEntitlementsFlow_() {
@@ -2015,15 +2043,15 @@ class EntitlementsManager {
   onEntitlementsFetched_(entitlements) {
     // Skip any notifications and toast if other flows are ongoing.
     // TODO(dvoytenko): what's the right action when pay flow was canceled?
-    const callbacks = this.deps_.callbacks();
-    if (callbacks.hasSubscribeResponsePending() ||
-        callbacks.hasLinkProgressPending() ||
-        callbacks.hasLinkCompletePending()) {
+    const blockNotification = this.blockNextNotification_;
+    this.blockNextNotification_ = false;
+    if (blockNotification) {
       return;
     }
 
     // Notify on the received entitlements.
-    callbacks.triggerEntitlementsResponse(Promise.resolve(entitlements));
+    this.deps_.callbacks().triggerEntitlementsResponse(
+        Promise.resolve(entitlements));
 
     // Show a toast if needed.
     this.maybeShowToast_(entitlements);
@@ -2080,7 +2108,7 @@ class EntitlementsManager {
    */
   fetch_() {
     const url =
-        'https://swg-staging.sandbox.google.com/_/v1/publication/' +
+        'https://subscribe.sandbox.google.com/swg/_/api/v1/publication/' +
         encodeURIComponent(this.config_.getPublicationId()) +
         '/entitlements';
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
@@ -2662,7 +2690,7 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?string|number>=} args
+   * @param {!Object<string, ?string|number|boolean>=} args
    * @param {boolean=} shouldFadeBody
    */
   constructor(
@@ -2690,7 +2718,7 @@ class ActivityIframeView extends View {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private @const {!Object<string, ?string|number>} */
+    /** @private @const {!Object<string, ?string|number|boolean>} */
     this.args_ = args || {};
 
     /** @private @const {boolean} */
@@ -2879,7 +2907,8 @@ class LinkCompleteFlow {
    */
   static configurePending(deps) {
     function handler(port) {
-      deps.callbacks().triggerLinkProgress(Promise.resolve());
+      deps.entitlementsManager().blockNextNotification();
+      deps.callbacks().triggerLinkProgress();
       const promise = acceptPortResult(
           port,
           parseUrl(LINK_CONFIRM_IFRAME_URL).origin,
@@ -2966,10 +2995,11 @@ class LinkCompleteFlow {
    * @private
    */
   complete_(response) {
-    this.callbacks_.triggerLinkComplete(Promise.resolve());
+    this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
-    this.entitlementsManager_.reset(response && response['success'] || false);
     this.entitlementsManager_.setToastShown(true);
+    this.entitlementsManager_.unblockNextNotification();
+    this.entitlementsManager_.reset(response && response['success'] || false);
     this.completeResolver_();
   }
 
@@ -3195,9 +3225,9 @@ class PayCompleteFlow {
    */
   static configurePending(deps) {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
+      deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(
-          port, flow.complete.bind(flow));
+      const promise = validatePayResponse(port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -3263,6 +3293,7 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   complete() {
+    this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
       this.activityIframeView_.message({'complete': true});
     });
@@ -3363,10 +3394,12 @@ function parseUserData(swgData) {
 const OFFERS_URL =
     'https://subscribe.sandbox.google.com/swglib/offersiframe';
 
+const OPTION_URL =
+    'https://subscribe.sandbox.google.com/swglib/optionsiframe';
+
 
 /**
  * The class for Offers flow.
- *
  */
 class OffersFlow {
 
@@ -3380,9 +3413,6 @@ class OffersFlow {
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
-
-    /** @private @const {!HTMLDocument} */
-    this.document_ = this.win_.document;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -3398,6 +3428,7 @@ class OffersFlow {
         {
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
+          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
         },
         /* shouldFadeBody */ true);
   }
@@ -3410,16 +3441,81 @@ class OffersFlow {
     // If result is due to OfferSelection, redirect to payments.
     this.activityIframeView_.onMessage(result => {
       if (result['alreadySubscribed']) {
-        this.deps_.callbacks().triggerLoginRequest();
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!result['linkRequested'],
+        });
         return;
       }
-      const skuId = result.sku || '';
-      if (skuId) {
-        new PayStartFlow(this.deps_, skuId).start();
+      if (result['sku']) {
+        new PayStartFlow(
+            this.deps_,
+            /** @type {string} */ (result['sku']))
+            .start();
+        return;
+      }
+      if (result['native']) {
+        this.deps_.callbacks().triggerSubscribeRequest();
+        return;
       }
     });
 
     return this.dialogManager_.openView(this.activityIframeView_);
+  }
+}
+
+
+/**
+ * The class for subscribe option flow.
+ */
+class SubscribeOptionFlow {
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        deps.win(),
+        this.activityPorts_,
+        OPTION_URL,
+        {
+          'publicationId': deps.pageConfig().getPublicationId(),
+        },
+        /* shouldFadeBody */ false);
+  }
+
+  /**
+   * Starts the offers flow or alreadySubscribed flow.
+   * @return {!Promise}
+   */
+  start() {
+    this.activityIframeView_.onMessage(data => {
+      this.maybeOpenOffersFlow_(data);
+    });
+    this.activityIframeView_.acceptResult().then(result => {
+      this.maybeOpenOffersFlow_(result.data);
+    });
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {*} data
+   * @private
+   */
+  maybeOpenOffersFlow_(data) {
+    if (data && data['subscribe']) {
+      new OffersFlow(this.deps_).start();
+    }
   }
 }
 
@@ -3687,6 +3783,14 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  showSubscribeOption() {
+    return this.documentParsed_.then(() => {
+      const flow = new SubscribeOptionFlow(this);
+      return flow.start();
+    });
+  }
+
+  /** @override */
   setOnLoginRequest(callback) {
     this.callbacks_.setOnLoginRequest(callback);
   }
@@ -3701,6 +3805,11 @@ class ConfiguredRuntime {
     return this.documentParsed_.then(() => {
       return new LinkbackFlow(this).start();
     });
+  }
+
+  /** @override */
+  setOnNativeSubscribeRequest(callback) {
+    this.callbacks_.setOnSubscribeRequest(callback);
   }
 
   /** @override */
@@ -3721,5 +3830,8 @@ class ConfiguredRuntime {
 
 export {
   ConfiguredRuntime,
+  Entitlements,
+  Entitlement,
   Fetcher,
+  SubscribeResponse,
 };
