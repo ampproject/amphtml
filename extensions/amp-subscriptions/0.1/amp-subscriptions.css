@@ -61,12 +61,10 @@ html.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
-[subscriptions-action] {
+[subscriptions-actions]:not([i-amphtml-subs-display]),
+[subscriptions-section='actions']:not([i-amphtml-subs-display]),
+[subscriptions-action]:not([i-amphtml-subs-display]) {
   display: none !important;
-}
-
-[i-amphtml-subs-display][subscriptions-action] {
-  display: block !important;
 }
 
 /** Dialog. */

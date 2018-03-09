@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Dialog} from '../dialog';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import {Dialog} from '../dialog';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;

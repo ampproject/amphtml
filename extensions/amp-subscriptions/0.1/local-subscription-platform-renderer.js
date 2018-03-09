@@ -56,7 +56,8 @@ export class LocalSubscriptionPlatformRenderer {
     return this.ampdoc_.whenReady().then(() => {
       // Find the first matching dialog.
       const querySelectors =
-          '[subscriptions-action], [subscriptions-sections="actions"]';
+          '[subscriptions-action], [subscriptions-section="actions"],'
+              + ' [subscriptions-actions]';
       const actionCandidates =
           this.rootNode_.querySelectorAll(querySelectors);
       for (let i = 0; i < actionCandidates.length; i++) {
