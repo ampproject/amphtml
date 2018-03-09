@@ -19,6 +19,10 @@ import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
 
 
+/** @type {Store=} */
+let globalStoreInstance;
+
+
 /**
  * @typedef {{action: string, payload: *}}
  */
@@ -64,7 +68,7 @@ const actions = (state, action) => {
 };
 
 
-export const store = new class Store {
+export class Store {
   constructor() {
     /** @private {!State} */
     this.state_ =
@@ -76,7 +80,7 @@ export const store = new class Store {
 
   /**
    * Retrieves a state property.
-   * @param  {String} key Property to retrieve from the state.
+   * @param  {string} key Property to retrieve from the state.
    * @return {*}
    */
   get(key) {
@@ -89,7 +93,7 @@ export const store = new class Store {
 
   /**
    * Subscribes to a state property mutations.
-   * @param  {String} key
+   * @param  {string} key
    * @param  {!Function} listener
    */
   subscribe(key, listener) {
@@ -155,4 +159,15 @@ export const store = new class Store {
         return {};
     }
   }
-};
+
+  /**
+   * Returns the global store instance.
+   * @return {!Store}
+   */
+  static getInstance() {
+    if (!globalStoreInstance) {
+      globalStoreInstance = new Store();
+    }
+    return globalStoreInstance;
+  }
+}

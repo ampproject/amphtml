@@ -17,7 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
-import {StateProperty, store} from './amp-story-store';
+import {StateProperty, Store} from './amp-story-store';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
@@ -104,6 +104,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
+
+    /** @private @const {!Store} */
+    this.store_ = Store.getInstance();
   }
 
   /** @override */
@@ -152,7 +155,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    return store.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION);
+    return this.store_.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION);
   }
 
   /**

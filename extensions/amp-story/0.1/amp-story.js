@@ -49,7 +49,7 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
-import {StateProperty, store} from './amp-story-store';
+import {StateProperty, Store} from './amp-story-store';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -318,6 +318,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private @const {!Store} */
+    this.store_ = Store.getInstance();
   }
 
 
@@ -451,7 +454,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (store.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
+      if (this.store_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
         this.ampStoryHint_.showFirstPageHintOverlay();
       }
     });
@@ -489,7 +492,7 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
         return;
       }
-      if (!store.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+      if (!this.store_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
         return;
       }
 
@@ -1315,7 +1318,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
-    if (!store.get(StateProperty.CAN_SHOW_BOOKEND)) {
+    if (!this.store_.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }
 
@@ -1622,7 +1625,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageToBeInsertedEl = pageToBeInserted.element;
 
     if (pageToBeInserted.isAd() &&
-        !store.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION)) {
+        !this.store_.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION)) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;
     }
