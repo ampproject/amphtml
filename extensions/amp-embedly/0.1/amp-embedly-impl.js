@@ -44,7 +44,7 @@ const ResourceType = {
  * Implementation of the amp-embedly component.
  * See {@link ../amp-embedly.md} for the spec.
  */
-export class AmpEmbedlyMain extends AMP.BaseElement {
+export class AmpEmbedly extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

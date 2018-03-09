@@ -56,7 +56,7 @@ export class Services {
    */
   static embedlyServiceForDoc(nodeOrDoc) {
     return (/** @type {!Promise<
-        !../extensions/amp-embedly/0.1/amp-embedly.EmbedlyService>} */ (
+        !../extensions/amp-embedly/0.1/embedly-service.EmbedlyService>} */ (
         getElementServiceForDoc(nodeOrDoc, 'embedly', 'amp-embedly-key')));
   }
 
