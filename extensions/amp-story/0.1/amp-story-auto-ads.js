@@ -27,6 +27,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseEmbedMode} from './embed-mode';
 import {parseJson} from '../../../src/json';
+import {store} from './amp-story-store';
 
 
 /** @const */
@@ -161,10 +162,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    const allowAutomaticAdInsertion = this.stateService_
-        .getState(StateType.ALLOW_AUTOMATIC_AD_INSERTION);
-
-    return allowAutomaticAdInsertion.getValue();
+    return store.get('allowAutomaticAdInsertion');
   }
 
   /**

@@ -81,6 +81,7 @@ import {parseEmbedMode} from './embed-mode';
 import {registerServiceBuilder} from '../../../src/service';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
+import {store} from './amp-story-store';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -460,11 +461,8 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
-    const noPreviousPageHelpShown = this.stateService_
-        .getState(StateType.NO_PREVIOUS_PAGE_HELP_SHOWN);
-
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (noPreviousPageHelpShown.isModifiable()) {
+      if (store.get('canShowPreviousPageHelp')) {
         this.ampStoryHint_.showFirstPageHintOverlay();
       }
     });
@@ -502,9 +500,7 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
         return;
       }
-      const navigationOverlayHintShown = this.stateService_
-          .getState(StateType.NAVIGATION_OVERLAY_HINT_SHOWN);
-      if (!navigationOverlayHintShown.isModifiable()) {
+      if (!store.get('canShowNavigationOverlayHint')) {
         return;
       }
 
@@ -1330,11 +1326,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
-    const bookendActive = this.stateService_.getState(StateType.BOOKEND_ACTIVE);
-    if (!bookendActive.isModifiable()) {
-      // Whether the bookend is active cannot be modified; its current value can
-      // be assumed.
-      return Promise.resolve(bookendActive.getValue());
+    if (!store.get('canShowBookend')) {
+      return Promise.resolve(false);
     }
 
     // TODO(newmuis): Change this comment.
@@ -1639,10 +1632,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageToBeInserted = this.getPageById(pageToBeInsertedId);
     const pageToBeInsertedEl = pageToBeInserted.element;
 
-    const allowAutomaticAdInsertion = this.stateService_
-        .getState(StateType.ALLOW_AUTOMATIC_AD_INSERTION);
-
-    if (pageToBeInserted.isAd() && !allowAutomaticAdInsertion.getValue()) {
+    if (pageToBeInserted.isAd() && !store.get('allowAutomaticAdInsertion')) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;
     }
