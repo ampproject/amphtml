@@ -16,6 +16,7 @@
 'use strict';
 
 const getStdout = require('./exec').getStdout;
+const https = require('https');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 const nodeScheduleUrl = 'https://raw.githubusercontent.com/nodejs/Release/master/schedule.json';
@@ -30,9 +31,27 @@ function yellow(text) {return '\x1b[33m' + text + '\x1b[0m';}
  * @fileoverview Makes sure that packages are being installed via yarn
  */
 
-function getNodeLatestLtsMajorVersion() {
-  const schedule = getStdout('curl -L ' + nodeScheduleUrl).trim();
+function startVersionChecks() {
+  https.get(nodeScheduleUrl, res => {
+    res.setEncoding('utf8');
+    let schedule = '';
+    res.on('data', data => {
+      schedule += data;
+    });
+    res.on('end', () => {
+      continueVersionChecks(schedule);
+    });
+  });
+}
+
+function continueVersionChecks(schedule) {
   const scheduleJson = JSON.parse(schedule);
+  const latestLtsMajorVersion = getNodeLatestLtsMajorVersion(scheduleJson);
+  performNodeVersionCheck(latestLtsMajorVersion);
+  performYarnVersionCheck();
+}
+
+function getNodeLatestLtsMajorVersion(scheduleJson) {
   const versions = Object.keys(scheduleJson);
   let latestLtsMajorVersion = '';
   versions.forEach(version => {
@@ -50,13 +69,8 @@ function getNodeLatestLtsMajorVersion() {
   return latestLtsMajorVersion;
 }
 
-function main() {
-  // Yarn is already used by default on Travis, so there is nothing more to do.
-  if (process.env.TRAVIS) {
-    return 0;
-  }
-
-  // If npm is being run, print a message and cause 'npm install' to fail.
+// If npm is being run, print a message and cause 'npm install' to fail.
+function ensureYarn() {
   if (process.env.npm_execpath.indexOf('yarn') === -1) {
     console.log(red(
         '*** The AMP project uses yarn for package management ***'), '\n');
@@ -75,11 +89,12 @@ function main() {
     console.log(cyan('$'), 'yarn remove [package_name]', '\n');
     console.log(yellow('For detailed instructions, see'),
         cyan(setupInstructionsUrl), '\n');
-    return 1;
+    process.exit(1);
   }
+}
 
-  // Check the node version and print a warning if it is not the latest LTS.
-  const latestLtsMajorVersion = getNodeLatestLtsMajorVersion();
+// Check the node version and print a warning if it is not the latest LTS.
+function performNodeVersionCheck(latestLtsMajorVersion) {
   const nodeVersion = getStdout('node --version').trim();
   const nodeMajorVersion = nodeVersion.split('.')[0];
   if (latestLtsMajorVersion === '') {
@@ -100,8 +115,10 @@ function main() {
     console.log(green('Detected node version'), cyan(nodeVersion) +
         green('.'));
   }
+}
 
-  // If yarn is being run, perform a version check and proceed with the install.
+// If yarn is being run, perform a version check and proceed with the install.
+function performYarnVersionCheck() {
   const yarnVersion = getStdout('yarn --version').trim();
   const major = parseInt(yarnVersion.split('.')[0], 10);
   const minor = parseInt(yarnVersion.split('.')[1], 10);
@@ -118,7 +135,15 @@ function main() {
     console.log(green('Detected yarn version'), cyan(yarnVersion) +
         green('. Installing packages...'));
   }
-  return 0;
 }
 
-process.exit(main());
+function main() {
+  // Yarn is already used by default on Travis, so there is nothing more to do.
+  if (process.env.TRAVIS) {
+    return 0;
+  }
+  ensureYarn();
+  startVersionChecks();
+}
+
+main();
