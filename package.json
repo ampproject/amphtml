@@ -69,7 +69,7 @@
     "doctrine": "2.1.0",
     "envify": "4.1.0",
     "escodegen": "1.9.1",
-    "eslint": "4.18.0",
+    "eslint": "4.18.2",
     "eslint-plugin-amphtml-internal": "file:build-system/eslint-rules",
     "eslint-plugin-chai-expect": "1.1.1",
     "eslint-plugin-google-camelcase": "0.0.2",
