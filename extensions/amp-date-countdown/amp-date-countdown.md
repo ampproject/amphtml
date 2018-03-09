@@ -33,15 +33,11 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
-  </tr>
 </table>
 
 ## Behavior
 
-The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific attributes in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the legend list below for each returned t.
+The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the [ list below for each returned time parameter](#returned-time-parameters).
 
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
 
