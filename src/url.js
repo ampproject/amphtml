@@ -73,8 +73,6 @@ export function getWinOrigin(win) {
 export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-
-    // Currently url LRUcache capacity is limited to 100
     cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
   }
 
