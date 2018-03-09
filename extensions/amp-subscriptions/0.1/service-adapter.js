@@ -48,6 +48,14 @@ export class ServiceAdapter {
   reAuthorizePlatform(subscriptionPlatform) {
     this.subscriptionService_.reAuthorizePlatform(subscriptionPlatform);
   }
+
+  /**
+   * Returns the singleton Dialog instance
+   * @returns {!./dialog.Dialog}
+   */
+  getDialog() {
+    this.subscriptionService_.getDialog();
+  }
 }
 
 /** @package @VisibleForTesting */

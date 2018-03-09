@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {Dialog} from './dialog';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
@@ -68,6 +69,9 @@ export class SubscriptionService {
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
+
+    /** @private {!Dialog} */
+    this.dialog_ = new Dialog(ampdoc);
   }
 
   /**
@@ -216,6 +220,14 @@ export class SubscriptionService {
       this.startAuthorizationFlow_();
     });
     return this;
+  }
+
+  /**
+   * Returns the singleton Dialog instance
+   * @returns {!Dialog}
+   */
+  getDialog() {
+    return this.dialog_;
   }
 
   /**

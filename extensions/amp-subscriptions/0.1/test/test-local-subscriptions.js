@@ -17,10 +17,13 @@
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+import {Dialog} from '../dialog';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  let serviceAdapter;
+
   const actionMap = {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
@@ -35,13 +38,14 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
       },
     ],
   };
-  let serviceAdapter;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig('example.org:basic', true));
+    sandbox.stub(serviceAdapter, 'getDialog')
+        .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
