@@ -356,7 +356,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('TIMEZONE_CODE', () => {
       let tzCode = '';
       if (Intl && typeof Intl === 'object') {
-        tzCode = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         // It could be undefined (i.e. IE11)
         if (typeof tzCode === 'undefined') {
