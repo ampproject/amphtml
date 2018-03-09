@@ -17,12 +17,12 @@ import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'
 import {EventType, dispatch} from './events';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
+import {StateProperty, store} from './amp-story-store';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
-import {store} from './amp-story-store';
 
 
 
@@ -144,7 +144,7 @@ export class SystemLayer {
     this.addEventHandlers_();
 
     // TODO(newmuis): Observe this value.
-    if (!store.get('canShowSystemLayerButtons')) {
+    if (!store.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
       this.root_.classList.add('i-amphtml-story-ui-no-buttons');
     }
 

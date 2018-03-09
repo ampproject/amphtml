@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  AmpStoryStateService,
-  StateType,
-} from './amp-story-state-service';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
+import {StateProperty, store} from './amp-story-store';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
-import {parseEmbedMode} from './embed-mode';
 import {parseJson} from '../../../src/json';
-import {store} from './amp-story-store';
 
 
 /** @const */
@@ -109,15 +104,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {Object<string, string>} */
     this.config_ = {};
-
-    /** @private @const {!AmpStoryStateService} */
-    this.stateService_ = new AmpStoryStateService();
   }
 
   /** @override */
   buildCallback() {
-    const embedMode = parseEmbedMode(this.win.location.hash);
-    this.stateService_.initializeEmbedMode(embedMode);
     if (!this.isAutomaticAdInsertionAllowed_()) {
       return;
     }
@@ -162,7 +152,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    return store.get('allowAutomaticAdInsertion');
+    return store.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION);
   }
 
   /**

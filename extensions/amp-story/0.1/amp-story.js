@@ -31,10 +31,6 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
-import {
-  AmpStoryStateService,
-  StateType,
-} from './amp-story-state-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -53,6 +49,7 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
+import {StateProperty, store} from './amp-story-store';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -77,11 +74,9 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {once} from '../../../src/utils/function';
-import {parseEmbedMode} from './embed-mode';
 import {registerServiceBuilder} from '../../../src/service';
 import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
-import {store} from './amp-story-store';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -260,9 +255,6 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(element, () => this.hasBookend_());
 
-    /** @private @const {!AmpStoryStateService} */
-    this.stateService_ = new AmpStoryStateService();
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
@@ -270,7 +262,7 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_ = new Bookend(this.win);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win, this.stateService_);
+    this.systemLayer_ = new SystemLayer(this.win);
 
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
@@ -369,9 +361,6 @@ export class AmpStory extends AMP.BaseElement {
       // Standalone CSS affects sizing of the entire page.
       this.onResize();
     }, html);
-
-    const embedMode = parseEmbedMode(this.win.location.hash);
-    this.stateService_.initializeEmbedMode(embedMode);
   }
 
 
@@ -462,7 +451,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (store.get('canShowPreviousPageHelp')) {
+      if (store.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
         this.ampStoryHint_.showFirstPageHintOverlay();
       }
     });
@@ -500,7 +489,7 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
         return;
       }
-      if (!store.get('canShowNavigationOverlayHint')) {
+      if (!store.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
         return;
       }
 
@@ -1326,7 +1315,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
-    if (!store.get('canShowBookend')) {
+    if (!store.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }
 
@@ -1632,7 +1621,8 @@ export class AmpStory extends AMP.BaseElement {
     const pageToBeInserted = this.getPageById(pageToBeInsertedId);
     const pageToBeInsertedEl = pageToBeInserted.element;
 
-    if (pageToBeInserted.isAd() && !store.get('allowAutomaticAdInsertion')) {
+    if (pageToBeInserted.isAd() &&
+        !store.get(StateProperty.ALLOW_AUTOMATIC_AD_INSERTION)) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;
     }
