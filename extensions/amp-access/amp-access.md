@@ -161,6 +161,11 @@ The following properties are defined in this configuration:
     <td>"client" or "server"</td>
     <td>Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.</td>
   </tr>
+  <tr>
+      <td class="col-fourty"><code>namespace</code></td>
+      <td>string</td>
+      <td>Default is empty. Namespace is required if multiple access providers are specified.</td>
+    </tr>
 </table>
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
@@ -180,6 +185,25 @@ Here’s an example of the AMP Access configuration:
 }
 </script>
 ```
+
+#### Multiple access providers
+
+It is possible to specify multiple access providers using an array instead of a single object and providing a `namespace` for each entry.
+
+```html
+<script id="amp-access" type="application/json">
+[
+  {
+    "property": value,
+    ...
+    "namespace": value
+  },
+  ...
+[
+</script>
+```
+
+
 ### Access URL Variables
 
 When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
@@ -238,7 +262,7 @@ https://pub.com/access?
 
 AUTHDATA variable is available to Pingback and Login URLs. It allows passing any field in the authorization
 response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
-`AUTHDATA(other.isSubscriber)`.
+`AUTHDATA(other.isSubscriber)`. If using namespaces, namespaces can be prepended to the field e.g. `AUTHDATA(anamespace.afield)`.
 
 ### Access Content Markup
 
@@ -250,7 +274,7 @@ The `amp-access` value is a boolean expression defined in a SQL-like language. T
 ```html
 <div amp-access="expression">...</div>
 ```
-Properties and values refer to the properties and values of the Authorization response returned by the Authorization endpoint. This provides a flexible system to support different access scenarios.
+Properties and values refer to the properties and values of the Authorization response returned by the Authorization endpoint. This provides a flexible system to support different access scenarios. If using namespaces, just prepend namespaces to property names, e.g. `anamespace.aproperty`.
 
 The `amp-access-hide` attribute can be used to optimistically hide the element before the Authorization response has been received, which can show it. It provides the semantics of “invisible by default”. The authorization response returned by the Authorization later may rescind this default and make section visible. When `amp-access-hide` attribute is omitted, the section will be shown/included by default. The `amp-access-hide` attribute can only be used in conjunction with the `amp-access` attribute.
 ```html
@@ -445,6 +469,8 @@ When multiple Login URLs are configured, the format is `tap:amp-access.login-{ty
 ```html
 <a on="tap:amp-access.login-signup">Subscribe</a>
 ```
+
+When namespaces are used, the format is `tap:amp-access.login-{namspace}` or `tap:amp-access.login-{namespace}-{type}`.
 
 AMP makes no distinction between login and subscribe. This distinction can be configured by the Publisher using multiple Login URLs/links or on the Publisher’s side.
 
