@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /**
@@ -36,8 +35,12 @@ export const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
 export class EmbedlyService {
   /**
    * Constructs instance of @see {@link EmbedlyService}.
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor() {
+  constructor(ampdoc) {
+    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /**
      * Embedly api key.
      * @type {?string}
@@ -52,14 +55,6 @@ export class EmbedlyService {
    */
   set key(key) {
     this.key_ = key;
-  }
-
-  /**
-   * Getter for embedly's api key.
-   * @returns {string}
-   */
-  get key() {
-    return dev().assertString(this.key_);
   }
 
   /**
@@ -78,7 +73,7 @@ export class EmbedlyService {
 
     const apiResourceUrl = addParamsToUrl(BASE_API_URL, params);
 
-    return Services.xhrFor(window).fetchJson(apiResourceUrl, {
+    return Services.xhrFor(this.ampdoc_.win).fetchJson(apiResourceUrl, {
       requireAmpResponseSourceOrigin: false,
     }).then(res => res.json());
   }
