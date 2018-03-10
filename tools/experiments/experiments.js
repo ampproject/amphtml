@@ -264,7 +264,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-document-recommendations',
-    name: 'Docment level recommendations and infinte scroll',
+    name: 'Document level recommendations and infinte scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
