@@ -72,23 +72,21 @@ export class AmpEmbedly extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'embedly');
     this.iframe_ = iframe;
 
-    return getEmbedlyServiceForDoc(this.element)
-        .then(service => {
-          return service.fetchOembedData(/**@type {string}*/(this.url_));
-        })
-        .then(oEmbed => {
-          iframe.src = this.getIframeSrc_(oEmbed);
+    return getEmbedlyServiceForDoc(this.element).then(service => {
+      return service.fetchOembedData(/**@type {string}*/(this.url_));
+    }).then(oEmbed => {
+      iframe.src = this.getIframeSrc_(oEmbed);
 
-          const opt_is3P = true;
-          listenFor(iframe, 'embed-size', data => {
-            this.changeHeight(data['height']);
-          }, opt_is3P);
+      const opt_is3P = true;
+      listenFor(iframe, 'embed-size', data => {
+        this.changeHeight(data['height']);
+      }, opt_is3P);
 
-          this.applyFillContent(iframe);
-          this.getVsync().mutate(() => this.element.appendChild(iframe));
+      this.applyFillContent(iframe);
+      this.getVsync().mutate(() => this.element.appendChild(iframe));
 
-          return this.loadPromise(iframe);
-        });
+      return this.loadPromise(iframe);
+    });
   }
 
   /** @override */
