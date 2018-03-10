@@ -46,16 +46,6 @@ export class AmpConsent extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
-
-  /** On user action, update consent, update UI */
-  onUserAction(unusedUserAction) {
-
-  }
-
-  /** Display consent manger UI */
-  onDisplayConsentManagerUI() {
-
-  }
 }
 
 AMP.extension('amp-consent', '0.1', AMP => {
