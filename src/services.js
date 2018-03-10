@@ -50,17 +50,6 @@ export class Services {
   }
 
   /**
-   * Returns a promise for the Embedly service.
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!Promise<!../extensions/amp-embedly/0.1/embedly-service.EmbedlyService>}
-   */
-  static embedlyServiceForDoc(nodeOrDoc) {
-    return (/** @type {!Promise<
-        !../extensions/amp-embedly/0.1/embedly-service.EmbedlyService>} */ (
-        getElementServiceForDoc(nodeOrDoc, 'embedly', 'amp-embedly-key')));
-  }
-
-  /**
    * Returns a promise for the Subscriptions service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!SubscriptionService>}

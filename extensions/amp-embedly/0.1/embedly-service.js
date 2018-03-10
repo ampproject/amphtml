@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
+import {getElementServiceForDoc} from '../../../src/element-service';
 
 /**
  * Service used by the amp-embedly extension components.
@@ -28,6 +29,15 @@ export const SERVICE_NAME = 'embedly';
  * @const {string}
  */
 export const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
+
+/**
+ * Returns a promise for the Embedly service.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Promise<!EmbedlyService>}
+ */
+export function getEmbedlyServiceForDoc(nodeOrDoc) {
+  return getElementServiceForDoc(nodeOrDoc, 'embedly', 'amp-embedly-key');
+}
 
 /**
  * Provides the api key used with the embedly xhr requests.

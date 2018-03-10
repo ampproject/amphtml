@@ -16,7 +16,7 @@
 
 import {BASE_API_URL} from './embedly-service';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {getEmbedlyServiceForDoc} from './embedly-service';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -44,7 +44,7 @@ export class AmpEmbedlyKey extends AMP.BaseElement {
         this.element
     );
 
-    return Services.embedlyServiceForDoc(this.element)
+    return getEmbedlyServiceForDoc(this.element)
         .then(service => service.key = apiKey);
   }
 

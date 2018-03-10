@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {getEmbedlyServiceForDoc} from './embedly-service';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
@@ -72,7 +72,7 @@ export class AmpEmbedly extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'embedly');
     this.iframe_ = iframe;
 
-    return Services.embedlyServiceForDoc(this.element)
+    return getEmbedlyServiceForDoc(this.element)
         .then(service => {
           return service.fetchOembedData(/**@type {string}*/(this.url_));
         })
