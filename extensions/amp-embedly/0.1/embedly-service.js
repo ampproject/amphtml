@@ -32,11 +32,14 @@ export const BASE_API_URL = 'https://api.embedly.com/1/oembed?';
 
 /**
  * Returns a promise for the Embedly service.
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Promise<!EmbedlyService>}
  */
 export function getEmbedlyServiceForDoc(nodeOrDoc) {
-  return getElementServiceForDoc(nodeOrDoc, 'embedly', 'amp-embedly-key');
+  return (
+    /** @type {!Promise<!EmbedlyService>}**/
+    (getElementServiceForDoc(nodeOrDoc, 'embedly', 'amp-embedly-key'))
+  );
 }
 
 /**
@@ -45,10 +48,10 @@ export function getEmbedlyServiceForDoc(nodeOrDoc) {
 export class EmbedlyService {
   /**
    * Constructs instance of @see {@link EmbedlyService}.
-   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /**
