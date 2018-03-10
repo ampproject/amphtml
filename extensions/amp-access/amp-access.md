@@ -470,7 +470,7 @@ When multiple Login URLs are configured, the format is `tap:amp-access.login-{ty
 <a on="tap:amp-access.login-signup">Subscribe</a>
 ```
 
-When namespaces are used, the format is `tap:amp-access.login-{namspace}` or `tap:amp-access.login-{namespace}-{type}`.
+When namespaces are used, the format is `tap:amp-access.login-{namespace}` or `tap:amp-access.login-{namespace}-{type}`.
 
 AMP makes no distinction between login and subscribe. This distinction can be configured by the Publisher using multiple Login URLs/links or on the Publisher’s side.
 
