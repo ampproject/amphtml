@@ -33,7 +33,7 @@ limitations under the License.
 <amp-ad width=728 height=90
     type="uas"
     json='{"accId": "132109", "adUnit": "10002912", "sizes": [[728, 90], [700, 90], [700, 60]]}'>
-</amp-ad>
+</amp-ad> 
 ```
 Note that the `width` and `height` mentioned should be maximum of the width-hight combinations mentioned in `json.sizes`.
 
