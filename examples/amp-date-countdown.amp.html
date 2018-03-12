@@ -34,7 +34,7 @@
       display: inline-block;
       font-weight: 100;
       text-align: center;
-      font-size: 30px;
+      font-size: 20px;
       background: #00ECB9;
       padding: 20px;
     }
@@ -75,11 +75,11 @@
   <h1 id="sample2" hidden>
       When Timer hits 0, will hide the timer itself and display this message.
   </h1>
-  <amp-date-countdown id="ampdate" end-date="2018-03-07T00:00:00+08:00" on="tap: timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="continue" locale='en'>
+  <amp-date-countdown id="ampdate" end-date="2020-06-20T11:22:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="400" when-ended="stop" locale='en'>
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">
-          {{#d}}
+        {{#d}}
           <div>
             <span class="d">{{d}}</span>
             <div class="smalltext">{{days}}</div>
@@ -111,28 +111,25 @@
       </div>
     </template>
   </amp-date-countdown>
-  <amp-date-countdown timestamp-ms="1521880470000" offset-s="1521880470" when-ended="stop" locale='zh-TW' height="50" width="360">
-      <template type="amp-mustache">
-        <div class="date-count-down">
+  <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-TW' height="50" width="360">
+    <template type="amp-mustache">
+      <div class="date-count-down">
+        {{#d}} {{d}} <span>{{days}}</span> {{/d}}
+        {{h}} <span>{{hours}}</span>
+        {{m}} <span>{{minutes}}</span>
+        {{s}} <span>{{seconds}}</span>
+      </div>
+    </template>
+</amp-date-countdown>
+<amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="stop" locale='de' height="50" width="360">
+  <template type="amp-mustache">
+      <div class="date-count-down">
           {{#d}} {{d}} <span>{{days}}</span> {{/d}}
           {{h}} <span>{{hours}}</span>
           {{m}} <span>{{minutes}}</span>
           {{s}} <span>{{seconds}}</span>
         </div>
-      </template>
-  </amp-date-countdown>
-  <amp-date-countdown timestamp-seconds="1521880470" offset-s="1521880470" when-ended="stop" locale='de' height="50" width="360">
-    <template type="amp-mustache">
-        <div class="date-count-down">
-            {{#d}} {{d}} <span>{{days}}</span> {{/d}}
-            {{h}} <span>{{hours}}</span>
-            {{m}} <span>{{minutes}}</span>
-            {{s}} <span>{{seconds}}</span>
-          </div>
-    </template>
-  </amp-date-countdown>
-  <div class="content">
-   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga ipsam sequi, nostrum fugit, explicabo aliquam, quisquam modi animi praesentium voluptate accusantium expedita asperiores? Dolorum exercitationem, voluptatibus esse commodi perspiciatis voluptatum.</p>
-  </div>
+  </template>
+</amp-date-countdown>
 </body>
 </html>

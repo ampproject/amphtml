@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Work in Progress</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,6 +38,42 @@ limitations under the License.
 ## Behavior
 
 The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the [ list below for each returned time parameter](#returned-time-parameters).
+
+```html
+<h1 id="sample">
+	When Timer hits 0, will hide the timer itself and hide this message.
+</h1>
+<h1 id="sample2" hidden>
+	When Timer hits 0, will hide the timer itself and display this message.
+</h1>
+<amp-date-countdown id="ampdate" end-date="2020-06-20T00:00:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="stop" locale='en'>
+	<template type="amp-mustache">
+	  <h1>Countdown Clock</h1>
+	  <div id="clockdiv">
+	    {{#d}}
+	      <div>
+	        <span class="d">{{d}}</span>
+	        <div class="smalltext">{{days}}</div>
+	      </div>
+	    {{/d}}
+	    {{#h}}
+	      <div>
+	        <span class="h">{{h}}</span>
+	        <div class="smalltext">{{hours}}</div>
+	      </div>
+	    {{/h}}
+	    <div>
+	      <span class="m">{{m}}</span>
+	      <div class="smalltext">{{minutes}}</div>
+	    </div>
+	    <div>
+	      <span class="s">{{s}}</span>
+	      <div class="smalltext">{{seconds}}</div>
+	    </div>
+	  </div>
+	</template>
+</amp-date-countdown>
+```
 
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
 
@@ -92,7 +128,7 @@ A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timest
 A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
 
 ##### when-ended (optional)
-Specifies whether to stop or continue the timer when it reaches 0 seconds. The value can be set to `stop` (default) or `continue`. If `stop`, the timer stops at 0 seconds and will not pass the final date.
+Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 secondsand will not pass the final date.
 
 ##### locale (optional)
 An i18n language string for each timer unit. The default value is `en` (for English).
@@ -128,7 +164,49 @@ The `amp-date-countdown` exposes the following actions you can use [AMP on-synta
 
 Action | Description
 -- | --
-`timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can  define any actions when the timer times out. ![ezgif com-video-to-gif 2](https://user-images.githubusercontent.com/4065175/36954871-c05f8b0e-205f-11e8-944a-cbfff96fcb29.gif)
+`timeout` |  When the timer times out. For this action to function, `when-ended` **must be** set to `stop`. You can  define any actions when the timer times out.
+
+### Examples of action
+
+#### Code
+```html
+<h1 id="sample">
+	When Timer hits 0, will hide the timer itself and hide this message.
+</h1>
+<h1 id="sample2" hidden>
+	When Timer hits 0, will hide the timer itself and display this message.
+</h1>
+<amp-date-countdown id="ampdate" end-date="2018-03-12T10:59:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="stop" locale='en'>
+	<template type="amp-mustache">
+	  <h1>Countdown Clock</h1>
+	  <div id="clockdiv">
+	    {{#d}}
+	      <div>
+	        <span class="d">{{d}}</span>
+	        <div class="smalltext">{{days}}</div>
+	      </div>
+	    {{/d}}
+	    {{#h}}
+	      <div>
+	        <span class="h">{{h}}</span>
+	        <div class="smalltext">{{hours}}</div>
+	      </div>
+	    {{/h}}
+	    <div>
+	      <span class="m">{{m}}</span>
+	      <div class="smalltext">{{minutes}}</div>
+	    </div>
+	    <div>
+	      <span class="s">{{s}}</span>
+	      <div class="smalltext">{{seconds}}</div>
+	    </div>
+	  </div>
+	</template>
+</amp-date-countdown>
+```
+
+#### Output
+![ezgif com-video-to-gif 3](https://user-images.githubusercontent.com/4065175/37264448-60503fae-25e8-11e8-8b94-de804cce65ae.gif)
 
 ## Validation
 See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.

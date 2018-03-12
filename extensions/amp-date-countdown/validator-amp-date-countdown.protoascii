@@ -27,7 +27,7 @@ tags: {  # amp-date-countdown
 
 tags: {  # <amp-date-countdown>
   html_format: AMP
-  tag_name: "amp-date-countdown"
+  tag_name: "AMP-DATE-COUNTDOWN"
   requires_extension: "amp-date-countdown"
   attrs: {
     name: "end-date"
@@ -50,7 +50,7 @@ tags: {  # <amp-date-countdown>
   }
   attrs: {
     name: "locale"
-    value: "(zh-CN|zh-TW|de|en|es|fr|id|it|ja|ko|nl|pt||ru|th|tr|vi)"
+    value: "(zh-CN|zh-TW|de|en|es|fr|id|it|ja|ko|nl|pt|ru|th|tr|vi)"
   }
   attrs: {
     name: "biggest-unit"

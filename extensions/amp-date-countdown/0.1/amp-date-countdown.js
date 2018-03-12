@@ -111,9 +111,14 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    Services.viewerForDoc(this.win.document).whenFirstVisible().then(() => {
+      const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
+      this.tickCountDown_(new Date(epoch) - new Date());
+    });
+  }
+  /** @override */
   renderOutsideViewport() {
-    const epoch = this.getEpoch_() + (this.offsetSeconds_ * 1000);
-    this.tickCountDown_(new Date(epoch) - new Date());
     return true;
   }
 
@@ -158,7 +163,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const data = this.getYDHMSFromMs_(differentBetween);
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
-          .trigger(this.element, 'timeout', null, ActionTrust.LOW);
+          .trigger(this.element, 'timeout', null, ActionTrust.HIGH);
       this.win.clearInterval(this.countDownTimer_);
     }
     this.renderItems_(Object.assign(data, this.localeWordList_));
