@@ -43,29 +43,35 @@ env => {
 
   describe('getPageConfig', () => {
     it('should call getPageConfig of subscription service', () => {
-      const pageConfigStub = sandbox.stub(subscriptionService, 'getPageConfig')
+      const stub = sandbox.stub(subscriptionService, 'getPageConfig')
           .callsFake(() => pageConfig);
       serviceAdapter.getPageConfig();
-      expect(pageConfigStub).to.be.calledOnce;
+      expect(stub).to.be.calledOnce;
     });
   });
 
   describe('delegateActionToLocal', () => {
     it('should call delegateActionToLocal of subscription service', () => {
-      const pageConfigStub = sandbox.stub(subscriptionService,
-          'delegateActionToLocal');
+      const stub = sandbox.stub(subscriptionService, 'delegateActionToLocal');
       const action = 'action';
       serviceAdapter.delegateActionToLocal(action);
-      expect(pageConfigStub).to.be.calledWith(action);
+      expect(stub).to.be.calledWith(action);
     });
   });
 
   describe('reAuthorizePlatform', () => {
     it('should call reAuthorizePlatform of subscription service', () => {
-      const pageConfigStub = sandbox.stub(subscriptionService,
-          'reAuthorizePlatform');
+      const stub = sandbox.stub(subscriptionService, 'reAuthorizePlatform');
       serviceAdapter.reAuthorizePlatform();
-      expect(pageConfigStub).to.be.calledOnce;
+      expect(stub).to.be.calledOnce;
+    });
+  });
+
+  describe('getDialog', () => {
+    it('should call getDialog of subscription service', () => {
+      const stub = sandbox.stub(subscriptionService, 'getDialog');
+      serviceAdapter.getDialog();
+      expect(stub).to.be.calledOnce;
     });
   });
 });

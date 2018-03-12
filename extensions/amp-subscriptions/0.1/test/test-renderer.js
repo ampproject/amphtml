@@ -188,11 +188,11 @@ describes.realWin('amp-subscriptions renderer', {
 
   it('should show appropriate elements when granted', () => {
     renderer.setGrantState(true);
-    displayed([content1, content2, actions1, actions2]);
+    displayed([content1, content2]);
   });
 
   it('should show appropriate elements when denied', () => {
     renderer.setGrantState(false);
-    displayed([contentNotGranted1, contentNotGranted2, actions1, actions2]);
+    displayed([contentNotGranted1, contentNotGranted2]);
   });
 });
