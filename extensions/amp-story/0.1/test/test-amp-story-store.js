@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {ActionType, StateProperty, Store} from '../amp-story-store';
+import {Action, StateProperty, Store} from '../amp-story-store';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
 
-describes.fakeWin('amp-story-store', {}, env => {
+describes.fakeWin('amp-story-store', {}, () => {
   let store;
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describes.fakeWin('amp-story-store', {}, env => {
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = sandbox.spy();
     store.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    store.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
+    store.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -41,7 +41,7 @@ describes.fakeWin('amp-story-store', {}, env => {
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = sandbox.spy();
     store.subscribe(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP, listenerSpy);
-    store.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
+    store.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
   });
 
@@ -53,14 +53,14 @@ describes.fakeWin('amp-story-store', {}, env => {
     // Subscribing from one store and dispatching from the other works since it
     // actually returned the same global instance.
     firstStore.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    secondStore.dispatch({type: ActionType.TOGGLE_BOOKEND, payload: true});
+    secondStore.dispatch(Action.TOGGLE_BOOKEND, true);
 
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 });
 
-describes.fakeWin('amp-story-store embed mode', {}, env => {
+describes.fakeWin('amp-story-store embed mode', {}, () => {
   let store;
 
   beforeEach(() => {

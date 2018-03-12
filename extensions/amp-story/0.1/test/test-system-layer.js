@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStoryStateService} from '../amp-story-state-service';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../system-layer';
@@ -27,7 +26,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let systemLayer;
   let progressBarStub;
   let progressBarRoot;
-  let stateService;
 
   beforeEach(() => {
     win = env.win;
@@ -43,9 +41,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
     sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    stateService = new AmpStoryStateService();
-
-    systemLayer = new SystemLayer(win, stateService);
+    systemLayer = new SystemLayer(win);
 
     sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),

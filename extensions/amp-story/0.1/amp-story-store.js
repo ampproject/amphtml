@@ -19,14 +19,12 @@ import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
 
 
-/** @type {Store=} */
+/** @type {string} */
+const TAG = 'amp-story';
+
+
+/** @type {!Store|undefined} */
 let globalStoreInstance;
-
-
-/**
- * @typedef {{action: string, payload: *}}
- */
-export let Action;
 
 
 /**
@@ -57,25 +55,26 @@ export const StateProperty = {
 
 
 /** @private @const @enum {string} */
-export const ActionType = {
+export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
 };
 
 
 /**
- * Maybe returns a new updated state.
+ * Returns the new sate.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
+ * @param  {*} data
  * @return {!State} new state
  */
-const actions = (state, {type, payload}) => {
-  switch (type) {
-    case ActionType.TOGGLE_BOOKEND:
-      return Object.assign(
-          {}, state, {[StateProperty.BOOKEND_STATE]: !!payload});
+const actions = (state, action, data) => {
+  switch (action) {
+    case Action.TOGGLE_BOOKEND:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
     default:
-      dev().error('amp-story', `Unknown action ${type}.`);
-      break;
+      dev().error(TAG, `Unknown action ${action}.`);
+      return state;
   }
 };
 
@@ -83,8 +82,8 @@ const actions = (state, {type, payload}) => {
 export class Store {
   constructor() {
     /** @private {!State} */
-    this.state_ =
-        Object.assign({}, this.getDefaultState_(), this.getEmbedOverrides_());
+    this.state_ = /** @type {!State} */ (Object.assign(
+        {}, this.getDefaultState_(), this.getEmbedOverrides_()));
 
     /** @private {!Object<string, !Observable>} */
     this.listeners_ = {};
@@ -97,7 +96,7 @@ export class Store {
    */
   get(key) {
     if (!this.state_.hasOwnProperty(key)) {
-      dev().error('amp-story', `Unknown state ${key}.`);
+      dev().error(TAG, `Unknown state ${key}.`);
       return;
     }
     return this.state_[key];
@@ -110,7 +109,7 @@ export class Store {
    */
   subscribe(key, listener) {
     if (!this.state_.hasOwnProperty(key)) {
-      dev().error('amp-story', `Can't subscribe to unknown state ${key}.`);
+      dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
     }
     if (!this.listeners_[key]) {
@@ -123,10 +122,11 @@ export class Store {
    * Dispatches an action and triggers the listeners for the updated state
    * properties.
    * @param  {!Action} action
+   * @param  {*} data
    */
-  dispatch(action) {
+  dispatch(action, data) {
     const oldState = Object.assign({}, this.state_);
-    this.state_ = actions(this.state_, action);
+    this.state_ = actions(this.state_, action, data);
 
     Object.keys(this.listeners_).forEach(key => {
       if (oldState[key] !== this.state_[key]) {
@@ -141,21 +141,22 @@ export class Store {
    * @private
    */
   getDefaultState_() {
-    return {
+    // Compiler won't resolve the object keys and trigger an error for missing
+    // properties, so we have to force the type.
+    return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
-      [StateProperty.MUTED_STATE]: true,
-    };
+    });
   }
 
   /**
    * Retrieves the embed mode config, that will override the default state.
    * @todo(gmajoulet): These should get their own file if they start growing.
-   * @return {!State}
+   * @return {!Object<StateProperty, *>} Partial state
    * @private
    */
   getEmbedOverrides_() {
