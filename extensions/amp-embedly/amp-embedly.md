@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Embeds content from any URL using <a href="http://docs.embed.ly/docs/oembed">Embedly’s oEmbed api</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,21 +27,51 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+The `amp-embedly` component allows you to embed third party content from any URL by using <a href="http://docs.embed.ly/docs/oembed">Embedly’s oEmbed api</a>. This api is part of a paid service that will provide you with a paid api key.
+
+Example: Embedding multiple resources.
+
+First, use the `amp-embedly-key` component to set your api key. You just need one per document that includes one or multiple `amp-embedly` components:
+
+```html
+<amp-embedly-key
+    value="12af2e3543ee432ca35ac30a4b4f656a"
+    layout="nodisplay">
+</amp-embedly-key>
+```
+
+Then use the `amp-embedly` for the embed content:
+
+```html
+<amp-embedly 
+	data-url="https://twitter.com/AMPhtml/status/970787731533189120" 					layout="responsive" 
+	width="150" 
+	height="80">
+</amp-embedly>  
+
+<amp-embedly 
+	data-url="https://vimeo.com/27246366" 
+	layout="responsive" 
+	width="150"
+	height="80">
+</amp-embedly>
+```
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+##### data-url (required)
+  
+The URL used to retrieve embedding information. 
+  
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 See [amp-embedly rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly/validator-amp-embedly.protoascii) in the AMP validator specification.
