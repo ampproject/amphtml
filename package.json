@@ -144,7 +144,7 @@
     "react-addons-shallow-compare": "15.6.2",
     "react-dates": "15.5.3",
     "react-externs": "0.13.6",
-    "request": "2.83.0",
+    "request": "2.84.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
     "sinon": "4.4.3",
