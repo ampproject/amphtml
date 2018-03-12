@@ -115,10 +115,18 @@ const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
 /** @private @enum {number} */
-const RTC_ATI_ENUM = {
-  RTC_SUCCESS: 2,
-  RTC_FAILURE: 3,
+export const RTC_ATI_ENUM = {
+  RTC_SUCCESS: '2',
+  RTC_FAILURE: '3',
 };
+RTC_ATI_ENUM[RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE] = '4';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.DUPLICATE_URL] = '5';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.INSECURE_URL] = '6';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED] = '7';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.NETWORK_FAILURE] = '8';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.UNKNOWN_VENDOR] = '9';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.TIMEOUT] = '10';
+RTC_ATI_ENUM[RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT] = '11';
 
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
@@ -910,16 +918,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const ard = [];
     let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
-      // Only want to send errors for requests we actually sent.
-      if (rtcResponse.error &&
-          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
-          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
-          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
-        return;
-      }
       artc.push(rtcResponse.rtcTime);
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
-        RTC_ATI_ENUM.RTC_FAILURE);
+        RTC_ATI_ENUM[rtcResponse.error] || RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
       if (rtcResponse.response) {
         if (rtcResponse.response['targeting']) {
