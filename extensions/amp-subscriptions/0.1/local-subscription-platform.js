@@ -15,7 +15,7 @@
  */
 
 import {Actions} from './actions';
-import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
@@ -34,10 +34,10 @@ export class LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!JsonObject} serviceConfig
-   * @param {!PageConfig} pageConfig
+   * @param {!JsonObject} platformConfig
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
-  constructor(ampdoc, serviceConfig, pageConfig) {
+  constructor(ampdoc, platformConfig, serviceAdapter) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -45,10 +45,13 @@ export class LocalSubscriptionPlatform {
     this.rootNode_ = ampdoc.getRootNode();
 
     /** @const @private {!JsonObject} */
-    this.serviceConfig_ = serviceConfig;
+    this.serviceConfig_ = platformConfig;
+
+    /** @private @const {!./service-adapter.ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
 
     /** @const @private {!PageConfig} */
-    this.pageConfig_ = pageConfig;
+    this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -85,10 +88,11 @@ export class LocalSubscriptionPlatform {
     this.readerIdPromise_ = null;
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
-    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
+        serviceAdapter.getDialog());
 
-    /** @private {?Entitlements}*/
-    this.entitlements_ = null;
+    /** @private {?Entitlement}*/
+    this.entitlement_ = null;
 
     this.initializeListeners_();
   }
@@ -107,9 +111,9 @@ export class LocalSubscriptionPlatform {
    */
   validateActionMap(actionMap) {
     user().assert(actionMap['login'],
-        'Action `Login` is not present in action map');
+        'Action "login" is not present in action map');
     user().assert(actionMap['subscribe'],
-        'Action `Subscribe` is not present in action map');
+        'Action "subscribe" is not present in action map');
     return actionMap;
   }
 
@@ -147,44 +151,38 @@ export class LocalSubscriptionPlatform {
 
   /**
    * Renders the platform specific UI
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  activate() {
-    this.renderer_.render(this.entitlements_);
+  activate(renderState) {
+    this.renderer_.render(renderState);
   }
 
   /**
    * Executes action for the local platform.
    * @param {string} action
+   * @returns {!Promise}
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
-    actionExecution.then(result => {
+    return actionExecution.then(result => {
       if (result) {
-        // TODO(@prateekbh): Add a service interface and call reauthorize on it.
-        this.getEntitlements();
+        this.serviceAdapter_.reAuthorizePlatform(this);
       }
+      return result;
     });
   }
 
   /** @override */
   getEntitlements() {
-    const currentProductId = user().assertString(
-        this.pageConfig_.getProductId(), 'Current Product ID is null');
-
     return this.xhr_
         .fetchJson(this.authorizationUrl_, {
           credentials: 'include',
         })
         .then(res => res.json())
         .then(resJson => {
-          const entitlements = new Entitlements(
-              this.serviceConfig_['serviceId'] || 'local',
-              JSON.stringify(resJson),
-              Entitlement.parseListFromJson(resJson),
-              currentProductId
-          );
-          this.entitlements_ = entitlements;
-          return entitlements;
+          const entitlement = Entitlement.parseFromJson(resJson);
+          this.entitlement_ = entitlement;
+          return entitlement;
         });
   }
 }

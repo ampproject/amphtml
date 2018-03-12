@@ -48,19 +48,21 @@ export class Dialog {
 
     this.wrapper_ = createElementWithAttributes(
         doc,
-        'amp-subscriptions-dialog', {
+        'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
           'role': 'dialog',
-        });
+        }));
 
     /** @private @const {!Element} */
     this.closeButton_ = createElementWithAttributes(
         doc,
-        'button', {
+        'button', /** @type {!JsonObject} */ ({
           'class': 'i-amphtml-subs-dialog-close-button',
-        });
+        }));
     this.showCloseAction(false);
     this.wrapper_.appendChild(this.closeButton_);
-    this.closeButton_.addEventListener('click', () => this.close());
+    this.closeButton_.addEventListener('click', () => {
+      this.close();
+    });
 
     // Start hidden.
     this.ampdoc_.getBody().appendChild(this.wrapper_);
@@ -105,7 +107,7 @@ export class Dialog {
       setImportantStyles(this.wrapper_, {
         display: 'block',
       });
-      this.showCloseAction(showCloseAction);
+      this.showCloseAction(/** @type {boolean} */ (showCloseAction));
     }).then(() => {
       // Animate to display.
       return this.vsync_.mutatePromise(() => {

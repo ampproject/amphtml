@@ -1,0 +1,75 @@
+#
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-story-auto-ads
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-auto-ads"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+# The following tags form a chain of direct child nodes starting from the
+# document body. As a result, we don't need to bother disallowing ancestors.
+# BODY > AMP-STORY > AMP-STORY-AUTO-ADS > amp-story-auto-ads config script
+# BODY > AMP-STORY > AMP-STORY-AUTO-ADS > TEMPLATE
+tags: {  # <amp-story-auto-ads>
+  html_format: AMP
+  tag_name: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-story-auto-ads"
+  mandatory_parent: "AMP-STORY"
+  unique: true
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-auto-ads.md"
+}
+tags: {  # amp-story-auto-ads (json config)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-story-auto-ads config script"
+  mandatory_parent: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-story-auto-ads"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-auto-ads.md"
+}
+# HTML5, 4.11.3 The template element
+tags: {
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "amp-story-auto-ads > template"
+  mandatory_parent: "AMP-STORY-AUTO-ADS"
+  requires_extension: "amp-mustache"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
+  reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER default" }
+  reference_points: { tag_spec_name: "AMP-STORY-GRID-LAYER animate-in" }
+}
