@@ -69,6 +69,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
    * @param {number=} retryTimer
    * @param {string=} fallback Validator/Renderer fallback.
+   * @final
    */
   onFailure(failureType, recoveryType, retryTimer, fallback) {
     if (this.recoveryModes_[failureType]) {
@@ -139,7 +140,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     });
   }
 
-  /** @param {string} validatorType */
+  /**
+   * @param {string} validatorType
+   * @private
+   */
   invokeValidator_(validatorType) {
     const unvalidatedBytes = this.context_.getUnvalidatedBytes();
     dev().assert(this.validators_[validatorType],
@@ -171,6 +175,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * @param {string} rendererType
    * @param {!AmpAdContext} context
+   * @private
    */
   invokeRenderer_(rendererType, context) {
     const renderer = this.renderers_[rendererType];
@@ -189,6 +194,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * @param {!./amp-ad-type-defs.FailureType} failureType
    * @param {*=} error
+   * @private
    */
   handleFailure_(failureType, error) {
     const recoveryMode = this.recoveryModes_[failureType];
@@ -222,6 +228,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * @param {!./amp-ad-type-defs.FailureType} type
    * @param {!./amp-ad-type-defs.RecoveryMode} mode
+   * @private
    */
   checkAndSetRecoveryMode_(type, mode) {
     dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
