@@ -1834,7 +1834,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('getPriority', () => {
+  describe('getLayoutPriority', () => {
     function getConfig() {
       return {
         'requests': {
@@ -1852,12 +1852,12 @@ describes.realWin('amp-analytics', {
     }
 
     it('is 1 for non-inabox', () => {
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(1);
     });
 
     it('is 0 for inabox', () => {
       env.win.AMP_MODE.runtime = 'inabox';
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(0);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(0);
     });
   });
 
