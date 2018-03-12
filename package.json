@@ -63,7 +63,7 @@
     "eslint-plugin-google-camelcase": "0.0.2",
     "esprima": "4.0.0",
     "express": "4.16.2",
-    "fetch-mock": "6.0.1",
+    "fetch-mock": "6.1.0",
     "file-reader": "1.1.1",
     "formidable": "1.2.0",
     "fs-extra": "5.0.0",
