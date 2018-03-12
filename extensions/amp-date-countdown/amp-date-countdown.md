@@ -22,10 +22,6 @@ limitations under the License.
     <td>Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
   </tr>
@@ -39,43 +35,45 @@ limitations under the License.
 
 The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the  `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering.  Refer to the [ list below for each returned time parameter](#returned-time-parameters).
 
-```html
-<h1 id="sample">
-	When Timer hits 0, will hide the timer itself and hide this message.
-</h1>
-<h1 id="sample2" hidden>
-	When Timer hits 0, will hide the timer itself and display this message.
-</h1>
-<amp-date-countdown id="ampdate" end-date="2020-06-20T00:00:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="stop" locale='en'>
-	<template type="amp-mustache">
-	  <h1>Countdown Clock</h1>
-	  <div id="clockdiv">
-	    {{#d}}
-	      <div>
-	        <span class="d">{{d}}</span>
-	        <div class="smalltext">{{days}}</div>
-	      </div>
-	    {{/d}}
-	    {{#h}}
-	      <div>
-	        <span class="h">{{h}}</span>
-	        <div class="smalltext">{{hours}}</div>
-	      </div>
-	    {{/h}}
-	    <div>
-	      <span class="m">{{m}}</span>
-	      <div class="smalltext">{{minutes}}</div>
-	    </div>
-	    <div>
-	      <span class="s">{{s}}</span>
-	      <div class="smalltext">{{seconds}}</div>
-	    </div>
-	  </div>
-	</template>
-</amp-date-countdown>
-```
+### Example
+
 
 ![count-down](https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png)
+
+
+```html
+<amp-date-countdown id="ampdate" 
+    end-date="2020-06-20T00:00:00+08:00" 
+    when-ended="stop"
+    locale="en"
+    height="235" width="500">
+  <template type="amp-mustache">
+    <h1>Countdown Clock</h1>
+    <div id="clockdiv">
+      {{#d}}
+        <div>
+          <span class="d">{{d}}</span>
+          <div class="smalltext">{{days}}</div>
+        </div>
+      {{/d}}
+      {{#h}}
+        <div>
+          <span class="h">{{h}}</span>
+          <div class="smalltext">{{hours}}</div>
+        </div>
+      {{/h}}
+      <div>
+        <span class="m">{{m}}</span>
+        <div class="smalltext">{{minutes}}</div>
+      </div>
+      <div>
+        <span class="s">{{s}}</span>
+        <div class="smalltext">{{seconds}}</div>
+      </div>
+    </div>
+  </template>
+</amp-date-countdown>
+```
 
 ### Returned time parameters
 
@@ -171,37 +169,37 @@ Action | Description
 #### Code
 ```html
 <h1 id="sample">
-	When Timer hits 0, will hide the timer itself and hide this message.
+  When Timer hits 0, will hide the timer itself and hide this message.
 </h1>
 <h1 id="sample2" hidden>
-	When Timer hits 0, will hide the timer itself and display this message.
+  When Timer hits 0, will hide the timer itself and display this message.
 </h1>
 <amp-date-countdown id="ampdate" end-date="2018-03-12T10:59:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="500" when-ended="stop" locale='en'>
-	<template type="amp-mustache">
-	  <h1>Countdown Clock</h1>
-	  <div id="clockdiv">
-	    {{#d}}
-	      <div>
-	        <span class="d">{{d}}</span>
-	        <div class="smalltext">{{days}}</div>
-	      </div>
-	    {{/d}}
-	    {{#h}}
-	      <div>
-	        <span class="h">{{h}}</span>
-	        <div class="smalltext">{{hours}}</div>
-	      </div>
-	    {{/h}}
-	    <div>
-	      <span class="m">{{m}}</span>
-	      <div class="smalltext">{{minutes}}</div>
-	    </div>
-	    <div>
-	      <span class="s">{{s}}</span>
-	      <div class="smalltext">{{seconds}}</div>
-	    </div>
-	  </div>
-	</template>
+  <template type="amp-mustache">
+    <h1>Countdown Clock</h1>
+    <div id="clockdiv">
+      {{#d}}
+        <div>
+          <span class="d">{{d}}</span>
+          <div class="smalltext">{{days}}</div>
+        </div>
+      {{/d}}
+      {{#h}}
+        <div>
+          <span class="h">{{h}}</span>
+          <div class="smalltext">{{hours}}</div>
+        </div>
+      {{/h}}
+      <div>
+        <span class="m">{{m}}</span>
+        <div class="smalltext">{{minutes}}</div>
+      </div>
+      <div>
+        <span class="s">{{s}}</span>
+        <div class="smalltext">{{seconds}}</div>
+      </div>
+    </div>
+  </template>
 </amp-date-countdown>
 ```
 
