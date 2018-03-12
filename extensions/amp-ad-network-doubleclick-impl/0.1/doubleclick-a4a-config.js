@@ -57,6 +57,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   REMOTE_HTML_CONTROL: '21061728',
   REMOTE_HTML_EXPERIMENT: '21061729',
+  USDRUD_CONTROL: '21061759',
+  USDRUD_EXPERIMENT: '21061760',
 };
 
 /** @const @enum{string} */
@@ -77,6 +79,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
   '9': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+  '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+  '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
 };
 
 /**
@@ -146,12 +150,18 @@ export class DoubleclickA4aEligibility {
       warnDeprecation('remote.html');
     }
     let experimentId;
-    const urlExperimentId = extractUrlExperimentId(win, element);
-    if (hasUSDRD || (useRemoteHtml &&
-                     !element.getAttribute('rtc-config') &&
-                     (!urlExperimentId ||
-                     URL_EXPERIMENT_MAPPING[urlExperimentId] !=
-                      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT))) {
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
+    if (hasUSDRD && (!urlExperimentId ||
+          ![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+            DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
+              URL_EXPERIMENT_MAPPING[urlExperimentId]))) {
+      return false;
+    }
+    if (useRemoteHtml && !element.getAttribute('rtc-config') &&
+        (!urlExperimentId ||
+         ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+           DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
+             URL_EXPERIMENT_MAPPING[urlExperimentId]))) {
       return false;
     }
     if (!this.isCdnProxy(win)) {
@@ -184,7 +194,9 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return experimentId != DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL;
+    return ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
+        experimentId);
   }
 
   /**
