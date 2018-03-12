@@ -28,6 +28,9 @@ import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
 
+/**
+ * @abstract
+ */
 export class AmpAdNetworkBase extends AMP.BaseElement {
 
   constructor(element) {
@@ -63,7 +66,135 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
+   * @param {number=} retryTimer
+   * @param {string=} fallback Validator/Renderer fallback.
+   * @final
+   */
+  onFailure(failureType, recoveryType, retryTimer, fallback) {
+    if (this.recoveryModes_[failureType]) {
+      dev().warn(TAG,
+          `Recovery mode for failure type ${failureType} already registered!`);
+    }
+    this.checkAndSetRecoveryMode_(
+        failureType, {type: recoveryType, retryTimer, fallback});
+  }
+
+  /**
+   * @param {!./amp-ad-render.Validator} validator
+   * @param {string=} type
+   * @final
+   */
+  registerValidator(validator, type = 'default') {
+    if (this.validators_[type]) {
+      dev().warn(TAG, `${type} validator already registered.`);
+    }
+    this.validators_[type] = validator;
+  }
+
+  /**
+   * @param {!./amp-ad-render.Renderer} renderer
+   * @param {string} type
+   * @final
+   */
+  registerRenderer(renderer, type) {
+    if (this.renderers_[type]) {
+      dev().warn(TAG, `Rendering mode already registered for type '${type}'`);
+    }
+    this.renderers_[type] = renderer;
+  }
+
+  /**
+   * @return {string} The finalized ad request URL.
+   * @protected
+   * @abstract
+   */
+  getRequestUrl() {
+    // Subclass must override.
+  }
+
+  /** @param {boolean} isReusable */
+  setIsReusable(isReusable) {
+    this.isReusable_ = isReusable;
+  }
+
+
+  /**
+   * Processes the ad response as soon as the XHR request returns. This can be
+   * overridden and used as a hook to perform any desired logic before passing
+   * the response to the validator.
+   * @param {?../../../src/service/xhr-impl.FetchResponse} response
+   * @private
+   */
+  handleAdResponse_(response) {
+    if (!response.arrayBuffer) {
+      this.handleFailure_(FailureTypes.NO_RESPONSE);
+      return;
+    }
+    response.arrayBuffer().then(unvalidatedBytes => {
+      const validatorType = response.headers.get('validator-type') || 'default';
+      this.context_
+          .setUnvalidatedBytes(unvalidatedBytes)
+          .setHeaders(response.headers);
+      this.invokeValidator_(validatorType);
+    });
+  }
+
+  /**
+   * @param {string} validatorType
+   * @private
+   */
+  invokeValidator_(validatorType) {
+    const unvalidatedBytes = this.context_.getUnvalidatedBytes();
+    dev().assert(this.validators_[validatorType],
+        'Validator never registered!');
+    dev().assert(unvalidatedBytes,
+        'Validator invoked before ad response received!');
+    this.validators_[validatorType].validate(this.context_)
+        .then(context => {
+          this.handleValidatorResponse_(context);
+          if (!this.isReusable_) {
+            this.validators_ = map({});
+          }
+        })
+        .catch(error =>
+          this.handleFailure_(FailureTypes.VALIDATOR_ERROR, error));
+  }
+
+  /**
+   * Processes validator response and delegates further action to appropriate
+   *   renderer.
+   * @param {!AmpAdContext} context
+   * @private
+   */
+  handleValidatorResponse_(context) {
+    const rendererType = context.getValidatorResult();
+    this.invokeRenderer_(/** @type {string} */ (rendererType), context);
+  }
+
+  /**
+   * @param {string} rendererType
+   * @param {!AmpAdContext} context
+   * @private
+   */
+  invokeRenderer_(rendererType, context) {
+    const renderer = this.renderers_[rendererType];
+
+    dev().assert(renderer, 'Renderer for AMP creatives never registered!');
+    renderer.render(context, this)
+        .then(unusedContext => {
+          if (!this.isReusable_) {
+            this.renderers_ = map({});
+          }
+        })
+        .catch(error =>
+          this.handleFailure_(FailureTypes.RENDERER_ERROR, error));
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.FailureType} failureType
    * @param {*=} error
+   * @private
    */
   handleFailure_(failureType, error) {
     const recoveryMode = this.recoveryModes_[failureType];
@@ -97,6 +228,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * @param {!./amp-ad-type-defs.FailureType} type
    * @param {!./amp-ad-type-defs.RecoveryMode} mode
+   * @private
    */
   checkAndSetRecoveryMode_(type, mode) {
     dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
@@ -105,127 +237,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.FailureType} failureType
-   * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
-   * @param {number=} retryTimer
-   * @param {string=} fallback Validator/Renderer fallback.
-   */
-  registerRecoveryMode(failureType, recoveryType, retryTimer, fallback) {
-    if (this.recoveryModes_[failureType]) {
-      dev().warn(TAG,
-          `Recovery mode for failure type ${failureType} already registered!`);
-    }
-    this.checkAndSetRecoveryMode_(
-        failureType, {type: recoveryType, retryTimer, fallback});
-  }
-
-  /**
-   * @param {string} resultType
-   * @param {!./amp-ad-render.Renderer} renderer
-   * @final
-   */
-  registerRenderer(resultType, renderer) {
-    if (this.renderers_[resultType]) {
-      dev().warn(TAG,
-          `Rendering mode already registered for type '${resultType}'`);
-    }
-    this.renderers_[resultType] = renderer;
-  }
-
-  /**
-   * @param {!./amp-ad-render.Validator} validator
-   * @param {string=} type
-   * @final
-   */
-  registerValidator(validator, type = 'default') {
-    if (this.validators_[type]) {
-      dev().warn(TAG, `${type} validator already registered.`);
-    }
-    this.validators_[type] = validator;
-  }
-
-  /**
    * Collapses slot by setting its size to 0x0.
    * @private
    */
   forceCollapse_() {
     this.attemptChangeSize(0, 0);
-  }
-
-  /**
-   * @return {string} The finalized ad request URL.
-   * @protected
-   */
-  getRequestUrl() {
-    return '';
-  }
-
-  /**
-   * Processes the ad response as soon as the XHR request returns. This can be
-   * overridden and used as a hook to perform any desired logic before passing
-   * the response to the validator.
-   * @param {?../../../src/service/xhr-impl.FetchResponse} response
-   * @private
-   */
-  handleAdResponse_(response) {
-    if (!response.arrayBuffer) {
-      this.handleFailure_(FailureTypes.MISSING_ARRAYBUFFER);
-      return;
-    }
-    response.arrayBuffer().then(unvalidatedBytes => {
-      const validatorType = response.headers.get('validator-type') || 'default';
-      this.context_
-          .setUnvalidatedBytes(unvalidatedBytes)
-          .setHeaders(response.headers);
-      this.invokeValidator_(validatorType);
-    });
-  }
-
-  /** @param {string} validatorType */
-  invokeValidator_(validatorType) {
-    const unvalidatedBytes = this.context_.getUnvalidatedBytes();
-    dev().assert(this.validators_[validatorType],
-        'Validator never registered!');
-    dev().assert(unvalidatedBytes,
-        'Validator invoked before ad response received!');
-    this.validators_[validatorType].validate(this.context_)
-        .then(context => {
-          this.handleValidatorResponse_(context);
-          if (!this.isReusable_) {
-            this.validators_ = map({});
-          }
-        })
-        .catch(error =>
-          this.handleFailure_(FailureTypes.VALIDATOR_ERROR, error));
-  }
-
-  /**
-   * Processes validator response and delegates further action to appropriate
-   *   renderer.
-   * @param {!AmpAdContext} context
-   * @private
-   */
-  handleValidatorResponse_(context) {
-    const rendererType = context.getValidatorResult();
-    this.invokeRenderer_(/** @type {string} */ (rendererType), context);
-  }
-
-  /**
-   * @param {string} rendererType
-   * @param {!AmpAdContext} context
-   */
-  invokeRenderer_(rendererType, context) {
-    const renderer = this.renderers_[rendererType];
-
-    dev().assert(renderer, 'Renderer for AMP creatives never registered!');
-    renderer.render(context, this)
-        .then(unusedContext => {
-          if (!this.isReusable_) {
-            this.renderers_ = map({});
-          }
-        })
-        .catch(error =>
-          this.handleFailure_(FailureTypes.RENDERER_ERROR, error));
   }
 
   /**
@@ -240,11 +256,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           .then(response => this.handleAdResponse_(response))
           .catch(error => this.handleFailure_(FailureTypes.SENDXHR, error));
     });
-  }
-
-  /** @param {boolean} isReusable */
-  setIsReusable(isReusable) {
-    this.isReusable_ = isReusable;
   }
 
   /** @override */

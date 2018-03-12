@@ -45,8 +45,8 @@ export let FailureType;
 /** @enum {FailureType} */
 export const FailureTypes = {
   SENDXHR: 'SENDXHR',
-  MISSING_ARRAYBUFFER: 'MISSING_ARRAYBUFFER',
-  EMPTY_ARRAYBUFFER: 'EMPTY_ARRAYBUFFER',
+  NO_RESPONSE: 'NO_RESPONSE',
+  EMPTY_RESPONSE: 'EMPTY_RESPONSE',
   VALIDATOR_ERROR: 'VALIDATOR_ERROR',
   RENDERER_ERROR: 'RENDERER_ERROR',
 };
@@ -73,8 +73,8 @@ export const RecoveryModeTypes = {
 /** @type {Object<FailureType, !Array<!RecoveryMode>>} */
 export const ValidRecoveryModeTypes = {
   SENDXHR: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
-  MISSING_ARRAYBUFFER: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
-  EMPTY_ARRAYBUFFER: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
+  NO_RESPONSE: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
+  EMPTY_RESPONSE: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
   VALIDATOR_ERROR: [RecoveryModeTypes.VALIDATOR_FALLBACK,
     RecoveryModeTypes.FORCE_RENDERER,
     RecoveryModeTypes.COLLAPSE],
@@ -90,4 +90,6 @@ export const ValidatorResult = {
   AMP: 'amp',
   NON_AMP: 'non_amp',
 };
+
+
 
