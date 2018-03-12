@@ -161,10 +161,11 @@
     <amp-story-page id="ken-burns-effect">
       <amp-story-grid-layer template="vertical">
         <h1>ken-burns-effect</h1>
-        <div animate-in="zoom-in" class="img-container">
+        <div animate-in="zoom-in" animate-in-duration="30s" class="img-container">
             <amp-img id="img-city1"
                src="img-city1.jpeg"
                animate-in="pan-left"
+               animate-in-duration="30s"
                layout="fixed"
                width="2255"
                height="1494">
@@ -173,6 +174,7 @@
         <div animate-in="fade-in" animate-in-after="img-city1" animate-in-delay="0.25s" animate-in-duration="1s">
           <div
             animate-in="zoom-out"
+            animate-in-duration="30s"
             class="img-container"
             animate-in-after="img-city1">
             <amp-img
@@ -181,6 +183,7 @@
               width="1000"
               height="1250"
               animate-in="pan-down"
+              animate-in-duration="30s"
               animate-in-after="img-city1"
               id="img-city2">
             </amp-img>

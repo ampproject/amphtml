@@ -180,7 +180,7 @@ export const PRESETS = {
     },
   },
   'pan-left': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
@@ -189,7 +189,7 @@ export const PRESETS = {
     }
   },
   'pan-right': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
@@ -198,7 +198,7 @@ export const PRESETS = {
     }
   },
   'pan-down': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = -dimensions.targetWidth / 2;
@@ -207,7 +207,7 @@ export const PRESETS = {
     },
   },
   'pan-up': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = -dimensions.targetWidth / 2;
@@ -216,7 +216,7 @@ export const PRESETS = {
     }
   },
   'zoom-in': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes: [
       {transform: 'scale(1,1)'},
@@ -224,7 +224,7 @@ export const PRESETS = {
     ],
   },
   'zoom-out': {
-    duration: 30000,
+    duration: 1000,
     easing: 'linear',
     keyframes: [
       {transform: 'scale(3,3)'},
