@@ -359,11 +359,10 @@ export class AmpLiveList extends AMP.BaseElement {
 
     if (hasInsertItems) {
       promise = promise.then(() => {
-        if (this.isReverseOrder_ && this.itemsSlot_.lastElementChild) {
-          return this.viewport_
-              .animateScrollIntoView(this.itemsSlot_.lastElementChild);
-        }
-        return this.viewport_.animateScrollIntoView(this.element);
+        const elementToScrollTo = this.isReverseOrder_ &&
+          this.itemsSlot_.lastElementChild ?
+          this.itemsSlot_.lastElementChild : this.element;
+        return this.viewport_.animateScrollIntoView(elementToScrollTo);
       });
     }
     return promise;
@@ -905,7 +904,7 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the elements top is below the viewport height.
+   * Checks if the element's top is below the viewport height.
    *
    * @param {!Element} element
    * @return {boolean}
@@ -921,6 +920,12 @@ export class AmpLiveList extends AMP.BaseElement {
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
   }
 
+  /**
+   * Checks if the element's bottom is above the viewport.
+   *
+   * @param {!Element} element
+   * @return {boolean}
+   */
   isElementAboveViewport_(element) {
     return this.viewport_.getLayoutRect(element).bottom <
         this.viewport_.getScrollTop();
