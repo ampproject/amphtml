@@ -183,7 +183,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           callout: 'www.exampleA.com', rtcTime: 100},
       ];
       const expectedParams = {
-        ati: RTC_ATI_ENUM.RTC_FAILURE,
+        ati: `${RTC_ATI_ENUM.RTC_FAILURE}`,
         artc: '100',
         ard: 'www.exampleA.com',
       };
@@ -199,7 +199,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
             callout: 'www.exampleA.com', rtcTime: 100},
         ];
         const expectedParams = {
-          ati: RTC_ATI_ENUM[RTC_ERROR_ENUM[errorName]],
+          ati: `${RTC_ATI_ENUM[RTC_ERROR_ENUM[errorName]]}`,
           artc: '100',
           ard: 'www.exampleA.com',
         };
