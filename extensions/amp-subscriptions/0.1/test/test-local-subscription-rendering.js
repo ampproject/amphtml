@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../../../../third_party/subscriptions-project/apis';
+import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
@@ -29,15 +29,18 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     const currentProduct = 'currentProductId';
     const sampleEntitlement1 =
       new Entitlement(serviceIds[0], ['currentProductId'], '');
-    entitlementsForService1 = new Entitlements(
+    entitlementsForService1 = new Entitlement(
         serviceIds[0], '', [sampleEntitlement1], currentProduct);
   });
 
   describe('render method', () => {
-    it('should call renderActions_ with the entitlements provided', () => {
+    it('should call renderActions_ and renderDialog with '
+        + 'the entitlements provided', () => {
       const actionRenderStub = sandbox.stub(renderer, 'renderActions_');
+      const dialogRenderStub = sandbox.stub(renderer.dialogRenderer_, 'render');
       renderer.render(entitlementsForService1);
       expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
+      expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
     });
   });
 });

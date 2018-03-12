@@ -200,6 +200,14 @@ amp-story[standalone]:fullscreen {
   display: block !important;
 }
 
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right {
+  display: none !important;
+}
+
 amp-story .amp-video-eq {
   display: none !important;
 }

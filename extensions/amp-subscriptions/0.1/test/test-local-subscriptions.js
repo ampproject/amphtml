@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import {Dialog} from '../dialog';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../service-adapter';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  let serviceAdapter;
+
   const actionMap = {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
@@ -37,8 +41,13 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
+    serviceAdapter = new ServiceAdapter(null);
+    sandbox.stub(serviceAdapter, 'getPageConfig')
+        .callsFake(() => new PageConfig('example.org:basic', true));
+    sandbox.stub(serviceAdapter, 'getDialog')
+        .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], new PageConfig('example.org:basic', true));
+        serviceConfig.services[0], serviceAdapter);
   });
 
   it('should fetch the entitlements on getEntitlements', () => {
@@ -96,8 +105,9 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
       const executeStub =
         sandbox.stub(localSubscriptionPlatform.actions_, 'execute')
             .callsFake(() => Promise.resolve(true));
-      const entitlementsStub =
-          sandbox.stub(localSubscriptionPlatform, 'getEntitlements');
+      const entitlementsStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'reAuthorizePlatform');
       localSubscriptionPlatform.executeAction(actionString);
       expect(executeStub).to.be.calledWith(actionString);
       return executeStub().then(() => {

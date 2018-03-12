@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {dict} from '../../../src/utils/object';
+import {DialogRenderer} from './dialog-renderer';
+import {Entitlement} from './entitlement';
 import {evaluateExpr} from './expr';
 
 /**
@@ -26,45 +26,45 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./dialog.Dialog} dialog
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, dialog) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
     this.rootNode_ = ampdoc.getRootNode();
 
+    /** @private @const */
+    this.dialogRenderer_ = new DialogRenderer(ampdoc, dialog);
   }
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  render(entitlements) {
-    this.renderActions_(entitlements);
+  render(renderState) {
+    this.renderActions_(renderState);
+    this.dialogRenderer_.render(/** @type {!JsonObject} */(renderState));
   }
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  renderActions_(entitlements) {
+  renderActions_(renderState) {
     return this.ampdoc_.whenReady().then(() => {
-      // Find the first matching dialog.
+      // Find the matching actions and sections and make them visible if evalutes to true.
+      const querySelectors =
+          '[subscriptions-action], [subscriptions-section="actions"],'
+              + ' [subscriptions-actions]';
       const actionCandidates =
-          this.rootNode_.querySelectorAll('[subscriptions-action]');
+          this.rootNode_.querySelectorAll(querySelectors);
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-
-        // TODO(@prateekbh): cleanup this forloop with Entitlements Wrapper
-        const entitlementsJson = entitlements.json();
-        /** @type {!JsonObject} */
-        const evaluationJson = dict();
-        for (const key in entitlementsJson) {
-          evaluationJson[key] = entitlementsJson[key];
-        }
-        if (expr && evaluateExpr(expr, evaluationJson)) {
+        if (expr && evaluateExpr(expr,
+            /** @type {!JsonObject} */(renderState))) {
           candidate.setAttribute('i-amphtml-subs-display', '');
         }
       }
@@ -76,6 +76,6 @@ export class LocalSubscriptionPlatformRenderer {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @VisibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }
