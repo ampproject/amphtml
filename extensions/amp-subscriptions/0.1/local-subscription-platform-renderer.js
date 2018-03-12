@@ -45,7 +45,7 @@ export class LocalSubscriptionPlatformRenderer {
    */
   render(renderState) {
     this.renderActions_(renderState);
-    this.dialogRenderer_.render(renderState);
+    this.dialogRenderer_.render(/** @type {!JsonObject} */(renderState));
   }
 
   /**
