@@ -34,10 +34,13 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   });
 
   describe('render method', () => {
-    it('should call renderActions_ with the entitlements provided', () => {
+    it('should call renderActions_ and renderDialog with '
+        + 'the entitlements provided', () => {
       const actionRenderStub = sandbox.stub(renderer, 'renderActions_');
+      const dialogRenderStub = sandbox.stub(renderer.dialogRenderer_, 'render');
       renderer.render(entitlementsForService1);
       expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
+      expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
     });
   });
 });
