@@ -142,8 +142,7 @@ amp-img {
 If you want your image to scale as the window is resized but up to a maximum width (so the image doesn't stretch beyond its width):
 
 1. Set `layout=responsive` for `<amp-img>`.
-2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.  Why on the container?  An `amp-img` element with `layout=responsive` is a *block-level* element, whereas, `<img>` is *inline*. Alternatively, you could set `display: inline-block` in your CSS for the amp-img element.
-
+2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.
 
 #### Setting a fixed sized image
 
