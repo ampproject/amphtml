@@ -213,7 +213,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
-import {uas} from '../ads/uas'
+import {uas} from '../ads/uas';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
