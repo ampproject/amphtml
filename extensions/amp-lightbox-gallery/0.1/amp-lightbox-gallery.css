@@ -159,7 +159,7 @@
   display: grid !important;
   justify-content: center !important;
   grid-gap: 5px !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: min-content !important;
   padding: 5px;
 }
