@@ -78,7 +78,8 @@ exports.getGraph = function(entryModules, config) {
         babelrc: false,
         presets: ['env'],
         plugins: [
-          require.resolve("./babel-plugins/add-module-export/src"),
+          require.resolve('./babel-plugins/add-module-export/src'),
+          require.resolve('./babel-plugins/collect-type-paths/src'),
         ],
       });
 
@@ -325,7 +326,7 @@ exports.getFlags = function(config) {
 };
 
 exports.getBundleFlags = function(g) {
-  console.log(g);
+  //console.log(g);
   var flagsArray = [];
 
   // Write all the packages (directories with a package.json) as --js
@@ -352,7 +353,7 @@ exports.getBundleFlags = function(g) {
         //extraModules++;
       //});
     //}
-    console.log(bundle.modules);
+    //console.log(bundle.modules);
     // In each bundle, first list JS files that belong into it.
     bundle.modules.forEach(function(js) {
       if (g.transformed[js]) {
@@ -410,14 +411,14 @@ exports.getBundleFlags = function(g) {
 exports.getFlags({
   modules: [
     //'./src/amp.js',
-    './extensions/amp-audio/0.1/amp-audio.js',
+    './extensions/amp-audio-2/0.1/amp-audio.js',
     './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
   ],
   writeTo: './sample/out/',
   externs: externs,
 }).then(function(flagsArray) {
   return new Promise(function(resolve, reject) {
-    console.log(flagsArray);
+    //console.log(flagsArray);
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
       if (exitCode == 0) {
         resolve({

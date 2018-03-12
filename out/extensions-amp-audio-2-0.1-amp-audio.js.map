@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/out/extensions-amp-audio-2-0.1-amp-audio.js",
+"lineCount":1,
+"mappings":"A,uCAgBC,IAAA,EAAA,EAqBCA,SAHWC,EAGA,CAACC,CAAD,CAAU,CACnB,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,CAAN,CAaAC,QAAAC,IAAA,CAAY,KAAZ,CAdmB,CAHhBC,CAAA,CAAA,CAAA,CAAA,GAAA,YAAA,CAyGPC,IAAAC,EAAA,CA/GYC,WA+GZ,CAAmB,KAAnB,CAA0B,QAAA,CAAAF,CAAA,CAAO,CAC/BA,CAAAG,gBAAA,CAhHUD,WAgHV,CAAyBP,CAAzB,CAD+B,CAAjC,CAzGaS,EAAAT,EAAA,CAAAA,C,CCjCb,CAACU,IAAA,GAAD,CAAYA,IAAA,GAAZ,EAAwB,EAAxB,EAA4B,2CAA5B,CAAA,CAAyED;",
+"sources":["/extensions/amp-audio-2/0.1/amp-audio.js","/splittable-build/tmp-9WmbHn.js"],
+"names":["constructor","AmpAudio","element","console","log","$jscomp.inherits","AMP","extension","TAG","registerElement","module$extensions$amp_audio_2$0_1$amp_audio","self"]
+}

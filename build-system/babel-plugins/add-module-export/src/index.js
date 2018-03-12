@@ -28,7 +28,6 @@ module.exports = function(babel) {
 
         const ex = t.exportNamedDeclaration(declar, []);
         path.unshiftContainer('body', ex);
-        //console.log(path);
       }
     }
   };
