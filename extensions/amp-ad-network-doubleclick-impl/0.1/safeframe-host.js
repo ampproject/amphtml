@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -205,12 +206,17 @@ export class SafeframeHostApi {
           'readCookie': false,
           'writeCookie': false,
         }));
+    const ampDoc = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc());
+    const restricted = !!this.win_.document.querySelector(
+        "meta[name='referrer'][content='origin']");
     attributes['metadata'] = JSON.stringify(
         dict({
           'shared': {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
+            'canonical_url': !restricted && ampDoc.canonicalUrl,
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
