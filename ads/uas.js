@@ -25,7 +25,7 @@ import {setStyles} from '../src/style';
 function forEachOnObject(theObject, callback) {
   if (typeof theObject === 'object' && theObject !== null) {
     if (typeof callback === 'function') {
-      for (var key in theObject){
+      for (const key in theObject) {
         if (theObject.hasOwnProperty(key)) {
           callback(key, theObject[key]);
         }
@@ -56,7 +56,7 @@ export function uas(global, data) {
       data,
       ['accId', 'adUnit', 'sizes', 'width', 'height'],
       ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams',
-      'visibility']
+        'visibility']
   );
   global.Phoenix = {EQ: []};
   const uasDivId = 'uas-amp-slot';
@@ -70,7 +70,7 @@ export function uas(global, data) {
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
       data.locSrc && global.Phoenix.setInfo('LOC_SRC', data.locSrc);
-      let slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes, uasDivId);
+      const slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes, uasDivId);
       slot.setVisibility(1);
       forEachOnObject(data.targetings, function(key, value) {
         slot.setTargeting(key, value);
