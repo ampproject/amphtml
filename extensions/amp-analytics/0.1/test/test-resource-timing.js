@@ -86,14 +86,16 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
    * @param {!Array<!PerformanceResourceTiming} fakeEntries
    * @param {!JsonObject} resourceTimingSpec
    * @param {string} expectedResult
+   * @param {number=} responseAfter
    * @return {!Promise<undefined>}
    */
   const runSerializeTest = function(
-    fakeEntries, resourceTimingSpec, expectedResult) {
+    fakeEntries, resourceTimingSpec, expectedResult, responseAfter = 0) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return serializeResourceTiming(resourceTimingSpec, win).then(result => {
-      expect(result).to.equal(expectedResult);
-    });
+    return serializeResourceTiming(resourceTimingSpec, win, responseAfter)
+        .then(result => {
+          expect(result).to.equal(expectedResult);
+        });
   };
 
   beforeEach(() => {
@@ -343,5 +345,21 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     spec['encoding']['delim'] = ':';
     return runSerializeTest(
         [entry1, entry2], spec, 'foo_bar?100,500:foo_bar?700,100');
+  });
+
+  it('should only include resources downloaded after `responseAfter`', () => {
+    const entry1 = newPerformanceResourceTiming(
+        'http://foo.example.com/lib.js?v=123', 'script', 100, 200, 10 * 1000,
+        false);
+    const entry2 = newPerformanceResourceTiming(
+        'http://bar.example.com/lib.js', 'script', 200, 200, 80 * 1000, true);
+    const entry3 = newPerformanceResourceTiming(
+        'http://bar.example.com/lib.js', 'script', 300, 200, 80 * 1000, true);
+    const spec = newResourceTimingSpec();
+    spec['encoding']['entry'] = '${key}.${startTime}';
+    spec['encoding']['delim'] = '-';
+    return runSerializeTest(
+        [entry1, entry2, entry3], spec, 'foo_bar.200-foo_bar.300',
+        350 /* responseAfter */);
   });
 });
