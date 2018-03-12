@@ -70,7 +70,8 @@ export function uas(global, data) {
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
       data.locSrc && global.Phoenix.setInfo('LOC_SRC', data.locSrc);
-      const slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes, uasDivId);
+      const slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes,
+        uasDivId);
       slot.setVisibility(1);
       forEachOnObject(data.targetings, function(key, value) {
         slot.setTargeting(key, value);
