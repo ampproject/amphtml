@@ -26,7 +26,7 @@ export class MockA4AImpl extends AmpA4A {
     return Promise.resolve(TEST_URL);
   }
 
-  updatePriority() {
+  updateLayoutPriority() {
     // Do nothing.
   }
 

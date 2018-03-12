@@ -31,7 +31,7 @@ export let AmpBindMacroDef;
  */
 export class AmpBindMacro extends AMP.BaseElement {
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Loads after other content.
     return 1;
   }

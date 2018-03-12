@@ -110,7 +110,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   }
 
   /** @override  */
-  getPriority() {
+  getLayoutPriority() {
     return 3;
   }
 

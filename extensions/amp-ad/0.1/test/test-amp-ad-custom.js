@@ -97,7 +97,7 @@ describe('Amp custom ad', () => {
     expect(ad4.getFullUrl_()).to.equal(expected34);
   });
 
-  describe('#getPriority', () => {
+  describe('#getLayoutPriority', () => {
     const url = '/examples/custom.ad.example.json';
     const slot = 'myslot';
 
@@ -109,7 +109,7 @@ describe('Amp custom ad', () => {
       it('should return priority of 1', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getPriority()).to.equal(1);
+        expect(customAd.getLayoutPriority()).to.equal(1);
       });
     });
 
@@ -121,7 +121,7 @@ describe('Amp custom ad', () => {
       it('should return priority of 2', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getPriority()).to.equal(2);
+        expect(customAd.getLayoutPriority()).to.equal(2);
       });
     });
   });

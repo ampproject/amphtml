@@ -28,7 +28,7 @@ import {tryParseJson} from '../../../src/json';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Loads after other content.
     return 1;
   }

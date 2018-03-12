@@ -864,7 +864,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           minifiedCreative: '<html><body>Hello, World!</body></html>',
         };
       });
-      sandbox.stub(impl, 'updatePriority').callsFake(() => {});
+      sandbox.stub(impl, 'updateLayoutPriority').callsFake(() => {});
 
       env.expectFetch(
           'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',

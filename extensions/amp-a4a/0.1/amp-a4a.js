@@ -394,7 +394,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Priority used for scheduling preload and layout callback.  Because
     // AMP creatives will be injected as part of the promise chain created
     // within onLayoutMeasure, this is only relevant to non-AMP creatives
@@ -794,7 +794,7 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
           // Update priority.
-          this.updatePriority(0);
+          this.updateLayoutPriority(0);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);

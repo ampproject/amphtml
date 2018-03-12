@@ -163,7 +163,7 @@ describes.realWin('amp-iframe', {
           ampIframe.querySelector('i-amphtml-scroll-container');
       expect(iframe.parentNode).to.equal(scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl.getPriority()).to.equal(0);
+      expect(impl.getLayoutPriority()).to.equal(0);
       return timer.promise(50).then(() => {
         expect(ranJs).to.equal(0);
       });
@@ -217,7 +217,7 @@ describes.realWin('amp-iframe', {
             scrolling: 'no',
           });
           yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-          expect(ampIframe.implementation_.getPriority()).to.equal(2);
+          expect(ampIframe.implementation_.getLayoutPriority()).to.equal(2);
           expect(ampIframe.getAttribute('sandbox')).to.equal('allow-scripts');
           return waitForJsInIframe().then(() => {
             expect(ranJs).to.equal(1);
@@ -602,10 +602,10 @@ describes.realWin('amp-iframe', {
       expect(impl1.looksLikeTrackingIframe_()).to.be.true;
       // appended amp-iframe 10x10
       expect(impl2.looksLikeTrackingIframe_()).to.be.true;
-      expect(impl2.getPriority()).to.equal(1);
+      expect(impl2.getLayoutPriority()).to.equal(1);
       // appended amp-iframe 100x100
       expect(impl3.looksLikeTrackingIframe_()).to.be.false;
-      expect(impl3.getPriority()).to.equal(0);
+      expect(impl3.getLayoutPriority()).to.equal(0);
       yield Services.timerFor(env.win).promise(21);
       expect(doc.querySelectorAll('[amp-removed]')).to.have.length(1);
       expect(doc.querySelectorAll('iframe')).to.have.length(1);
