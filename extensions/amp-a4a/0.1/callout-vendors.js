@@ -52,6 +52,10 @@ export const RTC_VENDORS = {
     macros: ['SITE_ID'],
     disableKeyAppend: true,
   },
+  lotame: {
+    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
+    macros: ['CLIENT_ID', 'AD_NETWORK'],
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
