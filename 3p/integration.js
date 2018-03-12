@@ -65,6 +65,7 @@ import {gltfViewer} from './3d-gltf/index';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
+import {yotpo} from './yotpo';
 
 import {_ping_} from '../ads/_ping_';
 
@@ -435,6 +436,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('yieldone', yieldone);
 register('yieldpro', yieldpro);
+register('yotpo', yotpo);
 register('zedo', zedo);
 register('zergnet', zergnet);
 register('zucks', zucks);

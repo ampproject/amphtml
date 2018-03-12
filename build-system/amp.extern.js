@@ -265,6 +265,24 @@ data.hideCta;
 data.smallHeader;
 data.showFacepile;
 data.showText;
+data.productId;
+data.imageUrl;
+data.yotpoElementId;
+data.backgroudColor;
+data.reviewIds;
+data.showBottomLine;
+data.autoplayEnabled;
+data.autoplaySpeed;
+data.showNavigation;
+data.layoutScroll;
+data.spacing;
+data.hoverColor;
+data.hoverOpacity;
+data.hoverIcon;
+data.ctaText;
+data.ctaColor;
+data.appKey;
+data.widgetType;
 
 // 3p code
 var twttr;

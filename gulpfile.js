@@ -207,6 +207,7 @@ declareExtension('amp-video-service', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-vk', '0.1');
+declareExtension('amp-yotpo', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
