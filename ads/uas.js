@@ -22,11 +22,11 @@ import {setStyles} from '../src/style';
  * @param {!Object} theObject
  * @param {!Function} callback
  */
-function forEachOnObject(theObject, callback){
-  if(typeof theObject === "object" && theObject !== null){
-    if(typeof callback === "function"){
-      for(var key in theObject){
-        if(theObject.hasOwnProperty(key)){
+function forEachOnObject(theObject, callback) {
+  if (typeof theObject === 'object' && theObject !== null) {
+    if (typeof callback === 'function') {
+      for (var key in theObject){
+        if (theObject.hasOwnProperty(key)) {
           callback(key, theObject[key]);
         }
       }
@@ -53,15 +53,16 @@ function centerAd(global) {
  */
 export function uas(global, data) {
   validateData(
-    data,
-    ['accId', 'adUnit', 'sizes', 'width', 'height'], 
-    ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams', 'visibility']
+      data,
+      ['accId', 'adUnit', 'sizes', 'width', 'height'],
+      ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams',
+      'visibility']
   );
   global.Phoenix = {EQ: []};
-  const uasDivId = "uas-amp-slot";
-  global.document.write("<div id='"+uasDivId+"'></div>");
+  const uasDivId = 'uas-amp-slot';
+  global.document.write('<div id="' + uasDivId + '"></div>');
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
-    global.Phoenix.EQ.push(function(){
+    global.Phoenix.EQ.push(function() {
       global.Phoenix.enableSingleRequestCallMode();
       global.Phoenix.setInfo('ACCID', data.accId);
       global.Phoenix.setInfo('PAGEURL', global.context.location.href);
@@ -69,12 +70,12 @@ export function uas(global, data) {
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
       data.locSrc && global.Phoenix.setInfo('LOC_SRC', data.locSrc);
-      var slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes, uasDivId);
+      let slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes, uasDivId);
       slot.setVisibility(1);
-      forEachOnObject(data.targetings, function(key, value){
+      forEachOnObject(data.targetings, function(key, value) {
         slot.setTargeting(key, value);
       });
-      forEachOnObject(data.extraParams, function(key, value){
+      forEachOnObject(data.extraParams, function(key, value) {
         slot.setExtraParameters(key, value);
       });
       global.Phoenix.display(uasDivId);
