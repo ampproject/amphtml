@@ -185,11 +185,7 @@ export class IframeTransport {
             entry.attribution.forEach(attrib => {
               if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                user().error(TAG_,
-                    'Long Task: ' +
-                      `Vendor: "${this.type_}" ` +
-                      `Duration: ${entry.duration}ms ` +
-                      `Occurrences: ${this.numLongTasks_}`);
+                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
               }
             });
           }
