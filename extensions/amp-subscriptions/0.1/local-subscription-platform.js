@@ -88,7 +88,8 @@ export class LocalSubscriptionPlatform {
     this.readerIdPromise_ = null;
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
-    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
+        serviceAdapter.getDialog());
 
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
