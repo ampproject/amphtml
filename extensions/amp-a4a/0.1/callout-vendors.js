@@ -50,7 +50,7 @@ export const RTC_VENDORS = {
   prebidrubicon: {
     url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&adc=ADCID&purl=HREF',
     macros: ['REQUEST_ID'],
-    disableKeyAppend: true,v
+    disableKeyAppend: true,
   },
   indexexchange: {
     url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=HREF',
