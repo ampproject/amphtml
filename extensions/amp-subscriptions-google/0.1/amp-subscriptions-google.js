@@ -152,6 +152,20 @@ export class GoogleSubscriptionsPlatform {
       this.runtime_.showOffers();
     }
   }
+
+  /**
+   * Returns if pingback is enabled for this platform
+   * @returns {boolean}
+   */
+  isPingbackEnabled() {
+    // TODO: implement this;
+    return false;
+  }
+
+  /**
+   * Perdforms the pingback to the subscription platform
+   */
+  pingback() {}
 }
 
 

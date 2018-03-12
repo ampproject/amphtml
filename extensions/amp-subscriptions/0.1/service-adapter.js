@@ -56,17 +56,6 @@ export class ServiceAdapter {
   getDialog() {
     return this.subscriptionService_.getDialog();
   }
-
-  /**
-   * Returns if pingback is enabled for this platform
-   * @returns {boolean}
-   */
-  isPingbackEnabled() {}
-
-  /**
-   * Perdforms the pingback to the subscription platform
-   */
-  pingback() {}
 }
 
 /** @package @VisibleForTesting */

@@ -16,13 +16,17 @@
 
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
+  let win, doc;
   let ampdoc;
   let renderer;
   let entitlementsForService1;
 
   beforeEach(() => {
+    win = env.win;
+    doc = win.document;
     ampdoc = env.ampdoc;
     renderer = new LocalSubscriptionPlatformRenderer(ampdoc);
     const serviceIds = ['service1', 'service2'];
@@ -41,6 +45,58 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       renderer.render(entitlementsForService1);
       expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
       expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
+    });
+  });
+
+  describe('action rendering', () => {
+    let unrelated;
+    let actions1, actions2;
+    let elements;
+    beforeEach(() => {
+      unrelated = createElementWithAttributes(doc, 'div', {});
+      actions1 = createElementWithAttributes(doc, 'div', {
+        id: 'actions1',
+        'subscriptions-action': 'login',
+        'subscriptions-display': 'loggedIn',
+      });
+      actions2 = createElementWithAttributes(doc, 'div', {
+        id: 'actions2',
+        'subscriptions-section': 'actions',
+        'subscriptions-display': 'subscribed',
+      });
+      console.log(unrelated.innerHTML);
+      elements = [
+        actions1, actions2,
+      ];
+      elements.forEach(element => {
+        doc.body.appendChild(element);
+      });
+    });
+
+    function isDisplayed(el) {
+      return el.hasAttribute('i-amphtml-subs-display');
+    }
+
+    function displayed(array) {
+      elements.forEach(element => {
+        const shouldBeDisplayed = array.includes(element);
+        expect(isDisplayed(element)).to.equal(
+            shouldBeDisplayed,
+            'Expected ' + element.id + ' to be ' +
+            (shouldBeDisplayed ? 'displayed' : 'not displayed'));
+      });
+    }
+
+    it('should display actions and action-sections', () => {
+      return renderer.render({loggedIn: true}).then(() => {
+        displayed([actions1]);
+      });
+    });
+
+    it('should display actions and action-sections', () => {
+      return renderer.render({subscribed: true}).then(() => {
+        displayed([actions2]);
+      });
     });
   });
 });

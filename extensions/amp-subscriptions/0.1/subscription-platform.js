@@ -41,6 +41,17 @@ export class SubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} unusedRenderState
    */
   activate(unusedRenderState) {}
+
+  /**
+   * Returns if pingback is enabled for this platform
+   * @returns {boolean}
+   */
+  isPingbackEnabled() {}
+
+  /**
+   * Perdforms the pingback to the subscription platform
+   */
+  pingback() {}
 }
 
 /**

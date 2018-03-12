@@ -270,6 +270,9 @@ export class SubscriptionService {
           'Selected service not registered');
 
       selectedPlatform.activate(renderState);
+      if (selectedPlatform.isPingbackEnabled()) {
+        selectedPlatform.pingback();
+      }
     });
   }
 

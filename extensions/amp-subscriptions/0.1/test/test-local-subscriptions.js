@@ -15,10 +15,10 @@
  */
 
 import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import { Entitlement } from '../entitlement';
 
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
