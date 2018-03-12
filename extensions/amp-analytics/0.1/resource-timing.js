@@ -246,17 +246,18 @@ function serialize(entries, resourceTimingSpec, win) {
  * Serializes resource timing entries according to the resource timing spec.
  * @param {!JsonObject} resourceTimingSpec
  * @param {!Window} win
- * @param {number} A timestamp (relative to navigationStart) for filtering
- *   resource timing entries. Only entries that have fully downloaded after this
- *   time will be included.
+ * @param {number} responseAfter A timestamp (relative to navigationStart) for
+ *   filtering resource timing entries. Only entries that have fully downloaded
+ *   after this time will be included.
  * @return {!Promise<string>}
  */
-export function serializeResourceTiming(resourceTimingSpec, win, after) {
+export function serializeResourceTiming(
+    resourceTimingSpec, win, responseAfter) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
     return Promise.resolve('');
   }
   const entries = getResourceTimingEntries(win)
-      .filter(e => e.startTime + e.duration >= after);
+      .filter(e => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }

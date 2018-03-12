@@ -693,9 +693,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   getAndUpdateLastReportedTime_(resourceTimingSpec) {
-    const lastReportedVariable = 'lastReported';
+    const lastReportedVariable = 'responseAfter';
     const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
-    resourceTimingSpec[lastReportedVariable] = now();
+    // Take the max time in case the user specified "responseAfter.
+    resourceTimingSpec[lastReportedVariable] = Math.max(now(), lastTime);
     return lastTime;
   }
 
