@@ -42,6 +42,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
+        pingbackUrl: 'https://lipsum.com/pingback',
       },
       {
         serviceId: 'google.subscription',
