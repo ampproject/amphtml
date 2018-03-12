@@ -28,6 +28,9 @@ import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
 
+/**
+ * @abstract
+ */
 export class AmpAdNetworkBase extends AMP.BaseElement {
 
   constructor(element) {
@@ -63,73 +66,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * @param {!./amp-ad-type-defs.FailureType} failureType
-   * @param {*=} error
-   */
-  handleFailure_(failureType, error) {
-    const recoveryMode = this.recoveryModes_[failureType];
-    if (error) {
-      dev().warn(TAG, error);
-    }
-    switch (recoveryMode.type) {
-      case RecoveryModeTypes.COLLAPSE:
-        this.forceCollapse_();
-        break;
-      case RecoveryModeTypes.RETRY:
-        Services.timerFor(this.win).delay(
-            () => this.sendRequest_(), recoveryMode.retryTimer || 0);
-        break;
-      case RecoveryModeTypes.VALIDATOR_FALLBACK:
-        dev().assert(recoveryMode.fallback,
-            'Fallback validator never specified for recovery mode!');
-        this.invokeValidator_(recoveryMode.fallback);
-        break;
-      case RecoveryModeTypes.FORCE_RENDERER:
-      case RecoveryModeTypes.RENDERER_FALLBACK:
-        dev().assert(recoveryMode.fallback,
-            'Fallback renderer never specified for recovery mode!');
-        this.invokeRenderer_(recoveryMode.fallback, this.context_);
-        break;
-      default:
-        dev().error(TAG, 'Invalid recovery mode!');
-    }
-  }
-
-  /**
-   * @param {!./amp-ad-type-defs.FailureType} type
-   * @param {!./amp-ad-type-defs.RecoveryMode} mode
-   */
-  checkAndSetRecoveryMode_(type, mode) {
-    dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
-        `Recovery mode ${mode.type} not allowed for failure type ${type}!`);
-    this.recoveryModes_[type] = mode;
-  }
-
-  /**
-   * @param {!./amp-ad-type-defs.FailureType} failureType
    * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
    * @param {number=} retryTimer
    * @param {string=} fallback Validator/Renderer fallback.
    */
-  registerRecoveryMode(failureType, recoveryType, retryTimer, fallback) {
+  onFailure(failureType, recoveryType, retryTimer, fallback) {
     if (this.recoveryModes_[failureType]) {
       dev().warn(TAG,
           `Recovery mode for failure type ${failureType} already registered!`);
     }
     this.checkAndSetRecoveryMode_(
         failureType, {type: recoveryType, retryTimer, fallback});
-  }
-
-  /**
-   * @param {string} resultType
-   * @param {!./amp-ad-render.Renderer} renderer
-   * @final
-   */
-  registerRenderer(resultType, renderer) {
-    if (this.renderers_[resultType]) {
-      dev().warn(TAG,
-          `Rendering mode already registered for type '${resultType}'`);
-    }
-    this.renderers_[resultType] = renderer;
   }
 
   /**
@@ -145,20 +92,31 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * Collapses slot by setting its size to 0x0.
-   * @private
+   * @param {!./amp-ad-render.Renderer} renderer
+   * @param {string} type
+   * @final
    */
-  forceCollapse_() {
-    this.attemptChangeSize(0, 0);
+  registerRenderer(renderer, type) {
+    if (this.renderers_[type]) {
+      dev().warn(TAG, `Rendering mode already registered for type '${type}'`);
+    }
+    this.renderers_[type] = renderer;
   }
 
   /**
    * @return {string} The finalized ad request URL.
    * @protected
+   * @abstract
    */
   getRequestUrl() {
-    return '';
+    // Subclass must override.
   }
+
+  /** @param {boolean} isReusable */
+  setIsReusable(isReusable) {
+    this.isReusable_ = isReusable;
+  }
+
 
   /**
    * Processes the ad response as soon as the XHR request returns. This can be
@@ -169,7 +127,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleAdResponse_(response) {
     if (!response.arrayBuffer) {
-      this.handleFailure_(FailureTypes.MISSING_ARRAYBUFFER);
+      this.handleFailure_(FailureTypes.NO_RESPONSE);
       return;
     }
     response.arrayBuffer().then(unvalidatedBytes => {
@@ -229,6 +187,57 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {*=} error
+   */
+  handleFailure_(failureType, error) {
+    const recoveryMode = this.recoveryModes_[failureType];
+    if (error) {
+      dev().warn(TAG, error);
+    }
+    switch (recoveryMode.type) {
+      case RecoveryModeTypes.COLLAPSE:
+        this.forceCollapse_();
+        break;
+      case RecoveryModeTypes.RETRY:
+        Services.timerFor(this.win).delay(
+            () => this.sendRequest_(), recoveryMode.retryTimer || 0);
+        break;
+      case RecoveryModeTypes.VALIDATOR_FALLBACK:
+        dev().assert(recoveryMode.fallback,
+            'Fallback validator never specified for recovery mode!');
+        this.invokeValidator_(recoveryMode.fallback);
+        break;
+      case RecoveryModeTypes.FORCE_RENDERER:
+      case RecoveryModeTypes.RENDERER_FALLBACK:
+        dev().assert(recoveryMode.fallback,
+            'Fallback renderer never specified for recovery mode!');
+        this.invokeRenderer_(recoveryMode.fallback, this.context_);
+        break;
+      default:
+        dev().error(TAG, 'Invalid recovery mode!');
+    }
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.FailureType} type
+   * @param {!./amp-ad-type-defs.RecoveryMode} mode
+   */
+  checkAndSetRecoveryMode_(type, mode) {
+    dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
+        `Recovery mode ${mode.type} not allowed for failure type ${type}!`);
+    this.recoveryModes_[type] = mode;
+  }
+
+  /**
+   * Collapses slot by setting its size to 0x0.
+   * @private
+   */
+  forceCollapse_() {
+    this.attemptChangeSize(0, 0);
+  }
+
+  /**
    * Sends ad request.
    * @private
    */
@@ -240,11 +249,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           .then(response => this.handleAdResponse_(response))
           .catch(error => this.handleFailure_(FailureTypes.SENDXHR, error));
     });
-  }
-
-  /** @param {boolean} isReusable */
-  setIsReusable(isReusable) {
-    this.isReusable_ = isReusable;
   }
 
   /** @override */

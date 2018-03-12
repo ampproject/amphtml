@@ -25,6 +25,9 @@ import {ValidatorResult} from './amp-ad-type-defs';
 const validator = new TemplateValidator();
 const renderer = new TemplateRenderer();
 
+/**
+ * @abstract
+ */
 export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   /**
    * @param {!Element} element
@@ -33,6 +36,6 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
     super(element);
 
     this.registerValidator(validator);
-    this.registerRenderer(ValidatorResult.AMP, renderer);
+    this.registerRenderer(renderer, ValidatorResult.AMP);
   }
 }
