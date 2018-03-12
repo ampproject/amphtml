@@ -271,6 +271,11 @@ const EXPERIMENTS = [
     id: 'inabox-rov',
     name: 'Extensions layout independent of viewport location if inabox.',
   },
+  {
+    id: 'amp-consent',
+    name: 'Enables the amp-consent extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
 ];
 
 if (getMode().localDev) {
