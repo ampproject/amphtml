@@ -1015,7 +1015,8 @@ describe('amp-a4a', () => {
             rtcResponse);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
-        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
+        const updateLayoutPriorityStub = sandbox.stub(
+            a4a, 'updateLayoutPriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const preloadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'preloadExtension');
@@ -1070,8 +1071,8 @@ describe('amp-a4a', () => {
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                 .to.be.calledOnce;
-            expect(updatePriorityStub).to.be.calledOnce;
-            expect(updatePriorityStub.args[0][0]).to.equal(0);
+            expect(updateLayoutPriorityStub).to.be.calledOnce;
+            expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
@@ -1162,7 +1163,8 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
+        const updateLayoutPriorityStub = sandbox.stub(
+            a4a, 'updateLayoutPriority');
         if (!isValidCreative) {
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
@@ -1193,8 +1195,8 @@ describe('amp-a4a', () => {
               expect(iframe.getAttribute('src')).to.be.null;
               expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                   .to.be.calledOnce;
-              expect(updatePriorityStub).to.be.calledOnce;
-              expect(updatePriorityStub.args[0][0]).to.equal(0);
+              expect(updateLayoutPriorityStub).to.be.calledOnce;
+              expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
@@ -1202,7 +1204,7 @@ describe('amp-a4a', () => {
                          '&__amp_source_origin=about%3Asrcdoc');
               expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
               if (!opt_failAmpRender) {
-                expect(updatePriorityStub).to.not.be.called;
+                expect(updateLayoutPriorityStub).to.not.be.called;
               }
             }
           });
@@ -1749,7 +1751,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#getPriority', () => {
+  describe('#getLayoutPriority', () => {
     describes.realWin('with shadow AmpDoc', {
       amp: {
         ampdoc: 'shadow',
@@ -1759,7 +1761,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getPriority()).to.equal(1);
+        expect(a4a.getLayoutPriority()).to.equal(1);
       });
     });
 
@@ -1772,7 +1774,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getPriority()).to.equal(2);
+        expect(a4a.getLayoutPriority()).to.equal(2);
       });
     });
   });

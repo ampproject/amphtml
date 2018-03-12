@@ -427,14 +427,14 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /** @override  */
-  getPriority() {
+  getLayoutPriority() {
     if (this.isAdLike_) {
       return 2; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
       return 1;
     }
-    return super.getPriority();
+    return super.getLayoutPriority();
   }
 
   /** @override */

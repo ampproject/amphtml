@@ -525,7 +525,7 @@ describes.realWin('amp-ad-3p-impl', {
   });
 });
 
-describe('#getPriority', () => {
+describe('#getLayoutPriority', () => {
   describes.realWin('with shadow AmpDoc', {
     amp: {
       ampdoc: 'shadow',
@@ -533,7 +533,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 1', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(1);
+      expect(ad3p.getLayoutPriority()).to.equal(1);
     });
   });
 
@@ -544,7 +544,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 2', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(2);
+      expect(ad3p.getLayoutPriority()).to.equal(2);
     });
   });
 });

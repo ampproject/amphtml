@@ -42,9 +42,10 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should delegate update priority to resources', () => {
     const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
-    const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
-    element.updatePriority(1);
-    expect(updatePriorityStub).to.be.calledOnce;
+    const updateLayoutPriorityStub = sandbox.stub(
+        resources, 'updateLayoutPriority');
+    element.updateLayoutPriority(1);
+    expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 
   it('propagateAttributes - niente', () => {
