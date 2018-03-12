@@ -54,7 +54,7 @@ export class LocalSubscriptionPlatformRenderer {
    */
   renderActions_(renderState) {
     return this.ampdoc_.whenReady().then(() => {
-      // Find the first matching dialog.
+      // Find the matching actions and sections and make them visible if evalutes to true.
       const querySelectors =
           '[subscriptions-action], [subscriptions-section="actions"],'
               + ' [subscriptions-actions]';
