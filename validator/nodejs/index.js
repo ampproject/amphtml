@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @license
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -387,7 +386,7 @@ function logValidationResult(filename, validationResult, color) {
 /**
  * Main entry point into the command line tool.
  */
-function main() {
+function cli() {
   program
       .usage(
           '[options] <fileOrUrlOrMinus...>\n\n' +
@@ -506,7 +505,4 @@ function main() {
             });
       });
 }
-
-if (require.main === module) {
-  main();
-}
+exports.cli = cli;
