@@ -68,8 +68,10 @@ export class ConsentPolicyManager {
     this.ConsentStateManagerPromise_.then(manager => {
       const itemsToWait = Object.keys(config['itemsToWait']);
       for (let i = 0; i < itemsToWait.length; i++) {
-        manager.onConsentStateChange(itemsToWait[i], state => {
-          this.consentStateChangeHandler_(state);
+        manager.whenConsentReady(itemsToWait[i]).then(() => {
+          manager.onConsentStateChange(itemsToWait[i], state => {
+            this.consentStateChangeHandler_(state);
+          });
         });
       }
     });

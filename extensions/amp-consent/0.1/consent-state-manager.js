@@ -39,6 +39,12 @@ export class ConsentStateManager {
 
     /** @private {!Object<string, ?Observable>}*/
     this.consentChangeObservable_ = {};
+
+    /** @private {!Object<string, function()>} */
+    this.consentReadyResolver_ = {};
+
+    /** @private {!Object<string, Promise>} */
+    this.consentReadyPromise_ = {};
   }
 
   /**
@@ -50,6 +56,11 @@ export class ConsentStateManager {
         `${TAG}: instance already registered`);
     this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
     this.consentChangeObservable_[instanceId] = new Observable();
+    if (this.consentReadyResolver_[instanceId]) {
+      this.consentReadyResolver_();
+      this.consentReadyPromise_[instanceId] = null;
+      this.consentReadyResolver_[instanceId] = null;
+    }
   }
 
   /**
@@ -110,6 +121,18 @@ export class ConsentStateManager {
       handler(state);
     });
     return unlistener;
+  }
+
+  whenConsentReady(instanceId) {
+    if (this.instances_[instanceId]) {
+      return Promise.resolve();
+    }
+    if (!this.consentReadyPromise_[instanceId]) {
+      this.consentReadyPromise_[instanceId] = new Promise(resolve => {
+        this.consentReadyResolver_[instanceId] = resolve;
+      });
+    }
+    return this.consentReadyPromise_[instanceId];
   }
 }
 

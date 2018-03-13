@@ -155,7 +155,6 @@ export class AmpConsent extends AMP.BaseElement {
               'consentInstanceId': instanceId,
               'consentState': localState,
             });
-
             // TODO: Decide which request method/Content Type to use.
             const init = {
               headers: {
@@ -220,7 +219,6 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentUIRequired_[instanceId]) {
       return;
     }
-    this.consentStateManager_.updateConsentInstanceState(instanceId, 2);
   }
 }
 
