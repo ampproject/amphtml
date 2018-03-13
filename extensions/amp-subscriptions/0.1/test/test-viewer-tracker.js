@@ -1,4 +1,5 @@
 import { ViewerTracker } from "../viewer-tracker";
+import { Observable } from "../../../../src/observable";
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -19,31 +20,31 @@ import { ViewerTracker } from "../viewer-tracker";
 describes.realWin('ViewerTracker', {amp: true}, env => {
   let ampdoc;
   let viewTracker;
+  let clock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     viewTracker = new ViewerTracker(ampdoc);
+    clock = sandbox.useFakeTimers();
   });
 
   describe('scheduleView', () => {
     it('should call `reportWhenViewed_`, if viewer is visible' ,() => {
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
       sandbox.stub(viewTracker.viewer_, 'isVisible').callsFake(() => true);
-      viewTracker.scheduleView();
-      return ampdoc.whenReady().then(() => {
+      return viewTracker.scheduleView().then(() => {
         expect(whenViewedStub).to.be.calledOnce;
       });
     });
 
-    it('should call `reportWhenViewed_`, when viewer gets visible' ,() => {
+    it('should call `reportWhenViewed_`, when viewer gets visible' , () => {
       let visibleState = false;
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
       const visibilityChangedStub =
           sandbox.stub(viewTracker.viewer_, 'onVisibilityChanged');
       sandbox.stub(viewTracker.viewer_, 'isVisible')
           .callsFake(() => visibleState);
-      viewTracker.scheduleView();
-      return ampdoc.whenReady().then(() => {
+      return viewTracker.scheduleView().then(() => {
         expect(whenViewedStub).to.not.be.calledOnce;
         expect(visibilityChangedStub).to.be.calledOnce;
         const callback = visibilityChangedStub.getCall(0).args[0];
@@ -57,9 +58,42 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
 
   describe('reportWhenViewed_', () => {
     it('should call whenViewed_', () => {
-      const whenViewedStub = sandbox.stub(viewTracker, 'whenViewed_');
+      const whenViewedStub = sandbox.stub(viewTracker, 'whenViewed_')
+          .callsFake(() => Promise.resolve());
       viewTracker.reportWhenViewed_(2000);
       expect(whenViewedStub).to.be.calledOnce;
+    });
+  });
+
+  describe('whenViewed_', () => {
+    it('should register "viewed" signal after timeout', () => {
+      const viewPromise = viewTracker.whenViewed_(1000);
+      clock.tick(1001);
+      return viewPromise;
+    });
+
+    it('should register "viewed" signal after scroll', () => {
+      const scrolled = new Observable();
+      viewTracker.viewport_ = {
+        onScroll: callback => scrolled.add(callback),
+      };
+      const viewPromise = viewTracker.whenViewed_(2000);
+      scrolled.fire();
+      return viewPromise;
+    });
+
+    it('should register "viewed" signal after click', () => {
+      const viewPromise = viewTracker.whenViewed_(2000);
+      let clickEvent;
+      if (document.createEvent) {
+        clickEvent = document.createEvent('MouseEvent');
+        clickEvent.initMouseEvent('click', true, true, window, 1);
+      } else {
+        clickEvent = document.createEventObject();
+        clickEvent.type = 'click';
+      }
+      ampdoc.getRootNode().dispatchEvent(clickEvent);
+      return viewPromise;
     });
   });
 });
