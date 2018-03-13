@@ -597,7 +597,11 @@ export function user(opt_element) {
  */
 function getUserLogger(suffix) {
   if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
+    const errorMsg = 'failed to call initLogConstructor.' +
+          (getMode().test || getMode().localDev) ?
+          ' Run "gulp clean && gulp css && gulp build" and try again' :
+          '';
+    throw new Error(errorMsg);
   }
   return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
@@ -623,7 +627,11 @@ export function dev() {
     return logs.dev;
   }
   if (!logConstructor) {
-    throw new Error('failed to call initLogConstructor');
+    const errorMsg = 'failed to call initLogConstructor' +
+          (getMode().test || getMode().localDev) ?
+          ' Run "gulp clean && gulp css && gulp build" and try again' :
+          '';
+    throw new Error(errorMsg);
   }
   return logs.dev = new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
