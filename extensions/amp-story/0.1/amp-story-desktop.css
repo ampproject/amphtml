@@ -297,7 +297,7 @@ amp-story[standalone][desktop] {
 }
 
 /* Top bar */
-.i-amphtml-story-top {
+div.i-amphtml-story-top {
   position: relative!important;
   display: block!important;
   height: 96px!important;
@@ -334,6 +334,7 @@ amp-story[standalone][desktop] {
   letter-spacing: .5px!important;
   margin: auto!important;
   color:#fff!important;
+  box-sizing: initial !important;
 }
 
 /* background for the share box */
@@ -345,6 +346,7 @@ amp-story[standalone][desktop] {
   padding: 0 16px!important;
   background-color: rgba(255, 255, 255, .2)!important;
   border-radius: 500px!important;
+  box-sizing: initial !important;
   transition: width 300ms ease-in-out!important;
   right: 0!important;
 }
