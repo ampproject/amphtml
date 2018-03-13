@@ -151,17 +151,16 @@ export class DoubleclickA4aEligibility {
     }
     let experimentId;
     const urlExperimentId = extractUrlExperimentId(win, element) || '';
-    if (hasUSDRD && (!urlExperimentId ||
-          ![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
-            DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
-              URL_EXPERIMENT_MAPPING[urlExperimentId]))) {
+    if (hasUSDRD &&
+        ![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+          DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
+              URL_EXPERIMENT_MAPPING[urlExperimentId])) {
       return false;
     }
     if (useRemoteHtml && !element.getAttribute('rtc-config') &&
-        (!urlExperimentId ||
-         ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
-           DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
-             URL_EXPERIMENT_MAPPING[urlExperimentId]))) {
+        ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+          DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
+              URL_EXPERIMENT_MAPPING[urlExperimentId])) {
       return false;
     }
     if (!this.isCdnProxy(win)) {
