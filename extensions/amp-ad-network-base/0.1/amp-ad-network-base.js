@@ -16,9 +16,8 @@
 
 import {AmpAdContext} from './amp-ad-context';
 import {
-  FailureTypes,
-  RecoveryModeTypes,
-  ValidRecoveryModeTypes,
+  FailureType,
+  RecoveryModeType,
 } from './amp-ad-type-defs';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
@@ -36,14 +35,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Object<string, !./amp-ad-render.Renderer>} */
-    this.renderers_ = map({});
+    /** @private {Object<string, !./amp-ad-type-defs.Renderer>} */
+    this.renderers_ = map();
 
-    /** @private {Object<string, !./amp-ad-render.Validator>} */
-    this.validators_ = map({});
+    /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
+    this.validators_ = map();
 
-    /** @private {Object<./amp-ad-type-defs.FailureType, !./amp-ad-type-defs.RecoveryMode>} */
-    this.recoveryModes_ = map({});
+    /** @private {Object<string, string>} */
+    this.recoveryModes_ = map();
 
     /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = null;
@@ -59,29 +58,32 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.isReusable_ = false;
 
     // Register default error modes.
-    for (const failureType in FailureTypes) {
-      this.recoveryModes_[failureType] = RecoveryModeTypes.COLLAPSE;
+    for (const failureType in FailureType) {
+      this.recoveryModes_[failureType] = RecoveryModeType.COLLAPSE;
     }
+
+    /**
+     * Number of times to retry a failed request. Zero by default.
+     * @type {number}
+     */
+    this.retryLimit_ = 0;
   }
 
   /**
-   * @param {!./amp-ad-type-defs.FailureType} failureType
-   * @param {!./amp-ad-type-defs.RecoveryModeType} recoveryType
-   * @param {number=} retryTimer
-   * @param {string=} fallback Validator/Renderer fallback.
+   * @param {string} failure
+   * @param {string} recovery
    * @final
    */
-  onFailure(failureType, recoveryType, retryTimer, fallback) {
-    if (this.recoveryModes_[failureType]) {
+  onFailure(failure, recovery) {
+    if (this.recoveryModes_[failure]) {
       dev().warn(TAG,
-          `Recovery mode for failure type ${failureType} already registered!`);
+          `Recovery mode for failure type ${failure} already registered!`);
     }
-    this.checkAndSetRecoveryMode_(
-        failureType, {type: recoveryType, retryTimer, fallback});
+    this.recoveryModes_[failure] = recovery;
   }
 
   /**
-   * @param {!./amp-ad-render.Validator} validator
+   * @param {!./amp-ad-type-defs.Validator} validator
    * @param {string=} type
    * @final
    */
@@ -93,7 +95,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-render.Renderer} renderer
+   * @param {!./amp-ad-type-defs.Renderer} renderer
    * @param {string} type
    * @final
    */
@@ -118,6 +120,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.isReusable_ = isReusable;
   }
 
+  /** @param {number} retries */
+  setRequestRetries(retries) {
+    this.retryLimit_ = retries;
+  }
+
 
   /**
    * Processes the ad response as soon as the XHR request returns. This can be
@@ -128,7 +135,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   handleAdResponse_(response) {
     if (!response.arrayBuffer) {
-      this.handleFailure_(FailureTypes.NO_RESPONSE);
+      this.handleFailure_(FailureType.INVALID_RESPONSE);
       return;
     }
     response.arrayBuffer().then(unvalidatedBytes => {
@@ -154,11 +161,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         .then(context => {
           this.handleValidatorResponse_(context);
           if (!this.isReusable_) {
-            this.validators_ = map({});
+            this.validators_ = map();
           }
         })
         .catch(error =>
-          this.handleFailure_(FailureTypes.VALIDATOR_ERROR, error));
+          this.handleFailure_(FailureType.VALIDATOR_ERROR, error));
   }
 
   /**
@@ -184,15 +191,15 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     renderer.render(context, this)
         .then(unusedContext => {
           if (!this.isReusable_) {
-            this.renderers_ = map({});
+            this.renderers_ = map();
           }
         })
         .catch(error =>
-          this.handleFailure_(FailureTypes.RENDERER_ERROR, error));
+          this.handleFailure_(FailureType.RENDERER_ERROR, error));
   }
 
   /**
-   * @param {!./amp-ad-type-defs.FailureType} failureType
+   * @param {string} failureType
    * @param {*=} error
    * @private
    */
@@ -202,38 +209,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       dev().warn(TAG, error);
     }
     switch (recoveryMode.type) {
-      case RecoveryModeTypes.COLLAPSE:
+      case RecoveryModeType.COLLAPSE:
         this.forceCollapse_();
         break;
-      case RecoveryModeTypes.RETRY:
-        Services.timerFor(this.win).delay(
-            () => this.sendRequest_(), recoveryMode.retryTimer || 0);
-        break;
-      case RecoveryModeTypes.VALIDATOR_FALLBACK:
-        dev().assert(recoveryMode.fallback,
-            'Fallback validator never specified for recovery mode!');
-        this.invokeValidator_(recoveryMode.fallback);
-        break;
-      case RecoveryModeTypes.FORCE_RENDERER:
-      case RecoveryModeTypes.RENDERER_FALLBACK:
-        dev().assert(recoveryMode.fallback,
-            'Fallback renderer never specified for recovery mode!');
-        this.invokeRenderer_(recoveryMode.fallback, this.context_);
+      case RecoveryModeType.RETRY:
+        if (this.retryLimit_--) {
+          this.sendRequest_();
+        }
         break;
       default:
         dev().error(TAG, 'Invalid recovery mode!');
     }
-  }
-
-  /**
-   * @param {!./amp-ad-type-defs.FailureType} type
-   * @param {!./amp-ad-type-defs.RecoveryMode} mode
-   * @private
-   */
-  checkAndSetRecoveryMode_(type, mode) {
-    dev().assert(ValidRecoveryModeTypes.indexOf(mode.type) >= 0,
-        `Recovery mode ${mode.type} not allowed for failure type ${type}!`);
-    this.recoveryModes_[type] = mode;
   }
 
   /**
@@ -254,7 +240,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       this.context_.setRequestUrl(url);
       sendXhrRequest(url, this.win)
           .then(response => this.handleAdResponse_(response))
-          .catch(error => this.handleFailure_(FailureTypes.SENDXHR, error));
+          .catch(error =>
+            this.handleFailure_(FailureType.REQUEST_ERROR, error));
     });
   }
 
