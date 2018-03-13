@@ -810,7 +810,7 @@ export const adConfig = {
   },
 
   tracdelight: {
-    prefetch: 'https://localhost:3000/tracdelight-bundle.js',
+    prefetch: 'https://scripts.tracdelight.com/amp.js',
   },
 
   triplelift: {},

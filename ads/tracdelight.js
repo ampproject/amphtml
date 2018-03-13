@@ -26,5 +26,5 @@ export function tracdelight(global, data) {
   global.widget_id = data.widget_id;
   global.access_key = data.access_key;
   global.mode = data.mode;
-  writeScript(global, 'https://localhost:3000/tracdelight-bundle.js');
+  writeScript(global, 'https://scripts.tracdelight.com/amp.js');
 }
