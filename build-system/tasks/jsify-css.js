@@ -16,10 +16,11 @@
 'use strict';
 
 
-const $$ = require('gulp-load-plugins')();
 const autoprefixer = require('autoprefixer');
-let cssnano = require('cssnano');
+const colors = require('ansi-colors');
+const cssnano = require('cssnano');
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
 
@@ -36,21 +37,43 @@ const cssprefixer = autoprefixer({
   ],
 });
 
-// See http://cssnano.co/optimisations/ for full list.
-// We try and turn off any optimization that is marked unsafe.
-cssnano = cssnano({
+const cssNanoDefaultOptions = {
   autoprefixer: false,
   convertValues: false,
   discardUnused: false,
+  cssDeclarationSorter: false,
   // `mergeIdents` this is only unsafe if you rely on those animation names in JavaScript.
   mergeIdents: true,
   reduceIdents: false,
+  reduceInitial: false,
   zindex: false,
   svgo: {
     encode: true,
   },
-});
+};
 
+/**
+ * Css transformations to target file using postcss.
+
+ * @param {string} filename css file
+ * @param {!Object=} opt_cssnano cssnano options
+ * @return {!Promise<string>} that resolves with the css content after
+ *    processing
+ */
+const transformCss = exports.transformCss = function(filename, opt_cssnano) {
+  opt_cssnano = opt_cssnano || Object.create(null);
+  // See http://cssnano.co/optimisations/ for full list.
+  // We try and turn off any optimization that is marked unsafe.
+  const cssnanoOptions = Object.assign(Object.create(null),
+      cssNanoDefaultOptions, opt_cssnano);
+  const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
+
+  const css = fs.readFileSync(filename, 'utf8');
+  const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
+  return postcss(transformers).process(css.toString(), {
+    'from': filename,
+  });
+};
 
 /**
  * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
@@ -62,13 +85,9 @@ cssnano = cssnano({
  *    processing
  */
 exports.jsifyCssAsync = function(filename) {
-  const css = fs.readFileSync(filename, 'utf8');
-  const transformers = [cssprefixer, cssnano];
-  return postcss(transformers).use(postcssImport).process(css.toString(), {
-    'from': filename,
-  }).then(function(result) {
+  return transformCss(filename).then(function(result) {
     result.warnings().forEach(function(warn) {
-      $$.util.log($$.util.colors.red(warn.toString()));
+      log(colors.red(warn.toString()));
     });
     const css = result.css;
     return css + '\n/*# sourceURL=/' + filename + '*/';

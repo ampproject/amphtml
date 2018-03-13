@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Gestures} from '../../src/gesture';
-import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
-    TapzoomRecognizer} from '../../src/gesture-recognizers';
 import * as sinon from 'sinon';
+import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
+  TapzoomRecognizer} from '../../src/gesture-recognizers';
+import {Gestures} from '../../src/gesture';
 
 
 describe('TapRecognizer', () => {
@@ -622,10 +622,11 @@ describe('PinchRecognizer', () => {
   }
 
 
-  it('should deny single-point touchstart', () => {
+  it('should wait and listen on single-point touchstart', () => {
+    gesturesMock.expects('signalReady_').never();
     const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
-    expect(res).to.equal(false);
+    expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(0);
     expect(recognizer.startY1_).to.equal(0);
     expect(recognizer.startX2_).to.equal(0);
@@ -635,7 +636,7 @@ describe('PinchRecognizer', () => {
   it('should allow two-point touchstart', () => {
     const res = recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
     expect(recognizer.startY1_).to.equal(80);
@@ -648,7 +649,7 @@ describe('PinchRecognizer', () => {
     gesturesMock.expects('signalReady_').never();
     let res = recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
     expect(recognizer.startY1_).to.equal(80);
@@ -656,11 +657,11 @@ describe('PinchRecognizer', () => {
     expect(recognizer.startY2_).to.equal(120);
 
     res = recognizer.onTouchMove({touches:
-    [{clientX: 88, clientY: 78},
-         {clientX: 112, clientY: 122}]});
+    [{clientX: 89, clientY: 79},
+      {clientX: 112, clientY: 122}]});
     expect(res).to.equal(true);
-    expect(recognizer.lastX1_).to.equal(88);
-    expect(recognizer.lastY1_).to.equal(78);
+    expect(recognizer.lastX1_).to.equal(89);
+    expect(recognizer.lastY1_).to.equal(79);
     expect(recognizer.lastX2_).to.equal(112);
     expect(recognizer.lastY2_).to.equal(122);
   });
@@ -670,12 +671,12 @@ describe('PinchRecognizer', () => {
 
     let res = recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
 
     res = recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+      {clientX: 120, clientY: 130}]});
     expect(res).to.equal(true);
   });
 
@@ -683,19 +684,19 @@ describe('PinchRecognizer', () => {
     gesturesMock.expects('signalReady_').never();
     let res = recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
 
     // Move in the same direction by 2px.
     res = recognizer.onTouchMove({touches:
     [{clientX: 88, clientY: 78},
-         {clientX: 108, clientY: 118}]});
+      {clientX: 108, clientY: 118}]});
     expect(res).to.equal(true);
 
     // Move in the same direction by 10px.
     res = recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 100, clientY: 110}]});
+      {clientX: 100, clientY: 110}]});
     expect(res).to.equal(false);
   });
 
@@ -704,10 +705,10 @@ describe('PinchRecognizer', () => {
     clock.tick(1);
     recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+      {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === true && data.last === false &&
@@ -744,10 +745,10 @@ describe('PinchRecognizer', () => {
     clock.tick(1);
     recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+      {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(unusedData => true), null).once();
     clock.tick(10);
@@ -755,7 +756,7 @@ describe('PinchRecognizer', () => {
 
     const event = {touches:
     [{clientX: 70, clientY: 60},
-         {clientX: 130, clientY: 140}]};
+      {clientX: 130, clientY: 140}]};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === false &&
@@ -778,10 +779,10 @@ describe('PinchRecognizer', () => {
     clock.tick(1);
     recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+      {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(unusedData => true), null).once();
     clock.tick(10);
@@ -808,10 +809,10 @@ describe('PinchRecognizer', () => {
     clock.tick(1);
     recognizer.onTouchStart({touches:
     [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+      {clientX: 110, clientY: 120}]});
     recognizer.onTouchMove({touches:
     [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+      {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(unusedData => true), null).once();
     clock.tick(10);

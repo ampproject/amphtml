@@ -16,11 +16,29 @@
 import {adsense} from '../adsense';
 
 describes.realWin('adsenseDelayedFetch', {}, env => {
-  let containerElem;
+
+  let containerElem, data;
+  const canonicalUrl = 'https://foo.com?some=page';
+  const clientId = 'some_clientId';
+  const pageViewId = 'some_pageViewId';
+  const elementAttributes = {
+    'adChannel': 'data-ad-channel',
+    'adClient': 'data-ad-client',
+    'adSlot': 'data-ad-slot',
+    'adHost': 'data-ad-host',
+    'adtest': 'data-adtest',
+    'tagOrigin': 'data-tag-origin',
+  };
+
   beforeEach(() => {
     containerElem = env.win.document.createElement('div');
     containerElem.setAttribute('id', 'c');
     env.win.document.body.appendChild(containerElem);
+    env.win.context = {canonicalUrl, clientId, pageViewId};
+    data = {};
+    Object.keys(elementAttributes).forEach(
+        attr => data[attr] = `some-${attr}`);
+    data['experimentId'] = '1234,567,890';
   });
 
   it('should create script/ins and call adsbygoogle push', () => {
@@ -31,23 +49,6 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
         pushArg = arg;
       },
     };
-    const canonicalUrl = 'https://foo.com?some=page';
-    const clientId = 'some_clientId';
-    const pageViewId = 'some_pageViewId';
-    env.win.context = {canonicalUrl, clientId, pageViewId};
-    const elementAttributes = {
-      'adChannel': 'data-ad-channel',
-      'adClient': 'data-ad-client',
-      'adSlot': 'data-ad-slot',
-      'adHost': 'data-ad-host',
-      'adtest': 'data-adtest',
-      'tagOrigin': 'data-tag-origin',
-    };
-    const data = {};
-    Object.keys(elementAttributes).forEach(
-        attr => data[attr] = `some-${attr}`);
-    data['experimentId'] = '1234,567,890';
-
     adsense(env.win, data);
     expect(env.win.document.querySelector('script[src=' +
         '"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'))
@@ -70,5 +71,27 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       cid: clientId,
       hid: pageViewId,
     });
+  });
+
+  it('should not throw for valid responsive ad unit height', () => {
+    data['fullWidth'] = 'true';
+    data['autoFormat'] = 'rspv';
+    data['height'] = '320';
+    expect(() => adsense(env.win, data)).to.not.throw();
+  });
+
+  it('should throw on invalid responsive ad unit height', () => {
+    data['fullWidth'] = 'true';
+    data['autoFormat'] = 'rspv';
+    data['height'] = '666';
+    expect(() => adsense(env.win, data)).to.throw(
+        /Specified height 666 in <amp-ad> tag is not equal to the required/);
+  });
+
+  it('should throw on missing fullWidth field for responsive ad unit', () => {
+    data['autoFormat'] = 'rspv';
+    data['height'] = '320';
+    expect(() => adsense(env.win, data)).to.throw(
+        /Responsive AdSense ad units require the attribute data-full-width.​/);
   });
 });

@@ -16,17 +16,23 @@
 
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-analytics
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-analytics"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-analytics (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
   requires_extension: "amp-analytics"
@@ -47,6 +53,9 @@ tags: {  # amp-analytics (json)
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 tags: {  # <amp-analytics>
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
   tag_name: "AMP-ANALYTICS"
   requires_extension: "amp-analytics"
   attrs: { name: "type" }

@@ -1,0 +1,175 @@
+<!--
+  ## Introduction
+
+  This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements 
+  according to the user's input. The options are rendered via amp-list.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <title>ComboBox</title>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/30_advanced/combobox/">
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--The amp-selector component is used for the user to select amongst the dropdown list options.-->
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <!--The amp-bind component is used for the filtering of the dropdown options according to the user's input.-->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- The amp-list component is used to generate the dropdown list options.-->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- The amp-mustache is used to generate the dropdown list options' template.-->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <style amp-custom>
+        .hidden, .hidden.select-option {
+            display: none;
+        }
+
+        .product-search{
+            width: 100%;
+            max-width: 350px;
+            position: relative;
+        }
+
+        .search-container {
+            display: flex;
+            flex-flow: row nowrap;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .search-submit {
+            display: flex;
+            align-items: center;
+        }
+	    .search-submit i {
+			width: 24px;
+         	height: 24px;
+    	}
+
+        .autosuggest-box {
+            box-shadow: 0px 2px 6px rgba(0,0,0,.3);
+            overflow-y: scroll;
+            position: absolute;
+            width: 100%;
+            background-color: #fafafa;
+        }
+    
+        .autosuggest-box > [role=list]{
+            overflow-y: scroll;
+        }
+
+        input.search-box {
+            padding: 5px 8px;
+            font-size: 1em;
+            background-color: #fff;
+            border: 1px solid #d4d4d4;
+            line-height: 1.53333em;
+            height: 2em;
+            padding-right: 50px;
+            width: 100%;
+        }
+
+        .select-option {
+            display: block;
+            box-sizing: border-box;
+            height: 30px;
+            line-height: 30px;
+            padding-left: 10px;
+            font-size: 15px;
+        }
+
+        amp-selector .select-option.no-outline.no-outline[option] {
+            outline: none;  
+        }
+        .select-option:focus {
+            box-shadow: inset rgb(94, 158, 215) 0px 0px 45px;
+        }
+
+        .select-option:focus {
+            background: #fff;
+        }
+
+        .lvl3 {
+            padding-left: 10px;
+            color: #777
+        }
+
+        .lvl2 {
+            padding-left: 5px;
+            font-weight: bold;
+            color: #777
+        }
+
+        .lvl1 {
+            padding-left: 0px;
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .select-option-wrap {
+            padding: 0 20px;
+        }
+
+        .dropdown-wrap {
+            padding-top: 2em;
+            padding-left: 1em;
+        }
+		.arrow-down {
+ 		 	background-image: url("data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAwMDAwIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik03LjQxIDcuODRMMTIgMTIuNDJsNC41OS00LjU4TDE4IDkuMjVsLTYgNi02LTZ6Ii8+CiAgICA8cGF0aCBkPSJNMC0uNzVoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz4KPC9zdmc+");
+		}
+  		.arrow-up {
+  			background-image: url("data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAwMDAwIiBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik03LjQxIDE1LjQxTDEyIDEwLjgzbDQuNTkgNC41OEwxOCAxNGwtNi02LTYgNnoiLz4KICAgIDxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz4KPC9zdmc+");
+		}
+    </style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+  This example includes two inputs. One is the input in which the user writes the text and the other is a hidden input, 
+  where the id value of the selected option is stored and could be submitted in a form.
+
+  The option attribute of the amp-selector's options, contain the id of the element, as well as its title, seperated by a comma.
+  This is done so that both values can be accessed using the 'event.targetOption' property. 
+  -->
+  <div class="dropdown-wrap">
+    <label for="products-dropdown">Select your favorite food or beverage. Start typing to filter the results.</label>
+    <div class="product-search select-wrap full-width">
+      <div class="search-container">
+        <input name="products-dropdown" type="hidden" [value]="foodId">
+        <input id="query" name="query" autocomplete="off" placeholder="Select a product" type="text" class="search-box" on="input-debounced:AMP.setState({ query: event.value, inputText: event.value, autosuggest: event.value, comboExpanded: true}), autosuggest-list.show"
+          [value]="inputText || ''" value="">
+
+        <button on="tap:autosuggest-list.toggleVisibility, AMP.setState({ comboExpanded: !comboExpanded })" class="search-submit" type="button">
+          <i [class]="comboExpanded ? 'arrow-up' : 'arrow-down'" class="arrow-down"></i>
+        </button>
+      </div>
+        <amp-list class="autosuggest-box" single-item items="." layout="fixed-height" height="350" src="/examples/visual-tests/amp-by-example/json/food-options.json" id="autosuggest-list" hidden>
+          <template type="amp-mustache">
+             <amp-selector class="dropdown-selector" keyboard-select-mode="focus" layout="container" on="select:AMP.setState({
+                                            query: '',
+                                            inputText: event.targetOption.split(',')[1],
+                                            foodId: event.targetOption.split(',')[0],
+                                            comboExpanded: false
+                                        }),
+                                        autosuggest-list.hide">
+               {{#items}}
+            <div class="select-option no-outline {{Level}}" [class]="'select-option no-outline {{Level}} ' + (query == null || '{{LowerCaseTitle}}'.indexOf(query.toLowerCase()) >= 0 || '{{ParentCategoryTitle}}'.indexOf(query.toLowerCase()) >= 0 ? '' : 'hidden')"
+              role="option" tabindex="0" on="tap:autosuggest-list.hide" option="{{Code}},{{Title}}">{{Title}}</div>
+                {{/items}}
+               </amp-selector>
+          </template>
+        </amp-list>
+      
+    </div>
+  </div>
+  <p class="p1">
+    Well done!
+  </p>
+</body>
+</html>

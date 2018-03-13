@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from '../navigation-state';
 import {AmpStoryAnalytics} from '../analytics';
+import {StateChangeType} from '../navigation-state';
 
 
 describes.fakeWin('amp-story analytics', {}, env => {
@@ -39,7 +39,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.storyPageIndex === '123' &&
+          vars.storyPageIndex === '123' &&
             vars.storyPageId == 'my-page-id'));
   });
 
@@ -59,7 +59,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledOnce;
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.storyPageIndex === '123' &&
+          vars.storyPageIndex === '123' &&
             vars.storyPageId == 'my-page-id'));
 
     for (let i = 0; i < 10; i++) {
@@ -75,7 +75,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledTwice;
     expect(trigger).to.have.been.calledWith('story-page-visible',
         sandbox.match(vars =>
-            vars.storyPageIndex === '6' &&
+          vars.storyPageIndex === '6' &&
             vars.storyPageId == 'foo-page-id'));
   });
 });

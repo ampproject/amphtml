@@ -26,7 +26,8 @@
  * </code>
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -34,7 +35,13 @@ import {Layout} from '../../../src/layout';
  * @private @const {!Object<string, string>}
  */
 const SUPPORTED_CSS_GRID_ATTRIBUTES = {
+  'align-content': 'alignContent',
+  'align-items': 'alignItems',
+  'align-self': 'alignSelf',
   'grid-area': 'gridArea',
+  'justify-content': 'justifyContent',
+  'justify-items': 'justifyItems',
+  'justify-self': 'justifySelf',
 };
 
 /**
@@ -45,8 +52,8 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
  */
 const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
     Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
-    .map(key => `[${key}]`)
-    .join(',');
+        .map(key => `[${key}]`)
+        .join(',');
 
 /**
  * The attribute name for grid layer templates.
@@ -65,9 +72,20 @@ const TEMPLATE_CLASS_NAMES = {
   'thirds': 'i-amphtml-story-grid-template-thirds',
 };
 
-export class AmpStoryGridLayer extends AMP.BaseElement {
+export class AmpStoryGridLayer extends AmpStoryBaseLayer {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {boolean} Only prerender if child of the first page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type amp-story-grid-layer');
+  }
+
+
   /** @override */
   buildCallback() {
+    super.buildCallback();
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
@@ -76,7 +94,7 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 
@@ -102,8 +120,8 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
    * @private
    */
   setDescendentCssGridStyles_() {
-    const elementsToUpgradeStyles = this.element
-        .querySelectorAll(SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
+    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
+        SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
@@ -138,11 +156,6 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
         element.removeAttribute(attributeName);
       }
     }
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
   }
 }
 

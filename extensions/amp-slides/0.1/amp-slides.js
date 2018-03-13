@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../../src/animation';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
+import {Animation} from '../../../src/animation';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 
 /**
@@ -133,9 +133,9 @@ class AmpSlides extends AMP.BaseElement {
         Animation.animate(this.element,
             this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
-              this.commitSwitch_(oldSlide, newSlide);
-              this.preloadNext_(dir);
-            });
+          this.commitSwitch_(oldSlide, newSlide);
+          this.preloadNext_(dir);
+        });
       }
     }
   }

@@ -1,0 +1,99 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="helloworld.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: white;
+      }
+      h1 {
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone bookend-config-src="bookend.json">
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <h1>Progress Bar examples with bookend</h1>
+          <p>This is the cover page. It does not have auto-advance enabled</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1" auto-advance-after="4s">
+        <amp-story-grid-layer template="vertical">
+          <h1>Auto advance page</h1>
+          <p>This page has auto-advance enabled</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2" auto-advance-after="vid1">
+        <amp-story-grid-layer template="vertical">
+          <h1>Short version of video</h1>
+          <amp-video
+            id="vid1"
+            src="../av/ForBiggerJoyrides-short.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            controls>
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3" auto-advance-after="vid2">
+        <amp-story-grid-layer template="vertical">
+          <h1>Full length video</h1>
+          <amp-video
+            id="vid2"
+            src="../av/ForBiggerJoyrides.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            controls>
+          </amp-video>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4" auto-advance-after="aud1">
+        <amp-story-grid-layer template="vertical">
+          <h1>Audio</h1>
+          <amp-audio
+            id="aud1"
+            src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+            artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+            title="Snow Fight"
+            album="Jan Morgenstern"
+            artist="Sintel"
+            height="50"
+            width="auto"
+            controls>
+          </amp-audio>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-5">
+        <amp-story-grid-layer template="vertical">
+          <h1>Fifth Page</h1>
+          <p>This is the fifth page of this story.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

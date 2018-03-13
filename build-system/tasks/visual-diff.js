@@ -31,8 +31,8 @@ function setPercyBranch() {
     const userName = getStdout(
         'git log -1 --pretty=format:"%ae"').trim();
     const branchName = process.env['TRAVIS'] ?
-        process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
-        getStdout('git rev-parse --abbrev-ref HEAD').trim();
+      process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
+      getStdout('git rev-parse --abbrev-ref HEAD').trim();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }
@@ -60,8 +60,9 @@ gulp.task(
         'master': '  Includes a blank snapshot (baseline for skipped builds)',
         'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
+        'headless': '  Runs Chrome in headless mode',
         'percy_debug': '  Prints debug info from Percy libraries',
-        'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
+        'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
       },

@@ -14,351 +14,522 @@
  * limitations under the License.
  */
 
-amp-story[desktop] {
+@import './amp-story-desktop-user-overridable.css';
+
+
+amp-story[standalone][desktop] {
  max-width: none!important;
  max-height: none!important;
  width: 100vw!important;
 }
 
 [desktop] .i-amphtml-story-logo {
- display: block;
+ display: block!important;
 }
 
 .i-amphtml-story-background-container {
- opacity: .8;
- position: absolute;
- top: 0;
- right: 0;
- bottom: 0;
- left: 0;
+ opacity: .8!important;
+ position: absolute!important;
+ top: 0!important;
+ right: 0!important;
+ bottom: 0!important;
+ left: 0!important;
+ overflow: hidden !important;
+}
+
+.i-amphtml-story-background-overlay,
+.i-amphtml-story-background-overlay::after {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1 !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Separate layer so overlay opacity can transition from 20% to 70%. */
+.i-amphtml-story-background-overlay::after {
+  content: '' !important;
+  display: block !important;
+  opacity: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  transition: opacity 0.3s !important;
+}
+
+.i-amphtml-story-bookend-active .i-amphtml-story-background-overlay::after {
+  opacity: 1 !important;
 }
 
 .i-amphtml-story-background {
- position: absolute;
- top: 0;
- right: 0;
- bottom: 0;
- left: 0;
- filter: blur(30px);
- margin: -60px;
- background-size: 125% 125%;
- background-color: transparent;
+  position: absolute !important;
+  top: -150px !important;
+  right: -150px !important;
+  bottom: -150px !important;
+  left: -150px !important;
+  opacity: 0 !important;
+  filter: blur(50px) !important;
+  background-size: cover !important;
+  background-color: transparent !important;
+  background-position: center center !important;
+  will-change: opacity, z-index !important;
+  z-index: 0 !important;
 }
 
-[desktop] amp-story-page {
-  opacity: .05;
-  transform-origin: left;
-}
-
-amp-story-page.i-amphtml-story-page-shown {
-  transition: none;
-}
-
-[desktop] amp-story-page.i-amphtml-story-page-shown {
-  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-[desktop] .i-amphtml-story-button-prev:hover ~ [pre-active],
-[desktop] .i-amphtml-story-button-next:hover ~ [active] + amp-story-page {
-  opacity: .25;
+.i-amphtml-story-background.active {
+  opacity: 1 !important;
+  z-index: 1 !important;
 }
 
 [desktop] amp-story-page {
   transform: scale(1.0) translateX(-350%) translateY(0%) !important;
-  border-radius: 3px;
+  opacity: .05!important;
+  transform-origin: left!important;
+  border-radius: 16px!important;
 }
 
-[desktop] amp-story-page[pre-active] {
+[desktop] amp-story-page[distance="0"],
+[desktop] amp-story-page[distance="1"] {
+  /* TODO(alanorozco): Enable transition for distance = 2.
+   * For some reason, enabling it breaks layout scheduling. */
+  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+[desktop] .i-amphtml-story-button-container {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100002 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+[desktop] .i-amphtml-story-button-container::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  /* Roughly equivalent to (viewport width - active page width) / 2  */
+  width: calc(50vw - 23vh - 32px) !important;
+}
+
+.i-amphtml-story-button-move,
+.i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
+.i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {
+  pointer-events: all !important;
+}
+
+.i-amphtml-story-button-hidden > .i-amphtml-story-button-move {
+  cursor: default !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+[desktop] > .next-container::before {
+  right: 0 !important;
+  background: linear-gradient(to right, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+}
+
+[desktop] > .prev-container::before {
+  left: 0 !important;
+  background: linear-gradient(to right, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
+}
+
+[desktop] > .next-container > .i-amphtml-story-button-move {
+  right: 0 !important;
+}
+
+[desktop] amp-story-page[pre-active],
+.prev-container > .i-amphtml-story-page-sentinel {
   /* -150% + 15% */
-  transform: scale(1.0) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[active] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
-  opacity: 1;
+  opacity: 1!important;;
 }
 
-[desktop] amp-story-page[active] + amp-story-page {
+[desktop] amp-story-page[active] + amp-story-page,
+.next-container > .i-amphtml-story-page-sentinel {
   /* 50% - 15% */
-  transform: scale(1.0) translateX(calc(50% + 64px)) translateY(0%) !important;
+  transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
 
 [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(1.0) translateX(250%) translateY(0%) !important;
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(1.0) translateX(250%) translateY(0%) !important;
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page[pre-active] {
   /* 50% - 15% */
-  transform: scale(1.0) translateX(calc(50% + 64px)) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
   /*transform: scale(1.0) translateX(35%) translateY(0%) !important;*/
 }
 
 [dir=rtl] [desktop] amp-story-page[active] {
   transform: scale(1.0) translateX(-50%) translateY(0%) !important;
-  opacity: 1;
+  opacity: 1!important;
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page {
   /* -150% + 15% */
-  transform: scale(1.0) translateX(calc(-150% - 64px)) translateY(0%) !important;
-  /*transform: scale(1.0) translateX(-135%) translateY(0%) !important;*/
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  /*transform: scale(0.9) translateX(-135%) translateY(0%) !important;*/
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
+  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
 }
 
-[desktop] amp-story-page {
+[desktop] > amp-story-page,
+.i-amphtml-story-page-sentinel {
   left: 50%!important;
-  right: auto!important;
-  margin: 112px auto;
-  max-height: 736px;
-  max-width: 338px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, .4);
+  right: auto !important;
+  margin: auto !important;
+  max-height: 75vh !important;
+  max-width: calc(3/5 * 75vh) !important;
+  min-width: 320px !important;
+  min-height: 533px !important;
+}
+
+[desktop] > amp-story-page {
+  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+}
+
+.i-amphtml-story-page-sentinel {
+  position: absolute !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin-left: -32px !important;
+  z-index: 100002 !important;
+  cursor: pointer;
 }
 
 /* Navigation buttons */
-[desktop] .i-amphtml-story-button-move {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  margin: auto 40px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 0;
-  background-color: #fff;
-  background-repeat: no-repeat;
-  background-size: 16px 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: .5;
-  transition: 150ms opacity linear, 300ms transform linear;
-  cursor: pointer;
-  z-index: 1;
-}
-
 .i-amphtml-story-button-move {
-  display: none;
+  position: absolute!important;
+  top: 0!important;
+  bottom: 0!important;
+  margin: auto 40px!important;
+  width: 60px!important;
+  height: 60px!important;
+  border-radius: 50%!important;
+  border: 0!important;
+  background-color: #fff!important;
+  background-repeat: no-repeat!important;
+  background-size: 12px 17px!important;
+  display: flex!important;
+  justify-content: center!important;
+  align-items: center!important;
+  opacity: .5!important;
+  transition: 150ms opacity linear, 300ms transform linear!important;
+  cursor: pointer!important;
+  z-index: 100002!important;
+  outline: none!important;
 }
 
-.i-amphtml-story-button-move:before {
-  position: absolute;
-  height: 65px;
-  width: 65px;
-  content: '';
-  transition: 300ms transform linear;
+.i-amphtml-story-prev-hover > amp-story-page[pre-active] {
+  opacity: 0.3 !important;
 }
 
-.i-amphtml-story-button-move:hover {
-  opacity: 1;
+.i-amphtml-story-next-hover > amp-story-page[active] + amp-story-page {
+  opacity: 0.3 !important;
 }
 
-.i-amphtml-story-button-move:hover:before {
-  transform: translateX(-8px);
+.prev-container > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>')!important;
+  background-position: 45% 50%!important;
+  left: 0!important;
 }
 
-.i-amphtml-story-button-prev:hover:before {
-  transform: translateX(8px);
+.i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
+  background-position: 55% 50%!important;
 }
 
-.i-amphtml-story-button-next {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
-  background-position: 55% 50%;
-  right: 0;
+.i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
 }
 
-.i-amphtml-story-button-prev {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
-  background-position: 45% 50%;
-  left: 0;
+.i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
 }
 
-.i-amphtml-story-button-next:hover {
-  transform: translateX(8px);
-  opacity: 1;
+/* On forward button mouseover */
+.i-amphtml-story-next-hover > .next-container > .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .prev-container > .i-amphtml-story-button-move {
+  transform: scale(1.1) !important;
+  opacity: 1!important;
 }
 
-.i-amphtml-story-button-prev:hover {
-  transform: translateX(-8px);
-  opacity: 1;
+/* Do not display when hidden. */
+.i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
+    .i-amphtml-story-button-move {
+  opacity: 0 !important;
 }
 
-.i-amphtml-story-button-move.i-amphtml-story-button-move-hidden {
-  opacity: 0;
-  cursor: default;
+/* On forward (next) button mouseover */
+.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
+    .i-amphtml-story-button-move {
+  transform: translateX(8px)!important;
+  opacity: 1!important;
+}
+
+/* On back button mouseover */
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
+    .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
+    .i-amphtml-story-button-move {
+  transform: translateX(-8px)!important;
+  opacity: 1!important;
 }
 
 /* Top bar */
 .i-amphtml-story-top {
-  position: relative;
-  display: block;
-  height: 112px;
-  width: 100%;
+  position: relative!important;
+  display: block!important;
+  height: 96px!important;
+  width: 100%!important;
+  z-index: 1!important;
+  background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-.i-amphtml-story-share {
-  display: flex;
-  position: absolute;
-  top: 0;
-  right: 40px;
-  bottom: 0;
-  margin: auto;
-  height: 40px;
-  align-items: center;
+.i-amphtml-story-share-pill {
+  display: none !important;
+  position: absolute!important;
+  top: 0!important;
+  right: 40px!important;
+  bottom: 0!important;
+  margin: auto!important;
+  height: 40px!important;
+  align-items: center!important;
+}
+
+[desktop] .i-amphtml-story-share-pill {
+  display: flex !important;
 }
 
 /* Share text for share box */
-.i-amphtml-story-share:after {
-  font-family: 'Roboto', sans-serif;
-  content: 'SHARE';
-  position: absolute;
-  right: 15px;
-  text-align: center;
-  width: 60px;
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: .5px;
-  margin: auto;
+.i-amphtml-story-share-pill:after {
+  font-family: 'Roboto', sans-serif!important;
+  content: 'SHARE'!important;
+  position: absolute!important;
+  right: 15px!important;
+  text-align: center!important;
+  width: 60px!important;
+  font-size: 12px!important;
+  font-weight: bold!important;
+  letter-spacing: .5px!important;
+  margin: auto!important;
+  color:#fff!important;
 }
 
 /* background for the share box */
-.i-amphtml-story-share:before {
-  position: absolute;
-  content: '';
-  width: 58px;
-  height: 40px;
-  padding: 0 16px;
-  background-color: rgba(255, 255, 255, .25);
-  border-radius: 500px;
-  transition: width 300ms ease-in-out;
-  right: 0;
+.i-amphtml-story-share-pill:before {
+  position: absolute!important;
+  content: ''!important;
+  width: 58px!important;
+  height: 40px!important;
+  padding: 0 16px!important;
+  background-color: rgba(255, 255, 255, .2)!important;
+  border-radius: 500px!important;
+  transition: width 300ms ease-in-out!important;
+  right: 0!important;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% - 16px);
+.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
+  opacity: 0!important;
+  transition: opacity 300ms linear!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li  {
-  opacity: 0;
-  transition: opacity 300ms linear;
+.i-amphtml-story-share-pill:hover .i-amphtml-story-share-item {
+  opacity: 1!important;
 }
 
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li {
-  opacity: 1;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li + li {
-  margin-left: 8px;
+.i-amphtml-story-share-pill .i-amphtml-story-share-item {
+  margin: 0 !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
 }
 
 /* Incremental fade in */
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(9) {
-  transition-delay: calc(30ms * 1);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(9) {
+  transition-delay: calc(30ms * 1)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(8) {
-  transition-delay: calc(30ms * 2);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(8) {
+  transition-delay: calc(30ms * 2)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(7) {
-  transition-delay: calc(30ms * 3);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(7) {
+  transition-delay: calc(30ms * 3)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(6) {
-  transition-delay: calc(30ms * 4);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(6) {
+  transition-delay: calc(30ms * 4)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(5) {
-  transition-delay: calc(30ms * 5);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(5) {
+  transition-delay: calc(30ms * 5)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(4) {
-  transition-delay: calc(30ms * 6);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(4) {
+  transition-delay: calc(30ms * 6)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(3) {
-  transition-delay: calc(30ms * 7);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(3) {
+  transition-delay: calc(30ms * 7)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(2) {
-  transition-delay: calc(30ms * 8);
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(2) {
+  transition-delay: calc(30ms * 8)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(1) {
-  transition-delay: calc(30ms * 9);
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list {
-  padding: 0;
-  margin: 0 80px 0 0;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li:first-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li:last-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li {
-  padding: 0;
-  width: 40px;
-  height: 40px;
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(1) {
+  transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li svg {
-  width: 28px;
-  height: 28px;
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
+  padding: 0!important;
+  margin: 0 72px 0 0 !important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-icon {
-  display: flex!important;
+.i-amphtml-story-share-pill:hover:before {
+  width: calc(100% - 32px) !important;
+}
+
+.i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  display: flex !important;
   justify-content: center;
   align-items: center;
-  width: 40px!important;
-  height: 40px!important;
-  background-size: 30px 30px;
-  background-color: transparent;
+  width: 48px !important;
+  height: 48px !important;
   padding: 0;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-name {
-  display: none;
+[desktop] .i-amphtml-story-share-icon {
+  font-size: 0px!important;
+  background-size: 24px 24px !important;
+  background-position: center center !important;
+  padding: 0 !important;
+}
+
+[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 28px 28px !important;
+  background-position: center center !important;
+}
+
+[desktop] .i-amphtml-story-share-icon::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-share-icon:active::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-share-list {
+  margin-right: 72px !important;
 }
 
 /* system layer changes */
 [desktop] .i-amphtml-story-system-layer {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
-  top: auto;
-  bottom: 0;
-  height: 72px;
+  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+  top: auto!important;
+  bottom: 0!important;
+  height: 96px!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 [desktop] .i-amphtml-story-progress-bar {
- height: 4px;
- width: calc(100vw/3);
- margin: auto;
- top: 0;
- bottom: 0;
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw/3) !important;
+  margin: 0px !important;
 }
 
-[desktop] .i-amphtml-story-page-progress-bar:first-child,
-[desktop] .i-amphtml-story-page-progress-bar:first-child .i-amphtml-story-page-progress-value {
-  border-radius: 50px 0 0 50px;
-}
-
-[desktop] .i-amphtml-story-page-progress-bar:last-child,
-[desktop] .i-amphtml-story-page-progress-bar:last-child .i-amphtml-story-page-progress-value {
-  border-radius: 0 50px 50px 0;
+[desktop] .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
 }
 
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
-  display: none;
+  display: none!important;
 }
 
 .i-amphtml-story-ui-left {
-  display: none;
+  display: none!important;
 }
 
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
-  display: block;
-  float: left;
-  margin: 16px 40px;
+  display: flex !important;
+  height: 40px !important;
+  flex: 1 !important;
+  min-width: 200px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 32px;
 }
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
-  margin: 16px 40px;
+  display: block !important;
+  flex: 1 !important;
+}
+
+[desktop] .i-amphtml-story-top {
+  z-index: 100002 !important; /* 1 higher than bookend */
+}
+
+[desktop] .i-amphtml-story-bookend .i-amphtml-story-share-widget {
+  /* TODO(alanorozco): Don't render at all when on desktop */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner {
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding: 104px 156px 64px !important;
+  margin: 0 !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-replay {
+  /* This is replaced with the forward button on desktop. */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-overflow {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 952px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 1272px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
 }

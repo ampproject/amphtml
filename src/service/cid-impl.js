@@ -22,25 +22,25 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
+import {GoogleCidApi, TokenStatus} from './cid-api';
+import {Services} from '../services';
+import {ViewerCidApi} from './viewer-cid-api';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev, rethrowAsync, user} from '../log';
+import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {
-  registerServiceBuilderForDoc,
   getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {
   getSourceOrigin,
   isProxyOrigin,
   parseUrl,
 } from '../url';
-import {dict} from '../utils/object';
 import {isIframed} from '../dom';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
-import {user, rethrowAsync} from '../log';
-import {ViewerCidApi} from './viewer-cid-api';
-import {GoogleCidApi, TokenStatus} from './cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 
@@ -99,7 +99,7 @@ export class Cid {
      */
     this.viewerCidApi_ = new ViewerCidApi(ampdoc);
 
-    this.cidApi_ = new GoogleCidApi(ampdoc.win);
+    this.cidApi_ = new GoogleCidApi(ampdoc);
   }
 
   /**
@@ -131,10 +131,8 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
-    const viewer = Services.viewerForDoc(this.ampdoc);
-
     return consent.then(() => {
-      return viewer.whenFirstVisible();
+      return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
       // Check if user has globally opted out of CID, we do this after
       // consent check since user can optout during consent process.
@@ -143,17 +141,15 @@ export class Cid {
       if (optedOut) {
         return '';
       }
-      return viewer.whenNextVisible().then(() => {
-        const cidPromise = this.getExternalCid_(
-            getCidStruct, opt_persistenceConsent || consent);
-        // Getting the CID might involve an HTTP request. We timeout after 10s.
-        return Services.timerFor(this.ampdoc.win)
-            .timeoutPromise(10000, cidPromise,
-            `Getting cid for "${getCidStruct.scope}" timed out`)
-            .catch(error => {
-              rethrowAsync(error);
-            });
-      });
+      const cidPromise = this.getExternalCid_(
+          getCidStruct, opt_persistenceConsent || consent);
+      // Getting the CID might involve an HTTP request. We timeout after 10s.
+      return Services.timerFor(this.ampdoc.win)
+          .timeoutPromise(10000, cidPromise,
+              `Getting cid for "${getCidStruct.scope}" timed out`)
+          .catch(error => {
+            rethrowAsync(error);
+          });
     });
   }
 
@@ -286,7 +282,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
       setCidCookie(win, cookieName, existingCookie);
     }
     return /** @type {!Promise<?string>} */ (
-        Promise.resolve(existingCookie));
+      Promise.resolve(existingCookie));
   }
 
   const newCookiePromise = getNewCidForCookie(win)
@@ -373,8 +369,6 @@ function getBaseCid(cid, persistenceConsent) {
  */
 function store(ampdoc, persistenceConsent, cidString) {
   const win = ampdoc.win;
-  // TODO(lannka, #4457): ideally, we should check if viewer has the capability
-  // of CID storage, rather than if it is iframed.
   if (isIframed(win)) {
     // If we are being embedded, try to save the base cid to the viewer.
     viewerBaseCid(ampdoc, createCidData(cidString));
@@ -405,12 +399,14 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
+    // TODO(lannka, #11060): clean up when all Viewers get migrated
+    dev().expectedError('CID', 'Viewer does not provide cap=cid');
     return viewer.sendMessageAwaitResponse('cid', opt_data)
         .then(data => {
-          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
           // For backward compatibility: #4029
           if (data && !tryParseJson(data)) {
-            // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
+            // TODO(lannka, #11060): clean up when all Viewers get migrated
+            dev().expectedError('CID', 'invalid cid format');
             return JSON.stringify(dict({
               'time': Date.now(), // CID returned from old API is always fresh
               'cid': data,

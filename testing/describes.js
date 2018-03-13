@@ -555,7 +555,7 @@ class RealWinFixture {
       const iframe = document.createElement('iframe');
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
-      iframe.srcdoc = '<!doctype><html><head>' +
+      iframe.srcdoc = '<!doctype html><html><head>' +
           '<style>.i-amphtml-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {

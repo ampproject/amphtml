@@ -88,6 +88,18 @@ Both posts and videos can be embedded as a post. Setting `data-embed-as="video"`
 
 Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 
+##### data-align-center
+
+The value is either `true` or `false`.  The default is `false`.
+
+Having this attribute set to true would align the post/video container to center.
+
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well. 
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.

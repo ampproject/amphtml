@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  getDataParamsFromAttributes,
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
+  getDataParamsFromAttributes,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {setStyles} from '../../../src/style';
-import {addParamsToUrl} from '../../../src/url';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @enum {number}
  * @private
  */
 
- // Correct PlayerStates taken from
- // https://developers.google.com/youtube/iframe_api_reference#Playback_status
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -73,11 +73,17 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string}  */
     this.videoid_ = null;
 
+    /** @private {?string} */
+    this.liveChannelid_ = null;
+
     /** @private {?boolean}  */
     this.muted_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Object} Info object about video returned by YouTube API*/
+    this.info_ = null;
 
     /** @private {?string} */
     this.videoIframeSrc_ = null;
@@ -122,7 +128,7 @@ class AmpYoutube extends AMP.BaseElement {
     return 0.75;
   }
 
-   /** @override */
+  /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
@@ -130,6 +136,8 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
+    this.liveChannelid_ = this.getLiveChannelId_();
+    this.assertDatasourceExists_();
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -139,7 +147,7 @@ class AmpYoutube extends AMP.BaseElement {
     // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder()) {
+    if (!this.getPlaceholder() && this.videoid_) {
       this.buildImagePlaceholder_();
     }
 
@@ -147,13 +155,34 @@ class AmpYoutube extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
   }
 
+  /**
+   * @return {string}
+   * @private
+   */
+  getEmbedUrl_() {
+    this.assertDatasourceExists_();
+    let urlSuffix = '';
+    if (this.getCredentials_() === 'omit') {
+      urlSuffix = '-nocookie';
+    }
+    const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+    let descriptor = '';
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
+    } else {
+      descriptor = 'live_stream?channel='
+        + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
+    }
+    return `${baseUrl}${descriptor}enablejsapi=1`;
+  }
+
   /** @return {string} */
   getVideoIframeSrc_() {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    dev().assert(this.videoid_);
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+
+    let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -233,7 +262,7 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
@@ -256,16 +285,38 @@ class AmpYoutube extends AMP.BaseElement {
       }
     }
   }
+  /**
+   * @return {?string}
+   * @private
+   */
+  getLiveChannelId_() {
+    return this.element.getAttribute('data-live-channelid');
+  }
+
+  /**
+   * @return {?string}
+   * @private
+   */
+  getVideoId_() {
+    return this.element.getAttribute('data-videoid');
+  }
 
   /**
    * @return {string}
    * @private
    */
-  getVideoId_() {
-    return user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+  getCredentials_() {
+    return this.element.getAttribute('credentials') || 'include';
+  }
+
+  assertDatasourceExists_() {
+    const datasourceExists = !(this.videoid_ && this.liveChannelid_)
+      && (this.videoid_ || this.liveChannelid_);
+    user().assert(
+        datasourceExists, 'Exactly one of data-videoid or '
+      + 'data-live-channelid should be present for <amp-youtube> %s',
+        this.element
+    );
   }
 
   /**
@@ -295,12 +346,12 @@ class AmpYoutube extends AMP.BaseElement {
     }
     if (!getData(event) || !(isObject(getData(event))
         || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     /** @const {?JsonObject} */
     const data = /** @type {?JsonObject} */ (isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event)));
+      ? getData(event)
+      : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
@@ -323,6 +374,11 @@ class AmpYoutube extends AMP.BaseElement {
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    } else if (data['event'] == 'initialDelivery' && data['info']) {
+      this.info_ = data['info'];
+    } else if (data['event'] == 'infoDelivery' && data['info'] &&
+        data['info']['currentTime'] !== undefined) {
+      this.info_.currentTime = data['info']['currentTime'];
     }
   }
 
@@ -331,6 +387,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   listenToFrame_() {
+    if (!this.iframe_) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
       'event': 'listening',
     })), '*');
@@ -339,8 +398,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_ || '';
+    const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
@@ -377,8 +435,10 @@ class AmpYoutube extends AMP.BaseElement {
           encodeURIComponent(videoid) + '/hqdefault.jpg';
       return this.loadPromise(imgPlaceholder);
     }).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
+      this.getVsync().mutate(() => {
+        setStyles(imgPlaceholder, {
+          'visibility': '',
+        });
       });
     });
   }
@@ -484,12 +544,17 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
+    if (this.info_) {
+      return this.info_.currentTime;
+    }
     return 0;
   }
 
   /** @override */
   getDuration() {
+    if (this.info_) {
+      return this.info_.duration;
+    }
     // Not supported.
     return 1;
   }

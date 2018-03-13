@@ -36,7 +36,12 @@
   <amp-youtube width="480" height="270"
                data-videoid="dQw4w9WgXcQ" [data-videoid]="foo.bar">
   </amp-youtube>
-  <!-- Invalid: data-videoid missing. -->
+  <!-- Valid: with data-live-channelid attribute -->
+  <amp-youtube width="480" height="270"
+    data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q">
+  </amp-youtube>
+
+  <!-- Invalid: data-videoid and data-live-channelid both missing. -->
   <amp-youtube width="480" height="270"></amp-youtube>
   <!-- Invalid: dimensions are missing. -->
   <amp-youtube data-videoid="dQw4w9WgXcQ">
@@ -44,6 +49,11 @@
   <!-- Invalid: the attr value must be a video id -->
   <amp-youtube width="480" height="270"
                data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  </amp-youtube>
+  <!-- Invalid: cannot have both data-videoid and data-live-channelid -->
+  <amp-youtube width="480" height="270"
+    data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+    data-videoid="dQw4w9WgXcQ">
   </amp-youtube>
 </body>
 </html>

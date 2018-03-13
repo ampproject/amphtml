@@ -34,7 +34,7 @@ describe('Poller', () => {
       work() {},
     };
     workStub = sandbox.stub(obj, 'work');
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
     const wait = 5000;
     poller = new Poller(window, wait, workStub);
   });

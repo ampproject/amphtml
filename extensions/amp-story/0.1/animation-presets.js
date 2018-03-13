@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {px} from '../../../src/style';
 import {StoryAnimationPresetDef} from './animation-types';
+import {px} from '../../../src/style';
+import {
+  rotateAndTranslate,
+  translate2d,
+  whooshIn,
+} from './animation-presets-utils';
 
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */
@@ -49,11 +54,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0)`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-right': {
@@ -61,11 +62,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0)`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-top': {
@@ -73,11 +70,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
-
-      return [
-        {transform: `translate(0, ${px(offsetY)})`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(0, offsetY, 0, 0);
     },
   },
   'fly-in-bottom': {
@@ -85,11 +78,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
-
-      return [
-        {transform: `translate(0, ${px(offsetY)})`},
-        {transform: 'translate(0, 0)'},
-      ];
+      return translate2d(0, offsetY, 0, 0);
     },
   },
   'rotate-in-left': {
@@ -97,11 +86,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0) rotate(-360deg)`},
-        {transform: 'translate(0, 0) rotate(0)'},
-      ];
+      return rotateAndTranslate(offsetX, 0, 0, 0, -1);
     },
   },
   'rotate-in-right': {
@@ -109,11 +94,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {transform: `translate(${px(offsetX)}, 0) rotate(360deg)`},
-        {transform: 'translate(0, 0) rotate(0)'},
-      ];
+      return rotateAndTranslate(offsetX, 0, 0, 0, 1);
     },
   },
   'fade-in': {
@@ -187,17 +168,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-
-      return [
-        {
-          opacity: 0,
-          transform: `translate(${px(offsetX)}, 0) scale(0.15)`,
-        },
-        {
-          opacity: 1,
-          transform: 'translate(0, 0) scale(1)',
-        },
-      ];
+      return whooshIn(offsetX, 0, 0, 0);
     },
   },
   'whoosh-in-right': {
@@ -205,17 +176,7 @@ export const PRESETS = {
     easing: 'ease-out',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
-
-      return [
-        {
-          opacity: 0,
-          transform: `translate(${px(offsetX)}, 0) scale(0.15)`,
-        },
-        {
-          opacity: 1,
-          transform: 'translate(0, 0) scale(1)',
-        },
-      ];
+      return whooshIn(offsetX, 0, 0, 0);
     },
   },
 };

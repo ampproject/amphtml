@@ -16,8 +16,8 @@
 
 import '../amp-facebook';
 import {facebook} from '../../../../3p/facebook';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 
 describes.realWin('amp-facebook', {
@@ -30,6 +30,7 @@ describes.realWin('amp-facebook', {
 
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
+  const fbPageHref = 'https://www.facebook.com/itsdougthepug';
   let win, doc;
 
   beforeEach(() => {
@@ -37,13 +38,18 @@ describes.realWin('amp-facebook', {
     doc = win.document;
   });
 
-  function getAmpFacebook(href, opt_embedAs) {
+  function getAmpFacebook(href, opt_embedAs, opt_locale) {
     const ampFB = doc.createElement('amp-facebook');
     ampFB.setAttribute('data-href', href);
     ampFB.setAttribute('width', '111');
     ampFB.setAttribute('height', '222');
     if (opt_embedAs) {
       ampFB.setAttribute('data-embed-as', opt_embedAs);
+    }
+    if (opt_locale) {
+      ampFB.setAttribute('data-locale', opt_locale);
+    } else {
+      ampFB.setAttribute('data-locale', 'en_US');
     }
     doc.body.appendChild(ampFB);
     return ampFB.build().then(() => {
@@ -66,6 +72,20 @@ describes.realWin('amp-facebook', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
+  it('renders amp-facebook with detected locale', () => {
+    return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('en_US');
+    });
+  });
+
+  it('renders amp-facebook with specified locale', () => {
+    return getAmpFacebook(fbVideoHref, 'post', 'fr_FR').then(ampFB => {
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('fr_FR');
     });
   });
 
@@ -104,6 +124,46 @@ describes.realWin('amp-facebook', {
     const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
     expect(fbVideo).not.to.be.undefined;
     expect(fbVideo.getAttribute('data-href')).to.equal(fbVideoHref);
+  });
+
+  it('adds fb-video element with `data-embed-as` and `data-show-text` ' +
+    'attributes set correctly', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-video')).to.be.true;
+    expect(fbVideo.getAttribute('data-embed-as')).to.equal('video');
+    expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
+  });
+
+  it('check that fb-page element correctly sets `data-adapt-container-width` ' +
+    'attribute to \'true\'', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK-PAGE',
+    };
+
+    facebook(win, {
+      href: fbPageHref,
+      width: 200,
+      height: 200,
+    });
+    const fbPage = doc.body.getElementsByClassName('fb-page')[0];
+    expect(fbPage).not.to.be.undefined;
+    expect(fbPage.getAttribute('data-adapt-container-width')).to.equal('true');
   });
 
   it('removes iframe after unlayoutCallback', () => {

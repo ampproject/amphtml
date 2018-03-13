@@ -20,52 +20,52 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
 import {
-  identityEnabled,
-} from './adsense-a4a-config';
-import {
-  addExperimentIdToElement,
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
-import {
+  QQID_HEADER,
+  ValidAdContainerTypes,
+  addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
+  extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
+  getEnclosingContainerTypes,
+  getIdentityToken,
   googleAdUrl,
   isReportingEnabled,
-  extractAmpAnalyticsConfig,
-  addCsiSignalsToAmpAnalyticsConfig,
-  QQID_HEADER,
   maybeAppendErrorParameter,
-  getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-  getIdentityToken,
+  setNameframeExperimentConfigs,
 } from '../../../ads/google/a4a/utils';
-import {
-  googleLifecycleReporterFactory,
-  setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {removeElement} from '../../../src/dom';
-import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/string';
-import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
   setStyle,
   setStyles,
 } from '../../../src/style';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {getMode} from '../../../src/mode';
+import {
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../../../ads/google/a4a/google-data-reporter';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {removeElement} from '../../../src/dom';
+import {stringHash32} from '../../../src/string';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -85,6 +85,7 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
+/** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
@@ -145,11 +146,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
+
+    /**
+     * @private {?boolean} whether preferential rendered AMP creative, null
+     * indicates no creative render.
+     */
+    this.isAmpCreative_ = null;
+
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
+    this.nameframeExperimentConfig_ = {
+      instantLoad: false,
+      writeInBody: false,
+    };
   }
 
   /**
    * @return {boolean}
    * @private
+   * @visibleForTesting
    */
   isResponsive_() {
     return this.autoFormat_ == 'rspv';
@@ -164,6 +178,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
+    if (this.isResponsive_()) {
+      if (!this.element.hasAttribute('data-full-width')) {
+        user().error(TAG,
+            'Responsive AdSense ad units require the attribute ' +
+            'data-full-width.');
+        return false;
+      }
+
+      const height = this.element.getAttribute('height');
+      const width = this.element.getAttribute('width');
+      if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+        user().error(TAG,
+            `Specified height ${height} in <amp-ad> tag is not equal to the ` +
+            `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+            'responsive AdSense ad units.');
+        return false;
+      }
+      if (width != '100vw') {
+        user().error(TAG,
+            `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
+            'Width must be 100vw.');
+        return false;
+      }
+    }
     return !!this.element.getAttribute('data-ad-client') &&
         this.isAmpAdElement();
   }
@@ -176,17 +214,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.identityTokenPromise_ = identityEnabled(this.win) ?
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
-        Promise.resolve(
-          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+        .whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
-    if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
-    }
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
@@ -223,8 +255,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         && !isNaN(width) && width > 0
         && !isNaN(height) && height > 0;
     this.size_ = useDefinedSizes
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+      ? {width, height}
+      : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
@@ -233,8 +265,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // dev().assert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
+    const slotname = this.element.getAttribute('data-ad-slot');
     const sharedStateParams = sharedState.addNewSlot(
-        format, this.uniqueSlotId_, adClientId);
+        format, this.uniqueSlotId_, adClientId, slotname);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     const enclosingContainers = getEnclosingContainerTypes(this.element);
@@ -246,13 +279,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       format,
       'w': this.size_.width,
       'h': this.size_.height,
-      'iu': this.element.getAttribute('data-ad-slot'),
+      'iu': slotname,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
+      'hl': this.element.getAttribute('data-language'),
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
       'channel': this.element.getAttribute('data-ad-channel'),
@@ -260,6 +294,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
+      'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
@@ -307,7 +342,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
     return this.size_;
+  }
+
+  /** @override */
+  getAdditionalContextMetadata() {
+    const attributes = dict({});
+    Object.assign(attributes, this.nameframeExperimentConfig_);
+    return attributes;
   }
 
   /**
@@ -357,6 +401,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
+    this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
@@ -391,7 +436,26 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   unlayoutCallback() {
-    super.unlayoutCallback();
+    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
+      case 'all':
+        // Ensure all creatives are removed.
+        this.isAmpCreative_ = false;
+        break;
+      case 'remain':
+        if (this.qqid_ && this.isAmpCreative_ === null) {
+          // Ad response received but not yet rendered.  Note that no fills
+          // would fall into this case even if layoutCallback has executed.
+          // Assume high probability of continued no fill therefore do not
+          // tear down.
+          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
+          return false;
+        }
+    }
+    if (this.isAmpCreative_) {
+      // Allow AMP creatives to remain in case SERP viewer swipe back.
+      return false;
+    }
+    const superResult = super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -404,6 +468,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     this.ampAnalyticsConfig_ = null;
     this.qqid_ = null;
+    this.isAmpCreative_ = null;
+    return superResult;
   }
 
   /** @override */
@@ -435,6 +501,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /** @override */
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
   }
 
   /**

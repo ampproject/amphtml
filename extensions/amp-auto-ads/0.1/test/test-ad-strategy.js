@@ -16,8 +16,8 @@
 
 
 import {AdStrategy} from '../ad-strategy';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {AdTracker} from '../ad-tracker';
+import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
 
 describes.realWin('amp-strategy', {
@@ -131,7 +131,7 @@ describes.realWin('amp-strategy', {
     const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
     expect(placements).to.have.lengthOf(2);
-    sandbox.stub(placements[0], 'placeAd', () => {
+    sandbox.stub(placements[0], 'placeAd').callsFake(() => {
       return Promise.resolve(PlacementState.REIZE_FAILED);
     });
 
@@ -390,10 +390,10 @@ describes.realWin('amp-strategy', {
     const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
     expect(placements).to.have.lengthOf(2);
-    sandbox.stub(placements[0], 'placeAd', () => {
+    sandbox.stub(placements[0], 'placeAd').callsFake(() => {
       return Promise.resolve(PlacementState.REIZE_FAILED);
     });
-    sandbox.stub(placements[1], 'placeAd', () => {
+    sandbox.stub(placements[1], 'placeAd').callsFake(() => {
       return Promise.resolve(PlacementState.REIZE_FAILED);
     });
 

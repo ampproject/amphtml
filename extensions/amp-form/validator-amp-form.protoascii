@@ -22,7 +22,7 @@ tags: {  # amp-form
     allowed_versions: "0.1"
     allowed_versions: "latest"
     deprecated_allow_duplicates: true
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }

@@ -37,6 +37,8 @@ export const MessageType = {
   EMBED_SIZE_CHANGED: 'embed-size-changed',
   EMBED_SIZE_DENIED: 'embed-size-denied',
   NO_CONTENT: 'no-content',
+  GET_HTML: 'get-html',
+  GET_HTML_RESULT: 'get-html-result',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',
@@ -81,7 +83,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @returns {string}
  */
 export function serializeMessage(type, sentinel, data = dict(),
-    rtvVersion = null) {
+  rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
   message['type'] = type;
@@ -115,7 +117,7 @@ export function deserializeMessage(message) {
 /**
  *  Returns true if message looks like it is an AMP postMessage
  *  @param {*} message
- *  @return {!boolean}
+ *  @return {boolean}
  */
 export function isAmpMessage(message) {
   return (typeof message == 'string' &&
@@ -128,12 +130,12 @@ export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport
 // ID 2 sends "hi", then an IframeTransportEvent would look like:
-// { transportId: "2", message: "hi" }
+// { creativeId: "2", message: "hi" }
 // If the creative with transport ID 2 sent that, and also sent "hello",
 // and the creative with transport ID 3 sends "goodbye" then an *array* of 3
 // AmpAnalyticsIframeTransportEvent would be sent to the 3p frame like so:
 // [
-//   { transportId: "2", message: "hi" }, // An AmpAnalyticsIframeTransportEvent
-//   { transportId: "2", message: "hello" }, // Another
-//   { transportId: "3", message: "goodbye" } // And another
+//   { creativeId: "2", message: "hi" }, // An AmpAnalyticsIframeTransportEvent
+//   { creativeId: "2", message: "hello" }, // Another
+//   { creativeId: "3", message: "goodbye" } // And another
 // ]

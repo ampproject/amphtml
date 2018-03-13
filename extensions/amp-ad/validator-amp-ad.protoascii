@@ -38,7 +38,7 @@ tags: {  # amp-ad
     name: "amp-ad"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -53,6 +53,8 @@ tags: {  # <amp-ad>
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "alt" }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
+  attrs: { name: "template" }
   attrs: {
     name: "src"
     value_url: {
@@ -69,6 +71,8 @@ tags: {  # <amp-ad>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -96,6 +100,7 @@ tags: {  # <amp-ad data-multi-size>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -112,17 +117,33 @@ tags: {  # <amp-ad data-multi-size>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-embed>
-  html_format: AMP
-  tag_name: "AMP-EMBED"
+
+tags: {  # <amp-ad data-enable-refresh>
+  html_format: AMP  # Ads are not allowed inside ads
+  tag_name: "AMP-AD"
+  spec_name: "amp-ad with data-enable-refresh attribute"
   requires_extension: "amp-ad"  # See note at top of file
   also_requires_tag_warning: "amp-ad extension .js script"
+  # If modifying disallowed_ancestors, then please also edit
+  # extensions/amp-auto-ads/*/placement.js
   disallowed_ancestor: "AMP-APP-BANNER"
+  # amp-ad elements cannot be both children of these amp ad containers and have
+  # data-enable-refresh attribute.
+  disallowed_ancestor: "AMP-FX-FLYING-CARPET"
+  disallowed_ancestor: "AMP-LIGHTBOX"
   attrs: { name: "alt" }
+  attrs: {
+    name: "data-enable-refresh"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
   attrs: { name: "json" }
   attrs: {
     name: "src"
@@ -140,6 +161,41 @@ tags: {  # <amp-embed>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {  # <amp-embed>
+  html_format: AMP
+  tag_name: "AMP-EMBED"
+  requires_extension: "amp-ad"  # See note at top of file
+  also_requires_tag_warning: "amp-ad extension .js script"
+  disallowed_ancestor: "AMP-APP-BANNER"
+  attrs: { name: "alt" }
+  attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
+  attrs: { name: "template" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "type" mandatory: true }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -165,6 +221,7 @@ tags: {  # <amp-embed data-multi-size>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -181,8 +238,9 @@ tags: {  # <amp-embed data-multi-size>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
-

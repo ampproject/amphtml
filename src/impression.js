@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-import {dev, user} from './log';
-import {isExperimentOn} from './experiments';
 import {Services} from './services';
 import {
-  isProxyOrigin,
-  parseUrl,
-  parseQueryString,
   addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+  parseUrl,
 } from './url';
+import {dev, user} from './log';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 
 const TIMEOUT_VALUE = 8000;
 
 let trackImpressionPromise = null;
+
+const DEFAULT_APPEND_URL_PARAM = [
+  'gclid',
+  'gclsrc',
+];
 
 /**
  * A function to get the trackImpressionPromise;
@@ -59,13 +64,21 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
-        dev().warn('IMPRESSION', error);
-      });
+    dev().warn('IMPRESSION', error);
+  });
 
-  Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
-    // Currently this feature is launched for trusted viewer, but still
-    // experiment guarded for all AMP docs.
-    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+  const viewer = Services.viewerForDoc(win.document);
+  const isTrustedViewerPromise = viewer.isTrustedViewer();
+  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  Promise.all([
+    isTrustedViewerPromise,
+    isTrustedReferrerPromise,
+  ]).then(results => {
+    const isTrustedViewer = results[0];
+    const isTrustedReferrer = results[1];
+    // Currently this feature is launched for trusted viewer and trusted referrer,
+    // but still experiment guarded for all AMP docs.
+    if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
     }
@@ -115,7 +128,7 @@ function handleReplaceUrl(win) {
   }
 
   // request async replaceUrl is viewer support getReplaceUrl.
-  return viewer.sendMessageAwaitResponse('getReplaceUrl', undefined)
+  return viewer.sendMessageAwaitResponse('getReplaceUrl', /* data */ undefined)
       .then(response => {
         if (!response || typeof response != 'object') {
           dev().warn('IMPRESSION', 'get invalid replaceUrl response');
@@ -139,6 +152,7 @@ function handleClickUrl(win) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
+
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -157,11 +171,13 @@ function handleClickUrl(win) {
     win.location.hash = '';
   }
 
-    // TODO(@zhouyx) need test with a real response.
+  // TODO(@zhouyx) need test with a real response.
   return viewer.whenFirstVisible().then(() => {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
     applyResponse(win, response);
+  }).catch(err => {
+    user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
   });
 }
 
@@ -169,7 +185,7 @@ function handleClickUrl(win) {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JsonObject>}
+ * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -179,16 +195,26 @@ function invoke(win, clickUrl) {
     credentials: 'include',
     // All origins are allows to send these requests.
     requireAmpResponseSourceOrigin: false,
-  }).then(res => res.json());
+  }).then(res => {
+    // Treat 204 no content response specially
+    if (res.status == 204) {
+      return null;
+    }
+    return res.json();
+  });
 }
 
 /**
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!JsonObject} response
+ * @param {?JsonObject} response
  */
 function applyResponse(win, response) {
+  if (!response) {
+    return;
+  }
+
   const adLocation = response['location'];
   const adTracking = response['tracking_url'];
 
@@ -213,4 +239,67 @@ function applyResponse(win, response) {
     const newHref = addParamsToUrl(currentHref, params);
     win.history.replaceState(null, '', newHref);
   }
+}
+
+/**
+ * Return a promise that whether appending extra url params to outgoing link is required.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ */
+export function shouldAppendExtraParams(ampdoc) {
+  return ampdoc.whenReady().then(() => {
+    return !!ampdoc.getBody().querySelector(
+        'amp-analytics[type=googleanalytics]');
+  });
+}
+
+/**
+ * Return the extra url params string that should be appended to outgoing link
+ * @param {!Window} win
+ * @param {!Element} target
+ * @return {string}
+ */
+export function getExtraParamsUrl(win, target) {
+  // Get an array with extra params that needs to append.
+  const url = parseUrl(win.location.href);
+  const params = parseQueryString(url.search);
+  const appendParams = [];
+  for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {
+    const param = DEFAULT_APPEND_URL_PARAM[i];
+    if (typeof params[param] !== 'undefined') {
+      appendParams.push(param);
+    }
+  }
+
+  // Check if the param already exists
+  const additionalUrlParams = target.getAttribute('data-amp-addparams');
+  let href = target.href;
+  if (additionalUrlParams) {
+    href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
+  }
+  const loc = parseUrl(href);
+  const existParams = parseQueryString(loc.search);
+  for (let i = appendParams.length - 1; i >= 0; i--) {
+    const param = appendParams[i];
+    if (typeof existParams[param] !== 'undefined') {
+      appendParams.splice(i, 1);
+    }
+  }
+  return getQueryParamUrl(appendParams);
+}
+
+/**
+ * Helper method to convert an query param array to string
+ * @param {!Array<string>} params
+ * @return {string}
+ */
+function getQueryParamUrl(params) {
+  let url = '';
+  for (let i = 0; i < params.length; i++) {
+    const param = params[i];
+    url += (i == 0) ?
+      `${param}=QUERY_PARAM(${param})` :
+      `&${param}=QUERY_PARAM(${param})`;
+  }
+  return url;
 }

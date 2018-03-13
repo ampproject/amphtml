@@ -90,8 +90,8 @@ describe('fromIterator', function() {
     const iterator = {
       next() {
         return index < 3 ?
-            {value: (index++) * 2, done: false} :
-            {value: undefined, done: true};
+          {value: (index++) * 2, done: false} :
+          {value: undefined, done: true};
       },
     };
 

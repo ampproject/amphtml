@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user, dev} from '../../../src/log';
-import {
-    installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -67,7 +67,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -92,6 +92,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = 'video';
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-outstream')) {
+      feedType = 'outstream';
     }
 
     //Create iframe
@@ -120,8 +122,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
-        this.element.getAttribute('data-playlist')),
-        'Either the data-video or the data-playlist ' +
+        this.element.getAttribute('data-playlist') ||
+        this.element.getAttribute('data-outstream')),
+        'Either the data-video or the data-playlist or the data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
         this.element);
 
@@ -168,7 +171,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
@@ -182,27 +185,35 @@ class AmpBridPlayer extends AMP.BaseElement {
     const partnerID = this.partnerID_;
     const feedID = this.feedID_;
 
-    const placeholderFallback = this.win.document.createElement('amp-img');
-    placeholderFallback.setAttribute('src',
-        'https://cdn.brid.tv/live/default/defaultSnapshot.png');
-    placeholderFallback.setAttribute('referrerpolicy', 'origin');
-    placeholderFallback.setAttribute('layout', 'fill');
-    placeholderFallback.setAttribute('fallback', '');
-    placeholder.appendChild(placeholderFallback);
+    if (this.element.hasAttribute('data-video') ||
+    		this.element.hasAttribute('data-playlist')) {
 
-    placeholder.setAttribute('src',
-        'https://cdn.brid.tv/live/partners/' +
-        encodeURIComponent(partnerID) + '/snapshot/' +
-        encodeURIComponent(feedID) + '.jpg');
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    this.applyFillContent(placeholder);
+      const placeholderFallback = this.win.document.createElement('amp-img');
+      placeholderFallback.setAttribute('src',
+    		  'https://cdn.brid.tv/live/default/defaultSnapshot.png');
+      placeholderFallback.setAttribute('referrerpolicy', 'origin');
+      placeholderFallback.setAttribute('layout', 'fill');
+      placeholderFallback.setAttribute('fallback', '');
+      placeholder.appendChild(placeholderFallback);
 
-    return placeholder;
+      placeholder.setAttribute('src',
+    		  'https://cdn.brid.tv/live/partners/' +
+    		  encodeURIComponent(partnerID) + '/snapshot/' +
+    		  encodeURIComponent(feedID) + '.jpg');
+      placeholder.setAttribute('layout', 'fill');
+      placeholder.setAttribute('placeholder', '');
+      placeholder.setAttribute('referrerpolicy', 'origin');
+      this.applyFillContent(placeholder);
+
+      return placeholder;
+
+    } else {
+      return false;
+    }
+
   }
 
-    /**
+  /**
      * Sends a command to the player through postMessage.
      * @param {string} command
      * @param {*=} opt_arg

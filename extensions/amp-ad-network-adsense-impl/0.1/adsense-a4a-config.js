@@ -22,26 +22,15 @@
 
 import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {
-  getExperimentBranch,
-  forceExperimentBranch,
-} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {forceExperimentBranch} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
-/** @const {!string} @visibleForTesting */
+/** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
-
-/** @const @enum{string} @visibleForTesting */
-export const ADSENSE_EXPERIMENT_FEATURE = {
-  CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
-  CACHE_EXTENSION_INJECTION_EXP: '21060954',
-  IDENTITY_CONTROL: '21060939',
-  IDENTITY_EXPERIMENT: '21060940',
-};
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adsense-impl';
@@ -50,21 +39,16 @@ const TAG = 'amp-ad-network-adsense-impl';
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // AMP Cache extension injection
-  '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
-  '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
-  // Identity
-  '7': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
-  '8': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
-  if (!isGoogleAdsA4AValidEnvironment(win) ||
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
   }
@@ -81,13 +65,4 @@ export function adsenseIsA4AEnabled(win, element) {
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
   return true;
-}
-
-/**
-+ * @param {!Window} win
-+ * @return {boolean} whether identity enabled.
-+ */
-export function identityEnabled(win) {
-  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
-    ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT;
 }

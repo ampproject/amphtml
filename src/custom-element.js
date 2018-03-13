@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -34,10 +35,10 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
-import * as dom from './dom';
 import {toWin} from './types';
 
 const TAG = 'CustomElement';
@@ -171,6 +172,12 @@ function createBaseCustomElementClass(win) {
        * @private {?./service/resources-impl.Resources}
        */
       this.resources_ = null;
+
+      /**
+       * Layers can only be looked up when an element is attached.
+       * @private {?./service/layers-impl.LayoutLayers}
+       */
+      this.layers_ = null;
 
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
@@ -319,6 +326,19 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns LayoutLayers. Only available after attachment. It throws
+     * exception before the element is attached.
+     * @return {!./service/layers-impl.LayoutLayers}
+     * @final @this {!Element}
+     * @package
+     */
+    getLayers() {
+      return /** @type {!./service/layers-impl.LayoutLayers} */ (
+        dev().assert(this.layers_,
+            'no layers yet, since element is not attached'));
+    }
+
+    /**
      * Whether the element has been upgraded yet. Always returns false when
      * the element has not yet been added to DOM. After the element has been
      * added to DOM, the value depends on the `BaseElement` implementation and
@@ -423,10 +443,10 @@ function createBaseCustomElementClass(win) {
      * Get the priority to load the element.
      * @return {number} @this {!Element}
      */
-    getPriority() {
+    getLayoutPriority() {
       dev().assert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
-      return this.implementation_.getPriority();
+      return this.implementation_.getLayoutPriority();
     }
 
     /**
@@ -593,7 +613,7 @@ function createBaseCustomElementClass(win) {
           this.layout_ === Layout.RESPONSIVE) {
         const heightsAttr = this.getAttribute('heights');
         this.heightsList_ = heightsAttr ?
-            parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
       if (this.heightsList_) {
         const sizer = this.getSizer_();
@@ -625,7 +645,7 @@ function createBaseCustomElementClass(win) {
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
-          this.resources_.deferMutate(this, () => {
+          this.resources_.mutateElement(this, () => {
             dom.removeElement(sizer);
           });
         }
@@ -690,6 +710,13 @@ function createBaseCustomElementClass(win) {
       if (!this.resources_) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+      }
+      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        if (!this.layers_) {
+          // Resources can now be initialized since the ampdoc is now available.
+          this.layers_ = Services.layersForDoc(this.ampdoc_);
+        }
+        this.getLayers().add(this);
       }
       this.getResources().add(this);
 
@@ -856,6 +883,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the element should render outside of renderOutsideViewport when
+     * the scheduler is idle.
+     * @return {boolean|number}
+     * @final @this {!Element}
+     */
+    idleRenderOutsideViewport() {
+      return this.implementation_.idleRenderOutsideViewport();
+    }
+
+    /**
      * Returns a previously measured layout box adjusted to the viewport. This
      * mainly affects fixed-position elements that are adjusted to be always
      * relative to the document position in the viewport.
@@ -960,7 +997,7 @@ function createBaseCustomElementClass(win) {
       dev().assert(this.isBuilt(),
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
-      const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      const isLoadEvent = (this.layoutCount_ == 0); // First layout is "load".
       this.signals_.reset(CommonSignals.UNLOAD);
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1308,7 +1345,7 @@ function createBaseCustomElementClass(win) {
           // Blacklist elements that has a native placeholder property
           // like input and textarea. These are not allowed to be AMP
           // placeholders.
-          !('placeholder' in el);
+          !isInputPlaceholder(el);
       });
     }
 
@@ -1327,6 +1364,11 @@ function createBaseCustomElementClass(win) {
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
+          // Don't toggle elements with a native placeholder property
+          // e.g. input, textarea
+          if (isInputPlaceholder(placeholders[i])) {
+            continue;
+          }
           placeholders[i].classList.add('amp-hidden');
         }
       }
@@ -1416,8 +1458,8 @@ function createBaseCustomElementClass(win) {
      */
     isInA4A_() {
       return (
-          // in FIE
-          this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+      // in FIE
+        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1493,7 +1535,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().deferMutate(this, () => {
+          this.getResources().mutateElement(this, () => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1507,7 +1549,7 @@ function createBaseCustomElementClass(win) {
     getLayoutDelayMeter_() {
       if (!this.layoutDelayMeter_) {
         this.layoutDelayMeter_ = new LayoutDelayMeter(
-            toWin(this.ownerDocument.defaultView), this.getPriority());
+            toWin(this.ownerDocument.defaultView), this.getLayoutPriority());
       }
       return this.layoutDelayMeter_;
     }
@@ -1564,9 +1606,14 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
-  };
+  }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
+}
+
+/** @param {!Element} element */
+function isInputPlaceholder(element) {
+  return 'placeholder' in element;
 }
 
 
@@ -1624,7 +1671,7 @@ function isInternalOrServiceNode(node) {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProtoForTesting(
-    win, name, opt_implementationClass) {
+  win, name, opt_implementationClass) {
   const ElementProto = createCustomElementClass(win, name).prototype;
   if (getMode().test && opt_implementationClass) {
     ElementProto.implementationClassForTesting = opt_implementationClass;

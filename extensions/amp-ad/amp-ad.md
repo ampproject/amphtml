@@ -48,7 +48,7 @@ custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://www.ampproject.org/docs/design/amp-html-layout#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
 <!--embedded example - displays in ampproject.org -->
@@ -123,13 +123,15 @@ Example with fallback:
 ```
 
 ## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
+There are 3 ways to monetize videos in AMP with video ads:
+1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+2. Use the [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
+3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
- - Video and poster must be served over HTTPS.
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Video and poster must be served over HTTPS.
 
 
 ## Running ads from a custom domain
@@ -200,28 +202,35 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adman](../../ads/adman.md)
 - [AdmanMedia](../../ads/admanmedia.md)
 - [AdOcean](../../ads/adocean.md)
+- [AdPlugg](../../ads/adplugg.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
-- [AdSpirit](../../ads/adspirit.md)
 - [AdSpeed](../../ads/adspeed.md)
+- [AdSpirit](../../ads/adspirit.md)
 - [AdStir](../../ads/adstir.md)
 - [AdTech](../../ads/adtech.md)
 - [AdThrive](../../ads/adthrive.md)
 - [Ad Up Technology](../../ads/aduptech.md)
+- [Adventive](../../ads/adventive.md)
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
 - [AdvertServe](../../ads/advertserve.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
 - [AppNexus](../../ads/appnexus.md)
+- [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
+- [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
+- [Broadstreet Ads](../../ads/broadstreetads.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
+- [Cedato](../../ads/cedato.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
+- [Connatix](../../ads/connatix.md)
 - [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
@@ -231,21 +240,24 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
+- [eADV](../../ads/eadv.md)
 - [E-Planning](../../ads/eplanning.md)
 - [Ezoic](../../ads/ezoic.md)
+- [Felmat](../../ads/felmat.md)
 - [FlexOneELEPHANT](../../ads/f1e.md)
 - [FlexOneHARRIER](../../ads/f1h.md)
-- [fluct](../../ads/fluct.md)
-- [Felmat](../../ads/felmat.md)
 - [Flite](../../ads/flite.md)
+- [fluct](../../ads/fluct.md)
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
+- [Giraff](../../ads/giraff.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
-- [Imedia](../../ads/imedia.md)
 - [I-Mobile](../../ads/imobile.md)
+- [Imonomy](../../ads/imonomy.md)
 - [iBillboard](../../ads/ibillboard.md)
+- [Imedia](../../ads/imedia.md)
 - [Improve Digital](../../ads/improvedigital.md)
 - [Index Exchange](../../ads/ix.md)
 - [Industrybrains](../../ads/industrybrains.md)
@@ -255,15 +267,18 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Ligatus](../../ads/ligatus.md)
+- [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
-- [MediaImpact](../../ads/mediaimpact.md)
 - [Media.net](../../ads/medianet.md)
+- [MediaImpact](../../ads/mediaimpact.md)
 - [Mediavine](../../ads/mediavine.md)
+- [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
+- [Monetizer101](../../ads/monetizer101.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
@@ -289,15 +304,18 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SlimCut Media](../../ads/slimcutmedia.md)
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
-- [Sortable](../../ads/sortable.md)
 - [sogou Ad](../../ads/sogouad.md)
+- [Sortable](../../ads/sortable.md)
 - [SOVRN](../../ads/sovrn.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
+- [Trugaze](../../ads/trugaze.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [Videonow](../../ads/videonow.md)
+- [Viralize](../../ads/viralize.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
@@ -310,15 +328,19 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
 ## Supported embed types
 
+- [24smi](../../ads/24smi.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
+- [Postquare](../../ads/postquare.md)
+- [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

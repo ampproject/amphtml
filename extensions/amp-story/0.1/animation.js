@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
+import {
+  KeyframesDef,
+  KeyframesOrFilterFnDef,
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 import {PRESETS} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
-import {map} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {setStyle, resetStyles} from '../../../src/style';
-import {
-  StoryAnimationDef,
-  StoryAnimationDimsDef,
-  KeyframesOrFilterFnDef,
-  KeyframesDef,
-  StoryAnimationPresetDef,
-} from './animation-types';
-
+import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
+import {map, omit} from '../../../src/utils/object';
+import {setStyles} from '../../../src/style';
+import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
 const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
@@ -40,42 +40,8 @@ const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
 const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
-
-
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-
-
-// This does not match what's in amp-animation, but that shouldn't matter since
-// the format here is a subset.
-// TODO: Extract from amp-animation
-/**
- * @param {string} time
- * @return {number}
- */
-function timeStrToMillis(time) {
-  const match = time.match(/^([0-9\.]+)\s*(s|ms)$/);
-
-  const num = match[1];
-  const units = match[2];
-
-  user().assert(
-      match &&
-          match.length == 3 &&
-          (units == 's' || units == 'ms'),
-      'Invalid time string %s', time);
-
-  return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
-}
-
-
-/**
- * @param {!Object<string, *>} frameDef
- * @return {!Array<string>}
- */
-function getCssProps(frameDef) {
-  return Object.keys(frameDef).filter(k => k != 'offset');
-}
 
 
 /**
@@ -108,7 +74,7 @@ class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(
-      page, animationDef, webAnimationBuilderPromise, vsync, timer, sequence) {
+    page, animationDef, webAnimationBuilderPromise, vsync, timer, sequence) {
     /** @private @const */
     this.page_ = page;
 
@@ -144,8 +110,12 @@ class AnimationRunner {
      *    !../../amp-animation/0.1/web-animations.WebAnimationRunner>}
      */
     this.runnerPromise_ = this.getWebAnimationDef_().then(webAnimDef =>
-        webAnimationBuilderPromise.then(builder =>
-            builder.createRunner(webAnimDef)));
+      webAnimationBuilderPromise.then(builder =>
+        builder.createRunner(webAnimDef)));
+
+    /** @private @const {!Promise<!Object<string, *>>} */
+    this.firstFrameProps_ =
+        this.keyframes_.then(keyframes => omit(keyframes[0], ['offset']));
 
     /** @private {?../../amp-animation/0.1/web-animations.WebAnimationRunner} */
     this.runner_ = null;
@@ -155,12 +125,6 @@ class AnimationRunner {
 
     /** @private {?Promise} */
     this.scheduledWait_ = null;
-
-    /** @private */
-    this.runnerReset_ = true;
-
-    /** @private */
-    this.firstFrameApplied_ = false;
 
     this.keyframes_.then(keyframes => dev().assert(
         !keyframes[0].offset,
@@ -179,16 +143,16 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
-      const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
+      const targetRect = unscaledClientRect(this.target_);
+      const pageRect = unscaledClientRect(this.page_);
 
       return /** @type {!StoryAnimationDimsDef} */ ({
-        pageWidth: pageBoundingRect.width,
-        pageHeight: pageBoundingRect.height,
-        targetWidth: targetBoundingRect.width,
-        targetHeight: targetBoundingRect.height,
-        targetX: targetBoundingRect.left - pageBoundingRect.left,
-        targetY: targetBoundingRect.top - pageBoundingRect.top,
+        pageWidth: pageRect.width,
+        pageHeight: pageRect.height,
+        targetWidth: targetRect.width,
+        targetHeight: targetRect.height,
+        targetX: targetRect.left - pageRect.left,
+        targetY: targetRect.top - pageRect.top,
       });
     });
   }
@@ -216,45 +180,24 @@ class AnimationRunner {
       target: this.target_,
       duration: `${this.duration_}ms`,
       easing: this.presetDef_.easing,
+      fill: 'forwards',
     }));
   }
 
   /** @return {!Promise<void>} */
   applyFirstFrame() {
-    if (this.firstFrameApplied_) {
+    if (this.hasStarted()) {
       return Promise.resolve();
     }
 
-    this.firstFrameApplied_ = true;
-
-    return this.keyframes_.then(keyframes => {
-      const firstFrameDef = keyframes[0];
-      const firstFrameProps = getCssProps(firstFrameDef);
-
-      return this.vsync_.mutatePromise(() => {
-        firstFrameProps.forEach(k => {
-          setStyle(this.target_, k, firstFrameDef[k]);
-        });
-      });
-    });
-  }
-
-  /** @private */
-  resetFirstFrame_() {
-    if (!this.firstFrameApplied_) {
-      return;
+    if (this.runner_) {
+      this.runner_.cancel();
     }
 
-    this.firstFrameApplied_ = false;
-
-    this.keyframes_.then(keyframes => {
-      const firstFrameDef = keyframes[0];
-      const firstFrameProps = getCssProps(firstFrameDef);
-
-      this.vsync_.mutate(() => {
-        resetStyles(this.target_, firstFrameProps);
-      });
-    });
+    return this.firstFrameProps_.then(firstFrameProps =>
+      this.vsync_.mutatePromise(() => {
+        setStyles(this.target_, firstFrameProps);
+      }));
   }
 
   /** Starts or resumes the animation. */
@@ -290,18 +233,7 @@ class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
-    const shouldStart = !!this.runnerReset_;
-
-    this.runnerReset_ = false;
-
-    this.resetFirstFrame_();
-
-    if (shouldStart) {
-      runner.start();
-      return;
-    }
-
-    runner.resume();
+    runner.start();
   }
 
   /** @return {boolean} */
@@ -313,12 +245,9 @@ class AnimationRunner {
 
   /** Force-finishes all animations. */
   finish() {
-    if (this.firstFrameApplied_) {
+    if (!this.runner_) {
       this.notifyFinish_();
     }
-
-    this.resetFirstFrame_();
-
     this.playback_(PlaybackActivity.FINISH);
   }
 
@@ -329,7 +258,6 @@ class AnimationRunner {
   finishWhenReady_(runner) {
     if (runner.getPlayState() == WebAnimationPlayState.RUNNING) {
       runner.finish();
-      this.runnerReset_ = true;
     }
   }
 
@@ -337,6 +265,10 @@ class AnimationRunner {
   cancel() {
     this.scheduledActivity_ = null;
     this.scheduledWait_ = null;
+
+    if (this.runner_) {
+      dev().assert(this.runner_).cancel();
+    }
   }
 
   /**
@@ -565,7 +497,7 @@ export class AnimationManager {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-          scopedQuerySelector(this.root_, `#${dependencyId}`),
+          this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
           `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
               `'${el.tagName}' is set to the invalid value ` +
               `'${dependencyId}'. No children of parenting 'amp-story-page' ` +

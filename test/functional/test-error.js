@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
+import * as analytics from '../../src/analytics';
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
   cancellation,
+  detectJsEngineFromStack,
   detectNonAmpJs,
-  getErrorReportUrl,
+  getErrorReportData,
   installErrorReporting,
   isCancellation,
+  maybeReportErrorToViewer,
   reportError,
-  detectJsEngineFromStack,
   reportErrorToAnalytics,
 } from '../../src/error';
-import {parseUrl, parseQueryString} from '../../src/url';
-import {user} from '../../src/log';
+import {
+  getMode,
+  getRtvVersionForTesting,
+} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../src/experiments';
-import * as sinon from 'sinon';
-import * as analytics from '../../src/analytics';
+import {user} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;
@@ -87,6 +92,78 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 });
 
+describe('maybeReportErrorToViewer', () => {
+  let win;
+  let viewer;
+  let sandbox;
+  let ampdocServiceForStub;
+  let sendMessageStub;
+
+  const data = getErrorReportData(undefined, undefined, undefined, undefined,
+      new Error('XYZ', false));
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    const optedInDoc = window.document.implementation.createHTMLDocument('');
+    optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
+
+    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+    });
+
+    viewer = {
+      hasCapability: () => true,
+      isTrustedViewer: () => Promise.resolve(true),
+      sendMessage: () => true,
+    };
+    sendMessageStub = sandbox.stub(viewer, 'sendMessage');
+
+    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not report if AMP doc is not single', () => {
+    ampdocServiceForStub.returns({isSingleDoc: () => false});
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if AMP doc is not opted in', () => {
+    const nonOptedInDoc =
+          window.document.implementation.createHTMLDocument('');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+    });
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if viewer is not capable', () => {
+    sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
+        .returns(false);
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if viewer is not trusted', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should send viewer message named `error`', () => {
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.have.been
+            .calledWith('error', data));
+  });
+});
 
 describe('reportErrorToServer', () => {
   let sandbox;
@@ -97,7 +174,7 @@ describe('reportErrorToServer', () => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
     nextRandomNumber = 0;
-    sandbox.stub(Math, 'random', () => nextRandomNumber);
+    sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });
 
   afterEach(() => {
@@ -112,90 +189,70 @@ describe('reportErrorToServer', () => {
     if (!e.stack || e.stack.indexOf('SHOULD_BE_IN_STACK') == -1) {
       e.stack = 'SHOULD_BE_IN_STACK';
     }
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            true));
-    const query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query.el).to.equal('u');
-    expect(query.a).to.equal('0');
-    expect(query.s).to.contain('SHOULD_BE_IN_STACK');
-    expect(query['3p']).to.equal(undefined);
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, true);
+    expect(data.m).to.equal('XYZ');
+    expect(data.el).to.equal('u');
+    expect(data.a).to.equal('0');
+    expect(data.s).to.contain('SHOULD_BE_IN_STACK');
+    expect(data['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
     if (location.ancestorOrigins) {
-      expect(query.or).to.contain('http://localhost');
+      expect(data.or).to.contain('http://localhost');
     }
-    expect(query.vs).to.be.undefined;
-    expect(query.ae).to.equal('');
-    expect(query.r).to.contain('http://localhost');
-    expect(query.noAmp).to.equal('1');
-    expect(query.args).to.be.undefined;
+    expect(data.vs).to.be.undefined;
+    expect(data.ae).to.equal('');
+    expect(data.r).to.contain('http://localhost');
+    expect(data.noAmp).to.equal('1');
+    expect(data.args).to.be.undefined;
   });
 
   it('reportError with error and ignore stack', () => {
     const e = new Error('XYZ');
     e.ignoreStack = true;
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            true));
-    const query = parseQueryString(url.search);
-    expect(query.s).to.be.undefined;
-
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-    expect(query.m).to.equal('XYZ');
-    expect(query.el).to.equal('u');
-    expect(query.a).to.equal('0');
-    expect(query['3p']).to.equal(undefined);
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, true);
+    expect(data.m).to.equal('XYZ');
+    expect(data.el).to.equal('u');
+    expect(data.a).to.equal('0');
+    expect(data['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
   });
 
   it('reportError with error object w/args', () => {
     const e = new Error('XYZ');
     e.args = {x: 1};
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            true));
-    const query = parseQueryString(url.search);
-
-    expect(query.args).to.equal(JSON.stringify({x: 1}));
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, true);
+    expect(data.args).to.equal(JSON.stringify({x: 1}));
   });
 
   it('reportError with a string instead of error', () => {
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined,
-            'string error',
-            true));
-    const query = parseQueryString(url.search);
-    expect(query.m).to.equal('string error');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        'string error',
+        true);
+    expect(data.m).to.equal('string error');
   });
 
   it('reportError with no error', () => {
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined,
-            undefined,
-            true));
-    const query = parseQueryString(url.search);
-    expect(query.m).to.equal('Unknown error');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        undefined,
+        true);
+    expect(data.m).to.equal('Unknown error');
   });
 
   it('reportError with associatedElement', () => {
     const e = new Error('XYZ');
     const el = document.createElement('foo-bar');
     e.associatedElement = el;
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            false));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query.el).to.equal('FOO-BAR');
-    expect(query.a).to.equal('0');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
-    expect(query.noAmp).to.equal('0');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, false);
+    expect(data.m).to.equal('XYZ');
+    expect(data.el).to.equal('FOO-BAR');
+    expect(data.a).to.equal('0');
+    expect(data.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
+    expect(data.noAmp).to.equal('0');
   });
 
   it('reportError mark asserts', () => {
@@ -205,13 +262,12 @@ describe('reportErrorToServer', () => {
     } catch (error) {
       e = error;
     }
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query.a).to.equal('1');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e);
+    expect(data.m).to.equal('XYZ');
+    expect(data.a).to.equal('1');
+    expect(data.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
   });
 
   it('reportError mark asserts without error object', () => {
@@ -221,13 +277,11 @@ describe('reportErrorToServer', () => {
     } catch (error) {
       e = error;
     }
-    const url = parseUrl(
-        getErrorReportUrl(e.message, undefined, undefined, undefined));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query.a).to.equal('1');
-    expect(query.v).to.equal('$internalRuntimeVersion$');
+    const data = getErrorReportData(e.message, undefined, undefined, undefined);
+    expect(data.m).to.equal('XYZ');
+    expect(data.a).to.equal('1');
+    expect(data.v).to.equal(
+        getRtvVersionForTesting(window, getMode().localDev));
   });
 
   it('reportError marks 3p', () => {
@@ -236,12 +290,10 @@ describe('reportErrorToServer', () => {
     };
     const e = new Error('XYZ');
     e.fromAssert = true;
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query['3p']).to.equal('1');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e);
+    expect(data.m).to.equal('XYZ');
+    expect(data['3p']).to.equal('1');
   });
 
   it('reportError marks canary and viewerState', () => {
@@ -251,13 +303,11 @@ describe('reportErrorToServer', () => {
     };
     const e = new Error('XYZ');
     e.fromAssert = true;
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query['ca']).to.equal('1');
-    expect(query['vs']).to.equal('some-state');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e);
+    expect(data.m).to.equal('XYZ');
+    expect(data['ca']).to.equal('1');
+    expect(data['vs']).to.equal('some-state');
   });
 
   it('reportError marks binary type', () => {
@@ -265,84 +315,52 @@ describe('reportErrorToServer', () => {
       type: 'canary',
     };
     const e = new Error('XYZ');
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    const query = parseQueryString(url.search);
-
-    expect(query.m).to.equal('XYZ');
-    expect(query['bt']).to.equal('canary');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e);
+    expect(data.m).to.equal('XYZ');
+    expect(data['bt']).to.equal('canary');
 
     window.AMP_CONFIG = {
       type: 'control',
     };
     const e1 = new Error('XYZ');
-    const url1 = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e1));
-    const query1 = parseQueryString(url1.search);
-
-    expect(query1.m).to.equal('XYZ');
-    expect(query1['bt']).to.equal('control');
+    const data1 = getErrorReportData(undefined, undefined, undefined, undefined,
+        e1);
+    expect(data1.m).to.equal('XYZ');
+    expect(data1['bt']).to.equal('control');
 
     window.AMP_CONFIG = {};
     const e2 = new Error('ABC');
-    const url2 = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e2));
-    const query2 = parseQueryString(url2.search);
-
-    expect(query2.m).to.equal('ABC');
-    expect(query2['bt']).to.equal('unknown');
+    const data2 = getErrorReportData(undefined, undefined, undefined, undefined,
+        e2);
+    expect(data2.m).to.equal('ABC');
+    expect(data2['bt']).to.equal('unknown');
   });
 
   it('reportError without error object', () => {
-    const url = parseUrl(
-        getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
-    const query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-
-    expect(query.m).to.equal('foo bar');
-    expect(query.f).to.equal('foo.js');
-    expect(query.l).to.equal('11');
-    expect(query.c).to.equal('22');
-    expect(query.SHORT).to.be.undefined;
+    const data = getErrorReportData('foo bar', 'foo.js', '11', '22', undefined);
+    expect(data.m).to.equal('foo bar');
+    expect(data.f).to.equal('foo.js');
+    expect(data.l).to.equal('11');
+    expect(data.c).to.equal('22');
   });
 
   it('should accumulate errors', () => {
-    parseUrl(getErrorReportUrl(undefined, undefined, undefined, undefined,
-        new Error('1'),true));
-    parseUrl(getErrorReportUrl(undefined, undefined, undefined, undefined,
-        new Error('2'),true));
-    const url = parseUrl(getErrorReportUrl(undefined, undefined, undefined,
-        undefined, new Error('3'),true));
-    const query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-
-    expect(query.m).to.equal('3');
-    expect(query.ae).to.equal('1,2');
-  });
-
-  it('should shorten very long reports', () => {
-    let message = 'TEST';
-    for (let i = 0; i < 4000; i++) {
-      message += '&';
-    }
-    const url = parseUrl(getErrorReportUrl(undefined, undefined, undefined,
-        undefined, new Error(message),true));
-    const query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
-
-    expect(query.m).to.match(/^TEST/);
-    expect(url.href.length <= 2072).to.be.ok;
-    expect(query.SHORT).to.equal('1');
+    getErrorReportData(undefined, undefined, undefined, undefined,
+        new Error('1'),true);
+    getErrorReportData(undefined, undefined, undefined, undefined,
+        new Error('2'),true);
+    const data = getErrorReportData(undefined, undefined, undefined,
+        undefined, new Error('3'),true);
+    expect(data.m).to.equal('3');
+    expect(data.ae).to.equal('1,2');
   });
 
   it('should not double report', () => {
     const e = new Error('something _reported_');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.undefined;
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.undefined;
   });
 
   it('should construct cancellation', () => {
@@ -368,9 +386,9 @@ describe('reportErrorToServer', () => {
 
   it('reportError with error object', () => {
     const e = cancellation();
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.undefined;
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.undefined;
   });
 
   it('should throttle user errors', () => {
@@ -381,62 +399,60 @@ describe('reportErrorToServer', () => {
     } catch (error) {
       e = error;
     }
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.undefined;
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.undefined;
   });
 
   it('should not report load errors', () => {
     nextRandomNumber = 1e-3 + 1e-4;
     const e = new Error('Failed to load:');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.undefined;
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.undefined;
   });
 
   it('should report throttled load errors at threshold', () => {
     nextRandomNumber = 1e-3;
     const e = new Error('Failed to load:');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.ok;
-    expect(url).to.contain('&ex=1');
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.ok;
+    expect(data.ex).to.equal('1');
   });
 
   it('should not report Script errors', () => {
     nextRandomNumber = 1e-3 + 1e-4;
     const e = new Error('Script error.');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.undefined;
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.undefined;
   });
 
   it('should report throttled Script errors at threshold', () => {
     nextRandomNumber = 1e-3;
     const e = new Error('Script error.');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.ok;
-    expect(url).to.contain('&ex=1');
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.ok;
+    expect(data.ex).to.contain('1');
   });
 
 
   it('should report throttled load errors under threshold', () => {
     nextRandomNumber = 1e-3 - 1e-4;
     const e = new Error('Failed to load:');
-    const url =
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
-    expect(url).to.be.ok;
-    expect(url).to.contain('&ex=1');
+    const data =
+        getErrorReportData(undefined, undefined, undefined, undefined, e);
+    expect(data).to.be.ok;
+    expect(data.ex).to.contain('1');
   });
 
   it('should omit the error stack for user errors', () => {
     const e = user().createError('123');
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            true));
-    const query = parseQueryString(url.search);
-    expect(query.s).to.be.undefined;
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, true);
+    expect(data.s).to.be.undefined;
   });
 
   it('should report experiments', () => {
@@ -446,11 +462,9 @@ describe('reportErrorToServer', () => {
     toggleExperiment(window, 'disabled-exp', true);
     toggleExperiment(window, 'disabled-exp', false);
     const e = user().createError('123');
-    const url = parseUrl(
-        getErrorReportUrl(undefined, undefined, undefined, undefined, e,
-            true));
-    const query = parseQueryString(url.search);
-    expect(query.exps).to.equal('test-exp=1,disabled-exp=0');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, true);
+    expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
   });
 
   describe('detectNonAmpJs', () => {

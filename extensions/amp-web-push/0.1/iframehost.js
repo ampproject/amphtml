@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {setStyle} from '../../../src/style';
 import {loadPromise} from '../../../src/event-helper';
+import {setStyle} from '../../../src/style';
 
- /** @fileoverview
+/** @fileoverview
  * Wraps the creation of an invisible sandboxed IFrame. Exposes a load() method
  * that resolves a Promise when the iFrame has finished loading.
  */

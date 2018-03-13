@@ -15,6 +15,7 @@
 #
 tags: {  # amp-live-list
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   mandatory_parent: "HEAD"
   unique_warning: true
@@ -22,12 +23,13 @@ tags: {  # amp-live-list
     name: "amp-live-list"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-live-list>
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "AMP-LIVE-LIST"
   requires_extension: "amp-live-list"
   attrs: {
@@ -68,6 +70,7 @@ tags: {  # <amp-live-list>
 }
 tags: {
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
   attrs: { name: "update" mandatory: true }
@@ -75,6 +78,7 @@ tags: {
 }
 tags: {
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-LIVE-LIST [items]"
   attrs: { name: "items" mandatory: true }
@@ -85,6 +89,7 @@ tags: {
 }
 tags: {
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
   attrs: { name: "pagination" mandatory: true }
@@ -92,6 +97,7 @@ tags: {
 }
 tags: {
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [items] item"
   attrs: { name: "id" mandatory: true }

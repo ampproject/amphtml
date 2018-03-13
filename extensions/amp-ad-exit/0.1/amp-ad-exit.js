@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import {makeClickDelaySpec} from './filters/click-delay';
-import {assertConfig, assertVendor, TransportMode} from './config';
-import {createFilter} from './filters/factory';
-import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {
+  MessageType,
+  deserializeMessage,
+  listen,
+} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
-import {user, dev} from '../../../src/log';
+import {TransportMode, assertConfig, assertVendor} from './config';
+import {createFilter} from './filters/factory';
+import {dev, user} from '../../../src/log';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getData} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
+import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
+import {makeClickDelaySpec} from './filters/click-delay';
+import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
-import {
-  listen,
-  deserializeMessage,
-  MessageType,
-} from '../../../src/3p-frame-messaging';
-import {getData} from '../../../src/event-helper';
 const TAG = 'amp-ad-exit';
 
 /**
@@ -86,12 +88,15 @@ export class AmpAdExit extends AMP.BaseElement {
   exit({args, event}) {
     const target = this.targets_[args['target']];
     user().assert(target, `Exit target not found: '${args['target']}'`);
+    user().assert(event, 'Unexpected null event');
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
+      event);
 
-    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
+    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
@@ -180,7 +185,7 @@ export class AmpAdExit extends AMP.BaseElement {
           // Either it's not a 3p analytics variable, or it is one
           // but no matching response has been received yet.
           return (customVarName in args) ?
-              args[customVarName] : customVar.defaultValue;
+            args[customVarName] : customVar.defaultValue;
         };
         whitelist[customVarName] = true;
       }
@@ -232,6 +237,9 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.defaultFilters_.push(
         createFilter('minDelay', makeClickDelaySpec(1000), this));
+    this.defaultFilters_.push(
+        createFilter('carouselBtns',
+            makeInactiveElementSpec('.amp-carousel-button'), this));
 
     const children = this.element.children;
     user().assert(children.length == 1,
@@ -280,10 +288,6 @@ export class AmpAdExit extends AMP.BaseElement {
       throw e;
     }
 
-    this.ampAdResourceId_ = user().assert(
-        this.getAmpAdResourceId_(),
-        `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
-
     this.init3pResponseListener_();
   }
 
@@ -324,6 +328,17 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   init3pResponseListener_() {
+    if (getMode().runtime == 'inabox') {
+      // TODO(jonkeller): Remove this once #11436 is resolved.
+      return;
+    }
+    this.ampAdResourceId_ = this.ampAdResourceId_ || this.getAmpAdResourceId_();
+    if (!this.ampAdResourceId_) {
+      user().warn(TAG,
+          'No friendly parent amp-ad element was found for amp-ad-exit; ' +
+          'not in inabox case.');
+      return;
+    }
     dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
     this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {

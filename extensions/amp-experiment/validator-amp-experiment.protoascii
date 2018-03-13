@@ -17,18 +17,20 @@
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-experiment
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-experiment"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -49,6 +51,7 @@ tags: {  # amp-experiment (json)
 }
 tags: {  # <amp-experiment>
   html_format: AMP
+  html_format: EXPERIMENTAL
   tag_name: "AMP-EXPERIMENT"
   requires_extension: "amp-experiment"
   unique: true

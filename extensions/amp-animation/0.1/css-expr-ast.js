@@ -17,7 +17,7 @@
 const FINAL_URL_RE = /^(data|https)\:/i;
 const DEG_TO_RAD = 2 * Math.PI / 360;
 const GRAD_TO_RAD = Math.PI / 200;
-const VAR_CSS_RE = /(calc|var|url|rand|index|width|height)\(/i;
+const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
 
@@ -440,8 +440,8 @@ export class CssLengthNode extends CssNumericNode {
     // Font-based: em/rem.
     if (this.units_ == 'em' || this.units_ == 'rem') {
       const fontSize = this.units_ == 'em' ?
-          context.getCurrentFontSize() :
-          context.getRootFontSize();
+        context.getCurrentFontSize() :
+        context.getRootFontSize();
       return new CssLengthNode(this.num_ * fontSize, 'px');
     }
 
@@ -649,10 +649,10 @@ export class CssTranslateNode extends CssFuncNode {
   constructor(suffix, args) {
     super(`translate${suffix.toUpperCase()}`, args,
         suffix == '' ? ['w', 'h'] :
-        suffix == 'x' ? ['w'] :
-        suffix == 'y' ? ['h'] :
-        suffix == 'z' ? ['z'] :
-        suffix == '3d' ? ['w', 'h', 'z'] : null);
+          suffix == 'x' ? ['w'] :
+            suffix == 'y' ? ['h'] :
+              suffix == 'z' ? ['z'] :
+                suffix == '3d' ? ['w', 'h', 'z'] : null);
     /** @const @private {string} */
     this.suffix_ = suffix;
   }
@@ -692,9 +692,53 @@ export class CssDimSizeNode extends CssNode {
   calc(context) {
     const size =
         this.selector_ ?
-        context.getElementSize(this.selector_, this.selectionMethod_) :
-        context.getCurrentElementSize();
+          context.getElementSize(this.selector_, this.selectionMethod_) :
+          context.getCurrentElementSize();
     return new CssLengthNode(getDimSide(this.dim_, size), 'px');
+  }
+}
+
+
+/**
+ * AMP-specific `num()` function. Format is `num(value)`. Returns a numeric
+ * representation of the value. E.g. `11px` -> 11, `12em` -> 12, `10s` -> 10.
+ */
+export class CssNumConvertNode extends CssNode {
+  /**
+   * @param {!CssNode} value
+   */
+  constructor(value) {
+    super();
+    /** @const @private */
+    this.value_ = value;
+  }
+
+  /** @override */
+  css() {
+    throw noCss();
+  }
+
+  /** @override */
+  isConst() {
+    return false;
+  }
+
+  /** @override */
+  calc(context, normalize) {
+    const value = this.value_.resolve(context, normalize);
+    if (value == null) {
+      return null;
+    }
+    let num;
+    if (value instanceof CssNumericNode) {
+      num = value.num_;
+    } else {
+      num = parseFloat(value.css());
+    }
+    if (num == null || isNaN(num)) {
+      return null;
+    }
+    return new CssNumberNode(num);
   }
 }
 

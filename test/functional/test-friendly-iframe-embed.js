@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -23,13 +24,12 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
+import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {
@@ -93,6 +93,8 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
       expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(embed.win.document.documentElement.classList.contains(
+          'i-amphtml-fie')).to.be.true;
 
       // BASE element has been inserted.
       expect(embed.win.document.querySelector('base').href)
@@ -251,9 +253,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 0 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
                 arg.height == iframe.contentWindow.innerHeight))
@@ -269,7 +271,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -285,9 +287,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 10 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
                 arg.height == 200))
@@ -304,7 +306,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -388,51 +390,74 @@ describe('friendly-iframe-embed', () => {
 
     it('should pre-pend to html', () => {
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal('<base href="https://acme.org/embed1"><a></a>');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';child-src \'none\'">'
+          + '<a></a>');
     });
 
     it('should insert into head', () => {
       spec.html = '<html><head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html><head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<html><head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';'
+          + 'child-src \'none\'">head</head><body>body');
     });
 
     it('should insert into head w/o html', () => {
       spec.html = '<head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="'
+          + 'script-src \'none\';object-src \'none\';child-src \'none\'">head'
+          + '</head><body>body');
     });
 
     it('should insert before body', () => {
       spec.html = '<html><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert before body w/o html', () => {
       spec.html = '<body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert after html', () => {
       spec.html = '<html>content';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + 'content');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'">content');
+    });
+
+    it('should insert CSP', () => {
+      spec.html = '<html><head></head><body></body></html>';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><head><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">' +
+          '</head><body></body></html>');
+      spec.html = '<html>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">foo');
+      spec.html = '<body>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'"><body>foo');
     });
   });
 
@@ -477,6 +502,24 @@ describe('friendly-iframe-embed', () => {
       });
       return embedPromise.then(embed => {
         return embed.whenWindowLoaded();
+      });
+    });
+
+    it('should add violation listener', () => {
+      let eventListenerSpy;
+      const container = {
+        appendChild: child => {
+          document.body.appendChild(child);
+          eventListenerSpy =
+              sandbox.spy(child.contentWindow, 'addEventListener');
+        },
+      };
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(eventListenerSpy).to.be.calledOnce;
       });
     });
   });
@@ -536,7 +579,9 @@ describe('friendly-iframe-embed', () => {
         },
         removeEventListener: () => {},
       };
-      contentWindow = {};
+      contentWindow = {
+        addEventListener: () => {},
+      };
       contentDocument = {};
       contentBody = {nodeType: 1, style: {}};
       container = {
@@ -570,6 +615,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should poll until ready', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -618,6 +664,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should stop polling when loaded', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -632,6 +679,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should stop polling when loading failed', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -677,7 +725,7 @@ describe('friendly-iframe-embed', () => {
       };
       iframe = document.createElement('iframe');
 
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
         right: x + w,
         left: x,
         top: y,
@@ -691,9 +739,9 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       }, Promise.resolve());
 
-      sandbox.stub(fie, 'getVsync', () => vsyncMock);
-      sandbox.stub(fie, 'getResources', () => resourcesMock);
-      sandbox.stub(fie, 'win', win);
+      sandbox.stub(fie, 'getVsync').callsFake(() => vsyncMock);
+      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
+      sandbox.stub(fie, 'win').callsFake(win);
     });
 
     it('should resize body and fixed container when entering', function* () {
@@ -701,7 +749,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
 
@@ -732,7 +780,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();

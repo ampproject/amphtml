@@ -15,8 +15,8 @@
  */
 
 import '../amp-twitter';
-import {twitter} from '../../../../3p/twitter';
 import {cleanupTweetId_} from '../../../../3p/twitter';
+import {twitter} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
   amp: {
@@ -92,10 +92,29 @@ describes.realWin('amp-twitter', {
       expect(cleanupTweetId_(good)).to.equal('20');
     });
 
-    it('cleans up bad tweet id with query string at end', () => {
-      const bad = '585110598171631616?ref=twsrc%5Etfw';
+    it('does not pick up random numbers', () => {
+      const bad1 = '<div>123</div>';
+      const bad2 = '123123junk123123';
+      const bad3 = 'https://twitter.com/1cram2force/status?ref=';
+      const bad4 = '<div>nonumber</div>';
+      const bad5 = 'aa585110598171631616?ref=twsrc%5etfw';
+      const bad6 = '';
+      const bad7 = '  ';
 
-      expect(cleanupTweetId_(bad)).to.equal(tweetId);
+      expect(cleanupTweetId_(bad1)).to.equal(bad1);
+      expect(cleanupTweetId_(bad2)).to.equal(bad2);
+      expect(cleanupTweetId_(bad3)).to.equal(bad3);
+      expect(cleanupTweetId_(bad4)).to.equal(bad4);
+      expect(cleanupTweetId_(bad5)).to.equal(bad5);
+      expect(cleanupTweetId_(bad6)).to.equal(bad6);
+      expect(cleanupTweetId_(bad7)).to.equal(bad7);
+    });
+
+    it('cleans up bad tweet id with ref query string at end', () => {
+      const bad1 = '585110598171631616?ref=twsrc%5Etfw';
+      const bad2 = '585110598171631616?ref_src=twsrc%5Etfw';
+      expect(cleanupTweetId_(bad1)).to.equal(tweetId);
+      expect(cleanupTweetId_(bad2)).to.equal(tweetId);
     });
 
     it('cleans up bad tweet full Url', () => {

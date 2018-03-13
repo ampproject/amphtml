@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -44,17 +44,17 @@ const TAG = 'AMP-AD';
  * metadata tags, preferring whichever it finds first.
  * @param {!Element} element
  * @param {!Window} win
- * @param {string} adType
  * @return {?number}
+ * @visibleForTesting
  */
-export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
+export function getPublisherSpecifiedRefreshInterval(element, win) {
   const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
   if (refreshInterval) {
     return checkAndSanitizeRefreshInterval(refreshInterval);
   }
   let metaTag;
   const metaTagContent = ((metaTag = win.document
-        .getElementsByName(METATAG_NAME))
+      .getElementsByName(METATAG_NAME))
       && metaTag[0]
       && metaTag[0].getAttribute('content'));
   if (!metaTagContent) {
@@ -65,7 +65,7 @@ export function getPublisherSpecifiedRefreshInterval(element, win, adType) {
     const pair = networkIntervalPairs[i].split('=');
     user().assert(pair.length == 2, 'refresh metadata config must be of ' +
         'the form `network_type=refresh_interval`');
-    if (pair[0].toLowerCase() == adType) {
+    if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
       return checkAndSanitizeRefreshInterval(pair[1]);
     }
   }
@@ -91,7 +91,6 @@ function checkAndSanitizeRefreshInterval(refreshInterval) {
   }
   return refreshIntervalNum * 1000;
 }
-
 
 /**
  * Defines the DFA states for the refresh cycle.
@@ -151,13 +150,36 @@ const managers = {};
  */
 let refreshManagerIdCounter = 0;
 
+/**
+ * Returns an instance of RefreshManager, if refresh is enabled on the page or
+ * slot. An optional predicate for eligibility may be passed. If refresh is not
+ * enabled, or fails the optional predicate, null will be returned.
+ *
+ * @param {!./amp-a4a.AmpA4A} a4a
+ * @param {function():boolean=} opt_predicate
+ * @return {?RefreshManager}
+ */
+export function getRefreshManager(a4a, opt_predicate) {
+  const refreshInterval =
+      getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
+  if (!refreshInterval || (opt_predicate && !opt_predicate())) {
+    return null;
+  }
+  return new RefreshManager(a4a, {
+    visiblePercentageMin: 50,
+    continuousTimeMin: 1,
+  }, refreshInterval);
+}
+
+
 export class RefreshManager {
 
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
+   * @param {number} refreshInterval
    */
-  constructor(a4a, config) {
+  constructor(a4a, config, refreshInterval) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -175,8 +197,7 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshInterval_ = getPublisherSpecifiedRefreshInterval(
-        this.element_, this.win_, this.adType_);
+    this.refreshInterval_ = refreshInterval;
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
@@ -190,15 +211,10 @@ export class RefreshManager {
     /** @private {?(number|string)} */
     this.visibilityTimeoutId_ = null;
 
-    /** @private {boolean} */
-    this.isRefreshable_ = !!(this.config_ && this.refreshInterval_);
-
-    if (this.isRefreshable_) {
-      const managerId = String(refreshManagerIdCounter++);
-      this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
-      managers[managerId] = this;
-      this.initiateRefreshCycle();
-    }
+    const managerId = String(refreshManagerIdCounter++);
+    this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
+    managers[managerId] = this;
+    this.initiateRefreshCycle();
   }
 
   /**
@@ -212,8 +228,8 @@ export class RefreshManager {
     threshold = String(threshold);
     return observers[threshold] ||
         (observers[threshold] = 'IntersectionObserver' in this.win_
-         ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-         : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
+          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
   }
 
   /**
@@ -271,9 +287,6 @@ export class RefreshManager {
    * element.
    */
   initiateRefreshCycle() {
-    if (!this.isRefreshable()) {
-      return;
-    }
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
         this.getIntersectionObserverWithThreshold_(
@@ -314,27 +327,11 @@ export class RefreshManager {
   convertAndSanitizeConfiguration_(config) {
     dev().assert(config['visiblePercentageMin'] >= 0 &&
         config['visiblePercentageMin'] <= 100,
-        'visiblePercentageMin for refresh must be in the range [0, 100]');
+    'visiblePercentageMin for refresh must be in the range [0, 100]');
     // Convert seconds to milliseconds.
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
     return config;
   }
-
-  /**
-   * Returns true if this slot is eligible and enabled for refresh. A slot is
-   * eligible for refresh if it is of a network type that has opted in to
-   * refresh eligibility, and is not the child of an invalid container type
-   * (the only valid types are carousel and sticky-ad). The slot is
-   * refresh-enabled if the publisher has supplied an appropriate data
-   * attribute either on the slot or as part of a meta tag.
-   *
-   * @VisibleForTesting
-   * @return {boolean}
-   */
-  isRefreshable() {
-    return this.isRefreshable_;
-  }
 }
-
 

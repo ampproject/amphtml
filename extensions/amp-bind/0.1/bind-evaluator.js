@@ -15,6 +15,7 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
 
@@ -43,6 +44,12 @@ export class BindEvaluator {
   constructor() {
     /** @const @private {!Array<BindingDef>} */
     this.bindings_ = [];
+
+    /**
+     * Maps `id` to parsed BindMacro objects for all <amp-bind-macro> on page.
+     * @private @const {!Object<string, !./bind-macro.BindMacro>}
+     */
+    this.macros_ = Object.create(null);
 
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
@@ -84,7 +91,31 @@ export class BindEvaluator {
     });
 
     filterSplice(this.bindings_, binding =>
-        !expressionsToRemove[binding.expressionString]);
+      !expressionsToRemove[binding.expressionString]);
+  }
+
+  /**
+   * Parses and stores the given macros and returns map of macro `id` to
+   * parse errors.
+   * @param {!Array<./amp-bind-macro.AmpBindMacroDef>} macros
+   * @return {!Object<string, EvaluatorErrorDef>}
+   */
+  addMacros(macros) {
+    const errors = [];
+    // Create BindMacro objects from AmpBindMacroDef.
+    macros.forEach((macro, index) => {
+      // Only allow a macro to reference macros defined before it to prevent
+      // cycles and recursion.
+      // TODO(willchou): Would be better if cycle/recursion errors are thrown
+      // at creation instead of evaluation.
+      const referableMacros = Object.assign(Object.create(null), this.macros_);
+      try {
+        this.macros_[macro.id] = new BindMacro(macro, referableMacros);
+      } catch (e) {
+        errors[index] = {message: e.message, stack: e.stack};
+      }
+    });
+    return errors;
   }
 
   /**
@@ -183,7 +214,7 @@ export class BindEvaluator {
     let error = null;
     if (!expression) {
       try {
-        expression = new BindExpression(expressionString);
+        expression = new BindExpression(expressionString, this.macros_);
         this.expressions_[expressionString] = expression;
       } catch (e) {
         error = {message: e.message, stack: e.stack};

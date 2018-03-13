@@ -1,8 +1,14 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.20",
+  "version": "1.0.23",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
-  "keywords": ["AMP", "validator", "validate", "AMP HTML", "Accelerated Mobile Pages"],
+  "keywords": [
+    "AMP",
+    "validator",
+    "validate",
+    "AMP HTML",
+    "Accelerated Mobile Pages"
+  ],
   "engines": {
     "node": ">=0.10.25"
   },
@@ -13,17 +19,14 @@
     "url": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs/"
   },
   "bin": {
-    "amphtml-validator": "index.sh"
+    "amphtml-validator": "index.js"
   },
   "dependencies": {
     "colors": "1.1.2",
     "commander": "2.9.0",
-    "promise" : "7.1.1"
+    "promise": "7.1.1"
   },
   "devDependencies": {
     "jasmine": "2.3.2"
-  },
-  "scripts": {
-    "postinstall": "/bin/sh -c \"exit 0\" 2> postinstall.DELETEME && rm postinstall.DELETEME || node postinstall-windows.js"
   }
 }

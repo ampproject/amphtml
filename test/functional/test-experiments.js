@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
-  publicJwk,
-  correctToken,
-  tokenWithBadVersion,
-  tokenWithBadConfigLength,
-  tokenWithBadSignature,
-  tokenWithExpiredExperiment,
-} from './testdata-experiments';
-import {Services} from '../../src/services';
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {
-  enableExperimentsForOriginTrials,
+  RANDOM_NUMBER_GENERATORS,
+  experimentToggles,
+  getBinaryType,
+  getExperimentBranch,
+  getExperimentToglesFromCookieForTesting,
   isCanary,
   isExperimentOn,
-  isExperimentOnForOriginTrial,
-  experimentToggles,
-  toggleExperiment,
-  resetExperimentTogglesForTesting,
-  getExperimentToglesFromCookieForTesting,
-  RANDOM_NUMBER_GENERATORS,
-  getExperimentBranch,
+  isOriginExperimentOn,
   randomlySelectUnsetExperiments,
-  getBinaryType,
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
 } from '../../src/experiments';
+import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
-import {user} from '../../src/log';
-import * as sinon from 'sinon';
+import {installCryptoService} from '../../src/service/crypto-impl';
 
 describe('experimentToggles', () => {
   it('should return experiment status map', () => {
@@ -869,175 +859,68 @@ describe('experiment branch tests', () => {
   });
 });
 
-describes.realWin('isExperimentOnForOriginTrial', {amp: true}, env => {
+describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
+  // Token enables experiment "foo" for origin "https://origin.com".
+  /*eslint "max-len": 0*/
+  const token = 'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY';
 
   let win;
-  let sandbox;
-  let crypto;
-
-  let warnStub;
+  let isPkcsAvailable;
 
   beforeEach(() => {
-    win = {
-      document: env.win.document,
-      location: {
-        href: 'https://www.google.com',
-      },
-      crypto: env.win.crypto,
-    };
-    sandbox = env.sandbox;
-
+    win = env.win;
     installCryptoService(win);
-    crypto = Services.cryptoFor(win);
-
-    warnStub = sandbox.stub(user(), 'warn');
-
-    // Ensure that tests don't appear to pass because fake window object
-    // doesn't have crypto when the window actually has it.
-    installCryptoService(env.win);
-    expect(Services.cryptoFor(env.win).isPkcsAvailable())
-        .to.equal(Services.cryptoFor(win).isPkcsAvailable());
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    const crypto = Services.cryptoFor(win);
+    isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
   });
 
   function setupMetaTagWith(token) {
-    const meta = document.createElement('meta');
+    const meta = win.document.createElement('meta');
     meta.setAttribute('name', 'amp-experiment-token');
     meta.setAttribute('content', token);
     win.document.head.appendChild(meta);
   }
 
   it('should return false if no token is found', () => {
-    // No meta tag ever added
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
-  });
-
-  it('should return false if public key is not present', () => {
-    setupMetaTagWith(correctToken);
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
   });
 
   it('should return false if crypto is unavailable', () => {
-    sandbox.stub(crypto, 'isPkcsAvailable').returns(false);
-    const p = isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    return expect(p).to.eventually.be.false;
+    isPkcsAvailable.returns(false);
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
   });
 
-  it('should throw for missing token', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
+  it('should return false for missing token', () => {
     setupMetaTagWith('');
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been
-          .calledWith('experiments', 'Unable to read experiments token');
-    });
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
   });
 
-  it('should throw for an unknown token version number', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(tokenWithBadVersion);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({
-            message: sinon.match(/Unrecognized experiments token version/),
-          }));
-    });
+  it('should return false if origin does not match', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://not-origin.com';
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
   });
 
-  it('should throw if config length exceeds byte length', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(tokenWithBadConfigLength);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Specified len extends past end of buffer'}));
-    });
-  });
+  it('should return true for valid token with matching origin', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
 
-  it('should throw if signature cannot be verified', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(tokenWithBadSignature);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Failed to verify config signature'}));
-    });
-  });
-
-  it('should throw if approved origin is not current origin', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    win.location.href = 'https://www.not-google.com';
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Config does not match current origin'}));
-    });
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.true;
   });
 
   it('should return false if requested experiment is not in config', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-not-in-config', publicJwk);
-      return expect(p).to.eventually.be.false;
-    });
-  });
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
 
-  it('should return false if trial has expired', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(tokenWithExpiredExperiment);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      return isExperimentOnForOriginTrial(win, 'amp-expired', publicJwk);
-    }).then(result => {
-      expect(result).to.be.false;
-      expect(warnStub).to.have.been.calledWith(
-          'experiments',
-          sinon.match({message: 'Experiment amp-expired has expired'}));
-    });
-  });
-
-  it('should return true for a well-formed token for an experiment ' +
-     'that has not yet expired', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-      return expect(p).to.eventually.be.true;
-    });
-  });
-
-  it('should return true for a correct token if the approved origin has ' +
-     'a trailing slash', () => {
-    if (!crypto.isPkcsAvailable()) { return; }
-    setupMetaTagWith(correctToken);
-    win.location.href = 'https://www.google.com/';
-    return enableExperimentsForOriginTrials(win, publicJwk).then(() => {
-      const p =
-          isExperimentOnForOriginTrial(win, 'amp-expires-later', publicJwk);
-      return expect(p).to.eventually.be.true;
-    });
+    return expect(isOriginExperimentOn(win, 'bar', true))
+        .to.eventually.be.false;
   });
 });

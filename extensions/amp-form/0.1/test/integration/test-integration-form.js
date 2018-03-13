@@ -20,7 +20,7 @@ import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
-    '../../../../../src/service/template-impl';
+  '../../../../../src/service/template-impl';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;
@@ -180,7 +180,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',
@@ -246,7 +246,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',
@@ -283,7 +283,7 @@ describes.realWin('AmpForm Integration', {
       // Stubbing timeout to catch async-thrown errors and expect
       // them. These catch errors thrown inside the catch-clause of the
       // xhr request using rethrowAsync.
-      sandbox.stub(window, 'setTimeout', stubSetTimeout);
+      sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
       const form = getForm({
         id: 'form1',

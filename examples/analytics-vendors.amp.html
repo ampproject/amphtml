@@ -47,10 +47,12 @@
       <option>acquialift</option>
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
+      <option>alexametrics</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
       <option>burt</option>
+      <option>byside</option>
       <option>chartbeat</option>
       <option>clicky</option>
       <option>colanalytics</option>
@@ -67,10 +69,13 @@
       <option>linkpulse</option>
       <option>lotame</option>
       <option>mediametrie</option>
-      <option>mediarithmics</option>            
+      <option>mediarithmics</option>
       <option>mediator</option>
+      <option>mobify</option>
       <option>mparticle</option>
       <option>mpulse</option>
+      <option>newrelic</option>
+      <option>nielsen</option>
       <option>nielsen-marketing-cloud</option>
       <option>oewa</option>
       <option>oewadirect</option>
@@ -84,6 +89,8 @@
       <option>snowplow</option>
       <option>top100</option>
       <option>topmailru</option>
+      <option>umenganalytics</option>
+      <option>treasuredata</option>
       <option>webtrekk</option>
     </select>
     <input type="submit" value="Go">
@@ -181,6 +188,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Adobe Analytics example -->
 
+<!-- Alexa tracking -->
+<amp-analytics type="alexametrics">
+<script type="application/json">
+  {
+    "vars": {
+      "atrk_acct": "YOURACCOUNT",
+      "domain": "YOURDOMAIN"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Alexa tracking -->
+
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">
 <script type="application/json">
@@ -258,6 +278,32 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End Burt example -->
+
+<!-- BySide tracking -->
+<amp-analytics type="byside" id="byside">
+  <script type="application/json">
+    {
+      "vars": {
+        "webcareId": "D6604AE5D0",
+        "channel": "",
+        "lang": "pt"
+      },
+      "triggers": {
+        "trackEvent": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventId": "shop",
+            "eventLabel": "Clicked on shop button",
+            "fields": "{\"product\": \"the_essentials\", \"name\": \"The essentials\"}"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End BySide example -->
 
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat" id="chartbeat">
@@ -572,7 +618,7 @@ For complete documentation and additional examples please see: https://marketing
       "vars": {
         "site_token": "amp-test17",
         "event_name": "amp-test-pageview"
-      }, 
+      },
       "extraUrlParams": {
         "prop1": "value1",
         "prop2": "value2"
@@ -593,6 +639,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mediator.media example -->
+
+<!-- Mobify tracking -->
+<amp-analytics type="mobify" id="mobify">
+<script type="application/json">
+  {
+    "vars": {
+      "projectSlug": "merlins",
+      "templateName": "pdp"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Mobify example -->
 
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
@@ -641,6 +700,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End mParticle example -->
+
+<!-- New Relic example -->
+<amp-analytics type="newrelic" id="newrelic">
+<script type="application/json">
+  {
+    "vars": {
+      "appId": "555555",
+      "licenseKey": "2fffffffff"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End New Relic example -->
 
 <!-- Nielsen example -->
 <amp-analytics type="nielsen" id="nielsen">
@@ -893,6 +965,44 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End SOASTA mPulse example -->
 
+<!-- Treasure Data example -->
+<amp-analytics type="treasuredata" id="treasuredata">
+<script type="application/json">
+  {
+    "vars": {
+      "host": "in.treasuredata.com",
+      "writeKey": "1/deadbeaf",
+      "database": "testdb"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview",
+        "vars": {
+          "table": "pageviews"
+        },
+        "extraUrlParams": {
+          "foo": "123"
+        }
+      },
+      "trackClick": {
+        "on": "click",
+        "request": "event",
+        "selector": "#test1",
+        "vars": {
+          "table": "events"
+        },
+        "extraUrlParams": {
+          "type": "click",
+          "bar": 789
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Treasure Data example -->
+
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk" id="webtrekk">
 <script type="application/json">
@@ -951,6 +1061,27 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
 
+<!-- Umeng+ Analytics Example -->
+<amp-analytics type="umenganalytics" id="umenganalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "siteid": "123456789"
+      },
+      "triggers": {
+        "event": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventName": "login"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Umeng Analytics example -->
 </div>
 
 <div class="logo"></div>

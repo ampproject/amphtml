@@ -38,6 +38,15 @@
   <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 
   <!--
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+
+  <!--
   href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
   The first two examples are valid, the third example is invalid.
   -->
@@ -66,6 +75,16 @@
         href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css"
         href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+  <!--
+    New Font Awesome url format the first four are valid the last two are not.
+  -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" rel="stylesheet">
+  <!-- invalid -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
 
   <!--
   rel value_regex: lengthy, see protoascii

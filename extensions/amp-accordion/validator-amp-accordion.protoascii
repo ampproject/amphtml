@@ -19,7 +19,7 @@ tags: {  # amp-accordion
     name: "amp-accordion"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -41,6 +41,7 @@ tags: {  # <amp-accordion> > <section>
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
+  attrs: { name: "expand-single-section" value: "" }
   child_tags: {
     mandatory_num_child_tags: 2
     first_child_tag_name_oneof: "H1"

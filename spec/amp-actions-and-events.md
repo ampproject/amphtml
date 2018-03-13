@@ -14,73 +14,93 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Actions and Events in AMP
+# Actions and events in AMP
+
+[TOC]
 
 The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
-The value for the syntax is a simple domain specific language of the form:
+The value for the syntax is a simple domain-specific language of the form:
 
 ```javascript
 eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 ```
 
-Here's what each part of this means:
-**eventName**
-__required__
-This is the name of the event that an element exposes.
+See the table below for descriptions of each part of the syntax.
 
-**targetId**
-__required__
-This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
 
-```html
-<amp-lightbox id="photo-slides"></amp-lightbox>
-<button on="tap:photo-slides">Show Images</button>
-```
+<table>
+  <tr>
+    <th width="30%">Syntax</th>
+    <th width="18%">Required?</th>
+    <th width="42%">Description</th>
+  </tr>
+  <tr>
+    <td><code>eventName</code></td>
+    <td>yes</td>
+    <td>This is the name of the event that an element exposes.</td>
+  </tr>
+  <tr>
+    <td><code>targetId</code></td>
+    <td>yes</td>
+    <td>This is the DOM id for the element, or a predefined <a href="#special-targets">special target</a> you'd like to execute an action on  in response to the event. In the following example, the <code>targetId</code> is the DOM id of the <code>amp-lightbox</code> target, <code>photo-slides</code>.
+    <pre>&lt;amp-lightbox id="photo-slides">&lt;/amp-lightbox>
+&lt;button on="tap:photo-slides">Show Images&lt;/button></pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>methodName</code></td>
+    <td>no</td>
+    <td>This is for elements with default actions.</p><p>This is the method that the target element (referenced by <code>targetId</code>) exposes and you'd like to execute when the event is triggered.</p><p>AMP has a concept of a default action that elements can implement. So when omitting the <code>methodName</code> AMP will execute that default method.</td>
+  </tr>
+  <tr>
+    <td><code>arg=value</code></td>
+    <td>no</td>
+    <td>Some actions, if documented, may accept arguments. The arguments are defined between parentheses in <code>key=value</code> notation. The accepted values are:
+      <ul>
+        <li>simple unquoted strings: <code>simple-value</code></li>
+        <li>quoted strings: <code>"string value"</code> or <code>'string value'</code></li>
+        <li>boolean values: <code>true</code> or <code>false</code></li>
+        <li>numbers: <code>11</code> or <code>1.1</code></li>
+        <li>dot-syntax reference to event data: <code>event.someDataVariableName</code></li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-**methodName**
-__optional__ for elements with default actions
-This is the method that the target element (referenced by `targetId`) exposes and you'd like to execute when the event is triggered.
+## Handling multiple events
 
-AMP has a concept of a default action that elements can implement. So when omitting the `methodName` AMP will execute that default method.
-
-**arg=value**
-__optional__
-Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation. The accepted values are:
- - simple unquoted strings: `simple-value`
- - quoted strings: `"string value"` or `'string value'`
- - boolean values: `true` or `false`
- - numbers: `11` or `1.1`
- - dot-syntax reference to event data: `event.someDataVariableName`
-
-## Handling Multiple Events
-You can listen to multiple events on an element by separating the two events with a semicolon `;`.
+You can listen to multiple events on an element by separating the events with a semicolon `;`.
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
 
-## Multiple Actions For One Event
-You can execute multiple actions in sequence for the same event by separating the two actions with a comma ','.
+## Multiple actions for one event
+
+You can execute multiple actions in sequence for the same event by separating the actions with a comma ','.
 
 Example: `on="tap:target1.actionA,target2.actionB"`
 
 
-## Globally defined Events and Actions
-Currently AMP defines `tap` event globally that you can listen to on any HTML element (including amp-elements).
+## Globally-defined events and actions
 
-AMP also defines `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
+AMP defines a `tap` event globally that you can listen to on any HTML element (including AMP elements).
 
-{% call callout('Note', type='note') %}Note: {% endcall %} An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. `show` does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`
+AMP also defines the `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
 
-For example, the following is possible in AMP.
+{% call callout('Note', type='note') %}
+An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. The `show` action does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`.
+
+For example, the following is possible in AMP:
 
 ```html
 <div id="warning-message">Warning...</div>
 
 <button on="tap:warning-message.hide">Cool, thanks!</button>
 ```
+{% endcall %}
 
-## Element Specific Events
+## Element-specific events
 
 ### * - all elements
 <table>
@@ -94,21 +114,20 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-### Input Elements
+### Input elements
 <table>
   <tr>
-    <th>Event</th>
-    <th>Description</th>
-    <th>Elements</th>
+    <th width="20%">Event</th>
+    <th width="30%">Description</th>
+    <th width="40%">Elements</th>
     <th>Data</th>
   </tr>
   <!-- change -->
   <tr>
     <td rowspan=3><code>change</code></td>
-    <td rowspan=3>
-      Fired when the value of the element is changed and committed.
-      <br><br>
-      Data properties mirror those in <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties">HTMLInputElement</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement#Properties">HTMLSelectElement</a>.
+    <td rowspan=3>Fired when the value of the element is changed and committed.
+      <p>
+      Data properties mirror those in <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties">HTMLInputElement</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement#Properties">HTMLSelectElement</a>.</p>
     </td>
     <td><code>input</code></td>
     <td>
@@ -119,7 +138,7 @@ event.valueAsNumber</pre>
     </td>
   </tr>
   <tr>
-    <td><code>input[type="radio"]</code>, <code>input[type="checkbox"]</code></td>
+    <td><code>input[type="radio"]</code>,<br><code>input[type="checkbox"]</code></td>
     <td>
       <code>event.checked</code>
     </td>
@@ -139,14 +158,21 @@ event.value</pre>
     <td>Elements that fire <code>input</code> event.</td>
     <td>Same as <code>change</code> event data.</td>
   </tr>
+    <!-- input-throttled -->
+  <tr>
+    <td><code>input-throttled</code></td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it is throttled to firing at most once every 100ms while the value of the input is changing.</td>
+    <td>Elements that fire <code>input</code> event.</td>
+    <td>Same as <code>change</code> event data.</td>
+  </tr>
 </table>
 
 ### amp-carousel[type="slides"]
 <table>
   <tr>
-    <th>Event</th>
-    <th>Description</th>
-    <th>Data</th>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
   </tr>
   <tr>
     <td><code>slideChange</code></td>
@@ -154,29 +180,71 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
+  <tr>
+    <td><code>toggleAutoplay</code></td>
+    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
+    <td><pre>optional toggle status</pre></td>
+  </tr>
 </table>
 
-### amp-selector
+### amp-lightbox
 <table>
   <tr>
-    <th>Event</th>
-    <th>Description</th>
-    <th>Data</th>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
   </tr>
   <tr>
-    <td><code>select</code></td>
-    <td>Fired when the user manually selects an option.</td>
-    <td><pre>// The `option` attribute value of the selected element.
-event.targetOption</pre></td>
+    <td><code>lightboxOpen</code></td>
+    <td>Fired when lightbox is fully visible.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>lightboxClose</code></td>
+    <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-sidebar
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>sidebarOpen</code></td>
+    <td>Fired when sidebar is fully opened after transition has ended.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>sidebarClose</code></td>
+    <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-video, amp-youtube
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>timeUpdate</code>(low-trust)</td>
+    <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
   </tr>
 </table>
 
 ### form
 <table>
   <tr>
-    <th>Event</th>
-    <th>Description</th>
-    <th>Data</th>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
   </tr>
   <tr>
     <td><code>submit</code></td>
@@ -208,11 +276,12 @@ event.response</pre></td>
 </table>
 
 
-## Element Specific Actions
+## Element-specific actions
+
 ### * (all elements)
 <table>
   <tr>
-    <th>Action</th>
+    <th width="40%">Action</th>
     <th>Description</th>
   </tr>
   <tr>
@@ -260,7 +329,7 @@ event.response</pre></td>
 ### amp-image-lightbox
 <table>
   <tr>
-    <th>Action</th>
+    <th width="40%">Action</th>
     <th>Description</th>
   </tr>
   <tr>
@@ -285,6 +354,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
+  </tr>
+</table>
+
 ### amp-live-list
 <table>
   <tr>
@@ -294,6 +375,26 @@ event.response</pre></td>
   <tr>
     <td><code>update (default)</code></td>
     <td>Updates the DOM items to show updated content.</td>
+  </tr>
+</table>
+
+### amp-selector
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>selectUp(delta=INTEGER)</code></td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+  </tr>
+  <tr>
+    <td><code>selectDown(delta=INTEGER)</code></td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+  </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
   </tr>
 </table>
 
@@ -329,7 +430,10 @@ event.response</pre></td>
   </tr>
 </table>
 
-### amp-video, amp-youtube, amp-3q-player, amp-brid-player, amp-dailymotion, amp-ima-video
+### Video elements
+
+The actions below are supported in the following AMP video elements: `amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`, `amp-dailymotion`, `amp-ima-video`.
+
 <table>
   <tr>
     <th>Action</th>
@@ -353,7 +457,7 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>fullscreen</code></td>
-    <td>Takes the video to fullscreen</td>
+    <td>Takes the video to fullscreen.</td>
   </tr>
 </table>
 
@@ -373,19 +477,19 @@ event.response</pre></td>
 
 The following are targets provided by the AMP system that have special requirements:
 
-### `AMP`
+### Target: AMP
 
 The `AMP` target is provided by the AMP runtime and implements top-level
 actions that apply to the whole document.
 
 <table>
   <tr>
-    <th>Action</th>
+    <th width="40%">Action</th>
     <th>Description</th>
   </tr>
   <tr>
     <td><code>navigateTo(url=STRING)</code></td>
-    <td>Navigates current window to given URL. Supports <a href="./amp-var-substitutions.md">standard URL subsitutions</a>.</td>
+    <td>Navigates current window to given URL. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
   </tr>
   <tr>
     <td><code>goBack</code></td>
@@ -398,7 +502,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#updating-state-with-ampsetstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state.</p>
       <p></p>
     </td>
@@ -406,19 +510,20 @@ actions that apply to the whole document.
   <tr>
     <td><code>pushState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#modifying-history-with-amppushstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
 </table>
 
 <sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.
 
-### `amp-access`
+### Target: amp-access
 
-The `amp-access` target is provided by the [AMP Access extension](../extensions/amp-access/amp-access.md).
+The `amp-access` target is provided by the [amp-access](https://www.ampproject.org/docs/reference/components/amp-access.html) component.
 
-It's special because
-1. You can't give an arbitrary ID to this target. The target is always `amp-access`.
-2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configruation](../extensions/amp-access/amp-access.md#configuration).
+The `amp-access` target is special for these reasons:
 
-See [details](../extensions/amp-access/amp-access.md#login-link) about using the `amp-access` target.
+1.  You can't give an arbitrary ID to this target. The target is always `amp-access`.
+2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://www.ampproject.org/docs/reference/components/amp-access#configuration).
+
+See [details](https://www.ampproject.org/docs/reference/components/amp-access#login-link) about using the `amp-access` target.

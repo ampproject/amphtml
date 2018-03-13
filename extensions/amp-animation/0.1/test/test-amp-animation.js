@@ -15,19 +15,11 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
-import {toggleExperiment} from '../../../../src/experiments';
+import {WebAnimationRunner} from '../web-animations';
+
 
 describes.sandboxed('AmpAnimation', {}, () => {
-
-  beforeEach(() => {
-    toggleExperiment(window, 'amp-animation', true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-animation', false);
-  });
 
   function createAnimInWindow(win, attrs, config) {
     const element = win.document.createElement('amp-animation');
@@ -71,8 +63,9 @@ describes.sandboxed('AmpAnimation', {}, () => {
       viewer.setVisibilityState_('hidden');
       runner = new WebAnimationRunner([]);
       runnerMock = sandbox.mock(runner);
-      createRunnerStub = sandbox.stub(AmpAnimation.prototype, 'createRunner_',
-          () => Promise.resolve(runner));
+      createRunnerStub =
+          sandbox.stub(AmpAnimation.prototype, 'createRunner_').callsFake(
+              () => Promise.resolve(runner));
     });
 
     afterEach(() => {
@@ -202,7 +195,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       // Go to hidden state.
       viewer.setVisibilityState_('hidden');
       expect(pauseStub).to.be.calledOnce;
-      expect(startStub).to.be.calledOnce;  // Doesn't change.
+      expect(startStub).to.be.calledOnce; // Doesn't change.
     });
 
     it('should NOT resume/pause when visible, but not triggered', function* () {
@@ -478,7 +471,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore pause before start', () => {
         runnerMock.expects('pause').never();
         return anim.executeAction(
-          {method: 'pause', satisfiesTrust: () => true}
+            {method: 'pause', satisfiesTrust: () => true}
         );
       });
 
@@ -512,7 +505,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore resume before start', () => {
         runnerMock.expects('resume').never();
         return anim.executeAction(
-          {method: 'resume', satisfiesTrust: () => true}
+            {method: 'resume', satisfiesTrust: () => true}
         );
       });
 
@@ -542,7 +535,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         runnerMock.expects('resume').never();
         runnerMock.expects('pause').never();
         return anim.executeAction(
-          {method: 'togglePause', satisfiesTrust: () => true}
+            {method: 'togglePause', satisfiesTrust: () => true}
         );
       });
 
@@ -618,7 +611,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore reverse before start', () => {
         runnerMock.expects('reverse').never();
         return anim.executeAction(
-          {method: 'reverse', satisfiesTrust: () => true}
+            {method: 'reverse', satisfiesTrust: () => true}
         );
       });
 

@@ -150,7 +150,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.error.message).to.equal('intentional');
       expect(holder.loaded).to.be.undefined;
       expect(holder.resolve).to.exist;
-      expect(holder.reject).to.exist;;
+      expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
       expect(promise).to.equal(holder.promise);
 
@@ -270,7 +270,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install elements in shadow doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       expect(win.ampExtendedElements &&
           win.ampExtendedElements['amp-test']).to.be.undefined;
       expect(win.ampExtendedElements &&
@@ -302,7 +303,9 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    it('should install declared elements for AmpDocShell in shadow-doc', () => {
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should install declared elements for ' +
+        'AmpDocShell in shadow-doc', () => {
       const ampdocShell = new AmpDocShell(win);
       const ampdocServiceMock = sandbox.mock(Services.ampdocServiceFor(win));
 
@@ -360,7 +363,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install all doc factories to shadow doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       const factory1 = sandbox.spy();
       const factory2 = function() {
         throw new Error('intentional');
@@ -477,7 +481,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install all services to doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       const factory1 = sandbox.spy();
       const factory2Spy = sandbox.spy();
       const factory2 = function() {
@@ -579,6 +584,30 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.customElements.elements['amp-test']).to.be.undefined;
     });
 
+    it('should insert template extension script correctly', () => {
+      expect(doc.head.querySelectorAll(
+          '[custom-template="amp-mustache"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-mustache']).to.be.undefined;
+      extensions.preloadExtension('amp-mustache');
+      expect(doc.head.querySelectorAll(
+          '[custom-template="amp-mustache"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-mustache'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-mustache']).to.be.undefined;
+    });
+
+    it('should insert extension version correctly', () => {
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      extensions.preloadExtension('amp-test', '1.0');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"][src*="0.1"]')).to.have.length(0);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"][src*="1.0"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.be.undefined;
+    });
+
     it('should only insert script once', () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
@@ -639,6 +668,8 @@ describes.sandboxed('Extensions', {}, () => {
           .to.have.length(0);
       expect(extensions.extensions_['amp-embed']).to.be.undefined;
     });
+
+
   });
 
   describes.realWin('installExtensionForDoc', {
@@ -661,7 +692,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(extensions.extensions_['amp-test']).to.be.undefined;
       extensions.installExtensionForDoc(ampdoc, 'amp-test');
       expect(loadSpy).to.be.calledOnce;
-      expect(loadSpy).to.be.calledWithExactly('amp-test');
+      expect(loadSpy).to.be.calledWithExactly('amp-test', undefined);
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;

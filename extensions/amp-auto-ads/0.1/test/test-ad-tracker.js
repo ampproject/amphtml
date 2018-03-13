@@ -30,7 +30,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
     doc = win.document;
 
     resources = Services.resourcesForDoc(doc);
-    sandbox.stub(resources, 'getElementLayoutBox', element => {
+    sandbox.stub(resources, 'getElementLayoutBox').callsFake(element => {
       return Promise.resolve(element.layoutBox);
     });
 

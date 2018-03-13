@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
+import * as config from './config';
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
-import {
-  createShadowDomWriter,
-  createShadowRoot,
-  importShadowBody,
-} from './shadow-embed';
+import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {
   addElementToExtension,
@@ -32,27 +29,31 @@ import {
   registerExtension,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {Services} from './services';
-import {startupChunk} from './chunk';
+import {childElementsByTag} from './dom';
+import {
+  createShadowDomWriter,
+  createShadowRoot,
+  importShadowBody,
+} from './shadow-embed';
 import {cssText} from '../build/css';
-import {dev, user, initLogConstructor, setReportError} from './log';
-import {reportErrorForWin} from './error';
+import {dev, initLogConstructor, setReportError, user} from './log';
 import {
   disposeServicesForDoc,
 } from './service';
-import {childElementsByTag} from './dom';
 import {getMode} from './mode';
 import {
   hasRenderDelayingServices,
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installDocumentStateService} from './service/document-state';
-import {installGlobalClickListenerForDoc} from './service/document-click';
+import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
+import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -63,25 +64,25 @@ import {
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
-import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
+import {installTimerService} from './service/timer-impl';
 import {installUrlReplacementsServiceForDoc} from
-    './service/url-replacements-impl';
+  './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
-    './service/viewer-impl';
+  './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
-import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
 import {parseUrl} from './url';
+import {reportErrorForWin} from './error';
 import {setStyle} from './style';
+import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 import {waitForBodyPromise} from './dom';
-import * as config from './config';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -103,6 +104,7 @@ export function installRuntimeServices(global) {
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
+  installInputService(global);
 }
 
 
@@ -122,7 +124,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
   installStorageServiceForDoc(ampdoc);
-  installGlobalClickListenerForDoc(ampdoc);
+  installGlobalNavigationHandlerForDoc(ampdoc);
   installGlobalSubmitListenerForDoc(ampdoc);
 }
 
@@ -342,7 +344,7 @@ function adoptShared(global, callback) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  return adoptShared(global, (global, extensions) => {
+  return adoptShared(global, global => {
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
@@ -365,7 +367,6 @@ export function adopt(global) {
     return waitForBodyPromise(global.document).then(() => {
       // Ensure that all declared extensions are marked and stubbed.
       stubElementsForDoc(ampdoc);
-      installAutoLoadExtensions(extensions, ampdoc);
     });
   });
 }
@@ -409,25 +410,10 @@ export function adoptShadowMode(global) {
   });
 }
 
-
-/**
- * Certain extensions can be auto-loaded by runtime based on experiments or
- * other configurations.
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- */
-function installAutoLoadExtensions(extensions, ampdoc) {
-  if (!getMode().test &&
-      isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto')) {
-    extensions.installExtensionForDoc(ampdoc, 'amp-lightbox-viewer');
-  }
-}
-
-
 /**
  * A manager for documents in the multi-doc environment.
  */
-class MultidocManager {
+export class MultidocManager {
 
   /**
    * @param {!Window} win
@@ -484,8 +470,6 @@ class MultidocManager {
         /* opt_isRuntimeCss */ true);
     // Instal doc services.
     installAmpdocServices(ampdoc, initParams || Object.create(null));
-    // Install auto-load extensions.
-    installAutoLoadExtensions(this.extensions_, ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 
@@ -726,10 +710,15 @@ class MultidocManager {
             if (n.hasAttribute('amp-boilerplate')) {
               // Ignore.
               dev().fine(TAG, '- ignore boilerplate style: ', n);
-            } else {
+            } else if (n.hasAttribute('amp-custom')) {
               installStylesForDoc(ampdoc, n.textContent,
                   /* callback */ null,
                   /* isRuntimeCss */ false, 'amp-custom');
+              dev().fine(TAG, '- import style: ', n);
+            } else if (n.hasAttribute('amp-keyframes')) {
+              installStylesForDoc(ampdoc, n.textContent,
+                  /* callback */ null,
+                  /* isRuntimeCss */ false, 'amp-keyframes');
               dev().fine(TAG, '- import style: ', n);
             }
             break;
@@ -741,14 +730,20 @@ class MultidocManager {
                   src.indexOf('/v0.js') != -1;
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
+              const versionRe = /-(\d+.\d+)(.max)?\.js$/;
+              const match = versionRe.exec(src);
+              const version = match ? match[1] : '0.1';
               if (isRuntime) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
               } else if (customElement || customTemplate) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
-                    ampdoc, customElement || customTemplate);
+                    ampdoc, customElement || customTemplate, version);
                 dev().fine(
-                    TAG, '- load extension: ', customElement || customTemplate);
+                    TAG, '- load extension: ',
+                    customElement || customTemplate,
+                    ' ',
+                    version);
                 if (customElement) {
                   extensionIds.push(customElement);
                 }

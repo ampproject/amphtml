@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
 import {getFormAsObject} from './form';
 import {map} from './utils/object';
 
@@ -47,14 +48,14 @@ export class FormDataWrapper {
    *     input content.
    */
   constructor(opt_form = undefined) {
-    /** @private @const {FormData} */
+    /** @private @const {!FormData} */
     this.formData_ = new FormData(opt_form);
 
-    /** @private @const {!Object|undefined} */
+    /** @private @const {?Object<string, !Array<string>>} */
     this.fieldValues_ =
-        this.formData_.entries ?
-            undefined :
-            (opt_form ? getFormAsObject(opt_form) : map());
+        this.formData_['entries'] ?
+          null :
+          (opt_form ? getFormAsObject(opt_form) : map());
   }
 
   /**
@@ -76,7 +77,7 @@ export class FormDataWrapper {
    * @param {string} value The field's value.
    */
   append(name, value) {
-    if (!this.formData_.entries) {
+    if (!this.formData_['entries']) {
       const nameString = String(name);
       this.fieldValues_[nameString] = this.fieldValues_[nameString] || [];
       this.fieldValues_[name].push(String(value));
@@ -93,13 +94,15 @@ export class FormDataWrapper {
    * @return {!Iterator<!Array<string>>}
    */
   entries() {
-    if (this.formData_.entries) {
-      return this.formData_.entries();
+    if (this.formData_['entries']) {
+      return this.formData_['entries']();
     }
 
     const fieldEntries = [];
-    Object.keys(this.fieldValues_).forEach(name => {
-      const values = this.fieldValues_[name];
+    const fieldValues = /** @type {!Object<string, !Array<string>>} */ (
+      dev().assert(this.fieldValues_));
+    Object.keys(fieldValues).forEach(name => {
+      const values = fieldValues[name];
       values.forEach(value => fieldEntries.push([name, value]));
     });
 
@@ -109,8 +112,8 @@ export class FormDataWrapper {
     return /** @type {!Iterator<!Array<string>>} */ ({
       next() {
         return nextIndex < fieldEntries.length ?
-            {value: fieldEntries[nextIndex++], done: false} :
-            {value: undefined, done: true};
+          {value: fieldEntries[nextIndex++], done: false} :
+          {value: undefined, done: true};
       },
     });
   }
@@ -118,9 +121,19 @@ export class FormDataWrapper {
   /**
    * Returns the wrapped native `FormData` object.
    *
-   * @return {FormData}
+   * @return {!FormData}
    */
   getFormData() {
     return this.formData_;
   }
+}
+
+/**
+ * Check if the given object is a FormDataWrapper instance
+ * @param {*} o
+ * @return {boolean} True if the object is a FormDataWrapper instance.
+ */
+export function isFormDataWrapper(o) {
+  // instanceof doesn't work as expected, so we detect with duck-typing.
+  return !!o && typeof o.getFormData == 'function';
 }

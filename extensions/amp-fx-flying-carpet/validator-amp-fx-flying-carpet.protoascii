@@ -20,7 +20,7 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
     name: "amp-fx-flying-carpet"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

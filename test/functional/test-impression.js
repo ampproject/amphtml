@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
+  getExtraParamsUrl,
   getTrackImpressionPromise,
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
+  shouldAppendExtraParams,
 } from '../../src/impression';
-import {toggleExperiment} from '../../src/experiments';
-import {Services} from '../../src/services';
 import {macroTask} from '../../testing/yield';
-import * as sinon from 'sinon';
+import {toggleExperiment} from '../../src/experiments';
+import {user} from '../../src/log';
 
 describe('impression', () => {
 
@@ -30,6 +33,8 @@ describe('impression', () => {
   let viewer;
   let xhr;
   let isTrustedViewer;
+  let isTrustedReferrer;
+  let warnStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -39,6 +44,7 @@ describe('impression', () => {
     xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.exist;
     const stub = sandbox.stub(xhr, 'fetchJson');
+    warnStub = sandbox.stub(user(), 'warn');
     stub.returns(Promise.resolve({
       json() {
         return Promise.resolve(null);
@@ -46,8 +52,11 @@ describe('impression', () => {
     }));
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
     isTrustedViewer = false;
-    sandbox.stub(viewer, 'isTrustedViewer', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
+    });
+    sandbox.stub(viewer, 'isTrustedReferrer').callsFake(() => {
+      return Promise.resolve(isTrustedReferrer);
     });
     resetTrackImpressionPromiseForTesting();
   });
@@ -155,6 +164,24 @@ describe('impression', () => {
       });
     });
 
+    it('should invoke click URL for trusted referrer', function* () {
+      toggleExperiment(window, 'alp', false);
+      isTrustedViewer = false;
+      isTrustedReferrer = true;
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      maybeTrackImpression(window);
+      expect(xhr.fetchJson).to.have.not.been.called;
+      yield macroTask();
+      expect(xhr.fetchJson).to.be.calledOnce;
+      const url = xhr.fetchJson.lastCall.args[0];
+      const params = xhr.fetchJson.lastCall.args[1];
+      expect(url).to.equal('https://www.example.com');
+      expect(params).to.jsonEqual({
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: false,
+      });
+    });
+
     it('should do nothing if response is not received', () => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -177,6 +204,31 @@ describe('impression', () => {
       maybeTrackImpression(window);
       yield macroTask();
       expect(window.location.href).to.equal(prevHref);
+    });
+
+    it('should resolve if get no content response', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        // No-content response
+        status: 204,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.not.be.called;
+      });
+    });
+
+    it('should still resolve on request error', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        status: 404,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.be.calledOnce;
+      });
     });
 
     it('should resolve trackImpressionPromise if resolve click', () => {
@@ -288,6 +340,77 @@ describe('impression', () => {
             'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1#hash');
         window.history.replaceState(null, '', prevHref);
       });
+    });
+  });
+
+  it('shouldAppendExtraParams', () => {
+    const div = window.document.createElement('amp-analytics');
+    div.setAttribute('type', 'fake');
+    const ampdocApi = {
+      whenReady: () => {return Promise.resolve();},
+      getBody: () => {return window.document.body;},
+    };
+    window.document.body.appendChild(div);
+    return shouldAppendExtraParams(ampdocApi).then(res => {
+      expect(res).to.be.false;
+      const div2 = window.document.createElement('amp-analytics');
+      div2.setAttribute('type', 'googleanalytics');
+      window.document.body.appendChild(div2);
+      return shouldAppendExtraParams(ampdocApi).then(res => {
+        expect(res).to.be.true;
+      });
+    });
+  });
+
+  describe('getExtraParamsUrl', () => {
+    let windowApi;
+
+    beforeEach(() => {
+      const WindowApi = function() {};
+      windowApi = new WindowApi();
+      windowApi.location = {};
+    });
+
+    afterEach(() => {
+    });
+
+    it('should append gclid and gclsrc from window href', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)&gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+    it('should respect window location href', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
+      windowApi.location.href = 'www.current.com';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal('');
+      windowApi.location.href = 'www.current.com?gclid=123';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)');
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)&gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+    it('should respect param in url', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&gclid=123';
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+
+    it('should respect param in data-amp-addparams', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&gclid=123';
+      target.setAttribute('data-amp-addparams', 'gclid=QUERY_PARAM(gclid)');
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclsrc=QUERY_PARAM(gclsrc)');
     });
   });
 });

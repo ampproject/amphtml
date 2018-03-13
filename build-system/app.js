@@ -19,12 +19,12 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const BBPromise = require('bluebird');
 const app = require('express')();
 const bacon = require('baconipsum');
+const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
-const fs = BBPromise.promisifyAll(require('fs'));
 const formidable = require('formidable');
+const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
@@ -38,7 +38,7 @@ app.use('/amp4test', require('./amp4test'));
 app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
-      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://use.typekit.net https://p.typekit.net https://maxcdn.bootstrapcdn.com; report-uri https://csp-collector.appspot.com/csp/amp",
+      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -312,7 +312,7 @@ function proxyToAmpProxy(req, res, mode) {
     body = body
         // Unversion URLs.
         .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-        'https://cdn.ampproject.org/')
+            'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
@@ -542,6 +542,14 @@ app.use('/impression-proxy/', (req, res) => {
     'gclid': '1234',
   };
   res.send(body);
+
+  // Or fake response with status 204 if viewer replaceUrl is provided
+});
+
+app.use('/get-consent/', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const body = {};
+  res.send(body);
 });
 
 // Proxy with local JS.
@@ -565,6 +573,26 @@ app.get('/iframe/*', (req, res) => {
               </iframe>
             </body>
           </html>`);
+});
+
+app.get('/a4a_template/*', (req, res) => {
+  assertCors(req, res, ['GET'], undefined, true);
+  const match = /^\/a4a_template\/([a-z-]+)\/(\d+)$/.exec(req.path);
+  if (!match) {
+    res.status(404);
+    res.end('Invalid path: ' + req.path);
+    return;
+  }
+  const filePath = `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
+      `0.1/data/${match[2]}.template`;
+  fs.readFileAsync(filePath).then(file => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.end(file);
+  }).error(() => {
+    res.status(404);
+    res.end('Not found: ' + filePath);
+  });
 });
 
 // Returns a document that echoes any post messages received from parent.
@@ -610,7 +638,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/FORCE3P/g, force3p)
+        .replace(/CHECKSIG/g, force3p || '')
         .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
@@ -628,7 +656,7 @@ app.use('/inabox/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') &&  // Ignore /proxy
+  if (!adUrl.startsWith('/proxy') && // Ignore /proxy
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -682,11 +710,12 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file, '', inabox);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
       enableCors(req, res, req.headers.origin);
+    } else {
+      file = replaceUrls(mode, file, '', inabox);
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
@@ -729,7 +758,12 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   });
 });
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function elementExtractor(tagName, type) {
+  type = escapeRegExp(type);
   return new RegExp(
       `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
@@ -830,41 +864,31 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
-// Simulated Cloudflare signed Ad server
-
-const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
-const fakeAdNetworkDataDir = '/extensions/amp-ad-network-fake-impl/0.1/data';
-
-/**
- * Handle CORS headers
- */
-app.use([cloudflareDataDir], function fakeCors(req, res, next) {
-  assertCors(req, res, ['GET', 'OPTIONS'], ['X-AmpAdSignature']);
-
-  if (req.method == 'OPTIONS') {
-    res.status(204).end();
-  } else {
-    next();
-  }
+// Simulated subscription entitlement
+app.use('/subscription/:id/entitlements', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    source: 'local' + req.params.id,
+    products: ['scenic-2017.appspot.com:news',
+      'scenic-2017.appspot.com:product2'],
+  });
 });
 
-/**
- * Handle fake a4a data
- */
-app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
-  let filePath = req.path;
-  const unwrap = !req.path.endsWith('.html');
-  filePath = pc.cwd() + filePath;
+// Simulated adzerk ad server and AMP cache CDN.
+app.get('/adzerk/*', (req, res) => {
+  assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
+  const match = /\/(\d+)/.exec(req.path);
+  if (!match || !match[1]) {
+    res.status(404);
+    res.end('Invalid path: ' + req.path);
+    return;
+  }
+  const filePath =
+      pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.readFileAsync(filePath).then(file => {
-    res.setHeader('X-AmpAdRender', 'nameframe');
-    if (!unwrap) {
-      res.end(file);
-      return;
-    }
-    const metadata = JSON.parse(file);
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('X-AmpAdSignature', metadata.signature);
-    res.end(metadata.creative);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.end(file);
   }).error(() => {
     res.status(404);
     res.end('Not found: ' + filePath);
@@ -1004,6 +1028,7 @@ app.get('/dist/diversions', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache;max-age=150');
   res.end(JSON.stringify(['98' + n]));
 });
+
 /*
  * End Cache SW LOCALDEV section
  */
@@ -1076,7 +1101,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) {  // eslint-disable-line no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line amphtml-internal/no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =
@@ -1120,11 +1145,14 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
   res.setHeader('Access-Control-Expose-Headers',
       ['AMP-Access-Control-Allow-Source-Origin']
           .concat(opt_exposeHeaders || []).join(', '));
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin);
+  if (req.query.__amp_source_origin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        req.query.__amp_source_origin);
+  }
 }
 
-function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
+  opt_ignoreMissingSourceOrigin) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
     return;
@@ -1151,7 +1179,8 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
       throw invalidOrigin;
     }
 
-    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    if (!opt_ignoreMissingSourceOrigin &&
+        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
       res.statusCode = 500;
       res.end(JSON.stringify({message: invalidSourceOrigin}));
       throw invalidSourceOrigin;

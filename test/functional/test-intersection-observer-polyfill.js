@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
+  DEFAULT_THRESHOLD,
   IntersectionObserverApi,
   IntersectionObserverPolyfill,
-  getThresholdSlot,
-  DEFAULT_THRESHOLD,
   getIntersectionChangeEntry,
+  getThresholdSlot,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 describe('IntersectionObserverApi', () => {
   let sandbox;
@@ -148,7 +148,7 @@ describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {
@@ -159,34 +159,34 @@ describe('getIntersectionChangeEntry', () => {
         layoutRectLtwh(0, 100, 50, 50),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRatio: 1,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRatio: 1,
+    });
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 200, 150, 200),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 100, 50, 0),
-          intersectionRatio: 0,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 100, 50, 0),
+      intersectionRatio: 0,
+    });
   });
   it('with owner', () => {
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 50, 150, 200),
         layoutRectLtwh(0, 50, 100, 100),
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 0, 50, 50),
-          intersectionRatio: 1 / 12,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 0, 50, 50),
+      intersectionRatio: 1 / 12,
+    });
   });
 });
 
@@ -194,7 +194,7 @@ describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {
@@ -202,6 +202,37 @@ describe('IntersectionObserverPolyfill', () => {
   });
 
   describe('threshold', () => {
+    it('default threshold is "[0]"', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {});
+      expect(io.threshold_).to.jsonEqual([0]);
+    });
+
+    it('accept a single number threshold', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {
+        threshold: 0.3,
+      });
+      expect(io.threshold_).to.jsonEqual([0.3]);
+    });
+
+    it('threshold value must be finite number', () => {
+      const io1 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: [0.5, '0.6'],
+        });
+      };
+      const io2 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: Infinity,
+        });
+      };
+      expect(io1).to.throw(
+          'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+      expect(io2).to.throw(
+          'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+    });
+
     it('will be sorted', () => {
       const io = new IntersectionObserverPolyfill(() => {}, {
         threshold: [0, 0.9, 0.3, 1, 0.02],

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 import {startsWith} from '../src/string';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -153,7 +153,7 @@ function setCustomVars(oxRequest, customVars) {
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
   const filteredKeys = Object.keys(customVars)
-    .filter(key => filterPattern.test(key));
+      .filter(key => filterPattern.test(key));
   const filteredCustomVar = {};
   filteredKeys.forEach(key => {
     filteredCustomVar[key.toLowerCase()] = customVars[key];

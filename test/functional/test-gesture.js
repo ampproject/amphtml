@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {GestureRecognizer, Gestures} from '../../src/gesture';
 import * as sinon from 'sinon';
+import {GestureRecognizer, Gestures} from '../../src/gesture';
 
 
 describe('Gestures', () => {
@@ -353,6 +353,16 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
     expect(event.preventDefault).to.have.not.been.called;
     expect(event.stopPropagation).to.have.not.been.called;
+  });
+
+  it('should gesture recognizer on removeGesture', () => {
+    expect(gestures.recognizers_.length).to.equal(1);
+    expect(gestures.removeGesture(TestRecognizer)).to.equal(true);
+    expect(gestures.removeGesture(Test2Recognizer)).to.equal(false);
+    expect(gestures.recognizers_.length).to.equal(0);
+    expect(gestures.ready_.length).to.equal(0);
+    expect(gestures.tracking_.length).to.equal(0);
+    expect(gestures.pending_.length).to.equal(0);
   });
 
   it('should remove listeners and shared cache instance on cleanup', () => {

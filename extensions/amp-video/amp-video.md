@@ -104,6 +104,10 @@ If present, the video will automatically loop back to the start upon reaching th
 
 Required if a `track` resource is hosted on a different origin than the document.
 
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
+
 ##### muted (deprecated)
 
 The `muted` attribute is deprecated and no longer has any effect. The `autoplay` attribute automatically controls the mute behavior.
@@ -112,42 +116,38 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+## Media Session API attributes
 
-## Media Session API Attributes
-
-`amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+The `amp-video` component implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session), which enables developers to specify more information about the video file. The additional information for the video displays in the notification center of the user's device (along with the play/pause controls).
 
 ##### artwork
 
-URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
+Specifies a URL to a PNG/JPG/ICO image serving as the video's artwork. If `artwork` is not present, the Media Session API helper uses either the `image` field in the `schema.org` definition, the `og:image`, or the website's `favicon`.
 
 ##### artist
 
-(string) indicates the author of the video file
+Indicates the author of the video file, specified as a string.
 
 ##### album
 
-(string) indicates the album/collection the video was taken from
+Indicates the album/collection the video was taken from, specified as a string.
 
 ##### title
 
-(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the video's name/title displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.
+Indicates the name/title of the video, specified as a string. If not provided, the Media Session API helper uses either the `aria-label` attribute or falls back to the page's title.
 
 Example:
 
-Note that this example has both the `poster` and `artwork` attributes, poster will be used as the
-placeholder before the video plays while `artwork` is the image that will be displayed in the
-notification throught the MediaSessionAPI.
+This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
 
 ```html
-<amp-audio width="400" height="300"
-  src="https://yourhost.com/audios/myaudio.mp3"
+<amp-video width="720" height="305" layout="responsive"
+  src="https://yourhost.com/videos/myvideo.mp4"
   poster="https://yourhost.com/posters/poster.png"
   artwork="https://yourhost.com/artworks/artwork.png"
-  title="Awesome music" artist="Awesome singer"
+  title="Awesome video" artist="Awesome artist"
   album="Amazing album">
-  <source type="audio/mpeg" src="foo.mp3">
-</amp-audio>
+</amp-video>
 ```
 
 ## Click-to-Play overlay

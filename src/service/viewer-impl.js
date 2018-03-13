@@ -15,21 +15,20 @@
  */
 
 import {Observable} from '../observable';
-import {findIndex} from '../utils/array';
-import {dict, map} from '../utils/object';
 import {Services} from '../services';
-import {registerServiceBuilderForDoc} from '../service';
+import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {isIframed} from '../dom';
+import {dict, map} from '../utils/object';
+import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
-  isProxyOrigin,
 } from '../url';
+import {isIframed} from '../dom';
+import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {VisibilityState} from '../visibility-state';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -69,6 +68,29 @@ const TRUSTED_VIEWER_HOSTS = [
    */
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
 ];
+
+/**
+ * These domains are trusted with more sensitive viewer operations such as
+ * sending impression requests. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /**
+   * Twitter's link wrapper domains:
+   * - t.co
+   */
+  /^t.co$/,
+];
+
+/**
+ * @typedef {function(*):(!Promise<*>|undefined)}
+ */
+export let RequestResponder;
+
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -113,6 +135,9 @@ export class Viewer {
 
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
+
+    /** @private {!Object<string, !RequestResponder>} */
+    this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -222,7 +247,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -252,14 +277,14 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        Services.timerFor(this.win).timeoutPromise(
-            20000,
-            new Promise(resolve => {
-              this.messagingReadyResolver_ = resolve;
-            })).catch(reason => {
-              throw getChannelError(/** @type {!Error|string|undefined} */ (
-                  reason));
-            }) : null;
+      Services.timerFor(this.win).timeoutPromise(
+          20000,
+          new Promise(resolve => {
+            this.messagingReadyResolver_ = resolve;
+          })).catch(reason => {
+        throw getChannelError(/** @type {!Error|string|undefined} */ (
+          reason));
+      }) : null;
 
     /**
      * A promise for non-essential messages. These messages should not fail
@@ -269,12 +294,12 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingMaybePromise_ = this.isEmbedded_ ?
-        this.messagingReadyPromise_
-            .catch(reason => {
-              // Don't fail promise, but still report.
-              reportError(getChannelError(
-                  /** @type {!Error|string|undefined} */ (reason)));
-            }) : null;
+      this.messagingReadyPromise_
+          .catch(reason => {
+            // Don't fail promise, but still report.
+            reportError(getChannelError(
+                /** @type {!Error|string|undefined} */ (reason)));
+          }) : null;
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -290,11 +315,6 @@ export class Viewer {
       trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
-    } else if (!this.params_['origin']) {
-      // TODO(dvoytenko, #10991): Remove "origin" parameter check once all
-      // clients properly implement handshake.
-      trustedViewerResolved = false;
-      trustedViewerPromise = Promise.resolve(false);
     } else {
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
@@ -326,8 +346,8 @@ export class Viewer {
     this.unconfirmedReferrerUrl_ =
         this.isEmbedded() && 'referrer' in this.params_ &&
             trustedViewerResolved !== false ?
-        this.params_['referrer'] :
-        this.win.document.referrer;
+          this.params_['referrer'] :
+          this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
@@ -444,23 +464,23 @@ export class Viewer {
 
   /**
    * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, will navigate the top level window
-   * to the destination.
+   * not support this operation, does nothing.
    * The URL is assumed to be in AMP Cache format already.
    * @param {string} url An AMP article URL.
    * @param {string} requestedBy Informational string about the entity that
    *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
    */
-  navigateTo(url, requestedBy) {
-    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
+  navigateToAmpUrl(url, requestedBy) {
     if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', dict({
+      this.sendMessage('a2aNavigate', dict({
         'url': url,
         'requestedBy': requestedBy,
       }));
-    } else {
-      this.win.top.location.href = url;
+      return true;
     }
+    return false;
   }
 
   /**
@@ -683,6 +703,19 @@ export class Viewer {
   }
 
   /**
+   * @param {string} referrer
+   * @return {boolean}
+   * @private
+   */
+  isTrustedReferrer_(referrer) {
+    const url = parseUrl(referrer);
+    if (url.protocol != 'https:') {
+      return false;
+    }
+    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  }
+
+  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
@@ -709,6 +742,16 @@ export class Viewer {
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
+  }
+
+  /**
+   * Whether the referrer has been whitelisted for CORS impression
+   * @return {!Promise<boolean>}
+   */
+  isTrustedReferrer() {
+    return this.referrerUrl_.then(referrer => {
+      return this.isTrustedReferrer_(referrer);
+    });
   }
 
   /**
@@ -769,6 +812,21 @@ export class Viewer {
   }
 
   /**
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {!RequestResponder} responder
+   * @return {!UnlistenDef}
+   */
+  onMessageRespond(eventType, responder) {
+    this.messageResponders_[eventType] = responder;
+    return () => {
+      if (this.messageResponders_[eventType] === responder) {
+        delete this.messageResponders_[eventType];
+      }
+    };
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
@@ -793,6 +851,11 @@ export class Viewer {
     const observable = this.messageObservables_[eventType];
     if (observable) {
       observable.fire(data);
+    }
+    const responder = this.messageResponders_[eventType];
+    if (responder) {
+      return responder(data);
+    } else if (observable) {
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -890,10 +953,10 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-          Promise.resolve(this.messageDeliverer_(
-              eventType,
-              /** @type {?JsonObject|string|undefined} */ (data),
-              awaitResponse)));
+        Promise.resolve(this.messageDeliverer_(
+            eventType,
+            /** @type {?JsonObject|string|undefined} */ (data),
+            awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {
@@ -970,7 +1033,7 @@ export class Viewer {
   }
 
   /**
-   * Replace the
+   * Replace the document url with the viewer provided new replaceUrl.
    * @param {?string} newUrl
    */
   replaceUrl(newUrl) {

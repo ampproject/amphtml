@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
+import * as url from '../../src/url';
+import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
-  optOutOfCid,
   isOptedOutOfCid,
+  optOutOfCid,
 } from '../../src/service/cid-impl';
-import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {parseUrl} from '../../src/url';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+import {getCookie, setCookie} from '../../src/cookies';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import * as url from '../../src/url';
-import {setCookie, getCookie} from '../../src/cookies';
-import * as sinon from 'sinon';
-import * as lolex from 'lolex';
+import {parseUrl} from '../../src/url';
+import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -98,10 +99,12 @@ describe('cid', () => {
       document: {
         nodeType: /* DOCUMENT */ 9,
         body: {},
+        querySelector: () => {},
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Math: window.Math,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -109,11 +112,12 @@ describe('cid', () => {
     ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
+    installDocumentInfoServiceForDoc(ampdoc);
 
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    sandbox.stub(extensions, 'preloadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();
@@ -122,12 +126,13 @@ describe('cid', () => {
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(viewer, 'whenFirstVisible', function() {
+    sandbox.stub(viewer, 'whenFirstVisible').callsFake(function() {
       return whenFirstVisible;
     });
-    sandbox.stub(viewer, 'isTrustedViewer',
+    sandbox.stub(viewer, 'isTrustedViewer').callsFake(
         () => Promise.resolve(trustedViewer));
-    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    viewerSendMessageStub = sandbox.stub(
+        viewer, 'sendMessageAwaitResponse').callsFake(
         (eventType, opt_data) => {
           if (eventType != 'cid') {
             return Promise.reject();
@@ -142,7 +147,7 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn', () => null);
+    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
   });
@@ -188,12 +193,12 @@ describe('cid', () => {
       return compare(
           'e1',
           'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come1)').then(() => {
-            expect(storage['amp-cid']).to.be.string;
-            const stored = JSON.parse(storage['amp-cid']);
-            expect(stored.cid).to.equal(
-                'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
-            expect(stored.time).to.equal(123);
-          });
+        expect(storage['amp-cid']).to.be.string;
+        const stored = JSON.parse(storage['amp-cid']);
+        expect(stored.cid).to.equal(
+            'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+        expect(stored.time).to.equal(123);
+      });
     });
 
     it('should depend on external id e2', () => {
@@ -590,16 +595,16 @@ describe('cid', () => {
       };
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
-            expect(c).to.exist;
-            // Since various parties depend on the cookie values, please be careful
-            // about changing the format.
-            expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
-            expect(fakeWin.document.cookie).to.equal(
-                'scope_name=' + encodeURIComponent(c) +
+        expect(c).to.exist;
+        // Since various parties depend on the cookie values, please be careful
+        // about changing the format.
+        expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
+        expect(fakeWin.document.cookie).to.equal(
+            'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
                 '; domain=abc.org' +
-                '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
-          });
+                '; expires=Fri, 01 Jan 1971 00:00:00 GMT'); // 1 year from 0.
+      });
     });
 
     it('should create fallback cookie with provided name', () => {
@@ -617,7 +622,7 @@ describe('cid', () => {
             'cookie_name=' + encodeURIComponent(c) +
             '; path=/' +
             '; domain=abc.org' +
-            '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
+            '; expires=Fri, 01 Jan 1971 00:00:00 GMT'); // 1 year from 0.
       });
     });
 
@@ -632,7 +637,7 @@ describe('cid', () => {
             'cookie_name=' + encodeURIComponent(c) +
           '; path=/' +
           '; domain=abc.org' +
-          '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.
+          '; expires=Fri, 01 Jan 1971 00:00:00 GMT' // 1 year from 0.
         );
       });
     });
@@ -718,8 +723,13 @@ describes.realWin('cid', {amp: true}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     sandbox = env.sandbox;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should store CID in cookie when not in Viewer', function *() {
@@ -736,7 +746,7 @@ describes.realWin('cid', {amp: true}, env => {
     expect(fooCid).to.equal(fooCid2);
   });
 
-  it('get method should return CID when in Viewer', () => {
+  it('get method should return CID when in Viewer ', () => {
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(Promise.resolve('cid-from-viewer'));

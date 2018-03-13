@@ -21,7 +21,7 @@ tags: {  # amp-brid-player
     name: "amp-brid-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,6 +31,11 @@ tags: {  # <amp-brid-player>
   tag_name: "AMP-BRID-PLAYER"
   requires_extension: "amp-brid-player"
   attrs: { name: "autoplay" }
+  attrs: {
+    name: "data-outstream"
+    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
   attrs: {
     name: "data-partner"
     mandatory: true
@@ -43,12 +48,12 @@ tags: {  # <amp-brid-player>
   }
   attrs: {
     name: "data-playlist"
-    mandatory_oneof: "['data-playlist', 'data-video']"
+    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
   }
   attrs: {
     name: "data-video"
-    mandatory_oneof: "['data-playlist', 'data-video']"
+    mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"

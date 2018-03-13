@@ -71,6 +71,6 @@ module.exports = function(context) {
         context.report(node,
             'Property marked as private but has no trailing underscore.');
       }
-    }
-  }
+    },
+  };
 };

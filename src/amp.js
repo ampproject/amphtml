@@ -18,26 +18,24 @@
  * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {Services} from './services';
-import {startupChunk} from './chunk';
+import {adopt, installAmpdocServices, installBuiltins, installRuntimeServices} from './runtime';
+import {cssText} from '../build/css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {installCacheServiceWorker} from './service-worker/install';
+import {installDocService} from './service/ampdoc-impl';
+import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
+import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installStylesForDoc, makeBodyVisible} from './style-installer';
-import {installErrorReporting} from './error';
-import {installDocService} from './service/ampdoc-impl';
-import {installCacheServiceWorker} from './service-worker/install';
-import {stubElementsForDoc} from './service/custom-element-registry';
-import {
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-  adopt,
-} from './runtime';
-import {cssText} from '../build/css';
-import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {maybeValidate} from './validator-integration';
+import {startupChunk} from './chunk';
+import {stubElementsForDoc} from './service/custom-element-registry';
 
 // Store the originalHash as early as possible. Trying to debug:
 // https://github.com/ampproject/amphtml/issues/6070
@@ -52,11 +50,11 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.
@@ -69,6 +67,10 @@ startupChunk(self.document, function initial() {
   installPerformanceService(self);
   /** @const {!./service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
+    perf.addEnabledExperiment('no-boilerplate');
+  }
+  installPlatformService(self);
   fontStylesheetTimeout(self);
   perf.tick('is');
   installStylesForDoc(ampdoc, cssText, () => {

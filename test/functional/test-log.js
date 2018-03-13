@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
   dev,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
   setReportError,
   user,
-  duplicateErrorIfNecessary,
-  isUserErrorEmbed,
 } from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('Logging', () => {
 
@@ -57,7 +57,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
-    sandbox.stub(self, 'reportError', error => error);
+    sandbox.stub(self, 'reportError').callsFake(error => error);
   });
 
   afterEach(() => {
@@ -106,16 +106,16 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_FINE);
       expect(log.level_).to.equal(LogLevel.FINE);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][1]).to.equal('[fine]');
-      expect(logSpy.args[1][1]).to.equal('[info]');
-      expect(logSpy.args[2][1]).to.equal('[warn]');
-      expect(logSpy.args[3][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('fine');
+      expect(logSpy.args[1][0]).to.equal('info');
+      expect(logSpy.args[2][0]).to.equal('warn');
+      expect(logSpy.args[3][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -123,15 +123,15 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_INFO);
       expect(log.level_).to.equal(LogLevel.INFO);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][1]).to.equal('[info]');
-      expect(logSpy.args[1][1]).to.equal('[warn]');
-      expect(logSpy.args[2][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('info');
+      expect(logSpy.args[1][0]).to.equal('warn');
+      expect(logSpy.args[2][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -139,14 +139,14 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_WARN);
       expect(log.level_).to.equal(LogLevel.WARN);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][1]).to.equal('[warn]');
-      expect(logSpy.args[1][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('warn');
+      expect(logSpy.args[1][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -154,13 +154,13 @@ describe('Logging', () => {
       const log = new Log(win, RETURNS_ERROR);
       expect(log.level_).to.equal(LogLevel.ERROR);
 
-      log.fine('fine');
-      log.info('info');
-      log.warn('warn');
-      log.error('error');
+      log.fine('test-log', 'fine');
+      log.info('test-log', 'info');
+      log.warn('test-log', 'warn');
+      log.error('test-log', 'error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -228,8 +228,8 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
 
-    it('should be disabled by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.OFF);
+    it('should be WARN by default', () => {
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {

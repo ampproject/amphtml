@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  getService,
-} from '../service';
-import {getMode} from '../mode';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {Services} from '../services';
+import {getMode} from '../mode';
+import {
+  getService,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -753,8 +753,8 @@ export class HistoryBindingVirtual_ {
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          return this.stackIndex_;
-        });
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -764,9 +764,9 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse(
         'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          this.updateStackIndex_(stackIndex - 1);
-          return this.stackIndex_;
-        });
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**
