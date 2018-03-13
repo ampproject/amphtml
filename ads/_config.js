@@ -809,6 +809,10 @@ export const adConfig = {
     ],
   },
 
+  tracdelight: {
+    prefetch: 'https://localhost:3000/tracdelight-bundle.js',
+  },
+
   triplelift: {},
 
   trugaze: {
