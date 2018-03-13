@@ -28,6 +28,7 @@ amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
 .i-amphtml-story-system-reset,
 .i-amphtml-story-system-reset * {
   border: none !important;
+  box-sizing: initial !important;
   color: initial !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: initial !important;
