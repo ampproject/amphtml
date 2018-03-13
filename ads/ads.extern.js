@@ -508,6 +508,7 @@ data.tag.tta;
 data.tag.ttp;
 
 // uas.js
+var Phoenix;
 window.Phoenix;
 Phoenix.EQ;
 Phoenix.EQ.push;
