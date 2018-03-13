@@ -49,6 +49,10 @@ tags: {  # <amp-live-list>
     name: "id"
     mandatory: true
   }
+  attrs: {
+    name: "sort"
+    value_regex: "ascending"
+  }
   reference_points: {
     tag_spec_name: "AMP-LIVE-LIST [update]"
     mandatory: true

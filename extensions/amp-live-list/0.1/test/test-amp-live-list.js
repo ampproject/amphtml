@@ -1220,7 +1220,7 @@ describes.realWin('amp-live-list', {
     });
   });
 
-  describe('reverse order', () => {
+  describe('sort=ascending', () => {
 
     it('should have correct insertion by using data-sort-time', () => {
       const oldDate = Date.now();
@@ -1232,7 +1232,7 @@ describes.realWin('amp-live-list', {
       child2.setAttribute('data-sort-time', oldDate - 1);
       itemsSlot.appendChild(child1);
       itemsSlot.appendChild(child2);
-      buildElement(elem, Object.assign({}, dftAttrs, {reverse: ''}));
+      buildElement(elem, Object.assign({}, dftAttrs, {'sort': 'ascending'}));
       toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
       liveList.buildCallback();
       expect(liveList.itemsSlot_.childElementCount).to.equal(2);
@@ -1283,7 +1283,7 @@ describes.realWin('amp-live-list', {
       itemsSlot.appendChild(child1);
       itemsSlot.appendChild(child2);
       buildElement(elem, Object.assign({}, dftAttrs,
-          {'data-max-items-per-page': 2, reverse: ''}));
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
       sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
       toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
       liveList.buildCallback();
@@ -1329,7 +1329,7 @@ describes.realWin('amp-live-list', {
       itemsSlot.appendChild(child1);
       itemsSlot.appendChild(child2);
       buildElement(elem, Object.assign({}, dftAttrs,
-          {'data-max-items-per-page': 2, reverse: ''}));
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
       const pred = sandbox.stub(liveList, 'isElementAboveViewport_');
       // id1
       pred.onCall(0).returns(true);
