@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpAdContext} from './amp-ad-context';
 import {
   FailureType,
   RecoveryModeType,

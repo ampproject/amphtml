@@ -65,11 +65,12 @@ export const ValidatorResult = {
  */
 export class Validator {
   /**
-   * @param {!ArrayBuffer} unusedContext
+   * @param {!ArrayBuffer} unusedUnvalidatedBytes
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
    * @return {!Promise<!ValidatorResult>}
    * @abstract
    */
-  validate(unvalidatedBytes, headers) {}
+  validate(unusedUnvalidatedBytes, unusedHeaders) {}
 }
 
 /**
