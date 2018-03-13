@@ -153,7 +153,7 @@ If you want your image to display at a fixed size:
 2. Specify the `width` and `height`.
 
 {% call callout('Read on', type='read') %}
-Learn about the [inferred layout](https://www.ampproject.org/docs/guides/responsive/control_layout#what-if-the-layout-attribute-isn’t-specified?) if you don't specify the `layout` attribute.
+Learn about the [inferred layout](https://www.ampproject.org/docs/guides/responsive/control_layout#what-if-the-layout-attribute-isn%E2%80%99t-specified?) if you don't specify the `layout` attribute.
 {% endcall %}
 
 
