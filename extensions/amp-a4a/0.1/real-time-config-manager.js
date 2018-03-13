@@ -29,7 +29,13 @@ const MAX_RTC_CALLOUTS = 5;
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
 
-/** @enum {string} */
+/**
+ * Enum starts at 4 because 1-3 reserved as:
+ *  1 = custom remote.html in use.
+ *  2 = RTC succeeded.
+ *  3 = deprecated generic RTC failures.
+ * @enum {string}
+ */
 export const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
   MALFORMED_JSON_RESPONSE: '4',
