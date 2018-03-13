@@ -60,7 +60,12 @@ describes.realWin('amp-list component', {
     listMock.verify();
   });
 
-  const DEFAULT_LIST_OPTS = {expr: 'items', maxItems: 0, singleItem: false, resetOnRefresh: false};
+  const DEFAULT_LIST_OPTS = {
+    expr: 'items',
+    maxItems: 0,
+    singleItem: false,
+    resetOnRefresh: false,
+  };
 
   /**
    * @param {!Array|!Object} fetched
@@ -279,11 +284,12 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should should placeholder and loading while refreshing when reset-on-refresh is set', () => {
+  it('should show placeholder and loading while refreshing when ' +
+    'reset-on-refresh is set', () => {
     element.setAttribute('reset-on-refresh', 'true');
     const items = [{title: 'foo'}];
     const foo = doc.createElement('div');
-    let opts = {expr: 'items', resetOnRefresh: true};
+    const opts = {expr: 'items', resetOnRefresh: true};
     const rendered = expectFetchAndRender(items, [foo], opts);
 
     return list.layoutCallback().then(() => rendered).then(() => {
