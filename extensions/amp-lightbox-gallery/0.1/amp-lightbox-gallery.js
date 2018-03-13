@@ -38,7 +38,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {setStyle, toggle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -413,28 +413,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       measure: measureOverflowState,
       mutate: mutateOverflowState,
     }, {});
-  }
-
-  /**
-   * @param {number} startY
-   * @param {number} dy
-   * @param {number} finalTop
-   * @param {number=} duration
-   * @param {string=} curve
-   * @return {!Promise}
-   * @private
-   */
-  animateDescOverflow_(startY, dy, finalTop,
-    duration = 500, curve = 'ease-out') {
-    const textArea = dev().assertElement(this.descriptionTextArea_);
-    const transition = tr.numeric(startY, dy);
-    return Animation.animate(textArea, time => {
-      const p = transition(time);
-      setStyle(textArea, 'transform', `translateY(${p}px)`);
-    }, duration, curve).thenAlways(() => {
-      setStyle(textArea, 'top', `${finalTop}px`);
-      setStyle(textArea, 'transform', '');
-    });
   }
 
   /**
