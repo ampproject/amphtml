@@ -211,13 +211,33 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         },
       });
     });
-    it('should not pass canonical_url if disallowed', () => {
+    it('should not pass canonical_url if referrer policy same-origin', () => {
       sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const meta = env.win.document.createElement('meta');
       meta.setAttribute('name', 'referrer');
-      meta.setAttribute('content', 'origin');
+      meta.setAttribute('content', 'same-origin');
+      env.win.document.head.appendChild(meta);
+      const attrs = safeframeHost.getSafeframeNameAttr();
+      // Check the metadata
+      expect(JSON.parse(attrs['metadata'])).to.deep.equal({
+        'shared': {
+          'sf_ver': doubleclickImpl.safeframeVersion,
+          'ck_on': 1,
+          'flash_ver': '26.0.0',
+          'canonical_url': false,
+        },
+      });
+    });
+
+    it('should not pass canonical_url if referrer policy no-referrer', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({
+        canonicalUrl: 'http://example.org/canonical',
+      });
+      const meta = env.win.document.createElement('meta');
+      meta.setAttribute('name', 'referrer');
+      meta.setAttribute('content', 'no-referrer');
       env.win.document.head.appendChild(meta);
       const attrs = safeframeHost.getSafeframeNameAttr();
       // Check the metadata

@@ -224,13 +224,9 @@ export class SafeframeHostApi {
   /**
    * Returns the canonical URL of the page, if the publisher allows
    * it to be passed.
-   * @return {!string|boolean}
+   * @return {string|boolean}
    */
   maybeGetCanonicalUrl() {
-    const blockedReferrers = [
-      "no-referrer",
-      "same-origin",
-    ];
     if (!!this.win_.document.querySelector(
         "meta[name='referrer'][content='same-origin']") ||
         !!this.win_.document.querySelector(
