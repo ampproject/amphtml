@@ -60,9 +60,12 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   authorize() {
     return super.authorize()
         .then(response => {
-          if (response && response.scroll) {
+          const isStory = this.ampdoc.getRootNode().querySelector(
+              'amp-story[standalone]');
+          if (response && response.scroll && !isStory) {
             new ScrollElement(this.ampdoc).show(this.accessService_);
           }
+          return response;
         });
   }
 }
