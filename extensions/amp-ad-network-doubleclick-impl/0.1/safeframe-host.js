@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -212,12 +214,41 @@ export class SafeframeHostApi {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
+            'canonical_url': this.maybeGetCanonicalUrl(),
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
     return attributes;
+  }
+
+  /**
+   * Returns the canonical URL of the page, if the publisher allows
+   * it to be passed.
+   * @return {string|undefined}
+   * @visibleForTesting
+   */
+  maybeGetCanonicalUrl() {
+    // Don't allow for referrer policy same-origin,
+    // as Safeframe will always be a different origin.
+    // Don't allow for no-referrer.
+    const canonicalUrl = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const metaReferrer = this.win_.document.querySelector(
+        "meta[name='referrer']");
+    if (!metaReferrer) {
+      return canonicalUrl;
+    }
+    switch (metaReferrer.getAttribute('content')) {
+      case 'same-origin':
+        return;
+      case 'no-referrer':
+        return;
+      case 'origin':
+        return parseUrl(canonicalUrl).origin;
+    }
+    return canonicalUrl;
   }
 
   /**
