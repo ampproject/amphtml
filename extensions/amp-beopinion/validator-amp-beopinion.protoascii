@@ -38,11 +38,11 @@ tags: {  # <amp-beopinion>
     value_regex_casei: "[0-9a-f]{24}"
   }
   attrs: {
-    name: "data-name"
-  }
-  attrs: {
     name: "data-my-content"
     value_regex: "0|1"
+  }
+  attrs: {
+    name: "data-name"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
