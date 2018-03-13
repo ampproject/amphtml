@@ -49,9 +49,10 @@ export class SubscriptionPlatform {
   isPingbackEnabled() {}
 
   /**
-   * Perdforms the pingback to the subscription platform
+   * Performs the pingback to the subscription platform
+   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
    */
-  pingback() {}
+  pingback(unusedSelectedPlatform) {}
 }
 
 /**

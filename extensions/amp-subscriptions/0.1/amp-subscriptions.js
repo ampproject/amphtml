@@ -27,6 +27,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
+import { ViewerTracker } from './viewer-tracker';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -73,6 +74,12 @@ export class SubscriptionService {
 
     /** @private {!Dialog} */
     this.dialog_ = new Dialog(ampdoc);
+
+    /** @private {!ViewerTracker} */
+    this.viewerTracker_ = new ViewerTracker(ampdoc);
+
+    /** @private {?Promise} */
+    this.viewTrackerPromise_ = null;
   }
 
   /**
@@ -158,6 +165,8 @@ export class SubscriptionService {
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
+    } else {
+      this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     }
 
   }
@@ -257,6 +266,8 @@ export class SubscriptionService {
       const grantState = resolvedValues[0];
       const selectedEntitlement = resolvedValues[1];
 
+      dev().assert(this.viewTrackerPromise_, 'viewer tracker promise is null');
+
       /** @type {!RenderState} */
       const renderState = {
         entitlement: selectedEntitlement.json(),
@@ -270,9 +281,21 @@ export class SubscriptionService {
           'Selected service not registered');
 
       selectedPlatform.activate(renderState);
-      if (selectedPlatform.isPingbackEnabled()) {
-        selectedPlatform.pingback();
-      }
+
+      this.viewTrackerPromise_.then(() => {
+        const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
+          dev().assert(this.subscriptionPlatforms_['local'],
+              'Local platform is not registered'));
+
+        if (selectedPlatform.isPingbackEnabled()) {
+          selectedPlatform.pingback(selectedEntitlement);
+        }
+
+        if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
+            && localPlatform.isPingbackEnabled_()) {
+          localPlatform.pingback(selectedEntitlement);
+        }
+      });
     });
   }
 

@@ -97,9 +97,8 @@ export class LocalSubscriptionPlatform {
     /** @private @const {boolean} */
     this.isPingbackEnabled_ = true;
 
-    /** @private @const {string} */
-    this.pingbackUrl_ = dev().assert(this.serviceConfig_['pingbackUrl'],
-        '"pingbackUrl" is required in config');
+    /** @private @const {string=} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'];
 
     this.initializeListeners_();
   }
@@ -195,11 +194,14 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   isPingbackEnabled() {
-    return this.isPingbackEnabled_;
+    return !!this.pingbackUrl_;
   }
 
   /** @override */
   pingback() {
+    if (!this.isPingbackEnabled) {
+      return;
+    }
     const promise = this.urlBuilder_.buildUrl(this.pingbackUrl_,
         /* useAuthData */ true);
     return promise.then(url => {
@@ -208,9 +210,9 @@ export class LocalSubscriptionPlatform {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify(this.entitlement_.json()),
+        body: this.entitlement_.raw,
       });
     });
   }
