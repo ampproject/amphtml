@@ -144,6 +144,9 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {number} */
     this.updateTime_ = 0;
 
+    /** @private {boolean} */
+    this.isReverseOrder_ = false;
+
     /** @private @const {!Object<string, string>} */
     this.knownItems_ = Object.create(null);
 
@@ -212,6 +215,10 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.maxItemsPerPage_ = Math.max(getNumberMaxOrDefault(maxItems, 1),
         actualCount);
+
+    if (isExperimentOn(this.win, 'amp-live-list-sorting')) {
+      this.isReverseOrder_ = this.element.hasAttribute('reverse');
+    }
 
     this.manager_.register(this.liveListId_, this);
 
@@ -352,7 +359,10 @@ export class AmpLiveList extends AMP.BaseElement {
 
     if (hasInsertItems) {
       promise = promise.then(() => {
-        return this.viewport_.animateScrollIntoView(this.element);
+        const elementToScrollTo = this.isReverseOrder_ &&
+          this.itemsSlot_.lastElementChild ?
+          this.itemsSlot_.lastElementChild : this.element;
+        return this.viewport_.animateScrollIntoView(elementToScrollTo);
       });
     }
     return promise;
@@ -387,17 +397,48 @@ export class AmpLiveList extends AMP.BaseElement {
         this.itemsSlot_.appendChild(orphan);
       } else {
         const orphanSortTime = this.getSortTime_(orphan);
-        for (let child = this.itemsSlot_.firstElementChild; child;
-          child = child.nextElementSibling) {
-          const childSortTime = this.getSortTime_(child);
-          if (orphanSortTime >= childSortTime) {
-            this.itemsSlot_.insertBefore(orphan, child);
-            count++;
-            break;
-          // We've exhausted the children list and the current orphan
-          // can be the last item.
-          } else if (!child.nextElementSibling) {
-            this.itemsSlot_.appendChild(orphan);
+
+        if (this.isReverseOrder_) {
+          for (let child = this.itemsSlot_.lastElementChild; child;
+            child = child.previousElementSibling) {
+            const childSortTime = this.getSortTime_(child);
+            if (orphanSortTime >= childSortTime) {
+              if (child.nextElementSibling) {
+                this.itemsSlot_.insertBefore(orphan, child.nextElementSibling);
+                count++;
+                break;
+              } else {
+                this.itemsSlot_.appendChild(orphan);
+                count++;
+                break;
+              }
+            // If we've exhausted the list it should be appended as the first
+            // item.
+            } else if (!child.previousElementSibling) {
+              this.itemsSlot_.insertBefore(orphan, child);
+              count++;
+              break;
+            }
+            // The current orphan has a smaller sort time and needs to be
+            // appended before the currently evaluated list item so we
+            // continue looking for it.
+            continue;
+          }
+        } else {
+          for (let child = this.itemsSlot_.firstElementChild; child;
+            child = child.nextElementSibling) {
+            const childSortTime = this.getSortTime_(child);
+            if (orphanSortTime >= childSortTime) {
+              this.itemsSlot_.insertBefore(orphan, child);
+              count++;
+              break;
+            // We've exhausted the children list and the current orphan
+            // can be the last item.
+            } else if (!child.nextElementSibling) {
+              this.itemsSlot_.appendChild(orphan);
+              count++;
+              break;
+            }
           }
         }
       }
@@ -479,16 +520,28 @@ export class AmpLiveList extends AMP.BaseElement {
     const deleteItemsCandidates = [];
     const actualDeleteItems = [];
 
-    // Walk through the children from last to first.
-    // Only accumulate the items in this loop. Removing them here
-    // will break the prev reference.
-    for (let child = parent.lastElementChild; child;
-      child = child.previousElementSibling) {
-      if (deleteItemsCandidates.length >= numOfItemsToDelete) {
-        break;
+    if (this.isReverseOrder_) {
+      for (let child = parent.firstElementChild; child;
+        child = child.nextElementSibling) {
+        if (deleteItemsCandidates.length >= numOfItemsToDelete) {
+          break;
+        }
+        if (!this.isChildTombstone_(child)) {
+          deleteItemsCandidates.push(child);
+        }
       }
-      if (!this.isChildTombstone_(child)) {
-        deleteItemsCandidates.push(child);
+    } else {
+      // Walk through the children from last to first.
+      // Only accumulate the items in this loop. Removing them here
+      // will break the prev reference.
+      for (let child = parent.lastElementChild; child;
+        child = child.previousElementSibling) {
+        if (deleteItemsCandidates.length >= numOfItemsToDelete) {
+          break;
+        }
+        if (!this.isChildTombstone_(child)) {
+          deleteItemsCandidates.push(child);
+        }
       }
     }
 
@@ -497,8 +550,14 @@ export class AmpLiveList extends AMP.BaseElement {
         // The moment one of the items is in viewport stop deleting.
         for (let i = 0; i < deleteItemsCandidates.length; i++) {
           const child = deleteItemsCandidates[i];
-          if (!this.isElementBelowViewport_(child)) {
-            break;
+          if (this.isReverseOrder_) {
+            if (!this.isElementAboveViewport_(child)) {
+              break;
+            }
+          } else {
+            if (!this.isElementBelowViewport_(child)) {
+              break;
+            }
           }
           actualDeleteItems.push(child);
         }
@@ -845,7 +904,7 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the elements top is below the viewport height.
+   * Checks if the element's top is below the viewport height.
    *
    * @param {!Element} element
    * @return {boolean}
@@ -859,6 +918,17 @@ export class AmpLiveList extends AMP.BaseElement {
 
     return this.viewport_.getLayoutRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
+  }
+
+  /**
+   * Checks if the element's bottom is above the viewport.
+   *
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isElementAboveViewport_(element) {
+    return this.viewport_.getLayoutRect(element).bottom <
+        this.viewport_.getScrollTop();
   }
 
   /** @override */
