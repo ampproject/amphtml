@@ -21,7 +21,6 @@
 import '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  RTC_ATI_ENUM,
 } from '../amp-ad-network-doubleclick-impl';
 import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
 import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
@@ -177,21 +176,6 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
 
-    it('should send generic failure for unknown failure', () => {
-      const rtcResponseArray = [
-        {error: 'SOME_UNKNOWN_ERROR',
-          callout: 'www.exampleA.com', rtcTime: 100},
-      ];
-      const expectedParams = {
-        ati: `${RTC_ATI_ENUM.RTC_FAILURE}`,
-        artc: '100',
-        ard: 'www.exampleA.com',
-      };
-      const expectedJsonTargeting = {};
-      testMergeRtcResponses(
-          rtcResponseArray, expectedParams, expectedJsonTargeting);
-    });
-
     Object.keys(RTC_ERROR_ENUM).forEach(errorName => {
       it(`should send correct error value for ${errorName}`, () => {
         const rtcResponseArray = [
@@ -199,7 +183,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
             callout: 'www.exampleA.com', rtcTime: 100},
         ];
         const expectedParams = {
-          ati: `${RTC_ATI_ENUM[RTC_ERROR_ENUM[errorName]]}`,
+          ati: `${RTC_ERROR_ENUM[errorName]}`,
           artc: '100',
           ard: 'www.exampleA.com',
         };
