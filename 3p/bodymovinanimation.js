@@ -31,6 +31,7 @@ function getBodymovinAnimationSdk(global, cb) {
 
 function loadAnimationOnEvent(event) {
   const dataReceived = JSON.parse(event.data);
+  const autoplay = dataReceived['autoplay'];
   const dataLoop = dataReceived['loop'];
   const animationData = dataReceived['animationData'];
   const animatingContainer = global.document.createElement('div');
@@ -43,8 +44,8 @@ function loadAnimationOnEvent(event) {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
-      loop,
-      autoplay: true,
+      loop: loop,
+      autoplay: autoplay,
       animationData,
     });
   });

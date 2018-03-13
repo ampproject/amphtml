@@ -32,6 +32,9 @@ tags: {  # <amp-bodymovin-animation>
     value_regex: "|[0-9]+"
   }
   attrs: {
+    name: "no-autoplay"
+  }
+  attrs: {
     name: "src"
     mandatory: true
   }

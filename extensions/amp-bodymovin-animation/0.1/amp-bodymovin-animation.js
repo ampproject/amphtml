@@ -41,6 +41,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.loop_ = 'true';
 
     /** @private {string} */
+    this.autoplay_ = true;
+
+    /** @private {string} */
     this.src_ = null;
 
   }
@@ -63,6 +66,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   buildCallback() {
     this.loop_ = this.element.getAttribute('loop') ?
       this.element.getAttribute('loop') : this.loop_;
+    this.autoplay_ = !this.element.hasAttribute('no-autoplay');
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
@@ -87,6 +91,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
           const message = JSON.stringify(dict({
             'loop': this.loop_,
             'animationData': data,
+            'autoplay': this.autoplay_,
           }));
           this.iframe_.contentWindow./*OK*/postMessage(message, '*');
         });
