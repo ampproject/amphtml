@@ -162,7 +162,9 @@ export class WebAnimationRunner {
     dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
-      player.pause();
+      if (player.playState == WebAnimationPlayState.RUNNING) {
+        player.pause();
+      }
     });
   }
 
@@ -170,13 +172,18 @@ export class WebAnimationRunner {
    */
   resume() {
     dev().assert(this.players_);
-    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+    const oldRunnerPlayState = this.playState_;
+    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
-    this.runningCount_ = this.players_.length;
+    this.runningCount_ = 0;
     this.players_.forEach(player => {
-      player.play();
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
+        player.play();
+        this.runningCount_++;
+      }
     });
   }
 
