@@ -1,6 +1,7 @@
 {
   "share-providers": {
-    "facebook": true
+    "facebook": true,
+    "whatsapp": true
   },
   "related-articles": {
     "test": [
