@@ -1040,6 +1040,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler = watchify(bundler);
   }
 
+  // Default wrapper for `gulp build`.
+  // We don't need an explicit function wrapper like we do for `gulp dist`
+  // because Babel handles that for you.
   const wrapper = options.wrapper || '<%= contents %>';
 
   const lazybuild = lazypipe()
