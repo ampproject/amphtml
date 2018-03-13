@@ -681,6 +681,15 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     connectedCallback() {
+      // Chrome and Safari can trigger connectedCallback even when the node is
+      // disconnected. See #12849, https://crbug.com/821195, and
+      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+      // connectedCallback will later be called when the disconnected root is
+      // connected to the document tree.
+      if (!dom.isConnected(this)) {
+        return;
+      }
+
       if (!this.everAttached) {
         this.classList.add('i-amphtml-element');
         this.classList.add('i-amphtml-notbuilt');

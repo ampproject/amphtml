@@ -238,6 +238,23 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
     });
 
+    it('Element - should handle buggy connectedCallback #12849', () => {
+      const element = new ElementClass();
+      Object.defineProperty(element, 'isConnected', {
+        value: false,
+      });
+
+      expect(element).to.not.have.class('i-amphtml-element');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
+
+      container.appendChild(element);
+
+      expect(element).to.not.have.class('i-amphtml-element');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
+    });
+
     it('Element - should reset on 2nd attachedCallback when requested', () => {
       clock.tick(1);
       const element = new ElementClass();
