@@ -97,8 +97,8 @@ export class LocalSubscriptionPlatform {
     /** @private @const {boolean} */
     this.isPingbackEnabled_ = true;
 
-    /** @private @const {string=} */
-    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'];
+    /** @private @const {?string} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
 
     this.initializeListeners_();
   }

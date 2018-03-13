@@ -23,11 +23,11 @@ import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {SubscriptionPlatform} from './subscription-platform';
+import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
-import { ViewerTracker } from './viewer-tracker';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -283,8 +283,8 @@ export class SubscriptionService {
       selectedPlatform.activate(renderState);
 
       this.viewTrackerPromise_.then(() => {
-        const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-          dev().assert(this.subscriptionPlatforms_['local'],
+        const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
+          user().assert(this.subscriptionPlatforms_['local'],
               'Local platform is not registered'));
 
         if (selectedPlatform.isPingbackEnabled()) {
@@ -292,7 +292,7 @@ export class SubscriptionService {
         }
 
         if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
-            && localPlatform.isPingbackEnabled_()) {
+            && localPlatform.isPingbackEnabled()) {
           localPlatform.pingback(selectedEntitlement);
         }
       });

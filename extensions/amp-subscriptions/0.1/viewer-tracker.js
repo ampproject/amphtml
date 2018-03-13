@@ -40,19 +40,21 @@ export class ViewerTracker {
 
   /**
    * @param {time} timeToView
-   * @returns {Promise}
+   * @returns {!Promise}
    */
   scheduleView(timeToView) {
     this.reportViewPromise_ = null;
     return this.ampdoc_.whenReady().then(() => {
-      if (this.viewer_.isVisible()) {
-        return this.reportWhenViewed_(timeToView);
-      }
-      this.viewer_.onVisibilityChanged(() => {
+      return new Promise(resolve => {
         if (this.viewer_.isVisible()) {
-          return this.reportWhenViewed_(timeToView);
+          resolve();
         }
-      });
+        this.viewer_.onVisibilityChanged(() => {
+          if (this.viewer_.isVisible()) {
+            resolve();
+          }
+        });
+      }).then(() => this.reportWhenViewed_(timeToView));
     });
   }
 
@@ -67,10 +69,6 @@ export class ViewerTracker {
     }
     dev().fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_(timeToView)
-        .then(() => {
-          // Wait for the most recent authorization flow to complete.
-          return this.lastAuthorizationPromises_;
-        })
         .catch(reason => {
           // Ignore - view has been canceled.
           dev().fine(TAG, 'view cancelled:', reason);

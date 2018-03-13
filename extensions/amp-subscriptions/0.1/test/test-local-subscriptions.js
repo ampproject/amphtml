@@ -156,7 +156,7 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         expect(sendSignalStub.getCall(0).args[0]).to.be
             .equal(localSubscriptionPlatform.pingbackUrl_);
         expect(sendSignalStub.getCall(0).args[1].body).to.deep
-            .equal(JSON.stringify(entitlement.json()));
+            .equal(entitlement.raw);
       });
     });
   });

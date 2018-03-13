@@ -158,7 +158,6 @@ export class GoogleSubscriptionsPlatform {
    * @returns {boolean}
    */
   isPingbackEnabled() {
-    // TODO: implement this;
     return false;
   }
 
