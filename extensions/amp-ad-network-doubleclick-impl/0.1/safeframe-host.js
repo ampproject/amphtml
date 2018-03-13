@@ -171,16 +171,17 @@ export class SafeframeHostApi {
     /** @private {boolean} */
     this.isRegistered_ = false;
 
+    // TODO: Make this page-level.
     const sfConfig = Object(tryParseJson(
         this.baseInstance_.element.getAttribute(
             'data-safeframe-config')) || {});
     /** @private {boolean} */
-    this.expandByOverlay_ = (sfConfig.hasOwnProperty('expandByOverlay') &&
-                             !!sfConfig['expandByOverlay']) || true;
+    this.expandByOverlay_ = sfConfig.hasOwnProperty('expandByOverlay') ?
+      sfConfig['expandByOverlay'] : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = (sfConfig.hasOwnProperty('expandByPush') &&
-                          !!sfConfig['expandByPush']) || true;
+    this.expandByPush_ = sfConfig.hasOwnProperty('expandByPush') ?
+      sfConfig['expandByPush'] : true;
 
     /** @private {?Function} */
     this.unlisten_ = null;
