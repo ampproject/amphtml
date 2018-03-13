@@ -392,7 +392,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           }),
 
           // inabox-host
@@ -404,7 +403,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           })
       );
     }
