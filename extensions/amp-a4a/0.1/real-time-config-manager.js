@@ -29,26 +29,32 @@ const MAX_RTC_CALLOUTS = 5;
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
 
-/** @enum {string} */
+/**
+ * Enum starts at 4 because 1-3 reserved as:
+ *  1 = custom remote.html in use.
+ *  2 = RTC succeeded.
+ *  3 = deprecated generic RTC failures.
+ * @enum {string}
+ */
 export const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
-  MALFORMED_JSON_RESPONSE: 'malformed_json_response',
+  MALFORMED_JSON_RESPONSE: '4',
   // Occurs when a publisher has specified the same url
   // or vendor url (after macros are substituted) to call out to more than once.
-  DUPLICATE_URL: 'duplicate_url',
+  DUPLICATE_URL: '5',
   // Occurs when a URL fails isSecureUrl check.
-  INSECURE_URL: 'insecure_url',
+  INSECURE_URL: '6',
   // Occurs when 5 valid callout urls have already been built, and additional
   // urls are still specified.
-  MAX_CALLOUTS_EXCEEDED: 'max_callouts_exceeded',
+  MAX_CALLOUTS_EXCEEDED: '7',
   // Occurs due to XHR failure.
-  NETWORK_FAILURE: 'network_failure',
+  NETWORK_FAILURE: '8',
   // Occurs when a specified vendor does not exist in RTC_VENDORS.
-  UNKNOWN_VENDOR: 'unknown_vendor',
+  UNKNOWN_VENDOR: '9',
   // Occurs when request took longer than timeout
-  TIMEOUT: 'timeout',
+  TIMEOUT: '10',
   // Occurs when URL expansion time exceeded allowed timeout, request never sent.
-  MACRO_EXPAND_TIMEOUT: 'macro_expand_timeout',
+  MACRO_EXPAND_TIMEOUT: '11',
 };
 
 /**
