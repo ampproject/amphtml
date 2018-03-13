@@ -931,7 +931,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   mutateElement(mutator, opt_element) {
-    return this.runElement(null, mutator, opt_element);
+    return this.measureMutateElement(null, mutator, opt_element);
   }
 
   /**
@@ -949,8 +949,8 @@ export class BaseElement {
    * @param {Element=} opt_element
    * @return {!Promise}
    */
-  runElement(measurer, mutator, opt_element) {
-    return this.element.getResources().runElement(
+  measureMutateElement(measurer, mutator, opt_element) {
+    return this.element.getResources().measureMutateElement(
         opt_element || this.element, measurer, mutator);
   }
 

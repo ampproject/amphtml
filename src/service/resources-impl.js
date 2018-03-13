@@ -916,7 +916,7 @@ export class Resources {
    * @return {!Promise}
    */
   mutateElement(element, mutator) {
-    return this.runElement(element, null, mutator);
+    return this.measureMutateElement(element, null, mutator);
   }
 
   /**
@@ -934,11 +934,11 @@ export class Resources {
    * @param {function()} mutator
    * @return {!Promise}
    */
-  runElement(element, measurer, mutator) {
+  measureMutateElement(element, measurer, mutator) {
     if (this.useLayers_) {
-      return this.runElementLayers_(element, measurer, mutator);
+      return this.measureMutateElementLayers_(element, measurer, mutator);
     } else {
-      return this.runElementResources_(element, measurer, mutator);
+      return this.measureMutateElementResources_(element, measurer, mutator);
     }
   }
 
@@ -950,7 +950,7 @@ export class Resources {
    * @param {function()} mutator
    * @return {!Promise}
    */
-  runElementResources_(element, measurer, mutator) {
+  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -1005,7 +1005,7 @@ export class Resources {
    * @param {function()} mutator
    * @return {!Promise}
    */
-  runElementLayers_(element, measurer, mutator) {
+  measureMutateElementLayers_(element, measurer, mutator) {
     return this.vsync_.runPromise({
       measure: measurer || undefined,
       mutate: () => {
