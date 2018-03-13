@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  CONSENT_ITEM_STATE,
-  ConsentStateManager,
-} from './consent-state-manager';
 import {getServicePromiseForDoc} from '../../../src/service';
 
-
 const CONSENT_STATE_MANAGER = 'consentStateManager';
-
 
 /**
  * Possible consent policy state to proceed with.
@@ -36,12 +30,16 @@ export const CONSENT_POLICY_STATE = {
 
 export class ConsentPolicyManager {
   constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    /** @private {!Object<string, !Promise>} */
     this.policyPromise_ = {};
 
+    /** @private {!Object<string, function()>} */
     this.policyResolver_ = {};
 
+    /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
   }
@@ -62,6 +60,10 @@ export class ConsentPolicyManager {
     this.initPolicy_(config);
   }
 
+  /**
+   * Initiate consent policy instance
+   * @param {!JsonObject} config
+   */
   initPolicy_(config) {
     this.ConsentStateManagerPromise_.then(manager => {
       const itemsToWait = Object.keys(config['itemsToWait']);
@@ -74,9 +76,16 @@ export class ConsentPolicyManager {
   }
 
   /**
+   * Handler to check policy instance state on consent state changed.
+   * @param {*} unusedConsentState
+   */
+  consentStateChangeHandler_(unusedConsentState) {
+
+  }
+
+  /**
    * Returns a promise with a consent states value
    * @param {string} unusedPolicyId
-   * @return {Promise<CONSENT_POLICY_STATE>}
    */
   onPolicyInstanceResolved(unusedPolicyId) {
 

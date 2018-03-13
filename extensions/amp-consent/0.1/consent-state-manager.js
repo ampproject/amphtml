@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 
 const TAG = 'CONSENT-STATE-MANAGER';

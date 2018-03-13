@@ -15,15 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  CONSENT_ITEM_STATE,
-  ConsentStateManager,
-} from './consent-state-manager';
-import {dict} from '../../../src/utils/object';
-import {
-  ConsentPolicyManager,
-} from './consent-policy-manager';
-import {isEnumValue} from '../../../src/types';
+import {ConsentPolicyManager} from './consent-policy-manager';
+import {ConsentStateManager} from './consent-state-manager';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -31,6 +24,7 @@ import {
   childElementsByTag,
   isJsonScriptTag,
 } from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
