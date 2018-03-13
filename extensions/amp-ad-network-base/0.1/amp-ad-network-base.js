@@ -112,6 +112,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * @param {string} name
+   * @param {*} value
+   */
+  setContextField(name, value) {
+    this.context_[name] = value;
+  }
+
+  /**
    * @return {string} The finalized ad request URL.
    * @protected
    * @abstract
@@ -147,7 +155,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           'Validator never registered!');
       try {
         return this.validators_[validatorType].validate(
-            unvalidatedBytes, response.headers);
+            unvalidatedBytes, response.headers, this.context_);
       } catch (err) {
         return Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err});
       }
