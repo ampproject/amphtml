@@ -84,13 +84,15 @@ export class AmpAdCustom extends AMP.BaseElement {
   layoutCallback() {
     /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
-    // If this promise has no URL yet, create one for it.
-    if (!(fullUrl in ampCustomadXhrPromises)) {
-      // Here is a promise that will return the data for this URL
-      ampCustomadXhrPromises[fullUrl] =
-          Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    // if we have cached the response, find it, otherwise fetch
+    const responsePromise = ampCustomadXhrPromises[fullUrl] ||
+        Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    if (this.slot_ !== null) {
+      // Cache this response if using `data-slot` feature so only one request
+      // is made per url
+      ampCustomadXhrPromises[fullUrl] = responsePromise;
     }
-    return ampCustomadXhrPromises[fullUrl].then(data => {
+    return responsePromise.then(data => {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
