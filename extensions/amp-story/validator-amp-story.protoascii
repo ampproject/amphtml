@@ -83,6 +83,7 @@ tags: {  # <amp-story-page>
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     mandatory_min_num_child_tags: 1
   }
