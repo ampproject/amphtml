@@ -63,7 +63,7 @@ export function uas(global, data) {
   );
   //global.Phoenix = {EQ: []};
   const uasDivId = 'uas-amp-slot';
-  global.document.write('<div  id="' + uasDivId + '"></div>');
+  global.document.write('<div id="' + uasDivId + '"></div>');
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
     global.Phoenix.EQ.push(function() {
       global.Phoenix.enableSingleRequestCallMode();
