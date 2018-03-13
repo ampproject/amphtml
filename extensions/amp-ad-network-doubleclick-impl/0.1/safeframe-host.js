@@ -232,21 +232,22 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const metaReferrer = this.win_.document.querySelector(
-        "meta[name='referrer']");
-    if (metaReferrer && (
-      metaReferrer.getAttribute('content') == 'same-origin'
-          || metaReferrer.getAttribute('content') == 'no-referrer')) {
-      return;
-    }
     const canonicalUrl = Services.documentInfoForDoc(
         this.baseInstance_.getAmpDoc()).canonicalUrl;
-    if (metaReferrer && metaReferrer.getAttribute(
-        'content') == 'origin') {
-      return parseUrl(canonicalUrl).origin;
-    } else {
+    const metaReferrer = this.win_.document.querySelector(
+        "meta[name='referrer']");
+    if (!metaReferrer) {
       return canonicalUrl;
     }
+    switch (metaReferrer.getAttribute('content')) {
+      case 'same-origin':
+        return;
+      case 'no-referrer':
+        return;
+      case 'origin':
+        return parseUrl(canonicalUrl).origin;
+    }
+    return canonicalUrl;
   }
 
   /**
