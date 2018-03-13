@@ -22,12 +22,13 @@ import {
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
 
-describes.fakeWin('amp-story-store-service', {}, () => {
+describes.fakeWin('amp-story-store-service', {}, env => {
   let storeService;
 
   beforeEach(() => {
+    win = env.win;
     // Making sure we always get a new instance to isolate each test.
-    storeService = new AmpStoryStoreService();
+    storeService = new AmpStoryStoreService(env.win);
   });
 
   it('should return the default state', () => {
@@ -50,20 +51,16 @@ describes.fakeWin('amp-story-store-service', {}, () => {
   });
 });
 
-describes.fakeWin('amp-story-store-service embed mode', {}, () => {
+describes.fakeWin('amp-story-store-service embed mode', {}, env => {
   let storeService;
 
   beforeEach(() => {
     // Initializing the store with an embed mode.
-    self.location.hash = `${EmbedModeParam}=${EmbedMode.NAME_TBD}`;
-    storeService = new AmpStoryStoreService();
+    env.win.location = `#${EmbedModeParam}=${EmbedMode.NAME_TBD}`;
+    storeService = new AmpStoryStoreService(env.win);
   });
 
   it('should override the state with the expected mode', () => {
     expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.false;
-  });
-
-  after(() => {
-    self.location.hash = '';
   });
 });

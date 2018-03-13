@@ -76,13 +76,19 @@ const actions = (state, action, data) => {
 
 
 export class AmpStoryStoreService {
-  constructor() {
-    /** @private {!State} */
-    this.state_ = /** @type {!State} */ (Object.assign(
-        {}, this.getDefaultState_(), this.getEmbedOverrides_()));
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
 
     /** @private {!Object<string, !Observable>} */
     this.listeners_ = {};
+
+    /** @private {!State} */
+    this.state_ = /** @type {!State} */ (Object.assign(
+        {}, this.getDefaultState_(), this.getEmbedOverrides_()));
   }
 
   /**
@@ -156,7 +162,7 @@ export class AmpStoryStoreService {
    * @private
    */
   getEmbedOverrides_() {
-    const embedMode = parseEmbedMode(self.location.hash);
+    const embedMode = parseEmbedMode(this.win_.location.hash);
     switch (embedMode) {
       case EmbedMode.NAME_TBD:
         return {

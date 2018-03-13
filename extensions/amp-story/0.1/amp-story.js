@@ -320,7 +320,7 @@ export class AmpStory extends AMP.BaseElement {
     this.timer_ = Services.timerFor(this.win);
 
     /** @private @const {!AmpStoryStoreService} */
-    this.storeService_ = new AmpStoryStoreService();
+    this.storeService_ = new AmpStoryStoreService(this.win);
   }
 
 
