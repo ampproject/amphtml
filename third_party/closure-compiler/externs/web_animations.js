@@ -31,6 +31,12 @@ class Animation {
      * @type {number}
      */
     this.currentTime;
+
+    /**
+     * Current state of the animation.
+     * @type {string}
+     */
+    this.playState;
   }
 
   /**
