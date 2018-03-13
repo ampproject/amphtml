@@ -74,14 +74,12 @@ export function metaJsonCreativeGrouper(callback) {
     if (first) {
       const metadata =
           /** @type {!Object<string, *>} */(tryParseJson(first) || {});
-      const m = {};
-      for (const key in metadata) {
-        m[key.toLowerCase()] = metadata[key];
-      }
-      callback(
-          unescapeLineDelimitedHtml_(line),
-          m,
-          done);
+      const lowerCasedMetadata =
+          Object.keys(metadata).reduce((newObj, key) => {
+            newObj[key.toLowerCase()] = metadata[key];
+            return newObj;
+          }, {});
+      callback(unescapeLineDelimitedHtml_(line), lowerCasedMetadata, done);
       first = null;
     } else {
       first = line;
