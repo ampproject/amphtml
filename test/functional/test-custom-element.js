@@ -238,7 +238,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
     });
 
-    it('Element - should handle async connectedCallback when disconnected', () => {
+    it('Element - handles async connectedCallback when disconnected', () => {
       const element = new ElementClass();
       Object.defineProperty(element, 'isConnected', {
         value: false,
@@ -699,7 +699,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(testElementFirstAttachedCallback).to.be.calledOnce;
     });
 
-    it('Element - should handle async detachedCallback when connected', () => {
+    it('Element - handles async detachedCallback when connected', () => {
       const element = new ElementClass();
       element.setAttribute('layout', 'fill');
       expect(testElementFirstAttachedCallback).to.have.not.been.called;
