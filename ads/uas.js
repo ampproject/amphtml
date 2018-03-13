@@ -58,7 +58,7 @@ export function uas(global, data) {
       ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams',
         'visibility']
   );
-  //global.Phoenix = {EQ: []};
+  global.Phoenix = {EQ: []};
   const uasDivId = 'uas-amp-slot';
   global.document.write('<div id="' + uasDivId + '"></div>');
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
