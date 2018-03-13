@@ -243,7 +243,7 @@ export class SafeframeHostApi {
         this.baseInstance_.getAmpDoc()).canonicalUrl;
     if (metaReferrer && metaReferrer.getAttribute(
         'content') == 'origin') {
-      return parseUrl(canonicalUrl).hostname;
+      return parseUrl(canonicalUrl).origin;
     } else {
       return canonicalUrl;
     }

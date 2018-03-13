@@ -264,7 +264,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
-          'canonical_url': 'example.org',
+          'canonical_url': 'http://example.org',
         },
       });
     });
