@@ -138,6 +138,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
       subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
         sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
             .callsFake(() => Promise.resolve());
