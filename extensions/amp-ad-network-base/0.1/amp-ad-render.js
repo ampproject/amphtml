@@ -49,6 +49,88 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /**
+ * Fetches and returns the template from the given ad response, wrapped as a
+ * promise, or rejects if the template cannot be fetched.
+ */
+export class TemplateValidator extends Validator {
+
+  constructor() {
+    super();
+
+    /** @private {?AmpAdTemplates} */
+    this.ampAdTemplates_ = null;
+  }
+
+  /**
+   * @param {string} templateString
+   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
+   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
+   * @private
+   */
+  getAmpAdMetadata_(templateString, parsedResponseBody) {
+    // TODO(levitzky) The following minification is for demo purposes only. Once
+    // launched this will either be performed server-side, or will be replaced
+    // by more sophisticated logic.
+    const minifiedCreative = templateString.replace(
+        /<script async.+?<\/script>/g, '');
+    const metadata = /** @type {?./amp-ad-type-defs.CreativeMetaDataDef} */ ({
+      minifiedCreative,
+      customElementExtensions: [],
+      extensions: [],
+    });
+    if (parsedResponseBody.analytics) {
+      pushIfNotExist(metadata['customElementExtensions'], 'amp-analytics');
+    }
+    pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
+    return metadata;
+  }
+
+  /**
+   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @private
+   */
+  processMetadata_(metadata, context) {
+    const extensions = Services.extensionsFor(context.getWindow());
+    metadata.customElementExtensions.forEach(
+        extensionId => extensions./*OK*/preloadExtension(extensionId));
+    // TODO(levitzky) Add preload logic for fonts / images.
+  }
+
+  /** @override */
+  validate(context) {
+    const unvalidatedBytes = context.getUnvalidatedBytes();
+    dev().assert(unvalidatedBytes, 'no bytes available for validation');
+    const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
+    const headers = context.getHeaders();
+    if (!headers ||
+        headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
+      context.setCreative(body)
+          .setValidatorResult(ValidatorResult.NON_AMP);
+      return Promise.resolve(context);
+    }
+
+    const parsedResponseBody =
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body) || {});
+    this.ampAdTemplates_ = this.ampAdTemplates_ ||
+        new AmpAdTemplates(context.getWindow());
+    return this.ampAdTemplates_
+        .fetch(parsedResponseBody.templateUrl)
+        .then(template => {
+          const creativeMetadata =
+              this.getAmpAdMetadata_(template, parsedResponseBody);
+          this.processMetadata_(creativeMetadata, context);
+          return context
+              .setTemplateData(parsedResponseBody)
+              .setCreativeMetadata(creativeMetadata)
+              .setCreative(creativeMetadata.minifiedCreative)
+              .setValidatorResult(ValidatorResult.AMP);
+        });
+  }
+}
+
+/**
  * Render a validated AMP creative directly in the parent page.
  */
 export class FriendlyFrameRenderer extends Renderer {
@@ -189,88 +271,6 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
                 });
           }
           return context;
-        });
-  }
-}
-
-/**
- * Fetches and returns the template from the given ad response, wrapped as a
- * promise, or rejects if the template cannot be fetched.
- */
-export class TemplateValidator extends Validator {
-
-  constructor() {
-    super();
-
-    /** @private {?AmpAdTemplates} */
-    this.ampAdTemplates_ = null;
-  }
-
-  /**
-   * @param {string} templateString
-   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
-   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
-   * @private
-   */
-  getAmpAdMetadata_(templateString, parsedResponseBody) {
-    // TODO(levitzky) The following minification is for demo purposes only. Once
-    // launched this will either be performed server-side, or will be replaced
-    // by more sophisticated logic.
-    const minifiedCreative = templateString.replace(
-        /<script async.+?<\/script>/g, '');
-    const metadata = /** @type {?./amp-ad-type-defs.CreativeMetaDataDef} */ ({
-      minifiedCreative,
-      customElementExtensions: [],
-      extensions: [],
-    });
-    if (parsedResponseBody.analytics) {
-      pushIfNotExist(metadata['customElementExtensions'], 'amp-analytics');
-    }
-    pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
-    return metadata;
-  }
-
-  /**
-   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
-   * @param {!./amp-ad-context.AmpAdContext} context
-   * @private
-   */
-  processMetadata_(metadata, context) {
-    const extensions = Services.extensionsFor(context.getWindow());
-    metadata.customElementExtensions.forEach(
-        extensionId => extensions./*OK*/preloadExtension(extensionId));
-    // TODO(levitzky) Add preload logic for fonts / images.
-  }
-
-  /** @override */
-  validate(context) {
-    const unvalidatedBytes = context.getUnvalidatedBytes();
-    dev().assert(unvalidatedBytes, 'no bytes available for validation');
-    const body = utf8Decode(/** @type {!ArrayBuffer} */ (unvalidatedBytes));
-    const headers = context.getHeaders();
-    if (!headers ||
-        headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
-      context.setCreative(body)
-          .setValidatorResult(ValidatorResult.NON_AMP);
-      return Promise.resolve(context);
-    }
-
-    const parsedResponseBody =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
-        tryParseJson(body) || {});
-    this.ampAdTemplates_ = this.ampAdTemplates_ ||
-        new AmpAdTemplates(context.getWindow());
-    return this.ampAdTemplates_
-        .fetch(parsedResponseBody.templateUrl)
-        .then(template => {
-          const creativeMetadata =
-              this.getAmpAdMetadata_(template, parsedResponseBody);
-          this.processMetadata_(creativeMetadata, context);
-          return context
-              .setTemplateData(parsedResponseBody)
-              .setCreativeMetadata(creativeMetadata)
-              .setCreative(creativeMetadata.minifiedCreative)
-              .setValidatorResult(ValidatorResult.AMP);
         });
   }
 }
