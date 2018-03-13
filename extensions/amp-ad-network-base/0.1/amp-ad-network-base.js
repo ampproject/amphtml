@@ -34,7 +34,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @pricate {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
+    /** @private {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
     this.adPromise_ = null;
 
     /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
