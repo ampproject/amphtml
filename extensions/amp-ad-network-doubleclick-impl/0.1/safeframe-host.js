@@ -206,23 +206,39 @@ export class SafeframeHostApi {
           'readCookie': false,
           'writeCookie': false,
         }));
-    const ampDoc = Services.documentInfoForDoc(
-        this.baseInstance_.getAmpDoc());
-    const restricted = !!this.win_.document.querySelector(
-        "meta[name='referrer'][content='origin']");
     attributes['metadata'] = JSON.stringify(
         dict({
           'shared': {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
-            'canonical_url': !restricted && ampDoc.canonicalUrl,
+            'canonical_url': this.maybeGetCanonicalUrl(),
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
     return attributes;
+  }
+
+  /**
+   * Returns the canonical URL of the page, if the publisher allows
+   * it to be passed.
+   * @return {!string|boolean}
+   */
+  maybeGetCanonicalUrl() {
+    const blockedReferrers = [
+      "no-referrer",
+      "same-origin",
+    ];
+    if (!!this.win_.document.querySelector(
+        "meta[name='referrer'][content='same-origin']") ||
+        !!this.win_.document.querySelector(
+            "meta[name='referrer'][content='no-referrer']")) {
+      return false;
+    }
+    return Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc()).canonicalUrl;
   }
 
   /**
