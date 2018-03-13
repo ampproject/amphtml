@@ -77,7 +77,7 @@ export class Validator {
  */
 export class Renderer {
   /**
-   * @param {!./amp-ad-context.AmpAdContext} unusedContext
+   * @param {!Object} unusedContext
    * @return {!Promise}
    * @abstract
    */

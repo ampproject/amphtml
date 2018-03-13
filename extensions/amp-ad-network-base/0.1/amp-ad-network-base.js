@@ -160,8 +160,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  invokeRenderer_(validationResult) {
-    const renderer = this.renderers_[validationResult];
+  invokeRenderer_(validatorResult) {
+    const renderer = this.renderers_[validatorResult];
     dev().assert(renderer, 'Renderer for AMP creatives never registered!');
     try {
       return renderer.render(this.context_);
