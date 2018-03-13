@@ -208,7 +208,6 @@ export class LocalSubscriptionPlatform {
     const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
-      dev().fine(this.getServiceId(), 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',

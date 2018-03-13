@@ -144,13 +144,12 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         loggedIn,
       };
       const entitlement = Entitlement.parseFromJson(json);
-      localSubscriptionPlatform.entitlement_ = entitlement;
       const urlBuildStub =
           sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
               .callsFake(() => Promise.resolve(pingbackUrl));
       const sendSignalStub =
           sandbox.stub(localSubscriptionPlatform.xhr_, 'sendSignal');
-      return localSubscriptionPlatform.pingback().then(() => {
+      return localSubscriptionPlatform.pingback(entitlement).then(() => {
         expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
         expect(sendSignalStub.getCall(0).args[0]).to.be
