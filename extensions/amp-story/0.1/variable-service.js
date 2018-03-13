@@ -37,7 +37,7 @@ export class AmpStoryVariableService {
     };
 
     /** @private {boolean} */
-    this.initialized_ = false;
+    this.isInitialized_ = false;
   }
 
   /**
@@ -48,7 +48,7 @@ export class AmpStoryVariableService {
       case StateChangeType.ACTIVE_PAGE:
         const {pageIndex, pageId} = stateChangeEvent.value;
         const variables = this.variables_;
-        this.initialized_ = true;
+        this.isInitialized_ = true;
         variables.pageIndex = pageIndex;
         variables.pageId = pageId;
         break;
@@ -59,7 +59,7 @@ export class AmpStoryVariableService {
    * @return {!StoryVariableDef}
    */
   get() {
-    dev().assert(this.initialized_);
+    dev().assert(this.isInitialized_);
     // TODO(newmius): You should probably Object.freeze this in development.
     return this.variables_;
   }
