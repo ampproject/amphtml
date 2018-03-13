@@ -507,6 +507,18 @@ data.tag;
 data.tag.tta;
 data.tag.ttp;
 
+// uas.js
+window.Phoenix;
+Phoenix.EQ;
+Phoenix.EQ.push;
+Phoenix.enableSingleRequestCallMode;
+Phoenix.setInfo;
+Phoenix.defineAdSlot;
+Phoenix.display;
+data.slot.setVisibility;
+data.slot.setTargeting;
+data.slot.setExtraParameters;
+
 // webediads.js
 var wads;
 wads.init;
