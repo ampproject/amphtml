@@ -14,8 +14,53 @@
  * limitations under the License.
  */
 
-describes.realWin('amp-consent', {amp: 1}, () => {
-  describe('amp-consent', () => {
+import {AmpConsent} from '../amp-consent';
 
+describes.realWin('amp-consent', {
+  amp: {
+    extensions: ['amp-consent'],
+  },
+}, env => {
+  let win;
+  let ampdoc;
+  let doc;
+  beforeEach(() => {
+    doc = env.win.doc;
+    win = env.win;
+    ampdoc = env.ampdoc;
+  });
+
+  describe('amp-consent', () => {
+    let defaultConfig;
+    let consentElement;
+    let scriptElement;
+    describe('Config', () => {
+      let defaultConfig;
+      let consentElement;
+      let scriptElement;
+      beforeEach(() => {
+        defaultConfig = {
+          'consents': {
+            'ABC': {
+              'check-consent-href': 'http://localhost:8000/get-consent',
+            },
+            'DEF': {
+              'check-consent-href': 'http://localhost:8000/get-consent',
+            },
+          },
+        };
+        consentElement = doc.createElement('amp-consent');
+        consentElement.setAttribute('layout', 'nodisplay');
+        scriptElement = doc.createElement('script');
+        scriptElement.setAttribute('type', 'application/json');
+      });
+      it.skip('read config', () => {
+        scriptElement.textContent = defaultConfig;
+        consentElement.appendChild(scriptElement);
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        ampConsent.buildCallback();
+      });
+    });
   });
 });
