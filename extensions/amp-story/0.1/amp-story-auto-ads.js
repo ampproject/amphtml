@@ -17,7 +17,7 @@
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
-import {StateProperty, Store} from './amp-story-store';
+import {StateProperty} from './amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
@@ -105,30 +105,35 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
-    /** @private @const {!Store} */
-    this.store_ = Store.getInstance();
+    /** @private {?./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
   /** @override */
   buildCallback() {
-    if (!this.isAutomaticAdInsertionAllowed_()) {
-      return;
-    }
+    return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
+      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      this.storeService_ = storeService;
 
-    const ampStoryElement = this.element.parentElement;
-    user().assert(ampStoryElement.tagName === 'AMP-STORY',
-        `<${TAG}> should be child of <amp-story>`);
+      if (!this.isAutomaticAdInsertionAllowed_()) {
+        return;
+      }
 
-    const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
-        ampdoc, AD_TAG);
-    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
-        ampdoc, MUSTACHE_TAG);
+      const ampStoryElement = this.element.parentElement;
+      user().assert(ampStoryElement.tagName === 'AMP-STORY',
+          `<${TAG}> should be child of <amp-story>`);
 
-    return ampStoryElement.getImpl().then(impl => {
-      this.ampStory_ = impl;
-      this.navigationState_ = this.ampStory_.getNavigationState();
-      this.navigationState_.observe(this.handleStateChange_.bind(this));
+      const ampdoc = this.getAmpDoc();
+      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+          ampdoc, AD_TAG);
+      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+          ampdoc, MUSTACHE_TAG);
+
+      return ampStoryElement.getImpl().then(impl => {
+        this.ampStory_ = impl;
+        this.navigationState_ = this.ampStory_.getNavigationState();
+        this.navigationState_.observe(this.handleStateChange_.bind(this));
+      });
     });
   }
 
@@ -155,7 +160,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    return this.store_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
   }
 
   /**

@@ -17,7 +17,7 @@ import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'
 import {EventType, dispatch} from './events';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {StateProperty, Store} from './amp-story-store';
+import {StateProperty} from './amp-story-store-service';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -118,9 +118,6 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
-
-    /** @private @const {!Store} */
-    this.store_ = Store.getInstance();
   }
 
   /**
@@ -146,10 +143,15 @@ export class SystemLayer {
 
     this.addEventHandlers_();
 
-    // TODO(newmuis): Observe this value.
-    if (!this.store_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
-      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
-    }
+    // The icon won't flash since this promise should be resolved instantly, but
+    // it is necessary to prevent any race condition.
+    Services.storyStoreServiceForOrNull(this.win_).then(storeService => {
+      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      // TODO(newmuis): Observe this value.
+      if (!storeService.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
+        this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+      }
+    });
 
     return this.getRoot();
   }

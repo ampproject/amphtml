@@ -31,6 +31,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryStoreService, StateProperty} from './amp-story-store-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -49,7 +50,6 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
-import {StateProperty, Store} from './amp-story-store';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -319,8 +319,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
-    /** @private @const {!Store} */
-    this.store_ = Store.getInstance();
+    /** @private @const {!AmpStoryStoreService} */
+    this.storeService_ = new AmpStoryStoreService();
   }
 
 
@@ -351,6 +351,8 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_.get());
+
+    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
   }
 
 
@@ -454,7 +456,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (this.store_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
+      if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
         this.ampStoryHint_.showFirstPageHintOverlay();
       }
     });
@@ -492,7 +494,8 @@ export class AmpStory extends AMP.BaseElement {
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
         return;
       }
-      if (!this.store_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
+      if (!this.storeService_
+          .get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)) {
         return;
       }
 
@@ -1318,7 +1321,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
-    if (!this.store_.get(StateProperty.CAN_SHOW_BOOKEND)) {
+    if (!this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)) {
       return Promise.resolve(false);
     }
 
@@ -1625,7 +1628,7 @@ export class AmpStory extends AMP.BaseElement {
     const pageToBeInsertedEl = pageToBeInserted.element;
 
     if (pageToBeInserted.isAd() &&
-        !this.store_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD)) {
+        !this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD)) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;
     }

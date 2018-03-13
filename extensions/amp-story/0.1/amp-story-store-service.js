@@ -23,10 +23,6 @@ import {dev} from '../../../src/log';
 const TAG = 'amp-story';
 
 
-/** @type {!Store|undefined} */
-let globalStoreInstance;
-
-
 /**
  * @typedef {{
  *    caninsertautomaticad: boolean,
@@ -79,7 +75,7 @@ const actions = (state, action, data) => {
 };
 
 
-export class Store {
+export class AmpStoryStoreService {
   constructor() {
     /** @private {!State} */
     this.state_ = /** @type {!State} */ (Object.assign(
@@ -173,16 +169,5 @@ export class Store {
       default:
         return {};
     }
-  }
-
-  /**
-   * Returns the global store instance.
-   * @return {!Store}
-   */
-  static getInstance() {
-    if (!globalStoreInstance) {
-      globalStoreInstance = new Store();
-    }
-    return globalStoreInstance;
   }
 }

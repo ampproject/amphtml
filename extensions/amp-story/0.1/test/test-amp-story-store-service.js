@@ -14,63 +14,53 @@
  * limitations under the License.
  */
 
-import {Action, StateProperty, Store} from '../amp-story-store';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
 
-describes.fakeWin('amp-story-store', {}, () => {
-  let store;
+describes.fakeWin('amp-story-store-service', {}, () => {
+  let storeService;
 
   beforeEach(() => {
     // Making sure we always get a new instance to isolate each test.
-    store = new Store();
+    storeService = new AmpStoryStoreService();
   });
 
   it('should return the default state', () => {
-    expect(store.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.true;
+    expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.true;
   });
 
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = sandbox.spy();
-    store.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    store.dispatch(Action.TOGGLE_BOOKEND, true);
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = sandbox.spy();
-    store.subscribe(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP, listenerSpy);
-    store.dispatch(Action.TOGGLE_BOOKEND, true);
+    storeService.subscribe(StateProperty.CAN_INSERT_AUTOMATIC_AD, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
-  });
-
-  it('should always retrieve the same global store instance', () => {
-    const listenerSpy = sandbox.spy();
-    const firstStore = Store.getInstance();
-    const secondStore = Store.getInstance();
-
-    // Subscribing from one store and dispatching from the other works since it
-    // actually returned the same global instance.
-    firstStore.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
-    secondStore.dispatch(Action.TOGGLE_BOOKEND, true);
-
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
   });
 });
 
-describes.fakeWin('amp-story-store embed mode', {}, () => {
-  let store;
+describes.fakeWin('amp-story-store-service embed mode', {}, () => {
+  let storeService;
 
   beforeEach(() => {
     // Initializing the store with an embed mode.
     self.location.hash = `${EmbedModeParam}=${EmbedMode.NAME_TBD}`;
-    store = new Store();
+    storeService = new AmpStoryStoreService();
   });
 
   it('should override the state with the expected mode', () => {
-    expect(store.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.false;
+    expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.false;
   });
 
   after(() => {
