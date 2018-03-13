@@ -23,25 +23,44 @@ import {loadScript} from './3p';
  * @param {function(!Object)} cb
  */
 
+let animationHandler;
+
 function getBodymovinAnimationSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
     cb(global.bodymovin);
   });
 }
 
-function loadAnimationOnEvent(event) {
+function parseMessage(event) {
   const dataReceived = JSON.parse(event.data);
-  const autoplay = dataReceived['autoplay'];
-  const dataLoop = dataReceived['loop'];
-  const animationData = dataReceived['animationData'];
+  const messageType = dataReceived['messageType'];
+  if (messageType == 'load dict') {
+    return loadAnimationEvent(dataReceived['animationData'], dataReceived['autoplay'], dataReceived['loop']);
+  } else if (animationHandler && messageType == 'action') {
+    getBodymovinAnimationSdk(global, function() {
+      const action = dataReceived['action'];
+      if (action == 'play') {
+        animationHandler.play();
+      } else if (action == 'pause') {
+        animationHandler.pause();
+      } else if (action == 'stop') {
+        animationHandler.stop();
+      }
+    });
+  }
+
+}
+
+function loadAnimationEvent(animationData, autoplay, loop_val) {
+  const dataReceived = JSON.parse(event.data);
   const animatingContainer = global.document.createElement('div');
 
   global.document.getElementById('c').appendChild(animatingContainer);
-  const shouldLoop = dataLoop == 'true';
-  const loop = isFiniteNumber(dataLoop) ? parseInt(dataLoop, 10) : shouldLoop;
+  const shouldLoop = loop_val == 'true';
+  const loop = isFiniteNumber(loop_val) ? parseInt(loop_val, 10) : shouldLoop;
 
   getBodymovinAnimationSdk(global, function() {
-    bodymovin.loadAnimation({
+    animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
       loop: loop,
@@ -51,7 +70,7 @@ function loadAnimationOnEvent(event) {
   });
 }
 
-window.addEventListener('message', loadAnimationOnEvent, false);
+window.addEventListener('message', parseMessage, false);
 
 export function bodymovinanimation(global, data) {
 }

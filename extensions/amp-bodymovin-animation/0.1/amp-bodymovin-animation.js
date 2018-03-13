@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
@@ -24,6 +25,14 @@ import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
+
+/** @enum {number} */
+export const PLAYING_STATE = {
+  LOADED_NOT_PLAYING: 0,
+  PLAYING: 1,
+  PAUSED: 2,
+  STOPPED: 3, 
+};
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
 
@@ -46,6 +55,8 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {string} */
     this.src_ = null;
 
+    /** @private {enum} */
+    this.playingState_;
   }
 
   /** @override */
@@ -67,10 +78,17 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.loop_ = this.element.getAttribute('loop') ?
       this.element.getAttribute('loop') : this.loop_;
     this.autoplay_ = !this.element.hasAttribute('no-autoplay');
+    this.playingState_ = this.autoplay_ ? PLAYING_STATE.PLAYING : PLAYING_STATE.LOADED_NOT_PLAYING;
+
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     this.src_ = this.element.getAttribute('src');
+
+    // Register relevant actions
+    this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
+    this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
+    this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -89,6 +107,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       }).then(() => {
         return this.loadPromise(this.iframe_).then(() => {
           const message = JSON.stringify(dict({
+            'messageType': 'load dict',
             'loop': this.loop_,
             'animationData': data,
             'autoplay': this.autoplay_,
@@ -106,6 +125,45 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  play_() {
+    if (this.playingState_ == PLAYING_STATE.PLAYING) {
+      return;
+    }
+
+    const message = JSON.stringify(dict({
+      'messageType': 'action',
+      'action': 'play',
+    }));
+    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    this.playingState_ = PLAYING_STATE.PLAYING;
+  }
+
+  pause_() {
+    if (this.playingState_ == PLAYING_STATE.PAUSED) {
+      return;
+    }
+
+    const message = JSON.stringify(dict({
+      'messageType': 'action',
+      'action': 'pause',
+    }));
+    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    this.playingState_ = PLAYING_STATE.PAUSED;
+  }
+
+  stop_() {
+    if (this.playingState_ == PLAYING_STATE.STOPPED) {
+      return;
+    }
+
+    const message = JSON.stringify(dict({
+      'messageType': 'action',
+      'action': 'stop',
+    }));
+    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    this.playingState_ = PLAYING_STATE.STOPPED;
   }
 }
 
