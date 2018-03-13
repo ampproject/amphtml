@@ -22,7 +22,11 @@ import {listenOnce} from '../../../src/event-helper';
 const TAG = 'local-viewer';
 
 export class ViewerTracker {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
+    /** @private */
     this.ampdoc_ = ampdoc;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */

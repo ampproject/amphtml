@@ -198,11 +198,14 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  pingback() {
+  pingback(selectedEntitlement) {
     if (!this.isPingbackEnabled) {
       return;
     }
-    const promise = this.urlBuilder_.buildUrl(this.pingbackUrl_,
+    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+        'pingbackUrl is null'));
+
+    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
         /* useAuthData */ true);
     return promise.then(url => {
       dev().fine(this.getServiceId(), 'Pingback URL: ', url);
@@ -212,7 +215,7 @@ export class LocalSubscriptionPlatform {
         headers: {
           'Content-Type': 'text/plain',
         },
-        body: this.entitlement_.raw,
+        body: selectedEntitlement.raw,
       });
     });
   }

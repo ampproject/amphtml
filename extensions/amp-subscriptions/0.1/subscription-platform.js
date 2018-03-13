@@ -51,7 +51,7 @@ export class SubscriptionPlatform {
   /**
    * Performs the pingback to the subscription platform
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
-   * @returns {Promise}
+   * @returns {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
 }

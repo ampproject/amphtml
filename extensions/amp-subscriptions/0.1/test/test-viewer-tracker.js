@@ -1,5 +1,5 @@
-import { ViewerTracker } from "../viewer-tracker";
-import { Observable } from "../../../../src/observable";
+import {Observable} from '../../../../src/observable';
+import {ViewerTracker} from '../viewer-tracker';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -32,7 +32,7 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
     it('should call `reportWhenViewed_`, if viewer is visible' ,() => {
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
       sandbox.stub(viewTracker.viewer_, 'isVisible').callsFake(() => true);
-      return viewTracker.scheduleView().then(() => {
+      return viewTracker.scheduleView(2000).then(() => {
         expect(whenViewedStub).to.be.calledOnce;
       });
     });
@@ -42,16 +42,22 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
       const visibilityChangedStub =
           sandbox.stub(viewTracker.viewer_, 'onVisibilityChanged');
-      sandbox.stub(viewTracker.viewer_, 'isVisible')
+      const visibilitySandbox = sandbox.stub(viewTracker.viewer_, 'isVisible')
           .callsFake(() => visibleState);
-      return viewTracker.scheduleView().then(() => {
-        expect(whenViewedStub).to.not.be.calledOnce;
+
+      const viewPromise = viewTracker.scheduleView(2000);
+
+      return ampdoc.whenReady().then(() => {
+        expect(visibilitySandbox).to.be.calledOnce;
         expect(visibilityChangedStub).to.be.calledOnce;
+        expect(whenViewedStub).to.not.be.called;
         const callback = visibilityChangedStub.getCall(0).args[0];
         expect(callback).to.be.instanceOf(Function);
         visibleState = true;
         callback();
-        expect(whenViewedStub).to.be.calledOnce;
+        return viewPromise.then(() => {
+          expect(whenViewedStub).to.be.called;
+        });
       });
     });
   });
