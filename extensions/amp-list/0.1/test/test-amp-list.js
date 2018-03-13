@@ -249,11 +249,12 @@ describes.realWin('amp-list component', {
     // Execute another fetch-triggering action immediately (actually on
     // the next tick to avoid losing the layoutCallback() promise resolver).
     Promise.resolve().then(() => {
-      listMock.expects('toggleLoading').withExactArgs(false).once();
-      listMock.expects('togglePlaceholder').withExactArgs(false).once();
       element.setAttribute('src', 'https://new.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
     });
+    listMock.expects('toggleLoading').withExactArgs(false).once();
+    listMock.expects('togglePlaceholder').withExactArgs(false).once();
+
 
     return layout.then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;
