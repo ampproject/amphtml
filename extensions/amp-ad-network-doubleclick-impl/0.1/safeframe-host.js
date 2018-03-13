@@ -227,6 +227,9 @@ export class SafeframeHostApi {
    * @return {string|boolean}
    */
   maybeGetCanonicalUrl() {
+    // Don't allow for referrer policy same-origin,
+    // as Safeframe will always be a different origin.
+    // Don't allow for no-referrer.
     if (!!this.win_.document.querySelector(
         "meta[name='referrer'][content='same-origin']") ||
         !!this.win_.document.querySelector(
