@@ -75,8 +75,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} failure
-   * @param {string} recovery
+   * @param {!./amp-ad-type-defs.FailureType} failure
+   * @param {!./amp-ad-type-defs.RecoveryModeType} recovery
    * @final
    */
   onFailure(failure, recovery) {
@@ -163,7 +163,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} validationResult
+   * @param {!./amp-ad-type-defs.ValidatorResult} validatorResult
    * @return {!Promise}
    * @private
    */
@@ -178,7 +178,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} failureType
+   * @param {!./amp-ad-type-defs. failureType
    * @param {*=} error
    * @private
    */
