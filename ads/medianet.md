@@ -82,13 +82,16 @@ If you have questions, please feel free to reach out to your Media.net contact.
 * `data-tagtype` - This parameter represents the product the publisher is using; It should be **`headerbidder`** for our **Header Bidding solution**
 * `data-cid` - Represents the unique customer identifier
 * `data-slot` - Ad unit as specified in DFP
+* `data-multi-size` - Multi-size support
+* `data-multi-size-validation` - Multi-size support
 
 **Some of the parameters supported via Json attribute (DFP Parameters)**
 
 * `targeting`
 * `categoryExclusions`
-
-For an exhaustive list of updated parameters supported by DoubleClick refer to the guide - [here](google/doubleclick.md).
+* `cookieOptions`
+* `tagForChildDirectedTreatment`
+* `targeting`
 
 
 ## Support 
