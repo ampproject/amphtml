@@ -24,7 +24,7 @@ limitations under the License.
 <amp-ad width=728 height=90
     type="uas"
     json='{"accountId": "132109", "adUnit": "10002912", "sizes": [[728, 90]]}'>
-</amp-ad>
+</amp-ad> 
 ```
 
 ### Multi-size Ad
