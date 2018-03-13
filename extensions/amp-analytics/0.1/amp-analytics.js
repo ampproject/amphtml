@@ -58,12 +58,12 @@ const WHITELIST_EVENT_IN_SANDBOX = [
 ];
 
 /**
+ * @param {!Window} win
  * @return {number} A timestamp relative to navigationStart or 0 if the
  *     Navigation Timing API is not supported.
  */
-function now() {
-  return window.performance && window.performance.now ? window.performance.now()
-    : 0;
+function now(win) {
+  return win.performance && win.performance.now ? win.performance.now() : 0;
 }
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -125,9 +125,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
-
-    /** @private @const {!Object<string, number> */
-    this.triggerTimings_ = {};
   }
 
   /** @override */
@@ -651,7 +648,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
 
-    this.triggerTimings_[trigger['on']] = now(this.win);
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
       this.handleRequestForEvent_(requestName, trigger, event);
@@ -700,7 +696,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     const lastReportedVariable = 'responseAfter';
     const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
     // Take the max time in case the user specified "responseAfter.
-    resourceTimingSpec[lastReportedVariable] = Math.max(now(), lastTime);
+    resourceTimingSpec[lastReportedVariable] =
+        Math.max(now(this.win), lastTime);
     return lastTime;
   }
 
