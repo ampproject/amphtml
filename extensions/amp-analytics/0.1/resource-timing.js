@@ -252,7 +252,7 @@ function serialize(entries, resourceTimingSpec, win) {
  * @return {!Promise<string>}
  */
 export function serializeResourceTiming(
-    resourceTimingSpec, win, responseAfter) {
+  resourceTimingSpec, win, responseAfter) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
     return Promise.resolve('');
   }

@@ -1978,7 +1978,7 @@ describes.realWin('amp-analytics', {
     this.timeout(400);
 
     const runResourceTimingTest = function(
-        entries, config, expectedPing, timeout = 100) {
+      entries, config, expectedPing, timeout = 100) {
       sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
       analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics, timeout, 2).then(() => {
@@ -2046,7 +2046,7 @@ describes.realWin('amp-analytics', {
           .then(() => {
             expect(sendRequestSpy.args[1][0]).to.equal(
                 'https://ping.example.com/endpoint?rt=');
-          })
+          });
     }).timeout(4000);
   });
 });

@@ -125,6 +125,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /** @private @const {!Object<string, number> */
+    this.triggerTimings_ = {};
   }
 
   /** @override */
@@ -648,6 +651,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
 
+    this.triggerTimings_[trigger['on']] = now(this.win);
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
       this.handleRequestForEvent_(requestName, trigger, event);
