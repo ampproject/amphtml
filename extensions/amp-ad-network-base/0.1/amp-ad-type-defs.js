@@ -65,11 +65,11 @@ export const ValidatorResult = {
  */
 export class Validator {
   /**
-   * @param {!./amp-ad-context.AmpAdContext} unusedContext
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @param {!ArrayBuffer} unusedContext
+   * @return {!Promise<!ValidatorResult>}
    * @abstract
    */
-  validate(unusedContext) {}
+  validate(unvalidatedBytes, headers) {}
 }
 
 /**
@@ -78,9 +78,8 @@ export class Validator {
 export class Renderer {
   /**
    * @param {!./amp-ad-context.AmpAdContext} unusedContext
-   * @param {!./amp-ad-network-base.AmpAdNetworkBase} unusedBaseInstance
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @return {!Promise}
    * @abstract
    */
-  render(unusedContext, unusedBaseInstance) {}
+  render(unusedContext) {}
 }

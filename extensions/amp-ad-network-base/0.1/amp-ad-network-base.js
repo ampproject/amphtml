@@ -50,8 +50,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = null;
 
-    /** @const @private {!AmpAdContext} */
-    this.context_ = new AmpAdContext(this.win);
+    /** @const @private {!Object} */
+    this.context_ = {
+      element,
+      win: this.win,
+    };
 
     /**
      * When true, indicates that the renderer and validator should not be
@@ -141,13 +144,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     return response.arrayBuffer().then(unvalidatedBytes => {
       const validatorType = response.headers.get('AMP-Ad-Response-Type')
           || 'default';
-      this.context_
-          .setUnvalidatedBytes(unvalidatedBytes)
-          .setHeaders(response.headers);
       dev().assert(this.validators_[validatorType],
           'Validator never registered!');
       try {
-        return this.validators_[validatorType].validate(this.context_);
+        return this.validators_[validatorType].validate(
+            unvalidatedBytes, response.headers);
       } catch (err) {
         return Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err});
       }
@@ -155,15 +156,15 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * @param {string} validationResult
    * @return {!Promise}
    * @private
    */
-  invokeRenderer_() {
-    const rendererType = this.context_.getValidatorResult();
-    const renderer = this.renderers_[rendererType];
+  invokeRenderer_(validationResult) {
+    const renderer = this.renderers_[validationResult];
     dev().assert(renderer, 'Renderer for AMP creatives never registered!');
     try {
-      return renderer.render(this.context_, this);
+      return renderer.render(this.context_);
     } catch (err) {
       return Promise.reject({type: FailureType.RENDERER_ERROR, msg: err});
     }
@@ -208,7 +209,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   sendRequest_() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const url = this.getRequestUrl();
-      this.context_.setRequestUrl(url);
       this.adPromise_ = sendXhrRequest(url, this.win);
     });
   }
@@ -220,7 +220,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
-    this.context_.setSize(this.initialSize_);
   }
 
   /** @override */
@@ -233,7 +232,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
     return this.adPromise_
         .then(response => this.invokeValidator_(response))
-        .then(() => this.invokeRenderer_())
+        .then(validatorResult => this.invokeRenderer_(validatorResult))
         .catch(error => this.handleFailure_(error.type, error.msg));
   }
 
