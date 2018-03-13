@@ -171,7 +171,7 @@ export class SizeList {
 
     // Iterate all but the last size
     for (let i = 0; i < length; i++) {
-      const option = sizes_[i];
+      const option = sizes[i];
       if (win.matchMedia(option.mediaQuery).matches) {
         return option.size;
       }
