@@ -152,6 +152,15 @@ function createBaseCustomElementClass(win) {
       /** @private {boolean} */
       this.built_ = false;
 
+      /**
+       * Several APIs require the element to be connected to the DOM tree, but
+       * the CustomElement lifecycle APIs are async. This lead to subtle bugs
+       * that require state tracking. See #12849, https://crbug.com/821195, and
+       * https://bugs.webkit.org/show_bug.cgi?id=180940.
+       * @private {boolean}
+       */
+      this.isConnected_ = false;
+
       /** @private {?Promise} */
       this.buildingPromise_ = null;
 
@@ -686,9 +695,10 @@ function createBaseCustomElementClass(win) {
       // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
       // connectedCallback will later be called when the disconnected root is
       // connected to the document tree.
-      if (!dom.isConnected(this)) {
+      if (this.isConnected_ || !dom.isConnectedNode(this)) {
         return;
       }
+      this.isConnected_ = true;
 
       if (!this.everAttached) {
         this.classList.add('i-amphtml-element');
@@ -825,6 +835,10 @@ function createBaseCustomElementClass(win) {
       if (this.isInTemplate_) {
         return;
       }
+      if (!this.isConnected_ || dom.isConnectedNode(this)) {
+        return;
+      }
+      this.isConnected_ = false;
       this.getResources().remove(this);
       this.implementation_.detachedCallback();
     }
