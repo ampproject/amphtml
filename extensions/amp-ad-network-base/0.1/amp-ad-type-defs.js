@@ -39,56 +39,48 @@ export let CrossDomainDataDef;
 /** @typedef {{width: string, height: string}} */
 export let LayoutInfoDef;
 
-/** @typedef {string} */
-export let FailureType;
-
-/** @enum {FailureType} */
-export const FailureTypes = {
-  SENDXHR: 'SENDXHR',
-  NO_RESPONSE: 'NO_RESPONSE',
+/** @enum {string} */
+export const FailureType = {
+  REQUEST_ERROR: 'REQUEST_ERROR',
+  INVALID_RESPONSE: 'INVALID_RESPONSE',
   EMPTY_RESPONSE: 'EMPTY_RESPONSE',
   VALIDATOR_ERROR: 'VALIDATOR_ERROR',
   RENDERER_ERROR: 'RENDERER_ERROR',
 };
 
-/** @typedef {string} */
-export let RecoveryModeType;
-
-/** @typedef {{
-      type: !RecoveryModeType,
-      retryTimer: (number|undefined),
-      fallback: (string|undefined),
-    }} */
-export let RecoveryMode;
-
-/** @enum {RecoveryModeType} */
-export const RecoveryModeTypes = {
+/** @enum {string} */
+export const RecoveryModeType = {
   COLLAPSE: 'COLLAPSE',
   RETRY: 'RETRY',
-  VALIDATOR_FALLBACK: 'VALIDATOR_FALLBACK',
-  FORCE_RENDERER: 'FORCE_RENDERER',
-  RENDERER_FALLBACK: 'RENDERER_FALLBACK',
 };
 
-/** @type {Object<FailureType, !Array<!RecoveryMode>>} */
-export const ValidRecoveryModeTypes = {
-  SENDXHR: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
-  NO_RESPONSE: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
-  EMPTY_RESPONSE: [RecoveryModeTypes.RETRY, RecoveryModeTypes.COLLAPSE],
-  VALIDATOR_ERROR: [RecoveryModeTypes.VALIDATOR_FALLBACK,
-    RecoveryModeTypes.FORCE_RENDERER,
-    RecoveryModeTypes.COLLAPSE],
-  RENDERER_FALLBACK: [RecoveryModeTypes.RENDERER_FALLBACK,
-    RecoveryModeTypes.COLLAPSE],
-};
-
-/** @typedef {string} */
-export let ValidatorResultType;
-
-/** @enu, {ValidatorResultType} */
+/** @enum {string} */
 export const ValidatorResult = {
-  AMP: 'amp',
-  NON_AMP: 'non_amp',
+  AMP: 'AMP',
+  NON_AMP: 'NON_AMP',
 };
 
+/**
+ * @abstract
+ */
+export class Renderer {
+  /**
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @param {!./amp-ad-network-base.AmpAdNetworkBase} unusedBaseInstance
+   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @abstract
+   */
+  render(unusedContext, unusedBaseInstance) {}
+}
 
+/**
+ * @abstract
+ */
+export class Validator {
+  /**
+   * @param {!./amp-ad-context.AmpAdContext} context
+   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @abstract
+   */
+  validate(unusedContext) {}
+}

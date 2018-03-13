@@ -1183,8 +1183,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
     if (this.isRefreshing) {
       dev().assert(this.refreshManager_);

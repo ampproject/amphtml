@@ -16,8 +16,8 @@
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
+import {Renderer, Validator, ValidatorResult} from './amp-ad-type-defs';
 import {Services} from '../../../src/services';
-import {ValidatorResult} from './amp-ad-type-defs';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -47,29 +47,6 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /** @const {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
-
-
-export class Renderer {
-  /**
-   * @param {!./amp-ad-context.AmpAdContext} context
-   * @param {!./amp-ad-network-base.AmpAdNetworkBase} unusedBaseInstance
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
-   */
-  render(context, unusedBaseInstance) {
-    return Promise.resolve(context);
-  }
-}
-
-export class Validator {
-  /**
-   * @param {!./amp-ad-context.AmpAdContext} context
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
-   */
-  validate(context) {
-    return Promise.resolve(context);
-  }
-}
-
 
 /**
  * Render a validated AMP creative directly in the parent page.
