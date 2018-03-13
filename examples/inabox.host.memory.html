@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>amp-inabox-host example</title>
+  <style>
+    body {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    This page tests amp-inabox memory usage on refresh. Follow the instructions
+    below.
+  </h2>
+  <hr>
+  <h3>Inabox above the fold</h3>
+  <div>
+    Open the Task Manager (Shift+ESC) and turn on tracking JavaScript memory
+    (right click table header, select JavaScript memory).  The "live" portion
+    shouldn't just climb and climb, but bounce around near a single number.
+  </div>
+
+  <script>
+    let n = 0;
+    let iframe = null;
+    window.ampInaboxIframes = window.ampInaboxIframes || [];
+    function make_ad_iframe() {
+      iframe = document.createElement('iframe');
+      iframe.name = 'iframe-' + n;
+      n++;
+      iframe.src = '//ads.localhost:8000/examples/inabox.amp.html';
+      iframe.scrolling = 'no';
+      iframe.width = 300;
+      iframe.height = 200;
+      window.ampInaboxIframes.push(iframe);
+      document.body.appendChild(iframe);
+    }
+    function remove_ad_iframe() {
+      if (!window.AMP) {
+        console.log("window.AMP not defined");
+      } else {
+        window.AMP.inaboxUnregisterIframe(iframe);
+      }
+      iframe.remove();
+    }
+    function repeatedly_replace_ad_iframe() {
+      make_ad_iframe();
+      window.setTimeout(() => {
+        remove_ad_iframe(iframe);
+        repeatedly_replace_ad_iframe();
+      }, 1000);
+    }
+    repeatedly_replace_ad_iframe();
+  </script>
+  <script src="./inabox-tag-integration.js"></script>
+</body>
