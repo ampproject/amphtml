@@ -65,7 +65,8 @@ function encodeValue(val) {
 }
 
 /**
- * Returns a function that executes method on a new Date instance.
+ * Returns a function that executes method on a new Date instance. This is a
+ * byte saving hack.
  *
  * @param {string} method
  * @return {!SyncResolverDef}
@@ -75,7 +76,8 @@ function dateMethod(method) {
 }
 
 /**
- * Returns a function that returns property of screen.
+ * Returns a function that returns property of screen. This is a byte saving
+ * hack.
  *
  * @param {!Screen} screen
  * @param {string} property
@@ -86,7 +88,8 @@ function screenProperty(screen, property) {
 }
 
 /**
- * Returns a function that executs method on the viewport.
+ * Returns a function that executes method on the viewport. This is a byte
+ * saving hack.
  *
  * @param {!./viewport/viewport-impl.Viewport} viewport
  * @param {string} method
