@@ -54,6 +54,7 @@ export class PositionObserver {
    * TODO: maybe take DOM mutation into consideration
    * @param element {!Element}
    * @param callback {function(!PositionEntryDef)}
+   * @return {!UnlistenDef}
    */
   observe(element, callback) {
     if (!this.positionObservable_) {
@@ -68,7 +69,7 @@ export class PositionObserver {
     }
     // Send the 1st ping immediately
     callback(this.getPositionEntry_(element));
-    this.positionObservable_.add(() => {
+    return this.positionObservable_.add(() => {
       callback(this.getPositionEntry_(element));
     });
   }
