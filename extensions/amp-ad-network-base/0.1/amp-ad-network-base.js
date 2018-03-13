@@ -127,9 +127,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
 
   /**
-   * Processes the ad response as soon as the XHR request returns. This can be
-   * overridden and used as a hook to perform any desired logic before passing
-   * the response to the validator.
+   * Processes the ad response as soon as the XHR request returns.
    * @param {?../../../src/service/xhr-impl.FetchResponse} response
    * @private
    */
@@ -159,10 +157,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         'Validator invoked before ad response received!');
     this.validators_[validatorType].validate(this.context_)
         .then(context => {
-          this.handleValidatorResponse_(context);
           if (!this.isReusable_) {
             this.validators_ = map();
           }
+          this.handleValidatorResponse_(context);
         })
         .catch(error =>
           this.handleFailure_(FailureType.VALIDATOR_ERROR, error));
@@ -265,6 +263,3 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.sendRequest_();
   }
 }
-
-
-
