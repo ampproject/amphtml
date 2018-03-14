@@ -97,7 +97,6 @@ function screenProperty(screen, property) {
  */
 function viewportMethod(viewport, method) {
   // Convert to object to allow dynamic access.
-  dev().assert(/** @type {!Object} */(viewport)[method]);
   return () => /** @type {!Object} */(viewport)[method]();
 }
 
