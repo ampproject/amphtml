@@ -291,7 +291,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - have attribute `charset`
  - do not have attributes `content`, `itemprop`, `name` and `property`
- - have attribute `http-equiv`
+ - have attribute `http-equiv` but not those with value of `x-dns-prefetch-control`
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
@@ -312,6 +312,7 @@ Remove any `<meta>` tags except for those that:
 | before | after |
 | --- | --- |
 | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=description content="An example AMP page">`<br>`<meta name=twitter:title content="AMP Example">` | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=twitter:title content="AMP Example">` |
+| `<meta charset=utf-8>`<br>`<meta http-equiv=x-dns-prefetch-control content=on>` | `<meta charset=utf-8>` |
 
 </details>
 
