@@ -172,7 +172,10 @@ export class SizeList {
     // Iterate all but the last size
     for (let i = 0; i < length; i++) {
       const option = sizes[i];
-      if (win.matchMedia(option.mediaQuery).matches) {
+      // Only the last item (which we don't iterate) has an undefined
+      // mediaQuery.
+      const query = /** @type {string} */(option.mediaQuery);
+      if (win.matchMedia(query).matches) {
         return option.size;
       }
     }
