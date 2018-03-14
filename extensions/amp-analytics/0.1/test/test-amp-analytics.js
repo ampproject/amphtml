@@ -1955,8 +1955,6 @@ describes.realWin('amp-analytics', {
   });
 
   describe('resourceTiming', () => {
-    let analytics;
-
     // NOTE: The following tests verify plumbing for resource timing variables.
     // More tests for resource timing can be found in test-resource-timing.js.
     const newConfig = function() {
@@ -1980,7 +1978,7 @@ describes.realWin('amp-analytics', {
     const runResourceTimingTest = function(
       entries, config, expectedPing, timeout = 100) {
       sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
-      analytics = getAnalyticsTag(config);
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics, timeout, 2).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
       });

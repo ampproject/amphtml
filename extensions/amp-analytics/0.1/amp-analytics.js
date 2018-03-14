@@ -60,7 +60,9 @@ const WHITELIST_EVENT_IN_SANDBOX = [
 /**
  * @param {!Window} win
  * @return {number} A timestamp relative to navigationStart or 0 if the
- *     Navigation Timing API is not supported.
+ *     Navigation Timing API is not supported. The timestamp is in milliseconds
+ *     with sub-millisecond precision (so the value is not necessarily an
+ *     integer).
  */
 function now(win) {
   return win.performance && win.performance.now ? win.performance.now() : 0;
