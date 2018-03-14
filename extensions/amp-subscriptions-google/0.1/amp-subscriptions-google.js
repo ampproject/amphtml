@@ -100,6 +100,9 @@ export class GoogleSubscriptionsPlatform {
     } else {
       this.serviceAdapter_.delegateActionToLocal('login');
     }
+    if (linkRequested === undefined) {
+      this.serviceAdapter_.delegateActionToLocal('other');
+    }
   }
 
   /** @private */
