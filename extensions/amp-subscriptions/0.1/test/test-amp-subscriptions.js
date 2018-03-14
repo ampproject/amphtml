@@ -140,38 +140,22 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
+        const entitlement =
+            new Entitlement('local', 'raw', 'local', products, 'token', false);
+        entitlement.setCurrentProduct('product1');
+        const localPlatform =
+          subscriptionService.platformStore_.getLocalPlatform();
+        subscriptionService.platformStore_.resolveEntitlement('local',
+            entitlement);
         sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
             .callsFake(() => Promise.resolve());
         sandbox.stub(subscriptionService.platformStore_, 'selectPlatform')
-            .callsFake(() => Promise.resolve(
-                new Entitlement('local', 'raw', 'local',
-                    products, 'token', false)
-            ));
-        const localPlatform =
-          subscriptionService.platformStore_.getLocalPlatform();
+            .callsFake(() => Promise.resolve(localPlatform));
         expect(localPlatform).to.be.not.null;
         const activateStub = sandbox.stub(localPlatform, 'activate');
         subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
           done();
-        });
-      });
-    });
-    it('should select local as default platform if everyone denies '
-        + 'user as subscriber', () => {
-      subscriptionService.start();
-      subscriptionService.viewTrackerPromise_ = Promise.resolve();
-      return subscriptionService.initialize_().then(() => {
-        sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
-            .callsFake(() => Promise.resolve());
-        sandbox.stub(subscriptionService.platformStore_, 'selectPlatform')
-            .callsFake(() => Promise.resolve(undefined));
-        const localPlatform =
-          subscriptionService.platformStore_.getLocalPlatform();
-        expect(localPlatform).to.be.not.null;
-        const activateStub = sandbox.stub(localPlatform, 'activate');
-        return subscriptionService.selectAndActivatePlatform_().then(() => {
-          expect(activateStub).to.be.calledOnce;
         });
       });
     });

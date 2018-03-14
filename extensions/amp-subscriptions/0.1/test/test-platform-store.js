@@ -17,6 +17,7 @@
 import {Entitlement} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
+import {SubscriptionPlatform} from '../subscription-platform';
 
 describes.realWin('Platform store', {}, () => {
   let platformStore;
@@ -137,18 +138,75 @@ describes.realWin('Platform store', {}, () => {
 
   describe('selectPlatform', () => {
     it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
-        + 'is true', done => {
+        + 'is true', () => {
       const fakeResult = [entitlementsForService1, entitlementsForService2];
       const getAllPlatformsStub = sandbox.stub(platformStore,
           'getAllPlatformsEntitlements_').callsFake(
           () => Promise.resolve(fakeResult));
-      const selectApplicablePlatformSpy = sandbox.stub(platformStore,
+      const selectApplicablePlatformStub = sandbox.stub(platformStore,
           'selectApplicablePlatform_').callsFake(() => Promise.resolve());
-      platformStore.selectPlatform().then(() => {
+      return platformStore.selectPlatform().then(() => {
         expect(getAllPlatformsStub).to.be.calledOnce;
-        expect(selectApplicablePlatformSpy).to.be.calledWith(fakeResult);
-        done();
+        expect(selectApplicablePlatformStub).to.be.calledOnce;
       });
+    });
+  });
+  describe('selectApplicablePlatform_', () => {
+    let localPlatform;
+    let anotherPlatform;
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      anotherPlatform = new SubscriptionPlatform();
+      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      platformStore.resolvePlatform('local', localPlatform);
+      platformStore.resolvePlatform('another', anotherPlatform);
+    });
+    it('should choose a platform based on subscription', () => {
+      sandbox.stub(localPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      platformStore.resolveEntitlement('local',
+          new Entitlement('local', '', 'local', ['product1'], 'token', false));
+      platformStore.resolveEntitlement('another',
+          new Entitlement('another', '', 'another', ['product2'], null, false));
+      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
+          .equal(localPlatform.getServiceId());
+      platformStore.resolveEntitlement('local',
+          new Entitlement('local', '', 'local', ['product1'], null, false));
+      platformStore.resolveEntitlement('another',
+          new Entitlement('another', '', 'another', ['product2'],
+              'token', false));
+      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
+          .equal(anotherPlatform.getServiceId());
+    });
+
+    it('should choose a platform based on if it supports current '
+        + 'viewer', () => {
+      sandbox.stub(localPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
+          .callsFake(() => true);
+      platformStore.resolveEntitlement('local',
+          new Entitlement('local', '', 'local', ['product1'], null, false));
+      platformStore.resolveEntitlement('another',
+          new Entitlement('another', '', 'another', ['product2'], null, false));
+      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
+          .equal(anotherPlatform.getServiceId());
+    });
+
+    it('should choose a local if all other conditions are same', () => {
+      sandbox.stub(localPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      platformStore.resolveEntitlement('local',
+          new Entitlement('local', '', 'local', ['product1'], null, false));
+      platformStore.resolveEntitlement('another',
+          new Entitlement('another', '', 'another', ['product2'], null, false));
+      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
+          .equal(localPlatform.getServiceId());
     });
   });
 

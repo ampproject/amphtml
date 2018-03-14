@@ -35,7 +35,7 @@ export class PlatformStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @const {!Object<string, !./entitlement.Entitlement|undefined>} */
+    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
@@ -51,11 +51,11 @@ export class PlatformStore {
 
   /**
    * Resolves a platform in the store
-   * @param {string} servideId
+   * @param {string} serviceId
    * @param {!./subscription-platform.SubscriptionPlatform} platform
    */
-  resolvePlatform(servideId, platform) {
-    this.subscriptionPlatforms_[servideId] = platform;
+  resolvePlatform(serviceId, platform) {
+    this.subscriptionPlatforms_[serviceId] = platform;
   }
 
   /**
@@ -123,7 +123,7 @@ export class PlatformStore {
    */
   getResolvedEntitlementFor(serviceId) {
     dev().assert(this.entitlements_[serviceId],
-        'Platform ${serviceId} has not yet resolved with entitlements');
+        `Platform ${serviceId} has not yet resolved with entitlements`);
     return this.entitlements_[serviceId];
   }
 
@@ -218,9 +218,9 @@ export class PlatformStore {
    */
   selectPlatform() {
 
-    return this.getAllPlatformsEntitlements_().then(entitlements => {
+    return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicableEntitlement_(entitlements);
+      return this.selectApplicablePlatform_();
     });
   }
 
@@ -243,24 +243,24 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
-   * @param {!Array<!./entitlement.Entitlement>} entitlements
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
-  selectApplicableEntitlement_(entitlements) {
+  selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
 
-    /** @type {object<string, number>} */
+    /** @type {!Object<string, number>} */
     const platformWeights = {};
 
-    // Subscriber, gains weight 10
-    entitlements.forEach(entitlement => {
-      if (!!entitlement.subscriptionToken) {
-        platformWeights[entitlement.serviceId] = 10;
-      }
-    });
-
-    // If supports the current viewer, gains weight 9
     this.getAllResolvedPlatforms().forEach(platform => {
+      const entitlement =
+          this.getResolvedEntitlementFor(platform.getServiceId());
+
+      // Subscriber, gains weight 10
+      if (!!entitlement.subscriptionToken) {
+        platformWeights[platform.getServiceId()] = 10;
+      }
+
+      // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
         platformWeights[platform.getServiceId()] =
           (platformWeights[platform.getServiceId()] || 0) + 9;
@@ -284,7 +284,7 @@ export class PlatformStore {
     }
 
     const winningWeight = platformWeights[weightSorter[0].serviceId];
-    const localWeight = platformWeights['local'];
+    const localWeight = platformWeights['local'] || 0;
 
     if (winningWeight > localWeight) {
       return this.getPlatform(weightSorter[0].serviceId);

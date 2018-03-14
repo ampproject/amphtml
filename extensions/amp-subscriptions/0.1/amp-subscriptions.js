@@ -104,8 +104,7 @@ export class SubscriptionService {
    */
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
-      this.platformStore_.resolvePlatform(
-          'local',
+      this.platformStore_.resolvePlatform('local',
           new LocalSubscriptionPlatform(
               this.ampdoc_,
               serviceConfig,
@@ -275,22 +274,22 @@ export class SubscriptionService {
 
       selectedPlatform.activate(renderState);
 
-      dev().assert(this.viewTrackerPromise_,
-          'viewer tracker promise is null');
-      this.viewTrackerPromise_.then(() => {
-        const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
-          user().assert(this.platformStore_.getLocalPlatform(),
-              'Local platform is not registered'));
+      if (this.viewTrackerPromise_) {
+        this.viewTrackerPromise_.then(() => {
+          const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
+            user().assert(this.platformStore_.getLocalPlatform(),
+                'Local platform is not registered'));
 
-        if (selectedPlatform.isPingbackEnabled()) {
-          selectedPlatform.pingback(selectedEntitlement);
-        }
+          if (selectedPlatform.isPingbackEnabled()) {
+            selectedPlatform.pingback(selectedEntitlement);
+          }
 
-        if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
-            && localPlatform.isPingbackEnabled()) {
-          localPlatform.pingback(selectedEntitlement);
-        }
-      });
+          if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
+              && localPlatform.isPingbackEnabled()) {
+            localPlatform.pingback(selectedEntitlement);
+          }
+        });
+      }
     });
   }
 
