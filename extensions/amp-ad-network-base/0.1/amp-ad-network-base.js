@@ -55,13 +55,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       win: this.win,
     };
 
-    /**
-     * When true, indicates that the renderer and validator should not be
-     * freed (e.g., for refreshable implementations).
-     * @private {boolean}
-     */
-    this.isReusable_ = false;
-
     // Register default error modes.
     for (const failureType in FailureType) {
       this.recoveryModes_[failureType] = RecoveryModeType.COLLAPSE;
@@ -126,11 +119,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   getRequestUrl() {
     // Subclass must override.
-  }
-
-  /** @param {boolean} isReusable */
-  setIsReusable(isReusable) {
-    this.isReusable_ = isReusable;
   }
 
   /** @param {number} retries */
