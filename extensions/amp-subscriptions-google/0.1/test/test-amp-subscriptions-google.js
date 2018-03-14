@@ -57,6 +57,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     methods = {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
+      showAbbrvOffer: sandbox.stub(
+          ConfiguredRuntime.prototype, 'showAbbrvOffer'),
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
@@ -116,13 +118,21 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should ignore activate when granted', () => {
-    platform.activate({granted: true});
+    platform.activate({granted: true, subscribed: true});
     expect(methods.showOffers).to.not.be.called;
+    expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show offers on activate when not granted', () => {
     platform.activate({granted: false});
     expect(methods.showOffers).to.be.calledOnce.calledWithExactly();
+    expect(methods.showAbbrvOffer).to.not.be.called;
+  });
+
+  it('should show abbrv offer on activate when granted non-subscriber', () => {
+    platform.activate({granted: true, subscribed: false});
+    expect(methods.showAbbrvOffer).to.be.calledOnce.calledWithExactly();
+    expect(methods.showOffers).to.not.be.called;
   });
 
   it('should start linking flow when requested', () => {
