@@ -1598,6 +1598,19 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
+boom@7.x.x:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.0.tgz#2bff24a55565767fde869ec808317eb10c48e966"
+  dependencies:
+    hoek "5.x.x"
+
+bounce@1.x.x:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/bounce/-/bounce-1.2.0.tgz#e3bac68c73fd256e38096551efc09f504873c8c8"
+  dependencies:
+    boom "7.x.x"
+    hoek "5.x.x"
+
 bowser@^1.7.3:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.9.0.tgz#c5015128dcf155b4e3d11d1ab46b7a4b6ee695b8"
@@ -2783,6 +2796,12 @@ cryptiles@3.x.x:
   resolved "https://registry.yarnpkg.com/cryptiles/-/cryptiles-3.1.2.tgz#a89fbb220f5ce25ec56e8c4aa8a4fd7b5b0d29fe"
   dependencies:
     boom "5.x.x"
+
+cryptiles@4.x.x:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/cryptiles/-/cryptiles-4.1.1.tgz#169256b9df9fe3c73f8085c99e30b32247d4ab46"
+  dependencies:
+    boom "7.x.x"
 
 crypto-browserify@^3.0.0:
   version "3.12.0"
@@ -5167,6 +5186,15 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
+hawk@~7.0.7:
+  version "7.0.7"
+  resolved "https://registry.yarnpkg.com/hawk/-/hawk-7.0.7.tgz#a1eb89793f1a464c271f68e0f9eeedc910ed0e90"
+  dependencies:
+    boom "7.x.x"
+    cryptiles "4.x.x"
+    hoek "5.x.x"
+    sntp "3.x.x"
+
 he@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
@@ -5201,6 +5229,10 @@ hoek@2.x.x:
 hoek@4.x.x:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-4.2.0.tgz#72d9d0754f7fe25ca2d01ad8f8f9a9449a89526d"
+
+hoek@5.x.x:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/hoek/-/hoek-5.0.3.tgz#b71d40d943d0a95da01956b547f83c4a5b4a34ac"
 
 hoist-non-react-statics@^2.3.1:
   version "2.3.1"
@@ -9092,7 +9124,34 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@2.83.0, request@^2.0.0, request@^2.74.0, request@^2.83.0:
+request@2.84.0:
+  version "2.84.0"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.84.0.tgz#59ca54a18663d7986aa37dbe4632aa8ada3a467f"
+  dependencies:
+    aws-sign2 "~0.7.0"
+    aws4 "^1.6.0"
+    caseless "~0.12.0"
+    combined-stream "~1.0.5"
+    extend "~3.0.1"
+    forever-agent "~0.6.1"
+    form-data "~2.3.1"
+    har-validator "~5.0.3"
+    hawk "~7.0.7"
+    http-signature "~1.2.0"
+    is-typedarray "~1.0.0"
+    isstream "~0.1.2"
+    json-stringify-safe "~5.0.1"
+    mime-types "~2.1.17"
+    oauth-sign "~0.8.2"
+    performance-now "^2.1.0"
+    qs "~6.5.1"
+    safe-buffer "^5.1.1"
+    stringstream "~0.0.5"
+    tough-cookie "~2.3.3"
+    tunnel-agent "^0.6.0"
+    uuid "^3.1.0"
+
+request@^2.0.0, request@^2.74.0, request@^2.83.0:
   version "2.83.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:
@@ -9516,9 +9575,9 @@ sinon-chai@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.0.0.tgz#d5cbd70fa71031edd96b528e0eed4038fcc99f29"
 
-sinon@4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.4.0.tgz#5bdbe9c96c6a2904d2fddde6316c1c9b7dc70ebe"
+sinon@4.4.5:
+  version "4.4.5"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.4.5.tgz#b625f992f0f0998d068a270c34e8f50ddcfd846b"
   dependencies:
     "@sinonjs/formatio" "^2.0.0"
     diff "^3.1.0"
@@ -9597,6 +9656,15 @@ sntp@2.x.x:
   resolved "https://registry.yarnpkg.com/sntp/-/sntp-2.1.0.tgz#2c6cec14fedc2222739caf9b5c3d85d1cc5a2cc8"
   dependencies:
     hoek "4.x.x"
+
+sntp@3.x.x:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/sntp/-/sntp-3.0.1.tgz#1aa9088d3eb844ea8c0980fce1877884d4117d09"
+  dependencies:
+    boom "7.x.x"
+    bounce "1.x.x"
+    hoek "5.x.x"
+    teamwork "3.x.x"
 
 socket.io-adapter@~1.1.0:
   version "1.1.1"
@@ -10159,6 +10227,10 @@ tar@^2.2.1:
     block-stream "*"
     fstream "^1.0.2"
     inherits "2"
+
+teamwork@3.x.x:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/teamwork/-/teamwork-3.0.1.tgz#ff38c7161f41f8070b7813716eb6154036ece196"
 
 temp-write@^1.0.0:
   version "1.1.2"
@@ -10890,9 +10962,9 @@ wd@^1.4.0:
     underscore.string "3.3.4"
     vargs "0.1.0"
 
-web-activities@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.2.0.tgz#9e290ef358af7407b3708c984f96077469f214a5"
+web-activities@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.5.0.tgz#64363baed86c415c8698d8fb181973f72c742b47"
   dependencies:
     promise-pjs "1.1.3"
 

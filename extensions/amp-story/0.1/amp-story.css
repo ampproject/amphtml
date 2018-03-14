@@ -28,6 +28,7 @@ amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
 .i-amphtml-story-system-reset,
 .i-amphtml-story-system-reset * {
   border: none !important;
+  box-sizing: initial !important;
   color: initial !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: initial !important;
@@ -120,18 +121,16 @@ amp-story[standalone]:fullscreen {
 
 .i-amphtml-story-ui-right {
   float: right !important;
-  margin: 0 8px !important;
 }
 
 .i-amphtml-story-button {
   background-repeat: no-repeat !important;
   background-position: center center !important;
-  height: 40px !important;
-  width: 40px !important;
+  height: 48px !important;
+  width: 48px !important;
   cursor: pointer !important;
-  border-radius: 40px !important;
+  border-radius: 50% !important;
   box-sizing: border-box !important;
-  padding: 8px !important;
   position: relative !important;
 
   /* for svg backgrounds: */
