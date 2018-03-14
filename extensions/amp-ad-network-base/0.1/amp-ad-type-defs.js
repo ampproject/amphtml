@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-/** @typedef {{width: string, height: string}} */
+/** @typedef {{
+      width: string,
+      height: string,
+      layout: string,
+    }} */
 export let LayoutInfoDef;
 
 /** @enum {string} */
@@ -40,6 +44,7 @@ export const ValidatorResult = {
 
 /** @typedef {{
       type: !ValidatorResult,
+      adResponseType: string,
       creativeData: !Object,
     }} */
 export let ValidatorOutput;
@@ -52,7 +57,7 @@ export class Validator {
    * @param {!Object} unusedContext
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
    * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
-   * @return {!Promise<!ValidatorResult>}
+   * @return {!Promise<!ValidatorOutput>}
    * @abstract
    */
   validate(unusedContext, unusedUnvalidatedBytes, unusedHeaders) {}
