@@ -49,11 +49,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
   });
 
   describe('action rendering', () => {
-    let unrelated;
     let actions1, actions2;
     let elements;
     beforeEach(() => {
-      unrelated = createElementWithAttributes(doc, 'div', {});
       actions1 = createElementWithAttributes(doc, 'div', {
         id: 'actions1',
         'subscriptions-action': 'login',
@@ -64,7 +62,6 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
       });
-      console.log(unrelated.innerHTML);
       elements = [
         actions1, actions2,
       ];

@@ -173,7 +173,7 @@ export class SubscriptionService {
 
   /**
    * @param {string} serviceId
-   * @param {!./entitlement.Entitlement} entitlement
+   * @param {!./entitlement.Entitlement|undefined} entitlement
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
@@ -187,7 +187,7 @@ export class SubscriptionService {
 
   /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise<!./entitlement.Entitlement>}
+   * @return {!Promise<!./entitlement.Entitlement|undefined>}
    */
   fetchEntitlements_(subscriptionPlatform) {
     return subscriptionPlatform.getEntitlements().then(entitlement => {
@@ -265,22 +265,25 @@ export class SubscriptionService {
     return requireValuesPromise.then(resolvedValues => {
       const grantState = resolvedValues[0];
       const selectedEntitlement = resolvedValues[1];
+      let selectedPlatform;
 
-      dev().assert(this.viewTrackerPromise_, 'viewer tracker promise is null');
-
-      /** @type {!RenderState} */
-      const renderState = {
-        entitlement: selectedEntitlement.json(),
-        loggedIn: selectedEntitlement.loggedIn,
-        subscribed: !!selectedEntitlement.subscriptionToken,
-        granted: grantState,
-      };
-
-      const selectedPlatform = dev().assert(
-          this.subscriptionPlatforms_[selectedEntitlement.service],
-          'Selected service not registered');
-
-      selectedPlatform.activate(renderState);
+      if (selectedEntitlement) {
+        selectedPlatform = dev().assert(
+            this.subscriptionPlatforms_[selectedEntitlement.service],
+            'Selected service not registered');
+        dev().assert(this.viewTrackerPromise_,
+            'viewer tracker promise is null');
+        /** @type {!RenderState} */
+        const renderState = {
+          entitlement: selectedEntitlement.json(),
+          loggedIn: selectedEntitlement.loggedIn,
+          subscribed: !!selectedEntitlement.subscriptionToken,
+          granted: grantState,
+        };
+        selectedPlatform.activate(renderState);
+      } else {
+        selectedPlatform = this.subscriptionPlatforms_['local'];
+      }
 
       this.viewTrackerPromise_.then(() => {
         const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
