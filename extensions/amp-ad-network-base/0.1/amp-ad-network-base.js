@@ -50,10 +50,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.initialSize_ = null;
 
     /** @const @private {!Object} */
-    this.context_ = {
-      element,
-      win: this.win,
-    };
+    this.context_ = {};
 
     // Register default error modes.
     for (const failureType in FailureType) {
