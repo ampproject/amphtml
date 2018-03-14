@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 
-/** @typedef {{serviceId: string, entitlement: !./entitlement.Entitlement}} */
+/** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
 
@@ -30,7 +30,7 @@ export class EntitlementStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @const {!Object<string, !./entitlement.Entitlement>} */
+    /** @private @const {!Object<string, !./entitlement.Entitlement|undefined>} */
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
@@ -55,10 +55,13 @@ export class EntitlementStore {
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {!./entitlement.Entitlement} entitlement
+   * @param {!./entitlement.Entitlement|undefined} entitlement
    */
   resolveEntitlement(serviceId, entitlement) {
-    entitlement.service = serviceId;
+    if (entitlement) {
+      entitlement.service = serviceId;
+    }
+
     this.entitlements_[serviceId] = entitlement;
     // Call all onChange callbacks.
     this.onChangeCallbacks_.fire({serviceId, entitlement});
@@ -151,12 +154,12 @@ export class EntitlementStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @returns {!Promise<!./entitlement.Entitlement>}
+   * @returns {!Promise<!./entitlement.Entitlement|undefined>}
    */
   selectPlatform() {
-    return this.getAllPlatformsEntitlements_().then(entitlement => {
+    return this.getAllPlatformsEntitlements_().then(entitlements => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicablePlatform_(entitlement);
+      return this.selectApplicablePlatform_(entitlements);
     });
   }
 
@@ -173,7 +176,7 @@ export class EntitlementStore {
   /**
    * Returns most qualified platform
    * @param {!Array<!./entitlement.Entitlement>} entitlements
-   * @returns {!./entitlement.Entitlement}
+   * @returns {!./entitlement.Entitlement|undefined}
    */
   selectApplicablePlatform_(entitlements) {
     let chosenPlatform;
