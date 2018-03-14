@@ -172,7 +172,7 @@ export class SubscriptionService {
 
   /**
    * @param {string} serviceId
-   * @param {!./entitlement.Entitlement|undefined} entitlement
+   * @param {!./entitlement.Entitlement} entitlement
    * @private
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
@@ -186,7 +186,7 @@ export class SubscriptionService {
 
   /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise<!./entitlement.Entitlement|undefined>}
+   * @return {!Promise<!./entitlement.Entitlement>}
    */
   fetchEntitlements_(subscriptionPlatform) {
     return subscriptionPlatform.getEntitlements().then(entitlement => {
@@ -222,9 +222,11 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllPlatforms().forEach(subscriptionPlatform => {
-        this.fetchEntitlements_(subscriptionPlatform);
-      });
+      this.platformStore_.getAllResolvedPlatforms().forEach(
+          subscriptionPlatform => {
+            this.fetchEntitlements_(subscriptionPlatform);
+          }
+      );
 
       this.startAuthorizationFlow_();
     });
@@ -259,37 +261,22 @@ export class SubscriptionService {
 
     return requireValuesPromise.then(resolvedValues => {
       const grantState = resolvedValues[0];
-      const selectedEntitlement = resolvedValues[1];
-      let selectedPlatform;
+      const selectedPlatform = resolvedValues[1];
+      const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
+          selectedPlatform.getServiceId());
 
-      if (selectedEntitlement) {
-        selectedPlatform = dev().assert(
-            this.platformStore_.getPlatform(selectedEntitlement.service),
-            'Selected service not registered');
-        dev().assert(this.viewTrackerPromise_,
-            'viewer tracker promise is null');
-        /** @type {!RenderState} */
-        const renderState = {
-          entitlement: selectedEntitlement.json(),
-          loggedIn: selectedEntitlement.loggedIn,
-          subscribed: !!selectedEntitlement.subscriptionToken,
-          granted: grantState,
-        };
-        selectedPlatform.activate(renderState);
-      } else {
-        // local is the default platform is nothing is selected
-        selectedPlatform = this.platformStore_.getLocalPlatform();
-        const entitlement = Entitlement.empty('local');
-        /** @type {!RenderState} */
-        const renderState = {
-          entitlement: entitlement.json(),
-          loggedIn: entitlement.loggedIn,
-          subscribed: !!entitlement.subscriptionToken,
-          granted: grantState,
-        };
-        selectedPlatform.activate(renderState);
-      }
+      /** @type {!RenderState} */
+      const renderState = {
+        entitlement: selectedEntitlement.json(),
+        loggedIn: selectedEntitlement.loggedIn,
+        subscribed: !!selectedEntitlement.subscriptionToken,
+        granted: grantState,
+      };
 
+      selectedPlatform.activate(renderState);
+
+      dev().assert(this.viewTrackerPromise_,
+          'viewer tracker promise is null');
       this.viewTrackerPromise_.then(() => {
         const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
           user().assert(this.platformStore_.getLocalPlatform(),
