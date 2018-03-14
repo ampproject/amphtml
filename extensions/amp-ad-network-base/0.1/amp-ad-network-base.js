@@ -70,6 +70,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       // TODO(levitzky) handle non-numeric values.
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
+      layout: this.element.getAttribute('layout'),
     };
   }
 
@@ -131,11 +132,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} name
-   * @param {*} value
+   * @return {!Object} The context object passed to validators and renderers.
    */
-  setContextField(name, value) {
-    this.context_[name] = value;
+  getContext() {
+    return this.context_;
   }
 
   /**

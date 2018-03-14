@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-/** @typedef {{width: string, height: string}} */
+/** @typedef {{
+      width: string,
+      height: string,
+      layout: string,
+    }} */
 export let LayoutInfoDef;
 
 /** @enum {string} */
