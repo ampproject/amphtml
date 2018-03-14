@@ -16,10 +16,10 @@
 
 import {Entitlement} from '../entitlement';
 
-import {EntitlementStore} from '../entitlement-store';
+import {PlatformStore} from '../platform-store';
 
-describes.realWin('entitlement-store', {}, () => {
-  let entitlementStore;
+describes.realWin('Platform store', {}, () => {
+  let platformStore;
   const serviceIds = ['service1', 'service2'];
   const currentProduct = 'currentProductId';
   const entitlementsForService1 =
@@ -32,24 +32,24 @@ describes.realWin('entitlement-store', {}, () => {
   entitlementsForService2.setCurrentProduct(currentProduct);
 
   beforeEach(() => {
-    entitlementStore = new EntitlementStore(serviceIds);
+    platformStore = new PlatformStore(serviceIds);
   });
 
   it('should instantiate with the service ids', () => {
-    expect(entitlementStore.serviceIds_).to.be.equal(serviceIds);
+    expect(platformStore.serviceIds_).to.be.equal(serviceIds);
   });
 
   it('should call onChange callbacks on every resolve', () => {
-    const cb = sandbox.stub(entitlementStore.onChangeCallbacks_, 'fire');
-    entitlementStore.onChange(cb);
-    entitlementStore.resolveEntitlement('service2',
+    const cb = sandbox.stub(platformStore.onChangeCallbacks_, 'fire');
+    platformStore.onChange(cb);
+    platformStore.resolveEntitlement('service2',
         new Entitlement('service2', ['product1'], ''));
     expect(cb).to.be.calledOnce;
   });
 
   describe('getGrantStatus', () => {
     it('should resolve true on recieving a positive entitlement', done => {
-      entitlementStore.getGrantStatus()
+      platformStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === true) {
               done();
@@ -57,16 +57,16 @@ describes.realWin('entitlement-store', {}, () => {
               throw new Error('Incorrect entitlement resolved');
             }
           });
-      entitlementStore.resolveEntitlement(serviceIds[1],
+      platformStore.resolveEntitlement(serviceIds[1],
           entitlementsForService2);
-      entitlementStore.resolveEntitlement(serviceIds[0],
+      platformStore.resolveEntitlement(serviceIds[0],
           entitlementsForService1);
     });
 
     it('should resolve true for existing positive entitlement', done => {
-      entitlementStore.entitlements_[serviceIds[0]] = entitlementsForService1;
-      entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      entitlementStore.getGrantStatus()
+      platformStore.entitlements_[serviceIds[0]] = entitlementsForService1;
+      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      platformStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === true) {
               done();
@@ -80,9 +80,9 @@ describes.realWin('entitlement-store', {}, () => {
       const negativeEntitlements = new Entitlement(serviceIds[0], '',
           serviceIds[0], ['product1'], '', false);
       negativeEntitlements.setCurrentProduct(currentProduct);
-      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-      entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-      entitlementStore.getGrantStatus()
+      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      platformStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === false) {
               done();
@@ -97,8 +97,8 @@ describes.realWin('entitlement-store', {}, () => {
       const negativeEntitlements = new Entitlement(serviceIds[0], '',
           serviceIds[0], ['product1'], '', false);
       negativeEntitlements.setCurrentProduct(currentProduct);
-      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-      entitlementStore.getGrantStatus()
+      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      platformStore.getGrantStatus()
           .then(entitlements => {
             if (entitlements === false) {
               done();
@@ -106,31 +106,31 @@ describes.realWin('entitlement-store', {}, () => {
               throw new Error('Incorrect entitlement resolved');
             }
           });
-      entitlementStore.resolveEntitlement(serviceIds[1],
+      platformStore.resolveEntitlement(serviceIds[1],
           entitlementsForService2);
     });
   });
 
   describe('areAllPlatformsResolved_', () => {
     it('should return true if all entitlements are present', () => {
-      entitlementStore.resolveEntitlement(serviceIds[1],
+      platformStore.resolveEntitlement(serviceIds[1],
           entitlementsForService2);
-      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(false);
-      entitlementStore.resolveEntitlement(serviceIds[0],
+      expect(platformStore.areAllPlatformsResolved_()).to.be.equal(false);
+      platformStore.resolveEntitlement(serviceIds[0],
           entitlementsForService1);
-      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(true);
+      expect(platformStore.areAllPlatformsResolved_()).to.be.equal(true);
     });
   });
 
   describe('getAvailablePlatformsEntitlements_', () => {
     it('should return all available entitlements', () => {
-      entitlementStore.resolveEntitlement(serviceIds[1],
+      platformStore.resolveEntitlement(serviceIds[1],
           entitlementsForService2);
-      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+      expect(platformStore.getAvailablePlatformsEntitlements_())
           .to.deep.equal([entitlementsForService2]);
-      entitlementStore.resolveEntitlement(serviceIds[0],
+      platformStore.resolveEntitlement(serviceIds[0],
           entitlementsForService1);
-      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+      expect(platformStore.getAvailablePlatformsEntitlements_())
           .to.deep.equal([entitlementsForService2, entitlementsForService1]);
     });
   });
@@ -139,12 +139,12 @@ describes.realWin('entitlement-store', {}, () => {
     it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
         + 'is true', done => {
       const fakeResult = [entitlementsForService1, entitlementsForService2];
-      const getAllPlatformsStub = sandbox.stub(entitlementStore,
+      const getAllPlatformsStub = sandbox.stub(platformStore,
           'getAllPlatformsEntitlements_').callsFake(
           () => Promise.resolve(fakeResult));
-      const selectApplicablePlatformSpy = sandbox.stub(entitlementStore,
+      const selectApplicablePlatformSpy = sandbox.stub(platformStore,
           'selectApplicablePlatform_').callsFake(() => Promise.resolve());
-      entitlementStore.selectPlatform().then(() => {
+      platformStore.selectPlatform().then(() => {
         expect(getAllPlatformsStub).to.be.calledOnce;
         expect(selectApplicablePlatformSpy).to.be.calledWith(fakeResult);
         done();

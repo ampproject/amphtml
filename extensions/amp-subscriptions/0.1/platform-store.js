@@ -15,17 +15,22 @@
  */
 
 import {Observable} from '../../../src/observable';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
 
-export class EntitlementStore {
+export class PlatformStore {
   /**
    *
    * @param {!Array<string>} expectedServiceIds
    */
   constructor(expectedServiceIds) {
+
+    /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
+    this.subscriptionPlatforms_ = dict();
 
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
@@ -42,6 +47,50 @@ export class EntitlementStore {
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
+  }
+
+  /**
+   * Resolves a platform in the store
+   * @param {string} platformId
+   * @param {!./subscription-platform.SubscriptionPlatform} platform
+   */
+  resolvePlatform(platformId, platform) {
+    this.subscriptionPlatforms_[platformId] = platform;
+  }
+
+  /**
+   * Returns the platform for the given id
+   * @param {string} platformId
+   * @returns {!./subscription-platform.SubscriptionPlatform}
+   */
+  getPlatform(platformId) {
+    const platform = this.subscriptionPlatforms_[platformId];
+    dev().assert(platform, `Platform for id ${platformId} is not resolved`);
+    return platform;
+  }
+
+  /**
+   * Returns the local platform;
+   * @returns {!./subscription-platform.SubscriptionPlatform}
+   */
+  getLocalPlatform() {
+    return this.getPlatform('local');
+  }
+
+  /**
+   * Returns all the platforms;
+   * @returns {!./subscription-platform.SubscriptionPlatform[]}
+   */
+  getAllPlatforms() {
+    const platforms = [];
+    for (const platformKey in this.subscriptionPlatforms_) {
+      if (this.subscriptionPlatforms_.hasOwnProperty(platformKey)) {
+        const subscriptionPlatform =
+          this.subscriptionPlatforms_[platformKey];
+        platforms.push(subscriptionPlatform);
+      }
+    }
+    return platforms;
   }
 
   /**
@@ -154,12 +203,13 @@ export class EntitlementStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
+   * @param {!Object<string, !SubscriptionPlatform>} platformDictionary
    * @returns {!Promise<!./entitlement.Entitlement|undefined>}
    */
-  selectPlatform() {
+  selectPlatform(platformDictionary) {
     return this.getAllPlatformsEntitlements_().then(entitlements => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicablePlatform_(entitlements);
+      return this.selectApplicableEntitlement_(platformDictionary, entitlements);
     });
   }
 
@@ -175,17 +225,21 @@ export class EntitlementStore {
 
   /**
    * Returns most qualified platform
+   * @param {!Object<string, !SubscriptionPlatform>} platformDictionary
    * @param {!Array<!./entitlement.Entitlement>} entitlements
    * @returns {!./entitlement.Entitlement|undefined}
    */
-  selectApplicablePlatform_(entitlements) {
-    let chosenPlatform;
-    entitlements.forEach(platform => {
+  selectApplicableEntitlement_(platformDictionary, entitlements) {
+    let chosenEntitlement;
+
+    // Subscriber wins
+    entitlements.forEach(entitlement => {
       // TODO(@prateekbh): add metering logic here
-      if (platform.enablesThis()) {
-        chosenPlatform = platform;
+      if (!!entitlement.subscriptionToken) {
+        chosenEntitlement = entitlement;
       }
     });
-    return chosenPlatform;
+
+    return chosenEntitlement;
   }
 }

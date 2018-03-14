@@ -17,15 +17,14 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {Entitlement} from './entitlement';
-import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
+import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -60,11 +59,8 @@ export class SubscriptionService {
     /** @private {?JsonObject} */
     this.platformConfig_ = null;
 
-    /** @private @const {!Object<string, !SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = dict();
-
-    /** @private {?EntitlementStore} */
-    this.entitlementStore_ = null;
+    /** @private {?PlatformStore} */
+    this.platformStore_ = null;
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
@@ -108,10 +104,13 @@ export class SubscriptionService {
    */
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
-      this.subscriptionPlatforms_['local'] = new LocalSubscriptionPlatform(
-          this.ampdoc_,
-          serviceConfig,
-          this.serviceAdapter_
+      this.platformStore_.resolvePlatform(
+          'local',
+          new LocalSubscriptionPlatform(
+              this.ampdoc_,
+              serviceConfig,
+              this.serviceAdapter_
+          )
       );
     }
   }
@@ -147,8 +146,8 @@ export class SubscriptionService {
           matchedServiceConfig,
           this.serviceAdapter_);
 
-      this.subscriptionPlatforms_[subscriptionPlatform.getServiceId()] =
-          subscriptionPlatform;
+      this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
+          subscriptionPlatform);
 
       this.fetchEntitlements_(subscriptionPlatform);
     });
@@ -182,7 +181,7 @@ export class SubscriptionService {
         'Product id is null'
     ));
     entitlement.setCurrentProduct(productId);
-    this.entitlementStore_.resolveEntitlement(serviceId, entitlement);
+    this.platformStore_.resolveEntitlement(serviceId, entitlement);
   }
 
   /**
@@ -217,19 +216,15 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.entitlementStore_ = new EntitlementStore(serviceIds);
+      this.platformStore_ = new PlatformStore(serviceIds);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
       });
 
-      for (const platformKey in this.subscriptionPlatforms_) {
-        if (this.subscriptionPlatforms_.hasOwnProperty(platformKey)) {
-          const subscriptionPlatform =
-            this.subscriptionPlatforms_[platformKey];
-          this.fetchEntitlements_(subscriptionPlatform);
-        }
-      }
+      this.platformStore_.getAllPlatforms().forEach(subscriptionPlatform => {
+        this.fetchEntitlements_(subscriptionPlatform);
+      });
 
       this.startAuthorizationFlow_();
     });
@@ -249,7 +244,7 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_() {
-    this.entitlementStore_.getGrantStatus()
+    this.platformStore_.getGrantStatus()
         .then(grantState => {this.processGrantState_(grantState);});
 
     this.selectAndActivatePlatform_();
@@ -258,8 +253,8 @@ export class SubscriptionService {
   /** @private */
   selectAndActivatePlatform_() {
     const requireValuesPromise = Promise.all([
-      this.entitlementStore_.getGrantStatus(),
-      this.entitlementStore_.selectPlatform(),
+      this.platformStore_.getGrantStatus(),
+      this.platformStore_.selectPlatform(),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
@@ -269,7 +264,7 @@ export class SubscriptionService {
 
       if (selectedEntitlement) {
         selectedPlatform = dev().assert(
-            this.subscriptionPlatforms_[selectedEntitlement.service],
+            this.platformStore_.getPlatform(selectedEntitlement.service),
             'Selected service not registered');
         dev().assert(this.viewTrackerPromise_,
             'viewer tracker promise is null');
@@ -283,7 +278,7 @@ export class SubscriptionService {
         selectedPlatform.activate(renderState);
       } else {
         // local is the default platform is nothing is selected
-        selectedPlatform = this.subscriptionPlatforms_['local'];
+        selectedPlatform = this.platformStore_.getLocalPlatform();
         const entitlement = Entitlement.empty('local');
         /** @type {!RenderState} */
         const renderState = {
@@ -297,7 +292,7 @@ export class SubscriptionService {
 
       this.viewTrackerPromise_.then(() => {
         const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
-          user().assert(this.subscriptionPlatforms_['local'],
+          user().assert(this.platformStore_.getLocalPlatform(),
               'Local platform is not registered'));
 
         if (selectedPlatform.isPingbackEnabled()) {
@@ -329,7 +324,7 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
-      this.entitlementStore_.reset();
+      this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
   }
@@ -340,7 +335,7 @@ export class SubscriptionService {
    */
   delegateActionToLocal(action) {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.subscriptionPlatforms_['local'],
+      dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
 
     localPlatform.executeAction(action);

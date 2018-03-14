@@ -54,6 +54,18 @@ export class SubscriptionPlatform {
    * @returns {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
+
+  /**
+   * Tells if this platform supports the current viewer
+   * @returns {boolean}
+   */
+  supportsViewer(unusedViewer) {}
+
+  /**
+   * Tells if the user is ready to pay to the platform or needs setup steps prior to pay
+   * @returns {boolean}
+   */
+  isReadyToPay() {}
 }
 
 /**
