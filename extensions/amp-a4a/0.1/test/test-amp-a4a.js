@@ -1571,18 +1571,20 @@ describe('amp-a4a', () => {
         //a4a.config = {};
         a4a.buildCallback();
         a4a.preconnectCallback(false);
-        const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-        expect(preconnects).to.have.lengthOf(3);
-        // SafeFrame origin.
-        expect(preconnects[0]).to.have.property(
-            'href', 'https://tpc.googlesyndication.com/');
-        // NameFrame origin (in testing mode).  Use a substring match here to
-        // be agnostic about localhost server port.
-        expect(preconnects[1]).to.have.property('href')
-            .that.has.string('http://ads.localhost');
-        // AdSense origin.
-        expect(preconnects[2]).to.have.property(
-            'href', 'https://googleads.g.doubleclick.net/');
+        return Promise.resolve().then(() => {
+          const preconnects = doc.querySelectorAll('link[rel=preconnect]');
+          expect(preconnects).to.have.lengthOf(3);
+          // SafeFrame origin.
+          expect(preconnects[0]).to.have.property(
+              'href', 'https://tpc.googlesyndication.com/');
+          // NameFrame origin (in testing mode).  Use a substring match here to
+          // be agnostic about localhost server port.
+          expect(preconnects[1]).to.have.property('href')
+              .that.has.string('http://ads.localhost');
+          // AdSense origin.
+          expect(preconnects[2]).to.have.property(
+              'href', 'https://googleads.g.doubleclick.net/');
+        });
       });
     });
   });
