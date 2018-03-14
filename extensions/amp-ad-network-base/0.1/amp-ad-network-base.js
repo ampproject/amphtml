@@ -200,7 +200,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs. failureType
+   * @param {!./amp-ad-type-defs.FailureType} failureType
    * @param {*=} error
    * @private
    */
