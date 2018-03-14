@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isFiniteNumber} from '../src/types';
 import {loadScript} from './3p';
 
 /**
@@ -29,16 +28,15 @@ function getBodymovinAnimationSdk(global, cb) {
   });
 }
 
-function loadAnimationOnEvent(event) {
-  const dataReceived = JSON.parse(event.data);
+export function bodymovinanimation(global) {
+  const dataReceived = JSON.parse(global.name).attributes._context;
   const dataLoop = dataReceived['loop'];
   const animationData = dataReceived['animationData'];
   const animatingContainer = global.document.createElement('div');
 
   global.document.getElementById('c').appendChild(animatingContainer);
-  const shouldLoop = dataLoop == 'true';
-  const loop = isFiniteNumber(dataLoop) ? parseInt(dataLoop, 10) : shouldLoop;
-
+  const shouldLoop = dataLoop != 'false';
+  const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
   getBodymovinAnimationSdk(global, function() {
     bodymovin.loadAnimation({
       container: animatingContainer,
@@ -48,9 +46,4 @@ function loadAnimationOnEvent(event) {
       animationData,
     });
   });
-}
-
-window.addEventListener('message', loadAnimationOnEvent, false);
-
-export function bodymovinanimation(global, data) {
 }
