@@ -179,22 +179,24 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       dev().assert(this.validators_[validatorType],
           'Validator never registered!');
       return this.validators_[validatorType].validate(
-          unvalidatedBytes, response.headers, this.context_)
+          this.context_, unvalidatedBytes, response.headers)
           .catch(err =>
             Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err}));
     });
   }
 
   /**
-   * @param {!./amp-ad-type-defs.ValidatorResult} validatorResult
+   * @param {!./amp-ad-type-defs.ValidatorOutput} validatorResult
    * @return {!Promise}
    * @private
    */
-  invokeRenderer_(validatorResult) {
-    const renderer = this.renderers_[validatorResult];
+  invokeRenderer_(validatorOutput) {
+    const renderer = this.renderers_[validatorOutput.type];
     dev().assert(renderer, 'Renderer for AMP creatives never registered!');
-    return renderer.render(this.context_).catch(err =>
-      Promise.reject({type: FailureType.RENDERER_ERROR, msg: err}));
+    return renderer.render(
+        this.context_, this.element, validatorOutput.creativeData)
+        .catch(err =>
+          Promise.reject({type: FailureType.RENDERER_ERROR, msg: err}));
   }
 
   /**
