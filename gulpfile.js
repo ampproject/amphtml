@@ -37,11 +37,15 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
+const path = require('path');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+const rimraf = require('rimraf');
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
+const transpileTs = require('./build-system/typescript').transpileTs;
 const watchify = require('watchify');
+
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -64,106 +68,105 @@ const unminifiedRuntimeTarget = 'dist/amp.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
-declareExtension('amp-3q-player', '0.1', {hasCss: false});
+declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
-declareExtension('amp-accordion', '0.1', {hasCss: false});
+declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
-declareExtension('amp-ad-network-adsense-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-adzerk-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-doubleclick-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-fake-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-triplelift-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-cloudflare-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-network-gmossp-impl', 0.1, {hasCss: false});
-declareExtension('amp-ad-exit', 0.1, {hasCss: false});
-declareExtension('amp-analytics', '0.1', {hasCss: false});
-declareExtension('amp-anim', '0.1', {hasCss: false});
-declareExtension('amp-animation', '0.1', {hasCss: false});
+declareExtension('amp-ad-network-adsense-impl', 0.1);
+declareExtension('amp-ad-network-adzerk-impl', 0.1);
+declareExtension('amp-ad-network-doubleclick-impl', 0.1);
+declareExtension('amp-ad-network-fake-impl', 0.1);
+declareExtension('amp-ad-network-triplelift-impl', 0.1);
+declareExtension('amp-ad-network-cloudflare-impl', 0.1);
+declareExtension('amp-ad-network-gmossp-impl', 0.1);
+declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-analytics', '0.1');
+declareExtension('amp-anim', '0.1');
+declareExtension('amp-animation', '0.1');
 declareExtension('amp-apester-media', '0.1', {hasCss: true});
 declareExtension('amp-app-banner', '0.1', {hasCss: true});
-declareExtension('amp-audio', '0.1', {hasCss: false});
-declareExtension('amp-auto-ads', '0.1', {hasCss: false});
-declareExtension('amp-bind', '0.1', {hasCss: false});
-declareExtension('amp-brid-player', '0.1', {hasCss: false});
-declareExtension('amp-brightcove', '0.1', {hasCss: false});
+declareExtension('amp-audio', '0.1');
+declareExtension('amp-auto-ads', '0.1');
+declareExtension('amp-bind', '0.1');
+declareExtension('amp-brid-player', '0.1');
+declareExtension('amp-brightcove', '0.1');
 declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-byside-content', '0.1', {hasCss: true});
-declareExtension('amp-kaltura-player', '0.1', {hasCss: false});
-declareExtension('amp-call-tracking', '0.1', {hasCss: false});
+declareExtension('amp-kaltura-player', '0.1');
+declareExtension('amp-call-tracking', '0.1');
 declareExtension('amp-carousel', '0.1', {hasCss: true});
-declareExtension('amp-compare-slider', '0.1', {hasCss: false});
-declareExtension('amp-crypto-polyfill', '0.1', {hasCss: false});
-declareExtension('amp-dailymotion', '0.1', {hasCss: false});
+declareExtension('amp-compare-slider', '0.1');
+declareExtension('amp-consent', '0.1', {hasCss: true});
+declareExtension('amp-crypto-polyfill', '0.1');
+declareExtension('amp-dailymotion', '0.1');
 declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
-declareExtension('amp-dynamic-css-classes', '0.1', {hasCss: false});
-declareExtension('amp-experiment', '0.1', {hasCss: false});
-declareExtension('amp-facebook', '0.1', {hasCss: false});
-declareExtension('amp-facebook-comments', '0.1', {hasCss: false});
-declareExtension('amp-facebook-like', '0.1', {hasCss: false});
-declareExtension('amp-facebook-page', '0.1', {hasCss: false});
+declareExtension('amp-dynamic-css-classes', '0.1');
+declareExtension('amp-experiment', '0.1');
+declareExtension('amp-facebook', '0.1');
+declareExtension('amp-facebook-comments', '0.1');
+declareExtension('amp-facebook-like', '0.1');
+declareExtension('amp-facebook-page', '0.1');
 declareExtension('amp-fit-text', '0.1', {hasCss: true});
-declareExtension('amp-font', '0.1', {hasCss: false});
+declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
-declareExtension('amp-fx-collection', '0.1', {hasCss: false});
+declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
-declareExtension('amp-gfycat', '0.1', {hasCss: false});
-declareExtension('amp-gist', '0.1', {hasCss: false});
+declareExtension('amp-gfycat', '0.1');
+declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
-declareExtension('amp-hulu', '0.1', {hasCss: false});
-declareExtension('amp-iframe', '0.1', {hasCss: false});
-declareExtension('amp-ima-video', '0.1', {hasCss: false});
+declareExtension('amp-hulu', '0.1');
+declareExtension('amp-iframe', '0.1');
+declareExtension('amp-ima-video', '0.1');
 declareExtension('amp-image-lightbox', '0.1', {hasCss: true});
-declareExtension('amp-imgur', '0.1', {hasCss: false});
+declareExtension('amp-imgur', '0.1');
 declareExtension('amp-instagram', '0.1', {hasCss: true});
-declareExtension('amp-install-serviceworker', '0.1', {hasCss: false});
-declareExtension('amp-izlesene', '0.1', {hasCss: false});
-declareExtension('amp-jwplayer', '0.1', {hasCss: false});
+declareExtension('amp-install-serviceworker', '0.1');
+declareExtension('amp-izlesene', '0.1');
+declareExtension('amp-jwplayer', '0.1');
 declareExtension('amp-lightbox', '0.1', {hasCss: true});
 declareExtension('amp-lightbox-gallery', '0.1', {hasCss: true});
-declareExtension('amp-list', '0.1', {hasCss: false});
+declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
-declareExtension('amp-mustache', '0.1', {hasCss: false});
-declareExtension('amp-nexxtv-player', '0.1', {hasCss: false});
-declareExtension('amp-o2-player', '0.1', {hasCss: false});
-declareExtension('amp-ooyala-player', '0.1', {hasCss: false});
+declareExtension('amp-mustache', '0.1');
+declareExtension('amp-nexxtv-player', '0.1');
+declareExtension('amp-o2-player', '0.1');
+declareExtension('amp-ooyala-player', '0.1');
 declareExtension('amp-pinterest', '0.1', {hasCss: true});
 declareExtension('amp-playbuzz', '0.1', {hasCss: true});
-declareExtension('amp-reach-player', '0.1', {hasCss: false});
-declareExtension('amp-reddit', '0.1', {hasCss: false});
-declareExtension('amp-riddle-quiz', '0.1', {hasCss: false});
-declareExtension('amp-share-tracking', '0.1', {hasCss: false});
+declareExtension('amp-reach-player', '0.1');
+declareExtension('amp-reddit', '0.1');
+declareExtension('amp-riddle-quiz', '0.1');
+declareExtension('amp-share-tracking', '0.1');
 declareExtension('amp-sidebar', '0.1', {hasCss: true});
-declareExtension('amp-soundcloud', '0.1', {hasCss: false});
-declareExtension('amp-springboard-player', '0.1', {hasCss: false});
+declareExtension('amp-soundcloud', '0.1');
+declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {hasCss: true});
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
-declareExtension('amp-wistia-player', '0.1', {hasCss: false});
-declareExtension('amp-position-observer', '0.1', {hasCss: false});
+declareExtension('amp-wistia-player', '0.1');
+declareExtension('amp-position-observer', '0.1');
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 declareExtension('amp-subscriptions', '0.1', {hasCss: true});
-declareExtension('amp-subscriptions-google', '0.1', {hasCss: false});
-
-
+declareExtension('amp-subscriptions-google', '0.1');
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
-declareExtension('amp-slides', '0.1', {hasCss: false});
+declareExtension('amp-slides', '0.1');
 declareExtension('amp-social-share', '0.1', {hasCss: true});
-declareExtension('amp-timeago', '0.1', {hasCss: false});
-declareExtension('amp-twitter', '0.1', {hasCss: false});
+declareExtension('amp-timeago', '0.1');
+declareExtension('amp-twitter', '0.1');
 declareExtension('amp-user-notification', '0.1', {hasCss: true});
-declareExtension('amp-vimeo', '0.1', {hasCss: false});
-declareExtension('amp-vine', '0.1', {hasCss: false});
+declareExtension('amp-vimeo', '0.1');
+declareExtension('amp-vine', '0.1');
 declareExtension('amp-viz-vega', '0.1', {hasCss: true});
-declareExtension('amp-google-vrview-image', '0.1', {hasCss: false});
+declareExtension('amp-google-vrview-image', '0.1');
 declareExtension('amp-viewer-integration', '0.1', {
   // The viewer integration code needs to run asap, so that viewers
   // can influence document state asap. Otherwise the document may take
@@ -171,9 +174,9 @@ declareExtension('amp-viewer-integration', '0.1', {
   // faster.
   loadPriority: 'high',
 });
-declareExtension('amp-video', '0.1', {hasCss: false});
-declareExtension('amp-vk', '0.1', {hasCss: false});
-declareExtension('amp-youtube', '0.1', {hasCss: false});
+declareExtension('amp-video', '0.1');
+declareExtension('amp-vk', '0.1');
+declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
 
@@ -199,10 +202,8 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 function declareExtension(name, version, options) {
   const defaultOptions = {hasCss: false};
   const extensionKey = `${name}-${version}`;
-  extensions[extensionKey] = Object.assign({
-    name,
-    version,
-  }, defaultOptions, options);
+  extensions[extensionKey] = Object.assign(
+      {name, version}, defaultOptions, options);
 }
 
 /**
@@ -392,7 +393,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           }),
 
           // inabox-host
@@ -404,7 +404,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           })
       );
     }
@@ -540,21 +539,19 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
       buildExtension(name, version, hasCss, copy);
     });
   }
+  let promise = Promise.resolve();
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
     const startTime = Date.now();
-    return buildExtensionCss(path, name, version, options).then(() => {
+    promise = buildExtensionCss(path, name, version, options).then(() => {
       endBuildStep('Recompiled CSS in', name, startTime);
-    }).then(function() {
-      if (options.compileOnlyCss) {
-        return Promise.resolve();
-      }
-      return buildExtensionJs(path, name, version, options);
     });
-  } else {
-    return buildExtensionJs(path, name, version, options);
+    if (options.compileOnlyCss) {
+      return promise;
+    }
   }
+  return promise.then(() => buildExtensionJs(path, name, version, options));
 }
 
 /**
@@ -602,26 +599,20 @@ function buildExtensionJs(path, name, version, options) {
     throw new Error('Unsupported loadPriority: ' + options.loadPriority);
   }
   const priority = options.loadPriority ? 'p:"high",' : '';
-  return compileJs(path + '/', filename, './dist/v0', {
-    watch: options.watch,
-    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-    minify: options.minify,
-    toName: name + '-' + version + '.max.js',
-    minifiedName: name + '-' + version + '.js',
-    latestName: name + '-latest.js',
-    extraGlobs: options.extraGlobs,
+  return compileJs(path + '/', filename, './dist/v0', Object.assign(options, {
+    toName: `${name}-${version}.max.js`,
+    minifiedName: `${name}-${version}.js`,
+    latestName: `${name}-latest.js`,
     // Wrapper that either registers the extension or schedules it for
     // execution after the main binary comes back.
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: options.noWrapper ? '' : ('(self.AMP=self.AMP||[])' +
-        '.push({n:"' + name + '",' + priority +
-        'v:"' + internalRuntimeVersion + '",' +
-        'f:(function(AMP){<%= contents %>\n})});'),
-  });
+    wrapper: options.noWrapper ? ''
+      : `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}` +
+      `v:"${internalRuntimeVersion}",f:(function(AMP){<%= contents %>\n})});`,
+  }));
 }
-
 
 /**
  * Prints a message that could help speed up local development.
@@ -982,7 +973,10 @@ function concatFilesToString(files) {
 }
 
 /**
- * Compile a javascript file
+ * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ *
+ * If `options.typeScript` is true, transpiles from TypeScript into
+ * intermediary files before compilation and deletes them afterwards.
  *
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
@@ -992,22 +986,37 @@ function concatFilesToString(files) {
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+
+  const entryPoint = path.join(srcDir, srcFilename);
+
+  // Transpile TS to Closure-annotated JS before actual bundling or compile.
+  if (options.typeScript) {
+    const startTime = Date.now();
+    transpileTs(srcDir, srcFilename);
+    endBuildStep('Transpiled', srcFilename, startTime);
+  }
+
   if (options.minify) {
     const startTime = Date.now();
-    return closureCompile(
-        srcDir + srcFilename, destDir, options.minifiedName, options)
+    return closureCompile(entryPoint, destDir, options.minifiedName, options)
         .then(function() {
-          const destPath = destDir + '/' + options.minifiedName;
+          const destPath = path.join(destDir, options.minifiedName);
           appendToCompiledFile(srcFilename, destPath);
-          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          fs.writeFileSync(
+              path.join(destDir, 'version.txt'), internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
                 destPath,
-                destDir + '/' + options.latestName);
+                path.join(destDir, options.latestName));
           }
         })
         .then(() => {
           endBuildStep('Minified', srcFilename, startTime);
+
+          // Remove intemediary, transpiled JS files after compilation.
+          if (options.typeScript) {
+            rimraf.sync(path.join(srcDir, '**/*.js'));
+          }
         });
   }
 
@@ -1018,7 +1027,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     browsers.push('Last 4 Chrome versions');
   }
 
-  let bundler = browserify(srcDir + srcFilename, {debug: true})
+  let bundler = browserify(entryPoint, {debug: true})
       .transform(babel, {
         presets: [
           ['env', {
@@ -1032,6 +1041,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler = watchify(bundler);
   }
 
+  // Default wrapper for `gulp build`.
+  // We don't need an explicit function wrapper like we do for `gulp dist`
+  // because Babel handles that for you.
   const wrapper = options.wrapper || '<%= contents %>';
 
   const lazybuild = lazypipe()
@@ -1065,10 +1077,16 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             .pipe($$.rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
-              appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
+              appendToCompiledFile(srcFilename,
+                  path.join(destDir, destFilename));
             }))
         .then(() => {
           endBuildStep('Compiled', srcFilename, startTime);
+
+          // Remove intemediary, transpiled JS files after compilation.
+          if (options.typeScript) {
+            rimraf.sync(path.join(srcDir, '**/*.js'));
+          }
         })
         .then(() => {
           if (process.env.NODE_ENV === 'development') {

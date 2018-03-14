@@ -28,16 +28,12 @@ describes.realWin('amp-video', {
   },
 }, env => {
   let win, doc;
-  let timer, viewerMock;
+  let timer;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     timer = Services.timerFor(win);
-    viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
-      'getVisibilityState',
-      'whenFirstVisible',
-    ]);
   });
 
   function getFooVideoSrc(filetype) {
@@ -486,8 +482,13 @@ describes.realWin('amp-video', {
     let makeVisible;
     let visiblePromise;
     let video;
+    let viewerMock;
 
     beforeEach(() => {
+      viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
+        'getVisibilityState',
+        'whenFirstVisible',
+      ]);
       viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
       visiblePromise = new Promise(resolve => {
         makeVisible = resolve;

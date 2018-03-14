@@ -141,27 +141,17 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
-      return info.canonicalUrl;
-    }));
+    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.host;
-    }));
+    this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.hostname;
-    }));
+    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
+        'hostname'));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.pathname;
-    }));
+    this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -206,37 +196,29 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
-      return removeFragment(info.sourceUrl);
-    }), () => {
+    this.setBoth('SOURCE_URL', () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      return removeFragment(docInfo.sourceUrl);
+    }, () => {
       return getTrackImpressionPromise().then(() => {
-        return this.getDocInfoValue_(info => {
-          return removeFragment(info.sourceUrl);
-        });
+        const docInfo = Services.documentInfoForDoc(this.ampdoc);
+        return removeFragment(docInfo.sourceUrl);
       });
     });
 
     // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).host;
-    }));
+    this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).hostname;
-    }));
+    this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).pathname;
-    }));
+    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
-      return info.pageViewId;
-    }));
+    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -521,15 +503,11 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
-          'STORY_PAGE_INDEX');
-    });
+    this.setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
+        'STORY_PAGE_INDEX'));
 
-    this.setAsync('STORY_PAGE_ID', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageId,
-          'STORY_PAGE_ID');
-    });
+    this.setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
+        'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
@@ -545,13 +523,18 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Resolves the value via document info.
-   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
+   * Resolves the value via one of document info's urls.
+   * @param {string} field A field on the docInfo
+   * @param {string=} opt_urlProp A subproperty of the field
    * @return {T}
    * @template T
    */
-  getDocInfoValue_(getter) {
-    return getter(Services.documentInfoForDoc(this.ampdoc));
+  getDocInfoUrl_(field, opt_urlProp) {
+    return () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      const value = docInfo[field];
+      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+    };
   }
 
   /**
@@ -636,22 +619,20 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-story's service.
-   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
-   * @param {string} expr
-   * @return {!Promise<T>}
-   * @template T
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
    * @private
    */
-  getStoryValue_(getter, expr) {
-    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
-        .then(storyVariables => {
-          user().assert(storyVariables,
-              'To use variable %s amp-story should be configured',
-              expr);
-          return getter(
-              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
-              (storyVariables));
-        });
+  getStoryValue_(property, name) {
+    return () => {
+      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
+      return service.then(storyVariables => {
+        user().assert(storyVariables,
+            'To use variable %s amp-story should be configured', name);
+        return storyVariables[property];
+      });
+    };
   }
 }
 

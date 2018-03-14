@@ -443,10 +443,10 @@ function createBaseCustomElementClass(win) {
      * Get the priority to load the element.
      * @return {number} @this {!Element}
      */
-    getPriority() {
+    getLayoutPriority() {
       dev().assert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
-      return this.implementation_.getPriority();
+      return this.implementation_.getLayoutPriority();
     }
 
     /**
@@ -645,7 +645,7 @@ function createBaseCustomElementClass(win) {
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
-          this.resources_.deferMutate(this, () => {
+          this.resources_.mutateElement(this, () => {
             dom.removeElement(sizer);
           });
         }
@@ -1535,7 +1535,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().deferMutate(this, () => {
+          this.getResources().mutateElement(this, () => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1549,7 +1549,7 @@ function createBaseCustomElementClass(win) {
     getLayoutDelayMeter_() {
       if (!this.layoutDelayMeter_) {
         this.layoutDelayMeter_ = new LayoutDelayMeter(
-            toWin(this.ownerDocument.defaultView), this.getPriority());
+            toWin(this.ownerDocument.defaultView), this.getLayoutPriority());
       }
       return this.layoutDelayMeter_;
     }

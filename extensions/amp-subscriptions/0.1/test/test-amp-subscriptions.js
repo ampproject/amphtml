@@ -31,6 +31,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let element;
   let pageConfig;
   let subscriptionService;
+  const products = ['scenic-2017.appspot.com:news',
+    'scenic-2017.appspot.com:product2'];
+
   const serviceConfig = {
     services: [
       {
@@ -39,6 +42,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
+        pingbackUrl: 'https://lipsum.com/pingback',
       },
       {
         serviceId: 'google.subscription',
@@ -94,12 +98,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factorySpy = sandbox.stub().callsFake(() => Promise.resolve());
-    subscriptionService.registerPlatform(serviceData.serviceId, factorySpy);
+    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
+    subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
     return subscriptionService.initialize_().then(() => {
-      expect(factorySpy).to.be.calledOnce;
-      expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceData);
-      expect(factorySpy.getCall(0).args[1]).to.be.equal(
+      expect(factoryStub).to.be.calledOnce;
+      expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
+      expect(factoryStub.getCall(0).args[1]).to.be.equal(
           subscriptionService.serviceAdapter_);
     });
   });
@@ -133,9 +137,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
-      const products = ['scenic-2017.appspot.com:news',
-        'scenic-2017.appspot.com:product2'];
       subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
         sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
             .callsFake(() => Promise.resolve());
@@ -153,6 +156,20 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           done();
         });
       });
+    });
+  });
+
+  describe('startAuthorizationFlow_', () => {
+    it('should start grantStatus and platform selection', () => {
+      subscriptionService.entitlementStore_ = new EntitlementStore(products);
+      const getGrantStatusStub =
+          sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+              .callsFake(() => Promise.resolve());
+      const selectAndActivateStub =
+          sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+      subscriptionService.startAuthorizationFlow_();
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.be.calledOnce;
     });
   });
 });

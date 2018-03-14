@@ -15,12 +15,15 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {Dialog} from './dialog';
+import {Entitlement} from './entitlement';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {SubscriptionPlatform} from './subscription-platform';
+import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -68,6 +71,15 @@ export class SubscriptionService {
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
+
+    /** @private {!Dialog} */
+    this.dialog_ = new Dialog(ampdoc);
+
+    /** @private {!ViewerTracker} */
+    this.viewerTracker_ = new ViewerTracker(ampdoc);
+
+    /** @private {?Promise} */
+    this.viewTrackerPromise_ = null;
   }
 
   /**
@@ -153,6 +165,8 @@ export class SubscriptionService {
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
+    } else {
+      this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     }
 
   }
@@ -172,13 +186,17 @@ export class SubscriptionService {
   }
 
   /**
-   *
    * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @return {!Promise<!./entitlement.Entitlement>}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlement => {
+    return subscriptionPlatform.getEntitlements().then(entitlement => {
+      if (!entitlement) {
+        entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
+      }
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
+      return entitlement;
     });
   }
 
@@ -213,18 +231,31 @@ export class SubscriptionService {
         }
       }
 
-      this.entitlementStore_.getGrantStatus()
-          .then(grantState => {this.processGrantState_(grantState);});
-
-      this.selectAndActivatePlatform_();
+      this.startAuthorizationFlow_();
     });
     return this;
   }
 
   /**
-   * @private
-   * @returns {!Promise}
+   * Returns the singleton Dialog instance
+   * @returns {!Dialog}
    */
+  getDialog() {
+    return this.dialog_;
+  }
+
+  /**
+   * Unblock document based on grant state and selected platform
+   * @private
+   */
+  startAuthorizationFlow_() {
+    this.entitlementStore_.getGrantStatus()
+        .then(grantState => {this.processGrantState_(grantState);});
+
+    this.selectAndActivatePlatform_();
+  }
+
+  /** @private */
   selectAndActivatePlatform_() {
     const requireValuesPromise = Promise.all([
       this.entitlementStore_.getGrantStatus(),
@@ -234,6 +265,8 @@ export class SubscriptionService {
     return requireValuesPromise.then(resolvedValues => {
       const grantState = resolvedValues[0];
       const selectedEntitlement = resolvedValues[1];
+
+      dev().assert(this.viewTrackerPromise_, 'viewer tracker promise is null');
 
       /** @type {!RenderState} */
       const renderState = {
@@ -245,10 +278,24 @@ export class SubscriptionService {
 
       const selectedPlatform = dev().assert(
           this.subscriptionPlatforms_[selectedEntitlement.service],
-          'Selected service not registered'
-      );
+          'Selected service not registered');
 
       selectedPlatform.activate(renderState);
+
+      this.viewTrackerPromise_.then(() => {
+        const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
+          user().assert(this.subscriptionPlatforms_['local'],
+              'Local platform is not registered'));
+
+        if (selectedPlatform.isPingbackEnabled()) {
+          selectedPlatform.pingback(selectedEntitlement);
+        }
+
+        if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
+            && localPlatform.isPingbackEnabled()) {
+          localPlatform.pingback(selectedEntitlement);
+        }
+      });
     });
   }
 
@@ -265,22 +312,12 @@ export class SubscriptionService {
   /**
    * Re authorizes a platform
    * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @return {!Promise}
    */
   reAuthorizePlatform(subscriptionPlatform) {
-    subscriptionPlatform.getEntitlements().then(entitlement => {
-      const productId = /** @type {string} */ (dev().assert(
-          this.pageConfig_.getProductId(),
-          'Product id is null'
-      ));
-      entitlement.setCurrentProduct(productId);
-      this.entitlementStore_.resolveEntitlement(
-          subscriptionPlatform.getServiceId(),
-          entitlement
-      );
-      // TODO (@prateekbh): Implement reset
-      // this.entitlementStore_.getGrantStatus()
-      //     .then(grantState => this.processGrantState_(grantState));
-      // this.selectAndActivatePlatform_();
+    return this.fetchEntitlements_(subscriptionPlatform).then(() => {
+      this.entitlementStore_.reset();
+      this.startAuthorizationFlow_();
     });
   }
 

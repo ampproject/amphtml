@@ -110,7 +110,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   }
 
   /** @override  */
-  getPriority() {
+  getLayoutPriority() {
     return 3;
   }
 
@@ -181,7 +181,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const whenVisible =
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
     return Promise.all([whenReady, whenVisible]).then(() => {
-      this.deferMutate(() => this.preloadShell_(shellUrl));
+      this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
 

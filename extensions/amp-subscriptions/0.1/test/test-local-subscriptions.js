@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -21,27 +23,32 @@ import {ServiceAdapter} from '../service-adapter';
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  let serviceAdapter;
+
   const actionMap = {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
   };
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
+  const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
         'authorizationUrl': authUrl,
         'actions': actionMap,
+        'pingbackUrl': pingbackUrl,
       },
     ],
   };
-  let serviceAdapter;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     sandbox.stub(serviceAdapter, 'getPageConfig')
         .callsFake(() => new PageConfig('example.org:basic', true));
+    sandbox.stub(serviceAdapter, 'getDialog')
+        .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
@@ -118,6 +125,38 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
       localSubscriptionPlatform.activate();
       expect(renderStub).to.be.calledOnce;
+    });
+  });
+
+  describe('pingback', () => {
+    it('should call `sendSignal` to the pingback signal', () => {
+      const service = 'sample-service';
+      const source = 'sample-source';
+      const products = ['scenic-2017.appspot.com:news',
+        'scenic-2017.appspot.com:product2'];
+      const subscriptionToken = 'token';
+      const loggedIn = true;
+      const json = {
+        service,
+        source,
+        products,
+        subscriptionToken,
+        loggedIn,
+      };
+      const entitlement = Entitlement.parseFromJson(json);
+      const urlBuildStub =
+          sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
+              .callsFake(() => Promise.resolve(pingbackUrl));
+      const sendSignalStub =
+          sandbox.stub(localSubscriptionPlatform.xhr_, 'sendSignal');
+      return localSubscriptionPlatform.pingback(entitlement).then(() => {
+        expect(urlBuildStub).to.be.calledOnce;
+        expect(sendSignalStub).to.be.calledOnce;
+        expect(sendSignalStub.getCall(0).args[0]).to.be
+            .equal(localSubscriptionPlatform.pingbackUrl_);
+        expect(sendSignalStub.getCall(0).args[1].body).to.deep
+            .equal(entitlement.raw);
+      });
     });
   });
 });
