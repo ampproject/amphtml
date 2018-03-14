@@ -386,6 +386,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'localStorage': {
@@ -489,8 +490,8 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
-  '\\.updatePriority\\(': {
-    message: 'updatePriority is a restricted API.',
+  '\\.updateLayoutPriority\\(': {
+    message: 'updateLayoutPriority is a restricted API.',
     whitelist: [
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
