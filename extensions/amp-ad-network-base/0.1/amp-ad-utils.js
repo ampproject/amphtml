@@ -17,11 +17,11 @@ import {Services} from '../../../src/services';
 
 /**
  * Sends a CORS XHR request to the given URL.
- * @param {string} url Request URL to send XHR to.
  * @param {!Window} win
+ * @param {string} url Request URL to send XHR to.
  * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
  */
-export function sendXhrRequest(url, win) {
+export function sendXhrRequest(win, url) {
   return Services.xhrFor(win).fetch(url, {
     mode: 'cors',
     method: 'GET',

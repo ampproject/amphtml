@@ -35,7 +35,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     super(element);
 
     /** @private {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
-    this.adPromise_ = null;
+    this.adResponsePromise_ = null;
 
     /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
     this.validators_ = map();
@@ -79,19 +79,19 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
-    return this.adPromise_
-        .then(response => this.invokeValidator_(response))
-        .then(validatorResult => this.invokeRenderer_(validatorResult))
-        .catch(error => this.handleFailure_(error.type, error.msg));
-  }
-
-  /** @override */
   onLayoutMeasure() {
     this.sendRequest_();
   }
 
+  /** @override */
+  layoutCallback() {
+    dev().assert(this.adResponsePromise_,
+        'layoutCallback invoked before XHR request!');
+    return this.adResponsePromise_
+        .then(response => this.invokeValidator_(response))
+        .then(validatorResult => this.invokeRenderer_(validatorResult))
+        .catch(error => this.handleFailure_(error.type, error.msg));
+  }
 
   /**
    * @param {!./amp-ad-type-defs.FailureType} failure
@@ -159,7 +159,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   sendRequest_() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
       const url = this.getRequestUrl();
-      this.adPromise_ = sendXhrRequest(url, this.win);
+      this.adResponsePromise_ = sendXhrRequest(this.win, url);
     });
   }
 
