@@ -37,7 +37,7 @@ FAIL
 |    </amp-list>
 |    <!-- Valid: amp-list with only [src] attribute -->
 |    <amp-list width=10 height=10
-|              src="https://data.com/articles.json?ref=CANONICAL_URL">
+|              [src]="foo.bar">
 |      <div></div>
 |    </amp-list>
 |    <!-- Valid: amp-list with both src and [src] attributes -->
