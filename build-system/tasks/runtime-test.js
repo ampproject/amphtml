@@ -84,7 +84,7 @@ function getConfig() {
         'SL_Safari_9',
         'SL_iOS_latest',
         'SL_iOS_10_0',
-        'SL_iOS_9_1',
+        'SL_iOS_9_3',
         'SL_Edge_latest',
         'SL_IE_11',
       ] : [
