@@ -100,7 +100,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    this.cidPromise_ = Services.cidForDoc(this.element).then(cid => {
+    this.cidPromise_ = Services.cidForDoc(this.ampdoc_).then(cid => {
       // Note: do not wait for consent of the cid used for amp-consent
       return cid.get({
         scope: TAG,

@@ -15,75 +15,72 @@
  */
 
 import {AmpConsent} from '../amp-consent';
-import {toggleExperiment} from '../../../../src/experiments';
+import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {macroTask} from '../../../../testing/yield';
 import {
-  getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {installXhrService} from '../../../../src/service/xhr-impl';
-import {Services} from '../../../../src/services';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-consent', {
   amp: {
     extensions: ['amp-consent'],
+    ampdoc: 'single',
   },
 }, env => {
   let win;
-  let ampdoc;
   let doc;
   let jsonMockResponses;
+  let storageValue;
+  let requestBody;
 
   beforeEach(() => {
     doc = env.win.document;
     win = env.win;
-    ampdoc = env.ampdoc;
     toggleExperiment(win, 'amp-consent', true);
+    storageValue = {};
     jsonMockResponses = {
-      'consentRequired': true,
-      'prompt': true,
+      'response1': '{"consentRequired": true, "prompt": true}',
     };
-    jsonMockResponses = {
-      'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
-      'config1': '{"vars": {"title": "remote"}}',
-      'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
-      'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
-    };
+
     resetServiceForTesting(win, 'xhr');
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
+        requestBody = init.body;
+        expect(init.credentials).to.equal('include');
+        expect(init.method).to.equal('POST');
         return Promise.resolve({
           json() {
-            console.log('json');
             return Promise.resolve(JSON.parse(jsonMockResponses[url]));
           },
         });
       }};
     });
+
     resetServiceForTesting(win, 'cid');
     registerServiceBuilder(win, 'cid', function() {
-      return {get: () => {
+      return Promise.resolve({get: () => {
         return Promise.resolve('cid123');
-      }};
+      }});
     });
 
-    // installXhrService(win);
-    // sandbox.stub(Services, 'xhrFor').returns(
-    //     {fetchJson: () => {
-    //       console.log("fetchJson");
-    //       return Promise.resolve({
-    //         json() {
-    //           return Promise.resolve(JSON.parse('{"transport": {"iframe": "fake.com"}}'));
-    //         },
-    //       });
-    //     }
-    //     });
+    resetServiceForTesting(win, 'storage');
+    registerServiceBuilder(win, 'storage', function() {
+      return Promise.resolve({
+        get: name => {
+          console.log('name is ', name, storageValue[name]);
+          return Promise.resolve(storageValue[name]);
+        },
+        set: (name, value) => {
+          storageValue[name] = value;
+          return Promise.resolve();
+        },
+      });
+    });
   });
 
   describe('amp-consent', () => {
-    let defaultConfig;
-    let consentElement;
-    let scriptElement;
     describe('consent config', () => {
       let defaultConfig;
       let consentElement;
@@ -92,10 +89,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'check-consent-href': 'http://localhost:8000/get-consent',
+              'check-consent-href': 'response1',
             },
             'DEF': {
-              'check-consent-href': 'http://localhost:8000/get-consent',
+              'check-consent-href': 'response1',
             },
           },
         };
@@ -116,32 +113,117 @@ describes.realWin('amp-consent', {
       });
 
       it('assert valid config', () => {
+        // Check script type equals to application/json
+        scriptElement.textContent = JSON.stringify(defaultConfig);
+        consentElement.appendChild(scriptElement);
+        scriptElement.setAttribute('type', '');
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        doc.body.appendChild(consentElement);
+        const ampConsent = new AmpConsent(consentElement);
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
 
+        // Check consent config exists
+        scriptElement.setAttribute('type', 'application/json');
+        scriptElement.textContent = JSON.stringify({});
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+
+        // Check there is only one script object
+        scriptElement.textContent = JSON.stringify(defaultConfig);
+        const script2 = doc.createElement('script');
+        consentElement.appendChild(script2);
+        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
       });
     });
   });
 
   describe('server communication', () => {
-    it('send post request to server', () => {
-
+    let defaultConfig;
+    let ampConsent;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'check-consent-href': 'response1',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
     });
 
-    it('pass persist state to server', () => {
-
+    it('send post request to server', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(requestBody).to.deep.equal({
+        'ampUserId': 'cid123',
+        'consentInstanceId': 'ABC',
+        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+      });
     });
 
-    it('assert server endpoint valid', () => {
-
+    it('pass persist state to server', function* () {
+      storageValue['amp-consent:ABC'] = true;
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(requestBody).to.deep.equal({
+        'ampUserId': 'cid123',
+        'consentInstanceId': 'ABC',
+        'consentState': CONSENT_ITEM_STATE.GRANTED,
+      });
     });
 
-    it('parse server response', () => {
-
+    it('parse server response', function* () {
+      const parseSpy = sandbox.spy(ampConsent, 'parseConsentResponse_');
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(parseSpy).to.be.calledWith('ABC', {
+        'consentRequired': true,
+        'prompt': true,
+      });
     });
   });
 
   describe('policy config', () => {
-    it('create default policy', () => {
+    let defaultConfig;
+    let ampConsent;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'check-consent-href': 'response1',
+          },
+          'DEF': {
+            'check-consent-href': 'response1',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+    });
 
+    it('create default policy', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.policyConfig_).to.deep.equal({
+        'default': {
+          'itemsToWait': {
+            'ABC': undefined,
+            'DEF': undefined,
+          },
+        },
+      });
     });
   });
 

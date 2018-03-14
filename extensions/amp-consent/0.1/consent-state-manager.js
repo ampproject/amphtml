@@ -181,7 +181,7 @@ class ConsentInstance {
     return this.storagePromise_.then(storage => {
       return storage.get(this.storageKey_);
     }).then(storedValue => {
-      if (!storedValue) {
+      if (storedValue === undefined) {
         // state value undefined;
         this.localValue_ = CONSENT_ITEM_STATE.UNKNOWN;
       } else {
