@@ -40,10 +40,10 @@ export class ConsentStateManager {
     /** @private {!Object<string, ?Observable>}*/
     this.consentChangeObservable_ = {};
 
-    /** @private {!Object<string, function()>} */
+    /** @private {!Object<string, ?function()>} */
     this.consentReadyResolver_ = {};
 
-    /** @private {!Object<string, Promise>} */
+    /** @private {!Object<string, ?Promise>} */
     this.consentReadyPromise_ = {};
   }
 

@@ -352,6 +352,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/local-subscription-platform.js',
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-consent/0.1/amp-consent.js',
     ],
   },
   'getBaseCid': {

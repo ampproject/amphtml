@@ -69,7 +69,6 @@ describes.realWin('amp-consent', {
     registerServiceBuilder(win, 'storage', function() {
       return Promise.resolve({
         get: name => {
-          console.log('name is ', name, storageValue[name]);
           return Promise.resolve(storageValue[name]);
         },
         set: (name, value) => {

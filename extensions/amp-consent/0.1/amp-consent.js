@@ -40,9 +40,6 @@ export class AmpConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = null;
-
     /** @private {?./consent-state-manager.ConsentStateManager} */
     this.consentStateManager_ = null;
 
@@ -63,8 +60,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   buildCallback() {
-    this.ampdoc_ = this.getAmpDoc();
-
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
     }
@@ -72,7 +67,7 @@ export class AmpConsent extends AMP.BaseElement {
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
 
-    getServicePromiseForDoc(this.ampdoc_, CONSENT_POLICY_MANGER)
+    getServicePromiseForDoc(this.getAmpDoc(), CONSENT_POLICY_MANGER)
         .then(manager => {
           this.consentPolicyManager_ = manager;
           this.generateDefaultPolicy_();
@@ -83,7 +78,7 @@ export class AmpConsent extends AMP.BaseElement {
           }
         });
 
-    getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER)
+    getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
         .then(manager => {
           this.consentStateManager_ = manager;
           this.init_();
@@ -100,7 +95,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    this.cidPromise_ = Services.cidForDoc(this.ampdoc_).then(cid => {
+    this.cidPromise_ = Services.cidForDoc(this.getAmpDoc()).then(cid => {
       // Note: do not wait for consent of the cid used for amp-consent
       return cid.get({
         scope: TAG,

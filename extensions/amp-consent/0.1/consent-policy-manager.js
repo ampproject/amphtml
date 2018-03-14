@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {CONSENT_ITEM_STATE} from './consent-state-manager';
+import {dev} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
+const TAG = 'consent-policy-manager';
 
 /**
  * Possible consent policy state to proceed with.
@@ -33,11 +36,14 @@ export class ConsentPolicyManager {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!Object<string, !Promise>} */
-    this.policyPromise_ = {};
+    /** @private {!Object<string, ?Promise>} */
+    this.policyInstancePromise_ = {};
 
-    /** @private {!Object<string, function()>} */
-    this.policyResolver_ = {};
+    /** @private {!Object<string, ?function()>} */
+    this.policyInstancePromiseResolver_ = {};
+
+    /** @private {!Object<string, ConsentPolicyInstance>} */
+    this.instances_ = {};
 
     /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
@@ -50,46 +56,131 @@ export class ConsentPolicyManager {
    * @param {!JsonObject} config
    */
   registerConsentPolicyInstance(policyId, config) {
-    if (this.policyPromise_[policyId]) {
-      return;
+    dev().assert(!this.instances_[policyId],
+        `${TAG}: instance already registered`);
+
+    const itemsToWait = Object.keys(config['itemsToWait']);
+
+    const instance = new ConsentPolicyInstance(itemsToWait);
+
+    this.instances_[policyId] = instance;
+
+    if (this.policyInstancePromiseResolver_[policyId]) {
+      this.policyInstancePromiseResolver_[policyId]();
+      this.policyInstancePromiseResolver_[policyId] = null;
+      this.policyInstancePromise_[policyId] = null;
     }
-    this.policyPromise_ = new Promise(resolve => {
-      this.policyResolver_[policyId] = resolve;
-    });
 
-    this.initPolicy_(config);
-  }
-
-  /**
-   * Initiate consent policy instance
-   * @param {!JsonObject} config
-   */
-  initPolicy_(config) {
     this.ConsentStateManagerPromise_.then(manager => {
-      const itemsToWait = Object.keys(config['itemsToWait']);
       for (let i = 0; i < itemsToWait.length; i++) {
-        manager.whenConsentReady(itemsToWait[i]).then(() => {
-          manager.onConsentStateChange(itemsToWait[i], state => {
-            this.consentStateChangeHandler_(state);
+        const consentId = itemsToWait[i];
+        manager.whenConsentReady(consentId).then(() => {
+          manager.onConsentStateChange(consentId, state => {
+            instance.consentStateChangeHandler(consentId, state);
           });
         });
       }
     });
   }
 
-  /**
-   * Handler to check policy instance state on consent state changed.
-   * @param {*} unusedConsentState
-   */
-  consentStateChangeHandler_(unusedConsentState) {
 
+  /**
+   * Used to wait for policy to resolve;
+   * @param {string} policyId
+   * @return {!Promise}
+   */
+  whenPolicyResolved(policyId) {
+    return this.whenPolicyInstanceReady_(policyId).then(() => {
+      return this.instances_[policyId].getReadyPromise();
+    });
   }
 
   /**
-   * Returns a promise with a consent states value
-   * @param {string} unusedPolicyId
+   * Wait for policy instance to be ready.
+   * @param {string} policyId
+   * @return {!Promise}
    */
-  onPolicyInstanceResolved(unusedPolicyId) {
+  whenPolicyInstanceReady_(policyId) {
+    if (this.instances_[policyId]) {
+      return Promise.resolve();
+    }
+    if (!this.policyInstancePromise_[policyId]) {
+      this.policyInstancePromise_[policyId] = new Promise(resolve => {
+        this.policyInstancePromiseResolver_[policyId] = resolve;
+      });
+    }
+    return this.policyInstancePromise_[policyId];
+  }
+}
 
+export class ConsentPolicyInstance {
+  constructor(pendingItems) {
+    /** @private {!Array<string>} */
+    this.pendingItems_ = pendingItems;
+
+    /** @private {?function()} */
+    this.readyPromiseResolver_ = null;
+
+    /** @private {!Promise} */
+    this.readyPromise_ = new Promise(resolve => {
+      this.readyPromiseResolver_ = resolve;
+    });
+  }
+
+  /**
+   * consent instance state change handler
+   * @param {string} consentId
+   * @param {CONSENT_ITEM_STATE} state
+   */
+  consentStateChangeHandler(consentId, state) {
+    if (this.pendingItems_.indexOf(consentId) == -1) {
+      // Doesn't care about this consent instance.
+      return;
+    }
+
+    if (state == CONSENT_ITEM_STATE.GRANTED) {
+      const index = this.pendingItems_.indexOf(consentId);
+      if (index > -1) {
+        this.pendingItems_.splice(index, 1);
+      }
+    }
+
+    if (state == CONSENT_ITEM_STATE.REJECTED) {
+      const index = this.pendingItems_.indexOf(consentId);
+      if (index == -1) {
+        this.pendingItems_.push(consentId);
+      }
+    }
+
+    // We don't need to move around state UNKNOWN because it will be in pending
+    // list at first.
+    this.evaluate_();
+  }
+
+
+  evaluate_() {
+    if (this.pendingItems_.length == 0) {
+      this.readyPromiseResolver_();
+      this.readyPromiseResolver_ = null;
+    } else {
+      // It's possible user toggle state. And ready promise needs to be reset
+      // TODO: Do not reset ready promise in case of timeout
+      if (!this.readyPromiseResolver_) {
+        this.readyPromise_ = new Promise(resolve => {
+          this.readyPromiseResolver_ = resolve;
+        });
+      }
+    }
+  }
+
+  /**
+   * Return a promise that resolved when policy ready.
+   * Note: the promise can be reset if use toggle consent state
+   * @return {!Promise}
+   */
+  getReadyPromise() {
+    this.readyPromise_.then(() => {
+    });
+    return this.readyPromise_;
   }
 }
