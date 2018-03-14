@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-/** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>,
-      images: (Array<string>|undefined),
-    }} */
-export let CreativeMetaDataDef;
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-      analytics: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
-
-/** @typedef {{
-      rawCreativeBytes: !ArrayBuffer,
-      additionalContextMetadata: !JsonObject,
-      sentinel: string,
-    }} */
-export let CrossDomainDataDef;
-
 /** @typedef {{width: string, height: string}} */
 export let LayoutInfoDef;
 
@@ -60,18 +38,24 @@ export const ValidatorResult = {
   NON_AMP: 'NON_AMP',
 };
 
+/** @typedef {{
+      type: !ValidatorResult,
+      creativeData: !Object,
+    }} */
+export let ValidatorOutput;
+
 /**
  * @abstract
  */
 export class Validator {
   /**
+   * @param {!Object} unusedContext
    * @param {!ArrayBuffer} unusedUnvalidatedBytes
    * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
-   * @param {!Object} unusedContext
    * @return {!Promise<!ValidatorResult>}
    * @abstract
    */
-  validate(unusedUnvalidatedBytes, unusedHeaders, unusedContext) {}
+  validate(unusedContext, unusedUnvalidatedBytes, unusedHeaders) {}
 }
 
 /**
@@ -80,6 +64,8 @@ export class Validator {
 export class Renderer {
   /**
    * @param {!Object} unusedContext
+   * @param {!Element} containerElement
+   * @param {!Object} creativeData
    * @return {!Promise}
    * @abstract
    */

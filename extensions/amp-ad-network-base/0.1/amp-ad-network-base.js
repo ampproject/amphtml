@@ -67,6 +67,35 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.retryLimit_ = 0;
   }
 
+  /** @override */
+  buildCallback() {
+    this.initialSize_ = {
+      // TODO(levitzky) handle non-numeric values.
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+    };
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  layoutCallback() {
+    dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
+    return this.adPromise_
+        .then(response => this.invokeValidator_(response))
+        .then(validatorResult => this.invokeRenderer_(validatorResult))
+        .catch(error => this.handleFailure_(error.type, error.msg));
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    this.sendRequest_();
+  }
+
+
   /**
    * @param {!./amp-ad-type-defs.FailureType} failure
    * @param {!./amp-ad-type-defs.RecoveryModeType} recovery
@@ -127,6 +156,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * Sends ad request.
+   * @private
+   */
+  sendRequest_() {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      const url = this.getRequestUrl();
+      this.adPromise_ = sendXhrRequest(url, this.win);
+    });
+  }
+
+  /**
    * Processes the ad response as soon as the XHR request returns.
    * @param {?../../../src/service/xhr-impl.FetchResponse} response
    * @return {!Promise}
@@ -141,12 +181,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
           || 'default';
       dev().assert(this.validators_[validatorType],
           'Validator never registered!');
-      try {
-        return this.validators_[validatorType].validate(
-            unvalidatedBytes, response.headers, this.context_);
-      } catch (err) {
-        return Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err});
-      }
+      return this.validators_[validatorType].validate(
+          unvalidatedBytes, response.headers, this.context_)
+          .catch(err =>
+            Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err}));
     });
   }
 
@@ -158,11 +196,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   invokeRenderer_(validatorResult) {
     const renderer = this.renderers_[validatorResult];
     dev().assert(renderer, 'Renderer for AMP creatives never registered!');
-    try {
-      return renderer.render(this.context_);
-    } catch (err) {
-      return Promise.reject({type: FailureType.RENDERER_ERROR, msg: err});
-    }
+    return renderer.render(this.context_).catch(err =>
+      Promise.reject({type: FailureType.RENDERER_ERROR, msg: err}));
   }
 
   /**
@@ -195,44 +230,5 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   forceCollapse_() {
     this.attemptChangeSize(0, 0);
-  }
-
-  /**
-   * Sends ad request.
-   * @private
-   */
-  sendRequest_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      const url = this.getRequestUrl();
-      this.adPromise_ = sendXhrRequest(url, this.win);
-    });
-  }
-
-  /** @override */
-  buildCallback() {
-    this.initialSize_ = {
-      // TODO(levitzky) handle non-numeric values.
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-    };
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  layoutCallback() {
-    dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
-    return this.adPromise_
-        .then(response => this.invokeValidator_(response))
-        .then(validatorResult => this.invokeRenderer_(validatorResult))
-        .catch(error => this.handleFailure_(error.type, error.msg));
-  }
-
-  /** @override */
-  onLayoutMeasure() {
-    this.sendRequest_();
   }
 }
