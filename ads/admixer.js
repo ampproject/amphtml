@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,5 +39,6 @@ export function admixer(global, data) {
     imp.sizes = tryParseJson(data.sizes);
   }
   payload.imps.push(imp);
-  writeScript(global, 'https://inv-nets.admixer.net/ampsrc.js?data=' + JSON.stringify(/** @type {JsonObject} */ (payload)));
+  const json = JSON.stringify(/** @type {JsonObject} */ (payload));
+  writeScript(global, 'https://inv-nets.admixer.net/ampsrc.js?data=' + json);
 }

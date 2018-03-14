@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ limitations under the License.
 
 ```html
 <amp-ad width="300" height="250"
-          type="admixer"
-          data-sizes="[[300,250]]"
-          data-zone="2eb6bd58-865c-47ce-af7f-a918108c3fd2">
-  </amp-ad>
+    type="admixer"
+    data-sizes="[[300,250]]"
+    data-zone="2eb6bd58-865c-47ce-af7f-a918108c3fd2">
+</amp-ad>
 ```
 
 ## Configuration
