@@ -96,7 +96,9 @@ function screenProperty(screen, property) {
  * @return {!SyncResolverDef}
  */
 function viewportMethod(viewport, method) {
-  return () => viewport[method]();
+  // Convert to object to allow dynamic access.
+  dev().assert(/** @type {!Object} */(viewport)[method]);
+  return () => /** @type {!Object} */(viewport)[method]();
 }
 
 /**
