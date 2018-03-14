@@ -44,8 +44,10 @@ export class LocalSubscriptionPlatformRenderer {
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   render(renderState) {
-    this.renderActions_(renderState);
-    this.dialogRenderer_.render(/** @type {!JsonObject} */(renderState));
+    return Promise.all([
+      this.renderActions_(renderState),
+      this.dialogRenderer_.render(/** @type {!JsonObject} */(renderState)),
+    ]);
   }
 
   /**

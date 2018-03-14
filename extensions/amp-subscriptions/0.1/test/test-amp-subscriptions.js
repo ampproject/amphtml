@@ -42,6 +42,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
+        pingbackUrl: 'https://lipsum.com/pingback',
       },
       {
         serviceId: 'google.subscription',
@@ -97,12 +98,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factorySpy = sandbox.stub().callsFake(() => Promise.resolve());
-    subscriptionService.registerPlatform(serviceData.serviceId, factorySpy);
+    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
+    subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
     return subscriptionService.initialize_().then(() => {
-      expect(factorySpy).to.be.calledOnce;
-      expect(factorySpy.getCall(0).args[0]).to.be.equal(serviceData);
-      expect(factorySpy.getCall(0).args[1]).to.be.equal(
+      expect(factoryStub).to.be.calledOnce;
+      expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
+      expect(factoryStub.getCall(0).args[1]).to.be.equal(
           subscriptionService.serviceAdapter_);
     });
   });
@@ -137,6 +138,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
       subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
         sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
             .callsFake(() => Promise.resolve());
