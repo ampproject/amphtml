@@ -118,6 +118,9 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
   }
 
   /**
@@ -143,15 +146,10 @@ export class SystemLayer {
 
     this.addEventHandlers_();
 
-    // The icon won't flash since this promise should be resolved instantly, but
-    // it is necessary to prevent any race condition.
-    Services.storyStoreServiceForOrNull(this.win_).then(storeService => {
-      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
-      // TODO(newmuis): Observe this value.
-      if (!storeService.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
-        this.root_.classList.add('i-amphtml-story-ui-no-buttons');
-      }
-    });
+    // TODO(newmuis): Observe this value.
+    if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
+      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+    }
 
     return this.getRoot();
   }

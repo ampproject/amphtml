@@ -251,6 +251,10 @@ export class AmpStory extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private @const {!AmpStoryStoreService} */
+    this.storeService_ = new AmpStoryStoreService(this.win);
+    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(element, () => this.hasBookend_());
@@ -275,6 +279,8 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
+    registerServiceBuilder(
+        this.win, 'story-variable', () => this.variableService_.get());
 
     /** @private @const {!function():!Promise<?./bookend.BookendConfigDef>} */
     this.loadBookendConfig_ = once(() => this.loadBookendConfigImpl_());
@@ -318,9 +324,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
-
-    /** @private @const {!AmpStoryStoreService} */
-    this.storeService_ = new AmpStoryStoreService(this.win);
   }
 
 
@@ -348,11 +351,6 @@ export class AmpStory extends AMP.BaseElement {
 
     // Mute `amp-story` in beginning.
     this.mute_();
-
-    registerServiceBuilder(this.win, 'story-variable',
-        () => this.variableService_.get());
-
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
   }
 
 

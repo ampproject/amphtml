@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {ProgressBar} from '../progress-bar';
-import {Services} from '../../../../src/services';
+import {Services, registerServiceBuilder} from '../../../../src/services';
 import {SystemLayer} from '../system-layer';
 
 
@@ -30,6 +30,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
   beforeEach(() => {
     win = env.win;
 
+    registerServiceBuilder(win, 'story-store', () => ({get: NOOP}));
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {

@@ -26,7 +26,6 @@ describes.fakeWin('amp-story-store-service', {}, env => {
   let storeService;
 
   beforeEach(() => {
-    win = env.win;
     // Making sure we always get a new instance to isolate each test.
     storeService = new AmpStoryStoreService(env.win);
   });
