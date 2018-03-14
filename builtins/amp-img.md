@@ -142,19 +142,11 @@ amp-img {
 If you want your image to scale as the window is resized but up to a maximum width (so the image doesn't stretch beyond its width):
 
 1. Set `layout=responsive` for `<amp-img>`.
-<<<<<<< HEAD
-2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.
-=======
 2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.  Why on the container?  An `amp-img` element with `layout=responsive` is a *block-level* element, whereas, `<img>` is *inline*. Alternatively, you could set `display: inline-block` in your CSS for the amp-img element.
 
-#### Understanding responsive vs intrinsic layout
+#### The difference between responsive and intrinsic layout
 
-<<<<<<< HEAD
 Both the `responsive` and `intrinsic` layouts create an image that will scale automatically.  The main difference is that the `intrinsic` layout uses an SVG image as it's scaling element.  This will make it behave in the same way as a standard html image while retaining the benifit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` becasue it takes its size from the parent which in a float has no natural size.
->>>>>>> Intrinsic layout
-=======
-Both the `responsive` and `intrinsic` layouts create an image that will scale automatically. The main difference is that the `intrinsic` layout uses an SVG image as it's scaling element.  This will make it behave in the same way as a standard html image while retaining the benefit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` because it takes its size from the parent which in a float has no natural size.
->>>>>>> Update amp-img.md
 
 #### Setting a fixed sized image
 
