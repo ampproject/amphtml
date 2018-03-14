@@ -64,7 +64,6 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
       });
-      console.log(unrelated.innerHTML);
       elements = [
         actions1, actions2,
       ];
