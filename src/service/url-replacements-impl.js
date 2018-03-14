@@ -49,6 +49,10 @@ const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @private @const {Object<string, boolean>} */
+const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
+
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
 
@@ -244,6 +248,18 @@ export class GlobalVariableSource extends VariableSource {
       return getTrackImpressionPromise().then(() => {
         return this.getQueryParamData_(param, defaultValue);
       });
+    });
+
+    this.setBoth('FRAGMENT_PARAM', (param, defaultValue = '') => {
+      return this.getFragmentParamData_(param, defaultValue);
+    }, (param, defaultValue = '') => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getFragmentParamData_(param, defaultValue);
+      });
+    });
+
+    this.set('ANCESTOR_ORIGIN', () => {
+      return document.location.ancestorOrigins[0];
     });
 
     /**
@@ -594,6 +610,24 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
+   * Return the FRAGMENT_PARAM from the original location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   * @private
+   */
+  getFragmentParamData_(param, defaultValue) {
+    user().assert(param,
+        'The first argument to FRAGMENT_PARAM, the fragment string ' +
+        'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
+    const hash = this.ampdoc.win.location.originalHash;
+    const params = parseQueryString(hash);
+    return (typeof params[param] !== 'undefined')
+      ? params[param] : defaultValue;
+  }
+
+  /**
    * Resolves the value via amp-experiment's variants service.
    * @param {function(!Object<string, string>):(?string)} getter
    * @param {string} expr
@@ -894,7 +928,7 @@ export class UrlReplacements {
     // additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended.
     // #2: If the expansion function is not whitelisted:
-    // addionalUrlParamters will not be expanded,
+    // additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
@@ -1005,7 +1039,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return NOENCODE_WHITELIST[match] ? val : encodeValue(val);
     });
 
     if (replacementPromise) {
