@@ -15,6 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -29,12 +30,14 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     'login': 'https://lipsum.com/login',
   };
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
+  const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
     'services': [
       {
         'serviceId': 'local',
         'authorizationUrl': authUrl,
         'actions': actionMap,
+        'pingbackUrl': pingbackUrl,
       },
     ],
   };
@@ -122,6 +125,38 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
       localSubscriptionPlatform.activate();
       expect(renderStub).to.be.calledOnce;
+    });
+  });
+
+  describe('pingback', () => {
+    it('should call `sendSignal` to the pingback signal', () => {
+      const service = 'sample-service';
+      const source = 'sample-source';
+      const products = ['scenic-2017.appspot.com:news',
+        'scenic-2017.appspot.com:product2'];
+      const subscriptionToken = 'token';
+      const loggedIn = true;
+      const json = {
+        service,
+        source,
+        products,
+        subscriptionToken,
+        loggedIn,
+      };
+      const entitlement = Entitlement.parseFromJson(json);
+      const urlBuildStub =
+          sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
+              .callsFake(() => Promise.resolve(pingbackUrl));
+      const sendSignalStub =
+          sandbox.stub(localSubscriptionPlatform.xhr_, 'sendSignal');
+      return localSubscriptionPlatform.pingback(entitlement).then(() => {
+        expect(urlBuildStub).to.be.calledOnce;
+        expect(sendSignalStub).to.be.calledOnce;
+        expect(sendSignalStub.getCall(0).args[0]).to.be
+            .equal(localSubscriptionPlatform.pingbackUrl_);
+        expect(sendSignalStub.getCall(0).args[1].body).to.deep
+            .equal(entitlement.raw);
+      });
     });
   });
 });
