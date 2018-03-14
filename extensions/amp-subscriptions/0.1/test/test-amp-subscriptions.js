@@ -157,6 +157,24 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
         });
       });
     });
+    it('should select local as default platform if everyone denies '
+        + 'user as subscriber', () => {
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      return subscriptionService.initialize_().then(() => {
+        sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+            .callsFake(() => Promise.resolve());
+        sandbox.stub(subscriptionService.entitlementStore_, 'selectPlatform')
+            .callsFake(() => Promise.resolve(undefined));
+        const localPlatform =
+          subscriptionService.subscriptionPlatforms_['local'];
+        expect(localPlatform).to.be.not.null;
+        const activateStub = sandbox.stub(localPlatform, 'activate');
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(activateStub).to.be.calledOnce;
+        });
+      });
+    });
   });
 
   describe('startAuthorizationFlow_', () => {

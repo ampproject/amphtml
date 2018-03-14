@@ -282,7 +282,17 @@ export class SubscriptionService {
         };
         selectedPlatform.activate(renderState);
       } else {
+        // local is the default platform is nothing is selected
         selectedPlatform = this.subscriptionPlatforms_['local'];
+        const entitlement = Entitlement.empty('local');
+        /** @type {!RenderState} */
+        const renderState = {
+          entitlement: entitlement.json(),
+          loggedIn: entitlement.loggedIn,
+          subscribed: !!entitlement.subscriptionToken,
+          granted: grantState,
+        };
+        selectedPlatform.activate(renderState);
       }
 
       this.viewTrackerPromise_.then(() => {
