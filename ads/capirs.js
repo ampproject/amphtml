@@ -26,11 +26,13 @@ export function capirs(global, data) {
 
   if (data['customCss']) {
     const style = window.document.createElement('style');
+
     if (style.styleSheet) {
       style.styleSheet.cssText = data['customCss'];
     } else {
       style.appendChild(document.createTextNode(data['customCss']));
     }
+
     global.document.body.appendChild(style);
   }
 
@@ -39,7 +41,9 @@ export function capirs(global, data) {
       init: () => {
         const block = global.document.createElement('div');
         block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
-        document.body.appendChild(block);
+
+        const container = document.getElementById('c') || document.body;
+        container.appendChild(block);
 
         global['Adf']['banner']['ssp'](block.id, data['params'], {
           'begun-auto-pad': data['begunAutoPad'],
@@ -50,10 +54,12 @@ export function capirs(global, data) {
     block: {
       draw: feed => {
         const banner = feed['banners']['graph'][0];
+
         window.context.renderStart({
           width: banner['width'],
           height: banner['height'],
         });
+
         const reportId = 'capirs-' + banner['banner_id'];
         window.context.reportRenderedEntityIdentifier(reportId);
       },
