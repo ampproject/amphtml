@@ -31,7 +31,7 @@ const shortenLicense = require('../shorten-license');
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = process.env.Travis ? 2 : 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
