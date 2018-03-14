@@ -217,7 +217,7 @@ export class AmpLiveList extends AMP.BaseElement {
         actualCount);
 
     if (isExperimentOn(this.win, 'amp-live-list-sorting')) {
-      this.isReverseOrder_ = this.element.hasAttribute('reverse');
+      this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
     }
 
     this.manager_.register(this.liveListId_, this);

@@ -9575,9 +9575,9 @@ sinon-chai@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.0.0.tgz#d5cbd70fa71031edd96b528e0eed4038fcc99f29"
 
-sinon@4.4.4:
-  version "4.4.4"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.4.4.tgz#113199a29ece8a394ea71bac77c5db0a4733c9b5"
+sinon@4.4.5:
+  version "4.4.5"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-4.4.5.tgz#b625f992f0f0998d068a270c34e8f50ddcfd846b"
   dependencies:
     "@sinonjs/formatio" "^2.0.0"
     diff "^3.1.0"
@@ -10962,9 +10962,9 @@ wd@^1.4.0:
     underscore.string "3.3.4"
     vargs "0.1.0"
 
-web-activities@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.2.0.tgz#9e290ef358af7407b3708c984f96077469f214a5"
+web-activities@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.5.0.tgz#64363baed86c415c8698d8fb181973f72c742b47"
   dependencies:
     promise-pjs "1.1.3"
 
