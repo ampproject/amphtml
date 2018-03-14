@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-52536e3 */
+ /** Version: 0.1.21-52536000 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -2040,7 +2040,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://subscribe-autopush.sandbox.google.com').origin;
+  return parseUrl('https://subscribe.sandbox.google.com').origin;
 }
 
 
@@ -2049,7 +2049,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://subscribe-autopush.sandbox.google.com/swg/_/api/v1' + url;
+  return 'https://subscribe.sandbox.google.com/swg/_/api/v1' + url;
 }
 
 
@@ -2060,7 +2060,7 @@ function serviceUrl(url) {
  */
 function feUrl(url, prefix = '') {
   return addQueryParam(
-      'https://subscribe-autopush.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
+      'https://subscribe.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
       '_', cacheParam('hr1'));
 }
 
@@ -3314,8 +3314,8 @@ class PayStartFlow {
         feArgs({
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
-          'environment': '',
-          'playEnvironment': '',
+          'environment': 'PRODUCTION',
+          'playEnvironment': 'AUTOPUSH',
           'swg': {
             'publicationId': this.pageConfig_.getPublicationId(),
             'skuId': this.sku_,
