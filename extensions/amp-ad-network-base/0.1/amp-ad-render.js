@@ -84,7 +84,7 @@ export class FriendlyFrameRenderer extends Renderer {
   /** @override */
   render(context, element, creativeData) {
 
-    const creativeMetaData = /** @type {!CreativeMetadataDef} */ (
+    const creativeMetaData = /** @type {!CreativeMetaDataDef} */ (
       creativeData.creativeMetadata);
     const size = context.size;
     const adUrl = context.requestUrl;
@@ -220,8 +220,8 @@ export class TemplateValidator extends Validator {
 
   /**
    * @param {string} templateString
-   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
-   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
+   * @param {!AmpTemplateCreativeDef} parsedResponseBody
+   * @return {!CreativeMetaDataDef}
    * @private
    */
   getAmpAdMetadata_(templateString, parsedResponseBody) {
@@ -230,7 +230,7 @@ export class TemplateValidator extends Validator {
     // by more sophisticated logic.
     const minifiedCreative = templateString.replace(
         /<script async.+?<\/script>/g, '');
-    const metadata = /** @type {?./amp-ad-type-defs.CreativeMetaDataDef} */ ({
+    const metadata = /** @type {!CreativeMetaDataDef} */ ({
       minifiedCreative,
       customElementExtensions: [],
       extensions: [],
@@ -243,7 +243,7 @@ export class TemplateValidator extends Validator {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
+   * @param {!CreativeMetaDataDef} metadata
    * @param {!Window} win
    * @private
    */
@@ -265,7 +265,7 @@ export class TemplateValidator extends Validator {
     }
 
     const parsedResponseBody =
-        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        /** @type {!AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
     this.ampAdTemplates_ = this.ampAdTemplates_ ||
         new AmpAdTemplates(context.win);
