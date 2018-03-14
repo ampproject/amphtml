@@ -186,7 +186,7 @@ within this `amp-list`. This must be a CORS HTTP service. The URL's protocol mus
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
-The `src` attribute may be ommitted if the `[src]` attribute exists. This is useful when rendering content as a result of a user gesture instead of on page load when working with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
+The `src` attribute may be omitted if the `[src]` attribute exists. This is useful when rendering content as a result of a user gesture instead of on page load when working with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
 
 ##### credentials (optional)
 

@@ -75,7 +75,7 @@ tags: {  # <amp-list> with mandatory [src] attr
   html_format: AMP
   html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
-  spec_name: "AMP-LIST-[SRC]"
+  spec_name: "AMP-LIST [SRC]"
   requires_extension: "amp-list"
   attrs: { name: "credentials" }
   attrs: { name: "items" }
