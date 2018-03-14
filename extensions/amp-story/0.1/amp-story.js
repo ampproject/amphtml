@@ -354,7 +354,7 @@ export class AmpStory extends AMP.BaseElement {
     this.mute_();
 
     registerServiceBuilder(this.win, 'story-variable',
-        () => this.variableService_);
+        () => this.variableService_.get());
   }
 
 

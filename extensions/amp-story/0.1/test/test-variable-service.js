@@ -33,7 +33,8 @@ describes.fakeWin('amp-story variable service', {}, () => {
       },
     });
 
-    expect(variableService.pageIndex).to.equal(123);
-    expect(variableService.pageId).to.equal('my-page-id');
+    const variables = variableService.get();
+    expect(variables.pageIndex).to.equal(123);
+    expect(variables.pageId).to.equal('my-page-id');
   });
 });
