@@ -1134,6 +1134,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const thumbnails = [];
     this.manager_.getThumbnails(this.currentLightboxGroupId_)
         .forEach(thumbnail => {
+          // Don't include thumbnails for ads, this may be subject to
+          // change pending user feedback or ux experiments after launch
+          if (thumbnail.element.tagName == 'AMP-AD') {
+            return;
+          }
           const thumbnailElement = this.createThumbnailElement_(thumbnail);
           thumbnails.push(thumbnailElement);
         });
