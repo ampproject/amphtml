@@ -212,6 +212,11 @@ export class ViewportBindingInabox {
     return this.getBodyElement();
   }
 
+  /** @override */
+  supportsPositionFixed() {
+    return true;
+  }
+
   /**
    * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
