@@ -288,6 +288,19 @@ export class LayoutLayers {
   }
 
   /**
+   * Dirties the element's parent layer, so remeasures will happen.
+   *
+   * @parent {!Element} node
+   */
+  dirty(node) {
+    // Find a parent layer, or fall back to the root scrolling layer in cases
+    // where the node is the scrolling layer (which doesn't have a parent).
+    const layer = LayoutElement.getParentLayer(node) ||
+        LayoutElement.for(this.scrollingElement_);
+    layer.dirtyMeasurements();
+  }
+
+  /**
    * Eagerly creates a Layer for the element.
    *
    * @param {!Element} element
