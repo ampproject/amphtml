@@ -49,13 +49,13 @@ export let ValidatorOutput;
  */
 export class Validator {
   /**
-   * @param {!Object} unusedContext
-   * @param {!ArrayBuffer} unusedUnvalidatedBytes
-   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
+   * @param {!Object} context
+   * @param {!ArrayBuffer} unvalidatedBytes
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
    * @return {!Promise<!ValidatorResult>}
    * @abstract
    */
-  validate(unusedContext, unusedUnvalidatedBytes, unusedHeaders) {}
+  validate(context, unvalidatedBytes, headers) {}
 }
 
 /**
@@ -63,11 +63,11 @@ export class Validator {
  */
 export class Renderer {
   /**
-   * @param {!Object} unusedContext
+   * @param {!Object} context
    * @param {!Element} containerElement
    * @param {!Object} creativeData
    * @return {!Promise}
    * @abstract
    */
-  render(unusedContext) {}
+  render(context, containerElement, creativeData) {}
 }
