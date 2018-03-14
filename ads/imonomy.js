@@ -124,7 +124,7 @@ function reportStats(data, code) {
       }
     }
 
-    xhttp.open('POST', unitCodeUrl, true);
+    xhttp.open('GET', unitCodeUrl, true);
     xhttp.setRequestHeader('Content-Type', 'application/json');
     xhttp.send();
 
