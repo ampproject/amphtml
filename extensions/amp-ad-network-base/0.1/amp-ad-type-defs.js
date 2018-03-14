@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-/** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>,
-      images: (Array<string>|undefined),
-    }} */
-export let CreativeMetaDataDef;
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-      analytics: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
-
-/** @typedef {{
-      rawCreativeBytes: !ArrayBuffer,
-      additionalContextMetadata: !JsonObject,
-      sentinel: string,
-    }} */
-export let CrossDomainDataDef;
-
 /** @typedef {{width: string, height: string}} */
 export let LayoutInfoDef;
 
@@ -60,16 +38,24 @@ export const ValidatorResult = {
   NON_AMP: 'NON_AMP',
 };
 
+/** @typedef {{
+      type: !ValidatorResult,
+      creativeData: !Object,
+    }} */
+export let ValidatorOutput;
+
 /**
  * @abstract
  */
 export class Validator {
   /**
-   * @param {!./amp-ad-context.AmpAdContext} unusedContext
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @param {!Object} unusedContext
+   * @param {!ArrayBuffer} unusedUnvalidatedBytes
+   * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} unusedHeaders
+   * @return {!Promise<!ValidatorResult>}
    * @abstract
    */
-  validate(unusedContext) {}
+  validate(unusedContext, unusedUnvalidatedBytes, unusedHeaders) {}
 }
 
 /**
@@ -77,10 +63,11 @@ export class Validator {
  */
 export class Renderer {
   /**
-   * @param {!./amp-ad-context.AmpAdContext} unusedContext
-   * @param {!./amp-ad-network-base.AmpAdNetworkBase} unusedBaseInstance
-   * @return {!Promise<!./amp-ad-context.AmpAdContext>}
+   * @param {!Object} unusedContext
+   * @param {!Element} unusedContainerElement
+   * @param {!Object} unusedCreativeData
+   * @return {!Promise}
    * @abstract
    */
-  render(unusedContext, unusedBaseInstance) {}
+  render(unusedContext, unusedContainerElement, unusedCreativeData) {}
 }

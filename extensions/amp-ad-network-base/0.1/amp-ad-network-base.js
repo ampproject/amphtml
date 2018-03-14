@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpAdContext} from './amp-ad-context';
 import {
   FailureType,
   RecoveryModeType,
@@ -35,7 +34,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @pricate {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
+    /** @private {?Promise<!../../../src/service/xhr-impl.FetchResponse>} */
     this.adPromise_ = null;
 
     /** @private {Object<string, !./amp-ad-type-defs.Validator>} */
@@ -50,15 +49,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?./amp-ad-type-defs.LayoutInfoDef} */
     this.initialSize_ = null;
 
-    /** @const @private {!AmpAdContext} */
-    this.context_ = new AmpAdContext(this.win);
-
-    /**
-     * When true, indicates that the renderer and validator should not be
-     * freed (e.g., for refreshable implementations).
-     * @private {boolean}
-     */
-    this.isReusable_ = false;
+    /** @const @private {!Object} */
+    this.context_ = {};
 
     // Register default error modes.
     for (const failureType in FailureType) {
@@ -72,9 +64,38 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.retryLimit_ = 0;
   }
 
+  /** @override */
+  buildCallback() {
+    this.initialSize_ = {
+      // TODO(levitzky) handle non-numeric values.
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+    };
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  layoutCallback() {
+    dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
+    return this.adPromise_
+        .then(response => this.invokeValidator_(response))
+        .then(validatorResult => this.invokeRenderer_(validatorResult))
+        .catch(error => this.handleFailure_(error.type, error.msg));
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    this.sendRequest_();
+  }
+
+
   /**
-   * @param {string} failure
-   * @param {string} recovery
+   * @param {!./amp-ad-type-defs.FailureType} failure
+   * @param {!./amp-ad-type-defs.RecoveryModeType} recovery
    * @final
    */
   onFailure(failure, recovery) {
@@ -110,6 +131,14 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
+   * @param {string} name
+   * @param {*} value
+   */
+  setContextField(name, value) {
+    this.context_[name] = value;
+  }
+
+  /**
    * @return {string} The finalized ad request URL.
    * @protected
    * @abstract
@@ -118,14 +147,20 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     // Subclass must override.
   }
 
-  /** @param {boolean} isReusable */
-  setIsReusable(isReusable) {
-    this.isReusable_ = isReusable;
-  }
-
   /** @param {number} retries */
   setRequestRetries(retries) {
     this.retryLimit_ = retries;
+  }
+
+  /**
+   * Sends ad request.
+   * @private
+   */
+  sendRequest_() {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      const url = this.getRequestUrl();
+      this.adPromise_ = sendXhrRequest(url, this.win);
+    });
   }
 
   /**
@@ -141,36 +176,31 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     return response.arrayBuffer().then(unvalidatedBytes => {
       const validatorType = response.headers.get('AMP-Ad-Response-Type')
           || 'default';
-      this.context_
-          .setUnvalidatedBytes(unvalidatedBytes)
-          .setHeaders(response.headers);
       dev().assert(this.validators_[validatorType],
           'Validator never registered!');
-      try {
-        return this.validators_[validatorType].validate(this.context_);
-      } catch (err) {
-        return Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err});
-      }
+      return this.validators_[validatorType].validate(
+          this.context_, unvalidatedBytes, response.headers)
+          .catch(err =>
+            Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err}));
     });
   }
 
   /**
+   * @param {!./amp-ad-type-defs.ValidatorOutput} validatorResult
    * @return {!Promise}
    * @private
    */
-  invokeRenderer_() {
-    const rendererType = this.context_.getValidatorResult();
-    const renderer = this.renderers_[rendererType];
+  invokeRenderer_(validatorOutput) {
+    const renderer = this.renderers_[validatorOutput.type];
     dev().assert(renderer, 'Renderer for AMP creatives never registered!');
-    try {
-      return renderer.render(this.context_, this);
-    } catch (err) {
-      return Promise.reject({type: FailureType.RENDERER_ERROR, msg: err});
-    }
+    return renderer.render(
+        this.context_, this.element, validatorOutput.creativeData)
+        .catch(err =>
+          Promise.reject({type: FailureType.RENDERER_ERROR, msg: err}));
   }
 
   /**
-   * @param {string} failureType
+   * @param {!./amp-ad-type-defs.FailureType} failureType
    * @param {*=} error
    * @private
    */
@@ -199,46 +229,5 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   forceCollapse_() {
     this.attemptChangeSize(0, 0);
-  }
-
-  /**
-   * Sends ad request.
-   * @private
-   */
-  sendRequest_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      const url = this.getRequestUrl();
-      this.context_.setRequestUrl(url);
-      this.adPromise_ = sendXhrRequest(url, this.win);
-    });
-  }
-
-  /** @override */
-  buildCallback() {
-    this.initialSize_ = {
-      // TODO(levitzky) handle non-numeric values.
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
-    };
-    this.context_.setSize(this.initialSize_);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  layoutCallback() {
-    dev().assert(this.adPromise_, 'layoutCallback invoked before XHR request!');
-    return this.adPromise_
-        .then(response => this.invokeValidator_(response))
-        .then(() => this.invokeRenderer_())
-        .catch(error => this.handleFailure_(error.type, error.msg));
-  }
-
-  /** @override */
-  onLayoutMeasure() {
-    this.sendRequest_();
   }
 }
