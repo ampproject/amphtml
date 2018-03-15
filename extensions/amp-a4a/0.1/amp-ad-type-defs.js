@@ -44,7 +44,7 @@ export const ValidatorResult = {
 
 /** @typedef {{
       type: !ValidatorResult,
-      adResponseType: string
+      adResponseType: string,
       creativeData: !Object,
     }} */
 export let ValidatorOutput;
