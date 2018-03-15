@@ -279,6 +279,9 @@ FB.init;
 var gist;
 gist.gistid;
 
+var bodymovin
+bodymovin.loadAnimation
+
 // Validator
 var amp;
 amp.validator;
