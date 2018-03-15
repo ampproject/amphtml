@@ -479,6 +479,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace TIMEZONE_CODE', () => {
+    return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
+      expect(res).to.match(/tz_code=\w+|^$/);
+    });
+  });
+
   it('should replace SCROLL_TOP', () => {
     return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       expect(res).to.match(/scrollTop=\d+/);
