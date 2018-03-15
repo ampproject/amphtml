@@ -481,7 +481,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace TIMEZONE_CODE', () => {
     return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
-      expect(res).to.match(/tz_code=\w+/);
+      expect(res).to.match(/tz_code=\w+|^$/);
     });
   });
 
