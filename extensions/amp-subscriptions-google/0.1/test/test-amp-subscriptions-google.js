@@ -32,6 +32,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let platform;
   let serviceAdapter;
   let serviceAdapterMock;
+  let viewer;
   let xhr;
   let callbacks;
   let methods;
@@ -40,6 +41,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     ampdoc = env.ampdoc;
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = sandbox.mock(serviceAdapter);
     sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
@@ -144,8 +147,19 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock.expects('delegateActionToLocal')
         .withExactArgs('login')
+        .returns(Promise.resolve(false))
         .once();
     callback(callbacks.loginRequest)({linkRequested: false});
+    expect(methods.linkAccount).to.not.be.called;
+  });
+
+  it('should delegate login for a non-google viewer', () => {
+    platform.isGoogleViewer_ = false;
+    serviceAdapterMock.expects('delegateActionToLocal')
+        .withExactArgs('login')
+        .returns(Promise.resolve(false))
+        .once();
+    callback(callbacks.loginRequest)({linkRequested: true});
     expect(methods.linkAccount).to.not.be.called;
   });
 
@@ -176,7 +190,82 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock.expects('delegateActionToLocal')
         .withExactArgs('subscribe')
+        .returns(Promise.resolve(false))
         .once();
     callback(callbacks.subscribeRequest)();
+  });
+
+  it('should reset on successful login', () => {
+    const loginResult = Promise.resolve(true);
+    serviceAdapterMock.expects('delegateActionToLocal')
+        .withExactArgs('login')
+        .returns(loginResult)
+        .once();
+    callback(callbacks.loginRequest)({linkRequested: false});
+    return loginResult.then(() => {
+      expect(methods.reset).to.be.calledOnce.calledWithExactly();
+    });
+  });
+
+  it('should NOT reset on failed login', () => {
+    const loginResult = Promise.resolve(false);
+    serviceAdapterMock.expects('delegateActionToLocal')
+        .withExactArgs('login')
+        .returns(loginResult)
+        .once();
+    callback(callbacks.loginRequest)({linkRequested: false});
+    return loginResult.then(() => {
+      expect(methods.reset).to.not.be.called;
+    });
+  });
+
+  it('should reset on successful subscribe', () => {
+    const loginResult = Promise.resolve(true);
+    serviceAdapterMock.expects('delegateActionToLocal')
+        .withExactArgs('subscribe')
+        .returns(loginResult)
+        .once();
+    callback(callbacks.subscribeRequest)();
+    return loginResult.then(() => {
+      expect(methods.reset).to.be.calledOnce.calledWithExactly();
+    });
+  });
+
+  it('should infer the viewer from viewerUrl', () => {
+    delete viewer.params_['viewerUrl'];
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    expect(platform.isGoogleViewer_).to.be.false;
+
+    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    expect(platform.isGoogleViewer_).to.be.true;
+  });
+
+  it('should infer the viewer from origin', () => {
+    delete viewer.params_['viewerUrl'];
+    let viewerOrigin = null;
+    sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
+
+    return Promise.resolve().then(() => {
+      viewerOrigin = Promise.resolve('');
+      platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+      return viewerOrigin;
+    }).then(() => {
+      expect(platform.isGoogleViewer_).to.be.false;
+
+      // Other origin.
+      viewerOrigin = Promise.resolve('https://other.com');
+      platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+      return viewerOrigin;
+    }).then(() => {
+      expect(platform.isGoogleViewer_).to.be.false;
+
+      // Google origin.
+      viewerOrigin = Promise.resolve('https://google.com');
+      platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+      return viewerOrigin;
+    }).then(() => {
+      expect(platform.isGoogleViewer_).to.be.true;
+    });
   });
 });

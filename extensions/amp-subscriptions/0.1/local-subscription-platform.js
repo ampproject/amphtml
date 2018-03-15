@@ -166,7 +166,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Executes action for the local platform.
    * @param {string} action
-   * @returns {!Promise}
+   * @returns {!Promise<boolean>}
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
@@ -174,7 +174,7 @@ export class LocalSubscriptionPlatform {
       if (result) {
         this.serviceAdapter_.reAuthorizePlatform(this);
       }
-      return result;
+      return !!result;
     });
   }
 
