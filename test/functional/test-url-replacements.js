@@ -805,6 +805,24 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace ANCESTOR_ORIGIN', () => {
+    const win = getFakeWindow();
+    win.location = {ancestorOrigins: ['http://margarine-paradise.com'],};
+    return Services.urlReplacementsForDoc(win.ampdoc)
+	.expandUrlAsync('ANCESTOR_ORIGIN/recipes').then(res => {
+      expect(res).to.equal('http://margarine-paradise.com/recipes');
+    });
+  });
+
+  it('should replace FRAGMENT_PARAM with 2', () => {
+    const win = getFakeWindow();
+    win.location = {originalHash: '#margarine=1&ice=2&cream=3',};
+    return Services.urlReplacementsForDoc(win.ampdoc)
+	.expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s').then(res => {
+      expect(res).to.equal('?sh=2&s');
+    });
+  });
+
   it('should accept $expressions', () => {
     return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');

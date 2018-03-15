@@ -250,16 +250,12 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
-    this.setBoth('FRAGMENT_PARAM', (param, defaultValue = '') => {
+    this.set('FRAGMENT_PARAM', (param, defaultValue = '') => {
       return this.getFragmentParamData_(param, defaultValue);
-    }, (param, defaultValue = '') => {
-      return getTrackImpressionPromise().then(() => {
-        return this.getFragmentParamData_(param, defaultValue);
-      });
     });
 
     this.set('ANCESTOR_ORIGIN', () => {
-      return document.location.ancestorOrigins[0];
+      return this.ampdoc.win.location.ancestorOrigins[0];
     });
 
     /**
