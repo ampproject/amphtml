@@ -18,7 +18,9 @@ before_script:
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
   - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
-after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
+after_script:
+  - ./node_modules/.bin/greenkeeper-lockfile-upload
+  - cat chromedriver.log
 branches:
   only:
     - master
