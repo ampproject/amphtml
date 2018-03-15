@@ -147,6 +147,11 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  supportsPositionFixed() {
+    return true;
+  }
+
+  /** @override */
   onScroll(callback) {
     this.scrollObservable_.add(callback);
   }

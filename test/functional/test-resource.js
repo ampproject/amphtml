@@ -158,6 +158,9 @@ describes.realWin('Resource', {amp: true}, env => {
       isDeclaredFixed() {
         return false;
       },
+      supportsPositionFixed() {
+        return true;
+      },
     };
     resource.resources_.getViewport = () => viewport;
     expect(() => {
