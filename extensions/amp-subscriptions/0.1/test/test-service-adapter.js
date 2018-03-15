@@ -52,10 +52,13 @@ env => {
 
   describe('delegateActionToLocal', () => {
     it('should call delegateActionToLocal of subscription service', () => {
-      const stub = sandbox.stub(subscriptionService, 'delegateActionToLocal');
+      const p = Promise.resolve();
+      const stub = sandbox.stub(subscriptionService, 'delegateActionToLocal')
+          .callsFake(() => p);
       const action = 'action';
-      serviceAdapter.delegateActionToLocal(action);
+      const result = serviceAdapter.delegateActionToLocal(action);
       expect(stub).to.be.calledWith(action);
+      expect(result).to.equal(p);
     });
   });
 
