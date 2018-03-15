@@ -55,7 +55,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovinjs', opt_onLayout);
+    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', opt_onLayout);
   }
 
   /** @override */

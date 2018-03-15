@@ -24,7 +24,7 @@ import {parseJson} from '../src/json';
  */
 
 function getBodymovinAnimationSdk(global, cb) {
-  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
+  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
     cb(global.bodymovin);
   });
 }

@@ -31,11 +31,14 @@ tags: {  # <amp-bodymovin-animation>
 
   attrs: {
     name: "loop"
-    value_regex: "|[0-9]+"
+    value_regex: "false|number|true"
   }
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bodymovin-animation"
   amp_layout: {
