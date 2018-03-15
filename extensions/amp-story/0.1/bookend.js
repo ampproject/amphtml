@@ -262,12 +262,8 @@ export class Bookend {
       }
     });
 
-    Services.storyStoreServiceForOrNull(this.win_).then(storeService => {
-      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
-
-      storeService.subscribe(
-          StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
-    });
+    this.storeService_.subscribe(
+        StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
   }
 
   /** @return {boolean} */
