@@ -52,6 +52,12 @@ export class ViewportBindingDef {
   requiresFixedLayerTransfer() {}
 
   /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {}
+
+  /**
    * Register a callback for scroll events.
    * @param {function()} unusedCallback
    */
