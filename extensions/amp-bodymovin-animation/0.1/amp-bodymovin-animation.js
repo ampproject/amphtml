@@ -83,6 +83,12 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
     this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
     this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
+    this.registerAction('seekTo', invocation => {
+      const args = invocation.args;
+      if (args && args['percent'] !== undefined) {
+        this.seekTo_(args['percent']);
+      }
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -146,6 +152,17 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
 
     const message = {
       'action': 'stop',
+    };
+    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+    this.playingState_ = PLAYING_STATE.STOPPED;
+  }
+
+  seekTo_() {
+    //Should this be paused?
+    this.pause_();
+    const message = {
+      'action': 'goToAndStop',
+      'value': ,
     };
     this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     this.playingState_ = PLAYING_STATE.STOPPED;

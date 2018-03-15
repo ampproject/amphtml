@@ -314,6 +314,22 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-bodymovin-animation
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>play</code></td>
+    <td>Plays the animation.</td>
+    <td><code>pause</code></td>
+    <td>Pauses the animation.</td>
+    <td><code>stop</code></td>
+    <td>Stops the animation.</td>
+  </tr>
+</table>
+
 ### amp-carousel[type="slides"]
 <table>
   <tr>
