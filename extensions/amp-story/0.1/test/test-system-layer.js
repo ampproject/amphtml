@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import {ProgressBar} from '../progress-bar';
-import {Services, registerServiceBuilder} from '../../../../src/services';
+import {Services} from '../../../../src/services';
 import {SystemLayer} from '../system-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
