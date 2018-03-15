@@ -49,6 +49,7 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {MediaPool, MediaType} from './media-pool';
+import {MessageId, MessageService} from './messages';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
@@ -81,6 +82,8 @@ import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
+import MessagesDefault from './messages/default';
+import MessagesEn from './messages/en';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -320,6 +323,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private @const {!MessageService} */
+    this.messageService_ = new MessageService();
+    this.messageService_.registerMessageBundle('default', MessagesDefault);
+    this.messageService_.registerMessageBundle('en', MessagesEn);
+    registerServiceBuilder(this.win, 'story-message',
+        () => this.messageService_);
   }
 
 

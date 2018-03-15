@@ -55,7 +55,7 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  messageId: MessageId.HINT_UI_PREVIOUS_LABEL,
+                  messageId: MessageId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
                 },
               ],
             },
@@ -85,7 +85,7 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  messageId: MessageId.HINT_UI_NEXT_LABEL,
+                  messageId: MessageId.AMP_STORY_HINT_UI_NEXT_LABEL,
                 },
               ],
             },

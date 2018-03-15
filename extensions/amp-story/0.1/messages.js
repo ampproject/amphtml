@@ -13,6 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {closest} from '../../../src/dom';
+
+
+/**
+ * A unique identifier for each message.  Message IDs should:
+ *
+ *   - Maintain alphabetical order
+ *   - Be prefixed with the name of the extension that uses the message
+ *     (e.g. "AMP_STORY_"), or with "AMP_" if they are general
+ *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
+ *     the string "DEPRECATED_"
+ *
+ * Next ID: 21
+ *
+ * @const @enum {number}
+ */
+export const MessageId = {
+  // amp-story
+  AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: 0,
+  AMP_STORY_EXPERIMENT_ENABLED_TEXT: 1,
+  AMP_STORY_HINT_UI_NEXT_LABEL: 2,
+  AMP_STORY_HINT_UI_PREVIOUS_LABEL: 3,
+  AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: 4,
+  AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: 5,
+  AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: 6,
+  AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: 7,
+  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: 8,
+  AMP_STORY_SHARING_PROVIDER_NAME_LINK: 9,
+  AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: 10,
+  AMP_STORY_SHARING_PROVIDER_NAME_NATIVE: 11,
+  AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: 12,
+  AMP_STORY_SHARING_PROVIDER_NAME_SMS: 13,
+  AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: 14,
+  AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: 15,
+  AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: 16,
+  AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: 17,
+  AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: 18,
+  AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: 19,
+  AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: 20,
+  AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: 21,
+};
+
 
 /**
  * @typedef {{
@@ -22,36 +64,109 @@
  */
 let MessageDef;
 
+
 /**
  * @typedef {!Object<!MessageId, !MessageDef>}
  */
 export let MessageBundleDef;
 
+
 /**
- * A unique identifier for each message.  Maintain alphabetical order.
- *
- * @const @enum {string}
+ * Language code used if there is no language code specified by the document.
+ * @const {string}
  */
-export const MessageId = {
-  AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: 'msg_experiment_enable_button_label',
-  AMP_STORY_EXPERIMENT_ENABLED_TEXT: 'msg_experiment_enabled_text',
-  AMP_STORY_HINT_UI_NEXT_LABEL: 'msg_hint_ui_next_label',
-  AMP_STORY_HINT_UI_PREVIOUS_LABEL: 'msg_hint_ui_previous_label',
-  AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: 'msg_sharing_clipboard_failure_text',
-  AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: 'msg_sharing_clipboard_success_text',
-  AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: 'msg_sharing_provider_name_email',
-  AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: 'msg_sharing_provider_name_facebook',
-  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: 'msg_sharing_provider_name_google_plus',
-  AMP_STORY_SHARING_PROVIDER_NAME_LINK: 'msg_sharing_provider_name_link',
-  AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: 'msg_sharing_provider_name_linkedin',
-  AMP_STORY_SHARING_PROVIDER_NAME_NATIVE: 'msg_sharing_provider_name_native',
-  AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: 'msg_sharing_provider_name_pinterest',
-  AMP_STORY_SHARING_PROVIDER_NAME_SMS: 'msg_sharing_provider_name_sms',
-  AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: 'msg_sharing_provider_name_tumblr',
-  AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: 'msg_sharing_provider_name_twitter',
-  AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: 'msg_sharing_provider_name_whatsapp',
-  AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: 'msg_system_layer_share_widget_label',
-  AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: 'msg_warning_experiment_disabled_text',
-  AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: 'msg_warning_landscape_orientation_text',
-  AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: 'msg_warning_unsupported_browser_text',
-};
+const DEFAULT_LANGUAGE_CODE = 'default';
+
+
+/**
+ * @const {!RegExp}
+ */
+const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
+
+
+/**
+ * @param {!Element} element
+ * @return {!Array<string>}
+ */
+export function getLanguageCodesForElement(element) {
+  const languageEl = closest(element, el => el.hasAttribute('lang'));
+  const languageCode = languageEl.getAttribute('lang') || '';
+  return getLanguageCodesFromString(languageCode);
+}
+
+
+/**
+ * @param {string} languageCode
+ * @return {!Array<string>} A list of language codes.
+ */
+export function getLanguageCodesFromString(languageCode) {
+  const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
+  return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
+    const fallbackLanguageCode = matches.slice(0, index + 1)
+        .join('-')
+        .toLowerCase();
+    fallbackLanguageCodeList.unshift(fallbackLanguageCode);
+    return fallbackLanguageCodeList;
+  }, [DEFAULT_LANGUAGE_CODE]);
+}
+
+
+/**
+ * Gets the message matching the specified message ID in the language specified.
+ * @param {!Object<string, MessageBundleDef>} messageBundles
+ * @param {!Array<string>} languageCodes
+ * @param {!MessageId} messageId
+ */
+function findMessage(messageBundles, languageCodes, messageId) {
+  let message = null;
+
+  languageCodes.some(languageCode => {
+    const messageBundle = messageBundles[languageCode];
+    if (messageBundle && messageBundle[messageId] &&
+        messageBundle[messageId].message) {
+      message = messageBundle[messageId].message;
+      return true;
+    }
+
+    return false;
+  });
+
+  return message;
+}
+
+
+export class MessageService {
+  constructor() {
+    /**
+     * A mapping of language code to message bundle.
+     * @private {!Object<string, !MessageBundleDef>}
+     */
+    this.messageBundles_ = {};
+  }
+
+
+  /**
+   * @param {string} languageCode The language code to associate with the
+   *     specified message bundle.
+   * @param {!MessageBundleDef} messageBundle The message bundle to register.
+   */
+  registerMessageBundle(languageCode, messageBundle) {
+    if (!this.messageBundles_[languageCode]) {
+      this.messageBundles_[languageCode] = {};
+    }
+
+    Object.assign(this.messageBundles_[languageCode], messageBundle);
+  }
+
+
+  /**
+   * @param {!Element} element The element whose text should be set.
+   * @param {!MessageId} messageId The ID of the message that should be set on
+   *     the specified element.
+   */
+  setInnerTextToMessage(element, messageId) {
+    const languageCodes = getLanguageCodesForElement(element);
+    const message = findMessage(this.messageBundles_, languageCodes, messageId);
+    element.innerText = message;
+  }
+}

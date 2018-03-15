@@ -75,7 +75,7 @@ function renderSingle(doc, elementDef) {
     doc.createElement(elementDef.tag);
 
   if (elementDef.messageId) {
-    el.textContent = getMessageTextContent(elementDef.messageId);
+    el.textContent = elementDef.messageId; // TODO getMessageTextContent(elementDef.messageId);
   }
 
   if (elementDef.children) {
