@@ -253,18 +253,18 @@ export class Resource {
    * Returns the resource's element priority.
    * @return {number}
    */
-  getPriority() {
+  getLayoutPriority() {
     if (this.priorityOverride_ != -1) {
       return this.priorityOverride_;
     }
-    return this.element.getPriority();
+    return this.element.getLayoutPriority();
   }
 
   /**
    * Overrides the element's priority.
    * @param {number} newPriority
    */
-  updatePriority(newPriority) {
+  updateLayoutPriority(newPriority) {
     this.priorityOverride_ = newPriority;
   }
 
@@ -454,7 +454,7 @@ export class Resource {
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
-    if (this.isDisplayed()) {
+    if (viewport.supportsPositionFixed() && this.isDisplayed()) {
       const win = this.resources_.win;
       const body = win.document.body;
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {

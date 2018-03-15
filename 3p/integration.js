@@ -66,10 +66,12 @@ import {urls} from '../src/config';
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
+import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -299,7 +301,9 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);

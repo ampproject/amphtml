@@ -90,6 +90,7 @@ declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
 declareExtension('amp-bind', '0.1');
+declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
 declareExtension('amp-brightcove', '0.1');
 declareExtension('amp-byside-content', '0.1', {hasCss: true});
@@ -392,7 +393,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           }),
 
           // inabox-host
@@ -404,7 +404,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
             watch,
             preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
-            wrapper: '<%= contents %>',
           })
       );
     }
@@ -1042,6 +1041,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler = watchify(bundler);
   }
 
+  // Default wrapper for `gulp build`.
+  // We don't need an explicit function wrapper like we do for `gulp dist`
+  // because Babel handles that for you.
   const wrapper = options.wrapper || '<%= contents %>';
 
   const lazybuild = lazypipe()

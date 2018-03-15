@@ -255,6 +255,16 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  beopinion: {
+    prefetch: 'https://widget.beopinion.com/sdk.js',
+    preconnect: [
+      'https://t.beopinion.com',
+      'https://s.beopinion.com',
+      'https://data.beopinion.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   bidtellect: {},
 
   brainy: {},
@@ -453,7 +463,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},

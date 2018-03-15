@@ -47,10 +47,19 @@ export const RTC_VENDORS = {
     macros: ['PLACEMENT_ID'],
     disableKeyAppend: true,
   },
+  prebidrubicon: {
+    url: 'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&adc=ADCID&purl=HREF',
+    macros: ['REQUEST_ID'],
+    disableKeyAppend: true,
+  },
   indexexchange: {
     url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=HREF',
     macros: ['SITE_ID'],
     disableKeyAppend: true,
+  },
+  lotame: {
+    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
+    macros: ['CLIENT_ID', 'AD_NETWORK'],
   },
 };
 

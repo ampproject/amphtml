@@ -35,7 +35,7 @@ describes.realWin('Resource', {amp: true}, env => {
     doc = win.document;
 
     element = env.createAmpElement('amp-ad');
-    sandbox.stub(element, 'getPriority').callsFake(() => 2);
+    sandbox.stub(element, 'getLayoutPriority').callsFake(() => 2);
     elementMock = sandbox.mock(element);
 
     const viewer = Services.viewerForDoc(document);
@@ -61,7 +61,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should initialize correctly', () => {
     expect(resource.getId()).to.equal(1);
     expect(resource.debugid).to.equal('amp-ad#1');
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
@@ -157,6 +157,9 @@ describes.realWin('Resource', {amp: true}, env => {
       },
       isDeclaredFixed() {
         return false;
+      },
+      supportsPositionFixed() {
+        return true;
       },
     };
     resource.resources_.getViewport = () => viewport;
@@ -601,19 +604,19 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should update priority', () => {
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
 
-    resource.updatePriority(2);
-    expect(resource.getPriority()).to.equal(2);
+    resource.updateLayoutPriority(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
 
-    resource.updatePriority(3);
-    expect(resource.getPriority()).to.equal(3);
+    resource.updateLayoutPriority(3);
+    expect(resource.getLayoutPriority()).to.equal(3);
 
-    resource.updatePriority(1);
-    expect(resource.getPriority()).to.equal(1);
+    resource.updateLayoutPriority(1);
+    expect(resource.getLayoutPriority()).to.equal(1);
 
-    resource.updatePriority(0);
-    expect(resource.getPriority()).to.equal(0);
+    resource.updateLayoutPriority(0);
+    expect(resource.getLayoutPriority()).to.equal(0);
   });
 
 
@@ -875,7 +878,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getPriority: () => 0,
+      getLayoutPriority: () => 0,
     };
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
@@ -931,7 +934,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getPriority: () => 0,
+      getLayoutPriority: () => 0,
     };
 
     resources = new Resources(new AmpDocSingle(window));

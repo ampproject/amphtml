@@ -94,6 +94,12 @@ export class LocalSubscriptionPlatform {
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
 
+    /** @private @const {boolean} */
+    this.isPingbackEnabled_ = true;
+
+    /** @private @const {?string} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
+
     this.initializeListeners_();
   }
 
@@ -160,7 +166,7 @@ export class LocalSubscriptionPlatform {
   /**
    * Executes action for the local platform.
    * @param {string} action
-   * @returns {!Promise}
+   * @returns {!Promise<boolean>}
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
@@ -168,7 +174,7 @@ export class LocalSubscriptionPlatform {
       if (result) {
         this.serviceAdapter_.reAuthorizePlatform(this);
       }
-      return result;
+      return !!result;
     });
   }
 
@@ -184,6 +190,38 @@ export class LocalSubscriptionPlatform {
           this.entitlement_ = entitlement;
           return entitlement;
         });
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    return !!this.pingbackUrl_;
+  }
+
+  /** @override */
+  pingback(selectedEntitlement) {
+    if (!this.isPingbackEnabled) {
+      return;
+    }
+    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+        'pingbackUrl is null'));
+
+    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
+        /* useAuthData */ true);
+    return promise.then(url => {
+      return this.xhr_.sendSignal(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: selectedEntitlement.raw,
+      });
+    });
+  }
+
+  /** @override */
+  supportsCurrentViewer() {
+    return false;
   }
 }
 

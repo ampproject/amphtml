@@ -490,8 +490,8 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
-  '\\.updatePriority\\(': {
-    message: 'updatePriority is a restricted API.',
+  '\\.updateLayoutPriority\\(': {
+    message: 'updateLayoutPriority is a restricted API.',
     whitelist: [
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
