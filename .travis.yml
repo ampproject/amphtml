@@ -2,7 +2,7 @@ language: node_js
 sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
 dist: trusty
 node_js:
-  - "6"
+  - "lts/*"
 python:
   - "2.7"
 notifications:
@@ -15,7 +15,7 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
+  - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
   - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script: ./node_modules/.bin/greenkeeper-lockfile-upload

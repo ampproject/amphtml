@@ -55,7 +55,6 @@ import {
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
@@ -114,11 +113,8 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @private @enum {number} */
-const RTC_ATI_ENUM = {
-  RTC_SUCCESS: 2,
-  RTC_FAILURE: 3,
-};
+/** @const {string} */
+const RTC_SUCCESS = '2';
 
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
@@ -910,16 +906,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const ard = [];
     let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
-      // Only want to send errors for requests we actually sent.
-      if (rtcResponse.error &&
-          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
-          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
-          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
-        return;
-      }
       artc.push(rtcResponse.rtcTime);
-      ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
-        RTC_ATI_ENUM.RTC_FAILURE);
+      ati.push(rtcResponse.error || RTC_SUCCESS);
       ard.push(rtcResponse.callout);
       if (rtcResponse.response) {
         if (rtcResponse.response['targeting']) {
@@ -986,6 +974,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
+      CANONICAL_URL: () =>
+        Services.documentInfoForDoc(this.element).canonicalUrl,
     };
   }
 

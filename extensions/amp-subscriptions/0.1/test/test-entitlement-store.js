@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Entitlement,
-  Entitlements,
-} from '../../../../third_party/subscriptions-project/apis';
+import {Entitlement} from '../entitlement';
 
 import {EntitlementStore} from '../entitlement-store';
 
@@ -25,14 +22,14 @@ describes.realWin('entitlement-store', {}, () => {
   let entitlementStore;
   const serviceIds = ['service1', 'service2'];
   const currentProduct = 'currentProductId';
-  const sampleEntitlement1 =
-    new Entitlement(serviceIds[0], ['currentProductId'], '');
-  const sampleEntitlement2 =
-    new Entitlement(serviceIds[1], ['product3'], '');
-  const entitlementsForService1 = new Entitlements(
-      serviceIds[0], '', [sampleEntitlement1], currentProduct);
-  const entitlementsForService2 = new Entitlements(
-      serviceIds[1], '', [sampleEntitlement2], currentProduct);
+  const entitlementsForService1 =
+    new Entitlement(serviceIds[0], '', serviceIds[0], ['currentProductId'],
+        '', false);
+  const entitlementsForService2 =
+    new Entitlement(serviceIds[1], '', serviceIds[1], ['product3'],
+        '', false);
+  entitlementsForService1.setCurrentProduct(currentProduct);
+  entitlementsForService2.setCurrentProduct(currentProduct);
 
   beforeEach(() => {
     entitlementStore = new EntitlementStore(serviceIds);
@@ -79,11 +76,10 @@ describes.realWin('entitlement-store', {}, () => {
           });
     });
 
-    it('should resolve false with null for negative entitlement', done => {
-      const negativeEntitlement1 =
-          new Entitlement(serviceIds[0], ['product1'], '');
-      const negativeEntitlements = new Entitlements(
-          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+    it('should resolve false for negative entitlement', done => {
+      const negativeEntitlements = new Entitlement(serviceIds[0], '',
+          serviceIds[0], ['product1'], '', false);
+      negativeEntitlements.setCurrentProduct(currentProduct);
       entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
       entitlementStore.getGrantStatus()
@@ -95,6 +91,66 @@ describes.realWin('entitlement-store', {}, () => {
             }
           });
     });
+
+    it('should resolve false if all future entitlement '
+        + 'are also negative ', done => {
+      const negativeEntitlements = new Entitlement(serviceIds[0], '',
+          serviceIds[0], ['product1'], '', false);
+      negativeEntitlements.setCurrentProduct(currentProduct);
+      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      entitlementStore.getGrantStatus()
+          .then(entitlements => {
+            if (entitlements === false) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+    });
   });
+
+  describe('areAllPlatformsResolved_', () => {
+    it('should return true if all entitlements are present', () => {
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(false);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+      expect(entitlementStore.areAllPlatformsResolved_()).to.be.equal(true);
+    });
+  });
+
+  describe('getAvailablePlatformsEntitlements_', () => {
+    it('should return all available entitlements', () => {
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2]);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+      expect(entitlementStore.getAvailablePlatformsEntitlements_())
+          .to.deep.equal([entitlementsForService2, entitlementsForService1]);
+    });
+  });
+
+  describe('selectPlatform', () => {
+    it('should call selectApplicablePlatform_ if areAllPlatformsResolved_ '
+        + 'is true', done => {
+      const fakeResult = [entitlementsForService1, entitlementsForService2];
+      const getAllPlatformsStub = sandbox.stub(entitlementStore,
+          'getAllPlatformsEntitlements_').callsFake(
+          () => Promise.resolve(fakeResult));
+      const selectApplicablePlatformSpy = sandbox.stub(entitlementStore,
+          'selectApplicablePlatform_').callsFake(() => Promise.resolve());
+      entitlementStore.selectPlatform().then(() => {
+        expect(getAllPlatformsStub).to.be.calledOnce;
+        expect(selectApplicablePlatformSpy).to.be.calledWith(fakeResult);
+        done();
+      });
+    });
+  });
+
 });
 

@@ -76,6 +76,12 @@ describe('sanitizeHtml', () => {
         'a<a on="tap">b</a>');
   });
 
+  it('should output "data-, aria-, and role" attributes', () => {
+    expect(
+        sanitizeHtml('<a data-foo="bar" aria-label="bar" role="button">b</a>'))
+        .to.be.equal('<a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
         'a<a href="http://acme.com/" target="_top">b</a>');
@@ -347,13 +353,13 @@ describe('resolveUrlAttr', () => {
     expect(resolveUrlAttr('amp-img', 'srcset',
         '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x');
     expect(resolveUrlAttr('amp-img', 'srcset',
         'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x');
   });
 
   it('should NOT rewrite image http(s) src when not on proxy', () => {

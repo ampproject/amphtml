@@ -42,14 +42,9 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  const metric = getTimingDataSync(win, startEvent, endEvent);
-  if (metric === '') {
-    // Metric is not yet available. Retry after a delay.
-    return loadPromise(win).then(() => {
-      return getTimingDataSync(win, startEvent, endEvent);
-    });
-  }
-  return Promise.resolve(metric);
+  return loadPromise(win).then(() => {
+    return getTimingDataSync(win, startEvent, endEvent);
+  });
 }
 
 /**
@@ -75,11 +70,9 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     ? timingInfo[startEvent]
     : timingInfo[endEvent] - timingInfo[startEvent];
 
-  if (!isFiniteNumber(metric)) {
+  if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
     return;
-  } else if (metric < 0) {
-    return '';
   } else {
     return metric;
   }
@@ -109,7 +102,13 @@ export function getNavigationData(win, attribute) {
  * and override initialize() to add more supported variables.
  */
 export class VariableSource {
-  constructor() {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @protected @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
@@ -121,6 +120,8 @@ export class VariableSource {
 
     /** @private {boolean} */
     this.initialized_ = false;
+
+    this.getUrlMacroWhitelist_();
   }
 
   /**
@@ -246,6 +247,12 @@ export class VariableSource {
    * @private
    */
   buildExpr_(keys, isV2) {
+    // If a whitelist is present, the keys must belong to the whitelist.
+    // We filter the keys one last time to ensure no unwhitelisted key is
+    // allowed.
+    if (this.getUrlMacroWhitelist_()) {
+      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+    }
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);
@@ -263,5 +270,49 @@ export class VariableSource {
       regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
     }
     return new RegExp(regexStr, 'g');
+  }
+
+  /**
+   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
+   *     a meta tag).
+   * @private
+   */
+  getUrlMacroWhitelist_() {
+    if (this.variableWhitelist_) {
+      return this.variableWhitelist_;
+    }
+
+    const head = this.ampdoc.getRootNode().head;
+    if (!head) {
+      return null;
+    }
+
+    // A meta[name="amp-allowed-url-macros"] tag, if present,
+    // contains, in its content attribute, a whitelist of variable substitution.
+    const meta =
+      head.querySelector('meta[name="amp-allowed-url-macros"]');
+    if (!meta) {
+      return null;
+    }
+
+    /**
+     * The whitelist of variables allowed for variable substitution.
+     * @private {?Array<string>}
+     */
+    this.variableWhitelist_ = meta.getAttribute('content').split(',')
+        .map(variable => variable.trim());
+    return this.variableWhitelist_;
+  }
+
+  /**
+   * Returns `true` if a variable whitelist is *not* present or the present
+   * whitelist contains the given variable name.
+   * @param {string} varName
+   * @return {boolean}
+   * @private
+   */
+  isWhitelisted_(varName) {
+    return !this.getUrlMacroWhitelist_() ||
+      this.getUrlMacroWhitelist_().includes(varName);
   }
 }

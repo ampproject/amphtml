@@ -48,7 +48,7 @@ custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#tldr-summary-of-layout-requirements--behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://www.ampproject.org/docs/design/amp-html-layout#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
 <!--embedded example - displays in ampproject.org -->
@@ -126,7 +126,7 @@ Example with fallback:
 There are 3 ways to monetize videos in AMP with video ads:
 1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-2. Use the [amp-ima-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/amp-ima-video.md) component that comes with a built-in IMA SDK and HTML5 video player
+2. Use the [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
 3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
@@ -222,11 +222,13 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
+- [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
 - [Broadstreet Ads](../../ads/broadstreetads.md)
 - [CA A.J.A. Infeed](../../ads/caajainfeed.md)
 - [CA-ProFit-X](../../ads/caprofitx.md)
+- [Cedato](../../ads/cedato.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
 - [Connatix](../../ads/connatix.md)
@@ -277,6 +279,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
+- [Monetizer101](../../ads/monetizer101.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)

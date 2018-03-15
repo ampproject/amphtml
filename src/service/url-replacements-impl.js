@@ -65,14 +65,35 @@ function encodeValue(val) {
 }
 
 /**
+ * Returns a function that executes method on a new Date instance.
+ *
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function dateMethod(method) {
+  return () => new Date()[method]();
+}
+
+/**
+ * Returns a function that returns property of screen.
+ *
+ * @param {!Screen} screen
+ * @param {string} property
+ * @return {!SyncResolverDef}
+ */
+function screenProperty(screen, property) {
+  return () => screen[property];
+}
+
+/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
-
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
   constructor(ampdoc) {
-    super();
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+    super(ampdoc);
 
     /**
      * @private
@@ -111,44 +132,26 @@ export class GlobalVariableSource extends VariableSource {
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
-    this.set('RANDOM', () => {
-      return Math.random();
-    });
+    this.set('RANDOM', () => Math.random());
 
     // Provides a counter starting at 1 per given scope.
-    let counterStore = null;
+    const counterStore = Object.create(null);
     this.set('COUNTER', scope => {
-      if (!counterStore) {
-        counterStore = Object.create(null);
-      }
-      if (!counterStore[scope]) {
-        counterStore[scope] = 0;
-      }
-      return ++counterStore[scope];
+      return counterStore[scope] = (counterStore[scope] | 0) + 1;
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
-      return info.canonicalUrl;
-    }));
+    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.host;
-    }));
+    this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.hostname;
-    }));
+    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
+        'hostname'));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.pathname;
-    }));
+    this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -193,37 +196,29 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
-      return removeFragment(info.sourceUrl);
-    }), () => {
+    this.setBoth('SOURCE_URL', () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      return removeFragment(docInfo.sourceUrl);
+    }, () => {
       return getTrackImpressionPromise().then(() => {
-        return this.getDocInfoValue_(info => {
-          return removeFragment(info.sourceUrl);
-        });
+        const docInfo = Services.documentInfoForDoc(this.ampdoc);
+        return removeFragment(docInfo.sourceUrl);
       });
     });
 
     // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).host;
-    }));
+    this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).hostname;
-    }));
+    this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).pathname;
-    }));
+    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
-      return info.pageViewId;
-    }));
+    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -331,19 +326,13 @@ export class GlobalVariableSource extends VariableSource {
       }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
-    this.set('TIMESTAMP', () => {
-      return Date.now();
-    });
+    this.set('TIMESTAMP', dateMethod('getTime'));
 
     //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
-    this.set('TIMESTAMP_ISO', () => {
-      return new Date().toISOString();
-    });
+    this.set('TIMESTAMP_ISO', dateMethod('toISOString'));
 
     // Returns the user's time-zone offset from UTC, in minutes.
-    this.set('TIMEZONE', () => {
-      return new Date().getTimezoneOffset();
-    });
+    this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', () => viewport.getScrollTop());
@@ -363,23 +352,22 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the viewport width.
     this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
 
+
+    const screen = this.ampdoc.win.screen;
     // Returns screen.width.
-    this.set('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
+    this.set('SCREEN_WIDTH', screenProperty(screen, 'width'));
 
     // Returns screen.height.
-    this.set('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
+    this.set('SCREEN_HEIGHT', screenProperty(screen, 'height'));
 
     // Returns screen.availHeight.
-    this.set('AVAILABLE_SCREEN_HEIGHT',
-        () => this.ampdoc.win.screen.availHeight);
+    this.set('AVAILABLE_SCREEN_HEIGHT', screenProperty(screen, 'availHeight'));
 
     // Returns screen.availWidth.
-    this.set('AVAILABLE_SCREEN_WIDTH',
-        () => this.ampdoc.win.screen.availWidth);
+    this.set('AVAILABLE_SCREEN_WIDTH', screenProperty(screen, 'availWidth'));
 
     // Returns screen.ColorDepth.
-    this.set('SCREEN_COLOR_DEPTH',
-        () => this.ampdoc.win.screen.colorDepth);
+    this.set('SCREEN_COLOR_DEPTH', screenProperty(screen, 'colorDepth'));
 
     // Returns document characterset.
     this.set('DOCUMENT_CHARSET', () => {
@@ -515,15 +503,11 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
-          'STORY_PAGE_INDEX');
-    });
+    this.setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
+        'STORY_PAGE_INDEX'));
 
-    this.setAsync('STORY_PAGE_ID', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageId,
-          'STORY_PAGE_ID');
-    });
+    this.setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
+        'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
@@ -539,13 +523,18 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Resolves the value via document info.
-   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
+   * Resolves the value via one of document info's urls.
+   * @param {string} field A field on the docInfo
+   * @param {string=} opt_urlProp A subproperty of the field
    * @return {T}
    * @template T
    */
-  getDocInfoValue_(getter) {
-    return getter(Services.documentInfoForDoc(this.ampdoc));
+  getDocInfoUrl_(field, opt_urlProp) {
+    return () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      const value = docInfo[field];
+      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+    };
   }
 
   /**
@@ -630,22 +619,20 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-story's service.
-   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
-   * @param {string} expr
-   * @return {!Promise<T>}
-   * @template T
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
    * @private
    */
-  getStoryValue_(getter, expr) {
-    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
-        .then(storyVariables => {
-          user().assert(storyVariables,
-              'To use variable %s amp-story should be configured',
-              expr);
-          return getter(
-              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
-              (storyVariables));
-        });
+  getStoryValue_(property, name) {
+    return () => {
+      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
+      return service.then(storyVariables => {
+        user().assert(storyVariables,
+            'To use variable %s amp-story should be configured', name);
+        return storyVariables[property];
+      });
+    };
   }
 }
 

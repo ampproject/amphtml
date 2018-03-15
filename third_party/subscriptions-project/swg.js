@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.18-1519411256378 */
+ /** Version: 0.1.21-52536000 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -23,9 +23,11 @@ import { ActivityPorts } from 'web-activities/activity-ports';
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
-  SUBSCRIBE: 2,
-  LOGIN_REQUEST: 3,
-  LINK_COMPLETE: 4,
+  SUBSCRIBE_REQUEST: 2,
+  SUBSCRIBE_RESPONSE: 3,
+  LOGIN_REQUEST: 4,
+  LINK_PROGRESS: 5,
+  LINK_COMPLETE: 6,
 };
 
 
@@ -36,9 +38,9 @@ class Callbacks {
   /**
    */
   constructor() {
-    /** @private @const {!Object<number, function(!Promise)>} */
+    /** @private @const {!Object<CallbackId, function(*)>} */
     this.callbacks_ = {};
-    /** @private @const {!Object<number, !Promise>} */
+    /** @private @const {!Object<CallbackId, *>} */
     this.resultBuffer_ = {};
   }
 
@@ -59,39 +61,94 @@ class Callbacks {
   }
 
   /**
-   * @param {function()} callback
+   * @return {boolean}
+   */
+  hasEntitlementsResponsePending() {
+    return !!this.resultBuffer_[CallbackId.ENTITLEMENTS];
+  }
+
+  /**
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLoginRequest() {
-    return this.trigger_(CallbackId.LOGIN_REQUEST, Promise.resolve());
+  triggerLoginRequest(request) {
+    return this.trigger_(CallbackId.LOGIN_REQUEST, request);
   }
 
   /**
-   * @param {function(!Promise)} callback
+   * @param {function()} callback
+   */
+  setOnLinkProgress(callback) {
+    this.setCallback_(CallbackId.LINK_PROGRESS, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerLinkProgress() {
+    return this.trigger_(CallbackId.LINK_PROGRESS, true);
+  }
+
+  /**
+   */
+  resetLinkProgress() {
+    this.resetCallback_(CallbackId.LINK_PROGRESS);
+  }
+
+  /**
+   * @param {function()} callback
    */
   setOnLinkComplete(callback) {
     this.setCallback_(CallbackId.LINK_COMPLETE, callback);
   }
 
   /**
-   * @param {!Promise} promise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLinkComplete(promise) {
-    return this.trigger_(CallbackId.LINK_COMPLETE, promise);
+  triggerLinkComplete() {
+    return this.trigger_(CallbackId.LINK_COMPLETE, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasLinkCompletePending() {
+    return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnSubscribeRequest(callback) {
+    this.setCallback_(CallbackId.SUBSCRIBE_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerSubscribeRequest() {
+    return this.trigger_(CallbackId.SUBSCRIBE_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasSubscribeRequestCallback() {
+    return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
   }
 
   /**
    * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
-    this.setCallback_(CallbackId.SUBSCRIBE, callback);
+    this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
@@ -100,7 +157,7 @@ class Callbacks {
    */
   triggerSubscribeResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.SUBSCRIBE,
+        CallbackId.SUBSCRIBE_RESPONSE,
         responsePromise.then(res => res.clone()));
   }
 
@@ -108,25 +165,25 @@ class Callbacks {
    * @return {boolean}
    */
   hasSubscribeResponsePending() {
-    return !!this.resultBuffer_[CallbackId.SUBSCRIBE];
+    return !!this.resultBuffer_[CallbackId.SUBSCRIBE_RESPONSE];
   }
 
   /**
    * @param {!CallbackId} id
-   * @param {function(!Promise)} callback
+   * @param {function(?)} callback
    * @private
    */
   setCallback_(id, callback) {
     this.callbacks_[id] = callback;
     // If result already exist, execute the callback right away.
     if (id in this.resultBuffer_) {
-      this.executeCallback_(callback, this.resultBuffer_[id]);
+      this.executeCallback_(id, callback, this.resultBuffer_[id]);
     }
   }
 
   /**
    * @param {!CallbackId} id
-   * @param {!Promise} data
+   * @param {*} data
    * @return {boolean}
    * @private
    */
@@ -134,20 +191,32 @@ class Callbacks {
     this.resultBuffer_[id] = data;
     const callback = this.callbacks_[id];
     if (callback) {
-      this.executeCallback_(callback, data);
+      this.executeCallback_(id, callback, data);
     }
     return !!callback;
   }
 
   /**
-   * @param {function(!Promise)} callback
-   * @param {!Promise} data
+   * @param {!CallbackId} id
    * @private
    */
-  executeCallback_(callback, data) {
+  resetCallback_(id) {
+    if (id in this.resultBuffer_) {
+      delete this.resultBuffer_[id];
+    }
+  }
+
+  /**
+   * @param {!CallbackId} id
+   * @param {function(*)} callback
+   * @param {*} data
+   * @private
+   */
+  executeCallback_(id, callback, data) {
     // Always execute callbacks in a microtask.
     Promise.resolve().then(() => {
       callback(data);
+      this.resetCallback_(id);
     });
   }
 }
@@ -518,6 +587,20 @@ function setStyles(element, styles) {
 
 
 /**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+function resetStyles(element, properties) {
+  const styleObj = {};
+  properties.forEach(prop => {
+    styleObj[prop] = null;
+  });
+  setStyles(element, styleObj);
+}
+
+
+/**
  * Resets all the styles of an element to a given value. Defaults to null.
  * The valid values are 'inherit', 'initial', 'unset' or null.
  */
@@ -717,25 +800,49 @@ class LoadingView {
   }
 
   /*
-   * Populates the loading indivicator view with children. The populated element
+   * Populates the loading indivicator. The populated element
    * can be added in any view, when required.
    * @private
    */
   buildLoadingIndicator_() {
     const loadingContainer = this.loadingContainer_;
 
-    // Add 4 vertical bars animated at different speed, as defined in the
-    // style.
-    for (let i = 0; i < 4; i++) {
-      const loadingBar = createElement(this.doc_, 'div', {
-        'class': 'swg-loading-bar',
-      });
-      loadingContainer.appendChild(loadingBar);
-    }
+    const loadingIndicatorTopContainer = createElement(this.doc_, 'div', {});
+    loadingContainer.appendChild(loadingIndicatorTopContainer);
+
+    const loadingIndicatorChildContainer = createElement(this.doc_, 'div', {});
+    loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}.swg-close-action{position:absolute;left:0;top:0;padding:16px;margin:0;border:none;z-index:2147483647;width:16px;height:16px;background:transparent url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%23757575' d='M0 11L11 0M0 0l11 11'/%3E%3C/svg%3E\") no-repeat center center;background-size:12px;display:none;cursor:pointer}@-webkit-keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}@keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}.swg-loading{position:fixed!important;top:50%!important;left:50%!important;-webkit-transform:translate(-50%,-50%)!important;transform:translate(-50%,-50%)!important;z-index:2147483647!important}.swg-loading .swg-loading-bar{display:inline-block!important;width:5px!important;height:20px!important;border-radius:5px!important;margin-right:5px!important;-webkit-animation:swg-loading 1s ease-in-out infinite!important;animation:swg-loading 1s ease-in-out infinite!important}.swg-loading-bar:first-child{background-color:#4285f4!important;-webkit-animation-delay:0!important;animation-delay:0!important}.swg-loading-bar:nth-child(2){background-color:#0f9d58!important;-webkit-animation-delay:0.09s!important;animation-delay:0.09s!important}.swg-loading-bar:nth-child(3){background-color:#f4b400!important;-webkit-animation-delay:.18s!important;animation-delay:.18s!important}.swg-loading-bar:nth-child(4){background-color:#db4437!important;-webkit-animation-delay:.27s!important;animation-delay:.27s!important}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}.swg-loading{position:fixed!important;top:40%!important;left:45%!important;-webkit-transform:translate(-40%,-40%)!important;transform:translate(-40%,-40%)!important;z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}.swg-loading>div{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}.swg-loading>div>div{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+
+
+
+/**
+ * Returns a promise which is resolved after the given duration of animation
+ * @param {!Element} el - Element to be observed.
+ * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {number} durationMillis - duration of animation.
+ * @param {string} curve - transition function for the animation.
+ * @return {!Promise} Promise which resolves once the animation is done playing.
+ */
+function transition(el, props, durationMillis, curve) {
+  const win = el.ownerDocument.defaultView;
+  const previousTransitionValue = el.style.transition || '';
+  return new Promise(resolve => {
+    win.setTimeout(() => {
+      win.setTimeout(resolve, durationMillis);
+      setImportantStyles(el, Object.assign({
+        'transition': `transform ${durationMillis}ms ${curve}`,
+      }, props));
+    });
+  }).then(() => {
+    setImportantStyles(el, {
+      'transition': previousTransitionValue,
+    });
+  });
+}
 
 
 
@@ -847,7 +954,8 @@ const rootElementImportantStyles = {
   'background-color': 'rgb(255, 255, 255)',
   'position': 'fixed',
   'z-index': '2147483647',
-  'box-shadow': 'gray 0px 3px, gray 0px 0px 22px',
+  'box-shadow':
+      'rgba(60, 64, 67, .3) 0 1px 1px, rgba(60, 64, 67, .15) 0 1px 4px 1px',
   'box-sizing': 'border-box',
 };
 
@@ -896,9 +1004,8 @@ class Dialog {
    * @param {!Window} win
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
-   * @param {boolean=} showCloseAction
    */
-  constructor(win, importantStyles = {}, styles = {}, showCloseAction = true) {
+  constructor(win, importantStyles = {}, styles = {}) {
 
     this.win_ = win;
 
@@ -923,30 +1030,39 @@ class Dialog {
     /** @private {LoadingView} */
     this.loadingView_ = null;
 
-    /** @private @const {boolean} */
-    this.showCloseAction_ = showCloseAction;
-
-    /** @private {Element} */
-    this.closeButton_ = null;
-
     /** @private {?Element} */
     this.container_ = null;  // Depends on constructed document inside iframe.
 
     /** @private {?./view.View} */
     this.view_ = null;
+
+    /** @private {?Promise} */
+    this.animating_ = null;
   }
 
   /**
    * Opens the dialog and builds the iframe container.
+   * @param {boolean=} animated
    * @return {!Promise<!Dialog>}
    */
-  open() {
+  open(animated = true) {
     const iframe = this.iframe_;
     if (iframe.isConnected()) {
       throw new Error('already opened');
     }
     // Attach the invisible faded background to be used for some views.
     this.attachBackground_();
+
+    if (animated) {
+      this.animate_(() => {
+        setImportantStyles(iframe.getElement(), {
+          'transform': 'translateY(100%)',
+        });
+        return transition(iframe.getElement(), {
+          'transform': 'translateY(0)',
+        }, 300, 'ease-out');
+      });
+    }
 
     this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
     return iframe.whenReady().then(() => {
@@ -977,53 +1093,30 @@ class Dialog {
         createElement(iframeDoc, 'div', {'class': 'swg-container'});
     iframeBody.appendChild(this.container_);
     this.setPosition_();
-
-    // Inject the close button after the iframe for mouse click event to
-    // respond otherwisethe mouse click event is captured by iframe.
-    this.addCloseAction_(iframeDoc, iframeBody);
-  }
-
-  /**
-   * Adds close action button with event listener.
-   * @private
-   */
-  addCloseAction_(iframeDoc, iframeBody) {
-    if (this.closeButton_) {
-      return;
-    }
-    this.closeButton_ = this.createCloseButton_(iframeDoc);
-    iframeBody.appendChild(this.closeButton_);
-  }
-
-  /**
-   * Renders or hides the "Close" action button. For some flows, this button
-   * should be hidden.
-   * @param {boolean} show
-   */
-  showCloseAction(show) {
-    if (!this.closeButton_) {
-      return;
-    }
-    if (show) {
-      setStyles(this.closeButton_, {
-        'display': 'block',
-      });
-    } else {
-      setStyles(this.closeButton_, {
-        'display': 'none',
-      });
-    }
   }
 
   /**
    * Closes the dialog.
+   * @param {boolean=} animated
+   * @return {!Promise}
    */
-  close() {
-    this.doc_.body.removeChild(this.iframe_.getElement());
-    this.removePaddingToHtml_();
-
-    // Remove the faded background from the parent document.
-    this.doc_.body.removeChild(this.fadeBackground_);
+  close(animated = true) {
+    let animating;
+    if (animated) {
+      animating = this.animate_(() => {
+        return transition(this.getElement(), {
+          'transform': 'translateY(100%)',
+        }, 300, 'ease-out');
+      });
+    } else {
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.doc_.body.removeChild(this.iframe_.getElement());
+      this.removePaddingToHtml_();
+      // Remove the faded background from the parent document.
+      this.doc_.body.removeChild(this.fadeBackground_);
+    });
   }
 
   /**
@@ -1082,9 +1175,6 @@ class Dialog {
     }
     this.view_ = view;
 
-    if (view.shouldShowCloseAction()) {
-      this.showCloseAction(this.showCloseAction_);
-    }
     setImportantStyles(view.getElement(), resetViewStyles);
     this.setLoading(true);
     this.getContainer().appendChild(view.getElement());
@@ -1106,16 +1196,68 @@ class Dialog {
    * Resizes the dialog container.
    * @param {!./view.View} view
    * @param {number} height
+   * @param {boolean=} animated
+   * @return {?Promise}
    */
-  resizeView(view, height) {
+  resizeView(view, height, animated = true) {
     if (this.view_ != view) {
-      return;
+      return null;
     }
-    setImportantStyles(this.getElement(), {
-      'height': `${this.getMaxAllowedHeight_(height)}px`,
+    const newHeight = this.getMaxAllowedHeight_(height);
+
+    let animating;
+    if (animated) {
+      const oldHeight = this.getElement().offsetHeight;
+      if (newHeight >= oldHeight) {
+        // Expand.
+        animating = this.animate_(() => {
+          setImportantStyles(this.getElement(), {
+            'height': `${newHeight}px`,
+            'transform': `translateY(${newHeight - oldHeight}px)`,
+          });
+          return transition(this.getElement(), {
+            'transform': 'translateY(0)',
+          }, 300, 'ease-out');
+        });
+      } else {
+        // Collapse.
+        animating = this.animate_(() => {
+          return transition(this.getElement(), {
+            'transform': `translateY(${oldHeight - newHeight}px)`,
+          }, 300, 'ease-out').then(() => {
+            setImportantStyles(this.getElement(), {
+              'height': `${newHeight}px`,
+              'transform': 'translateY(0)',
+            });
+          });
+        });
+      }
+    } else {
+      setImportantStyles(this.getElement(), {
+        'height': `${newHeight}px`,
+      });
+      animating = Promise.resolve();
+    }
+    return animating.then(() => {
+      this.updatePaddingToHtml_(height);
+      view.resized();
     });
-    this.updatePaddingToHtml_(height);
-    view.resized();
+  }
+
+  /**
+   * @param {function():!Promise} callback
+   * @return {!Promise}
+   * @private
+   */
+  animate_(callback) {
+    const wait = this.animating_ || Promise.resolve();
+    return this.animating_ = wait.then(() => {
+      return callback();
+    }, () => {
+      // Ignore errors to make sure animations don't get stuck.
+    }).then(() => {
+      this.animating_ = null;
+    });
   }
 
   /**
@@ -1213,30 +1355,6 @@ class Dialog {
   }
 
   /**
-   * Adds the dialog close action button.
-   * @param {!Document} doc
-   * @return {!Element}
-   * @private
-   */
-  createCloseButton_(doc) {
-    const closeButton = createElement(doc, 'div', {
-      'class': 'swg-close-action',
-      'role': 'button',
-      'tabindex': '1',
-      'aria-label': 'Close dialog',
-    });
-
-    closeButton.addEventListener('click', () => this.close());
-    closeButton.addEventListener('keypress', event => {
-      const keyValue = (event.key || '').toUpperCase();
-      if (keyValue == 'ENTER') {
-        this.close();
-      }
-    });
-    return closeButton;
-  }
-
-  /**
    * Attaches the hidden faded background to the parent document.
    * @private
    */
@@ -1248,8 +1366,7 @@ class Dialog {
       'right': 0,
       'bottom': 0,
       'left': 0,
-      'background-color': '#fff',
-      'opacity': '.5',
+      'background-color': 'rgba(32, 33, 36, .6)',
       'z-index': 2147483646,  /** 1 less than SwG dialog */
     });
     this.doc_.body.appendChild(this.fadeBackground_);
@@ -1303,13 +1420,19 @@ class DialogManager {
    * @return {!Promise}
    */
   openView(view) {
+    view.whenComplete().catch(reason => {
+      if (reason.name === 'AbortError') {
+        this.completeView(view);
+      }
+      throw (reason);
+    });
     return this.openDialog().then(dialog => {
       return dialog.openView(view);
     });
   }
 
   /**
-   * @param {!./view.View} view
+   * @param {?./view.View} view
    */
   completeView(view) {
     // Give a small amount of time for another view to take over the dialog.
@@ -1670,76 +1793,107 @@ class JwtHelper {
 
 
 
-const SERVICE_ID = 'subscribe.google.com';
+/** @const {!Object<string, string|number>} */
+const toastImportantStyles = {
+  'position': 'fixed',
+  'bottom': 0,
+  'height': 0,
+  'max-height': '46px',
+  'z-index': '2147483647',
+  'border': 'none',
+};
 
+/** @const {!Object<string, string>} */
+const iframeAttributes = {
+  'frameborder': '0',
+  'scrolling': 'no',
+  'class': 'swg-toast',
+};
 
 /**
+ * The class Notification toast.
  */
-class EntitlementsManager {
+class Toast {
 
   /**
-   * @param {!Window} win
-   * @param {!../model/page-config.PageConfig} config
-   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!../runtime/deps.DepsDef} deps
+   * @param {string} src
+   * @param {!Object<string, ?>} args
    */
-  constructor(win, config, fetcher) {
+  constructor(deps, src, args) {
+
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = deps.win();
 
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
+    /** @private @const {!HTMLDocument} */
+    this.doc_ = this.win_.document;
 
-    /** @private @const {!./fetcher.Fetcher} */
-    this.fetcher_ = fetcher;
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
 
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper();
+    /** @private @const {string} */
+    this.src_ = src;
 
-    /** @private {?Promise<!Entitlements>} */
-    this.responsePromise_ = null;
-  }
+    /** @private @const {!Object<string, ?>} */
+    this.args_ = args;
 
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlements() {
-    if (!this.responsePromise_) {
-      this.responsePromise_ = this.fetch_();
-    }
-    return this.responsePromise_;
-  }
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (
+            createElement(this.doc_, 'iframe', iframeAttributes));
 
-  /**
-   */
-  reset() {
-    this.responsePromise_ = null;
-  }
+    setImportantStyles(this.iframe_, toastImportantStyles);
+    setStyles(this.iframe_, topFriendlyIframePositionStyles);
 
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetch_() {
-    const url =
-        'https://swg-staging.sandbox.google.com/_/v1/publication/' +
-        encodeURIComponent(this.config_.getPublisherId()) +
-        '/entitlements';
-    return this.fetcher_.fetchCredentialedJson(url).then(json => {
-      const signedData = json['signedEntitlements'];
-      if (signedData) {
-        const jwt = this.jwtHelper_.decode(signedData);
-        const entitlementsClaim = jwt['entitlements'];
-        if (entitlementsClaim) {
-          return new Entitlements(
-              SERVICE_ID,
-              signedData,
-              Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
-        }
-      }
-      // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+    /** @private @const {!Promise} */
+    this.ready_ = new Promise(resolve => {
+      this.iframe_.onload = resolve;
     });
+  }
+
+  /**
+   * Returns the iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * Opens the notification toast.
+   * @return {!Promise}
+   */
+  open() {
+    this.doc_.body.appendChild(this.iframe_);  // Fires onload.
+    return this.buildToast_();
+  }
+
+  /**
+   * Builds the content of the iframe. On load, animates the toast.
+   */
+  buildToast_() {
+    const toastDurationSeconds = 7;
+    return this.activityPorts_.openIframe(
+        this.iframe_, this.src_, this.args_).then(port => {
+          return port.whenReady();
+        }).then(() => {
+          resetStyles(this.iframe_, ['height']);
+          setImportantStyles(this.iframe_, {
+            'animation': 'swg-notify .3s ease-out normal backwards, '
+                  + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
+                  's normal forwards',
+          });
+          this.win_.setTimeout(() => {
+            this.close();
+          }, (toastDurationSeconds + 1) * 1000);
+        });
+  }
+
+  /**
+   * Closes the toast.
+   */
+  close() {
+    this.doc_.body.removeChild(this.iframe_);
   }
 }
 
@@ -1843,13 +1997,314 @@ function parseUrlWithA(a, url) {
 
 
 /**
- * Returns the Url including the path and search, without fregment.
+ * Adds a parameter to a query string.
  * @param {string} url
+ * @param {string} param
+ * @param {string} value
  * @return {string}
  */
-function getHostUrl(url) {
-  const locationHref = parseUrl(url);
-  return locationHref.origin + locationHref.pathname + locationHref.search;
+function addQueryParam(url, param, value) {
+  const queryIndex = url.indexOf('?');
+  const fragmentIndex = url.indexOf('#');
+  let fragment = '';
+  if (fragmentIndex != -1) {
+    fragment = url.substring(fragmentIndex);
+    url = url.substring(0, fragmentIndex);
+  }
+  if (queryIndex == -1) {
+    url += '?';
+  } else if (queryIndex < url.length - 1) {
+    url += '&';
+  }
+  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return url + fragment;
+}
+
+
+
+/**
+ * Have to put these in the map to avoid compiler optimization. Due to
+ * optimization issues, this map only allows property-style keys. E.g. "hr1",
+ * as opposed to "1hr".
+ * @type {!Object<string, number>}
+ * @package Visible for testing only.
+ */
+const CACHE_KEYS = {
+  'nocache': 1,
+  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
+  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+};
+
+
+/**
+ * @return {string}
+ */
+function feOrigin() {
+  return parseUrl('https://subscribe.sandbox.google.com').origin;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function serviceUrl(url) {
+  return 'https://subscribe.sandbox.google.com/swg/_/api/v1' + url;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/offersiframe".
+ * @param {string=} prefix
+ * @return {string} The complete URL.
+ */
+function feUrl(url, prefix = '') {
+  return addQueryParam(
+      'https://subscribe.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
+      '_', cacheParam('hr1'));
+}
+
+
+/**
+ * @param {!Object<string, ?>} args
+ * @return {!Object<string, ?>}
+ */
+function feArgs(args) {
+  return Object.assign(args, {
+    '_client': 'SwG 0.1.21-52536000',
+  });
+}
+
+
+/**
+ * @param {string} cacheKey
+ * @return {string}
+ * @package Visible for testing only.
+ */
+function cacheParam(cacheKey) {
+  let period = CACHE_KEYS[cacheKey];
+  if (period == null) {
+    period = 1;
+  }
+  if (period === 0) {
+    return '_';
+  }
+  const now = Date.now();
+  return String(period <= 1 ? now : Math.floor(now / period));
+}
+
+
+
+const SERVICE_ID = 'subscribe.google.com';
+const TOAST_STORAGE_KEY = 'toast';
+
+
+/**
+ */
+class EntitlementsManager {
+
+  /**
+   * @param {!Window} win
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(win, config, fetcher, deps) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
+
+    /** @private @const {string} */
+    this.publicationId_ = this.config_.getPublicationId();
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper();
+
+    /** @private {?Promise<!Entitlements>} */
+    this.responsePromise_ = null;
+
+    /** @private {number} */
+    this.positiveRetries_ = 0;
+
+    /** @private {boolean} */
+    this.blockNextNotification_ = false;
+
+    /** @private @const {!./storage.Storage} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * @param {boolean=} opt_expectPositive
+   */
+  reset(opt_expectPositive) {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = Math.max(
+        this.positiveRetries_, opt_expectPositive ? 3 : 0);
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlements() {
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.getEntitlementsFlow_();
+    }
+    return this.responsePromise_;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  fetchEntitlements() {
+    // TODO(dvoytenko): Replace retries with consistent fetch.
+    let positiveRetries = this.positiveRetries_;
+    this.positiveRetries_ = 0;
+    const attempt = () => {
+      positiveRetries--;
+      return this.fetch_().then(entitlements => {
+        if (entitlements.enablesThis() || positiveRetries <= 0) {
+          return entitlements;
+        }
+        return new Promise(resolve => {
+          this.win_.setTimeout(() => {
+            resolve(attempt());
+          }, 550);
+        });
+      });
+    };
+    return attempt();
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setToastShown(value) {
+    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
+  }
+
+  /**
+   */
+  blockNextNotification() {
+    this.blockNextNotification_ = true;
+  }
+
+  /**
+   */
+  unblockNextNotification() {
+    this.blockNextNotification_ = false;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlementsFlow_() {
+    return this.fetchEntitlements().then(entitlements => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  onEntitlementsFetched_(entitlements) {
+    // Skip any notifications and toast if other flows are ongoing.
+    // TODO(dvoytenko): what's the right action when pay flow was canceled?
+    const blockNotification = this.blockNextNotification_;
+    this.blockNextNotification_ = false;
+    if (blockNotification) {
+      return;
+    }
+
+    // Notify on the received entitlements.
+    this.deps_.callbacks().triggerEntitlementsResponse(
+        Promise.resolve(entitlements));
+
+    // Show a toast if needed.
+    this.maybeShowToast_(entitlements);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  maybeShowToast_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement) {
+      return Promise.resolve();
+    }
+
+    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
+      if (value == '1') {
+        // Already shown;
+        return;
+      }
+
+      this.setToastShown(true);
+      if (entitlement) {
+        this.showToast_(entitlement);
+      }
+    });
+  }
+
+  /**
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  showToast_(entitlement) {
+    const source = entitlement.source || 'google';
+
+    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
+      'publicationId': this.publicationId_,
+      'source': source,
+    })).open();
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetch_() {
+    const url = serviceUrl(
+        '/publication/' +
+        encodeURIComponent(this.publicationId_) +
+        '/entitlements');
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const signedData = json['signedEntitlements'];
+      if (signedData) {
+        const jwt = this.jwtHelper_.decode(signedData);
+        const entitlementsClaim = jwt['entitlements'];
+        if (entitlementsClaim) {
+          return new Entitlements(
+              SERVICE_ID,
+              signedData,
+              Entitlement.parseListFromJson(entitlementsClaim),
+              this.config_.getProductId());
+        }
+      } else {
+        const plainEntitlements = json['entitlements'];
+        if (plainEntitlements) {
+          return new Entitlements(
+              SERVICE_ID,
+              '',
+              Entitlement.parseListFromJson(plainEntitlements),
+              this.config_.getProductId());
+        }
+      }
+      // Empty response.
+      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+    });
+  }
 }
 
 
@@ -2274,23 +2729,23 @@ class View {
     // Do nothing by default. Override if needed.
   }
 
+  /*
+   * Accept the result.
+   * @return {!Promise}
+   */
+  whenComplete() {}
+
   /**
    * @return {boolean}
    * @abstract
    */
   shouldFadeBody() {}
-
-  /**
-   * @return {boolean}
-   * @abstract
-   */
-  shouldShowCloseAction() {}
 }
 
 
 
 /** @const {!Object<string, string>} */
-const iframeAttributes = {
+const iframeAttributes$1 = {
   'frameborder': '0',
   'scrolling': 'no',
 };
@@ -2305,17 +2760,15 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?string|number>=} args
+   * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
-   * @param {boolean=} showCloseAction
    */
   constructor(
       win,
       activityPorts,
       src,
       args,
-      shouldFadeBody = false,
-      showCloseAction = false) {
+      shouldFadeBody = false) {
     super();
 
     /** @private @const {!Window} */
@@ -2327,7 +2780,7 @@ class ActivityIframeView extends View {
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes));
+            createElement(this.doc_, 'iframe', iframeAttributes$1));
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = activityPorts;
@@ -2335,30 +2788,27 @@ class ActivityIframeView extends View {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private @const {!Object<string, ?string|number>} */
+    /** @private @const {!Object<string, ?>} */
     this.args_ = args || {};
 
     /** @private @const {boolean} */
     this.shouldFadeBody_ = shouldFadeBody;
-
-    /** @private @const {boolean} */
-    this.showCloseAction_ = showCloseAction;
 
     /** @private {?web-activities/activity-ports.ActivityIframePort} */
     this.port_ = null;
 
     /**
      * @private
-     * {?function((!web-activities/activity-ports.ActivityResult|!Promise))}
+     * {?function<!web-activities/activity-ports.ActivityIframePort|!Promise>}
      */
-    this.resolve_ = null;
+    this.portResolver_ = null;
 
     /**
      * @private @const
-     * {!Promise<!web-activities/activity-ports.ActivityResult>}
+     * {!Promise<!web-activities/activity-ports.ActivityIframePort>}
      */
-    this.promise_ = new Promise(resolve => {
-      this.resolve_ = resolve;
+    this.portPromise_ = new Promise(resolve => {
+      this.portResolver_ = resolve;
     });
   }
 
@@ -2382,28 +2832,45 @@ class ActivityIframeView extends View {
   }
 
   /**
-   * Returns if document should fade for this view.
-   * @return {boolean}
-   */
-  shouldShowCloseAction() {
-    return this.showCloseAction_;
-  }
-
-  /**
    * @param {!web-activities/activity-ports.ActivityIframePort} port
    * @param {!../components/dialog.Dialog} dialog
    * @return {!Promise}
    */
   onOpenIframeResponse_(port, dialog) {
     this.port_ = port;
+    this.portResolver_(port);
 
     this.port_.onResizeRequest(height => {
       dialog.resizeView(this, height);
     });
 
-    this.resolve_(this.port_.acceptResult());
-
     return this.port_.whenReady();
+  }
+
+  /**
+   * @return {!Promise<!web-activities/activity-ports.ActivityIframePort>}
+   */
+  port() {
+    return this.portPromise_;
+  }
+
+  /**
+   * @param {!Object} data
+   */
+  message(data) {
+    this.port().then(port => {
+      port.message(data);
+    });
+  }
+
+  /**
+   * Handles the message received by the port.
+   * @param {function(!Object<string, string|boolean>)} callback
+   */
+  onMessage(callback) {
+    this.port().then(port => {
+      port.onMessage(callback);
+    });
   }
 
   /**
@@ -2411,7 +2878,15 @@ class ActivityIframeView extends View {
    * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
   acceptResult() {
-    return this.promise_;
+    return this.port().then(port => port.acceptResult());
+  }
+
+  /**
+   * Completes the flow.
+   * @return {!Promise}
+   */
+  whenComplete() {
+    return this.acceptResult();
   }
 
   /** @override */
@@ -2424,22 +2899,42 @@ class ActivityIframeView extends View {
 
 
 
-const LINK_FRONT_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/linkfrontiframe';
 
-const LINK_CONFIRM_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/linkconfirmiframe';
+/**
+ * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {string} requireOrigin
+ * @param {boolean} requireOriginVerified
+ * @param {boolean} requireSecureChannel
+ * @return {!Promise<!Object>}
+ */
+function acceptPortResult(
+    port,
+    requireOrigin,
+    requireOriginVerified,
+    requireSecureChannel) {
+  return port.acceptResult().then(result => {
+    if (result.origin != requireOrigin ||
+        requireOriginVerified && !result.originVerified ||
+        requireSecureChannel && !result.secureChannel) {
+      throw new Error('channel mismatch');
+    }
+    return result.data;
+  });
+}
 
-const COMPLETE_LINK_REQUEST_ID = 'swg-link-continue';
+
+
+const CONTINUE_LINK_REQUEST_ID = 'swg-link-continue';
+const LINK_REQUEST_ID = 'swg-link';
 
 
 /**
- * The flow to initiate linking process.
+ * The flow to initiate linkback flow.
  */
-class LinkStartFlow {
+class LinkbackFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
@@ -2448,23 +2943,8 @@ class LinkStartFlow {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        LINK_FRONT_IFRAME_URL,
-        {
-          'publisherId': deps.pageConfig().getPublisherId(),
-          'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
-          'requestId': COMPLETE_LINK_REQUEST_ID,
-          'returnUrl': getHostUrl(this.win_.location.href),
-        },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ false
-    );
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.pageConfig_ = deps.pageConfig();
   }
 
   /**
@@ -2472,31 +2952,14 @@ class LinkStartFlow {
    * @return {!Promise}
    */
   start() {
-    this.activityIframeView_.acceptResult().then(result => {
-      if (result.ok) {
-        this.openLoginForm_(/** @type {!Object} */ (result.data));
-      }
-    });
-    return this.dialogManager_.openView(this.activityIframeView_);
-  }
-
-
-  /**
-   * Opens the publisher's login page.
-   * @param {!Object} resp
-   * @private
-   */
-  openLoginForm_(resp) {
-    const redirectUrl = resp['redirectUrl'];
     this.activityPorts_.open(
-        COMPLETE_LINK_REQUEST_ID, redirectUrl, '_blank', null, {
-          // TODO(dvoytenko): Remove the debug code.
-          // Only keep request URL params for debugging URLs.
-          skipRequestInUrl: redirectUrl.indexOf('http://localhost') == -1,
-        });
-    // Disconnected flow: will proceed with LinkCompleteFlow once popup
-    // returns.
-    this.dialogManager_.completeView(this.activityIframeView_);
+        LINK_REQUEST_ID,
+        feUrl('/linkbackstart'),
+        '_blank',
+        feArgs({
+          'publicationId': this.pageConfig_.getPublicationId(),
+        }), {});
+    return Promise.resolve();
   }
 }
 
@@ -2507,23 +2970,30 @@ class LinkStartFlow {
 class LinkCompleteFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
-    deps.activities().onResult(COMPLETE_LINK_REQUEST_ID, port => {
-      return port.acceptResult().then(result => {
-        if (result.ok) {
-          const flow = new LinkCompleteFlow(deps);
-          flow.start();
-        }
+    function handler(port) {
+      deps.entitlementsManager().blockNextNotification();
+      deps.callbacks().triggerLinkProgress();
+      const promise = acceptPortResult(
+          port,
+          feOrigin(),
+          /* requireOriginVerified */ false,
+          /* requireSecureChannel */ false);
+      return promise.then(response => {
+        const flow = new LinkCompleteFlow(deps, response);
+        flow.start();
       });
-    });
+    }    deps.activities().onResult(CONTINUE_LINK_REQUEST_ID, handler);
+    deps.activities().onResult(LINK_REQUEST_ID, handler);
   }
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
+   * @param {?Object} response
    */
-  constructor(deps) {
+  constructor(deps, response) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
@@ -2533,22 +3003,32 @@ class LinkCompleteFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** @private @const {!../runtime/callbacks.Callbacks} */
+    /** @private @const {!./entitlements-manager.EntitlementsManager} */
+    this.entitlementsManager_ = deps.entitlementsManager();
+
+    /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
+    const index = response && response['index'] || '0';
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ =
         new ActivityIframeView(
             this.win_,
             this.activityPorts_,
-            LINK_CONFIRM_IFRAME_URL,
-            {
-              'publisherId': deps.pageConfig().getPublisherId(),
-              'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
-            },
-            /* shouldFadeBody */ true,
-            /* showCloseAction */ false
-        );
+            feUrl('/linkconfirmiframe', '/u/' + index),
+            feArgs({
+              'productId': deps.pageConfig().getProductId(),
+              'publicationId': deps.pageConfig().getPublicationId(),
+            }),
+            /* shouldFadeBody */ true);
+
+    /** @private {?function()} */
+    this.completeResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.completePromise_ = new Promise(resolve => {
+      this.completeResolver_ = resolve;
+    });
   }
 
   /**
@@ -2556,12 +3036,90 @@ class LinkCompleteFlow {
    * @return {!Promise}
    */
   start() {
-    this.callbacks_.triggerLinkComplete(Promise.resolve());
-    this.activityIframeView_.acceptResult().then(() => {
+    const promise = this.activityIframeView_.port().then(port => {
+      return acceptPortResult(
+          port,
+          feOrigin(),
+          /* requireOriginVerified */ true,
+          /* requireSecureChannel */ true);
+    });
+    promise.then(response => {
+      this.complete_(response);
+    }).catch(reason => {
+      // Rethrow async.
+      setTimeout(() => {
+        throw reason;
+      });
+    }).then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
     });
     return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {?Object} response
+   * @private
+   */
+  complete_(response) {
+    this.callbacks_.triggerLinkComplete();
+    this.callbacks_.resetLinkProgress();
+    this.entitlementsManager_.setToastShown(true);
+    this.entitlementsManager_.unblockNextNotification();
+    this.entitlementsManager_.reset(response && response['success'] || false);
+    this.completeResolver_();
+  }
+
+  /** @return {!Promise} */
+  whenComplete() {
+    return this.completePromise_;
+  }
+}
+
+
+
+
+class OffersApi {
+
+  /**
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   */
+  constructor(config, fetcher) {
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+  }
+
+  /**
+   * @param {string=} opt_productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   */
+  getOffers(opt_productId) {
+    const productId = opt_productId || this.config_.getProductId();
+    if (!productId) {
+      throw new Error('getOffers requires productId in config or arguments');
+    }
+    return this.fetch_(productId);
+  }
+
+  /**
+   * @param {string} productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   * @private
+   */
+  fetch_(productId) {
+    const url = serviceUrl(
+        '/publication/' +
+        encodeURIComponent(this.config_.getPublicationId()) +
+        '/offers' +
+        '?label=' + encodeURIComponent(productId));
+    // TODO(dvoytenko): switch to a non-credentialed request after launch.
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      return json['offers'] || [];
+    });
   }
 }
 
@@ -2632,14 +3190,17 @@ class SubscribeResponse {
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
+   * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData) {
+  constructor(raw, purchaseData, userData, completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
     this.purchaseData = purchaseData;
     /** @const {?UserData} */
     this.userData = userData;
+    /** @private @const {function():!Promise} */
+    this.completeHandler_ = completeHandler;
   }
 
   /**
@@ -2649,7 +3210,8 @@ class SubscribeResponse {
     return new SubscribeResponse(
         this.raw,
         this.purchaseData,
-        this.userData);
+        this.userData,
+        this.completeHandler_);
   }
 
   /**
@@ -2660,6 +3222,23 @@ class SubscribeResponse {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
     };
+  }
+
+  /**
+   * Allows the receiving site to complete/acknowledge that it registered
+   * the subscription purchase. The typical action would be to create an
+   * account (or match an existing one) and associated the purchase with
+   * that account.
+   *
+   * SwG will display progress indicator until this method is called and
+   * upon receiving this call will show the confirmation to the user.
+   * The promise returned by this method will yield once the user closes
+   * the confirmation.
+   *
+   * @return {!Promise}
+   */
+  complete() {
+    return this.completeHandler_();
   }
 }
 
@@ -2696,37 +3275,6 @@ class PurchaseData {
 
 
 
-
-/**
- * @param {!web-activities/activity-ports.ActivityPort} port
- * @param {string} requireOrigin
- * @param {boolean} requireOriginVerified
- * @param {boolean} requireSecureChannel
- * @return {!Promise<!Object>}
- */
-function acceptPortResult(
-    port,
-    requireOrigin,
-    requireOriginVerified,
-    requireSecureChannel) {
-  return port.acceptResult().then(result => {
-    if (result.origin != requireOrigin ||
-        requireOriginVerified && !result.originVerified ||
-        requireSecureChannel && !result.secureChannel) {
-      throw new Error('channel mismatch');
-    }
-    return result.data;
-  });
-}
-
-
-
-const PAY_URL =
-    'https://subscribe.sandbox.google.com/swglib/pay';
-
-const PAY_CONFIRM_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/payconfirmiframe';
-
 const PAY_REQUEST_ID = 'swg-pay';
 
 
@@ -2736,7 +3284,7 @@ const PAY_REQUEST_ID = 'swg-pay';
 class PayStartFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
   constructor(deps, sku) {
@@ -2760,15 +3308,19 @@ class PayStartFlow {
   start() {
     // TODO(dvoytenko): switch to gpay async client.
     this.activityPorts_.open(
-        PAY_REQUEST_ID, PAY_URL, '_blank', {
+        PAY_REQUEST_ID,
+        feUrl('/pay'),
+        '_blank',
+        feArgs({
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
+          'environment': 'PRODUCTION',
+          'playEnvironment': 'AUTOPUSH',
           'swg': {
-            'publicationId': this.pageConfig_.getPublisherId(),
-            // TODO(dvoytenko): use 'instant' for tests if necessary.
+            'publicationId': this.pageConfig_.getPublicationId(),
             'skuId': this.sku_,
           },
-        }, {});
+        }), {});
     return Promise.resolve();
   }
 }
@@ -2780,24 +3332,29 @@ class PayStartFlow {
 class PayCompleteFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   static configurePending(deps) {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
-      const promise = validatePayResponse(port);
+      deps.entitlementsManager().blockNextNotification();
+      const flow = new PayCompleteFlow(deps);
+      const promise = validatePayResponse(port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
-      return promise.then(() => {
-        new PayCompleteFlow(deps).start();
+      return promise.then(response => {
+        flow.start(response);
       });
     });
   }
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -2808,54 +3365,81 @@ class PayCompleteFlow {
     /** @private @const {!../runtime/callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        PAY_CONFIRM_IFRAME_URL,
-        {
-          'publicationId': deps.pageConfig().getPublisherId(),
-        },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ false
-    );
+    /** @private {?ActivityIframeView} */
+    this.activityIframeView_ = null;
+
+    /** @private {?SubscribeResponse} */
+    this.response_ = null;
+
+    /** @private {?Promise} */
+    this.readyPromise_ = null;
   }
 
   /**
    * Starts the payments completion flow.
+   * @param {!SubscribeResponse} response
    * @return {!Promise}
    */
-  start() {
+  start(response) {
+    this.deps_.entitlementsManager().reset(true);
+    this.response_ = response;
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/payconfirmiframe'),
+        feArgs({
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'loginHint': response.userData && response.userData.email,
+        }),
+        /* shouldFadeBody */ true);
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
     });
-    return this.dialogManager_.openView(this.activityIframeView_);
+    this.readyPromise_ = this.dialogManager_.openView(this.activityIframeView_);
+    return this.readyPromise_;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  complete() {
+    this.deps_.entitlementsManager().unblockNextNotification();
+    this.readyPromise_.then(() => {
+      this.activityIframeView_.message({'complete': true});
+    });
+    return this.activityIframeView_.acceptResult().catch(() => {
+      // Ignore errors.
+    }).then(() => {
+      this.deps_.entitlementsManager().setToastShown(true);
+    });
   }
 }
 
 
 /**
  * @param {!web-activities/activity-ports.ActivityPort} port
+ * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
  * @package Visible for testing only.
  */
-function validatePayResponse(port) {
+function validatePayResponse(port, completeHandler) {
   return acceptPortResult(
       port,
-      parseUrl(PAY_URL).origin,
+      feOrigin(),
       // TODO(dvoytenko): support payload decryption.
       /* requireOriginVerified */ false,
       /* requireSecureChannel */ false)
-      .then(data => parseSubscriptionResponse(data));
+      .then(data => parseSubscriptionResponse(data, completeHandler));
 }
 
 
 /**
  * @param {*} data
+ * @param {function():!Promise} completeHandler
  * @return {!SubscribeResponse}
  */
-function parseSubscriptionResponse(data) {
+function parseSubscriptionResponse(data, completeHandler) {
   let swgData = null;
   let raw = null;
   if (data) {
@@ -2886,7 +3470,8 @@ function parseSubscriptionResponse(data) {
   return new SubscribeResponse(
       raw,
       parsePurchaseData(swgData),
-      parseUserData(swgData));
+      parseUserData(swgData),
+      completeHandler);
 }
 
 
@@ -2917,29 +3502,22 @@ function parseUserData(swgData) {
 
 
 
-const OFFERS_URL =
-    'https://subscribe.sandbox.google.com/swglib/offersiframe';
-
 
 /**
  * The class for Offers flow.
- *
  */
 class OffersFlow {
 
   /**
-   * @param {!../model/deps.DepsDef} deps
+   * @param {!./deps.DepsDef} deps
    */
   constructor(deps) {
 
-    /** @private @const {!../model/deps.DepsDef} */
+    /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
-
-    /** @private @const {!HTMLDocument} */
-    this.document_ = this.win_.document;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -2951,42 +3529,159 @@ class OffersFlow {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        OFFERS_URL,
-        {
+        feUrl('/offersiframe'),
+        feArgs({
           'productId': deps.pageConfig().getProductId(),
-          'publisherId': deps.pageConfig().getPublisherId(),
-          'publicationId': deps.pageConfig().getPublisherId(),  // MIGRATE
-          'label': deps.pageConfig().getProductId(),  // MIGRATE
-        },
-        /* shouldFadeBody */ true,
-        /* showCloseAction */ true
-    );
-
-    PayCompleteFlow.configurePending(this.deps_);
+          'publicationId': deps.pageConfig().getPublicationId(),
+          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        }),
+        /* shouldFadeBody */ true);
   }
 
   /**
-   * Starts the offers flow.
+   * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */
   start() {
     // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.acceptResult().then(result => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      assert(result.secureChannel, 'The channel is not secured');
-      const data = result.data;
-      if (!data) {
+    this.activityIframeView_.onMessage(result => {
+      if (result['alreadySubscribed']) {
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!result['linkRequested'],
+        });
         return;
       }
-      if (data['alreadySubscribed']) {
-        this.deps_.callbacks().triggerLoginRequest();
+      if (result['sku']) {
+        new PayStartFlow(
+            this.deps_,
+            /** @type {string} */ (result['sku']))
+            .start();
         return;
       }
-      const skuId = data['sku'] || data['skuId'] || '';
-      if (skuId) {
-        return new PayStartFlow(this.deps_, skuId).start();
+      if (result['native']) {
+        this.deps_.callbacks().triggerSubscribeRequest();
+        return;
       }
     });
+
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+}
+
+
+/**
+ * The class for subscribe option flow.
+ */
+class SubscribeOptionFlow {
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        deps.win(),
+        this.activityPorts_,
+        feUrl('/optionsiframe'),
+        feArgs({
+          'publicationId': deps.pageConfig().getPublicationId(),
+        }),
+        /* shouldFadeBody */ false);
+  }
+
+  /**
+   * Starts the offers flow or alreadySubscribed flow.
+   * @return {!Promise}
+   */
+  start() {
+    this.activityIframeView_.onMessage(data => {
+      this.maybeOpenOffersFlow_(data);
+    });
+    this.activityIframeView_.acceptResult().then(result => {
+      this.maybeOpenOffersFlow_(result.data);
+    });
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {*} data
+   * @private
+   */
+  maybeOpenOffersFlow_(data) {
+    if (data && data['subscribe']) {
+      new OffersFlow(this.deps_).start();
+    }
+  }
+}
+
+
+/**
+ * The class for Abbreviated Offer flow.
+ *
+ */
+class AbbrvOfferFlow {
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/abbrvofferiframe'),
+        feArgs({
+          'publicationId': deps.pageConfig().getPublicationId(),
+        }),
+        /* shouldFadeBody */ true);
+  }
+
+  /**
+   * Starts the offers flow
+   * @return {!Promise}
+   */
+  start() {
+
+    // If the user is already subscribed, trigger login flow
+    this.activityIframeView_.onMessage(data => {
+      if (data['alreadySubscribed']) {
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!data['linkRequested'],
+        });
+        return;
+      }
+      // TODO(sohanirao) : Handle the case when user is logged in
+    });
+    // If result is due to requesting offers, redirect to offers flow
+    this.activityIframeView_.acceptResult().then(result => {
+      if (result.data['viewOffers']) {
+        new OffersFlow(this.deps_).start();
+      }
+    });
+
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 }
@@ -3063,146 +3758,76 @@ function whenDocumentReady(doc) {
 
 
 
-const CSS$2 = "body{padding:0;margin:0;font-family:'Google sans, sans-serif'}.swg-toast-container{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;width:100%}.swg-label{color:#fff;-webkit-box-flex:1;-ms-flex:auto;flex:auto;font-weight:300;padding-left:8px}.swg-detail{background:transparent;color:#0f0;border:none;cursor:pointer;font-size:inherit;outline:none;white-space:nowrap;-webkit-box-flex:initial;-ms-flex:initial;flex:initial;font-family:inherit}\n/*# sourceURL=/./src/ui/toast.css*/";
+const PREFIX = 'subscribe.google.com';
 
 
-
-/** @const {!Object<string, string|number>} */
-const toastImportantStyles = {
-  'height': '60px',
-  'position': 'fixed',
-  'bottom': 0,
-  'color': 'rgb(255, 255, 255)',
-  'font-size': '15px',
-  'padding': '20px 8px 0',
-  'z-index': '2147483647',
-  'border': 'none',
-  'box-shadow': 'gray 3px 3px, rgb(0, 0, 0) 0 0 1.4em',
-  'background-color': 'rgb(51, 51, 51)',
-  'box-sizing': 'border-box',
-  'font-family': 'Google sans, sans-serif',
-  'animation': 'swg-notify 1s ease-out normal backwards, '
-      + 'swg-notify-hide 1s ease-out 7s normal forwards',
-};
-
-
-/**
- * The class Notification toast.
- */
-class Toast {
+class Storage {
 
   /**
    * @param {!Window} win
-   * @param {!ToastSpecDef} spec
    */
-  constructor(win, spec) {
-
+  constructor(win) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = win.document;
-
-    /** @private @const {!ToastSpecDef} */
-    this.spec_ = spec;
-
-    /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-toast'});
-
-    /** @private {?Element} */
-    this.container_ = null;
-
-    setImportantStyles(this.iframe_.getElement(), toastImportantStyles);
-    setStyles(this.iframe_.getElement(), topFriendlyIframePositionStyles);
+    /** @private @const {!Object<string, !Promise<?string>>} */
+    this.values_ = {};
   }
 
   /**
-   * Gets the attached iframe instance.
-   * @return {!FriendlyIframe}
+   * @param {string} key
+   * @return {!Promise<?string>}
    */
-  getIframe() {
-    return this.iframe_;
+  get(key) {
+    if (!this.values_[key]) {
+      this.values_[key] = new Promise(resolve => {
+        if (this.win_.sessionStorage) {
+          try {
+            resolve(this.win_.sessionStorage.getItem(storageKey(key)));
+          } catch (e) {
+            // Ignore error.
+            resolve(null);
+          }
+        } else {
+          resolve(null);
+        }
+      });
+    }
+    return this.values_[key];
   }
 
   /**
-   * Gets the Iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_.getElement();
-  }
-
-  /**
-   * Opens the notification toast.
+   * @param {string} key
+   * @param {string} value
    * @return {!Promise}
    */
-  open() {
-    const iframe = this.iframe_;
-    if (iframe.isConnected()) {
-      throw new Error('Already opened');
-    }
-    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
-
-    return iframe.whenReady().then(() => this.buildIframe_());
-  }
-
-  /**
-   * Closes the toast.
-   */
-  close() {
-    this.doc_.body.removeChild(this.iframe_.getElement());
-  }
-
-  /**
-   * Builds the iframe with content and the styling after iframe is loaded.
-   * @private
-   * @return {!Toast}
-   */
-  buildIframe_() {
-    const iframe = this.iframe_;
-    const iframeDoc = iframe.getDocument();
-    const iframeBody = iframe.getBody();
-
-    // Inject Google fonts in <HEAD> section of the iframe.
-    injectFontsLink(iframeDoc, googleFontsUrl);
-    injectStyleSheet(iframeDoc, CSS$2);
-
-    this.addItems_(iframeDoc, iframeBody);
-
-    return this;
-  }
-
-  /**
-   * Adds label and detail button.
-   * @param {!Document} iframeDoc
-   * @param {?Element} iframeBody
-   * @private
-   */
-  addItems_(iframeDoc, iframeBody) {
-    const childElements = [];
-
-    const label = createElement(iframeDoc, 'div', {
-      'class': 'swg-label',
-    }, this.spec_.text);
-    childElements.push(label);
-
-    if (this.spec_.action && this.spec_.action.label) {
-      const linkButton = createElement(iframeDoc, 'button', {
-        'class': 'swg-detail',
-        'aria-label': 'Details',
-      }, this.spec_.action.label);
-      linkButton.addEventListener('click', this.spec_.action.handler);
-      childElements.push(linkButton);
-    }
-
-    // Create container element and add 'label' and/or 'linkButton' to it.
-    this.container_ = createElement(iframeDoc, 'div', {
-      'class': 'swg-toast-container',
-    }, childElements);
-
-    iframeBody.appendChild(this.container_);
+  set(key, value) {
+    this.values_[key] = Promise.resolve(value);
+    return new Promise(resolve => {
+      if (this.win_.sessionStorage) {
+        try {
+          this.win_.sessionStorage.setItem(storageKey(key), value);
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+      resolve();
+    });
   }
 }
+
+
+/**
+ * @param {string} key
+ * @return {string}
+ */
+function storageKey(key) {
+  return PREFIX + ':' + key;
+}
+
+
+
+
 
 
 
@@ -3233,9 +3858,8 @@ class ConfiguredRuntime {
     /** @private @const {!Fetcher} */
     this.fetcher_ = opt_integr && opt_integr.fetcher || new XhrFetcher(win);
 
-    /** @private @const {!EntitlementsManager} */
-    this.entitlementsManager_ =
-        new EntitlementsManager(this.win_, this.config_, this.fetcher_);
+    /** @private @const {!Storage} */
+    this.storage_ = new Storage(this.win_);
 
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(win);
@@ -3245,6 +3869,13 @@ class ConfiguredRuntime {
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
+
+    /** @private @const {!EntitlementsManager} */
+    this.entitlementsManager_ =
+        new EntitlementsManager(this.win_, this.config_, this.fetcher_, this);
+
+    /** @private @const {!OffersApi} */
+    this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
 
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
@@ -3271,8 +3902,18 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  entitlementsManager() {
+    return this.entitlementsManager_;
+  }
+
+  /** @override */
   callbacks() {
     return this.callbacks_;
+  }
+
+  /** @override */
+  storage() {
+    return this.storage_;
   }
 
   /** @override */
@@ -3281,46 +3922,17 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  reset() {
+    this.entitlementsManager_.reset();
+  }
+
+  /** @override */
   start() {
     // No need to run entitlements without a product or for an unlocked page.
     if (!this.config_.getProductId() || !this.config_.isLocked()) {
       return Promise.resolve();
     }
-    // TODO(dvoytenko): is there a point in running entitlements at all before
-    // subscription response is discovered?
-    // TODO(dvoytenko): what's the right action when pay flow was canceled?
-    const promise = this.entitlementsManager_.getEntitlements();
-    return promise.catch(() => null).then(entitlements => {
-      if (this.callbacks_.hasSubscribeResponsePending()) {
-        return;
-      }
-      this.callbacks_.triggerEntitlementsResponse(promise);
-      if (!entitlements) {
-        return;
-      }
-      const entitlement = entitlements.getEntitlementForThis();
-      if (entitlement) {
-        const toast = new Toast(this.win_, {
-          text:
-              (entitlement.source || 'google') == 'google' ?
-              'Access via Google Subscriptions' :
-              // TODO(dvoytenko): display name instead.
-              'Access via [' + entitlement.source + ']',
-          action: {
-            label: 'View',
-            handler: function() {
-              // TODO(dparikh): Implementation.
-            },
-          },
-        });
-        toast.open();
-      }
-    });
-  }
-
-  /** @override */
-  reset() {
-    this.entitlementsManager_.reset();
+    this.getEntitlements();
   }
 
   /** @override */
@@ -3335,9 +3947,30 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  getOffers(opt_options) {
+    return this.offersApi_.getOffers(opt_options && opt_options.productId);
+  }
+
+  /** @override */
   showOffers() {
     return this.documentParsed_.then(() => {
       const flow = new OffersFlow(this);
+      return flow.start();
+    });
+  }
+
+  /** @override */
+  showSubscribeOption() {
+    return this.documentParsed_.then(() => {
+      const flow = new SubscribeOptionFlow(this);
+      return flow.start();
+    });
+  }
+
+  /** override */
+  showAbbrvOffer() {
+    return this.documentParsed_.then(() => {
+      const flow = new AbbrvOfferFlow(this);
       return flow.start();
     });
   }
@@ -3355,8 +3988,13 @@ class ConfiguredRuntime {
   /** @override */
   linkAccount() {
     return this.documentParsed_.then(() => {
-      return new LinkStartFlow(this).start();
+      return new LinkbackFlow(this).start();
     });
+  }
+
+  /** @override */
+  setOnNativeSubscribeRequest(callback) {
+    this.callbacks_.setOnSubscribeRequest(callback);
   }
 
   /** @override */
@@ -3377,5 +4015,8 @@ class ConfiguredRuntime {
 
 export {
   ConfiguredRuntime,
+  Entitlements,
+  Entitlement,
   Fetcher,
+  SubscribeResponse,
 };
