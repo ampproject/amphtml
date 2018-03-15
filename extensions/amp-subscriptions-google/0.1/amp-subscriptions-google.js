@@ -185,9 +185,14 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * Perdforms the pingback to the subscription platform
+   * Performs the pingback to the subscription platform
    */
   pingback() {}
+
+  /** @override */
+  supportsCurrentViewer() {
+    return this.isGoogleViewer_;
+  }
 
   /**
    * @param {!../../../src/service/viewer-impl.Viewer} viewer
