@@ -88,10 +88,10 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Element} element
  * @return {!Array<string>}
  */
-export function getLanguageCodesForElement(element) {
+function getLanguageCodesForElement(element) {
   const languageEl = closest(element, el => el.hasAttribute('lang'));
-  const languageCode = languageEl.getAttribute('lang') || '';
-  return getLanguageCodesFromString(languageCode);
+  const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
+  return getLanguageCodesFromString(languageCode || '');
 }
 
 

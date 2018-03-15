@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {MessageId} from '../messages';
+import {
+  MessageId,
+  MessageService,
+  getLanguageCodesFromString,
+} from '../messages';
 
 describes.fakeWin('amp-story messages', {}, () => {
   describe('message IDs', () => {
@@ -43,6 +47,30 @@ describes.fakeWin('amp-story messages', {}, () => {
             .lengthOf(1, `${value} is used as a value for more than one ` +
                 `message ID: ${keys}`);
       });
+    });
+  });
+
+  describe('message service', () => {
+    const TEST_MESSAGE_ID = 'test_message_id';
+    const TEST_MESSAGE_CONTENT = 'test message content';
+
+    it('should set text content from message', () => {
+      const messageService = new MessageService();
+      messageService.registerMessageBundle('default', {
+        [TEST_MESSAGE_ID]: {
+          message: TEST_MESSAGE_CONTENT,
+        },
+      });
+      const el = document.createElement('div');
+
+      expect(el.innerText).to.be.empty;
+      messageService.setInnerTextToMessage(el, TEST_MESSAGE_ID);
+      expect(el.innerText).to.equal(TEST_MESSAGE_CONTENT);
+    });
+
+    it('should have language fallbacks', () => {
+      expect(getLanguageCodesFromString('en-US-123')).to
+          .deep.equal(['en-us-123', 'en-us', 'en', 'default']);
     });
   });
 });

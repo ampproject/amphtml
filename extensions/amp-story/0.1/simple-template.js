@@ -23,7 +23,7 @@ import {isArray, toWin} from '../../../src/types';
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   messageId: ./messages.MessageId,
+ *   messageId: (number|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
