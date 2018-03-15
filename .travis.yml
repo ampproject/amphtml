@@ -17,7 +17,7 @@ before_script:
   - pip install --user protobuf
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
   - ./node_modules/.bin/greenkeeper-lockfile-update
-script: node build-system/pr-check.js
+script: gulp build && gulp visual-diff --headless
 after_script:
   - ./node_modules/.bin/greenkeeper-lockfile-upload
   - cat chromedriver.log
@@ -51,7 +51,7 @@ addons:
     - python-protobuf
 matrix:
   include:
-    - env: BUILD_SHARD="unit_tests"
+    # - env: BUILD_SHARD="unit_tests"
     - env: BUILD_SHARD="integration_tests"
 cache:
   yarn: true
