@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkTemplateBase} from './amp-ad-network-template-base';
-import {NetworkRegistry} from './template-common-config';
+import {AmpAdNetworkTemplateBase} from '../../amp-a4a/0.1/amp-ad-network-template-base';
+import {NetworkRegistry} from './config';
 import {dev} from '../../../src/log';
 
 const TAG = 'amp-ad-template-common';
@@ -37,6 +37,7 @@ export class AmpAdTemplateCommon extends AmpAdNetworkTemplateBase {
 
   /** @override */
   getRequestUrl() {
+    this.getContext().requestUrl = this.requestUrl_;
     return this.requestUrl_;
   }
 }

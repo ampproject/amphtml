@@ -17,10 +17,10 @@
 import {AmpAdNetworkBase} from './amp-ad-network-base';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {FriendlyFrameRenderer} from './amp-ad-render';
-import {Validator, ValidatorResult} from './amp-ad-type-defs';
 import {Services} from '../../../src/services';
-import {tryParseJson} from '../../../src/json';
+import {Validator, ValidatorResult} from './amp-ad-type-defs';
 import {pushIfNotExist} from '../../../src/utils/array';
+import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -49,7 +49,7 @@ export class TemplateValidator extends Validator {
   /**
    * @param {string} templateString
    * @param {!AmpTemplateCreativeDef} parsedResponseBody
-   * @return {!CreativeMetaDataDef}
+   * @return {!./amp-ad-render.CreativeMetaDataDef}
    * @private
    */
   getAmpAdMetadata_(templateString, parsedResponseBody) {
@@ -58,7 +58,7 @@ export class TemplateValidator extends Validator {
     // by more sophisticated logic.
     const minifiedCreative = templateString.replace(
         /<script async.+?<\/script>/g, '');
-    const metadata = /** @type {!CreativeMetaDataDef} */ ({
+    const metadata = /** @type {!./amp-ad-render.CreativeMetaDataDef} */ ({
       minifiedCreative,
       customElementExtensions: [],
       extensions: [],
@@ -71,7 +71,7 @@ export class TemplateValidator extends Validator {
   }
 
   /**
-   * @param {!CreativeMetaDataDef} metadata
+   * @param {!./amp-ad-render.CreativeMetaDataDef} metadata
    * @param {!Window} win
    * @private
    */
@@ -89,7 +89,12 @@ export class TemplateValidator extends Validator {
     if (!headers ||
         headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
       creativeData['creative'] = body;
-      return Promise.resolve({creativeData, type: ValidatorResult.NON_AMP});
+      return Promise.resolve(
+          /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
+            creativeData,
+            adResponseType: 'template',
+            type: ValidatorResult.NON_AMP,
+          }));
     }
 
     const parsedResponseBody =
@@ -102,8 +107,8 @@ export class TemplateValidator extends Validator {
         .then(template => {
           const creativeMetadata =
               this.getAmpAdMetadata_(template, parsedResponseBody);
-          this.processMetadata_(creativeMetadata, context);
-          creativeData.templateData = parsedResponseBody.data;
+          this.processMetadata_(creativeMetadata, context.win);
+          creativeData.templateData = parsedResponseBody;
           creativeData.creativeMetadata = creativeMetadata;
           return {creativeData, type: ValidatorResult.AMP};
         });
@@ -124,7 +129,8 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
 
   /** @override */
   render(context, containerElement, creativeData) {
-    super.render(context, containerElement, creativeData.creativeMetadata)
+    return super.render(
+        context, containerElement, creativeData.creativeMetadata)
         .then(() => {
           const templateData = creativeData.templateData;
           const templateMacroValues = templateData && templateData.data;
@@ -167,6 +173,19 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
     this.registerRenderer(renderer, ValidatorResult.AMP);
 
     this.getContext().win = this.win;
+    this.getContext().applyFillContent = this.applyFillContent.bind(this);
+    this.getContext().isInViewport = this.isInViewport.bind(this);
+    this.getContext().ampDoc = this.getAmpDoc();
+  }
+
+  /** @override */
+  buildCallback() {
+    this.getContext().size = {
+      // TODO(levitzky) handle non-numeric values.
+      width: this.element.getAttribute('width'),
+      height: this.element.getAttribute('height'),
+      layout: this.element.getAttribute('layout'),
+    };
   }
 }
 
