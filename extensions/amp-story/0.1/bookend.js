@@ -258,7 +258,7 @@ export class Bookend {
       }
       if (e.keyCode == KeyCodes.ESCAPE) {
         e.preventDefault();
-        this.dispatchClose_();
+        this.close_();
       }
     });
 
@@ -289,8 +289,15 @@ export class Bookend {
   maybeClose_(e) {
     if (this.elementOutsideUsableArea_(dev().assertElement(e.target))) {
       e.stopPropagation();
-      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
+      this.close_();
     }
+  }
+
+  /**
+   * Closes the bookend.
+   */
+  close_() {
+    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
   }
 
   /**

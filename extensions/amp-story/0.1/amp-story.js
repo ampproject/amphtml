@@ -1135,10 +1135,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Toggle content when bookend is opened/closed.
-   * @param {boolean} display
+   * @param {boolean} isActive
    * @private
    */
-  toggleElementsOnBookend_(display) {
+  toggleElementsOnBookend_(isActive) {
     if (!this.isDesktop_()) {
       return;
     }
@@ -1147,13 +1147,13 @@ export class AmpStory extends AMP.BaseElement {
         HIDE_ON_BOOKEND_SELECTOR);
 
     Array.prototype.forEach.call(elements, el => {
-      if (display) {
-        resetStyles(el, ['opacity', 'transition']);
-      } else {
+      if (isActive) {
         setImportantStyles(el, {
           opacity: 0,
           transition: 'opacity 0.3s',
         });
+      } else {
+        resetStyles(el, ['opacity', 'transition']);
       }
     });
   }
@@ -1328,7 +1328,7 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve(true);
     }
     return this.loadBookendConfig_().then(config =>
-      config && config.relatedArticles && config.relatedArticles.length);
+      !!(config && config.relatedArticles && config.relatedArticles.length));
   }
 
 

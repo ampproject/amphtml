@@ -130,10 +130,12 @@ class PaginationButton {
     e.preventDefault();
     if (this.state_.triggers) {
       dispatch(this.element, dev().assert(this.state_.triggers),
-        /* opt_bubbles */ true);
+          /* opt_bubbles */ true);
+      return;
     }
-    if(this.state_.action) {
+    if (this.state_.action) {
       this.storeService_.dispatch(this.state_.action, this.state_.data);
+      return;
     }
   }
 }

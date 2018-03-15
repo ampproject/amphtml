@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventType} from './events';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
@@ -66,7 +65,7 @@ export class NavigationState {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       if (isActive) {
         this.fire_(StateChangeType.BOOKEND_ENTER);
-        this.fire_(StateChangeType.END)
+        this.fire_(StateChangeType.END);
       }
 
       if (!isActive) {
@@ -76,7 +75,7 @@ export class NavigationState {
   }
 
   /**
-   * @param {!function(!StateChangeEventDef):void} stateChangeFn
+   * @param {function(!StateChangeEventDef):void} stateChangeFn
    */
   observe(stateChangeFn) {
     this.observable_.add(stateChangeFn);
