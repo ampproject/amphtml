@@ -16,6 +16,7 @@
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
+import {NetworkRegistry} from '../../amp-ad-template-common/0.1/config';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
@@ -60,7 +61,8 @@ export class AmpAd extends AMP.BaseElement {
       const type = this.element.getAttribute('type');
       const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
-          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+          || hasOwn(a4aRegistry, type) || hasOwn(NetworkRegistry, type),
+      `Unknown ad type "${type}"`);
 
       // Check for the custom ad type (no ad network, self-service)
       if (isCustom) {
@@ -78,30 +80,39 @@ export class AmpAd extends AMP.BaseElement {
               this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
           // TODO(tdrl): Check amp-ad registry to see if they have this already.
           // TODO(a4a-cam): Shorten this predicate.
-          if (!a4aRegistry[type] ||
+          const isA4aEligible = a4aRegistry[type] &&
               // Note that predicate execution may have side effects.
-              !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
-            // Either this ad network doesn't support Fast Fetch, its Fast
-            // Fetch implementation has explicitly opted not to handle this
-            // tag, or this page uses remote.html which is inherently
-            // incompatible with Fast Fetch. Fall back to Delayed Fetch.
-            return resolve(new AmpAd3PImpl(this.element));
+              a4aRegistry[type](this.win, this.element, useRemoteHtml);
+          const isA4aLiteEligible = !!NetworkRegistry[type];
+          const handleError = error => {
+            // Work around presubmit restrictions.
+            const TAG = this.element.tagName;
+            // Report error and fallback to 3p
+            this.user().error(
+                TAG,
+                'Unable to load ad implementation for type, falling back to',
+                type, '3p, error: ', error);
+            return new AmpAd3PImpl(this.element);
+          };
+          if (isA4aEligible) {
+            const extensionTagName = networkImplementationTag(type);
+            this.element.setAttribute('data-a4a-upgrade-type',
+                extensionTagName);
+            return resolve(Services.extensionsFor(this.win)
+                .loadElementClass(extensionTagName)
+                .then(ctor => new ctor(this.element))
+                .catch(handleError));
+          } else if (isA4aLiteEligible) {
+            return resolve(Services.extensionsFor(this.win)
+                .loadElementClass('amp-ad-template-common')
+                .then(ctor => new ctor(this.element))
+                .catch(handleError));
           }
-
-          const extensionTagName = networkImplementationTag(type);
-          this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-          resolve(Services.extensionsFor(this.win)
-              .loadElementClass(extensionTagName)
-              .then(ctor => new ctor(this.element))
-              .catch(error => {
-              // Work around presubmit restrictions.
-                const TAG = this.element.tagName;
-                // Report error and fallback to 3p
-                this.user().error(
-                    TAG, 'Unable to load ad implementation for type ',
-                    type, ', falling back to 3p, error: ', error);
-                return new AmpAd3PImpl(this.element);
-              }));
+          // Either this ad network doesn't support Fast Fetch, its Fast Fetch
+          // implementation has explicitly opted not to handle this tag, or this
+          // page uses remote.html which is inherently incompatible with Fast
+          // Fetch. Fall back to Delayed Fetch.
+          return resolve(new AmpAd3PImpl(this.element));
         });
       });
     });
@@ -112,3 +123,4 @@ AMP.extension('amp-ad', '0.1', AMP => {
   AMP.registerElement('amp-ad', AmpAd, CSS);
   AMP.registerElement('amp-embed', AmpAd);
 });
+
