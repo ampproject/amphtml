@@ -335,9 +335,9 @@ class AmpApesterMedia extends AMP.BaseElement {
           const payload = response['payload'];
           // If it's a playlist we choose a media randomly.
           // The response will be an array.
-          const media = this.embedOptions_.playlist
+          const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
             ? payload[Math.floor(Math.random() * payload.length)]
-            : payload;
+            : payload);
           const src = this.constructUrlFromMedia_(media['interactionId']);
           const iframe = this.constructIframe_(src);
           this.intersectionObserverApi_ = new IntersectionObserverApi(
@@ -359,7 +359,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                     this.iframe_.classList
                         .add('i-amphtml-apester-iframe-ready');
                     this.iframe_.contentWindow./*OK*/ postMessage(
-                        {type: 'campaigns', data: media['campaignData']},
+                        /** @type {JsonObject} */ ({type: 'campaigns', data: media['campaignData']}),
                         '*'
                     );
                     this.togglePlaceholder(false);
