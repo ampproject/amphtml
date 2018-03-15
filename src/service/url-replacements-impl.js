@@ -336,17 +336,14 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the IANA timezone code
     this.set('TIMEZONE_CODE', () => {
-      let tzCode = '';
-      if (Intl && typeof Intl === 'object') {
-        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
-
+      let tzCode;
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
         // It could be undefined (i.e. IE11)
-        if (typeof tzCode === 'undefined') {
-          tzCode = '';
-        }
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
       }
 
-      return tzCode;
+      return tzCode || '';
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
