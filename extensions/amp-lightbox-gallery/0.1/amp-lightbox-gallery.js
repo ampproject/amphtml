@@ -38,7 +38,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {setStyle, toggle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-lightbox-gallery';
@@ -55,7 +55,6 @@ const LightboxControlsModes = {
   CONTROLS_HIDDEN: 0,
 };
 
-const DESC_BOX_PADDING_TOP = 50;
 const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
@@ -121,6 +120,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.descriptionTextArea_ = null;
+
+    /** @private {?Element} */
+    this.descriptionOverflowMask_ = null;
 
     /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
     this.elementsMetadata_ = {
@@ -330,8 +332,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
-    this.descriptionTextArea_.classList.add('non-expanded');
 
+    this.descriptionOverflowMask_ = this.win.document.createElement('div');
+    this.descriptionOverflowMask_.classList.add('i-amphtml-lbg-desc-mask');
+
+    this.descriptionBox_.appendChild(this.descriptionOverflowMask_);
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     this.descriptionBox_.addEventListener('click', event => {
@@ -350,14 +355,37 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    // The problem with setting innerText is that it not only removes
-    // child nodes from the element, but also permanently destroys all
-    // descendant text nodes. It is okay in this case because the description
-    // text area is a div that does not contain descendant elements.
-    this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
       this.vsync_.mutate(() => {
         toggle(dev().assertElement(this.descriptionBox_), false);
+      });
+    } else {
+      const measureOverflow = state => {
+        state.isOverflown = this.descriptionBox_./*OK*/clientHeight
+          !== this.descriptionBox_./*OK*/scrollHeight;
+        state.overflowOn = this.descriptionBox_.classList.contains('overflow');
+      };
+
+      const mutateOverflowIfApplicable = state => {
+        if (state.isOverflown || state.overflowOn) {
+          toggle(dev().assertElement(this.descriptionOverflowMask_), true);
+        } else if (!state.overflowOn) {
+          toggle(dev().assertElement(this.descriptionOverflowMask_), false);
+        }
+      };
+
+      this.vsync_.mutate(() => {
+        // The problem with setting innerText is that it not only removes
+        // child nodes from the element, but also permanently destroys all
+        // descendant text nodes. It is okay in this case because the description
+        // text area is a div that does not contain descendant elements.
+        this.descriptionTextArea_./*OK*/innerText = descText;
+
+        toggle(dev().assertElement(this.descriptionBox_), true);
+        this.vsync_.run({
+          measure: measureOverflow,
+          mutate: mutateOverflowIfApplicable,
+        }, {});
       });
     }
   }
@@ -367,83 +395,24 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
-    // TODO: if there is nothing to expand into, don't shim.
-    if (this.descriptionBox_.classList.contains('standard')) {
-      const measureBeforeExpandingDescTextArea = state => {
-        state.prevDescTextAreaHeight =
-            this.descriptionTextArea_./*OK*/scrollHeight;
-        state.descBoxHeight = this.descriptionBox_./*OK*/clientHeight;
-        state.descBoxPaddingTop = DESC_BOX_PADDING_TOP;
-      };
+    const measureOverflowState = state => {
+      state.isStandard = this.descriptionBox_.classList.contains('standard');
+    };
 
-      const measureAfterExpandingDescTextArea = state => {
-        state.descTextAreaHeight = this.descriptionTextArea_./*OK*/scrollHeight;
-      };
-
-      const mutateAnimateDesc = state => {
-        const finalDescTextAreaTop =
-            state.descBoxHeight > state.descTextAreaHeight ?
-              state.descBoxHeight - state.descBoxPaddingTop -
-            state.descTextAreaHeight : 0;
-        const tempOffsetHeight =
-            state.descBoxHeight > state.descTextAreaHeight ?
-              state.descTextAreaHeight - state.prevDescTextAreaHeight :
-              state.descBoxHeight - state.descBoxPaddingTop -
-            state.prevDescTextAreaHeight;
-        this.animateDescOverflow_(tempOffsetHeight, finalDescTextAreaTop);
-      };
-
-      const mutateExpandingDescTextArea = state => {
-        this.descriptionTextArea_.classList.remove('non-expanded');
-        const tempDescTextAreaTop = state.descBoxHeight -
-            state.descBoxPaddingTop - state.prevDescTextAreaHeight;
-        setStyle(this.descriptionTextArea_, 'top', `${tempDescTextAreaTop}px`);
-        this.vsync_.run({
-          measure: measureAfterExpandingDescTextArea,
-          mutate: mutateAnimateDesc,
-        }, {
-          prevDescTextAreaHeight: state.prevDescTextAreaHeight,
-          descBoxHeight: state.descBoxHeight,
-          descBoxPaddingTop: state.descBoxPaddingTop,
-        });
-      };
-
-      this.descriptionBox_.classList.remove('standard');
-      this.descriptionBox_.classList.add('overflow');
-      this.topBar_.classList.add('fullscreen');
-      this.vsync_.run({
-        measure: measureBeforeExpandingDescTextArea,
-        mutate: mutateExpandingDescTextArea,
-      }, {});
-    } else if (this.descriptionBox_.classList.contains('overflow')) {
-      this.vsync_.mutate(() => {
+    const mutateOverflowState = state => {
+      if (state.isStandard) {
+        this.descriptionBox_.classList.remove('standard');
+        this.descriptionBox_.classList.add('overflow');
+      } else {
         this.descriptionBox_.classList.remove('overflow');
-        this.topBar_.classList.remove('fullscreen');
         this.descriptionBox_.classList.add('standard');
-        this.descriptionTextArea_.classList.add('non-expanded');
-        setStyle(this.descriptionTextArea_, 'top', '');
-      });
-    }
-  }
+      }
+    };
 
-  /**
-   * @param {number} diffTop
-   * @param {number} finalTop
-   * @param {number=} duration
-   * @param {string=} curve
-   * @private
-   */
-  animateDescOverflow_(diffTop, finalTop,
-    duration = 500, curve = 'ease-out') {
-    const textArea = dev().assertElement(this.descriptionTextArea_);
-    const transition = tr.numeric(0, diffTop);
-    return Animation.animate(textArea, time => {
-      const p = transition(time);
-      setStyle(textArea, 'transform', `translateY(-${p}px)`);
-    }, duration, curve).thenAlways(() => {
-      setStyle(textArea, 'top', `${finalTop}px`);
-      setStyle(textArea, 'transform', '');
-    });
+    this.vsync_.run({
+      measure: measureOverflowState,
+      mutate: mutateOverflowState,
+    }, {});
   }
 
   /**
@@ -975,16 +944,23 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /**
    * Calculates transition duration from vertical distance traveled
    * @param {number} dy
+   * @param {number=} maxY
+   * @param {number=} minDur
+   * @param {number=} maxDur
    * @return {number}
    * @private
    */
-  getTransitionDuration_(dy) {
-    const distanceAdjustedDuration =
-      Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * MAX_TRANSITION_DURATION;
+  getTransitionDuration_(
+    dy,
+    maxY = MAX_DISTANCE_APPROXIMATION,
+    minDur = MIN_TRANSITION_DURATION,
+    maxDur = MAX_TRANSITION_DURATION
+  ) {
+    const distanceAdjustedDuration = Math.abs(dy) / maxY * maxDur;
     return clamp(
         distanceAdjustedDuration,
-        MIN_TRANSITION_DURATION,
-        MAX_TRANSITION_DURATION
+        minDur,
+        maxDur
     );
   }
 
@@ -1134,6 +1110,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const thumbnails = [];
     this.manager_.getThumbnails(this.currentLightboxGroupId_)
         .forEach(thumbnail => {
+          // Don't include thumbnails for ads, this may be subject to
+          // change pending user feedback or ux experiments after launch
+          if (thumbnail.element.tagName == 'AMP-AD') {
+            return;
+          }
           const thumbnailElement = this.createThumbnailElement_(thumbnail);
           thumbnails.push(thumbnailElement);
         });

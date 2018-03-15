@@ -123,7 +123,7 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  overflow-x: hidden !important;
+  overflow: hidden !important;
   color: #ffffff;
   z-index: 2 !important;
   opacity: 0;
@@ -133,14 +133,20 @@
 .i-amphtml-lbg-desc-box.standard {
   background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
   max-height: 6rem !important;
+  transition: max-height ease-out 0.3s !important;
 }
 
 .i-amphtml-lbg-desc-box.overflow {
-  background-color: rgba(0,0,0,0.5);
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  top: 0px !important;
-  padding-top: 50px !important;
+  max-height: 100% !important;
+  transition: max-height ease-in 0.3s !important;
+}
+
+.i-amphtml-lbg-desc-mask {
+  width: 100% !important;
+  position: fixed !important;
+  bottom: 0 !important;
 }
 
 .i-amphtml-lbg-desc-text {
@@ -148,18 +154,30 @@
   position: relative !important;
 }
 
-.i-amphtml-lbg-desc-text.non-expanded {
-  overflow-y: hidden !important;
-  overflow-x: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+.i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-text {
+  padding-top: 40px !important;
+}
+
+.i-amphtml-lbg-desc-box.standard .i-amphtml-lbg-desc-mask {
+  z-index: 1 !important;
+  height: 4rem !important;
+  background: linear-gradient(transparent, transparent 50%, rgba(0,0,0,0.9));
+  transition: background-color ease-out 0.4s !important;
+}
+.i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-mask {
+  background-color: rgba(0,0,0,0.4) !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 0 !important;
+  transition: background-color ease-in 0.4s !important;
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
   display: grid !important;
   justify-content: center !important;
   grid-gap: 5px !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: min-content !important;
   padding: 5px;
 }
@@ -238,4 +256,11 @@ amp-lightbox-gallery .i-amphtml-slide-item > * {
     opacity: 0;
     visibility: hidden;
    }
+}
+
+@keyframes slideUp {
+  from { max-height: 6rem; }
+  to {
+    max-height: 100%;
+  }
 }

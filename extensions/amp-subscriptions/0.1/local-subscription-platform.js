@@ -88,10 +88,17 @@ export class LocalSubscriptionPlatform {
     this.readerIdPromise_ = null;
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
-    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_);
+    this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
+        serviceAdapter.getDialog());
 
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
+
+    /** @private @const {boolean} */
+    this.isPingbackEnabled_ = true;
+
+    /** @private @const {?string} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
 
     this.initializeListeners_();
   }
@@ -183,6 +190,33 @@ export class LocalSubscriptionPlatform {
           this.entitlement_ = entitlement;
           return entitlement;
         });
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    return !!this.pingbackUrl_;
+  }
+
+  /** @override */
+  pingback(selectedEntitlement) {
+    if (!this.isPingbackEnabled) {
+      return;
+    }
+    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
+        'pingbackUrl is null'));
+
+    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
+        /* useAuthData */ true);
+    return promise.then(url => {
+      return this.xhr_.sendSignal(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: selectedEntitlement.raw,
+      });
+    });
   }
 }
 
