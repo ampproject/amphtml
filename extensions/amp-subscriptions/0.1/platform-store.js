@@ -266,6 +266,7 @@ export class PlatformStore {
       if (!!entitlement.subscriptionToken) {
         weight += 10;
       }
+
       // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
         weight += 9;
@@ -283,12 +284,13 @@ export class PlatformStore {
     platformWeights.sort(function(platform1, platform2) {
       return platform2.weight - platform1.weight;
     });
-
     // Nobody supports current viewer, nor is anybody subscribed
     if (platformWeights.length === 0) {
       return localPlatform;
     }
+
     const winningWeight = platformWeights[0].weight;
+
     if (winningWeight > localWeight) {
       return platformWeights[0].platform;
     }

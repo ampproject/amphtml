@@ -23,12 +23,12 @@ describes.realWin('Platform store', {}, () => {
   let platformStore;
   const serviceIds = ['service1', 'service2'];
   const currentProduct = 'currentProductId';
-  const entitlementsForService1 =
-    new Entitlement(serviceIds[0], '', serviceIds[0], ['currentProductId'],
-        '', false);
-  const entitlementsForService2 =
-    new Entitlement(serviceIds[1], '', serviceIds[1], ['product3'],
-        '', false);
+  const entitlementsForService1 = new Entitlement({source: serviceIds[0],
+    raw: '', service: serviceIds[0],
+    products: ['currentProductId'], subscriptionToken: '', loggedIn: false});
+  const entitlementsForService2 = new Entitlement({source: serviceIds[1],
+    raw: '', service: serviceIds[1],
+    products: ['product3'], subscriptionToken: '', loggedIn: false});
   entitlementsForService1.setCurrentProduct(currentProduct);
   entitlementsForService2.setCurrentProduct(currentProduct);
 
@@ -78,8 +78,11 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should resolve false for negative entitlement', done => {
-      const negativeEntitlements = new Entitlement(serviceIds[0], '',
-          serviceIds[0], ['product1'], '', false);
+      const negativeEntitlements = new Entitlement({source: serviceIds[0],
+        raw: '',
+        service: serviceIds[0],
+        products: ['product1'],
+        subscriptionToken: ''});
       negativeEntitlements.setCurrentProduct(currentProduct);
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.entitlements_[serviceIds[1]] = entitlementsForService2;
@@ -95,8 +98,11 @@ describes.realWin('Platform store', {}, () => {
 
     it('should resolve false if all future entitlement '
         + 'are also negative ', done => {
-      const negativeEntitlements = new Entitlement(serviceIds[0], '',
-          serviceIds[0], ['product1'], '', false);
+      const negativeEntitlements = new Entitlement({source: serviceIds[0],
+        raw: '',
+        service: serviceIds[0],
+        products: ['product1'],
+        subscriptionToken: ''});
       negativeEntitlements.setCurrentProduct(currentProduct);
       platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
       platformStore.getGrantStatus()
@@ -167,17 +173,36 @@ describes.realWin('Platform store', {}, () => {
           .callsFake(() => false);
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
-      platformStore.resolveEntitlement('local',
-          new Entitlement('local', '', 'local', ['product1'], 'token', false));
-      platformStore.resolveEntitlement('another',
-          new Entitlement('another', '', 'another', ['product2'], null, false));
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local',
+        raw: '',
+        service: 'local',
+        products: ['product1'],
+        subscriptionToken: 'token',
+      }));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another',
+        raw: '',
+        service: 'another',
+        products: ['product2'],
+        subscriptionToken: null,
+      }));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
-      platformStore.resolveEntitlement('local',
-          new Entitlement('local', '', 'local', ['product1'], null, false));
-      platformStore.resolveEntitlement('another',
-          new Entitlement('another', '', 'another', ['product2'],
-              'token', false));
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local',
+        raw: '',
+        service: 'local',
+        products: ['product1'],
+        subscriptionToken: null,
+      }));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another',
+        raw: '',
+        service: 'another',
+        products: ['product2'],
+        subscriptionToken: 'token',
+      }));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
     });
@@ -188,10 +213,12 @@ describes.realWin('Platform store', {}, () => {
           .callsFake(() => false);
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => true);
-      platformStore.resolveEntitlement('local',
-          new Entitlement('local', '', 'local', ['product1'], null, false));
-      platformStore.resolveEntitlement('another',
-          new Entitlement('another', '', 'another', ['product2'], null, false));
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local', products: ['product1'],
+        subscriptionToken: null}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another', products: ['product2'],
+        subscriptionToken: null}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(anotherPlatform.getServiceId());
     });
@@ -201,10 +228,12 @@ describes.realWin('Platform store', {}, () => {
           .callsFake(() => false);
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
-      platformStore.resolveEntitlement('local',
-          new Entitlement('local', '', 'local', ['product1'], null, false));
-      platformStore.resolveEntitlement('another',
-          new Entitlement('another', '', 'another', ['product2'], null, false));
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local', products: ['product1'],
+        subscriptionToken: null}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another', products: ['product2'],
+        subscriptionToken: null}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
     });

@@ -17,17 +17,24 @@
 import {Entitlement} from '../entitlement';
 
 
-describes.realWin('entitlements', {}, () => {
+describes.realWin('entitlement', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
   const subscriptionToken = 'token';
   const loggedIn = true;
+  const metering = {
+    left: 1,
+    total: 10,
+    resetTime: 30,
+    durationUnit: 'days',
+    token: 'token',
+  };
   it('should give json representation of the object', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement(source, raw, service, products,
-        subscriptionToken, loggedIn);
+    const entitlement = new Entitlement({source, raw, service, products,
+      subscriptionToken, loggedIn, metering});
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
@@ -35,6 +42,7 @@ describes.realWin('entitlements', {}, () => {
       products,
       subscriptionToken,
       loggedIn,
+      metering,
     });
   });
 
@@ -45,6 +53,7 @@ describes.realWin('entitlements', {}, () => {
       products,
       subscriptionToken,
       loggedIn,
+      metering,
     };
     const entitlement = Entitlement.parseFromJson(json);
     expect(entitlement.source).to.be.equal(source);
@@ -52,12 +61,13 @@ describes.realWin('entitlements', {}, () => {
     expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
     expect(entitlement.raw).to.be.equal(JSON.stringify(json));
     expect(entitlement.loggedIn).to.be.equal(loggedIn);
+    expect(entitlement.metering).to.deep.equal(metering);
   });
 
   it('should tell if current product is enabled', () => {
     const raw = 'raw';
-    const entitlement = new Entitlement(source, raw, service, products,
-        subscriptionToken, loggedIn);
+    const entitlement = new Entitlement({source, raw, service, products,
+      subscriptionToken, loggedIn});
     entitlement.setCurrentProduct(products[0]);
     expect(entitlement.enablesThis()).to.be.true;
     entitlement.setCurrentProduct('lipsum');

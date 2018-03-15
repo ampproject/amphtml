@@ -140,8 +140,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
-        const entitlement =
-            new Entitlement('local', 'raw', 'local', products, 'token', false);
+        const entitlement = new Entitlement({source: 'local', raw: 'raw',
+          service: 'local', products, subscriptionToken: 'token'});
         entitlement.setCurrentProduct('product1');
         const localPlatform =
           subscriptionService.platformStore_.getLocalPlatform();
