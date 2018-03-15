@@ -71,11 +71,11 @@ export class PlatformStore {
 
   /**
    * Returns the local platform;
-   * @returns {!./local-subscription-platform.LocalSubscriptionPlatformRenderer}
+   * @returns {!./local-subscription-platform.LocalSubscriptionPlatform}
    */
   getLocalPlatform() {
     const localPlatform =
-        /** @type{!./local-subscription-platform.LocalSubscriptionPlatformRenderer} */
+        /** @type{!./local-subscription-platform.LocalSubscriptionPlatform} */
         (this.getPlatform_('local'));
     return localPlatform;
   }
@@ -250,7 +250,7 @@ export class PlatformStore {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
 
-    /** @type {!Object<string, number>} */
+    /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
     const platformWeights = [];
 
     this.getAllRegisteredPlatforms_().forEach(platform => {
