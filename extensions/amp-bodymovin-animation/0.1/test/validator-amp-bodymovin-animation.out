@@ -1,6 +1,6 @@
 PASS
 |  <!--
-|    Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |  
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ PASS
 |    <script async custom-element="amp-bodymovin-animation" src="https://cdn.ampproject.org/v0/amp-bodymovin-animation-0.1.js"></script>
 |  </head>
 |  <body>
-|    <amp-bodymovin-animation layout="fixed" width="200" height="200" no-autoplay src="https://nainar.github.io/loader.json" name="ripple_2">
+|    <amp-bodymovin-animation layout="fixed" width="200" height="200" src="https://nainar.github.io/loader.json">
 |    </amp-bodymovin-animation>
 |  </body>
 |  </html>

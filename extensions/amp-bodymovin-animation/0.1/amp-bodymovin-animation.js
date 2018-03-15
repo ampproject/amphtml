@@ -45,7 +45,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
+    /** @private {?string} */
+    this.loop_ = null;
+
+    /** @private {?string} */
     this.src_ = null;
 
     /** @private {enum} */
@@ -63,7 +66,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovinjs', opt_onLayout);
+    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', opt_onLayout);
   }
 
   /** @override */

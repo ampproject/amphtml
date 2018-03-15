@@ -15,6 +15,7 @@
  */
 
 import {loadScript} from './3p';
+import {parseJson} from '../src/json';
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -25,7 +26,7 @@ import {loadScript} from './3p';
 let animationHandler;
 
 function getBodymovinAnimationSdk(global, cb) {
-  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.js', function() {
+  loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
     cb(global.bodymovin);
   });
 }
@@ -44,7 +45,7 @@ function parseMessage(event) {
 
 }
 export function bodymovinanimation(global) {
-  const dataReceived = JSON.parse(global.name).attributes._context;
+  const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
   const animatingContainer = global.document.createElement('div');
 
