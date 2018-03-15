@@ -25,9 +25,9 @@ describes.realWin('entitlement', {}, () => {
   const subscriptionToken = 'token';
   const loggedIn = true;
   const metering = {
-    quotaLeft: 1,
-    quotaTotal: 10,
-    durationLeft: 30,
+    left: 1,
+    total: 10,
+    resetTime: 30,
     durationUnit: 'days',
     token: 'token',
   };

@@ -17,7 +17,7 @@
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
-/** @typedef {{quotaLeft: number, quotaTotal: number, durationLeft: number, durationUnit: string, token: string}} */
+/** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
 export let MeteringData;
 
 /**
@@ -51,8 +51,8 @@ export class Entitlement {
    * @param {boolean} [input.loggedIn]
    * @param {?MeteringData} [input.metering]
    */
-  constructor({source, raw, service, products,
-    subscriptionToken, loggedIn = false, metering = null}) {
+  constructor({source, raw = '', service, products = [],
+    subscriptionToken = '', loggedIn = false, metering = null}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -65,7 +65,7 @@ export class Entitlement {
     this.subscriptionToken = subscriptionToken;
     /** @const {boolean} */
     this.loggedIn = loggedIn;
-    /** @const {MeteringData} */
+    /** @const {?MeteringData} */
     this.metering = metering;
     /** @private {?string} */
     this.product_ = null;
@@ -132,9 +132,9 @@ export class Entitlement {
     let metering = null;
     if (meteringData) {
       metering = {
-        quotaLeft: meteringData['quotaLeft'],
-        quotaTotal: meteringData['quotaTotal'],
-        durationLeft: meteringData['durationLeft'],
+        left: meteringData['left'],
+        total: meteringData['total'],
+        resetTime: meteringData['resetTime'],
         durationUnit: meteringData['durationUnit'],
         token: meteringData['token'],
       };
