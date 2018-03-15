@@ -163,7 +163,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const data = this.getYDHMSFromMs_(differentBetween);
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
       Services.actionServiceForDoc(this.element)
-          .trigger(this.element, 'timeout', null, ActionTrust.HIGH);
+          .trigger(this.element, 'timeout', null, ActionTrust.LOW);
       this.win.clearInterval(this.countDownTimer_);
     }
     this.renderItems_(Object.assign(data, this.localeWordList_));
