@@ -594,12 +594,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   next(opt_isAutomaticAdvance) {
     const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
-    if (pageId === null) {
-      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
-      return;
+    if (pageId) {
+      this.switchTo_(pageId);
     }
-
-    this.switchTo_(pageId);
   }
 
   /**

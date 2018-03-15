@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action, StateProperty} from './amp-story-store-service';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './share';
@@ -211,7 +212,10 @@ export class Bookend {
     this.closeBtn_ = null;
 
     /** @private {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(win);
+    this.shareWidget_ = ScrollableShareWidget.create(this.win_);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
   }
 
   /**
@@ -257,6 +261,13 @@ export class Bookend {
         this.dispatchClose_();
       }
     });
+
+    Services.storyStoreServiceForOrNull(this.win_).then(storeService => {
+      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+
+      storeService.subscribe(
+          StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
+    });
   }
 
   /** @return {boolean} */
@@ -282,13 +293,8 @@ export class Bookend {
   maybeClose_(e) {
     if (this.elementOutsideUsableArea_(dev().assertElement(e.target))) {
       e.stopPropagation();
-      this.dispatchClose_();
+      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
     }
-  }
-
-  /** @private */
-  dispatchClose_() {
-    dispatch(this.getRoot(), EventType.CLOSE_BOOKEND, /* opt_bubbles */ true);
   }
 
   /**
@@ -317,16 +323,6 @@ export class Bookend {
             FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
       },
     }, {});
-  }
-
-  /** Hides bookend with a transition. */
-  hide() {
-    this.toggle_(false);
-  }
-
-  /** Shows bookend with a transition. */
-  show() {
-    this.toggle_(true);
   }
 
   /**

@@ -27,11 +27,15 @@
 import './amp-story-auto-ads';
 import './amp-story-grid-layer';
 import './amp-story-page';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryStoreService, StateProperty} from './amp-story-store-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -257,7 +261,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!NavigationState} */
     this.navigationState_ =
-        new NavigationState(element, () => this.hasBookend_());
+        new NavigationState(this.win, () => this.hasBookend_());
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -397,18 +401,6 @@ export class AmpStory extends AMP.BaseElement {
       this.previous_();
     });
 
-    this.element.addEventListener(EventType.SHOW_BOOKEND, () => {
-      this.hasBookend_().then(hasBookend => {
-        if (hasBookend) {
-          this.showBookend_();
-        }
-      });
-    });
-
-    this.element.addEventListener(EventType.CLOSE_BOOKEND, () => {
-      this.hideBookend_();
-    });
-
     this.element.addEventListener(EventType.MUTE, () => {
       this.mute_();
     });
@@ -426,7 +418,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
-      if (this.bookend_.isActive()) {
+      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
         return;
       }
@@ -462,6 +454,10 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
       this.performTapNavigation_(direction);
+    });
+
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
     });
 
     this.win.document.addEventListener('keydown', e => {
@@ -553,7 +549,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
-    this.paginationButtons_ = PaginationButtons.create(this.win.document);
+    this.paginationButtons_ = PaginationButtons.create(this.win);
 
     this.paginationButtons_.attach(this.element);
 
@@ -794,7 +790,11 @@ export class AmpStory extends AMP.BaseElement {
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
-      dispatch(this.element, EventType.SHOW_BOOKEND);
+      this.hasBookend_().then(hasBookend => {
+        if (hasBookend) {
+          this.showBookend_();
+        }
+      });
     }
   }
 
@@ -1099,20 +1099,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   showBookend_() {
-    if (this.bookend_.isActive()) {
-      return;
-    }
-
     this.buildBookend_().then(() => {
-      this.systemLayer_.hideDeveloperLog();
-
-      this.activePage_.pauseCallback();
-
-      this.toggleElementsOnBookend_(/* display */ false);
-
-      this.element.classList.add('i-amphtml-story-bookend-active');
-
-      this.bookend_.show();
+      this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
     });
   }
 
@@ -1122,18 +1110,28 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hideBookend_() {
-    if (!this.bookend_.isActive()) {
-      return;
+    this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
+  }
+
+
+  /**
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.toggleElementsOnBookend_(/* display */ isActive);
+    this.element.classList.toggle('i-amphtml-story-bookend-active', isActive);
+
+    if (isActive) {
+      this.systemLayer_.hideDeveloperLog();
+      this.activePage_.pauseCallback();
     }
 
-    this.activePage_.resumeCallback();
-
-    this.toggleElementsOnBookend_(/* display */ true);
-
-    this.element.classList.remove('i-amphtml-story-bookend-active');
-
-    this.bookend_.hide();
+    if (!isActive) {
+      this.activePage_.resumeCallback();
+    }
   }
+
 
   /**
    * Toggle content when bookend is opened/closed.
@@ -1359,26 +1357,6 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @param {!Element} el
-   * @return {boolean}
-   * @private
-   */
-  isBookend_(el) {
-    return this.bookend_.isBuilt() && el === this.bookend_.getRoot();
-  }
-
-
-  /**
-   * @param {!Element} el
-   * @return {boolean}
-   * @private
-   */
-  isTopBar_(el) {
-    return !!this.topBar_ && this.topBar_.contains(el);
-  }
-
-
-  /**
    * @param {string} id The ID of the page whose index should be retrieved.
    * @return {number} The index of the page.
    * @private
@@ -1588,9 +1566,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   replay_() {
     if (this.bookend_.isActive()) {
-      // Dispaching event instead of calling method directly so that all
-      // listeners can respond.
-      dispatch(this.element, EventType.CLOSE_BOOKEND);
+      this.hideBookend_();
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
