@@ -22,9 +22,11 @@ import {
 import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {parseUrl} from '../../../src/url';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
+const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 
 /**
@@ -88,6 +90,10 @@ export class GoogleSubscriptionsPlatform {
         this.onSubscribeResponse_(response);
       });
     });
+
+    /** @private {boolean} */
+    this.isGoogleViewer_ = false;
+    this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
   }
 
   /**
@@ -95,10 +101,11 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   onLoginRequest_(linkRequested) {
-    if (linkRequested) {
+    if (linkRequested && this.isGoogleViewer_) {
       this.runtime_.linkAccount();
     } else {
-      this.serviceAdapter_.delegateActionToLocal('login');
+      this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
+          'login'));
     }
   }
 
@@ -110,7 +117,20 @@ export class GoogleSubscriptionsPlatform {
 
   /** @private */
   onNativeSubscribeRequest_() {
-    this.serviceAdapter_.delegateActionToLocal('subscribe');
+    this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
+        'subscribe'));
+  }
+
+  /**
+   * @param {!Promise<boolean>} promise
+   * @private
+   */
+  maybeComplete_(promise) {
+    promise.then(result => {
+      if (result) {
+        this.runtime_.reset();
+      }
+    });
   }
 
   /**
@@ -147,9 +167,12 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   activate(renderState) {
+    // Offers or abbreviated offers may need to be shown depending on
+    // whether the access has been granted and whether user is a subscriber.
     if (!renderState.granted) {
-      // TODO(dvoytenko): vary between full and abbreviated offers.
       this.runtime_.showOffers();
+    } else if (!renderState.subscribed) {
+      this.runtime_.showAbbrvOffer();
     }
   }
 
@@ -168,7 +191,31 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   supportsCurrentViewer() {
-    return false;
+    return this.isGoogleViewer_;
+  }
+
+  /**
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @private
+   */
+  resolveGoogleViewer_(viewer) {
+    // This is a very light veiwer resolution since there's no real security
+    // implication - this only affects on-platform preferences.
+    const viewerUrl = viewer.getParam('viewerUrl');
+    if (viewerUrl) {
+      this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
+          parseUrl(viewerUrl).hostname);
+    } else {
+      // This can only be resolved asynchronously in this case. However, the
+      // action execution must be done synchronously. Thus we have to allow
+      // a minimal race condition here.
+      viewer.getViewerOrigin().then(origin => {
+        if (origin) {
+          this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
+              parseUrl(origin).hostname);
+        }
+      });
+    }
   }
 }
 
