@@ -90,6 +90,7 @@ declareExtension('amp-app-banner', '0.1', {hasCss: true});
 declareExtension('amp-audio', '0.1');
 declareExtension('amp-auto-ads', '0.1');
 declareExtension('amp-bind', '0.1');
+declareExtension('amp-bodymovin-animation', '0.1', {hasCss: false});
 declareExtension('amp-brid-player', '0.1');
 declareExtension('amp-brightcove', '0.1');
 declareExtension('amp-byside-content', '0.1', {hasCss: true});
