@@ -253,6 +253,9 @@ export class PlatformStore {
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
     const platformWeights = [];
 
+    dev().assert(this.areAllPlatformsResolved_(),
+        'All platforms are not resolved yet');
+
     this.getAllRegisteredPlatforms_().forEach(platform => {
       let weight = 0;
       const entitlement =
