@@ -37,7 +37,7 @@ export function bodymovinanimation(global) {
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
-  getBodymovinAnimationSdk(global, function() {
+  getBodymovinAnimationSdk(global, function(bodymovin) {
     bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',

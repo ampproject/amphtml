@@ -26,12 +26,7 @@ describe.configure().run('amp-bodymovin-animation', function() {
   describes.integration('amp-bodymovin-animation iframe renders', {
     body: bodymovinBody,
     extensions,
-  }, env => {
-
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
+  }, () => {
 
     it('iframe renders', () => {
       const loadPromise = waitForAnimationLoad();
