@@ -22,7 +22,7 @@ import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {FiniteStateMachine} from '../../../src/finite-state-machine';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {createCustomEvent, listen} from '../../../src/event-helper';
@@ -98,16 +98,10 @@ const TAG = 'amp-date-picker';
 const DATE_SEPARATOR = ' ';
 
 const attributesToForward = [
-  'initial-visible-month',
-  'keep-open-on-date-select',
   'max',
   'min',
   'month-format',
-  'month-format',
   'number-of-months',
-  'orientation',
-  'reopen-picker-on-clear-date',
-  'with-full-screen-portal',
 ];
 
 /** @enum {string} */
@@ -262,17 +256,28 @@ class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.container_ = this.document_.createElement('div');
-    this.container_.classList.add(CALENDAR_CONTAINER_CSS);
-    this.container_.classList.add(PRIVATE_CALENDAR_CONTAINER_CSS);
+    this.container_.classList.add(
+        CALENDAR_CONTAINER_CSS, PRIVATE_CALENDAR_CONTAINER_CSS);
 
     /** @private @const */
     this.type_ = this.element.getAttribute('type') || DatePickerType.SINGLE;
 
+    /** @private @const */
     this.weekDayFormat_ = this.element.getAttribute('week-day-format') ||
         DEFAULT_WEEK_DAY_FORMAT;
 
+    /** @private @const */
     this.allowBlockedRanges_ =
         this.element.hasAttribute('allow-blocked-ranges');
+
+    /** @private @const */
+    this.fullscreen_ = this.element.hasAttribute('fullscreen');
+
+    /** @private @const */
+    this.openAfterClear_ = this.element.hasAttribute('open-after-clear');
+
+    /** @private @const */
+    this.openAfterSelect_ = this.element.hasAttribute('open-after-select');
 
     /** @private @const */
     this.picker_ = (this.type_ === DatePickerType.RANGE ?
@@ -283,12 +288,6 @@ class AmpDatePicker extends AMP.BaseElement {
     this.mode_ = this.element.getAttribute('mode') == DatePickerMode.OVERLAY ?
       DatePickerMode.OVERLAY :
       DatePickerMode.STATIC; // default
-
-    /** @private @const */
-    this.props_ = this.getProps_();
-
-    /** @private @const */
-    this.state_ = this.getInitialState_();
 
     /** @private @const */
     this.elementTemplates_ = this.parseElementTemplates_();
@@ -337,20 +336,39 @@ class AmpDatePicker extends AMP.BaseElement {
 
     const locale = this.element.getAttribute('locale') || DEFAULT_LOCALE;
     this.moment_.locale(locale);
+
+    /** @private @const */
+    this.props_ = this.getProps_();
+
+    /** @private @const */
+    this.state_ = this.getInitialState_();
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    // TODO(cvializ): Use layout fixed and then expand?
-    return layout == Layout.CONTAINER;
+    return this.mode_ == DatePickerMode.STATIC ?
+      isLayoutSizeDefined(layout) :
+      Layout.CONTAINER;
   }
 
   /** @override */
   layoutCallback() {
     this.setupTemplates_();
     this.setupListeners_();
-    // Make sure it's rendered and measured properly
-    return this.render(this.state_);
+    // Make sure it's rendered and measured properly. Then if possible, attempt
+    // to adjust expand the height to fit the element for static pickers.
+    return this.render(this.state_).then(() => {
+      if (this.mode_ == DatePickerMode.STATIC) {
+        this.vsync_.measure(() => {
+          const scrollHeight = this.container_./*OK*/scrollHeight;
+          const height = this.element./*OK*/offsetHeight;
+          if (scrollHeight > height) {
+            // Add 1px to allow the bottom border to show
+            this.attemptChangeHeight(scrollHeight + 1).catch(() => {});
+          }
+        });
+      }
+    });
   }
 
   /** @override */
@@ -438,7 +456,8 @@ class AmpDatePicker extends AMP.BaseElement {
       if (this.mode_ == DatePickerMode.OVERLAY &&
           this.dateField_ === null) {
         user().error(TAG,
-            'Overlay single pickers must specify an existing input element.');
+            'Overlay single pickers must specify "input-selector" to ' +
+            'an existing input element.');
       }
     } else if (this.type_ === DatePickerType.RANGE) {
       this.startDateField_ = this.setupDateField_(DateFieldType.START_DATE);
@@ -447,8 +466,8 @@ class AmpDatePicker extends AMP.BaseElement {
       if (this.mode_ == DatePickerMode.OVERLAY &&
           (!this.startDateField_ || !this.endDateField_)) {
         user().error(TAG,
-            'Overlay range pickers must specify existing start and end ' +
-            'input elements.');
+            'Overlay range pickers must "start-input-selector" and ' +
+            '"end-input-selector" to existing start and end input elements.');
       }
     } else {
       user().error(TAG, 'Invalid date picker type', this.type_);
@@ -893,6 +912,18 @@ class AmpDatePicker extends AMP.BaseElement {
       return acc;
     }, {});
 
+    if (this.hasInfoTemplate_()) {
+      props.renderCalendarInfo = this.renderInfo;
+    }
+
+    if (this.fullscreen_) {
+      props.orientation = 'verticalScrollable';
+      props.withFullScreenPortal = true;
+    }
+
+    props.reopenPickerOnClearDate = this.openAfterClear_;
+    props.keepOpenOnDateSelect = this.openAfterSelect_;
+
     return props;
   }
 
@@ -956,7 +987,6 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   onFocusChange(focusedInput) {
     const {START_DATE, END_DATE} = this.ReactDatesConstants_;
-    // TODO(cvializ): Use text segment highlighting API?
     const focusedField =
       (focusedInput === START_DATE ? this.startDateField_ :
         (focusedInput === END_DATE ? this.endDateField_ : this.dateField_));
@@ -1340,12 +1370,11 @@ class AmpDatePicker extends AMP.BaseElement {
     const shouldBeOpen = props.isOpen || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.picker_ : null;
 
-    if (this.hasInfoTemplate_()) {
-      props.renderCalendarInfo = this.renderInfo;
-    }
-
     return this.vsync_.mutatePromise(() => {
       if (Picker) {
+        // TODO(cvializ): When rendered with React, the picker expands to fit the number of
+        // weeks for that month. When rendered with Preact, the picker expands 1 behind where it
+        // should for the number of weeks in the month. Fix this.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, {
               date: props.date,
@@ -1363,7 +1392,7 @@ class AmpDatePicker extends AMP.BaseElement {
               daySize: this.daySize_,
               weekDayFormat: this.weekDayFormat_,
               isFocused: props.isFocused, // should automatically focus
-              focused: props.focused, // TODO(cvializ): understand why only used by SDP?
+              focused: props.focused,
             }, props)),
             this.container_);
       } else {
