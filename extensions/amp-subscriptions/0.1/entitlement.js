@@ -37,6 +37,7 @@ export class Entitlement {
       products: [],
       subscriptionToken: null,
       loggedIn: false,
+      metering: null,
     });
   }
 
@@ -51,7 +52,7 @@ export class Entitlement {
    * @param {?MeteringData} [input.metering]
    */
   constructor({source, raw, service, products,
-    subscriptionToken, loggedIn = false, metering}) {
+    subscriptionToken, loggedIn = false, metering = null}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -65,7 +66,7 @@ export class Entitlement {
     /** @const {boolean} */
     this.loggedIn = loggedIn;
     /** @const {MeteringData} */
-    this.metering_ = metering;
+    this.metering = metering;
     /** @private {?string} */
     this.product_ = null;
   }
@@ -82,7 +83,7 @@ export class Entitlement {
       'products': this.products,
       'loggedIn': this.loggedIn,
       'subscriptionToken': this.subscriptionToken,
-      'metering': this.metering_,
+      'metering': this.metering,
     });
     return (entitlementJson);
   }
@@ -127,7 +128,18 @@ export class Entitlement {
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
     const loggedIn = json['loggedIn'];
+    const meteringData = json['metering'];
+    let metering = null;
+    if (meteringData) {
+      metering = {
+        quotaLeft: meteringData['quotaLeft'],
+        quotaTotal: meteringData['quotaTotal'],
+        durationLeft: meteringData['durationLeft'],
+        durationUnit: meteringData['durationUnit'],
+        token: meteringData['token'],
+      };
+    }
     return new Entitlement({source, raw, service: '',
-      products, subscriptionToken, loggedIn});
+      products, subscriptionToken, loggedIn, metering});
   }
 }
