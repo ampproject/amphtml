@@ -42,13 +42,20 @@ export const EmbedMode = {
 
 
 /**
+ * Parameter to retrieve the embed mode from the location hash.
+ * @type {string}
+ */
+export const EmbedModeParam = 'embedMode';
+
+
+/**
  * @param {string} str
  * @return {!EmbedMode}
  * @private
  */
 export function parseEmbedMode(str) {
   const params = parseQueryString(str);
-  const unsanitizedEmbedMode = params['embedMode'];
+  const unsanitizedEmbedMode = params[EmbedModeParam];
   const embedModeIndex = parseInt(unsanitizedEmbedMode, 10);
 
   return isEnumValue(EmbedMode, embedModeIndex)
