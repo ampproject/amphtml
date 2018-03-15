@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {isArray} from '../../../src/types';
+import {dev} from '../../../src/log';
+import {isArray, toWin} from '../../../src/types';
 
 
 /**
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   messageId: (string|undefined),
+ *   messageId: ./messages.MessageId,
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -75,7 +77,11 @@ function renderSingle(doc, elementDef) {
     doc.createElement(elementDef.tag);
 
   if (elementDef.messageId) {
-    el.textContent = elementDef.messageId; // TODO getMessageTextContent(elementDef.messageId);
+    const win = toWin(doc.defaultView);
+    Services.messageServiceForOrNull(win).then(messageService => {
+      dev().assert(messageService, 'Could not retrieve MessageService.');
+      messageService.setInnerTextToMessage(el, elementDef.messageId);
+    });
   }
 
   if (elementDef.children) {

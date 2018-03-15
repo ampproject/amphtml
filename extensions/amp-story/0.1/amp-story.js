@@ -49,7 +49,7 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {MediaPool, MediaType} from './media-pool';
-import {MessageId, MessageService} from './messages';
+import {MessageService} from './messages';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
@@ -328,8 +328,7 @@ export class AmpStory extends AMP.BaseElement {
     this.messageService_ = new MessageService();
     this.messageService_.registerMessageBundle('default', MessagesDefault);
     this.messageService_.registerMessageBundle('en', MessagesEn);
-    registerServiceBuilder(this.win, 'story-message',
-        () => this.messageService_);
+    registerServiceBuilder(this.win, 'message', () => this.messageService_);
   }
 
 

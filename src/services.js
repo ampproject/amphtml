@@ -312,6 +312,23 @@ export class Services {
   }
 
   /**
+   * @return {?Promise<?../extensions/amp-story/0.1/messages.MessageService>}
+   */
+  static messageServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/messages.MessageService>} */
+      (getElementServiceIfAvailable(win, 'message', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/messages.MessageService}
+   */
+  static messageService(win) {
+    return getService(win, 'message');
+  }
+
+  /**
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
    */
