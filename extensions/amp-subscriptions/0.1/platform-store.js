@@ -63,7 +63,7 @@ export class PlatformStore {
    * @param {string} servideId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
-  getPlatform(servideId) {
+  getPlatform_(servideId) {
     const platform = this.subscriptionPlatforms_[servideId];
     dev().assert(platform, `Platform for id ${servideId} is not resolved`);
     return platform;
@@ -71,24 +71,25 @@ export class PlatformStore {
 
   /**
    * Returns the local platform;
-   * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @returns {!./local-subscription-platform.LocalSubscriptionPlatformRenderer}
    */
   getLocalPlatform() {
-    return this.getPlatform('local');
+    const localPlatform =
+        /** @type{!./local-subscription-platform.LocalSubscriptionPlatformRenderer} */
+        (this.getPlatform_('local'));
+    return localPlatform;
   }
 
   /**
    * Returns all the platforms;
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
-  getAllResolvedPlatforms() {
+  getAllRegisteredPlatforms_() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
-      if (this.subscriptionPlatforms_.hasOwnProperty(platformKey)) {
-        const subscriptionPlatform =
-          this.subscriptionPlatforms_[platformKey];
-        platforms.push(subscriptionPlatform);
-      }
+      const subscriptionPlatform =
+        this.subscriptionPlatforms_[platformKey];
+      platforms.push(subscriptionPlatform);
     }
     return platforms;
   }
@@ -247,47 +248,48 @@ export class PlatformStore {
    */
   selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
+    let localWeight = 0;
 
     /** @type {!Object<string, number>} */
-    const platformWeights = {};
+    const platformWeights = [];
 
-    this.getAllResolvedPlatforms().forEach(platform => {
+    this.getAllRegisteredPlatforms_().forEach(platform => {
+      let weight = 0;
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
       // Subscriber, gains weight 10
       if (!!entitlement.subscriptionToken) {
-        platformWeights[platform.getServiceId()] = 10;
+        weight += 10;
       }
 
       // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
-        platformWeights[platform.getServiceId()] =
-          (platformWeights[platform.getServiceId()] || 0) + 9;
+        weight += 9;
+      }
+
+      platformWeights.push({
+        platform,
+        weight,
+      });
+
+      if (platform.getServiceId() === 'local') {
+        localWeight = weight;
       }
     });
 
-    // Sort according to weight
-    const weightSorter = [];
-    for (const platformName in platformWeights) {
-      weightSorter.push({serviceId: platformName,
-        weight: platformWeights[platformName]});
-    }
-
-    weightSorter.sort(function(platform1, platform2) {
+    platformWeights.sort(function(platform1, platform2) {
       return platform2.weight - platform1.weight;
     });
-
     // Nobody supports current viewer, nor is anybody subscribed
-    if (weightSorter.length === 0) {
+    if (platformWeights.length === 0) {
       return localPlatform;
     }
 
-    const winningWeight = platformWeights[weightSorter[0].serviceId];
-    const localWeight = platformWeights['local'] || 0;
+    const winningWeight = platformWeights[0].weight;
 
     if (winningWeight > localWeight) {
-      return this.getPlatform(weightSorter[0].serviceId);
+      return platformWeights[0].platform;
     }
 
     return localPlatform;

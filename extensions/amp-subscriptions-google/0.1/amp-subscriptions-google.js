@@ -166,7 +166,7 @@ export class GoogleSubscriptionsPlatform {
    */
   pingback() {}
 
-  /** override */
+  /** @override */
   supportsCurrentViewer() {
     return false;
   }

@@ -276,9 +276,7 @@ export class SubscriptionService {
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
-          const localPlatform = /** @type {!LocalSubscriptionPlatform} */ (
-            user().assert(this.platformStore_.getLocalPlatform(),
-                'Local platform is not registered'));
+          const localPlatform = this.platformStore_.getLocalPlatform();
 
           if (selectedPlatform.isPingbackEnabled()) {
             selectedPlatform.pingback(selectedEntitlement);

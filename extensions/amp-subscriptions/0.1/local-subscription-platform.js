@@ -219,7 +219,7 @@ export class LocalSubscriptionPlatform {
     });
   }
 
-  /** override */
+  /** @override */
   supportsCurrentViewer() {
     return false;
   }
