@@ -25,15 +25,15 @@ export function capirs(global, data) {
   validateData(data, ['begunAutoPad', 'begunBlockId']);
 
   if (data['customCss']) {
-    const style = window.document.createElement('style');
+    const style = global.document.createElement('style');
 
     if (style.styleSheet) {
       style.styleSheet.cssText = data['customCss'];
     } else {
-      style.appendChild(document.createTextNode(data['customCss']));
+      style.appendChild(global.document.createTextNode(data['customCss']));
     }
 
-    global.document.body.appendChild(style);
+    global.document.getElementById('c').appendChild(style);
   }
 
   global['begun_callbacks'] = {
@@ -42,8 +42,7 @@ export function capirs(global, data) {
         const block = global.document.createElement('div');
         block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
 
-        const container = document.getElementById('c') || document.body;
-        container.appendChild(block);
+        global.document.getElementById('c').appendChild(block);
 
         global['Adf']['banner']['ssp'](block.id, data['params'], {
           'begun-auto-pad': data['begunAutoPad'],
@@ -55,15 +54,15 @@ export function capirs(global, data) {
       draw: feed => {
         const banner = feed['banners']['graph'][0];
 
-        window.context.renderStart({
+        global.context.renderStart({
           width: banner['width'],
           height: banner['height'],
         });
 
         const reportId = 'capirs-' + banner['banner_id'];
-        window.context.reportRenderedEntityIdentifier(reportId);
+        global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: window.context.noContentAvailable,
+      unexist: global.context.noContentAvailable,
     },
   };
 
