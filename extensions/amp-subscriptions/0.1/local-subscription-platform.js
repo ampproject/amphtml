@@ -218,6 +218,11 @@ export class LocalSubscriptionPlatform {
       });
     });
   }
+
+  /** @override */
+  supportsCurrentViewer() {
+    return false;
+  }
 }
 
 /**

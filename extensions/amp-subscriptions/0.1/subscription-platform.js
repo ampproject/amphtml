@@ -54,6 +54,12 @@ export class SubscriptionPlatform {
    * @returns {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
+
+  /**
+   * Tells if this platform supports the current viewer
+   * @returns {boolean}
+   */
+  supportsCurrentViewer() {}
 }
 
 /**
