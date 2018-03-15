@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-52536000 */
+ /** Version: 0.1.21-55a6698 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -1438,11 +1438,24 @@ class DialogManager {
     // Give a small amount of time for another view to take over the dialog.
     setTimeout(() => {
       if (this.dialog_ && this.dialog_.getCurrentView() == view) {
-        this.dialog_.close();
-        this.dialog_ = null;
-        this.openPromise_ = null;
+        this.close_();
       }
     }, 100);
+  }
+
+  /**
+   */
+  completeAll() {
+    if (this.dialog_) {
+      this.close_();
+    }
+  }
+
+  /** @private */
+  close_() {
+    this.dialog_.close();
+    this.dialog_ = null;
+    this.openPromise_ = null;
   }
 }
 
@@ -2071,7 +2084,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-52536000',
+    '_client': 'SwG 0.1.21-55a6698',
   });
 }
 
@@ -3924,6 +3937,7 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
+    this.dialogManager_.completeAll();
   }
 
   /** @override */
