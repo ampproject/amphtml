@@ -31,7 +31,7 @@ import {tryParseJson} from '../../../src/json';
 /** @const */
 const TAG = 'amp-subscriptions';
 
-/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject}} */
+/** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
 export let RenderState;
 
 export class SubscriptionService {
@@ -270,6 +270,7 @@ export class SubscriptionService {
         loggedIn: selectedEntitlement.loggedIn,
         subscribed: !!selectedEntitlement.subscriptionToken,
         granted: grantState,
+        metered: !!selectedEntitlement.metering,
       };
 
       selectedPlatform.activate(renderState);
