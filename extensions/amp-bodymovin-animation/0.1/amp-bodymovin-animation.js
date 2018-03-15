@@ -30,7 +30,7 @@ export const PLAYING_STATE = {
   LOADED_NOT_PLAYING: 0,
   PLAYING: 1,
   PAUSED: 2,
-  STOPPED: 3, 
+  STOPPED: 3,
 };
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
@@ -73,7 +73,8 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   buildCallback() {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('no-autoplay');
-    this.playingState_ = this.autoplay_ ? PLAYING_STATE.PLAYING : PLAYING_STATE.LOADED_NOT_PLAYING;
+    this.playingState_ = this.autoplay_ ?
+      PLAYING_STATE.PLAYING : PLAYING_STATE.LOADED_NOT_PLAYING;
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
@@ -157,10 +158,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.playingState_ = PLAYING_STATE.STOPPED;
   }
 
-  seekTo_(time_val) {
+  seekTo_(timeVal) {
     const message = {
       'action': 'goToAndStop',
-      'value': time_val,
+      'value': timeVal,
     };
     this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     this.pause_();

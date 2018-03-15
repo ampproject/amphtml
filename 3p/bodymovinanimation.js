@@ -58,7 +58,7 @@ export function bodymovinanimation(global) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
-      loop: loop,
+      loop,
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
