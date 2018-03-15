@@ -57,10 +57,8 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   getLayoutPriority() {
-    // Loads ads after other content
-    const isPWA = !this.element.getAmpDoc().isSingleDoc();
-    // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    // Since this is AMPHTML we are trusting that it will load responsibly
+    return 0;
   }
 
   /** @override **/
