@@ -269,7 +269,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const attributes = dict({
       'id': `i-amphtml-ad-page-${id}`,
       'ad': '',
-      'distance': '1',
+      'distance': '2',
     });
 
     return createElementWithAttributes(
