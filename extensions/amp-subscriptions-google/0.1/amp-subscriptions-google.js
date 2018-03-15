@@ -131,12 +131,13 @@ export class GoogleSubscriptionsPlatform {
       if (!swgEntitlement) {
         return null;
       }
-      return new Entitlement(
-          swgEntitlement.source,
-          swgEntitlements.raw,
-          PLATFORM_ID,
-          swgEntitlement.products,
-          swgEntitlement.subscriptionToken);
+      return new Entitlement({
+        source: swgEntitlement.source,
+        raw: swgEntitlements.raw,
+        service: PLATFORM_ID,
+        products: swgEntitlement.products,
+        subscriptionToken: swgEntitlement.subscriptionToken,
+      });
     });
   }
 

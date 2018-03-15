@@ -17,6 +17,9 @@
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
+/** @typedef {{quotaLeft: number, quotaTotal: number, durationLeft: number, durationUnit: string, token: string}} */
+export let MeteringData;
+
 /**
  * The single entitlement object.
  */
@@ -27,25 +30,28 @@ export class Entitlement {
    * @return {!Entitlement}
    */
   static empty(service) {
-    return new Entitlement(
-        /* source */ '',
-        /* raw */ '',
-        service,
-        /* products */ [],
-        /* subscriptionToken */ null,
-        /* loggedIn */ false);
+    return new Entitlement({
+      source: '',
+      raw: '',
+      service,
+      products: [],
+      subscriptionToken: null,
+      loggedIn: false,
+    });
   }
 
   /**
-   * @param {string} source
-   * @param {string} raw
-   * @param {string} service
-   * @param {!Array<string>} products
-   * @param {?string} subscriptionToken
-   * @param {boolean} loggedIn
+   * @param {Object} input
+   * @param {string} [input.source]
+   * @param {string} [input.raw]
+   * @param {string} [input.service]
+   * @param {!Array<string>} [input.products]
+   * @param {?string} [input.subscriptionToken]
+   * @param {boolean} [input.loggedIn]
+   * @param {?MeteringData} [input.metering]
    */
-  constructor(source, raw, service, products,
-    subscriptionToken, loggedIn = false) {
+  constructor({source, raw, service, products,
+    subscriptionToken, loggedIn = false, metering}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -58,7 +64,8 @@ export class Entitlement {
     this.subscriptionToken = subscriptionToken;
     /** @const {boolean} */
     this.loggedIn = loggedIn;
-
+    /** @const {MeteringData} */
+    this.metering_ = metering;
     /** @private {?string} */
     this.product_ = null;
   }
@@ -75,6 +82,7 @@ export class Entitlement {
       'products': this.products,
       'loggedIn': this.loggedIn,
       'subscriptionToken': this.subscriptionToken,
+      'metering': this.metering_,
     });
     return (entitlementJson);
   }
@@ -119,7 +127,7 @@ export class Entitlement {
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
     const loggedIn = json['loggedIn'];
-    return new Entitlement(source, raw, /* service */ '',
-        products, subscriptionToken, loggedIn);
+    return new Entitlement({source, raw, service: '',
+      products, subscriptionToken, loggedIn});
   }
 }
