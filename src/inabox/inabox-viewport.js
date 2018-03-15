@@ -214,7 +214,7 @@ export class ViewportBindingInabox {
 
   /** @override */
   supportsPositionFixed() {
-    return true;
+    return false;
   }
 
   /**
