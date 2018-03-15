@@ -1373,14 +1373,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   (creative, headersObj, done) => {
                     checkStillCurrent();
                     // Force safeframe rendering method.
-                    headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                    headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
+                        XORIGIN_MODE.SAFEFRAME;
                     // Construct pseudo fetch response to be passed down the A4A
                     // promise chain for this block.
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
-                    get: name => headersObj[name],
-                    has: name => !!headersObj[name],
+                    get: name => headersObj[name.toLowerCase()],
+                    has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
