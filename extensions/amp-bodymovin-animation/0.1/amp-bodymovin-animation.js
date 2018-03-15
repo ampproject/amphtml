@@ -36,7 +36,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
+    /** @private {?string} */
+    this.loop_ = null;
+
+    /** @private {?string} */
     this.src_ = null;
 
   }
