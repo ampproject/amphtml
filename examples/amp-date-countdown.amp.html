@@ -63,19 +63,43 @@
     .date-count-down span{
       color: red;
     }
+    #sample2 {
+      visibility: hidden;
+    }
   </style>
   <script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <amp-animation id="hide-timeout-event" layout="nodisplay">
+      <script type="application/json">
+          {
+              "duration": "1s",
+              "fill": "both",
+              "selector": "#ampdate, #sample",
+              "keyframes": { "visibility": "hidden"}
+          }
+      </script>
+  </amp-animation>
+  <amp-animation id="show-timeout-event" layout="nodisplay">
+      <script type="application/json">
+          {
+              "duration": "1s",
+              "fill": "both",
+              "selector": "#sample2",
+              "keyframes": { "visibility": "visible"}
+          }
+      </script>
+  </amp-animation>
   <h1 id="sample">
       When Timer hits 0, will hide the timer itself and hide this message.
   </h1>
-  <h1 id="sample2" hidden>
+  <h1 id="sample2">
       When Timer hits 0, will hide the timer itself and display this message.
   </h1>
-  <amp-date-countdown id="ampdate" end-date="2020-06-20T11:22:00+08:00" on="timeout: ampdate.hide, sample.hide, sample2.show;" height="235" width="400" when-ended="stop" locale='en'>
+  <amp-date-countdown id="ampdate" end-date="2018-03-15T10:48:20+08:00" on="timeout: hide-timeout-event.start, show-timeout-event.start" height="235" width="400" when-ended="stop" locale='en'>
     <template type="amp-mustache">
       <h1>Countdown Clock</h1>
       <div id="clockdiv">
