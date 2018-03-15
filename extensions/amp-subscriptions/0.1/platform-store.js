@@ -60,6 +60,7 @@ export class PlatformStore {
 
   /**
    * Returns the platform for the given id
+   * @private
    * @param {string} servideId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
@@ -82,6 +83,7 @@ export class PlatformStore {
 
   /**
    * Returns all the platforms;
+   * @private
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
   getAllRegisteredPlatforms_() {
@@ -245,11 +247,11 @@ export class PlatformStore {
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
    * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @private
    */
   selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
-
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
     const platformWeights = [];
 
@@ -265,7 +267,6 @@ export class PlatformStore {
       if (!!entitlement.subscriptionToken) {
         weight += 10;
       }
-
       // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
         weight += 9;
@@ -275,7 +276,6 @@ export class PlatformStore {
         platform,
         weight,
       });
-
       if (platform.getServiceId() === 'local') {
         localWeight = weight;
       }
@@ -284,13 +284,12 @@ export class PlatformStore {
     platformWeights.sort(function(platform1, platform2) {
       return platform2.weight - platform1.weight;
     });
+
     // Nobody supports current viewer, nor is anybody subscribed
     if (platformWeights.length === 0) {
       return localPlatform;
     }
-
     const winningWeight = platformWeights[0].weight;
-
     if (winningWeight > localWeight) {
       return platformWeights[0].platform;
     }
