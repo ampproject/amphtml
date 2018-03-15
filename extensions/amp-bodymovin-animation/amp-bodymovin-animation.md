@@ -58,10 +58,6 @@ The path to the exported Bodymovin animation object
 
 Whether the animation should be looping or not. `true` by default. Values can be: `true`|`false`|`number`
 
-##### no-autoplay (optional)
-
-Doesn't autoplay the loaded animation when specified. Animations do autoplay by default. 
-
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
