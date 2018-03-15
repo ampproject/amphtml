@@ -247,7 +247,7 @@ function sendRtcCallout_(
           }
           const response = tryParseJson(text);
           return response ? {response, rtcTime,
-                             callout: getCalloutParam(callout)} :
+            callout: getCalloutParam(callout)} :
             buildErrorResponse_(
                 RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
         });

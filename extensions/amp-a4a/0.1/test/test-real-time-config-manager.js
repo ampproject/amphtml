@@ -22,11 +22,11 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
 import {
   RTC_ERROR_ENUM,
+  getCalloutParam,
   inflateAndSendRtc_,
   maybeExecuteRealTimeConfig_,
   truncUrl_,
   validateRtcConfig_,
-  getCalloutParam,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
@@ -356,9 +356,9 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       ];
       const expectedRtcArray = [
         {response: rtcCalloutResponses[0],
-         callout: getCalloutParam(urls[0]), rtcTime: 10},
+          callout: getCalloutParam(urls[0]), rtcTime: 10},
         {callout: getCalloutParam(urls[1]),
-         error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
+          error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
       ];
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
@@ -382,11 +382,11 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       ];
       const expectedRtcArray = [
         {response: rtcCalloutResponses[0],
-         callout: getCalloutParam(urls[0]), rtcTime: 10},
+          callout: getCalloutParam(urls[0]), rtcTime: 10},
         {response: rtcCalloutResponses[1],
-         callout: getCalloutParam(urls[1]), rtcTime: 10},
+          callout: getCalloutParam(urls[1]), rtcTime: 10},
         {callout: getCalloutParam(urls[2]),
-         error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
+          error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
       ];
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
