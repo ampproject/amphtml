@@ -37,7 +37,7 @@ tags: {  # <amp-bodymovin-animation>
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "https",
+      allowed_protocol: "https"
       allow_relative: false
     }
   }
