@@ -221,7 +221,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms_().forEach(
+      this.platformStore_.getAllRegisteredPlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }

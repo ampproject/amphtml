@@ -83,10 +83,9 @@ export class PlatformStore {
 
   /**
    * Returns all the platforms;
-   * @private
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
-  getAllRegisteredPlatforms_() {
+  getAllRegisteredPlatforms() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
       const subscriptionPlatform =
@@ -258,7 +257,7 @@ export class PlatformStore {
     dev().assert(this.areAllPlatformsResolved_(),
         'All platforms are not resolved yet');
 
-    this.getAllRegisteredPlatforms_().forEach(platform => {
+    this.getAllRegisteredPlatforms().forEach(platform => {
       let weight = 0;
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
