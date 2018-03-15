@@ -189,7 +189,7 @@ amphtml uses Node.js, the Yarn package manager and the Gulp build system to buil
    You can install Gulp using Yarn:
 
    ```
-   yarn global add gulp
+   yarn global add gulp-cli
    ```
 
    The preceding command might require elevated privileges using `sudo` on some platforms.

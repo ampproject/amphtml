@@ -29,7 +29,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
-* Install Gulp by running `yarn global add gulp` (this may require elevated privileges using `sudo` on some platforms)
+* Install Gulp by running `yarn global add gulp-cli` (this may require elevated privileges using `sudo` on some platforms)
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
