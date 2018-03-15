@@ -105,14 +105,15 @@ function appnexusAst(global, data) {
     apntag = context.master.apntag;
 
     //preserve a global reference
+    /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
   }
 
   // check for ad responses received for a slot but before listeners are registered,
   // for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
-    apntag.checkAdAvailable(data.target)
-        .getAd({resolve: isAdAvailable, reject: noAdAvailable});
+    const getAd = apntag.checkAdAvailable(data.target);
+    getAd({resolve: isAdAvailable, reject: noAdAvailable});
   });
 
   apntag.anq.push(() => {
@@ -121,14 +122,14 @@ function appnexusAst(global, data) {
   });
 }
 
+/**
+ * resolve getAd with an available ad object
+ *
+ * @param {{targetId: string}} adObj
+ */
 function isAdAvailable(adObj) {
-  global.context.renderStart({width: adObj.width, height: adObj.height});
 
-  /**
-   * render the ad for this tag
-   * @param {string} adObj.targetId the dom element id to render the ad into
-   * @param {Object} global.window
-   */
+  global.context.renderStart({width: adObj.width, height: adObj.height});
   global.apntag.showTag(adObj.targetId, global.window);
 }
 
