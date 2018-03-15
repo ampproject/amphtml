@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-bodymovin-animation
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-bodymovin-animation"
@@ -24,6 +25,7 @@ tags: {  # amp-bodymovin-animation
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-bodymovin-animation>
+  html_format: AMP
   tag_name: "AMP-BODYMOVIN-ANIMATION"
   requires_extension: "amp-bodymovin-animation"
 
