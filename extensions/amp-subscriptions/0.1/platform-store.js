@@ -83,10 +83,9 @@ export class PlatformStore {
 
   /**
    * Returns all the platforms;
-   * @private
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
-  getAllRegisteredPlatforms_() {
+  getAllRegisteredPlatforms() {
     const platforms = [];
     for (const platformKey in this.subscriptionPlatforms_) {
       const subscriptionPlatform =
@@ -252,11 +251,13 @@ export class PlatformStore {
   selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
-
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
     const platformWeights = [];
 
-    this.getAllRegisteredPlatforms_().forEach(platform => {
+    dev().assert(this.areAllPlatformsResolved_(),
+        'All platforms are not resolved yet');
+
+    this.getAllRegisteredPlatforms().forEach(platform => {
       let weight = 0;
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
@@ -275,7 +276,6 @@ export class PlatformStore {
         platform,
         weight,
       });
-
       if (platform.getServiceId() === 'local') {
         localWeight = weight;
       }

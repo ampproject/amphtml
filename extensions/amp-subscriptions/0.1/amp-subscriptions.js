@@ -221,7 +221,7 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms_().forEach(
+      this.platformStore_.getAllRegisteredPlatforms().forEach(
           subscriptionPlatform => {
             this.fetchEntitlements_(subscriptionPlatform);
           }
@@ -317,13 +317,14 @@ export class SubscriptionService {
   /**
    * Delegates an action to local platform
    * @param {string} action
+   * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
 
-    localPlatform.executeAction(action);
+    return localPlatform.executeAction(action);
   }
 }
 

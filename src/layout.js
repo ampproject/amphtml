@@ -37,6 +37,7 @@ export const Layout = {
   FILL: 'fill',
   FLEX_ITEM: 'flex-item',
   FLUID: 'fluid',
+  INTRINSIC: 'intrinsic',
 };
 
 
@@ -132,7 +133,8 @@ export function isLayoutSizeDefined(layout) {
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL ||
       layout == Layout.FLEX_ITEM ||
-      layout == Layout.FLUID);
+      layout == Layout.FLUID ||
+      layout == Layout.INTRINSIC);
 }
 
 
@@ -308,7 +310,8 @@ export function applyStaticLayout(element) {
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
         parseLayout(completedLayoutAttr)));
-    if (layout == Layout.RESPONSIVE && element.firstElementChild) {
+    if ((layout == Layout.RESPONSIVE || layout === Layout.INTRINSIC)
+      && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
           element.querySelector('i-amphtml-sizer') || undefined;
@@ -377,7 +380,7 @@ export function applyStaticLayout(element) {
 
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.RESPONSIVE) {
+      layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     user().assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
@@ -385,12 +388,14 @@ export function applyStaticLayout(element) {
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
-  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE ||
+      layout == Layout.INTRINSIC) {
     user().assert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
-  if (layout == Layout.RESPONSIVE) {
+
+  if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     user().assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
@@ -424,6 +429,18 @@ export function applyStaticLayout(element) {
     });
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
+  } else if (layout == Layout.INTRINSIC) {
+    // Intrinsic uses an svg inside the sizer element rather than the padding trick
+    // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
+    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    const intrinsicSizer = element.ownerDocument.createElement('img');
+    sizer.classList.add('i-amphtml-sizer');
+    intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+    intrinsicSizer.setAttribute('src',
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>`);
+    sizer.appendChild(intrinsicSizer);
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement = intrinsicSizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {

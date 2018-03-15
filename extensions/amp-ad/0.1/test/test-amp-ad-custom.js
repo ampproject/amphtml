@@ -130,10 +130,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'shadow',
       },
     }, env => {
-      it('should return priority of 1', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(1);
+        expect(customAd.getLayoutPriority()).to.equal(0);
       });
     });
 
@@ -142,10 +142,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'single',
       },
     }, env => {
-      it('should return priority of 2', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(2);
+        expect(customAd.getLayoutPriority()).to.equal(0);
       });
     });
   });
