@@ -32,7 +32,7 @@ export class LRUCache {
     this.capacity_ = capacity;
 
     /** @private {!Object<(number|string), !Cacheable>} */
-    this.cache_ = {};
+    this.cache_ = Object.create(null);
   }
 
   /**

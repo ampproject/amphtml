@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LRUCache} from './utils/lru-cache';
 import {dict} from './utils/object';
 import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
@@ -87,10 +88,11 @@ export function getWinOrigin(win) {
 export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
   }
 
-  const fromCache = cache[url];
+  const fromCache = cache.get(url);
+
   if (fromCache) {
     return fromCache;
   }
@@ -103,7 +105,10 @@ export function parseUrl(url, opt_nocache) {
   if (opt_nocache) {
     return frozen;
   }
-  return cache[url] = frozen;
+
+  cache.put(url, frozen);
+
+  return frozen;
 }
 
 /**
