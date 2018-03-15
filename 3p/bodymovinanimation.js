@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isFiniteNumber} from '../src/types';
 import {loadScript} from './3p';
 
 /**
@@ -32,45 +31,35 @@ function getBodymovinAnimationSdk(global, cb) {
 }
 
 function parseMessage(event) {
-  const dataReceived = JSON.parse(event.data);
-  const messageType = dataReceived['messageType'];
-  if (messageType == 'load dict') {
-    return loadAnimationEvent(dataReceived['animationData'], dataReceived['autoplay'], dataReceived['loop']);
-  } else if (animationHandler && messageType == 'action') {
-    getBodymovinAnimationSdk(global, function() {
-      const action = dataReceived['action'];
-      if (action == 'play') {
-        animationHandler.play();
-      } else if (action == 'pause') {
-        animationHandler.pause();
-      } else if (action == 'stop') {
-        animationHandler.stop();
-      }
-    });
+  const action = event.data['action'];
+  if (animationHandler) {
+    if (action == 'play') {
+      animationHandler.play();
+    } else if (action == 'pause') {
+      animationHandler.pause();
+    } else if (action == 'stop') {
+      animationHandler.stop();
+    }
   }
 
 }
-
-function loadAnimationEvent(animationData, autoplay, loop_val) {
-  const dataReceived = JSON.parse(event.data);
+export function bodymovinanimation(global) {
+  const dataReceived = JSON.parse(global.name).attributes._context;
+  const dataLoop = dataReceived['loop'];
   const animatingContainer = global.document.createElement('div');
 
   global.document.getElementById('c').appendChild(animatingContainer);
-  const shouldLoop = loop_val == 'true';
-  const loop = isFiniteNumber(loop_val) ? parseInt(loop_val, 10) : shouldLoop;
-
-  getBodymovinAnimationSdk(global, function() {
+  const shouldLoop = dataLoop != 'false';
+  const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
+  getBodymovinAnimationSdk(global, function(bodymovin) {
     animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
       loop: loop,
-      autoplay: autoplay,
-      animationData,
+      autoplay: dataReceived['autoplay'],
+      animationData: dataReceived['animationData'],
     });
   });
 }
 
 window.addEventListener('message', parseMessage, false);
-
-export function bodymovinanimation(global, data) {
-}

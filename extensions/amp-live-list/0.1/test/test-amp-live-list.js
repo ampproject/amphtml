@@ -19,11 +19,15 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
-import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 
-adopt(window);
 
-describe('amp-live-list', () => {
+describes.realWin('amp-live-list', {
+  amp: {
+    extensions: ['amp-live-list'],
+  },
+}, function(env) {
+  let win;
   let sandbox;
   let ampdoc;
   let liveList;
@@ -32,8 +36,9 @@ describe('amp-live-list', () => {
   let itemsSlot;
 
   beforeEach(() => {
+    win = env.win;
     sandbox = sinon.sandbox.create();
-    ampdoc = new AmpDocSingle(window);
+    ampdoc = new AmpDocSingle(win);
     elem = document.createElement('amp-live-list');
     elem.getAmpDoc = () => ampdoc;
     const updateSlot = document.createElement('button');
@@ -78,9 +83,6 @@ describe('amp-live-list', () => {
       return Promise.resolve().then(() => {
         cb();
       });
-    };
-    liveList.deferMutate = cb => {
-      cb();
     };
     return elem;
   }
@@ -393,7 +395,9 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([{id: 'id0'}]);
       expect(spy).to.have.not.been.called;
       liveList.update(fromServer1);
-      expect(spy).to.have.been.calledOnce;
+      return Promise.resolve().then(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
     });
 
     it('no items slot on update should be a no op update', () => {
@@ -530,9 +534,11 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       expect(liveList.pendingItemsInsert_).to.have.length(1);
-      expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
+      return Promise.resolve().then(() => {
+        expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
 
-      return liveList.updateAction_(fromServer1).then(() => {
+        return liveList.updateAction_(fromServer1);
+      }).then(() => {
         expect(liveList.updateSlot_).to.have.class('amp-hidden');
       });
     });
@@ -1010,13 +1016,13 @@ describe('amp-live-list', () => {
     itemsSlot.appendChild(child2);
     itemsSlot.appendChild(child1);
     buildElement(elem, Object.assign({}, dftAttrs,
-        {'data-max-items-per-page': 3}));
+        {'data-max-items-per-page': 2}));
     sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
     liveList.buildCallback();
     const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
 
     const fromServer1 = createFromServer([
-      {id: 'id3'},
+      {id: 'id3', sortTime: '122'},
     ]);
 
     // Insert 1 new item
@@ -1029,52 +1035,16 @@ describe('amp-live-list', () => {
     expect(removeChildSpy).to.have.not.been.called;
 
     return liveList.updateAction_().then(() => {
-      expect(liveList.curNumOfLiveItems_).to.equal(3);
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
       expect(liveList.pendingItemsInsert_).to.have.length(0);
 
-      expect(removeChildSpy).to.have.not.been.called;
-      // tombstone id3
-      const fromServer = createFromServer([
-        {id: 'id3', tombstone: null},
-        // id6 actually doesn't exist.
-        {id: 'id6', tombstone: null},
-      ]);
-      liveList.update(fromServer);
-      // Note that updateAction_ is actually called twice here, since
-      // `update` will call it right away w/o any insertion operation.
-      return liveList.updateAction_().then(() => {
-        expect(removeChildSpy).to.have.not.been.called;
-        expect(liveList.curNumOfLiveItems_).to.equal(2);
-      });
-    }).then(() => {
-      // Insert 1 new item
-      const fromServer = createFromServer([
-        {id: 'id4'},
-      ]);
-      liveList.update(fromServer);
-      return liveList.updateAction_().then(() => {
-        // We have room for 1 more since we did a tombstone to id3
-        expect(removeChildSpy).to.have.not.been.called;
-        expect(liveList.curNumOfLiveItems_).to.equal(3);
-        expect(liveList.itemsSlot_
-            .lastElementChild.getAttribute('id')).to.equal('id1');
-      });
-    }).then(() => {
-      // Insert 1 new item
-      const fromServer = createFromServer([
-        {id: 'id8'},
-      ]);
-      liveList.update(fromServer);
-      return liveList.updateAction_().then(() => {
-        // We finally call removeChild on parent as we've
-        // passed the max items limit.
-        expect(removeChildSpy).to.be.calledOnce;
-        expect(liveList.curNumOfLiveItems_).to.equal(3);
-        // Last item is now id2, since id1 would have been removed from live
-        // DOM.
-        expect(liveList.itemsSlot_
-            .lastElementChild.getAttribute('id')).to.equal('id2');
-      });
+      expect(removeChildSpy).to.have.been.called;
+
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id2');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id1');
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
     });
   });
 
@@ -1107,12 +1077,30 @@ describe('amp-live-list', () => {
       {id: 'id6'},
     ]);
 
+    expect(liveList.curNumOfLiveItems_).to.equal(2);
+    expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+    expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+        .to.equal('id2');
+    expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+        .to.equal('id1');
 
     liveList.update(fromServer1);
     expect(removeChildSpy).to.have.not.been.called;
 
     return liveList.updateAction_().then(() => {
       // Will only remove id1 and not id2
+      expect(liveList.curNumOfLiveItems_).to.equal(5);
+      expect(liveList.itemsSlot_.childElementCount).to.equal(5);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id6');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id5');
+      expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+          .to.equal('id4');
+      expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+          .to.equal('id3');
+      expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+          .to.equal('id2');
       expect(removeChildSpy).to.be.calledOnce;
     });
   });
@@ -1230,5 +1218,160 @@ describe('amp-live-list', () => {
       expect(getNumberMaxOrDefault('0', 10)).to.equal(10);
       expect(getNumberMaxOrDefault(0, 10)).to.equal(10);
     });
+  });
+
+  describe('sort=ascending', () => {
+
+    it('should have correct insertion by using data-sort-time', () => {
+      const oldDate = Date.now();
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'unique-id-num-1');
+      child2.setAttribute('id', 'unique-id-num-2');
+      child1.setAttribute('data-sort-time', oldDate - 2);
+      child2.setAttribute('data-sort-time', oldDate - 1);
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs, {'sort': 'ascending'}));
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
+
+
+      const fromServer1 = createFromServer([
+        {id: 'unique-id-num-4', sortTime: oldDate + 2},
+        {id: 'unique-id-num-3', sortTime: oldDate + 1},
+        {id: 'unique-id-num-5', sortTime: oldDate - 3},
+      ]);
+
+      liveList.update(fromServer1);
+
+      // Sort order should be 5, 3, 4
+      expect(liveList.pendingItemsInsert_[0].getAttribute('id'))
+          .to.equal('unique-id-num-5');
+      expect(liveList.pendingItemsInsert_[1].getAttribute('id'))
+          .to.equal('unique-id-num-3');
+      expect(liveList.pendingItemsInsert_[2].getAttribute('id'))
+          .to.equal('unique-id-num-4');
+      return liveList.updateAction_().then(() => {
+        // Insertion order should be 5, 3, 4
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('unique-id-num-5');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('unique-id-num-1');
+        expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+            .to.equal('unique-id-num-2');
+        expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+            .to.equal('unique-id-num-3');
+        expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+            .to.equal('unique-id-num-4');
+        expect(liveList.itemsSlot_.children.length).to.equal(5);
+      });
+    });
+
+    it('should delete old items to accomodate new items', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child1.textContent = 'hello world';
+      child1.appendChild(document.createElement('div'));
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      // append child 2 first
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs,
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
+      sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+
+      const fromServer1 = createFromServer([
+        {id: 'id3', sortTime: '125'},
+      ]);
+
+      // Insert 1 new item
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(liveList.pendingItemsInsert_).to.have.length(0);
+
+      liveList.update(fromServer1);
+      expect(liveList.pendingItemsInsert_).to.have.length(1);
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(removeChildSpy).to.have.not.been.called;
+
+      return liveList.updateAction_().then(() => {
+        expect(liveList.curNumOfLiveItems_).to.equal(2);
+        expect(liveList.pendingItemsInsert_).to.have.length(0);
+
+        expect(removeChildSpy).to.have.been.called;
+
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('id2');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('id3');
+        expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      });
+    });
+
+    it('should only delete items above the viewport', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child1.textContent = 'hello world';
+      child1.appendChild(document.createElement('div'));
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      // append child 2 first
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs,
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
+      const pred = sandbox.stub(liveList, 'isElementAboveViewport_');
+      // id1
+      pred.onCall(0).returns(true);
+      // Anything else
+      pred.returns(false);
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+
+      const fromServer1 = createFromServer([
+        {id: 'id3'},
+        {id: 'id4'},
+        {id: 'id5'},
+        {id: 'id6'},
+      ]);
+
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id1');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id2');
+      liveList.update(fromServer1);
+      expect(removeChildSpy).to.have.not.been.called;
+
+      return liveList.updateAction_().then(() => {
+        // Will only remove id1 and not id2
+        expect(removeChildSpy).to.be.calledOnce;
+        expect(liveList.curNumOfLiveItems_).to.equal(5);
+        expect(liveList.itemsSlot_.childElementCount).to.equal(5);
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('id2');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('id3');
+        expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+            .to.equal('id4');
+        expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+            .to.equal('id5');
+        expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+            .to.equal('id6');
+      });
+    });
+
   });
 });

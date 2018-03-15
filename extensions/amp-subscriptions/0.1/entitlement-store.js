@@ -101,6 +101,13 @@ export class EntitlementStore {
   }
 
   /**
+   * Clears the grant status
+   */
+  reset() {
+    this.grantStatusPromise_ = null;
+  }
+
+  /**
    * Returns entitlements when all services are done fetching them.
    * @private
    * @returns {!Promise<!Array<!./entitlement.Entitlement>>}
@@ -147,9 +154,9 @@ export class EntitlementStore {
    * @returns {!Promise<!./entitlement.Entitlement>}
    */
   selectPlatform() {
-    return this.getAllPlatformsEntitlements_().then(entitlements => {
-      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlements.
-      return this.selectApplicablePlatform_(entitlements);
+    return this.getAllPlatformsEntitlements_().then(entitlement => {
+      // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
+      return this.selectApplicablePlatform_(entitlement);
     });
   }
 

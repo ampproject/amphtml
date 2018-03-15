@@ -17,7 +17,9 @@
 import {
   ConfiguredRuntime,
   Fetcher,
+  SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
+import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 
@@ -59,6 +61,11 @@ export class GoogleSubscriptionsPlatform {
    * @param {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
+    /**
+     * @private @const
+     * {!../../amp-subscriptions/0.1/service-adapter.ServiceAdapter}
+     */
+    this.serviceAdapter_ = serviceAdapter;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
         ampdoc.win,
@@ -67,20 +74,100 @@ export class GoogleSubscriptionsPlatform {
           fetcher: new AmpFetcher(ampdoc.win),
         }
     );
+    this.runtime_.setOnLoginRequest(request => {
+      this.onLoginRequest_(request && request.linkRequested);
+    });
+    this.runtime_.setOnLinkComplete(() => {
+      this.onLinkComplete_();
+    });
+    this.runtime_.setOnNativeSubscribeRequest(() => {
+      this.onNativeSubscribeRequest_();
+    });
+    this.runtime_.setOnSubscribeResponse(promise => {
+      promise.then(response => {
+        this.onSubscribeResponse_(response);
+      });
+    });
+  }
+
+  /**
+   * @param {boolean} linkRequested
+   * @private
+   */
+  onLoginRequest_(linkRequested) {
+    if (linkRequested) {
+      this.runtime_.linkAccount();
+    } else {
+      this.serviceAdapter_.delegateActionToLocal('login');
+    }
+  }
+
+  /** @private */
+  onLinkComplete_() {
+    this.runtime_.reset();
+    this.serviceAdapter_.reAuthorizePlatform(this);
+  }
+
+  /** @private */
+  onNativeSubscribeRequest_() {
+    this.serviceAdapter_.delegateActionToLocal('subscribe');
+  }
+
+  /**
+   * @param {!SubscribeResponse} response
+   * @private
+   */
+  onSubscribeResponse_(response) {
+    response.complete().then(() => {
+      this.runtime_.reset();
+      this.serviceAdapter_.reAuthorizePlatform(this);
+    });
   }
 
   /** @override */
   getEntitlements() {
-    return this.runtime_.getEntitlements();
+    return this.runtime_.getEntitlements().then(swgEntitlements => {
+      const swgEntitlement = swgEntitlements.getEntitlementForThis();
+      if (!swgEntitlement) {
+        return null;
+      }
+      return new Entitlement(
+          swgEntitlement.source,
+          swgEntitlements.raw,
+          PLATFORM_ID,
+          swgEntitlement.products,
+          swgEntitlement.subscriptionToken);
+    });
   }
-
-  /** @override */
-  activate() {}
 
   /** @override */
   getServiceId() {
     return PLATFORM_ID;
   }
+
+  /** @override */
+  activate(renderState) {
+    // Offers or abbreviated offers may need to be shown depending on
+    // whether the access has been granted and whether user is a subscriber.
+    if (!renderState.granted) {
+      this.runtime_.showOffers();
+    } else if (!renderState.subscribed) {
+      this.runtime_.showAbbrvOffer();
+    }
+  }
+
+  /**
+   * Returns if pingback is enabled for this platform
+   * @returns {boolean}
+   */
+  isPingbackEnabled() {
+    return false;
+  }
+
+  /**
+   * Perdforms the pingback to the subscription platform
+   */
+  pingback() {}
 }
 
 
@@ -138,4 +225,12 @@ export function getFetcherClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getSubscribeResponseClassForTesting() {
+  return SubscribeResponse;
 }

@@ -18,7 +18,6 @@ import {ActionTrust} from '../../../src/action-trust';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
@@ -47,12 +46,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {string} */
-    this.loop_ = 'true';
-
-    /** @private {string} */
-    this.autoplay_ = true;
-
-    /** @private {string} */
     this.src_ = null;
 
     /** @private {enum} */
@@ -75,11 +68,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loop_ = this.element.getAttribute('loop') ?
-      this.element.getAttribute('loop') : this.loop_;
+    this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('no-autoplay');
     this.playingState_ = this.autoplay_ ? PLAYING_STATE.PLAYING : PLAYING_STATE.LOADED_NOT_PLAYING;
-
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
@@ -93,27 +84,21 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.element.setAttribute('data-loop', this.loop_);
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
     return animData.then(data => {
-      // We will get here when the data has been fetched from the server
-      this.element.setAttribute('data-animation-data', JSON.stringify(data));
-
+      const opt_context = {
+        loop: this.loop_,
+        autoplay: this.autoplay_,
+        animationData: data,
+      };
+      const iframe = getIframe(
+          this.win, this.element, 'bodymovinanimation', opt_context);
       return Services.vsyncFor(this.win).mutatePromise(() => {
-        const iframe = getIframe(this.win, this.element, 'bodymovinanimation');
         this.applyFillContent(iframe);
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        return this.loadPromise(this.iframe_).then(() => {
-          const message = JSON.stringify(dict({
-            'messageType': 'load dict',
-            'loop': this.loop_,
-            'animationData': data,
-            'autoplay': this.autoplay_,
-          }));
-          this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-        });
+        return this.loadPromise(this.iframe_);
       });
     });
   }
@@ -132,10 +117,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       return;
     }
 
-    const message = JSON.stringify(dict({
-      'messageType': 'action',
+    const message = {
       'action': 'play',
-    }));
+    };
     this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     this.playingState_ = PLAYING_STATE.PLAYING;
   }
@@ -145,10 +129,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       return;
     }
 
-    const message = JSON.stringify(dict({
-      'messageType': 'action',
+    const message = {
       'action': 'pause',
-    }));
+    };
     this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     this.playingState_ = PLAYING_STATE.PAUSED;
   }
@@ -158,10 +141,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       return;
     }
 
-    const message = JSON.stringify(dict({
-      'messageType': 'action',
+    const message = {
       'action': 'stop',
-    }));
+    };
     this.iframe_.contentWindow./*OK*/postMessage(message, '*');
     this.playingState_ = PLAYING_STATE.STOPPED;
   }

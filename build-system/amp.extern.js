@@ -265,10 +265,6 @@ data.hideCta;
 data.smallHeader;
 data.showFacepile;
 data.showText;
-data.loop;
-data.autoplay;
-data.animationData;
-data.src;
 
 // 3p code
 var twttr;

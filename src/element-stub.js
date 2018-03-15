@@ -28,7 +28,7 @@ export class ElementStub extends BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     return dev().assert(0, 'Cannot get priority of stubbed element');
   }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.19-1520269025428 */
+ /** Version: 0.1.21-52536000 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -23,10 +23,11 @@ import { ActivityPorts } from 'web-activities/activity-ports';
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
-  SUBSCRIBE: 2,
-  LOGIN_REQUEST: 3,
-  LINK_PROGRESS: 4,
-  LINK_COMPLETE: 5,
+  SUBSCRIBE_REQUEST: 2,
+  SUBSCRIBE_RESPONSE: 3,
+  LOGIN_REQUEST: 4,
+  LINK_PROGRESS: 5,
+  LINK_COMPLETE: 6,
 };
 
 
@@ -37,9 +38,9 @@ class Callbacks {
   /**
    */
   constructor() {
-    /** @private @const {!Object<number, function(!Promise)>} */
+    /** @private @const {!Object<CallbackId, function(*)>} */
     this.callbacks_ = {};
-    /** @private @const {!Object<number, !Promise>} */
+    /** @private @const {!Object<CallbackId, *>} */
     this.resultBuffer_ = {};
   }
 
@@ -67,39 +68,32 @@ class Callbacks {
   }
 
   /**
-   * @param {function()} callback
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
    */
   setOnLoginRequest(callback) {
     this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
   }
 
   /**
+   * @param {!../api/subscriptions.LoginRequest} request
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLoginRequest() {
-    return this.trigger_(CallbackId.LOGIN_REQUEST, Promise.resolve());
+  triggerLoginRequest(request) {
+    return this.trigger_(CallbackId.LOGIN_REQUEST, request);
   }
 
   /**
-   * @param {function(!Promise)} callback
+   * @param {function()} callback
    */
   setOnLinkProgress(callback) {
     this.setCallback_(CallbackId.LINK_PROGRESS, callback);
   }
 
   /**
-   * @param {!Promise} promise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLinkProgress(promise) {
-    return this.trigger_(CallbackId.LINK_PROGRESS, promise);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasLinkProgressPending() {
-    return !!this.resultBuffer_[CallbackId.LINK_PROGRESS];
+  triggerLinkProgress() {
+    return this.trigger_(CallbackId.LINK_PROGRESS, true);
   }
 
   /**
@@ -109,18 +103,17 @@ class Callbacks {
   }
 
   /**
-   * @param {function(!Promise)} callback
+   * @param {function()} callback
    */
   setOnLinkComplete(callback) {
     this.setCallback_(CallbackId.LINK_COMPLETE, callback);
   }
 
   /**
-   * @param {!Promise} promise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerLinkComplete(promise) {
-    return this.trigger_(CallbackId.LINK_COMPLETE, promise);
+  triggerLinkComplete() {
+    return this.trigger_(CallbackId.LINK_COMPLETE, true);
   }
 
   /**
@@ -131,10 +124,31 @@ class Callbacks {
   }
 
   /**
+   * @param {function()} callback
+   */
+  setOnSubscribeRequest(callback) {
+    this.setCallback_(CallbackId.SUBSCRIBE_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerSubscribeRequest() {
+    return this.trigger_(CallbackId.SUBSCRIBE_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasSubscribeRequestCallback() {
+    return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
+  }
+
+  /**
    * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
-    this.setCallback_(CallbackId.SUBSCRIBE, callback);
+    this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
   }
 
   /**
@@ -143,7 +157,7 @@ class Callbacks {
    */
   triggerSubscribeResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.SUBSCRIBE,
+        CallbackId.SUBSCRIBE_RESPONSE,
         responsePromise.then(res => res.clone()));
   }
 
@@ -151,12 +165,12 @@ class Callbacks {
    * @return {boolean}
    */
   hasSubscribeResponsePending() {
-    return !!this.resultBuffer_[CallbackId.SUBSCRIBE];
+    return !!this.resultBuffer_[CallbackId.SUBSCRIBE_RESPONSE];
   }
 
   /**
    * @param {!CallbackId} id
-   * @param {function(!Promise)} callback
+   * @param {function(?)} callback
    * @private
    */
   setCallback_(id, callback) {
@@ -169,7 +183,7 @@ class Callbacks {
 
   /**
    * @param {!CallbackId} id
-   * @param {!Promise} data
+   * @param {*} data
    * @return {boolean}
    * @private
    */
@@ -194,8 +208,8 @@ class Callbacks {
 
   /**
    * @param {!CallbackId} id
-   * @param {function(!Promise)} callback
-   * @param {!Promise} data
+   * @param {function(*)} callback
+   * @param {*} data
    * @private
    */
   executeCallback_(id, callback, data) {
@@ -573,6 +587,20 @@ function setStyles(element, styles) {
 
 
 /**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+function resetStyles(element, properties) {
+  const styleObj = {};
+  properties.forEach(prop => {
+    styleObj[prop] = null;
+  });
+  setStyles(element, styleObj);
+}
+
+
+/**
  * Resets all the styles of an element to a given value. Defaults to null.
  * The valid values are 'inherit', 'initial', 'unset' or null.
  */
@@ -772,25 +800,22 @@ class LoadingView {
   }
 
   /*
-   * Populates the loading indivicator view with children. The populated element
+   * Populates the loading indivicator. The populated element
    * can be added in any view, when required.
    * @private
    */
   buildLoadingIndicator_() {
     const loadingContainer = this.loadingContainer_;
 
-    // Add 4 vertical bars animated at different speed, as defined in the
-    // style.
-    for (let i = 0; i < 4; i++) {
-      const loadingBar = createElement(this.doc_, 'div', {
-        'class': 'swg-loading-bar',
-      });
-      loadingContainer.appendChild(loadingBar);
-    }
+    const loadingIndicatorTopContainer = createElement(this.doc_, 'div', {});
+    loadingContainer.appendChild(loadingIndicatorTopContainer);
+
+    const loadingIndicatorChildContainer = createElement(this.doc_, 'div', {});
+    loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}@-webkit-keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}@keyframes swg-loading{0%{-webkit-transform:scale(1);transform:scale(1)}20%{-webkit-transform:scaleY(2.2);transform:scaleY(2.2)}40%{-webkit-transform:scale(1);transform:scale(1)}}.swg-loading{position:fixed!important;top:50%!important;left:50%!important;-webkit-transform:translate(-50%,-50%)!important;transform:translate(-50%,-50%)!important;z-index:2147483647!important}.swg-loading .swg-loading-bar{display:inline-block!important;width:5px!important;height:20px!important;border-radius:5px!important;margin-right:5px!important;-webkit-animation:swg-loading 1s ease-in-out infinite!important;animation:swg-loading 1s ease-in-out infinite!important}.swg-loading-bar:first-child{background-color:#4285f4!important;-webkit-animation-delay:0!important;animation-delay:0!important}.swg-loading-bar:nth-child(2){background-color:#0f9d58!important;-webkit-animation-delay:0.09s!important;animation-delay:0.09s!important}.swg-loading-bar:nth-child(3){background-color:#f4b400!important;-webkit-animation-delay:.18s!important;animation-delay:.18s!important}.swg-loading-bar:nth-child(4){background-color:#db4437!important;-webkit-animation-delay:.27s!important;animation-delay:.27s!important}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}.swg-loading{position:fixed!important;top:40%!important;left:45%!important;-webkit-transform:translate(-40%,-40%)!important;transform:translate(-40%,-40%)!important;z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}.swg-loading>div{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}.swg-loading>div>div{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 
 
@@ -929,7 +954,8 @@ const rootElementImportantStyles = {
   'background-color': 'rgb(255, 255, 255)',
   'position': 'fixed',
   'z-index': '2147483647',
-  'box-shadow': 'gray 0px 3px, gray 0px 0px 22px',
+  'box-shadow':
+      'rgba(60, 64, 67, .3) 0 1px 1px, rgba(60, 64, 67, .15) 0 1px 4px 1px',
   'box-sizing': 'border-box',
 };
 
@@ -1340,8 +1366,7 @@ class Dialog {
       'right': 0,
       'bottom': 0,
       'left': 0,
-      'background-color': '#fff',
-      'opacity': '.5',
+      'background-color': 'rgba(32, 33, 36, .6)',
       'z-index': 2147483646,  /** 1 less than SwG dialog */
     });
     this.doc_.body.appendChild(this.fadeBackground_);
@@ -1766,28 +1791,24 @@ class JwtHelper {
   }
 }
 
-const CSS$2 = "body{padding:0;margin:0;font-family:'Google sans, sans-serif'}.swg-toast-container{display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-ms-flex-direction:row;flex-direction:row;width:100%}.swg-label{color:#fff;-webkit-box-flex:1;-ms-flex:auto;flex:auto;font-weight:300;padding-left:8px}.swg-detail{background:transparent;color:#0f0;border:none;cursor:pointer;font-size:inherit;outline:none;white-space:nowrap;-webkit-box-flex:initial;-ms-flex:initial;flex:initial;font-family:inherit}\n/*# sourceURL=/./src/ui/toast.css*/";
-
 
 
 /** @const {!Object<string, string|number>} */
 const toastImportantStyles = {
-  'height': '60px',
   'position': 'fixed',
   'bottom': 0,
-  'color': 'rgb(255, 255, 255)',
-  'font-size': '15px',
-  'padding': '20px 8px 0',
+  'height': 0,
+  'max-height': '46px',
   'z-index': '2147483647',
   'border': 'none',
-  'box-shadow': 'gray 3px 3px, rgb(0, 0, 0) 0 0 1.4em',
-  'background-color': 'rgb(51, 51, 51)',
-  'box-sizing': 'border-box',
-  'font-family': 'Google sans, sans-serif',
-  'animation': 'swg-notify 1s ease-out normal backwards, '
-      + 'swg-notify-hide 1s ease-out 7s normal forwards',
 };
 
+/** @const {!Object<string, string>} */
+const iframeAttributes = {
+  'frameborder': '0',
+  'scrolling': 'no',
+  'class': 'swg-toast',
+};
 
 /**
  * The class Notification toast.
@@ -1795,44 +1816,47 @@ const toastImportantStyles = {
 class Toast {
 
   /**
-   * @param {!Window} win
-   * @param {!ToastSpecDef} spec
+   * @param {!../runtime/deps.DepsDef} deps
+   * @param {string} src
+   * @param {!Object<string, ?>} args
    */
-  constructor(win, spec) {
+  constructor(deps, src, args) {
 
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = deps.win();
 
     /** @private @const {!HTMLDocument} */
-    this.doc_ = win.document;
+    this.doc_ = this.win_.document;
 
-    /** @private @const {!ToastSpecDef} */
-    this.spec_ = spec;
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
 
-    /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-toast'});
+    /** @private @const {string} */
+    this.src_ = src;
 
-    /** @private {?Element} */
-    this.container_ = null;
+    /** @private @const {!Object<string, ?>} */
+    this.args_ = args;
 
-    setImportantStyles(this.iframe_.getElement(), toastImportantStyles);
-    setStyles(this.iframe_.getElement(), topFriendlyIframePositionStyles);
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ =
+        /** @type {!HTMLIFrameElement} */ (
+            createElement(this.doc_, 'iframe', iframeAttributes));
+
+    setImportantStyles(this.iframe_, toastImportantStyles);
+    setStyles(this.iframe_, topFriendlyIframePositionStyles);
+
+    /** @private @const {!Promise} */
+    this.ready_ = new Promise(resolve => {
+      this.iframe_.onload = resolve;
+    });
   }
 
   /**
-   * Gets the attached iframe instance.
-   * @return {!FriendlyIframe}
-   */
-  getIframe() {
-    return this.iframe_;
-  }
-
-  /**
-   * Gets the Iframe element.
+   * Returns the iframe element.
    * @return {!HTMLIFrameElement}
    */
   getElement() {
-    return this.iframe_.getElement();
+    return this.iframe_;
   }
 
   /**
@@ -1840,274 +1864,36 @@ class Toast {
    * @return {!Promise}
    */
   open() {
-    const iframe = this.iframe_;
-    if (iframe.isConnected()) {
-      throw new Error('Already opened');
-    }
-    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
+    this.doc_.body.appendChild(this.iframe_);  // Fires onload.
+    return this.buildToast_();
+  }
 
-    return iframe.whenReady().then(() => this.buildIframe_());
+  /**
+   * Builds the content of the iframe. On load, animates the toast.
+   */
+  buildToast_() {
+    const toastDurationSeconds = 7;
+    return this.activityPorts_.openIframe(
+        this.iframe_, this.src_, this.args_).then(port => {
+          return port.whenReady();
+        }).then(() => {
+          resetStyles(this.iframe_, ['height']);
+          setImportantStyles(this.iframe_, {
+            'animation': 'swg-notify .3s ease-out normal backwards, '
+                  + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
+                  's normal forwards',
+          });
+          this.win_.setTimeout(() => {
+            this.close();
+          }, (toastDurationSeconds + 1) * 1000);
+        });
   }
 
   /**
    * Closes the toast.
    */
   close() {
-    this.doc_.body.removeChild(this.iframe_.getElement());
-  }
-
-  /**
-   * Builds the iframe with content and the styling after iframe is loaded.
-   * @private
-   * @return {!Toast}
-   */
-  buildIframe_() {
-    const iframe = this.iframe_;
-    const iframeDoc = iframe.getDocument();
-    const iframeBody = iframe.getBody();
-
-    // Inject Google fonts in <HEAD> section of the iframe.
-    injectFontsLink(iframeDoc, googleFontsUrl);
-    injectStyleSheet(iframeDoc, CSS$2);
-
-    this.addItems_(iframeDoc, iframeBody);
-
-    return this;
-  }
-
-  /**
-   * Adds label and detail button.
-   * @param {!Document} iframeDoc
-   * @param {?Element} iframeBody
-   * @private
-   */
-  addItems_(iframeDoc, iframeBody) {
-    const childElements = [];
-
-    const label = createElement(iframeDoc, 'div', {
-      'class': 'swg-label',
-    }, this.spec_.text);
-    childElements.push(label);
-
-    if (this.spec_.action && this.spec_.action.label) {
-      const linkButton = createElement(iframeDoc, 'button', {
-        'class': 'swg-detail',
-        'aria-label': 'Details',
-      }, this.spec_.action.label);
-      linkButton.addEventListener('click', this.spec_.action.handler);
-      childElements.push(linkButton);
-    }
-
-    // Create container element and add 'label' and/or 'linkButton' to it.
-    this.container_ = createElement(iframeDoc, 'div', {
-      'class': 'swg-toast-container',
-    }, childElements);
-
-    iframeBody.appendChild(this.container_);
-  }
-}
-
-
-
-const SERVICE_ID = 'subscribe.google.com';
-const TOAST_STORAGE_KEY = 'toast';
-
-
-/**
- */
-class EntitlementsManager {
-
-  /**
-   * @param {!Window} win
-   * @param {!../model/page-config.PageConfig} config
-   * @param {!./fetcher.Fetcher} fetcher
-   * @param {!./deps.DepsDef} deps
-   */
-  constructor(win, config, fetcher, deps) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
-
-    /** @private @const {!./fetcher.Fetcher} */
-    this.fetcher_ = fetcher;
-
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper();
-
-    /** @private {?Promise<!Entitlements>} */
-    this.responsePromise_ = null;
-
-    /** @private {number} */
-    this.positiveRetries_ = 0;
-
-    /** @private @const {!./storage.Storage} */
-    this.storage_ = deps.storage();
-  }
-
-  /**
-   * @param {boolean=} opt_expectPositive
-   */
-  reset(opt_expectPositive) {
-    this.responsePromise_ = null;
-    this.positiveRetries_ = Math.max(
-        this.positiveRetries_, opt_expectPositive ? 3 : 0);
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlements() {
-    if (!this.responsePromise_) {
-      this.responsePromise_ = this.getEntitlementsFlow_();
-    }
-    return this.responsePromise_;
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  fetchEntitlements() {
-    // TODO(dvoytenko): Replace retries with consistent fetch.
-    let positiveRetries = this.positiveRetries_;
-    this.positiveRetries_ = 0;
-    const attempt = () => {
-      positiveRetries--;
-      return this.fetch_().then(entitlements => {
-        if (entitlements.enablesThis() || positiveRetries <= 0) {
-          return entitlements;
-        }
-        return new Promise(resolve => {
-          this.win_.setTimeout(() => {
-            resolve(attempt());
-          }, 550);
-        });
-      });
-    };
-    return attempt();
-  }
-
-  /**
-   * @param {boolean} value
-   */
-  setToastShown(value) {
-    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlementsFlow_() {
-    return this.fetchEntitlements().then(entitlements => {
-      this.onEntitlementsFetched_(entitlements);
-      return entitlements;
-    });
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @private
-   */
-  onEntitlementsFetched_(entitlements) {
-    // Skip any notifications and toast if other flows are ongoing.
-    // TODO(dvoytenko): what's the right action when pay flow was canceled?
-    const callbacks = this.deps_.callbacks();
-    if (callbacks.hasSubscribeResponsePending() ||
-        callbacks.hasLinkProgressPending() ||
-        callbacks.hasLinkCompletePending()) {
-      return;
-    }
-
-    // Notify on the received entitlements.
-    callbacks.triggerEntitlementsResponse(Promise.resolve(entitlements));
-
-    // Show a toast if needed.
-    this.maybeShowToast_(entitlements);
-  }
-
-  /**
-   * @param {!Entitlements} entitlements
-   * @return {!Promise}
-   * @private
-   */
-  maybeShowToast_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
-    if (!entitlement) {
-      return Promise.resolve();
-    }
-
-    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
-      if (value == '1') {
-        // Already shown;
-        return;
-      }
-
-      this.setToastShown(true);
-      if (entitlement) {
-        this.showToast_(entitlement);
-      }
-    });
-  }
-
-  /**
-   * @param {!Entitlement} entitlement
-   * @private
-   */
-  showToast_(entitlement) {
-    const toast = new Toast(this.win_, {
-      text:
-          (entitlement.source || 'google') == 'google' ?
-          'Access via Google Subscriptions' :
-          // TODO(dvoytenko): display name instead.
-          'Access via [' + entitlement.source + ']',
-      action: {
-        label: 'View',
-        handler: function() {
-          // TODO(dparikh): Implementation.
-        },
-      },
-    });
-    toast.open();
-  }
-
-  /**
-   * @return {!Promise<!Entitlements>}
-   * @private
-   */
-  fetch_() {
-    const url =
-        'https://swg-staging.sandbox.google.com/_/v1/publication/' +
-        encodeURIComponent(this.config_.getPublicationId()) +
-        '/entitlements';
-    return this.fetcher_.fetchCredentialedJson(url).then(json => {
-      const signedData = json['signedEntitlements'];
-      if (signedData) {
-        const jwt = this.jwtHelper_.decode(signedData);
-        const entitlementsClaim = jwt['entitlements'];
-        if (entitlementsClaim) {
-          return new Entitlements(
-              SERVICE_ID,
-              signedData,
-              Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
-        }
-      } else {
-        const plainEntitlements = json['entitlements'];
-        if (plainEntitlements) {
-          return new Entitlements(
-              SERVICE_ID,
-              '',
-              Entitlement.parseListFromJson(plainEntitlements),
-              this.config_.getProductId());
-        }
-      }
-      // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
-    });
+    this.doc_.body.removeChild(this.iframe_);
   }
 }
 
@@ -2207,6 +1993,318 @@ function parseUrlWithA(a, url) {
     info.origin = info.protocol + '//' + info.host;
   }
   return info;
+}
+
+
+/**
+ * Adds a parameter to a query string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const queryIndex = url.indexOf('?');
+  const fragmentIndex = url.indexOf('#');
+  let fragment = '';
+  if (fragmentIndex != -1) {
+    fragment = url.substring(fragmentIndex);
+    url = url.substring(0, fragmentIndex);
+  }
+  if (queryIndex == -1) {
+    url += '?';
+  } else if (queryIndex < url.length - 1) {
+    url += '&';
+  }
+  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return url + fragment;
+}
+
+
+
+/**
+ * Have to put these in the map to avoid compiler optimization. Due to
+ * optimization issues, this map only allows property-style keys. E.g. "hr1",
+ * as opposed to "1hr".
+ * @type {!Object<string, number>}
+ * @package Visible for testing only.
+ */
+const CACHE_KEYS = {
+  'nocache': 1,
+  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
+  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+};
+
+
+/**
+ * @return {string}
+ */
+function feOrigin() {
+  return parseUrl('https://subscribe.sandbox.google.com').origin;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function serviceUrl(url) {
+  return 'https://subscribe.sandbox.google.com/swg/_/api/v1' + url;
+}
+
+
+/**
+ * @param {string} url Relative URL, e.g. "/offersiframe".
+ * @param {string=} prefix
+ * @return {string} The complete URL.
+ */
+function feUrl(url, prefix = '') {
+  return addQueryParam(
+      'https://subscribe.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
+      '_', cacheParam('hr1'));
+}
+
+
+/**
+ * @param {!Object<string, ?>} args
+ * @return {!Object<string, ?>}
+ */
+function feArgs(args) {
+  return Object.assign(args, {
+    '_client': 'SwG 0.1.21-52536000',
+  });
+}
+
+
+/**
+ * @param {string} cacheKey
+ * @return {string}
+ * @package Visible for testing only.
+ */
+function cacheParam(cacheKey) {
+  let period = CACHE_KEYS[cacheKey];
+  if (period == null) {
+    period = 1;
+  }
+  if (period === 0) {
+    return '_';
+  }
+  const now = Date.now();
+  return String(period <= 1 ? now : Math.floor(now / period));
+}
+
+
+
+const SERVICE_ID = 'subscribe.google.com';
+const TOAST_STORAGE_KEY = 'toast';
+
+
+/**
+ */
+class EntitlementsManager {
+
+  /**
+   * @param {!Window} win
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(win, config, fetcher, deps) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
+
+    /** @private @const {string} */
+    this.publicationId_ = this.config_.getPublicationId();
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper();
+
+    /** @private {?Promise<!Entitlements>} */
+    this.responsePromise_ = null;
+
+    /** @private {number} */
+    this.positiveRetries_ = 0;
+
+    /** @private {boolean} */
+    this.blockNextNotification_ = false;
+
+    /** @private @const {!./storage.Storage} */
+    this.storage_ = deps.storage();
+  }
+
+  /**
+   * @param {boolean=} opt_expectPositive
+   */
+  reset(opt_expectPositive) {
+    this.responsePromise_ = null;
+    this.positiveRetries_ = Math.max(
+        this.positiveRetries_, opt_expectPositive ? 3 : 0);
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlements() {
+    if (!this.responsePromise_) {
+      this.responsePromise_ = this.getEntitlementsFlow_();
+    }
+    return this.responsePromise_;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  fetchEntitlements() {
+    // TODO(dvoytenko): Replace retries with consistent fetch.
+    let positiveRetries = this.positiveRetries_;
+    this.positiveRetries_ = 0;
+    const attempt = () => {
+      positiveRetries--;
+      return this.fetch_().then(entitlements => {
+        if (entitlements.enablesThis() || positiveRetries <= 0) {
+          return entitlements;
+        }
+        return new Promise(resolve => {
+          this.win_.setTimeout(() => {
+            resolve(attempt());
+          }, 550);
+        });
+      });
+    };
+    return attempt();
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setToastShown(value) {
+    this.storage_.set(TOAST_STORAGE_KEY, value ? '1' : '0');
+  }
+
+  /**
+   */
+  blockNextNotification() {
+    this.blockNextNotification_ = true;
+  }
+
+  /**
+   */
+  unblockNextNotification() {
+    this.blockNextNotification_ = false;
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   */
+  getEntitlementsFlow_() {
+    return this.fetchEntitlements().then(entitlements => {
+      this.onEntitlementsFetched_(entitlements);
+      return entitlements;
+    });
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  onEntitlementsFetched_(entitlements) {
+    // Skip any notifications and toast if other flows are ongoing.
+    // TODO(dvoytenko): what's the right action when pay flow was canceled?
+    const blockNotification = this.blockNextNotification_;
+    this.blockNextNotification_ = false;
+    if (blockNotification) {
+      return;
+    }
+
+    // Notify on the received entitlements.
+    this.deps_.callbacks().triggerEntitlementsResponse(
+        Promise.resolve(entitlements));
+
+    // Show a toast if needed.
+    this.maybeShowToast_(entitlements);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @return {!Promise}
+   * @private
+   */
+  maybeShowToast_(entitlements) {
+    const entitlement = entitlements.getEntitlementForThis();
+    if (!entitlement) {
+      return Promise.resolve();
+    }
+
+    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
+      if (value == '1') {
+        // Already shown;
+        return;
+      }
+
+      this.setToastShown(true);
+      if (entitlement) {
+        this.showToast_(entitlement);
+      }
+    });
+  }
+
+  /**
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  showToast_(entitlement) {
+    const source = entitlement.source || 'google';
+
+    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
+      'publicationId': this.publicationId_,
+      'source': source,
+    })).open();
+  }
+
+  /**
+   * @return {!Promise<!Entitlements>}
+   * @private
+   */
+  fetch_() {
+    const url = serviceUrl(
+        '/publication/' +
+        encodeURIComponent(this.publicationId_) +
+        '/entitlements');
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const signedData = json['signedEntitlements'];
+      if (signedData) {
+        const jwt = this.jwtHelper_.decode(signedData);
+        const entitlementsClaim = jwt['entitlements'];
+        if (entitlementsClaim) {
+          return new Entitlements(
+              SERVICE_ID,
+              signedData,
+              Entitlement.parseListFromJson(entitlementsClaim),
+              this.config_.getProductId());
+        }
+      } else {
+        const plainEntitlements = json['entitlements'];
+        if (plainEntitlements) {
+          return new Entitlements(
+              SERVICE_ID,
+              '',
+              Entitlement.parseListFromJson(plainEntitlements),
+              this.config_.getProductId());
+        }
+      }
+      // Empty response.
+      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+    });
+  }
 }
 
 
@@ -2647,7 +2745,7 @@ class View {
 
 
 /** @const {!Object<string, string>} */
-const iframeAttributes = {
+const iframeAttributes$1 = {
   'frameborder': '0',
   'scrolling': 'no',
 };
@@ -2662,7 +2760,7 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?string|number>=} args
+   * @param {!Object<string, ?>=} args
    * @param {boolean=} shouldFadeBody
    */
   constructor(
@@ -2682,7 +2780,7 @@ class ActivityIframeView extends View {
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes));
+            createElement(this.doc_, 'iframe', iframeAttributes$1));
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = activityPorts;
@@ -2690,7 +2788,7 @@ class ActivityIframeView extends View {
     /** @private @const {string} */
     this.src_ = src;
 
-    /** @private @const {!Object<string, ?string|number>} */
+    /** @private @const {!Object<string, ?>} */
     this.args_ = args || {};
 
     /** @private @const {boolean} */
@@ -2826,12 +2924,6 @@ function acceptPortResult(
 
 
 
-const LINKBACK_URL =
-    'https://subscribe.sandbox.google.com/swglib/linkbackstart';
-
-const LINK_CONFIRM_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/u/$index$/swglib/linkconfirmiframe';
-
 const CONTINUE_LINK_REQUEST_ID = 'swg-link-continue';
 const LINK_REQUEST_ID = 'swg-link';
 
@@ -2861,9 +2953,12 @@ class LinkbackFlow {
    */
   start() {
     this.activityPorts_.open(
-        LINK_REQUEST_ID, LINKBACK_URL, '_blank', {
+        LINK_REQUEST_ID,
+        feUrl('/linkbackstart'),
+        '_blank',
+        feArgs({
           'publicationId': this.pageConfig_.getPublicationId(),
-        }, {});
+        }), {});
     return Promise.resolve();
   }
 }
@@ -2879,10 +2974,11 @@ class LinkCompleteFlow {
    */
   static configurePending(deps) {
     function handler(port) {
-      deps.callbacks().triggerLinkProgress(Promise.resolve());
+      deps.entitlementsManager().blockNextNotification();
+      deps.callbacks().triggerLinkProgress();
       const promise = acceptPortResult(
           port,
-          parseUrl(LINK_CONFIRM_IFRAME_URL).origin,
+          feOrigin(),
           /* requireOriginVerified */ false,
           /* requireSecureChannel */ false);
       return promise.then(response => {
@@ -2919,11 +3015,11 @@ class LinkCompleteFlow {
         new ActivityIframeView(
             this.win_,
             this.activityPorts_,
-            LINK_CONFIRM_IFRAME_URL.replace(/\$index\$/g, index),
-            {
+            feUrl('/linkconfirmiframe', '/u/' + index),
+            feArgs({
               'productId': deps.pageConfig().getProductId(),
               'publicationId': deps.pageConfig().getPublicationId(),
-            },
+            }),
             /* shouldFadeBody */ true);
 
     /** @private {?function()} */
@@ -2943,7 +3039,7 @@ class LinkCompleteFlow {
     const promise = this.activityIframeView_.port().then(port => {
       return acceptPortResult(
           port,
-          parseUrl(LINK_CONFIRM_IFRAME_URL).origin,
+          feOrigin(),
           /* requireOriginVerified */ true,
           /* requireSecureChannel */ true);
     });
@@ -2966,16 +3062,64 @@ class LinkCompleteFlow {
    * @private
    */
   complete_(response) {
-    this.callbacks_.triggerLinkComplete(Promise.resolve());
+    this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
-    this.entitlementsManager_.reset(response && response['success'] || false);
     this.entitlementsManager_.setToastShown(true);
+    this.entitlementsManager_.unblockNextNotification();
+    this.entitlementsManager_.reset(response && response['success'] || false);
     this.completeResolver_();
   }
 
   /** @return {!Promise} */
   whenComplete() {
     return this.completePromise_;
+  }
+}
+
+
+
+
+class OffersApi {
+
+  /**
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
+   */
+  constructor(config, fetcher) {
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
+
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+  }
+
+  /**
+   * @param {string=} opt_productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   */
+  getOffers(opt_productId) {
+    const productId = opt_productId || this.config_.getProductId();
+    if (!productId) {
+      throw new Error('getOffers requires productId in config or arguments');
+    }
+    return this.fetch_(productId);
+  }
+
+  /**
+   * @param {string} productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   * @private
+   */
+  fetch_(productId) {
+    const url = serviceUrl(
+        '/publication/' +
+        encodeURIComponent(this.config_.getPublicationId()) +
+        '/offers' +
+        '?label=' + encodeURIComponent(productId));
+    // TODO(dvoytenko): switch to a non-credentialed request after launch.
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      return json['offers'] || [];
+    });
   }
 }
 
@@ -3131,12 +3275,6 @@ class PurchaseData {
 
 
 
-const PAY_URL =
-    'https://subscribe.sandbox.google.com/swglib/pay';
-
-const PAY_CONFIRM_IFRAME_URL =
-    'https://subscribe.sandbox.google.com/swglib/payconfirmiframe';
-
 const PAY_REQUEST_ID = 'swg-pay';
 
 
@@ -3170,16 +3308,19 @@ class PayStartFlow {
   start() {
     // TODO(dvoytenko): switch to gpay async client.
     this.activityPorts_.open(
-        PAY_REQUEST_ID, PAY_URL, '_blank', {
+        PAY_REQUEST_ID,
+        feUrl('/pay'),
+        '_blank',
+        feArgs({
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
-          'environment': '',
-          'playEnvironment': '',
+          'environment': 'PRODUCTION',
+          'playEnvironment': 'AUTOPUSH',
           'swg': {
             'publicationId': this.pageConfig_.getPublicationId(),
             'skuId': this.sku_,
           },
-        }, {});
+        }), {});
     return Promise.resolve();
   }
 }
@@ -3195,9 +3336,9 @@ class PayCompleteFlow {
    */
   static configurePending(deps) {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
+      deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(
-          port, flow.complete.bind(flow));
+      const promise = validatePayResponse(port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -3245,11 +3386,11 @@ class PayCompleteFlow {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        PAY_CONFIRM_IFRAME_URL,
-        {
+        feUrl('/payconfirmiframe'),
+        feArgs({
           'publicationId': this.deps_.pageConfig().getPublicationId(),
           'loginHint': response.userData && response.userData.email,
-        },
+        }),
         /* shouldFadeBody */ true);
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
@@ -3263,6 +3404,7 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   complete() {
+    this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
       this.activityIframeView_.message({'complete': true});
     });
@@ -3284,7 +3426,7 @@ class PayCompleteFlow {
 function validatePayResponse(port, completeHandler) {
   return acceptPortResult(
       port,
-      parseUrl(PAY_URL).origin,
+      feOrigin(),
       // TODO(dvoytenko): support payload decryption.
       /* requireOriginVerified */ false,
       /* requireSecureChannel */ false)
@@ -3360,13 +3502,9 @@ function parseUserData(swgData) {
 
 
 
-const OFFERS_URL =
-    'https://subscribe.sandbox.google.com/swglib/offersiframe';
-
 
 /**
  * The class for Offers flow.
- *
  */
 class OffersFlow {
 
@@ -3381,9 +3519,6 @@ class OffersFlow {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
-    /** @private @const {!HTMLDocument} */
-    this.document_ = this.win_.document;
-
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
@@ -3394,11 +3529,12 @@ class OffersFlow {
     this.activityIframeView_ = new ActivityIframeView(
         this.win_,
         this.activityPorts_,
-        OFFERS_URL,
-        {
+        feUrl('/offersiframe'),
+        feArgs({
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
-        },
+          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        }),
         /* shouldFadeBody */ true);
   }
 
@@ -3410,12 +3546,139 @@ class OffersFlow {
     // If result is due to OfferSelection, redirect to payments.
     this.activityIframeView_.onMessage(result => {
       if (result['alreadySubscribed']) {
-        this.deps_.callbacks().triggerLoginRequest();
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!result['linkRequested'],
+        });
         return;
       }
-      const skuId = result.sku || '';
-      if (skuId) {
-        new PayStartFlow(this.deps_, skuId).start();
+      if (result['sku']) {
+        new PayStartFlow(
+            this.deps_,
+            /** @type {string} */ (result['sku']))
+            .start();
+        return;
+      }
+      if (result['native']) {
+        this.deps_.callbacks().triggerSubscribeRequest();
+        return;
+      }
+    });
+
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+}
+
+
+/**
+ * The class for subscribe option flow.
+ */
+class SubscribeOptionFlow {
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        deps.win(),
+        this.activityPorts_,
+        feUrl('/optionsiframe'),
+        feArgs({
+          'publicationId': deps.pageConfig().getPublicationId(),
+        }),
+        /* shouldFadeBody */ false);
+  }
+
+  /**
+   * Starts the offers flow or alreadySubscribed flow.
+   * @return {!Promise}
+   */
+  start() {
+    this.activityIframeView_.onMessage(data => {
+      this.maybeOpenOffersFlow_(data);
+    });
+    this.activityIframeView_.acceptResult().then(result => {
+      this.maybeOpenOffersFlow_(result.data);
+    });
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {*} data
+   * @private
+   */
+  maybeOpenOffersFlow_(data) {
+    if (data && data['subscribe']) {
+      new OffersFlow(this.deps_).start();
+    }
+  }
+}
+
+
+/**
+ * The class for Abbreviated Offer flow.
+ *
+ */
+class AbbrvOfferFlow {
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+        this.win_,
+        this.activityPorts_,
+        feUrl('/abbrvofferiframe'),
+        feArgs({
+          'publicationId': deps.pageConfig().getPublicationId(),
+        }),
+        /* shouldFadeBody */ true);
+  }
+
+  /**
+   * Starts the offers flow
+   * @return {!Promise}
+   */
+  start() {
+
+    // If the user is already subscribed, trigger login flow
+    this.activityIframeView_.onMessage(data => {
+      if (data['alreadySubscribed']) {
+        this.deps_.callbacks().triggerLoginRequest({
+          linkRequested: !!data['linkRequested'],
+        });
+        return;
+      }
+      // TODO(sohanirao) : Handle the case when user is logged in
+    });
+    // If result is due to requesting offers, redirect to offers flow
+    this.activityIframeView_.acceptResult().then(result => {
+      if (result.data['viewOffers']) {
+        new OffersFlow(this.deps_).start();
       }
     });
 
@@ -3567,6 +3830,8 @@ function storageKey(key) {
 
 
 
+
+
 /**
  * @implements {DepsDef}
  * @implements {Subscriptions}
@@ -3608,6 +3873,9 @@ class ConfiguredRuntime {
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ =
         new EntitlementsManager(this.win_, this.config_, this.fetcher_, this);
+
+    /** @private @const {!OffersApi} */
+    this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
 
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
@@ -3679,9 +3947,30 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  getOffers(opt_options) {
+    return this.offersApi_.getOffers(opt_options && opt_options.productId);
+  }
+
+  /** @override */
   showOffers() {
     return this.documentParsed_.then(() => {
       const flow = new OffersFlow(this);
+      return flow.start();
+    });
+  }
+
+  /** @override */
+  showSubscribeOption() {
+    return this.documentParsed_.then(() => {
+      const flow = new SubscribeOptionFlow(this);
+      return flow.start();
+    });
+  }
+
+  /** override */
+  showAbbrvOffer() {
+    return this.documentParsed_.then(() => {
+      const flow = new AbbrvOfferFlow(this);
       return flow.start();
     });
   }
@@ -3704,6 +3993,11 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  setOnNativeSubscribeRequest(callback) {
+    this.callbacks_.setOnSubscribeRequest(callback);
+  }
+
+  /** @override */
   setOnSubscribeResponse(callback) {
     this.callbacks_.setOnSubscribeResponse(callback);
   }
@@ -3721,5 +4015,8 @@ class ConfiguredRuntime {
 
 export {
   ConfiguredRuntime,
+  Entitlements,
+  Entitlement,
   Fetcher,
+  SubscribeResponse,
 };
