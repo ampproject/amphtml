@@ -40,6 +40,8 @@ function parseMessage(event) {
       animationHandler.pause();
     } else if (action == 'stop') {
       animationHandler.stop();
+    } else if (action == 'goToAndStop') {
+      animationHandler.goToAndPlay(event.data['value']);
     }
   }
 

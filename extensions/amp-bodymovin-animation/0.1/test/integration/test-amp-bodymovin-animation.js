@@ -16,7 +16,7 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().run('amp-bodymovin-animation', function() {
+describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const extensions = ['amp-bodymovin-animation'];
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
