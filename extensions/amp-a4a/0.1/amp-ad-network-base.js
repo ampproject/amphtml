@@ -186,7 +186,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-ad-type-defs.ValidatorOutput} validatorResult
+   * @param {!./amp-ad-type-defs.ValidatorOutput} validatorOutput
    * @return {!Promise}
    * @private
    */
