@@ -261,7 +261,8 @@ def configure_browser
     Capybara::Selenium::Driver.new(
       app,
       browser: :chrome,
-      options: options
+      options: options,
+      driver_opts: {log_path: 'chromedriver.log'}
     )
   end
   Capybara.default_driver = :chrome
