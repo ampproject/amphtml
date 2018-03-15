@@ -337,6 +337,29 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.getPageLayoutBox()).to.eql(layoutRectLtwh(0, 0, 10, 10));
   });
 
+  it('should not subtract viewport scroll offset for inabox', () => {
+    win.AMP_MODE = {runtime: 'inabox'};
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('getBoundingClientRect').returns(
+        layoutRectLtwh(0, 0, 10, 10)).once();
+    viewportMock.expects('getScrollTop').returns(123).atLeast(0);
+    const fixedParent = doc.createElement('div');
+    fixedParent.style.position = 'fixed';
+    doc.body.appendChild(fixedParent);
+    fixedParent.appendChild(element);
+    viewportMock.expects('isDeclaredFixed')
+        .withExactArgs(element)
+        .returns(false)
+        .once();
+    viewportMock.expects('isDeclaredFixed')
+        .withExactArgs(fixedParent)
+        .returns(true)
+        .once();
+    resource.measure();
+    expect(resource.isFixed()).to.be.true;
+    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 123, 10, 10));
+  });
+
   describe('placeholder measure', () => {
     let rect;
 
