@@ -17,16 +17,36 @@
   </h2>
   <hr>
   <h3>Inabox above the fold</h3>
-  <div>
-    Open the Task Manager (Shift+ESC) and turn on tracking JavaScript memory
-    (right click table header, select JavaScript memory).  The "live" portion
-    shouldn't just climb and climb, but bounce around near a single number.
-  </div>
+
+  Start Chrome with:
+  <pre>--js-flags="--expose-gc" --enable-precise-memory-info</pre>
+  then visit this page.  Memory usage should stay more or less constant, to
+  within about a megabyte.  If it grows without bound there's a leak.
+
+  <p>
+
+  Note: if you have devtools open you'll see memory grow as if there's a leak,
+  so you need to run this with devtools closed.
+
+  <p>
+
+  Memory usage:
+  <span id=memory-usage>make sure you enabled precise memory info</span>
+
+  <hr>
 
   <script>
     let n = 0;
     let iframe = null;
     window.ampInaboxIframes = window.ampInaboxIframes || [];
+    function update_memory_usage() {
+      window.gc();
+      var memory_usage_span = document.getElementById("memory-usage");
+      if (window.performance && window.performance.memory) {
+        memory_usage_span.textContent = (
+            window.performance.memory.usedJSHeapSize / 1000000 + "MB");
+      }
+    }
     function make_ad_iframe() {
       iframe = document.createElement('iframe');
       iframe.name = 'iframe-' + n;
@@ -47,6 +67,7 @@
       iframe.remove();
     }
     function repeatedly_replace_ad_iframe() {
+      update_memory_usage();
       make_ad_iframe();
       window.setTimeout(() => {
         remove_ad_iframe(iframe);
