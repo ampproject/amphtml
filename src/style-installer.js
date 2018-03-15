@@ -15,11 +15,17 @@
  */
 
 import {Services} from './services';
+import {
+  dangerousSyncMutateStart,
+  dangerousSyncMutateStop,
+} from './black-magic';
 import {dev, rethrowAsync} from './log';
 import {insertAfterOrAtStart, waitForBody} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
+import {toWin} from './types';
 import {waitForServices} from './render-delaying-services';
+
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
@@ -48,6 +54,7 @@ export function installStylesForDoc(
   ampdoc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const cssRoot = ampdoc.getHeadNode();
   const style = insertStyleElement(
+      ampdoc.win,
       cssRoot,
       maybeTransform(cssRoot, cssText),
       opt_isRuntimeCss || false,
@@ -93,7 +100,9 @@ export function installStylesForDoc(
  */
 export function installStylesLegacy(
   doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
+  dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
   const style = insertStyleElement(
+      toWin(doc.defaultView),
       dev().assertElement(doc.head),
       cssText,
       opt_isRuntimeCss || false,
@@ -123,13 +132,14 @@ export function installStylesLegacy(
 
 /**
  * Creates the properly configured style element.
+ * @param {!Window} win
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {string} cssText
  * @param {boolean} isRuntimeCss
  * @param {?string} ext
  * @return {!Element}
  */
-function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
+function insertStyleElement(win, cssRoot, cssText, isRuntimeCss, ext) {
   let styleMap = cssRoot[STYLE_MAP_PROP];
   if (!styleMap) {
     styleMap = cssRoot[STYLE_MAP_PROP] = map();
@@ -168,7 +178,9 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
     }
     afterElement = cssRoot.lastChild;
   }
+  dangerousSyncMutateStart(win);
   insertAfterOrAtStart(cssRoot, style, afterElement);
+  dangerousSyncMutateStop(win);
   if (key) {
     styleMap[key] = style;
   }
@@ -230,17 +242,19 @@ function maybeTransform(cssRoot, cssText) {
  */
 export function makeBodyVisible(doc, opt_waitForServices) {
   dev().assert(doc.defaultView, 'Passed in document must have a defaultView');
-  const win = /** @type {!Window} */ (doc.defaultView);
+  const win = toWin(doc.defaultView);
   if (win[bodyVisibleSentinel]) {
     return;
   }
   const set = () => {
     win[bodyVisibleSentinel] = true;
+    dangerousSyncMutateStart(win);
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
     });
+    dangerousSyncMutateStop(win);
     renderStartedNoInline(doc);
   };
   try {

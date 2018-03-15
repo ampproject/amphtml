@@ -308,6 +308,23 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  'dangerousSyncMutateStart': {
+    message: 'dangerousSyncMutateStart() must not be used! Use ' +
+        'BaseElement.mutateElement() instead.',
+    whitelist: [
+      'src/custom-element.js',
+      'src/black-magic.js',
+      'src/font-stylesheet-timeout.js',
+      'src/preconnect.js',
+      'src/style-installer.js',
+      'src/service/extensions-impl.js',
+      'src/service/fixed-layer.js',
+      'src/service/vsync-impl.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
+    ],
+  },
   '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [

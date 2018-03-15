@@ -29,6 +29,10 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+import {
+  dangerousSyncMutateStart,
+  dangerousSyncMutateStop,
+} from '../black-magic';
 import {declareExtension} from './ampdoc-impl';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
@@ -611,7 +615,9 @@ export class Extensions {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
       const scriptElement =
           this.createExtensionScript_(extensionId, opt_extensionVersion);
+      dangerousSyncMutateStart(this.win);
       this.win.document.head.appendChild(scriptElement);
+      dangerousSyncMutateStop(this.win);
       holder.scriptPresent = true;
     }
   }

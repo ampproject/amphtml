@@ -18,6 +18,10 @@ import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
+import {
+  dangerousSyncMutateStart,
+  dangerousSyncMutateStop,
+} from '../black-magic';
 import {dev, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
@@ -407,11 +411,15 @@ export class Vsync {
         }
       }
     }
+
+    dangerousSyncMutateStart(this.win);
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
         callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
+    dangerousSyncMutateStop(this.win);
+
     // Swap last arrays into double buffer.
     this.nextTasks_ = tasks;
     this.nextStates_ = states;

@@ -30,6 +30,10 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {createLoaderElement} from '../src/loader';
+import {
+  dangerousSyncMutateStart,
+  dangerousSyncMutateStop,
+} from './black-magic';
 import {dev, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
@@ -391,11 +395,14 @@ function createBaseCustomElementClass(win) {
      * @final @private @this {!Element}
      */
     completeUpgrade_(newImpl, upgradeStartTime) {
+      const win = toWin(this.ownerDocument.defaultView);
       this.upgradeDelayMs_ = win.Date.now() - upgradeStartTime;
       this.upgradeState_ = UpgradeState.UPGRADED;
       this.implementation_ = newImpl;
+      dangerousSyncMutateStart(win);
       this.classList.remove('amp-unresolved');
       this.classList.remove('i-amphtml-unresolved');
+      dangerousSyncMutateStop(win);
       this.implementation_.createdCallback();
       this.assertLayout_();
       this.implementation_.layout_ = this.layout_;
@@ -465,12 +472,20 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise(resolve => {
-        resolve(this.implementation_.buildCallback());
+        dangerousSyncMutateStart(win);
+        try {
+          resolve(this.implementation_.buildCallback());
+        } finally {
+          dangerousSyncMutateStop(win);
+        }
       }).then(() => {
+        const win = toWin(this.ownerDocument.defaultView);
         this.preconnect(/* onLayout */false);
         this.built_ = true;
+        dangerousSyncMutateStart(win);
         this.classList.remove('i-amphtml-notbuilt');
         this.classList.remove('amp-notbuilt');
+        dangerousSyncMutateStop(win);
         this.signals_.signal(CommonSignals.BUILT);
         if (this.isInViewport_) {
           this.updateInViewport_(true);
@@ -478,13 +493,14 @@ function createBaseCustomElementClass(win) {
         if (this.actionQueue_) {
           // Only schedule when the queue is not empty, which should be
           // the case 99% of the time.
-          Services.timerFor(toWin(this.ownerDocument.defaultView))
-              .delay(this.dequeueActions_.bind(this), 1);
+          Services.timerFor(win).delay(this.dequeueActions_.bind(this), 1);
         }
         if (!this.getPlaceholder()) {
           const placeholder = this.createPlaceholder();
           if (placeholder) {
+            dangerousSyncMutateStart(win);
             this.appendChild(placeholder);
+            dangerousSyncMutateStop(win);
           }
         }
       }, reason => {
@@ -595,8 +611,10 @@ function createBaseCustomElementClass(win) {
       }
       if (this.mediaQuery_) {
         const defaultView = this.ownerDocument.defaultView;
+        dangerousSyncMutateStart(win);
         this.classList.toggle('i-amphtml-hidden-by-media-query',
             !defaultView.matchMedia(this.mediaQuery_).matches);
+        dangerousSyncMutateStop(win);
       }
 
       // Sizes.
@@ -605,8 +623,10 @@ function createBaseCustomElementClass(win) {
         this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       if (this.sizeList_) {
+        dangerousSyncMutateStart(win);
         setStyle(this, 'width', this.sizeList_.select(
             toWin(this.ownerDocument.defaultView)));
+        dangerousSyncMutateStop(win);
       }
       // Heights.
       if (this.heightsList_ === undefined &&
@@ -618,8 +638,10 @@ function createBaseCustomElementClass(win) {
       if (this.heightsList_) {
         const sizer = this.getSizer_();
         if (sizer) {
+          dangerousSyncMutateStart(win);
           setStyle(sizer, 'paddingTop',
               this.heightsList_.select(toWin(this.ownerDocument.defaultView)));
+          dangerousSyncMutateStop(win);
         }
       }
     }
@@ -681,10 +703,13 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     connectedCallback() {
+      const win = toWin(this.ownerDocument.defaultView);
       if (!this.everAttached) {
+        dangerousSyncMutateStart(win);
         this.classList.add('i-amphtml-element');
         this.classList.add('i-amphtml-notbuilt');
         this.classList.add('amp-notbuilt');
+        dangerousSyncMutateStop(win);
       }
 
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
@@ -695,7 +720,6 @@ function createBaseCustomElementClass(win) {
       }
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const win = toWin(this.ownerDocument.defaultView);
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
@@ -734,17 +758,22 @@ function createBaseCustomElementClass(win) {
       } else {
         this.everAttached = true;
 
+        dangerousSyncMutateStart(win);
         try {
           this.layout_ = applyStaticLayout(this);
         } catch (e) {
           reportError(e, this);
+        } finally {
+          dangerousSyncMutateStop(win);
         }
         if (!isStub(this.implementation_)) {
           this.tryUpgrade_();
         }
         if (!this.isUpgraded()) {
+          dangerousSyncMutateStart(win);
           this.classList.add('amp-unresolved');
           this.classList.add('i-amphtml-unresolved');
+          dangerousSyncMutateStop(win);
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
           this.dispatchCustomEventForTesting(AmpEvents.STUBBED);

@@ -17,6 +17,10 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  dangerousSyncMutateStart,
+  dangerousSyncMutateStop,
+} from '../../black-magic';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
@@ -158,7 +162,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    dangerousSyncMutateStart(this.win);
     setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
+    dangerousSyncMutateStop(this.win);
   }
 
   /** @override */

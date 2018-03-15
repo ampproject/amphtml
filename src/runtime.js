@@ -40,6 +40,7 @@ import {dev, initLogConstructor, setReportError, user} from './log';
 import {
   disposeServicesForDoc,
 } from './service';
+import {getCookie} from './cookies';
 import {getMode} from './mode';
 import {
   hasRenderDelayingServices,
@@ -54,6 +55,7 @@ import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
+import {install as installMutationMonitor} from './black-magic';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -103,6 +105,13 @@ export function installRuntimeServices(global) {
   installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
+  if (getMode(global).development ||
+      // Test explicitly for opt-in, not canary which could be 1% prod traffic.
+      getCookie(global, 'AMP_CANARY') === '1') {
+    // Only install in development environments because of the **massive**
+    // performance hits.
+    installMutationMonitor(global);
+  }
   installXhrService(global);
   installInputService(global);
 }
