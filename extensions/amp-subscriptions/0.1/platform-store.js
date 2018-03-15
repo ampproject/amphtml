@@ -60,6 +60,7 @@ export class PlatformStore {
 
   /**
    * Returns the platform for the given id
+   * @private
    * @param {string} servideId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
@@ -82,6 +83,7 @@ export class PlatformStore {
 
   /**
    * Returns all the platforms;
+   * @private
    * @returns {!Array<!./subscription-platform.SubscriptionPlatform>}
    */
   getAllRegisteredPlatforms_() {
@@ -245,6 +247,7 @@ export class PlatformStore {
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
    * @returns {!./subscription-platform.SubscriptionPlatform}
+   * @private
    */
   selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
