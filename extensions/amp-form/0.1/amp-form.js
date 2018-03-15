@@ -34,6 +34,7 @@ import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  escapeCssSelectorIdent,
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -235,6 +236,9 @@ export class AmpForm {
         this.handleSubmitAction_(invocation);
       });
     }
+    else if (invocation.method === 'clear') {
+      this.handleClearAction_();
+    }
     return null;
   }
 
@@ -333,6 +337,25 @@ export class AmpForm {
       // Trigger the actual submit of GET non-XHR.
       this.form_.submit();
     }
+  }
+
+  handleClearAction_() {
+    this.form_.reset();
+    this.setState_(FormState_.INITIAL);
+    this.form_.classList.remove('user-valid');
+    this.form_.classList.remove('user-invalid');
+    const elements = this.form_.querySelectorAll('.user-valid, .user-invalid');
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].classList.remove('user-valid');
+      elements[i].classList.remove('user-invalid');
+    }
+    const messageElements = this.form_
+        .querySelectorAll('.visible[validation-for]');
+    for (let i = 0; i < messageElements.length; i++) {
+      messageElements[i].classList.remove('visible');
+    }
+    removeValidityStateClasses(this.form_);
+    return;
   }
 
   /**
@@ -807,6 +830,16 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
+function removeValidityStateClasses(form) {
+  const dummyInput = document.createElement('input');
+  for (const validityState in dummyInput.validity) {
+    const elements = form
+        .querySelectorAll(`.${escapeCssSelectorIdent(validityState)}`);
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].classList.remove(validityState);
+    }
+  }
+}
 
 /**
  * Checks user validity which applies .user-valid and .user-invalid AFTER the user
