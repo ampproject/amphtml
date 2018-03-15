@@ -17,7 +17,10 @@ import {RTC_VENDORS} from './callout-vendors.js';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
-import {isSecureUrl} from '../../../src/url';
+import {
+  isSecureUrl,
+  parseUrl,
+} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
@@ -66,11 +69,29 @@ export const RTC_ERROR_ENUM = {
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
+  callout = getCalloutParam(callout);
   if (opt_log) {
     dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
   }
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
+}
+
+/**
+ * Converts a URL into its corresponding shortened callout string, or if
+ * passed a vendor name, just returns the vendor. For instance, if we are
+ * passed "https://example.com/example.php?foo=a&bar=b, then we return
+ * example.com/example.php
+ * and if we are passed "exampleVendor" then we return "exampleVendor"
+ * @param {string} callout
+ * @return {string}
+ */
+export function getCalloutParam(callout) {
+  try {
+    const parsedUrl = parseUrl(callout);
+    callout = (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
+  } catch (e) {}
+  return callout;
 }
 
 /**
@@ -225,7 +246,8 @@ function sendRtcCallout_(
             return {rtcTime, callout};
           }
           const response = tryParseJson(text);
-          return response ? {response, rtcTime, callout} :
+          return response ? {response, rtcTime,
+                             callout: getCalloutParam(callout)} :
             buildErrorResponse_(
                 RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
         });

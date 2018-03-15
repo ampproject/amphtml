@@ -26,6 +26,7 @@ import {
   maybeExecuteRealTimeConfig_,
   truncUrl_,
   validateRtcConfig_,
+  getCalloutParam,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
@@ -137,7 +138,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       return urls;
     }
 
-    function rtcEntry(response, callout, error) {
+    function rtcEntry(response, url, error) {
+      const callout = getCalloutParam(url);
       return response ? {response, callout, rtcTime: 10} :
         {callout, error, rtcTime: 10};
     }
@@ -168,7 +170,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcArray = [];
       urls.forEach((url, i) => {
         expectedRtcArray.push({
-          callout: url, rtcTime: 10, response: rtcCalloutResponses[i]});
+          callout: getCalloutParam(url), rtcTime: 10,
+          response: rtcCalloutResponses[i]});
       });
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
@@ -352,8 +355,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.0.com/',
       ];
       const expectedRtcArray = [
-        {response: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
-        {callout: urls[1], error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
+        {response: rtcCalloutResponses[0],
+         callout: getCalloutParam(urls[0]), rtcTime: 10},
+        {callout: getCalloutParam(urls[1]),
+         error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
       ];
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
@@ -376,9 +381,12 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com',
       ];
       const expectedRtcArray = [
-        {response: rtcCalloutResponses[0], callout: urls[0], rtcTime: 10},
-        {response: rtcCalloutResponses[1], callout: urls[1], rtcTime: 10},
-        {callout: urls[2], error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
+        {response: rtcCalloutResponses[0],
+         callout: getCalloutParam(urls[0]), rtcTime: 10},
+        {response: rtcCalloutResponses[1],
+         callout: getCalloutParam(urls[1]), rtcTime: 10},
+        {callout: getCalloutParam(urls[2]),
+         error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
       ];
       return executeTest({
         urls, inflatedUrls: urls, rtcCalloutResponses, calloutCount,
