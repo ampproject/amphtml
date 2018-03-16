@@ -262,7 +262,7 @@ export class AmpStory extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private @const {!Bookend} */
-    this.bookend_ = new Bookend(this.getAmpDoc(), this.element);
+    this.bookend_ = new Bookend(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);

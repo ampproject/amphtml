@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
@@ -199,20 +200,20 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 
 /**
  * Bookend component for <amp-story>.
+ * This component has to be built and preloaded before it can be displayed,
+ * through the 'build' and 'loadConfig' method. It can then be toggled by
+ * dispatching the store TOGGLE_BOOKEND action.
  */
 export class Bookend {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} win
    * @param {!Element} storyElement Element where to append the bookend
    */
-  constructor(ampdoc, storyElement) {
+  constructor(win, storyElement) {
     /** @private @const {!Window} */
-    this.win_ = ampdoc.win;
+    this.win_ = win;
 
-    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
-    /** @private {?./bookend.BookendConfigDef=} Fetched bookend config */
+    /** @private {?./bookend.BookendConfigDef|undefined} */
     this.config_;
 
     /** @private {boolean} */
@@ -233,7 +234,7 @@ export class Bookend {
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
 
-    /** @private {!../../../src/vsync-impl.Vsync} */
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
   }
 
@@ -251,10 +252,11 @@ export class Bookend {
 
     this.replayButton_ = this.buildReplayButton_();
 
+    const ampdoc = getAmpdoc(this.storyElement_);
+
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
-    innerContainer.appendChild(this.shareWidget_.build(this.ampdoc_));
-
+    innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
@@ -295,7 +297,7 @@ export class Bookend {
    * @private
    */
   isActive_() {
-    return this.storeService_.get(StateProperty.BOOKEND_STATE);
+    return !!this.storeService_.get(StateProperty.BOOKEND_STATE);
   }
 
   /**
@@ -313,18 +315,17 @@ export class Bookend {
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
    * @return {!Promise<?./bookend.BookendConfigDef>}
-   * @private
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
-      if (applyConfig) {
+      if (applyConfig && this.config_) {
         this.setConfig(this.config_);
       }
       return Promise.resolve(this.config_);
     }
 
     return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
-        .then(response  => {
+        .then(response => {
           if (!response) {
             return null;
           }
@@ -363,7 +364,9 @@ export class Bookend {
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
-    return Services.urlReplacementsForDoc(this.ampdoc_)
+    const ampdoc = getAmpdoc(this.storyElement_);
+
+    return Services.urlReplacementsForDoc(ampdoc)
         .expandUrlAsync(user().assertString(rawUrl))
         .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
         .then(response => {
@@ -500,7 +503,8 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_() {
-    const jsonLd = getJsonLd(this.ampdoc_.getRootNode());
+    const ampdoc = getAmpdoc(this.storyElement_);
+    const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
       title: jsonLd && jsonLd['headline'] ?
@@ -510,7 +514,7 @@ export class Bookend {
             'Please set <title> or structured data (JSON-LD).').textContent,
 
       domainName: parseUrl(
-          Services.documentInfoForDoc(this.ampdoc_).canonicalUrl).hostname,
+          Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
@@ -527,7 +531,7 @@ export class Bookend {
    * @private
    */
   buildReplayButton_() {
-    const metadata = this.getStoryMetadata_(this.ampdoc_);
+    const metadata = this.getStoryMetadata_();
     return renderAsElement(this.win_.document, buildReplayButtonTemplate(
         this.win_.document,
         metadata.title,
