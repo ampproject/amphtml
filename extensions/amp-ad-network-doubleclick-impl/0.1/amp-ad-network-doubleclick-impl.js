@@ -247,7 +247,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super(element);
 
     /**
-     * @private
+     * @type
      * {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
@@ -344,6 +344,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
+  }
+
+  /** @visibleForTesting */
+  getNameFrameExperimentConfig() {
+    return this.nameframeExperimentConfig_;
   }
 
   /** @override */
@@ -865,12 +870,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
     }
-    if (this.safeframeApi_) {
-      this.safeframeApi_.destroy();
-      this.safeframeApi_ = null;
+    this.destroySafeFrameApi_();
+    return super.unlayoutCallback();
+  }
+
+  /** @visibleForTesting */
+  cleanupAfterTest() {
+    this.destroySafeFrameApi_();
+  }
+
+  /** @private */
+  destroySafeFrameApi_() {
+    if (!this.safeframeApi_) {
+      return;
     }
-    const superResult = super.unlayoutCallback();
-    return superResult;
+    this.safeframeApi_.destroy();
+    this.safeframeApi_ = null;
   }
 
   /** @override */
