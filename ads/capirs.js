@@ -79,8 +79,8 @@ function getWidth(global, banner) {
 
   if (isResponsiveAd(banner)) {
     width = Math.max(
-        global.document.documentElement/*OK*/.clientWidth,
-        global.window/*OK*/.innerWidth || 0,
+        global.document.documentElement./*OK*/clientWidth,
+        global.window./*OK*/innerWidth || 0
     );
   } else {
     width = banner.width;
@@ -94,5 +94,5 @@ function getWidth(global, banner) {
  * @return {boolean}
  */
 function isResponsiveAd(banner) {
-  return banner.width.includes('%');
+  return banner.width.indexOf('%') !== -1;
 }
