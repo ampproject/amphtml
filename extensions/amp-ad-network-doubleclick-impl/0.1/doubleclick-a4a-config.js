@@ -59,6 +59,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   REMOTE_HTML_EXPERIMENT: '21061729',
   USDRUD_CONTROL: '21061759',
   USDRUD_EXPERIMENT: '21061760',
+  LAUNCH_CONTROL: '21061783',
+  LAUNCH_EXPERIMENT: '21061784',
 };
 
 /** @const @enum{string} */
@@ -81,6 +83,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
   '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
   '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+  '13': DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL,
+  '14': DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT,
 };
 
 /**
@@ -154,7 +158,9 @@ export class DoubleclickA4aEligibility {
     if (![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
       DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
       DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
-      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT].includes(
         URL_EXPERIMENT_MAPPING[urlExperimentId])) {
       if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
         return false;
@@ -192,16 +198,19 @@ export class DoubleclickA4aEligibility {
     }
     // If we are in the Remote.html or USDRUD controls, then we are supposed
     // to use Delayed Fetch in accordance with the existing carveouts.
-    if ([DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
-        experimentId)) {
-      return !(hasUSDRD || useRemoteHtml);
-    } else if (experimentId ==
-               DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT) {
-      return !hasUSDRD;
-    } else if (experimentId ==
-               DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT) {
-      return !useRemoteHtml;
+    switch (experimentId) {
+      case DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL:
+      case DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT:
+        return (!hasUSDRD ||
+                experimentId ==
+                DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT)
+          && (!useRemoteHtml ||
+              experimentId ==
+              DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT);
+      case DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL:
+        return !hasUSDRD && !useRemoteHtml;
     }
     return true;
   }
