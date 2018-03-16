@@ -33,9 +33,10 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>Size-defined layouts for <code>static</code> mode. <code>container</code> layout for <code>overlay</code> mode.</td>
+    <td><code>static</code> mode requires <code>fixed</code>, <code>fixed-height</code>, <code>responsive</code>, <code>fill</code> or <code>flex-item</code> layouts. <code>overlay</code> mode requires <code>container</code> layout.</td>
   </tr>
 </table>
+
 
 ## Behavior
 
@@ -154,7 +155,6 @@ Learn more about layouts in the [AMP HTML Layout System](https://www.ampproject.
 
 ## Attributes
 
-
 ##### mode (optional)
 
 Specifies how the date picker is rendered. Allowed values are:
@@ -248,7 +248,12 @@ By default, this attribute is not present.
 
 ##### src (optional)
 
-If present, `amp-date-picker` makes a request for JSON data to populate the `highlighted` and `blocked` lists, as well as matching templates in the document to lists of dates.
+If present, `amp-date-picker` requests JSON data to populate the
+`highlighted` and `blocked` lists, as well as matching templates in the document
+to lists of dates.
+
+While waiting for the JSON response, the date picker renders the
+templates specified in the markup.
 
 ```json
 {
@@ -263,7 +268,7 @@ If present, `amp-date-picker` makes a request for JSON data to populate the `hig
       "selector": "#my-second-template-id",
       "dates": [
         "2018-01-01",
-        "FREQ=WEEKLY;DTSTART=20180201T150000Z;COUNT=30;WKST=SU;BYDAY=TU"
+        "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
       ]
     },
     {
@@ -275,23 +280,44 @@ If present, `amp-date-picker` makes a request for JSON data to populate the `hig
 
 ```html
 <amp-date-picker src="https://www.example.com/date-data.json">
-  <template id="my-template-id">⚡️</template>
-  <template id="my-second-template-id">🌮</template>
-  <template id="my-default-template-id">{{D}}</template>
+  <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
+  <template type="amp-mustache" date-template id="my-second-template-id">🌮</template>
+  <template type="amp-mustache" date-template id="my-default-template-id">{{D}}</template>
 </amp-date-picker>
 ```
 
 ##### fullscreen (optional)
 
-Renders the picker to fill the space available to it, like in a fullscreen overlay. Works best with `layout="fill"`.
+Renders the picker to fill the space available to it, like in a fullscreen lightbox.
+This works best with `layout="fill"`.
+
+```html
+<input on="tap:lightbox.open" placeholder="Start" id="start"/>
+<input on="tap:lightbox.open" placeholder="End" id="end"/>
+<button on="tap:dp.clear">Clear</button>
+<amp-lightbox id="lightbox" layout="nodisplay">
+  <amp-date-picker
+    id="date-picker"
+    layout="fill"
+    fullscreen
+    type="range"
+    number-of-months="12"
+    start-input-selector="#start"
+    end-input-selector="#end"
+    on="
+      activate: lightbox.open;
+      deactivate: lightbox.close"
+  ></amp-date-picker>
+</amp-lightbox>
+```
+
+<!-- TODO(cvializ): add image -->
 
 ##### open-after-select (optional)
 
 If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not present.
 
-<!--
-TODO(cvializ): does it still trigger deactivate?
--->
+<!-- TODO(cvializ): does it still trigger deactivate? -->
 
 ##### open-after-clear (optional)
 
@@ -356,6 +382,69 @@ or date range picker with the specified `id`, e.g. `date-picker`.
 
 ```html
 <button on="tap: date-picker.clear">Clear</button>
+```
+
+
+## Templates
+
+`amp-date-picker` provides a markup API to render templates for certain dates
+and for an extra information area below the calendar view.
+
+##### date-template
+
+`amp-date-picker` consumes templates specified in HTML markup to render dates.
+These templates must only be used for dates that will not need to be updated
+often, like holidays. For rendering special information in the calendar days
+like days with sales, or amounts of money, or other information that must change
+often, consider [using the `src` attribute](#src-(optional)) instead.
+Using `src` prevents chached AMP documents from showing out-of-date information.
+
+
+A `date-template` must have a `dates` or `default` attribute.
+
+- **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
+  The template content will render for the dates matching the dates in the attribute.
+- **default**: If the `default` attribute is present, the template content will render for
+  all dates not matching an existing template.
+
+The date picker provides mustache variables to render in the templates.
+These variables are ISO 8601 format string values e.g. `DD`, `D`, `X`, etc.
+
+`date-template`s may contain any valid AMP content and are only
+rendered after the calendar view renders for the first time.
+
+```html
+<amp-date-picker>
+  <!-- Render the "party" emoji on New Years Day 2018 -->
+  <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
+  <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
+  <template
+      type="amp-mustache"
+      date-template
+      dates="FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
+  >🌮</template>
+  <!-- Render an image -->
+  <template type="amp-mustache" date-template dates="2018-01-02">
+    <amp-img layout="fixed-height" height="39" src="./example.jpg"></amp-img>
+  </template>
+  <!-- Renders dates in the two-digit day format -->
+  <template type="amp-mustache" date-template default>{{DD}}</template>
+</amp-date-picker>
+```
+
+
+##### info-template
+
+The `info-template` contains markup to render in an information area below
+the calendar view. `info-template`s may contain any valid AMP content and are only
+rendered after the calendar view renders for the first time.
+
+```html
+<amp-date-picker>
+  <template type="amp-mustache" info-template>
+    Warning: Tacos are only available on Tuesday
+  </template>
+</amp-date-picker>
 ```
 
 <!-- DO NOT SUBMIT(cvializ): add how to style this -->
