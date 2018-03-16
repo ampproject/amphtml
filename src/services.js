@@ -284,15 +284,31 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<
-         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
-         * >} */ (
-        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
-            true)));
+    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+          true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreService(win) {
+    return getService(win, 'story-store');
   }
 
   /**

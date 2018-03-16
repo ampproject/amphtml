@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-52536000 */
+ /** Version: 0.1.21-87f482e */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -1438,11 +1438,24 @@ class DialogManager {
     // Give a small amount of time for another view to take over the dialog.
     setTimeout(() => {
       if (this.dialog_ && this.dialog_.getCurrentView() == view) {
-        this.dialog_.close();
-        this.dialog_ = null;
-        this.openPromise_ = null;
+        this.close_();
       }
     }, 100);
+  }
+
+  /**
+   */
+  completeAll() {
+    if (this.dialog_) {
+      this.close_();
+    }
+  }
+
+  /** @private */
+  close_() {
+    this.dialog_.close();
+    this.dialog_ = null;
+    this.openPromise_ = null;
   }
 }
 
@@ -1459,8 +1472,9 @@ class Entitlements {
    * @param {string} raw
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
+   * @param {function(!Entitlements)} ackHandler
    */
-  constructor(service, raw, entitlements, currentProduct) {
+  constructor(service, raw, entitlements, currentProduct, ackHandler) {
     /** @const {string} */
     this.service = service;
     /** @const {string} */
@@ -1470,6 +1484,8 @@ class Entitlements {
 
     /** @private @const {?string} */
     this.product_ = currentProduct;
+    /** @private @const {function(!Entitlements)} */
+    this.ackHandler_ = ackHandler;
   }
 
   /**
@@ -1480,7 +1496,8 @@ class Entitlements {
         this.service,
         this.raw,
         this.entitlements.map(ent => ent.clone()),
-        this.product_);
+        this.product_,
+        this.ackHandler_);
   }
 
   /**
@@ -1543,6 +1560,14 @@ class Entitlements {
       }
     }
     return null;
+  }
+
+  /**
+   * A 3p site should call this method to acknowledge that it "saw" and
+   * "understood" entitlements.
+   */
+  ack() {
+    this.ackHandler_(this);
   }
 }
 
@@ -2071,7 +2096,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-52536000',
+    '_client': 'SwG 0.1.21-87f482e',
   });
 }
 
@@ -2243,14 +2268,13 @@ class EntitlementsManager {
     if (!entitlement) {
       return Promise.resolve();
     }
-
+    // Check if storage bit is set. It's only set by the `Entitlements.ack`
+    // method.
     return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
       if (value == '1') {
         // Already shown;
         return;
       }
-
-      this.setToastShown(true);
       if (entitlement) {
         this.showToast_(entitlement);
       }
@@ -2263,11 +2287,20 @@ class EntitlementsManager {
    */
   showToast_(entitlement) {
     const source = entitlement.source || 'google';
-
     return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
       'publicationId': this.publicationId_,
       'source': source,
     })).open();
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  ack_(entitlements) {
+    if (entitlements.getEntitlementForThis()) {
+      this.setToastShown(true);
+    }
   }
 
   /**
@@ -2280,6 +2313,7 @@ class EntitlementsManager {
         encodeURIComponent(this.publicationId_) +
         '/entitlements');
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const ackHandler = this.ack_.bind(this);
       const signedData = json['signedEntitlements'];
       if (signedData) {
         const jwt = this.jwtHelper_.decode(signedData);
@@ -2289,7 +2323,8 @@ class EntitlementsManager {
               SERVICE_ID,
               signedData,
               Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       } else {
         const plainEntitlements = json['entitlements'];
@@ -2298,11 +2333,17 @@ class EntitlementsManager {
               SERVICE_ID,
               '',
               Entitlement.parseListFromJson(plainEntitlements),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       }
       // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+      return new Entitlements(
+          SERVICE_ID,
+          '',
+          [],
+          this.config_.getProductId(),
+          ackHandler);
     });
   }
 }
@@ -3284,6 +3325,13 @@ const PAY_REQUEST_ID = 'swg-pay';
 class PayStartFlow {
 
   /**
+   * @param {!../utils/preconnect.Preconnect} pre
+   */
+  static preconnect(pre) {
+    pre.prefetch(feUrl('/pay'));
+  }
+
+  /**
    * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
@@ -3338,7 +3386,8 @@ class PayCompleteFlow {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(port, flow.complete.bind(flow));
+      const promise = validatePayResponse(
+          deps.win(), port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -3418,19 +3467,34 @@ class PayCompleteFlow {
 
 
 /**
+  *@param {!Window} win
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
  * @package Visible for testing only.
  */
-function validatePayResponse(port, completeHandler) {
+function validatePayResponse(win, port, completeHandler) {
   return acceptPortResult(
       port,
       feOrigin(),
       // TODO(dvoytenko): support payload decryption.
       /* requireOriginVerified */ false,
       /* requireSecureChannel */ false)
-      .then(data => parseSubscriptionResponse(data, completeHandler));
+      .then(data => {
+        if (data['redirectEncryptedCallbackData']) {
+          const xhr = new Xhr(win);
+          const url = getDecryptionUrl(data['environment']);
+          const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+            method: 'post',
+            headers: {'Accept': 'text/plain, application/json'},
+            credentials: 'include',
+            body: data['redirectEncryptedCallbackData'],
+            mode: 'cors',
+          });
+          return xhr.fetch(url, init).then(response => response.json());
+        }
+        return data;
+      }).then(data => parseSubscriptionResponse(data, completeHandler));
 }
 
 
@@ -3474,6 +3538,19 @@ function parseSubscriptionResponse(data, completeHandler) {
       completeHandler);
 }
 
+/**
+   * Returns the decryption url to be used to decrypt the encrypted payload.
+   *
+   * @param {!string} environment
+   * @return {!string} The decryption url
+   */
+function getDecryptionUrl(environment) {
+  if (environment == 'PRODUCTION') {
+    return 'https://pay.google.com/gp/p/apis/buyflow/process';
+  }
+  return 'https://pay.sandbox.google.com/gp/p/apis/buyflow/process';
+}
+
 
 /**
  * @param {!Object} swgData
@@ -3510,9 +3587,9 @@ class OffersFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
-
+  constructor(deps, options) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -3534,6 +3611,8 @@ class OffersFlow {
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
           'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
         }),
         /* shouldFadeBody */ true);
   }
@@ -3576,11 +3655,15 @@ class SubscribeOptionFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -3619,7 +3702,7 @@ class SubscribeOptionFlow {
    */
   maybeOpenOffersFlow_(data) {
     if (data && data['subscribe']) {
-      new OffersFlow(this.deps_).start();
+      new OffersFlow(this.deps_, this.options_).start();
     }
   }
 }
@@ -3633,11 +3716,15 @@ class AbbrvOfferFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
@@ -3673,12 +3760,11 @@ class AbbrvOfferFlow {
         });
         return;
       }
-      // TODO(sohanirao) : Handle the case when user is logged in
     });
     // If result is due to requesting offers, redirect to offers flow
     this.activityIframeView_.acceptResult().then(result => {
       if (result.data['viewOffers']) {
-        new OffersFlow(this.deps_).start();
+        new OffersFlow(this.deps_, this.options_).start();
       }
     });
 
@@ -3755,6 +3841,67 @@ function whenDocumentReady(doc) {
 }
 
 
+
+
+
+
+class Preconnect {
+
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+  }
+
+  /**
+   * @param {string} url
+   */
+  preconnect(url) {
+    this.pre_(url, 'preconnect');
+  }
+
+  /**
+   * @param {string} url
+   */
+  dnsPrefetch(url) {
+    this.pre_(url, 'dns-prefetch');
+  }
+
+  /**
+   * @param {string} url
+   */
+  prefetch(url) {
+    this.pre_(url, 'preconnect prefetch');
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} as
+   */
+  preload(url, as) {
+    this.pre_(url, 'preconnect preload', as);
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} rel
+   * @param {?string=} opt_as
+   * @private
+   */
+  pre_(url, rel, opt_as) {
+    // <link rel="prefetch" href="..." as="">
+    const linkEl = createElement(this.doc_, 'link', {
+      'rel': rel,
+      'href': url,
+    });
+    if (opt_as) {
+      linkEl.setAttribute('as', opt_as);
+    }
+    this.doc_.head.appendChild(linkEl);
+  }
+}
 
 
 
@@ -3877,8 +4024,11 @@ class ConfiguredRuntime {
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
 
+    const preconnect = new Preconnect(this.win_.document);
+
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
+    PayStartFlow.preconnect(preconnect);
   }
 
   /** @override */
@@ -3924,6 +4074,7 @@ class ConfiguredRuntime {
   /** @override */
   reset() {
     this.entitlementsManager_.reset();
+    this.dialogManager_.completeAll();
   }
 
   /** @override */
@@ -3952,25 +4103,25 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showOffers() {
+  showOffers(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new OffersFlow(this);
+      const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
   }
 
   /** @override */
-  showSubscribeOption() {
+  showSubscribeOption(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new SubscribeOptionFlow(this);
+      const flow = new SubscribeOptionFlow(this, opt_options);
       return flow.start();
     });
   }
 
-  /** override */
-  showAbbrvOffer() {
+  /** @override */
+  showAbbrvOffer(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new AbbrvOfferFlow(this);
+      const flow = new AbbrvOfferFlow(this, opt_options);
       return flow.start();
     });
   }
