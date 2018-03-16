@@ -327,6 +327,8 @@ event.response</pre></td>
     <td>Pauses the animation.</td>
     <td><code>stop</code></td>
     <td>Stops the animation.</td>
+    <td><code>seekTo(time=INTEGER)</code></td>
+    <td>Sets the currentTime of the animation to the specified value and pauses animation. </td>
   </tr>
 </table>
 
