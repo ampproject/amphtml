@@ -571,8 +571,9 @@ export class SafeframeHostApi {
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
       try {
-        const success = !!this.baseInstance_.element.style.height.match(height)
-              && !!this.baseInstance_.element.style.width.match(width);
+        const success =
+              (this.baseInstance_.element.style.height == height + 'px')
+              && (this.baseInstance_.element.style.width == width + 'px');
         // If the amp-ad element was successfully resized, always update
         // the size of the safeframe as well. If the amp-ad element could not
         // be resized, but this is a collapse request, then only collapse
