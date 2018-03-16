@@ -133,7 +133,12 @@ export class A4AVariableSource extends VariableSource {
    *     set, up to a max of 10. May be URI encoded.
    * Note: Additional params will be the names of the attributes whose values
    * will be returned. There should be at least 1.
-   * @returns {string}
+   * @returns {string} A stringified JSON array containing one member for each
+   *     matching element. Each member will contain the names and values of the
+   *     specified attributes, if the corresponding element has that attribute.
+   *     Note that if an element matches the cssSelected but has none of the
+   *     requested attributes, then nothing will be included in the array
+   *     for that element.
    */
   htmlAttrBinding_(cssSelector) {
     const HTML_ATTR_MAX_RETURN_SIZE = 10;
