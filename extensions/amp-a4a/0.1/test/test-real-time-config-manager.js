@@ -22,7 +22,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
 import {
   RTC_ERROR_ENUM,
-  getCalloutParam,
+  getCalloutParam_,
   inflateAndSendRtc_,
   maybeExecuteRealTimeConfig_,
   truncUrl_,
@@ -91,6 +91,22 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
   });
 
+  describe('#getCalloutParam_', () => {
+    it('should convert url to callout param when parseable', () => {
+      const url = 'https://www.example.com/endpoint.php?unincluded';
+      const ard = getCalloutParam_(url);
+      expect(ard).to.equal('www.example.com/endpoint.php');
+    });
+
+    it('should convert & trunc url when parseable', () => {
+      const url = 'https://www.example.com/thisIsTooMany' +
+            'Characters1234567891011121314.php';
+      const ard = getCalloutParam_(url);
+      expect(ard).to.equal(
+          'www.example.com/thisIsTooManyCharacters12345678910');
+    });
+  });
+
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
       const {urls, vendors, timeoutMillis, rtcCalloutResponses,
@@ -138,8 +154,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       return urls;
     }
 
-    function rtcEntry(response, url, error) {
-      const callout = getCalloutParam(url);
+    function rtcEntry(response, url, error, isVendor) {
+      // If this is an entry for a vendor, then the callout is just
+      // the vendor name passed in to url here.
+      const callout = !!isVendor ? url : getCalloutParam_(url);
       return response ? {response, callout, rtcTime: 10} :
         {callout, error, rtcTime: 10};
     }
@@ -170,7 +188,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcArray = [];
       urls.forEach((url, i) => {
         expectedRtcArray.push({
-          callout: getCalloutParam(url), rtcTime: 10,
+          callout: getCalloutParam_(url), rtcTime: 10,
           response: rtcCalloutResponses[i]});
       });
       return executeTest({
@@ -234,7 +252,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const calloutCount = 1;
       const expectedRtcArray = [];
       expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
-          Object.keys(vendors)[0].toLowerCase()));
+          Object.keys(vendors)[0].toLowerCase(), undefined, true));
       return executeTest({
         vendors, customMacros, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
@@ -257,7 +275,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const calloutCount = 1;
       const expectedRtcArray = [];
       expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
-          Object.keys(vendors)[0].toLowerCase()));
+          Object.keys(vendors)[0].toLowerCase(), undefined, true));
       return executeTest({
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
@@ -286,7 +304,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
             rtcEntry(rtcCalloutResponses[i], inflatedUrls[i]));
       }
       expectedRtcArray.push(rtcEntry(rtcCalloutResponses[4],
-          Object.keys(vendors)[0].toLowerCase()));
+          Object.keys(vendors)[0].toLowerCase(), undefined, true));
       const calloutCount = 5;
       return executeTest({
         urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
@@ -304,7 +322,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       for (let i = 0; i < 1; i++) {
         expectedRtcArray.push(
             rtcEntry(rtcCalloutResponses[i],
-                Object.keys(vendors)[0].toLowerCase()));
+                Object.keys(vendors)[0].toLowerCase(), undefined, true));
       }
       const calloutCount = 1;
       return executeTest({
@@ -356,8 +374,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       ];
       const expectedRtcArray = [
         {response: rtcCalloutResponses[0],
-          callout: getCalloutParam(urls[0]), rtcTime: 10},
-        {callout: getCalloutParam(urls[1]),
+          callout: getCalloutParam_(urls[0]), rtcTime: 10},
+        {callout: getCalloutParam_(urls[1]),
           error: RTC_ERROR_ENUM.DUPLICATE_URL, rtcTime: 10},
       ];
       return executeTest({
@@ -382,10 +400,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       ];
       const expectedRtcArray = [
         {response: rtcCalloutResponses[0],
-          callout: getCalloutParam(urls[0]), rtcTime: 10},
+          callout: getCalloutParam_(urls[0]), rtcTime: 10},
         {response: rtcCalloutResponses[1],
-          callout: getCalloutParam(urls[1]), rtcTime: 10},
-        {callout: getCalloutParam(urls[2]),
+          callout: getCalloutParam_(urls[1]), rtcTime: 10},
+        {callout: getCalloutParam_(urls[2]),
           error: RTC_ERROR_ENUM.INSECURE_URL, rtcTime: 10},
       ];
       return executeTest({
@@ -400,7 +418,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       const expectedRtcArray = [];
       expectedRtcArray.push(
           rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
-              RTC_ERROR_ENUM.UNKNOWN_VENDOR));
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, true));
       return executeTest({vendors, calloutCount, expectedRtcArray});
     });
     it('should handle bad JSON response', () => {

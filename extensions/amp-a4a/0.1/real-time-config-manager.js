@@ -69,7 +69,6 @@ export const RTC_ERROR_ENUM = {
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
-  callout = getCalloutParam(callout);
   if (opt_log) {
     dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
   }
@@ -78,20 +77,18 @@ function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
 }
 
 /**
- * Converts a URL into its corresponding shortened callout string, or if
- * passed a vendor name, just returns the vendor. For instance, if we are
- * passed "https://example.com/example.php?foo=a&bar=b, then we return
+ * Converts a URL into its corresponding shortened callout string.
+ * We also truncate to a maximum length of 50 characters.
+ * For instance, if we are passed
+ * "https://example.com/example.php?foo=a&bar=b, then we return
  * example.com/example.php
- * and if we are passed "exampleVendor" then we return "exampleVendor"
- * @param {string} callout
+ * @param {string} url
  * @return {string}
+ * @visibleForTesting
  */
-export function getCalloutParam(callout) {
-  try {
-    const parsedUrl = parseUrl(callout);
-    callout = (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
-  } catch (e) {}
-  return callout;
+export function getCalloutParam_(url) {
+  const parsedUrl = parseUrl(url);
+  return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
 }
 
 /**
@@ -163,6 +160,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   rtcStartTime, macros, timeoutMillis, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
+  const callout = opt_vendor || getCalloutParam_(url);
   /**
    * The time that it takes to substitute the macros into the URL can vary
    * depending on what the url requires to be substituted, i.e. a long
@@ -173,22 +171,22 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-          opt_vendor || url, undefined, true);
+          callout, undefined, true);
     }
     if (!isSecureUrl(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-          opt_vendor || url, undefined, true);
+          callout, undefined, true);
     }
     if (seenUrls[url]) {
       return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-          opt_vendor || url, undefined, true);
+          callout, undefined, true);
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
     return sendRtcCallout_(
-        url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
+        url, rtcStartTime, win, timeoutMillis, callout);
   };
 
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
@@ -202,7 +200,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return send(url);
   }).catch(unused => {
     return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        opt_vendor || url, undefined, true);
+        callout, undefined, true);
   }));
 }
 
@@ -246,8 +244,7 @@ function sendRtcCallout_(
             return {rtcTime, callout};
           }
           const response = tryParseJson(text);
-          return response ? {response, rtcTime,
-            callout: getCalloutParam(callout)} :
+          return response ? {response, rtcTime, callout} :
             buildErrorResponse_(
                 RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
         });
