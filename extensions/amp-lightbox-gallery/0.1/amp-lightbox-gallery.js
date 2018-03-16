@@ -1044,15 +1044,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     switch (keyCode) {
       case KeyCodes.ESCAPE:
         this.close_();
-        return;
+        break;
       case KeyCodes.LEFT_ARROW:
         this.maybeSlideCarousel_(/*Prev*/ -1);
-        return;
+        break;
       case KeyCodes.RIGHT_ARROW:
         this.maybeSlideCarousel_(/*Next*/ 1);
-        return;
+        break;
       default:
-        return;
+        // Keycode not registered. Do nothing.
     }
 
   }
