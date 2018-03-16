@@ -198,6 +198,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * @see https://dom.spec.whatwg.org/#connected
  */
 export function isConnectedNode(node) {
+  const connected = node.isConnected;
+  if (connected !== undefined) {
+    return connected;
+  }
+
   // "An element is connected if its shadow-including root is a document."
   let n = node;
   do {

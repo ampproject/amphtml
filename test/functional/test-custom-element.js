@@ -229,13 +229,30 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.classList.remove('i-amphtml-notbuilt');
       element.classList.remove('amp-notbuilt');
 
-      element.attachedCallback();
+      container.appendChild(element);
       return buildPromise.then(() => {
         expect(buildStub).to.be.called;
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
         expect(element).to.not.have.class('amp-notbuilt');
       });
+    });
+
+    it('Element - handles async connectedCallback when disconnected', () => {
+      const element = new ElementClass();
+      Object.defineProperty(element, 'isConnected', {
+        value: false,
+      });
+
+      expect(element).to.not.have.class('i-amphtml-element');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
+
+      container.appendChild(element);
+
+      expect(element).to.not.have.class('i-amphtml-element');
+      expect(element).to.not.have.class('i-amphtml-notbuilt');
+      expect(element).to.not.have.class('amp-notbuilt');
     });
 
     it('Element - should reset on 2nd attachedCallback when requested', () => {
@@ -245,13 +262,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const buildStub = sandbox.stub(element, 'build').callsFake(
           () => buildPromise);
       container.appendChild(element);
+      container.removeChild(element);
 
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => true);
       element.layoutCount_ = 10;
       element.isFirstLayoutCompleted_ = true;
       element.signals().signal('render-start');
       element.signals().signal('load-end');
-      element.attachedCallback();
+      container.appendChild(element);
       return buildPromise.then(() => {
         expect(buildStub).to.be.called;
         expect(element.layoutCount_).to.equal(0);
@@ -266,6 +284,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       const element = new ElementClass();
       sandbox.stub(element, 'build');
       container.appendChild(element);
+      container.removeChild(element);
 
       sandbox.stub(element, 'reconstructWhenReparented').callsFake(() => false);
       element.layoutCount_ = 10;
@@ -273,7 +292,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       element.signals().signal('render-start');
       expect(element.signals().get('render-start')).to.be.ok;
       element.signals().signal('load-end');
-      element.attachedCallback();
+      container.appendChild(element);
       expect(element.layoutCount_).to.equal(10);
       expect(element.isFirstLayoutCompleted_).to.be.true;
       expect(element.signals().get('render-start')).to.be.ok;
@@ -672,7 +691,30 @@ describes.realWin('CustomElement', {amp: true}, env => {
       container.appendChild(element);
 
       resourcesMock.expects('remove').withExactArgs(element).once();
-      element.detachedCallback();
+      container.removeChild(element);
+
+      expect(element.everAttached).to.equal(true);
+      expect(element.layout_).to.equal(Layout.FILL);
+      expect(element.implementation_.layout_).to.equal(Layout.FILL);
+      expect(testElementFirstAttachedCallback).to.be.calledOnce;
+    });
+
+    it('Element - handles async detachedCallback when connected', () => {
+      const element = new ElementClass();
+      element.setAttribute('layout', 'fill');
+      expect(testElementFirstAttachedCallback).to.have.not.been.called;
+      expect(element.everAttached).to.equal(false);
+      expect(element.layout_).to.equal(Layout.NODISPLAY);
+
+      resourcesMock.expects('add').withExactArgs(element).atLeast(1);
+      resourcesMock.expects('upgraded').withExactArgs(element).atLeast(1);
+      container.appendChild(element);
+
+      resourcesMock.expects('remove').withExactArgs(element).never();
+      Object.defineProperty(element, 'isConnected', {
+        value: true,
+      });
+      container.removeChild(element);
 
       expect(element.everAttached).to.equal(true);
       expect(element.layout_).to.equal(Layout.FILL);
