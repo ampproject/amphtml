@@ -5,8 +5,8 @@
   "description": "Fastish HTML",
   "main": "index.js",
   "engines": {
-    "node": ">=6",
-    "yarn": ">=1.0.2"
+    "node": ">=8.10.0",
+    "yarn": ">=1.2.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
