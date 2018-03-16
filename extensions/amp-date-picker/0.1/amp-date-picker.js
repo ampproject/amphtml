@@ -263,6 +263,16 @@ class AmpDatePicker extends AMP.BaseElement {
     this.type_ = this.element.getAttribute('type') || DatePickerType.SINGLE;
 
     /** @private @const */
+    this.pickerClass_ = (this.type_ === DatePickerType.RANGE ?
+      createDateRangePicker() :
+      createSingleDatePicker()); // default
+
+    /** @private @const {!DatePickerMode} */
+    this.mode_ = this.element.getAttribute('mode') == DatePickerMode.OVERLAY ?
+      DatePickerMode.OVERLAY :
+      DatePickerMode.STATIC; // default
+
+    /** @private @const */
     this.weekDayFormat_ = this.element.getAttribute('week-day-format') ||
         DEFAULT_WEEK_DAY_FORMAT;
 
@@ -272,6 +282,10 @@ class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
+    if (this.fullscreen_) {
+      user().assert(this.mode_ == DatePickerMode.STATIC,
+          'amp-date-picker mode must be "static" to use fullscreen attribute');
+    }
 
     /** @private @const */
     this.openAfterClear_ = this.element.hasAttribute('open-after-clear');
@@ -279,15 +293,6 @@ class AmpDatePicker extends AMP.BaseElement {
     /** @private @const */
     this.openAfterSelect_ = this.element.hasAttribute('open-after-select');
 
-    /** @private @const */
-    this.picker_ = (this.type_ === DatePickerType.RANGE ?
-      createDateRangePicker() :
-      createSingleDatePicker()); // default
-
-    /** @private @const {!DatePickerMode} */
-    this.mode_ = this.element.getAttribute('mode') == DatePickerMode.OVERLAY ?
-      DatePickerMode.OVERLAY :
-      DatePickerMode.STATIC; // default
 
     /** @private @const */
     this.elementTemplates_ = this.parseElementTemplates_();
@@ -364,7 +369,7 @@ class AmpDatePicker extends AMP.BaseElement {
           const height = this.element./*OK*/offsetHeight;
           if (scrollHeight > height) {
             // Add 1px to allow the bottom border to show
-            this.attemptChangeHeight(scrollHeight + 1).catch(() => {});
+            this./*OK*/changeHeight(scrollHeight + 1);
           }
         });
       }
@@ -1368,7 +1373,7 @@ class AmpDatePicker extends AMP.BaseElement {
   render(opt_additionalProps) {
     const props = Object.assign({}, this.props_, opt_additionalProps);
     const shouldBeOpen = props.isOpen || this.mode_ == DatePickerMode.STATIC;
-    const Picker = shouldBeOpen ? this.picker_ : null;
+    const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
     return this.vsync_.mutatePromise(() => {
       if (Picker) {

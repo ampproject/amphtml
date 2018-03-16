@@ -287,7 +287,7 @@ Renders the picker to fill the space available to it, like in a fullscreen overl
 
 ##### open-after-select (optional)
 
-If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not  present.
+If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not present.
 
 <!--
 TODO(cvializ): does it still trigger deactivate?
@@ -295,7 +295,7 @@ TODO(cvializ): does it still trigger deactivate?
 
 ##### open-after-clear (optional)
 
-If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not  present.
+If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not present.
 
 ##### common attributes
 
