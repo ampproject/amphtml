@@ -330,7 +330,7 @@ describe('doubleclick-a4a-config', () => {
           DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL);
     });
 
-    it('should use FF: LAUNCH CTL | useRemoteHtml=false | ' +
+    it('should use FF: DF_DEP_LAUNCH CTL | useRemoteHtml=false | ' +
        'hasUSDRUD=false', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -343,10 +343,10 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem1);
       expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL);
     });
 
-    it('should use DF: LAUNCH CTL | useRemoteHtml=true | ' +
+    it('should use DF: DF_DEP_LAUNCH CTL | useRemoteHtml=true | ' +
        'hasUSDRUD=false', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -360,10 +360,10 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)
       ).to.be.false;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL);
     });
 
-    it('should use DF: LAUNCH CTL | useRemoteHtml=true | ' +
+    it('should use DF: DF_DEP_LAUNCH CTL | useRemoteHtml=true | ' +
        'hasUSDRUD=true', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -379,10 +379,10 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)
       ).to.be.false;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL);
     });
 
-    it('should use DF: LAUNCH CTL | useRemoteHtml=false | ' +
+    it('should use DF: DF_DEP_LAUNCH CTL | useRemoteHtml=false | ' +
        'hasUSDRUD=true', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -398,10 +398,10 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)
       ).to.be.false;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_CONTROL);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL);
     });
 
-    it('should use FF: LAUNCH EXP | useRemoteHtml=true | ' +
+    it('should use FF: DF_DEP_LAUNCH EXP | useRemoteHtml=true | ' +
        'hasUSDRUD=true', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -416,10 +416,10 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem1);
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)).to.be.true;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT);
     });
 
-    it('should use FF: LAUNCH EXP | useRemoteHtml=false | ' +
+    it('should use FF: DF_DEP_LAUNCH EXP | useRemoteHtml=false | ' +
        'hasUSDRUD=true', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -434,10 +434,10 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem1);
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)).to.be.true;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT);
     });
 
-    it('should use FF: LAUNCH EXP | useRemoteHtml=true | ' +
+    it('should use FF: DF_DEP_LAUNCH EXP | useRemoteHtml=true | ' +
        'hasUSDRUD=false', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -450,10 +450,10 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem1);
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)).to.be.true;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT);
     });
 
-    it('should use FF: LAUNCH EXP | useRemoteHtml=false | ' +
+    it('should use FF: DF_DEP_LAUNCH EXP | useRemoteHtml=false | ' +
        'hasUSDRUD=false', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -466,7 +466,7 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem1);
       expect(doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)).to.be.true;
       expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_EXPERIMENT_FEATURE.LAUNCH_EXPERIMENT);
+          DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT);
     });
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
