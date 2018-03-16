@@ -1044,11 +1044,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (code == KeyCodes.ESCAPE) {
         this.close_();
       } else if (code == KeyCodes.LEFT_ARROW) {
-        /**@type {?}*/ (this.carousel_).implementation_.goCallback(
-            /*Prev*/ -1, /*Animate*/ true, /*Autoplay*/ false);
+        if (!this.container_.hasAttribute('gallery-view')) {
+          /**@type {?}*/ (this.carousel_).implementation_.goCallback(
+              /*Prev*/ -1, /*Animate*/ true, /*Autoplay*/ false);
+        }
       } else if (code == KeyCodes.RIGHT_ARROW) {
-        /**@type {?}*/ (this.carousel_).implementation_.goCallback(
-            /*Next*/ 1, /*Animate*/ true, /*Autoplay*/ false);
+        if (!this.container_.hasAttribute('gallery-view')) {
+          /**@type {?}*/ (this.carousel_).implementation_.goCallback(
+              /*Next*/ 1, /*Animate*/ true, /*Autoplay*/ false);
+        }
       }
     }
   }
