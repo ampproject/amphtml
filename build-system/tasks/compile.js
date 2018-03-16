@@ -38,6 +38,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
   outputFilename, options) {
+  console.log(arguments);
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve) {

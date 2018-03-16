@@ -411,6 +411,7 @@ exports.getBundleFlags = function(g) {
 exports.getFlags({
   modules: [
     //'./src/amp.js',
+    './extensions/amp-audio/0.1/amp-audio.js',
     './extensions/amp-audio-2/0.1/amp-audio.js',
     './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
   ],
