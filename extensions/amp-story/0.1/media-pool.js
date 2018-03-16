@@ -216,7 +216,9 @@ export class MediaPool {
       this.vsync_.mutate(() => {
         for (let i = count; i > 0; i--) {
           // Re-use seed when reaching end of set.
-          const mediaEl = (i == 1) ? seed : seed.cloneNode();
+          const mediaEl = /** @type {!HTMLMediaElement} */ (
+            (i == 1) ? seed : seed.cloneNode(/* deep */ true));
+
           const sources = this.getDefaultSource_(type);
           mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
