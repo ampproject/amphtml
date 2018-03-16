@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -85,8 +85,8 @@ Additional image features like captions can be implemented with standard HTML (f
 {% call callout('Read on', type='read') %}
 Learn more about using `amp-img` from these resources:
 
-- [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders)
-- [Include Images & Video](https://www.ampproject.org/docs/guides/amp_replacements)
+- [Placeholders & fallbacks](https://www.ampproject.org/docs/design/responsive/placeholders)
+- [Include Images & Video](https://www.ampproject.org/docs/media/amp_replacements)
 {% endcall %}
 
 ## Attributes
@@ -104,7 +104,7 @@ Same as `srcset` attribute on the `img` tag. The behavior will be polyfilled whe
 Same as `sizes` attribute on the `img` tag. 
 
 {% call callout('Read on', type='read') %}
-See [Responsive images with srcset, sizes & heights](https://www.ampproject.org/docs/guides/responsive/art_direction) for usage of `sizes` and `srcset`.
+See [Responsive images with srcset, sizes & heights](https://www.ampproject.org/docs/design/responsive/art_direction) for usage of `sizes` and `srcset`.
 {% endcall %}
 
 **alt**
@@ -144,6 +144,9 @@ If you want your image to scale as the window is resized but up to a maximum wid
 1. Set `layout=responsive` for `<amp-img>`.
 2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.  Why on the container?  An `amp-img` element with `layout=responsive` is a *block-level* element, whereas, `<img>` is *inline*. Alternatively, you could set `display: inline-block` in your CSS for the amp-img element.
 
+#### The difference between responsive and intrinsic layout
+
+Both the `responsive` and `intrinsic` layouts create an image that will scale automatically.  The main difference is that the `intrinsic` layout uses an SVG image as it's scaling element.  This will make it behave in the same way as a standard html image while retaining the benifit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` becasue it takes its size from the parent which in a float has no natural size.
 
 #### Setting a fixed sized image
 
@@ -153,7 +156,7 @@ If you want your image to display at a fixed size:
 2. Specify the `width` and `height`.
 
 {% call callout('Read on', type='read') %}
-Learn about the [inferred layout](https://www.ampproject.org/docs/guides/responsive/control_layout#what-if-the-layout-attribute-isn’t-specified?) if you don't specify the `layout` attribute.
+Learn about the [inferred layout](https://www.ampproject.org/docs/design/responsive/control_layout#what-if-the-layout-attribute-isn%E2%80%99t-specified?) if you don't specify the `layout` attribute.
 {% endcall %}
 
 
@@ -176,7 +179,7 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 
-The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
+The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://www.ampproject.org/docs/design/responsive/control_layout#the-layout-attribute) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
 
 ## Validation
 

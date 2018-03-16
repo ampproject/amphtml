@@ -262,6 +262,26 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13594',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13591',
   },
+  {
+    id: 'amp-document-recommendations',
+    name: 'Docment level recommendations and infinte scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
+  },
+  {
+    id: 'inabox-rov',
+    name: 'Extensions layout independent of viewport location if inabox.',
+  },
+  {
+    id: 'amp-live-list-sorting',
+    name: 'Allows "newest last" insertion algorithm to be used',
+    spec: 'https://github.com/ampproject/amphtml/issues/5396',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
+  },
+  {
+    id: 'amp-consent',
+    name: 'Enables the amp-consent extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
 ];
 
 if (getMode().localDev) {

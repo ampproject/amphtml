@@ -38,7 +38,7 @@ app.use('/amp4test', require('./amp4test'));
 app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
-      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
+      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -328,13 +328,12 @@ function proxyToAmpProxy(req, res, mode) {
 }
 
 
-const liveListUpdateFile = '/examples/live-list-update.amp.html';
-let liveListCtr = 0;
 let itemCtr = 2;
-let liveListDoc = null;
 const doctype = '<!doctype html>\n';
-app.use('/examples/live-list-update.amp.html', (req, res, next) => {
+const liveListDocs = Object.create(null);
+app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   const mode = pc.env.SERVE_MODE;
+  let liveListDoc = liveListDocs[req.baseUrl];
   if (mode != 'compiled' && mode != 'default') {
     // Only handle compile(prev min)/default (prev max) mode
     next();
@@ -349,16 +348,19 @@ app.use('/examples/live-list-update.amp.html', (req, res, next) => {
     return;
   }
   if (!liveListDoc) {
-    const liveListUpdateFullPath = `${pc.cwd()}${liveListUpdateFile}`;
+    const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
+    console.log('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
-    liveListDoc = jsdom.jsdom(liveListFile);
+    liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(liveListFile)
+        .window.document;
+    liveListDoc.ctr = 0;
   }
   const liveList = liveListDoc.querySelector('#my-live-list');
   const perPage = Number(liveList.getAttribute('data-max-items-per-page'));
   const items = liveList.querySelector('[items]');
   const pagination = liveListDoc.querySelector('#my-live-list [pagination]');
   const item1 = liveList.querySelector('#list-item-1');
-  if (liveListCtr != 0) {
+  if (liveListDoc.ctr != 0) {
     if (Math.random() < .8) {
       // Always run a replace on the first item
       liveListReplace(item1);
@@ -389,7 +391,7 @@ app.use('/examples/live-list-update.amp.html', (req, res, next) => {
   }
   let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
   outerHTML = replaceUrls(mode, outerHTML);
-  liveListCtr++;
+  liveListDoc.ctr++;
   res.send(`${doctype}${outerHTML}`);
 });
 
@@ -544,6 +546,12 @@ app.use('/impression-proxy/', (req, res) => {
   res.send(body);
 
   // Or fake response with status 204 if viewer replaceUrl is provided
+});
+
+app.use('/get-consent/', (req, res) => {
+  assertCors(req, res, ['POST']);
+  const body = {};
+  res.send(body);
 });
 
 // Proxy with local JS.
@@ -862,8 +870,9 @@ app.use('/list/vegetable-data/get', (req, res) => {
 app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
-    source: req.params.id,
-    products: ['product1', 'product2'],
+    source: 'local' + req.params.id,
+    products: ['scenic-2017.appspot.com:news',
+      'scenic-2017.appspot.com:product2'],
   });
 });
 

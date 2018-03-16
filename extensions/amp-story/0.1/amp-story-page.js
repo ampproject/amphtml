@@ -461,7 +461,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setDistance(distance) {
     // TODO(ccordry) refactor this when pages are managed
     if (this.isAd()) {
-      distance = Math.min(distance, 1);
+      distance = Math.min(distance, 2);
     }
 
     this.element.setAttribute('distance', distance);

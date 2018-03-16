@@ -28,6 +28,10 @@ tags: {  # <amp-ima-video>
   html_format: AMP
   tag_name: "AMP-IMA-VIDEO"
   requires_extension: "amp-ima-video"
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {
     name: "data-src"

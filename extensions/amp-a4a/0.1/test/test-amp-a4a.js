@@ -29,8 +29,10 @@ import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
+  IFRAME_SANDBOXING_FLAGS,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
+  SANDBOX_HEADER,
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
@@ -175,7 +177,7 @@ describe('amp-a4a', () => {
   }
 
   // Checks that element is an amp-ad that is rendered via SafeFrame.
-  function verifySafeFrameRender(element, sfVersion) {
+  function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -188,6 +190,12 @@ describe('amp-a4a', () => {
     const re = /^([^;]+);(\d+);([\s\S]*)$/;
     const match = re.exec(name);
     expect(match).to.be.ok;
+    const sandboxAttribute = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
+    } else {
+      expect(sandboxAttribute).to.be.null;
+    }
     const contentLength = Number(match[2]);
     const rest = match[3];
     expect(rest.length).to.be.above(contentLength);
@@ -203,7 +211,7 @@ describe('amp-a4a', () => {
   }
 
   // Checks that element is an amp-ad that is rendered via nameframe.
-  function verifyNameFrameRender(element) {
+  function verifyNameFrameRender(element, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -214,9 +222,16 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
+    const sandboxAttribute = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
+    } else {
+      expect(sandboxAttribute).to.be.null;
+    }
   }
 
-  function verifyCachedContentIframeRender(element, srcUrl) {
+  function verifyCachedContentIframeRender(element, srcUrl,
+    shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -227,6 +242,12 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
+    const sandboxAttribute = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandboxAttribute).to.equal(IFRAME_SANDBOXING_FLAGS);
+    } else {
+      expect(sandboxAttribute).to.be.null;
+    }
   }
 
   function verifyNameData(nameData) {
@@ -555,6 +576,41 @@ describe('amp-a4a', () => {
       });
     });
 
+    describe('#renderViaCachedContentIframe', () => {
+      beforeEach(() => {
+        // Verify client cache iframe rendering.
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
+        a4a.onLayoutMeasure();
+      });
+
+      it('should attach a client cached iframe when set', () => {
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL,
+              true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL,
+              false /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+    });
+
     describe('illegal render mode value', () => {
       let devErrLogSpy;
       beforeEach(() => {
@@ -611,6 +667,24 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyNameFrameRender(a4aElement);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyNameFrameRender(a4aElement, true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -682,6 +756,26 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
+              true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
+              false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -921,7 +1015,8 @@ describe('amp-a4a', () => {
             rtcResponse);
         const tryExecuteRealTimeConfigSpy =
               sandbox.spy(a4a, 'tryExecuteRealTimeConfig_');
-        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
+        const updateLayoutPriorityStub = sandbox.stub(
+            a4a, 'updateLayoutPriority');
         const renderAmpCreativeSpy = sandbox.spy(a4a, 'renderAmpCreative_');
         const preloadExtensionSpy =
             sandbox.spy(Extensions.prototype, 'preloadExtension');
@@ -937,7 +1032,7 @@ describe('amp-a4a', () => {
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, null)).to.be.true;
+              a4a, {})).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(getAdUrlSpy.calledWith(rtcResponse)).to.be.true;
@@ -976,8 +1071,8 @@ describe('amp-a4a', () => {
             expect(doc.querySelector('script[src*="amp-font-0.1"]')).to.be.ok;
             expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                 .to.be.calledOnce;
-            expect(updatePriorityStub).to.be.calledOnce;
-            expect(updatePriorityStub.args[0][0]).to.equal(0);
+            expect(updateLayoutPriorityStub).to.be.calledOnce;
+            expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
@@ -1068,7 +1163,8 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const updatePriorityStub = sandbox.stub(a4a, 'updatePriority');
+        const updateLayoutPriorityStub = sandbox.stub(
+            a4a, 'updateLayoutPriority');
         if (!isValidCreative) {
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
@@ -1099,8 +1195,8 @@ describe('amp-a4a', () => {
               expect(iframe.getAttribute('src')).to.be.null;
               expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                   .to.be.calledOnce;
-              expect(updatePriorityStub).to.be.calledOnce;
-              expect(updatePriorityStub.args[0][0]).to.equal(0);
+              expect(updateLayoutPriorityStub).to.be.calledOnce;
+              expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
@@ -1108,7 +1204,7 @@ describe('amp-a4a', () => {
                          '&__amp_source_origin=about%3Asrcdoc');
               expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
               if (!opt_failAmpRender) {
-                expect(updatePriorityStub).to.not.be.called;
+                expect(updateLayoutPriorityStub).to.not.be.called;
               }
             }
           });
@@ -1475,18 +1571,20 @@ describe('amp-a4a', () => {
         //a4a.config = {};
         a4a.buildCallback();
         a4a.preconnectCallback(false);
-        const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-        expect(preconnects).to.have.lengthOf(3);
-        // SafeFrame origin.
-        expect(preconnects[0]).to.have.property(
-            'href', 'https://tpc.googlesyndication.com/');
-        // NameFrame origin (in testing mode).  Use a substring match here to
-        // be agnostic about localhost server port.
-        expect(preconnects[1]).to.have.property('href')
-            .that.has.string('http://ads.localhost');
-        // AdSense origin.
-        expect(preconnects[2]).to.have.property(
-            'href', 'https://googleads.g.doubleclick.net/');
+        return Promise.resolve().then(() => {
+          const preconnects = doc.querySelectorAll('link[rel=preconnect]');
+          expect(preconnects).to.have.lengthOf(3);
+          // SafeFrame origin.
+          expect(preconnects[0]).to.have.property(
+              'href', 'https://tpc.googlesyndication.com/');
+          // NameFrame origin (in testing mode).  Use a substring match here to
+          // be agnostic about localhost server port.
+          expect(preconnects[1]).to.have.property('href')
+              .that.has.string('http://ads.localhost');
+          // AdSense origin.
+          expect(preconnects[2]).to.have.property(
+              'href', 'https://googleads.g.doubleclick.net/');
+        });
       });
     });
   });
@@ -1655,7 +1753,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#getPriority', () => {
+  describe('#getLayoutPriority', () => {
     describes.realWin('with shadow AmpDoc', {
       amp: {
         ampdoc: 'shadow',
@@ -1665,7 +1763,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getPriority()).to.equal(1);
+        expect(a4a.getLayoutPriority()).to.equal(1);
       });
     });
 
@@ -1678,7 +1776,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getPriority()).to.equal(2);
+        expect(a4a.getLayoutPriority()).to.equal(2);
       });
     });
   });
@@ -2138,8 +2236,8 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
   });
 
   describe('#getCustomRealTimeConfigMacros_', () => {
-    it('should return null', () => {
-      expect(a4a.getCustomRealTimeConfigMacros_()).to.be.null;
+    it('should return empty object', () => {
+      expect(a4a.getCustomRealTimeConfigMacros_()).to.deep.equal({});
     });
   });
 });

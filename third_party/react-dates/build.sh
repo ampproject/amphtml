@@ -3,7 +3,8 @@
 -t [ babelify --presets env ] \
 -g [ envify purge --NODE_ENV production ] \
 -g uglifyify \
--r prop-types -r preact:react -r preact-compat:react-dom -r moment \
+-r prop-types -r preact:react -r preact-compat:react-dom \
+-r moment \
 -r react-dates -r react-dates/initialize -r react-dates/constants \
 ./third_party/react-dates/index.js | \
 node ./build-system/scope-require.js | \

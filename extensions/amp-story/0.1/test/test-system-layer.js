@@ -16,6 +16,7 @@
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../system-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -30,6 +31,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
   beforeEach(() => {
     win = env.win;
 
+    registerServiceBuilder(win, 'story-store', () => ({get: NOOP}));
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {

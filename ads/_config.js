@@ -255,6 +255,16 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  beopinion: {
+    prefetch: 'https://widget.beopinion.com/sdk.js',
+    preconnect: [
+      'https://t.beopinion.com',
+      'https://s.beopinion.com',
+      'https://data.beopinion.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   bidtellect: {},
 
   brainy: {},
@@ -290,6 +300,10 @@ export const adConfig = {
       'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
     ],
     preconnect: 'https://ad.caprofitx.adtdp.com',
+  },
+
+  cedato: {
+    renderStartImplemented: true,
   },
 
   chargeads: {},
@@ -449,7 +463,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},
@@ -584,6 +597,10 @@ export const adConfig = {
     ],
   },
 
+  monetizer101: {
+    renderStartImplemented: true,
+  },
+
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
     prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
@@ -677,6 +694,12 @@ export const adConfig = {
 
   purch: {
     prefetch: 'https://ramp.purch.com/serve/creative_amp.js',
+    renderStartImplemented: true,
+  },
+
+  quoraad: {
+    prefetch: 'https://a.quora.com/amp_ad.js',
+    preconnect: 'https://ampad.quora.com',
     renderStartImplemented: true,
   },
 

@@ -1187,6 +1187,55 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'mobify': {
+    'vars': {
+      'projectSlug': 'mobify-project-id',
+      'templateName': 'page-type',
+    },
+    'requests': {
+      '_host': 'https://engagement-collector.mobify.net',
+      '_dimensions': [
+        '%22platform%22%3a%22AMP%22',
+        '%22client_id%22%3a%22${clientId(sandy-client-id)}%22',
+        '%22title%22%3a%22${title}%22',
+        '%22location%22%3a%22${sourceUrl}%22',
+        '%22page%22%3a%22${sourcePath}%22',
+        '%22src_location%22%3a%22${ampdocUrl}%22',
+        '%22referrer%22%3a%22${documentReferrer}%22',
+        '%22templateName%22%3a%22${templateName}%22',
+      ].join('%2c'),
+      '_basePrefix': '${_host}/s.gif?' +
+        'slug=${projectSlug}&' +
+        'timestamp_local=${timestamp}&' +
+        'channel=web&' +
+        'dimensions=%7b${_dimensions}%7d',
+      'ampstart': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22ampStart%22%2c%22value%22' +
+        '%3a${navTiming(navigationStart,domLoading)}%7d',
+      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
+      'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
+      'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22DOMContentLoaded%22%2c%22value%22' +
+        '%3a${contentLoadTime}%7d',
+    },
+    'triggers': {
+      'triggerName': {
+        'on': 'visible',
+        'request': ['ampstart', 'pageload', 'pagedcl'],
+      },
+      'pageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': true,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'mparticle': {
     'vars': {
       'eventType': 'Unknown',
@@ -1278,7 +1327,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
     'requests': {
       'session': 'https://${prefix}uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId}_${pageViewId}&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
-      'cloudapi': 'https://${prefix}cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}_${pageViewId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
+      'cloudapi': 'https://${prefix}cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}_${pageViewId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}_${pageViewId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
     },
     'triggers': {
       'visible': {
@@ -1676,7 +1725,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'base': 'https://${host}/postback/v3/event/${database}',
       'baseParams': 'td_write_key=${writeKey}' +
         '&td_global_id=td_global_id' +
-        '&td_client_id=CLIENT_ID(td_client_id)' +
+        '&td_client_id=CLIENT_ID(_td)' +
         '&td_charset=DOCUMENT_CHARSET' +
         '&td_language=BROWSER_LANGUAGE' +
         '&td_color=SCREEN_COLOR_DEPTH' +

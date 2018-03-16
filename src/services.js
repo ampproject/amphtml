@@ -29,6 +29,9 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+export let SubscriptionService;
+
 export class Services {
   /**
    * Returns a promise for the Access service.
@@ -39,6 +42,17 @@ export class Services {
     return (/** @type {!Promise<
         !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
         getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
@@ -270,15 +284,31 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<
-         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
-         * >} */ (
-        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
-            true)));
+    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+          true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreService(win) {
+    return getService(win, 'story-store');
   }
 
   /**

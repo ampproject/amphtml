@@ -354,6 +354,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refreshes data from the <code>src</code> and re-renders the list.</td>
+  </tr>
+</table>
+
 ### amp-live-list
 <table>
   <tr>
@@ -379,6 +391,10 @@ event.response</pre></td>
   <tr>
     <td><code>selectDown(delta=INTEGER)</code></td>
     <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+  </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
   </tr>
 </table>
 
