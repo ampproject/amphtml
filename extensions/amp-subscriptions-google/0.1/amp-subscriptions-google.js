@@ -171,9 +171,9 @@ export class GoogleSubscriptionsPlatform {
     // Offers or abbreviated offers may need to be shown depending on
     // whether the access has been granted and whether user is a subscriber.
     if (!renderState.granted) {
-      this.runtime_.showOffers();
+      this.runtime_.showOffers({});
     } else if (!renderState.subscribed) {
-      this.runtime_.showAbbrvOffer();
+      this.runtime_.showAbbrvOffer({});
     }
   }
 
