@@ -560,7 +560,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.resizeAmpAdAndSafeframe(550, 550, SERVICE.EXPAND_RESPONSE);
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(sendResizeResponseSpy).to.be.calledWith(
-            false, SERVICE.EXPAND_RESPONSE, 550, 550);
+            false, SERVICE.EXPAND_RESPONSE);
       });
     });
 
