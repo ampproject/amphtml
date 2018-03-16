@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-3136180 */
+ /** Version: 0.1.21-c3966ba */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -2096,7 +2096,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-3136180',
+    '_client': 'SwG 0.1.21-c3966ba',
   });
 }
 
@@ -3558,9 +3558,9 @@ class OffersFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
-
+  constructor(deps, options) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -3582,6 +3582,8 @@ class OffersFlow {
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
           'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
         }),
         /* shouldFadeBody */ true);
   }
@@ -3624,11 +3626,15 @@ class SubscribeOptionFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -3667,7 +3673,7 @@ class SubscribeOptionFlow {
    */
   maybeOpenOffersFlow_(data) {
     if (data && data['subscribe']) {
-      new OffersFlow(this.deps_).start();
+      new OffersFlow(this.deps_, this.options_).start();
     }
   }
 }
@@ -3681,11 +3687,15 @@ class AbbrvOfferFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
@@ -3721,12 +3731,11 @@ class AbbrvOfferFlow {
         });
         return;
       }
-      // TODO(sohanirao) : Handle the case when user is logged in
     });
     // If result is due to requesting offers, redirect to offers flow
     this.activityIframeView_.acceptResult().then(result => {
       if (result.data['viewOffers']) {
-        new OffersFlow(this.deps_).start();
+        new OffersFlow(this.deps_, this.options_).start();
       }
     });
 
@@ -4065,25 +4074,25 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showOffers() {
+  showOffers(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new OffersFlow(this);
+      const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
   }
 
   /** @override */
-  showSubscribeOption() {
+  showSubscribeOption(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new SubscribeOptionFlow(this);
+      const flow = new SubscribeOptionFlow(this, opt_options);
       return flow.start();
     });
   }
 
-  /** override */
-  showAbbrvOffer() {
+  /** @override */
+  showAbbrvOffer(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new AbbrvOfferFlow(this);
+      const flow = new AbbrvOfferFlow(this, opt_options);
       return flow.start();
     });
   }
