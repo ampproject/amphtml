@@ -55,7 +55,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
     it('register policy instance correctly', function* () {
       manager.registerConsentPolicyInstance('test', {
-        'itemsToWait': {
+        'waitFor': {
           'ABC': undefined,
           'DEF': undefined,
         },

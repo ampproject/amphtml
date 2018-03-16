@@ -26,7 +26,7 @@ const TAG = 'consent-policy-manager';
  * @enum {number}
  */
 export const CONSENT_POLICY_STATE = {
-  SUFFIENT: 0,
+  SUFFICIENT: 0,
   INSUFFICIENT: 1,
   UNKNOWN: 2,
 };
@@ -52,6 +52,15 @@ export class ConsentPolicyManager {
 
   /**
    * Register the policy instance
+   * Example policy config format:
+   * {
+   *   "waitFor": {
+   *     "consentABC": undefined,
+   *     "consentDEF": undefined
+   *   }
+   * }
+   *
+   * TODO: Add support to timeout
    * @param {string} policyId
    * @param {!JsonObject} config
    */
@@ -59,9 +68,9 @@ export class ConsentPolicyManager {
     dev().assert(!this.instances_[policyId],
         `${TAG}: instance already registered`);
 
-    const itemsToWait = Object.keys(config['itemsToWait'] || {});
+    const waitFor = Object.keys(config['waitFor'] || {});
 
-    const instance = new ConsentPolicyInstance(itemsToWait);
+    const instance = new ConsentPolicyInstance(waitFor);
 
     this.instances_[policyId] = instance;
 
@@ -72,8 +81,8 @@ export class ConsentPolicyManager {
     }
 
     this.ConsentStateManagerPromise_.then(manager => {
-      for (let i = 0; i < itemsToWait.length; i++) {
-        const consentId = itemsToWait[i];
+      for (let i = 0; i < waitFor.length; i++) {
+        const consentId = waitFor[i];
         manager.whenConsentReady(consentId).then(() => {
           manager.onConsentStateChange(consentId, state => {
             instance.consentStateChangeHandler(consentId, state);
@@ -128,11 +137,13 @@ export class ConsentPolicyInstance {
   }
 
   /**
-   * consent instance state change handler
+   * consent instance state change handlerit
    * @param {string} consentId
    * @param {CONSENT_ITEM_STATE} state
    */
   consentStateChangeHandler(consentId, state) {
+    // TODO: Keeping an array can have performance issue, change to using a map
+    // if necessary.
     if (state == CONSENT_ITEM_STATE.GRANTED) {
       const index = this.pendingItems_.indexOf(consentId);
       if (index > -1) {

@@ -197,7 +197,7 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(ampConsent.policyConfig_).to.deep.equal({
         'default': {
-          'itemsToWait': {
+          'waitFor': {
             'ABC': undefined,
             'DEF': undefined,
           },

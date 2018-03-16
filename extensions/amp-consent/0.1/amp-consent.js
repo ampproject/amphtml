@@ -120,7 +120,7 @@ export class AmpConsent extends AMP.BaseElement {
       defaultWaitForItems[instanceKeys[i]] = undefined;
     }
     const defaultPolicy = {
-      'itemsToWait': defaultWaitForItems,
+      'waitFor': defaultWaitForItems,
     };
     this.policyConfig_['default'] = defaultPolicy;
   }
@@ -152,10 +152,20 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Read and parse consent instance config
+   * An example valid config json looks like
+   * {
+   *   "consents": {
+   *     "consentABC": {
+   *       "checkConsentHref": "https://fake.com"
+   *     }
+   *   }
+   * }
+   * TODO: Add support for policy config
    */
   assertAndParseConfig_() {
     // All consent config within the amp-consent component. There will be only
     // one single amp-consent allowed in page.
+    // TODO: Make this a shared helper method.
     const scripts = childElementsByTag(this.element, 'script');
     user().assert(scripts.length == 1,
         `${TAG} should have (only) one <script> child`);
@@ -171,6 +181,11 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Parse response from server endpoint
+   * The response format example:
+   * {
+   *   "consentRequired": true/false
+   * }
+   * TODO: Support vendor lists
    * @param {string} instanceId
    * @param {?JsonObject} response
    */

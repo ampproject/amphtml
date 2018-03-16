@@ -39,13 +39,13 @@ export class ConsentStateManager {
     this.instances_ = {};
 
     /** @private {!Object<string, ?Observable>}*/
-    this.consentChangeObservable_ = {};
+    this.consentChangeObservables_ = {};
 
     /** @private {!Object<string, ?function()>} */
-    this.consentReadyResolver_ = {};
+    this.consentReadyResolvers_ = {};
 
     /** @private {!Object<string, ?Promise>} */
-    this.consentReadyPromise_ = {};
+    this.consentReadyPromises_ = {};
   }
 
   /**
@@ -56,11 +56,11 @@ export class ConsentStateManager {
     dev().assert(!this.instances_[instanceId],
         `${TAG}: instance already registered`);
     this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
-    this.consentChangeObservable_[instanceId] = new Observable();
-    if (this.consentReadyResolver_[instanceId]) {
-      this.consentReadyResolver_[instanceId]();
-      this.consentReadyPromise_[instanceId] = null;
-      this.consentReadyResolver_[instanceId] = null;
+    this.consentChangeObservables_[instanceId] = new Observable();
+    if (this.consentReadyResolvers_[instanceId]) {
+      this.consentReadyResolvers_[instanceId]();
+      this.consentReadyPromises_[instanceId] = null;
+      this.consentReadyResolvers_[instanceId] = null;
     }
   }
 
@@ -69,16 +69,18 @@ export class ConsentStateManager {
    * @param {string} instanceId
    */
   ignoreConsentInstance(instanceId) {
+    // TODO: Add new CONSENT_ITEM_STATE.IGNORED
+    // TODO: Remove instance completely
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
 
-    if (this.consentChangeObservable_[instanceId] === null) {
+    if (this.consentChangeObservables_[instanceId] === null) {
       // This consent instance has been ignored before
       return;
     }
-    this.consentChangeObservable_[instanceId].fire(CONSENT_ITEM_STATE.GRANTED);
-    this.consentChangeObservable_[instanceId].removeAll();
-    this.consentChangeObservable_[instanceId] = null;
+    this.consentChangeObservables_[instanceId].fire(CONSENT_ITEM_STATE.GRANTED);
+    this.consentChangeObservables_[instanceId].removeAll();
+    this.consentChangeObservables_[instanceId] = null;
   }
 
   /**
@@ -90,9 +92,9 @@ export class ConsentStateManager {
 
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-    dev().assert(this.consentChangeObservable_[instanceId],
+    dev().assert(this.consentChangeObservables_[instanceId],
         `${TAG}: should not update ignored consent`);
-    this.consentChangeObservable_[instanceId].fire(state);
+    this.consentChangeObservables_[instanceId].fire(state);
     this.instances_[instanceId].update(state);
   }
 
@@ -116,12 +118,12 @@ export class ConsentStateManager {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
     let unlistener = null;
-    if (this.consentChangeObservable_[instanceId] === null) {
+    if (this.consentChangeObservables_[instanceId] === null) {
       // Do not need consent for this instance.
       handler(CONSENT_ITEM_STATE.GRANTED);
       return () => {};
     } else {
-      unlistener = this.consentChangeObservable_[instanceId].add(handler);
+      unlistener = this.consentChangeObservables_[instanceId].add(handler);
     }
     // Fire first consent instance state.
     this.getConsentInstanceState(instanceId).then(state => {
@@ -139,12 +141,12 @@ export class ConsentStateManager {
     if (this.instances_[instanceId]) {
       return Promise.resolve();
     }
-    if (!this.consentReadyPromise_[instanceId]) {
-      this.consentReadyPromise_[instanceId] = new Promise(resolve => {
-        this.consentReadyResolver_[instanceId] = resolve;
+    if (!this.consentReadyPromises_[instanceId]) {
+      this.consentReadyPromises_[instanceId] = new Promise(resolve => {
+        this.consentReadyResolvers_[instanceId] = resolve;
       });
     }
-    return this.consentReadyPromise_[instanceId];
+    return this.consentReadyPromises_[instanceId];
   }
 }
 
@@ -181,7 +183,7 @@ export class ConsentInstance {
       return;
     }
 
-    const value = (state == CONSENT_ITEM_STATE.GRANTED) ? true : false;
+    const value = (state == CONSENT_ITEM_STATE.GRANTED);
     this.storagePromise_.then(storage => {
       if (state != this.localValue_) {
         // If state has changed. do not store.
