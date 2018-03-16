@@ -45,8 +45,8 @@ export class ParallaxProvider {
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
+    /** @private @const {!../../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     installPositionObserverServiceForDoc(ampdoc);
 
@@ -61,7 +61,7 @@ export class ParallaxProvider {
   installOn(element) {
     setStyle(element, 'will-change', 'transform');
     const parallaxElement = new ParallaxElement(
-        element, this.positionObserver_, this.viewport_, this.vsync_);
+        element, this.positionObserver_, this.viewport_, this.resources_);
     parallaxElement.initialize();
   }
 }
@@ -74,9 +74,9 @@ class ParallaxElement {
    * @param {!Element} element The element to give a parallax effect.
    * @param {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} positionObserver
    * @param {!../../../../src/service/viewport/viewport-impl.Viewport} viewport
-   * @param {!../../../../src/service/vsync-impl.Vsync} vsync
+   * @param {!../../../../src/service/resources-impl.Resources} resources
    */
-  constructor(element, positionObserver, viewport, vsync) {
+  constructor(element, positionObserver, viewport, resources) {
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = positionObserver;
@@ -84,8 +84,8 @@ class ParallaxElement {
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = viewport;
 
-    /** @const @private {!../../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
+    /** @const @private {!../../../../src/service/resources-impl.Resources} */
+    this.resources_ = resources;
 
     /** @const {string} */
     const factorValue = user().assert(element.getAttribute(FACTOR_ATTR),
@@ -102,6 +102,14 @@ class ParallaxElement {
 
     /** @private @const {!Element} */
     this.element_ = element;
+
+    /** @private {number} */
+    this.translateYOffset_ = 0;
+
+    /** @private {boolean} */
+    this.mutateScheduled_ = false;
+
+    this.boundTranslateY_ = this.translateY_.bind(this);
   }
 
   /**
@@ -138,11 +146,18 @@ class ParallaxElement {
     // Offset is how much extra to move the element which is position within
     // viewport times adjusted factor.
     const offset = (this.adjustedViewportHeight_ - top) * adjustedFactor;
+    this.translateYOffset_ = offset;
 
+    if (!this.mutateScheduled_) {
+      this.resources_.mutateElement(this.element_, this.boundTranslateY_);
+    }
+  }
+
+  /**
+   * This must be called inside a mutate phase.
+   */
+  translateY_() {
     // Translate the element offset pixels.
-    // No need for vsync mutate, position observer only calls back at most
-    // every animation frame and we are only changing `translate` which does
-    // not cause relayouts.
     setStyles(this.element_,
         {transform: `translateY(${offset.toFixed(0)}px)`}
     );
@@ -174,7 +189,7 @@ class ParallaxElement {
    * @private
    */
   getAdjustedViewportHeight_() {
-    return this.vsync_.measurePromise(() => {
+    return this.resources_.measureElement(() => {
       const viewportHeight = this.viewport_.getHeight();
 
       let offsetTop = 0;
