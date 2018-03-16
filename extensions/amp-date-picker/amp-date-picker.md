@@ -48,7 +48,7 @@ When rendered in a `<form>`, the `static` picker will create hidden input elemen
 existing inputs specified with `*date-selector`. It will name them `input` or `start-date` and `end-date` if those
 names are not taken in the form, and otherwise will attempt to name them with the `id` of the `<amp-date-picker>`.
 
-<!--embedded example - displays in ampproject.org -->
+```html
 <form
   method="post"
   action-xhr="/form/echo-json/post"
@@ -73,7 +73,7 @@ names are not taken in the form, and otherwise will attempt to name them with th
     </template>
   </div>
 </form>
-
+```
 
 ### `mode="overlay"`
 
@@ -81,7 +81,7 @@ A static picker must use `layout="container"` and contain the input fields that 
 When the user clicks, focuses, or presses the down-arrow in an input field the overlay will appear as an overlay
 near the input field.
 
-<!--embedded example - displays in ampproject.org -->
+```html
 <form
   method="post"
   action-xhr="/form/echo-json/post"
@@ -108,11 +108,12 @@ near the input field.
     </template>
   </div>
 </form>
+```
 
 <!-- TODO(cvializ): talk about why type="tel" on the inputs -->
 
 {% call callout('Read on', type='read') %}
-Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) spec and [Supported Layouts](https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute).
+Learn more about layouts in the [AMP HTML Layout System](https://www.ampproject.org/docs/design/amp-html-layout) spec and [Supported Layouts](https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute).
 {% endcall %}
 
 
