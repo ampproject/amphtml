@@ -232,6 +232,9 @@ export class Bookend {
 
     /** @private @const {!Element} */
     this.storyElement_ = storyElement;
+
+    /** @private {!../../../src/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
   }
 
   /**
@@ -254,7 +257,9 @@ export class Bookend {
 
     this.initializeListeners_();
 
-    this.storyElement_.appendChild(this.getRoot());
+    this.vsync_.mutate(() => {
+      this.storyElement_.appendChild(this.getRoot());
+    });
   }
 
   /**
@@ -271,7 +276,7 @@ export class Bookend {
         throttle(this.win_, () => this.onScroll_(), 100));
 
     this.win_.addEventListener('keyup', event => {
-      if (!this.isActive()) {
+      if (!this.isActive_()) {
         return;
       }
       if (event.keyCode == KeyCodes.ESCAPE) {
@@ -284,10 +289,13 @@ export class Bookend {
         StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
   }
 
-  /** @return {boolean} */
-  isActive() {
-    return this.isBuilt() &&
-        !this.getRoot().classList.contains(HIDDEN_CLASSNAME);
+  /**
+   * Whether the bookend is displayed.
+   * @return {boolean}
+   * @private
+   */
+  isActive_() {
+    return this.storeService_.get(StateProperty.BOOKEND_STATE);
   }
 
   /**
@@ -396,10 +404,10 @@ export class Bookend {
    * @private
    */
   onScroll_() {
-    if (!this.isActive()) {
+    if (!this.isActive_()) {
       return;
     }
-    Services.vsyncFor(this.win_).run({
+    this.vsync_.run({
       measure: state => {
         state.shouldBeFullBleed =
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
@@ -416,7 +424,7 @@ export class Bookend {
    * @private
    */
   toggle_(show) {
-    Services.vsyncFor(this.win_).mutate(() => {
+    this.vsync_.mutate(() => {
       this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
     });
   }
@@ -452,9 +460,11 @@ export class Bookend {
    * @private
    */
   setRelatedArticles_(articleSets) {
-    this.getInnerContainer_().appendChild(
-        renderSimpleTemplate(this.win_.document,
-            buildArticlesContainerTemplate(articleSets)));
+    this.vsync_.mutate(() => {
+      this.getInnerContainer_().appendChild(
+          renderSimpleTemplate(this.win_.document,
+              buildArticlesContainerTemplate(articleSets)));
+    });
   }
 
   /** @return {!Element} */
