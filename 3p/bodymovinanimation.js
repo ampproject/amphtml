@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 
@@ -32,7 +33,8 @@ function getBodymovinAnimationSdk(global, cb) {
 }
 
 function parseMessage(event) {
-  const action = event.data['action'];
+  const eventMessage = parseJson(getData(event));
+  const action = eventMessage['action'];
   if (animationHandler) {
     if (action == 'play') {
       animationHandler.play();
@@ -41,7 +43,7 @@ function parseMessage(event) {
     } else if (action == 'stop') {
       animationHandler.stop();
     } else if (action == 'goToAndStop') {
-      animationHandler.goToAndPlay(event.data['value']);
+      animationHandler.goToAndPlay(eventMessage['value']);
     }
   }
 
