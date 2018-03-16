@@ -214,9 +214,9 @@ export class MediaPool {
       this.unallocated[type] = [];
 
       this.vsync_.mutate(() => {
-        for (let i = 0; i < count; i++) {
+        for (let i = count; i > 0; i--) {
           // Re-use seed when reaching end of set.
-          const mediaEl = (i == count - 1) ? seed : seed.cloneNode();
+          const mediaEl = (i == 1) ? seed : seed.cloneNode();
           const sources = this.getDefaultSource_(type);
           mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
