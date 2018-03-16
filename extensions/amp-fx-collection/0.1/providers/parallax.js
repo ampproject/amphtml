@@ -149,6 +149,7 @@ class ParallaxElement {
     this.translateYOffset_ = offset;
 
     if (!this.mutateScheduled_) {
+      this.mutateScheduled_ = true;
       this.resources_.mutateElement(this.element_, this.boundTranslateY_);
     }
   }
@@ -157,9 +158,10 @@ class ParallaxElement {
    * This must be called inside a mutate phase.
    */
   translateY_() {
+    this.mutateScheduled_ = false;
     // Translate the element offset pixels.
     setStyles(this.element_,
-        {transform: `translateY(${offset.toFixed(0)}px)`}
+        {transform: `translateY(${this.translateYOffset_.toFixed(0)}px)`}
     );
   }
 
