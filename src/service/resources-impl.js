@@ -959,6 +959,7 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
         if (measurer) {
