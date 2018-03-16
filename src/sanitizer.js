@@ -112,7 +112,9 @@ const WHITELISTED_ATTRS = [
   'text',
   /* Attributes for amp-subscriptions */
   'subscriptions-action',
+  'subscriptions-actions',
   'subscriptions-section',
+  'subscriptions-display',
 ];
 
 /** @const {!Object<string, !Array<string>>} */

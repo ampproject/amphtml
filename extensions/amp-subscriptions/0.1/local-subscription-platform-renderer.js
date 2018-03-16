@@ -51,7 +51,6 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
-   * @param {!Node} rootNode
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   renderActions_(renderState) {

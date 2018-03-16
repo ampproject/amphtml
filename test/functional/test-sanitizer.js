@@ -227,6 +227,17 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
         .to.equal('<a [href]="foo.bar" target="_top">link</a>');
   });
+
+  it('should allow amp-subscriptions attributes', () => {
+    expect(sanitizeHtml('<div subscriptions-action="login">link</div>'))
+        .to.equal('<div subscriptions-action="login">link</div>');
+    expect(sanitizeHtml('<div subscriptions-section="actions">link</div>'))
+        .to.equal('<div subscriptions-section="actions">link</div>');
+    expect(sanitizeHtml('<div subscriptions-actions="">link</div>'))
+        .to.equal('<div subscriptions-actions="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-display="">link</div>'))
+        .to.equal('<div subscriptions-display="">link</div>');
+  });
 });
 
 

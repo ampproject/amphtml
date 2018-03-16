@@ -71,6 +71,7 @@ describes.realWin('amp-subscriptions DialogRenderer', {
   afterEach(() => {
     templatesMock.verify();
     dialogMock.verify();
+    actionRendererStub.restore();
   });
 
   it('should render an element', () => {
