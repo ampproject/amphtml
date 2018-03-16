@@ -149,7 +149,7 @@ The RTC Response to a GET must meet the following requirements:
 
 *   Status Code = 200
 *   Headers (in addition to automatically added headers):
-    *   Following [CORS headers](https://developer.mozilla.org/en-US/docs/Glossary/CORS): 
+    *   Following [CORS headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md):
         *   Access-Control-Allow-Origin: Must reflect the origin of the request, i.e. if request is coming from https://yoursite.cdn.ampproject.org/somepage.html, the value of this header should be https://yoursite.cdn.ampproject.org.
         *   AMP-Access-Control-Allow-Source-Origin: Must reflect the origin of the canonical URL of the page if on AMP CDN, otherwise should be the same as Access-Control-Allow-Origin above. For example, if the request is coming from  https://yoursite.cdn.ampproject.org/somepage.html and the canonical url associated is https://yoursite.com/somepage.html, then the value of this header should be https://yoursite.com.  **Important to note** that Access-Control-Allow-Origin and AMP-Access-Control-Allow-Source-Origin should be different values if the request is coming from a page served from the AMP CDN, and should be the same value if request coming from an AMP page served directly from your own site. 
         *   Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin
