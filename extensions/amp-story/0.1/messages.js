@@ -164,9 +164,9 @@ export class MessageService {
    * @param {!MessageId} messageId The ID of the message that should be set on
    *     the specified element.
    */
-  setInnerTextToMessage(element, messageId) {
+  setTextContentToMessage(element, messageId) {
     const languageCodes = getLanguageCodesForElement(element);
     const message = findMessage(this.messageBundles_, languageCodes, messageId);
-    element.innerText = message;
+    element.textContent = message;
   }
 }

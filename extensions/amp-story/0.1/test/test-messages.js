@@ -64,7 +64,7 @@ describes.fakeWin('amp-story messages', {}, () => {
       const el = document.createElement('div');
 
       expect(el.innerText).to.be.empty;
-      messageService.setInnerTextToMessage(el, TEST_MESSAGE_ID);
+      messageService.setTextContentToMessage(el, TEST_MESSAGE_ID);
       expect(el.innerText).to.equal(TEST_MESSAGE_CONTENT);
     });
 
