@@ -16,6 +16,7 @@
 
 import {
   ConfiguredRuntime,
+  Entitlements,
   SubscribeResponse,
 } from '../../../../third_party/subscriptions-project/swg';
 import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
@@ -36,6 +37,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let xhr;
   let callbacks;
   let methods;
+  let ackStub;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -64,6 +66,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
           ConfiguredRuntime.prototype, 'showAbbrvOffer'),
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
+    ackStub = sandbox.stub(Entitlements.prototype, 'ack');
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
@@ -120,6 +123,40 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should ack matching entitlements', () => {
+    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      return Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            entitlements: {
+              source: 'google',
+              products: ['example.org:basic'],
+              subscriptionToken: 'tok1',
+            },
+          });
+        },
+      });
+    });
+    return platform.getEntitlements().then(() => {
+      expect(ackStub).to.be.calledOnce;
+    });
+  });
+
+  it('should NOT ack non-matching entitlements', () => {
+    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      return Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            entitlements: {},
+          });
+        },
+      });
+    });
+    return platform.getEntitlements().then(() => {
+      expect(ackStub).to.not.be.called;
+    });
+  });
+
   it('should ignore activate when granted', () => {
     platform.activate({granted: true, subscribed: true});
     expect(methods.showOffers).to.not.be.called;
@@ -128,13 +165,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should show offers on activate when not granted', () => {
     platform.activate({granted: false});
-    expect(methods.showOffers).to.be.calledOnce.calledWithExactly({});
+    expect(methods.showOffers).to.be.calledOnce
+        .calledWithExactly({list: 'amp'});
     expect(methods.showAbbrvOffer).to.not.be.called;
   });
 
   it('should show abbrv offer on activate when granted non-subscriber', () => {
     platform.activate({granted: true, subscribed: false});
-    expect(methods.showAbbrvOffer).to.be.calledOnce.calledWithExactly({});
+    expect(methods.showAbbrvOffer).to.be.calledOnce
+        .calledWithExactly({list: 'amp'});
     expect(methods.showOffers).to.not.be.called;
   });
 
