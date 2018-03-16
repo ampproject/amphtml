@@ -112,7 +112,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
 
-If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled, and AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
 Example with fallback:
 
