@@ -16,9 +16,9 @@ before_install:
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
-  - ./node_modules/.bin/greenkeeper-lockfile-update
   - chromedriver-update 2.35
   - chromedriver -v
+  - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
 branches:
