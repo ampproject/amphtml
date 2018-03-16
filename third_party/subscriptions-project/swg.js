@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-55a6698 */
+ /** Version: 0.1.21-3136180 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -1472,8 +1472,9 @@ class Entitlements {
    * @param {string} raw
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
+   * @param {function(!Entitlements)} ackHandler
    */
-  constructor(service, raw, entitlements, currentProduct) {
+  constructor(service, raw, entitlements, currentProduct, ackHandler) {
     /** @const {string} */
     this.service = service;
     /** @const {string} */
@@ -1483,6 +1484,8 @@ class Entitlements {
 
     /** @private @const {?string} */
     this.product_ = currentProduct;
+    /** @private @const {function(!Entitlements)} */
+    this.ackHandler_ = ackHandler;
   }
 
   /**
@@ -1493,7 +1496,8 @@ class Entitlements {
         this.service,
         this.raw,
         this.entitlements.map(ent => ent.clone()),
-        this.product_);
+        this.product_,
+        this.ackHandler_);
   }
 
   /**
@@ -1556,6 +1560,14 @@ class Entitlements {
       }
     }
     return null;
+  }
+
+  /**
+   * A 3p site should call this method to acknowledge that it "saw" and
+   * "understood" entitlements.
+   */
+  ack() {
+    this.ackHandler_(this);
   }
 }
 
@@ -2084,7 +2096,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-55a6698',
+    '_client': 'SwG 0.1.21-3136180',
   });
 }
 
@@ -2256,14 +2268,13 @@ class EntitlementsManager {
     if (!entitlement) {
       return Promise.resolve();
     }
-
+    // Check if storage bit is set. It's only set by the `Entitlements.ack`
+    // method.
     return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
       if (value == '1') {
         // Already shown;
         return;
       }
-
-      this.setToastShown(true);
       if (entitlement) {
         this.showToast_(entitlement);
       }
@@ -2276,11 +2287,20 @@ class EntitlementsManager {
    */
   showToast_(entitlement) {
     const source = entitlement.source || 'google';
-
     return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
       'publicationId': this.publicationId_,
       'source': source,
     })).open();
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  ack_(entitlements) {
+    if (entitlements.getEntitlementForThis()) {
+      this.setToastShown(true);
+    }
   }
 
   /**
@@ -2293,6 +2313,7 @@ class EntitlementsManager {
         encodeURIComponent(this.publicationId_) +
         '/entitlements');
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const ackHandler = this.ack_.bind(this);
       const signedData = json['signedEntitlements'];
       if (signedData) {
         const jwt = this.jwtHelper_.decode(signedData);
@@ -2302,7 +2323,8 @@ class EntitlementsManager {
               SERVICE_ID,
               signedData,
               Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       } else {
         const plainEntitlements = json['entitlements'];
@@ -2311,11 +2333,17 @@ class EntitlementsManager {
               SERVICE_ID,
               '',
               Entitlement.parseListFromJson(plainEntitlements),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       }
       // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+      return new Entitlements(
+          SERVICE_ID,
+          '',
+          [],
+          this.config_.getProductId(),
+          ackHandler);
     });
   }
 }
@@ -3297,6 +3325,13 @@ const PAY_REQUEST_ID = 'swg-pay';
 class PayStartFlow {
 
   /**
+   * @param {!../utils/preconnect.Preconnect} pre
+   */
+  static preconnect(pre) {
+    pre.prefetch(feUrl('/pay'));
+  }
+
+  /**
    * @param {!./deps.DepsDef} deps
    * @param {string} sku
    */
@@ -3771,6 +3806,67 @@ function whenDocumentReady(doc) {
 
 
 
+
+class Preconnect {
+
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+  }
+
+  /**
+   * @param {string} url
+   */
+  preconnect(url) {
+    this.pre_(url, 'preconnect');
+  }
+
+  /**
+   * @param {string} url
+   */
+  dnsPrefetch(url) {
+    this.pre_(url, 'dns-prefetch');
+  }
+
+  /**
+   * @param {string} url
+   */
+  prefetch(url) {
+    this.pre_(url, 'preconnect prefetch');
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} as
+   */
+  preload(url, as) {
+    this.pre_(url, 'preconnect preload', as);
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} rel
+   * @param {?string=} opt_as
+   * @private
+   */
+  pre_(url, rel, opt_as) {
+    // <link rel="prefetch" href="..." as="">
+    const linkEl = createElement(this.doc_, 'link', {
+      'rel': rel,
+      'href': url,
+    });
+    if (opt_as) {
+      linkEl.setAttribute('as', opt_as);
+    }
+    this.doc_.head.appendChild(linkEl);
+  }
+}
+
+
+
 const PREFIX = 'subscribe.google.com';
 
 
@@ -3890,8 +3986,11 @@ class ConfiguredRuntime {
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
 
+    const preconnect = new Preconnect(this.win_.document);
+
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
+    PayStartFlow.preconnect(preconnect);
   }
 
   /** @override */
