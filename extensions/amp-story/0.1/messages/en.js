@@ -75,11 +75,6 @@ export default {
     'description': 'Button label for the share target that shares a link via ' +
         'LinkedIn.',
   },
-  [MessageId.AMP_STORY_SHARING_PROVIDER_NAME_NATIVE]: {
-    'message': 'More',
-    'description': 'Button label for the share target that shares a link via ' +
-        'deferral to the operating system\'s native sharing handler.',
-  },
   [MessageId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST]: {
     'message': 'Pinterest',
     'description': 'Button label for the share target that shares a link via ' +
@@ -89,6 +84,11 @@ export default {
     'message': 'SMS',
     'description': 'Button label for the share target that shares a link via ' +
         'SMS.',
+  },
+  [MessageId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM]: {
+    'message': 'More',
+    'description': 'Button label for the share target that shares a link via ' +
+        'deferral to the operating system\'s native sharing handler.',
   },
   [MessageId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     'message': 'Tumblr',

@@ -165,7 +165,7 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'The page is best viewed in portrait mode',
+            messageId: MessageId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
           },
         ],
       },
@@ -191,7 +191,7 @@ const DESKTOP_SIZE_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'Expand your window to view this experience',
+            messageId: MessageId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
           },
         ],
       },
@@ -215,8 +215,7 @@ const UNSUPPORTED_BROWSER_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
-                'this experience',
+            messageId: MessageId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
           },
         ],
       },
@@ -232,6 +231,13 @@ const UNSUPPORTED_BROWSER_WARNING = [
 const SHARE_WIDGET_PILL_CONTAINER = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-share-pill'}),
+  children: [
+    {
+      tag: 'span',
+      attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
+      messageId: MessageId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+    },
+  ],
 };
 
 
@@ -579,7 +585,13 @@ export class AmpStory extends AMP.BaseElement {
 
     this.shareWidget_ = new ShareWidget(this.win);
 
-    container.appendChild(this.shareWidget_.build(this.getAmpDoc()));
+    const shareLabelEl = dev().assertElement(
+        container.querySelector('.i-amphtml-story-share-pill-label'),
+        'Expected share pill label to be present.');
+
+    container.insertBefore(
+        this.shareWidget_.build(this.getAmpDoc()),
+        shareLabelEl);
 
     this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
       if (bookendConfig !== null) {

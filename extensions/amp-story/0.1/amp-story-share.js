@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {MessageId} from './messages';
 import {Services} from '../../../src/services';
 import {Toast} from './toast';
 import {
@@ -20,7 +21,7 @@ import {
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
+import {dict, map} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -32,13 +33,19 @@ import {throttle} from '../../../src/utils/rate-limit';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!JsonObject}
+ * @const {!Object<string, !MessageId>}
  */
-const SHARE_PROVIDER_NAME = dict({
-  'gplus': 'Google+',
-  'linkedin': 'LinkedIn',
-  'system': 'More',
-  'whatsapp': 'WhatsApp',
+const SHARE_PROVIDER_MESSAGE_ID = map({
+  'system': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'linkedin': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 
@@ -86,7 +93,7 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  text: 'Get Link', // TODO(alanorozco): i18n
+  messageId: MessageId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
 };
 
 
@@ -118,6 +125,10 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
+  const shareProviderMessageId = dev().assert(
+      SHARE_PROVIDER_MESSAGE_ID[shareType],
+      `No message to display name for share type ${shareType}.`);
+
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([
         {
@@ -130,7 +141,7 @@ function buildProvider(doc, shareType, opt_params) {
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          text: SHARE_PROVIDER_NAME[shareType] || shareType,
+          messageId: shareProviderMessageId,
         },
       ]));
 }
@@ -148,12 +159,12 @@ function buildCopySuccessfulToast(doc, url) {
     children: [
       {
         tag: 'div',
-        text: 'Link copied!', // TODO(alanorozco): i18n
+        messageId: MessageId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-        text: url,
+        untranslatedText: url,
       },
     ],
   }));
@@ -174,6 +185,9 @@ export class ShareWidget {
 
     /** @private {?Element} */
     this.root_ = null;
+
+    /** @private {?./messages/MessageService} */
+    this.messageServicePromise_ = null;
   }
 
   /** @param {!Window} win */
@@ -189,6 +203,7 @@ export class ShareWidget {
     dev().assert(!this.root_, 'Already built.');
 
     this.ampdoc_ = ampdoc;
+    this.messageServicePromise_ = Services.messageServiceForOrNull(this.win_);
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
@@ -224,7 +239,12 @@ export class ShareWidget {
           dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_, url)) {
-      Toast.show(this.win_, 'Could not copy link to clipboard :(');
+      this.messageServicePromise_.then(messageService => {
+        dev().assert(messageService, 'Could not retrieve MessageService.');
+        const failureMessage = messageService
+            .getMessage(MessageId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
+        Toast.show(this.win_, failureMessage);
+      });
       return;
     }
 

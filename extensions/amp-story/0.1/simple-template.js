@@ -24,6 +24,7 @@ import {isArray, toWin} from '../../../src/types';
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
  *   messageId: (number|undefined),
+ *   untranslatedText: (string|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -82,6 +83,10 @@ function renderSingle(doc, elementDef) {
       dev().assert(messageService, 'Could not retrieve MessageService.');
       el.textContent = messageService.getMessage(elementDef.messageId);
     });
+  }
+
+  if (elementDef.untranslatedText) {
+    el.textContent = elementDef.untranslatedText;
   }
 
   if (elementDef.children) {
