@@ -522,7 +522,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     /**
-     * If the safeframed creative asks to resize within the bounds of
+     * If the safeframed creative asks to resize outside the bounds of
      * the amp-ad element, first we try to resize the amp-ad element by
      * using element.attemptChangeSize. If that succeeds, then we also
      * resize the safeframe.
@@ -547,6 +547,21 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       expect(sendResizeResponseSpy).to.be.calledWith(
           true, SERVICE.EXPAND_RESPONSE);
       expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+    });
+
+    /**
+     * If the safeframed creative asks to resize outside the bounds of
+     * the amp-ad element, first we try to resize the amp-ad element by
+     * using element.attemptChangeSize. If that rejects, we should send
+     * a failure message.
+     */
+    it('resizeAmpAdAndSafeframe should send error on rejection', () => {
+      attemptChangeSizeStub.rejects();
+      safeframeHost.resizeAmpAdAndSafeframe(550, 550, SERVICE.EXPAND_RESPONSE);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE, 550, 550);
+      });
     });
 
     /**

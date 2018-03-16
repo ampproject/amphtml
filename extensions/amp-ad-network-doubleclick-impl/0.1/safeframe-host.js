@@ -570,26 +570,35 @@ export class SafeframeHostApi {
    */
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      const success = !!this.baseInstance_.element.style.height.match(height)
+      try {
+        const success = !!this.baseInstance_.element.style.height.match(height)
               && !!this.baseInstance_.element.style.width.match(width);
-      // If the amp-ad element was successfully resized, always update
-      // the size of the safeframe as well. If the amp-ad element could not
-      // be resized, but this is a collapse request, then only collapse
-      // the safeframe.
-      if (success || optIsCollapse) {
-        this.resizeIframe(height, width);
-        this.isCollapsed_ = !!optIsCollapse;
-        this.baseInstance_.getResource().measure();
-      } else {
-        // attemptChangeSize automatically registers a pendingChangeSize if
-        // the initial attempt failed. We do not want to do that, so clear it.
-        this.baseInstance_.getResource().resetPendingChangeSize();
+        // If the amp-ad element was successfully resized, always update
+        // the size of the safeframe as well. If the amp-ad element could not
+        // be resized, but this is a collapse request, then only collapse
+        // the safeframe. Collapse will always resize the safeframe.
+        if (success || optIsCollapse) {
+          this.resizeIframe(height, width);
+          this.isCollapsed_ = !!optIsCollapse;
+          // We need to force a measure right now, as without remeasuring, we
+          // will have the wrong size information for the amp-ad and the
+          // safeframe when we send the response message into the safeframe.
+          // This would be an issue specifically for when expand is successful
+          // while amp-ad is out of the viewport, for example.
+          this.baseInstance_.getResource().measure();
+        } else {
+          // attemptChangeSize automatically registers a pendingChangeSize if
+          // the initial attempt failed. We do not want to do that, so clear it.
+          this.baseInstance_.getResource().resetPendingChangeSize();
+        }
+        this.sendResizeResponse(success || !!optIsCollapse, messageType);
+      } catch (e) {
+        dev().error(TAG, 'Resizing the safeframe failed.');
+        this.sendResizeResponse(false, messageType);
       }
-      this.sendResizeResponse(success || !!optIsCollapse,
-          messageType, height, width);
     }).catch(() => {
       // If there are errors, try sending a failure message.
-      this.sendResizeResponse(false, messageType, height, width);
+      this.sendResizeResponse(false, messageType);
     });
   }
 
