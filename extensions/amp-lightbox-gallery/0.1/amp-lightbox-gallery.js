@@ -1039,9 +1039,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   handleKeyboardEvents_(event) {
-    const code = event.keyCode;
-    if (code == KeyCodes.ESCAPE) {
-      this.close_();
+    if (this.active_) {
+      const code = event.keyCode;
+      if (code == KeyCodes.ESCAPE) {
+        this.close_();
+      } else if (code == KeyCodes.LEFT_ARROW) {
+        /**@type {?}*/ (this.carousel_).implementation_.goCallback(
+            /*Prev*/ -1, /*Animate*/ true, /*Autoplay*/ false);
+      } else if (code == KeyCodes.RIGHT_ARROW) {
+        /**@type {?}*/ (this.carousel_).implementation_.goCallback(
+            /*Next*/ 1, /*Animate*/ true, /*Autoplay*/ false);
+      }
     }
   }
 
