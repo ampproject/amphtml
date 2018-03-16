@@ -212,8 +212,9 @@ export class MediaPool {
 
       this.allocated[type] = [];
       this.unallocated[type] = [];
-      for (let i = 0; i < count; i++) {
-        this.vsync_.mutate(() => {
+
+      this.vsync_.mutate(() => {
+        for (let i = 0; i < count; i++) {
           // Re-use seed when reaching end of set.
           const mediaEl = (i == count - 1) ? seed : seed.cloneNode();
           const sources = this.getDefaultSource_(type);
@@ -224,8 +225,8 @@ export class MediaPool {
           // is returned.  If so, we should adjust the pool size/distribution
           // between media types.
           this.unallocated[type].push(mediaEl);
-        });
-      }
+        }
+      });
     });
   }
 
