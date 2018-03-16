@@ -548,43 +548,12 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
-app.use('/get-consent/', (req, res) => {
-  assertCors(req, res, ['POST']);
-  const body = {
-    'fullConsentStateList': {
-      'itemA': {
-        'name': 'itemAFullName',
-        'status': 0,
-        'prompt': false,
-      },
-      'itemB': {
-        'name': 'itemBFullName',
-        'status': 1,
-        'prompt': true,
-      },
-      'itemC': {
-        'name': 'itemCFullName',
-        'status': 2,
-        'prompt': true,
-      },
-    },
-  };
-  res.send(body);
-});
-
-app.use('/get-consent-v1/', (req, res) => {
+app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
   const body = {
     'consentRequired': true,
-    'prompt': true,
   };
-  res.send(body);
-});
-
-app.use('/update-consent/', (req, res) => {
-  assertCors(req, res, ['POST']);
-  res.status(200);
-  res.end();
+  res.json(body);
 });
 
 // Proxy with local JS.

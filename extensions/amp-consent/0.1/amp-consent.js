@@ -46,9 +46,6 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?./consent-policy-manager.ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
 
-    /** @private {?Promise} */
-    this.cidPromise_ = null;
-
     /** @private {!JsonObject} */
     this.consentConfig_ = dict();
 
@@ -95,14 +92,6 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    this.cidPromise_ = Services.cidForDoc(this.getAmpDoc()).then(cid => {
-      // Note: do not wait for consent of the cid used for amp-consent
-      return cid.get({
-        scope: TAG,
-        createCookieIfNotPresent: true,
-      }, Promise.resolve());
-    });
-
     const instanceKeys = Object.keys(this.consentConfig_);
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
@@ -142,32 +131,22 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<!JsonObject>}
    */
   getConsentRemote_(instanceId) {
-    return this.consentStateManager_.getConsentInstanceState(instanceId)
-        .then(localState => {
-          return this.cidPromise_.then(ampUserId => {
-            const request = /** @type {!JsonObject} */ ({
-              'ampUserId': ampUserId,
-              'consentInstanceId': instanceId,
-              'consentState': localState,
-            });
-            // TODO: Decide which request method/Content Type to use.
-            const init = {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-              method: 'POST',
-              body: request,
-              requireAmpResponseSourceOrigin: false,
-            };
-            const href =
-                this.consentConfig_[instanceId]['check-consent-href'];
-            assertHttpsUrl(href, this.element);
-            return Services.xhrFor(this.win)
-                .fetchJson(href, init)
-                .then(res => res.json());
-          });
-        });
+    // Note: Expect the request to look different in following versions.
+    const request = /** @type {!JsonObject} */ ({
+      'consentInstanceId': instanceId,
+    });
+    const init = {
+      credentials: 'include',
+      method: 'POST',
+      body: request,
+      requireAmpResponseSourceOrigin: false,
+    };
+    const href =
+        this.consentConfig_[instanceId]['checkConsentHref'];
+    assertHttpsUrl(href, this.element);
+    return Services.xhrFor(this.win)
+        .fetchJson(href, init)
+        .then(res => res.json());
   }
 
 
@@ -201,8 +180,10 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentUIRequired_[instanceId] = false;
       this.consentStateManager_.ignoreConsentInstance(instanceId);
       return;
+    } else {
+      // TODO: Check for current consent state and decide if UI is required.
+      this.consentUIRequired_[instanceId] = true;
     }
-    this.consentUIRequired_[instanceId] = !!response['prompt'];
   }
 
   /**

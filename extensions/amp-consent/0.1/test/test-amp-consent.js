@@ -58,13 +58,6 @@ describes.realWin('amp-consent', {
       }};
     });
 
-    resetServiceForTesting(win, 'cid');
-    registerServiceBuilder(win, 'cid', function() {
-      return Promise.resolve({get: () => {
-        return Promise.resolve('cid123');
-      }});
-    });
-
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function() {
       return Promise.resolve({
@@ -88,10 +81,10 @@ describes.realWin('amp-consent', {
         defaultConfig = {
           'consents': {
             'ABC': {
-              'check-consent-href': 'response1',
+              'checkConsentHref': 'response1',
             },
             'DEF': {
-              'check-consent-href': 'response1',
+              'checkConsentHref': 'response1',
             },
           },
         };
@@ -142,7 +135,7 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'check-consent-href': 'response1',
+            'checkConsentHref': 'response1',
           },
         },
       };
@@ -160,20 +153,7 @@ describes.realWin('amp-consent', {
       ampConsent.buildCallback();
       yield macroTask();
       expect(requestBody).to.deep.equal({
-        'ampUserId': 'cid123',
         'consentInstanceId': 'ABC',
-        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-      });
-    });
-
-    it('pass persist state to server', function* () {
-      storageValue['amp-consent:ABC'] = true;
-      ampConsent.buildCallback();
-      yield macroTask();
-      expect(requestBody).to.deep.equal({
-        'ampUserId': 'cid123',
-        'consentInstanceId': 'ABC',
-        'consentState': CONSENT_ITEM_STATE.GRANTED,
       });
     });
 
@@ -195,10 +175,10 @@ describes.realWin('amp-consent', {
       defaultConfig = {
         'consents': {
           'ABC': {
-            'check-consent-href': 'response1',
+            'checkConsentHref': 'response1',
           },
           'DEF': {
-            'check-consent-href': 'response1',
+            'checkConsentHref': 'response1',
           },
         },
       };
