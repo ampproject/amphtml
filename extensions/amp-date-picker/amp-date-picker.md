@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A date picker component useful for picking dates in the near future or near past. It can render as an overlay relative to input fields, or as a static calendar widget.</td>
+    <td>Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -35,18 +35,17 @@ limitations under the License.
 
 ## Behavior
 
-An `amp-date-picker` with the `mode="static"` attribute renders a static calendar view.
-With `mode="overlay"` the date picker is only shown when the user interacts with its input elements.
-Each mode has slightly different functionality.
+The `amp-date-picker` provides two modes to render the date picker:
+
+* `mode="static"`: renders a static calendar view.
+* `mode="overlay"`: shows only when the user interacts with its input elements.
+
 
 ### `mode="static"`
 
-An overlay picker must use a size-defined layout. The calendar overlay will position itself relative to the `<amp-date-picker>` tag.
-The `static` mode is the default mode.
+Using `mode="static"` (default mode), the `amp-date-picker` renders a static calendar view. The calendar overlay positions itself relative to the `<amp-date-picker>` tag, so you must use a size-defined layout. 
 
-When rendered in a `<form>`, the `static` picker will create hidden input elements if it does not have any
-existing inputs specified with `*date-selector`. It will name them `input` or `start-date` and `end-date` if those
-names are not taken in the form, and otherwise will attempt to name them with the `id` of the `<amp-date-picker>`.
+When the `static` amp-date-picker is rendered in a `<form>`, the amp-date-picker creates hidden input elements if it does not have any existing inputs specified with `*date-selector`. It will name them `input` or `start-date` and `end-date` if those names are not taken in the form, and otherwise attempts to name them with the `id` of the `<amp-date-picker>`.
 
 ```html
 <form
