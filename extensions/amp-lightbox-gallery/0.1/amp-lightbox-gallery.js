@@ -983,7 +983,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       });
 
       dev().assert(lightboxCarouselMetadata.sourceCarousel).getImpl()
-        .then(carousel => carousel.showSlideWhenReady(returnSlideIndex));
+          .then(carousel => carousel.showSlideWhenReady(returnSlideIndex));
     }
   }
 
@@ -1046,10 +1046,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.close_();
         break;
       case KeyCodes.LEFT_ARROW:
-        this.maybeSlideCarousel_(/*Prev*/ -1);
+        this.maybeSlideCarousel_(/*direction*/ -1);
         break;
       case KeyCodes.RIGHT_ARROW:
-        this.maybeSlideCarousel_(/*Next*/ 1);
+        this.maybeSlideCarousel_(/*direction*/ 1);
         break;
       default:
         // Keycode not registered. Do nothing.
@@ -1174,7 +1174,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
       dev().assert(this.carousel_).getImpl()
-        .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
+          .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
       this.updateDescriptionBox_();
       event.stopPropagation();
     };
