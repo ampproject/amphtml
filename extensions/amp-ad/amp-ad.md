@@ -319,6 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
+- [UAS](../../ads/uas.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
