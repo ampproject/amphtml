@@ -1905,28 +1905,27 @@ describes.realWin('CustomElement', {amp: true}, env => {
     });
 
     // TODO(jridgewell): fix this test
-    it.skip('should ignore loading "on" if layout completed before vsync', () => {
-      stubInA4A(false);
-      resourcesMock.expects('mutateElement').once();
-      container.appendChild(element);
-      element.prepareLoading_();
-      element.toggleLoading(true);
-      return element.build().then(() => {
-        return element.layoutCallback();
-      }).then(() => {
-        expect(vsyncTasks).to.have.length(2);
+    it.skip('should ignore loading "on" if layout completed before vsync',
+        () => {
+          stubInA4A(false);
+          resourcesMock.expects('mutateElement').once();
+          container.appendChild(element);
+          element.prepareLoading_();
+          element.toggleLoading(true);
+          return element.build().then(() => {
+            return element.layoutCallback();
+          }).then(() => {
+            // The first mutate started by toggleLoading(true), but it must
+            // immediately proceed to switch it to off.
+            // vsyncTasks.shift()();
+            expect(element.loadingContainer_).to.have.class('amp-hidden');
+            expect(element.loadingElement_).to.not.have.class('amp-active');
 
-        // The first mutate started by toggleLoading(true), but it must
-        // immediately proceed to switch it to off.
-        vsyncTasks.shift()();
-        expect(element.loadingContainer_).to.have.class('amp-hidden');
-        expect(element.loadingElement_).to.not.have.class('amp-active');
-
-        // Second vsync should perform cleanup.
-        vsyncTasks.shift()();
-        expect(element.loadingContainer_).to.be.null;
-      });
-    });
+            // Second vsync should perform cleanup.
+            // vsyncTasks.shift()();
+            expect(element.loadingContainer_).to.be.null;
+          });
+        });
   });
 });
 
