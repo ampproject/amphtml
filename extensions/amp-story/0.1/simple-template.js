@@ -80,7 +80,7 @@ function renderSingle(doc, elementDef) {
     const win = toWin(doc.defaultView);
     Services.messageServiceForOrNull(win).then(messageService => {
       dev().assert(messageService, 'Could not retrieve MessageService.');
-      messageService.setTextContentToMessage(el, elementDef.messageId);
+      el.textContent = messageService.getMessage(elementDef.messageId);
     });
   }
 

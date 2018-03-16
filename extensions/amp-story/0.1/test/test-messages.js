@@ -20,7 +20,7 @@ import {
   getLanguageCodesFromString,
 } from '../messages';
 
-describes.fakeWin('amp-story messages', {}, () => {
+describes.fakeWin('amp-story messages', {}, env => {
   describe('message IDs', () => {
     it('should have unique values', () => {
       // Transform message IDs from a map of keys to values to a multimap of
@@ -54,18 +54,16 @@ describes.fakeWin('amp-story messages', {}, () => {
     const TEST_MESSAGE_ID = 'test_message_id';
     const TEST_MESSAGE_CONTENT = 'test message content';
 
-    it('should set text content from message', () => {
-      const messageService = new MessageService();
+    it('should get message text', () => {
+      const messageService = new MessageService(env.win);
       messageService.registerMessageBundle('default', {
         [TEST_MESSAGE_ID]: {
           message: TEST_MESSAGE_CONTENT,
         },
       });
-      const el = document.createElement('div');
 
-      expect(el.innerText).to.be.empty;
-      messageService.setTextContentToMessage(el, TEST_MESSAGE_ID);
-      expect(el.innerText).to.equal(TEST_MESSAGE_CONTENT);
+      expect(messageService.getMessage(TEST_MESSAGE_ID))
+          .to.equal(TEST_MESSAGE_CONTENT);
     });
 
     it('should have language fallbacks', () => {
@@ -74,4 +72,3 @@ describes.fakeWin('amp-story messages', {}, () => {
     });
   });
 });
-

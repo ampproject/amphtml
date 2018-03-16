@@ -85,17 +85,6 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 
 
 /**
- * @param {!Element} element
- * @return {!Array<string>}
- */
-function getLanguageCodesForElement(element) {
-  const languageEl = closest(element, el => el.hasAttribute('lang'));
-  const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
-  return getLanguageCodesFromString(languageCode || '');
-}
-
-
-/**
  * @param {string} languageCode
  * @return {!Array<string>} A list of language codes.
  */
@@ -136,12 +125,34 @@ function findMessage(messageBundles, languageCodes, messageId) {
 
 
 export class MessageService {
-  constructor() {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    const rootEl = win.document.documentElement;
+
+    /**
+     * @private @const {!Array<string>}
+     */
+    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
+
     /**
      * A mapping of language code to message bundle.
-     * @private {!Object<string, !MessageBundleDef>}
+     * @private @const {!Object<string, !MessageBundleDef>}
      */
     this.messageBundles_ = {};
+  }
+
+
+  /**
+   * @param {!Element} element
+   * @return {!Array<string>}
+   * @private
+   */
+  getLanguageCodesForElement_(element) {
+    const languageEl = closest(element, el => el.hasAttribute('lang'));
+    const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
+    return getLanguageCodesFromString(languageCode || '');
   }
 
 
@@ -160,13 +171,17 @@ export class MessageService {
 
 
   /**
-   * @param {!Element} element The element whose text should be set.
-   * @param {!MessageId} messageId The ID of the message that should be set on
-   *     the specified element.
+   * @param {!MessageId} messageId
+   * @param {!Element=} opt_elementToUse The element where the message will be
+   *     used.  The language is based on the language at that part of the
+   *     document.  If unspecified, will use the document-level language, if
+   *     one exists, or the default otherwise.
    */
-  setTextContentToMessage(element, messageId) {
-    const languageCodes = getLanguageCodesForElement(element);
-    const message = findMessage(this.messageBundles_, languageCodes, messageId);
-    element.textContent = message;
+  getMessage(messageId, opt_elementToUse) {
+    const languageCodes = opt_elementToUse ?
+      this.getLanguageCodesForElement_(opt_elementToUse) :
+      this.rootLanguageCodes_;
+
+    return findMessage(this.messageBundles_, languageCodes, messageId);
   }
 }

@@ -49,7 +49,7 @@ import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {MediaPool, MediaType} from './media-pool';
-import {MessageService} from './messages';
+import {MessageId, MessageService} from './messages';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
@@ -325,7 +325,7 @@ export class AmpStory extends AMP.BaseElement {
     this.timer_ = Services.timerFor(this.win);
 
     /** @private @const {!MessageService} */
-    this.messageService_ = new MessageService();
+    this.messageService_ = new MessageService(this.win);
     this.messageService_.registerMessageBundle('default', MessagesDefault);
     this.messageService_.registerMessageBundle('en', MessagesEn);
     registerServiceBuilder(this.win, 'message', () => this.messageService_);
@@ -733,16 +733,18 @@ export class AmpStory extends AMP.BaseElement {
     errorIconEl.classList.add('i-amphtml-story-experiment-icon-error');
 
     const errorMsgEl = this.win.document.createElement('span');
-    errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
-        'view this content.';
+    errorMsgEl.textContent = this.messageService_
+        .getMessage(MessageId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT);
 
     const experimentsLinkEl = this.win.document.createElement('button');
-    experimentsLinkEl.textContent = 'Enable';
+    experimentsLinkEl.textContent = this.messageService_
+        .getMessage(MessageId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
       toggleExperiment(this.win, 'amp-story', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
-      errorMsgEl.textContent = 'Experiment enabled.  Please reload.';
+      errorMsgEl.textContent = this.messageService_
+          .getMessage(MessageId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
       removeElement(experimentsLinkEl);
     });
 
