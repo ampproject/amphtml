@@ -579,28 +579,18 @@ export class SafeframeHostApi {
       if (success || optIsCollapse) {
         this.resizeIframe(height, width);
         this.isCollapsed_ = !!optIsCollapse;
-        this.baseInstance_.element.getResources().resources_.forEach(
-            resource => {
-              if (resource.element == this.baseInstance_.element) {
-                // Need to force a measure event, as measure won't happen immediately
-                // if the element was above the viewport when resize occured, and
-                // without a measure, we'll send the wrong size for the creative
-                // on the geometry update message.
-                resource.measure();
-              }
-            });
+        this.baseInstance_.getResource().measure();
       } else {
         // attemptChangeSize automatically registers a pendingChangeSize if
         // the initial attempt failed. We do not want to do that, so clear it.
-        this.baseInstance_.element.getResources().resources_.forEach(
-            resource => {
-              if (resource.element == this.baseInstance_.element) {
-                resource.pendingChangeSize_ = undefined;
-              }
-            });
+        this.baseInstance_.getResource().resetPendingChangeSize();
       }
-      this.sendResizeResponse(success || !!optIsCollapse, messageType);
-    }).catch(() => {});
+      this.sendResizeResponse(success || !!optIsCollapse,
+          messageType, height, width);
+    }).catch(() => {
+      // If there are errors, try sending a failure message.
+      this.sendResizeResponse(false, messageType, height, width);
+    });
   }
 
   /**
