@@ -54,7 +54,7 @@ function centerAd(global) {
 export function uas(global, data) {
   validateData(
       data,
-      ['accId', 'adUnit', 'sizes', 'width', 'height'],
+      ['accId', 'adUnit', 'sizes'],
       ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams',
         'visibility']
   );
