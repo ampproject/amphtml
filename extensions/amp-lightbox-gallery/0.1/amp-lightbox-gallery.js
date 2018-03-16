@@ -93,7 +93,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     super(element);
 
     /** @private {boolean} */
-    this.active_ = false;
+    this.isActive_ = false;
 
     /** @private {number} */
     this.currentElemId_ = -1;
@@ -614,7 +614,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       });
     }).then(() => {
       this.getViewport().enterLightboxMode();
-      this.active_ = true;
+      this.isActive_ = true;
 
       this.updateInViewport(dev().assertElement(this.container_), true);
       this.scheduleLayout(dev().assertElement(this.container_));
@@ -995,11 +995,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   close_() {
-    if (!this.active_) {
+    if (!this.isActive_) {
       return Promise.resolve();
     }
 
-    this.active_ = false;
+    this.isActive_ = false;
 
     this.cleanupEventListeners_();
 
@@ -1039,7 +1039,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   handleKeyboardEvents_(event) {
-    if (this.active_) {
+    if (this.isActive_) {
       const code = event.keyCode;
       if (code == KeyCodes.ESCAPE) {
         this.close_();
