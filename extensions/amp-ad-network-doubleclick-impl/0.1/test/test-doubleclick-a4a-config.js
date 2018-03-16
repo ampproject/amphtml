@@ -97,6 +97,38 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
     });
 
+    it('should use DF if useRemoteHtml & in control', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html?exp=da:9');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('type', 'doubleclick');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = true;
+      // Returns true = using delayed fetch
+      expect(
+          doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
+    });
+
+    it('should use FF if no useRemoteHtml & in control', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html?exp=da:9');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('type', 'doubleclick');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      // Returns true = using fast fetch
+      expect(
+          doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.be.ok;
+    });
+
     it('should use Fast Fetch if useRemoteHtml is true and RTC is set', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
@@ -231,6 +263,30 @@ describe('doubleclick-a4a-config', () => {
           DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL);
     });
 
+    it('should use FF if no USDRUD in use & in control', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/content.html?exp=da:11');
+
+      const elem1 = testFixture.doc.createElement('div');
+      elem1.setAttribute('type', 'doubleclick');
+      testFixture.doc.body.appendChild(elem1);
+      expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.true;
+      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL);
+
+      const elem2 = testFixture.doc.createElement('div');
+      elem2.setAttribute('type', 'doubleclick');
+      elem2.setAttribute(
+          'data-use-same-domain-rendering-until-deprecated', '1');
+      testFixture.doc.body.appendChild(elem2);
+      expect(doubleclickIsA4AEnabled(mockWin, elem2)).to.be.false;
+      expect(elem2.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
+          DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL);
+    });
+
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(
@@ -238,9 +294,7 @@ describe('doubleclick-a4a-config', () => {
             String(expFlagValue));
         const elem = testFixture.doc.createElement('div');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all except da:9 and 11
-        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.equal(
-            (!['9', '11'].includes(expFlagValue)));
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {

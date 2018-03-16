@@ -193,9 +193,14 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+    // If we are in the Remote.html or USDRUD controls, then we are supposed
+    // to use Delayed Fetch in accordance with the existing carveouts.
+    if ([DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
       DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
-        experimentId);
+        experimentId)) {
+      return !(hasUSDRD || useRemoteHtml);
+    }
+    return true;
   }
 
   /**
