@@ -55,8 +55,8 @@ export function capirs(global, data) {
         const banner = feed['banners']['graph'][0];
 
         global.context.renderStart({
-          width: banner['width'],
-          height: banner['height'],
+          width: getWidth(global, banner),
+          height: banner.height,
         });
 
         const reportId = 'capirs-' + banner['banner_id'];
@@ -68,4 +68,31 @@ export function capirs(global, data) {
 
   loadScript(global, '//ssp.rambler.ru/lpdid.js');
   loadScript(global, '//ssp.rambler.ru/capirs_async.js');
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} banner
+ */
+function getWidth(global, banner) {
+  let width;
+
+  if (isResponsiveAd(banner)) {
+    width = Math.max(
+      global.document.documentElement.clientWidth,
+      global.window.innerWidth || 0,
+    );
+  } else {
+    width = banner.width;
+  }
+
+  return width;
+}
+
+/**
+ * @param {!Object} banner
+ * @return {boolean}
+ */
+function isResponsiveAd(banner) {
+  return banner.width.includes('%');
 }
