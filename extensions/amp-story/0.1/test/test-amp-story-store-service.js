@@ -63,3 +63,28 @@ describes.fakeWin('amp-story-store-service embed mode', {}, env => {
     expect(storeService.get(StateProperty.CAN_SHOW_BOOKEND)).to.be.false;
   });
 });
+
+describes.fakeWin('amp-story-store-service actions', {}, env => {
+  let storeService;
+
+  beforeEach(() => {
+    // Making sure we always get a new instance to isolate each test.
+    storeService = new AmpStoryStoreService(env.win);
+  });
+
+  it('should toggle the bookend', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should not toggle the bookend if embed mode disables it', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.state_[StateProperty.CAN_SHOW_BOOKEND] = false;
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_BOOKEND, true);
+    expect(listenerSpy).to.have.callCount(0);
+  });
+});
