@@ -642,10 +642,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
-    // Hack to access private property. Better than not getting
-    // type checking to work.
-    /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-        this.currentElemId_);
+    dev().assert(this.carousel_).getImpl()
+        .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
     const tagName = this.getCurrentElement_().tagName;
     if (ELIGIBLE_TAP_TAGS[tagName]) {
       this.getCurrentElement_().imageViewer.signals()
@@ -984,8 +982,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }
       });
 
-      /**@type {?}*/ (lightboxCarouselMetadata.sourceCarousel).implementation_
-          .showSlideWhenReady(returnSlideIndex);
+      dev().assert(lightboxCarouselMetadata.sourceCarousel).getImpl()
+        .then(carousel => carousel.showSlideWhenReady(returnSlideIndex));
     }
   }
 
@@ -1175,10 +1173,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
-      // Hack to access private property. Better than not getting
-      // type checking to work.
-      /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-          this.currentElemId_);
+      dev().assert(this.carousel_).getImpl()
+        .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
       this.updateDescriptionBox_();
       event.stopPropagation();
     };
