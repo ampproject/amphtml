@@ -585,7 +585,7 @@ There are several types of runtime errors that may be encountered when working w
 
 ### Debugging State
 
-In development mode, use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
