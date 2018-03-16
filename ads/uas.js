@@ -37,13 +37,16 @@ function forEachOnObject(theObject, callback) {
  * @param {!Window} global
  */
 function centerAd(global) {
-  setStyles(global.document.getElementById('c'), {
-    top: '50%',
-    left: '50%',
-    bottom: '',
-    right: '',
-    transform: 'translate(-50%, -50%)',
-  });
+  let e = global.document.getElementById('c');
+  if(e){
+    setStyles(e, {
+      top: '50%',
+      left: '50%',
+      bottom: '',
+      right: '',
+      transform: 'translate(-50%, -50%)',
+    });
+  }
 }
 
 /**
