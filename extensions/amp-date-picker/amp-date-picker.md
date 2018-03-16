@@ -123,7 +123,7 @@ Learn more about layouts in the [AMP HTML Layout System](https://www.ampproject.
 
 Specifies how the date picker is rendered. Allowed values are:
 
-- **`static`** (default): The date picker is rendered as an interactive calendar view.
+- **`static`** (default): The date picker renders as an interactive calendar view.
 - **`overlay`**: The date picker calendar view is not rendered until the user interacts
 with required input field(s) nested in the `&lt;amp-date-picker>`.
 
@@ -137,7 +137,7 @@ Specifies the selection type for the date picker. Allowed values are:
 ##### input-selector (optional)
 
 A query selector for a single date picker's input. If this is omitted,
-the date picker will automatically generate a hidden input field. It will assign it
+the date picker automatically generates a hidden input field. It will assign it
 a name `date` or `${id}-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error will be emitted.
 
@@ -146,26 +146,26 @@ with an existing element in the form, an error will be emitted.
 A query selector for a date range picker's input. If this is omitted,
 the date picker will automatically generate a hidden input field. It will assign it
 a name `start-date` or `${id}-start-date` using the date picker's id. If either of these conflict
-with an existing element in the form, an error will be emitted.
+with an existing element in the form, an error is emitted.
 
 ##### end-input-selector (optional)
 
 A query selector for a date range picker's input. If this is omitted,
-the date picker will automatically generate a hidden input field. It will assign it
+the date picker automatically generates a hidden input field. It will assign it
 a name `end-date` or `${id}-end-date` using the date picker's id. If either of these conflict
-with an existing element in the form, an error will be emitted.
+with an existing element in the form, an error is emitted.
 
 ##### min (optional)
 
-The earliest date the user may select. The default value is the current date.
+The earliest date that the user may select. The default value is the current date.
 
 ##### max (optional)
 
-The latest date the user may select. The default value is no end date.
+The latest date that the user may select. The default value is no end date.
 
 #####  month-format (optional)
 
-The format to use for displaying the month in the calendar view. Default: `"MMMM YYYY"`
+The format to use for displaying the month in the calendar view. The default format is: `"MMMM YYYY"`.
 
 ##### format (optional)
 
@@ -173,20 +173,19 @@ The format to use for displaying and parsing the date in the input boxes. Defaul
 
 ##### week-day-format (optional)
 
-The format to use for displaying the day of the week in the calendar view.
-Default: non-ISO-standard single character weekday.
+The format to use for displaying the day of the week in the calendar view. The default format is the non-ISO-standard single character weekday.
 
 ##### locale (optional)
 
-The locale to use for rendering the calendar view. Default: `"en"`
+The locale to use for rendering the calendar view. The default locale is `"en"`.
 
 ##### number-of-months (optional)
 
-The number of months to display at one time in the calendar view. Default: `"1"`
+The number of months to display at one time in the calendar view. The default is `"1"`.
 
 ##### first-day-of-week (optional)
 
-The day 0-6 of the first day of the week. Default `"0"` (Sunday)
+The day to specify as the first day of the week (0-6). The default value is `"0"` (Sunday).
 
 ##### blocked (optional)
 
@@ -198,15 +197,15 @@ A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as
 
 ##### day-size (optional)
 
-The size in `px` of the date cells in the calendar view table. Default: `39`
+The size in `px` of the date cells in the calendar view table. The default is `39`.
 
 ##### allow-blocked-ranges (optional)
 
-If present, this attribute prevents the user from selecting a range with a blocked date. Default: not present.
+If present, this attribute prevents the user from selecting a range with a blocked date. By default, this attribute is not present.
 
 ##### src (optional)
 
-If present, `amp-date-picker` will make a request for JSON data to populate the `highlighted` and `blocked` lists, as well as matching templates in the document to lists of dates.
+If present, `amp-date-picker` makes a request for JSON data to populate the `highlighted` and `blocked` lists, as well as matching templates in the document to lists of dates.
 
 ```json
 {
@@ -241,16 +240,19 @@ If present, `amp-date-picker` will make a request for JSON data to populate the 
 
 ##### fullscreen (optional)
 
-Render the picker to fill the space available to it, like in a fullscreen overlay. Works best with `layout="fill"`.
+Renders the picker to fill the space available to it, like in a fullscreen overlay. Works best with `layout="fill"`.
 
 ##### open-after-select (optional)
 
-If present, keep the date picker overlay open after the user selects a date or dates. Default: not present.
+If present, keeps the date picker overlay open after the user selects a date or dates. By default, this attribute is not  present.
+
+<!--
 TODO(cvializ): does it still trigger deactivate?
+-->
 
 ##### open-after-clear (optional)
 
-If present, keep the date picker open after the user clears the date or dates. Default: not present.
+If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not  present.
 
 ##### common attributes
 
@@ -270,7 +272,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ##### setDate
 
-Sets the selected date in a single date picker.
+This action sets the selected date in a single date picker.
 
 ```html
 <button on="tap: date-picker.setDate(date='2018-01-01')">
@@ -280,7 +282,7 @@ Sets the selected date in a single date picker.
 
 ##### setDates
 
-Sets the selected start and end dates in a date range picker.
+This action sets the selected start and end dates in a date range picker.
 
 ```html
 <button on="tap: date-picker.setDates(start='2018-01-01', end='2018-01-07')">
