@@ -296,7 +296,7 @@ exports.rules = [
   // Please see https://github.com/ampproject/amphtml/issues/11834
   // for more information.
   // Do not add any additional files to this whitelist without express
-  // permission from bradfrizzell@, kjwright@, or rhazan@.
+  // permission from @bradfrizzell, @keithwrightbos, or @robhazan.
   {
     mustNotDependOn: [
       'ads/google/doubleclick.js',
