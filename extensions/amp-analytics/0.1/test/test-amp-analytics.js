@@ -473,7 +473,7 @@ describes.realWin('amp-analytics', {
   it('should not replace HTML_ATTR outside of amp-ad', () => {
     const analytics = getAnalyticsTag({
       'requests': {
-        'htmlAttrRequest': 'https://example.com/bar&ids=${htmlAttr(div,id)}'
+        'htmlAttrRequest': 'https://example.com/bar&ids=${htmlAttr(div,id)}',
       },
       'triggers': [{'on': 'visible', 'request': 'htmlAttrRequest'}],
     });
