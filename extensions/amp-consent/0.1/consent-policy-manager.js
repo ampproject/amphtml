@@ -59,7 +59,7 @@ export class ConsentPolicyManager {
     dev().assert(!this.instances_[policyId],
         `${TAG}: instance already registered`);
 
-    const itemsToWait = Object.keys(config['itemsToWait']);
+    const itemsToWait = Object.keys(config['itemsToWait'] || {});
 
     const instance = new ConsentPolicyInstance(itemsToWait);
 
@@ -133,11 +133,6 @@ export class ConsentPolicyInstance {
    * @param {CONSENT_ITEM_STATE} state
    */
   consentStateChangeHandler(consentId, state) {
-    if (this.pendingItems_.indexOf(consentId) == -1) {
-      // Doesn't care about this consent instance.
-      return;
-    }
-
     if (state == CONSENT_ITEM_STATE.GRANTED) {
       const index = this.pendingItems_.indexOf(consentId);
       if (index > -1) {
@@ -179,8 +174,6 @@ export class ConsentPolicyInstance {
    * @return {!Promise}
    */
   getReadyPromise() {
-    this.readyPromise_.then(() => {
-    });
     return this.readyPromise_;
   }
 }
