@@ -109,7 +109,7 @@ export class ConsentPolicyManager {
         this.policyInstancePromiseResolver_[policyId] = resolve;
       });
     }
-    return this.policyInstancePromise_[policyId];
+    return /** @type {!Promise} */ (this.policyInstancePromise_[policyId]);
   }
 }
 

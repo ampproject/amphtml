@@ -17,6 +17,7 @@
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {isEnumValue} from '../../../src/types';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
@@ -57,7 +58,7 @@ export class ConsentStateManager {
     this.instances_[instanceId] = new ConsentInstance(this.ampdoc_, instanceId);
     this.consentChangeObservable_[instanceId] = new Observable();
     if (this.consentReadyResolver_[instanceId]) {
-      this.consentReadyResolver_();
+      this.consentReadyResolver_[instanceId]();
       this.consentReadyPromise_[instanceId] = null;
       this.consentReadyResolver_[instanceId] = null;
     }
@@ -70,6 +71,11 @@ export class ConsentStateManager {
   ignoreConsentInstance(instanceId) {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
+
+    if (this.consentChangeObservable_[instanceId] === null) {
+      // This consent instance has been ignored before
+      return;
+    }
     this.consentChangeObservable_[instanceId].fire(CONSENT_ITEM_STATE.GRANTED);
     this.consentChangeObservable_[instanceId].removeAll();
     this.consentChangeObservable_[instanceId] = null;
@@ -84,7 +90,8 @@ export class ConsentStateManager {
 
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-
+    dev().assert(this.consentChangeObservable_[instanceId],
+        `${TAG}: should not update ignored consent`);
     this.consentChangeObservable_[instanceId].fire(state);
     this.instances_[instanceId].update(state);
   }
@@ -120,9 +127,14 @@ export class ConsentStateManager {
     this.getConsentInstanceState(instanceId).then(state => {
       handler(state);
     });
+
     return unlistener;
   }
 
+  /**
+   * Returns a promise that's resolved when consent instance is ready.
+   * @param {string} instanceId
+   */
   whenConsentReady(instanceId) {
     if (this.instances_[instanceId]) {
       return Promise.resolve();
@@ -136,8 +148,10 @@ export class ConsentStateManager {
   }
 }
 
-
-class ConsentInstance {
+/**
+ * @visibleForTesting
+ */
+export class ConsentInstance {
   constructor(ampdoc, id) {
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
@@ -154,9 +168,14 @@ class ConsentInstance {
    * @param {!CONSENT_ITEM_STATE} state
    */
   update(state) {
+    if (!isEnumValue(CONSENT_ITEM_STATE, state)) {
+      state = CONSENT_ITEM_STATE.UNKNOWN;
+    }
+
     if (state === this.localValue_) {
       return;
     }
+
     this.localValue_ = state;
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       return;
@@ -164,6 +183,10 @@ class ConsentInstance {
 
     const value = (state == CONSENT_ITEM_STATE.GRANTED) ? true : false;
     this.storagePromise_.then(storage => {
+      if (state != this.localValue_) {
+        // If state has changed. do not store.
+        return;
+      }
       storage.set(this.storageKey_, value);
     });
   }
@@ -181,6 +204,10 @@ class ConsentInstance {
     return this.storagePromise_.then(storage => {
       return storage.get(this.storageKey_);
     }).then(storedValue => {
+      if (this.localValue_) {
+        // If value has been updated. return most updated value;
+        return this.localValue_;
+      }
       if (storedValue === undefined) {
         // state value undefined;
         this.localValue_ = CONSENT_ITEM_STATE.UNKNOWN;
@@ -189,6 +216,9 @@ class ConsentInstance {
           CONSENT_ITEM_STATE.GRANTED : CONSENT_ITEM_STATE.REJECTED;
       }
       return this.localValue_;
+    }).catch(e => {
+      dev().error(TAG, 'Failed to read storage', e);
+      return CONSENT_ITEM_STATE.UNKNOWN;
     });
   }
 }
