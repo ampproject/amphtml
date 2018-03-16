@@ -99,7 +99,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.currentElemId_ = -1;
 
     /** @private {function(!Event)} */
-    this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
+    this.boundOnKeyDown_ = this.onKeyDown_.bind(this);
 
     /**
      * @private {?./service/lightbox-manager-impl.LightboxManager}
@@ -620,7 +620,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.scheduleLayout(dev().assertElement(this.container_));
 
       this.win.document.documentElement.addEventListener(
-          'keydown', this.boundHandleKeyboardEvents_);
+          'keydown', this.boundOnKeyDown_);
 
       this.carousel_.addEventListener(
           'slideChange', event => this.slideChangeHandler_(event)
@@ -1016,7 +1016,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
 
     this.win.document.documentElement.removeEventListener(
-        'keydown', this.boundHandleKeyboardEvents_);
+        'keydown', this.boundOnKeyDown_);
 
     this.carousel_.removeEventListener(
         'slideChange', event => {this.slideChangeHandler_(event);});
@@ -1038,23 +1038,39 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *  -Esc will close the lightbox.
    * @private
    */
-  handleKeyboardEvents_(event) {
-    if (this.isActive_) {
-      const code = event.keyCode;
-      if (code == KeyCodes.ESCAPE) {
-        this.close_();
-      } else if (code == KeyCodes.LEFT_ARROW) {
-        if (!this.container_.hasAttribute('gallery-view')) {
-          /**@type {?}*/ (this.carousel_).implementation_.goCallback(
-              /*Prev*/ -1, /*Animate*/ true, /*Autoplay*/ false);
-        }
-      } else if (code == KeyCodes.RIGHT_ARROW) {
-        if (!this.container_.hasAttribute('gallery-view')) {
-          /**@type {?}*/ (this.carousel_).implementation_.goCallback(
-              /*Next*/ 1, /*Animate*/ true, /*Autoplay*/ false);
-        }
-      }
+  onKeyDown_(event) {
+    if (!this.isActive_) {
+      return;
     }
+    const {keyCode} = event;
+    switch (keyCode) {
+      case KeyCodes.ESCAPE:
+        this.close_();
+        return;
+      case KeyCodes.LEFT_ARROW:
+        this.maybeSlideCarousel_(/*Prev*/ -1);
+        return;
+      case KeyCodes.RIGHT_ARROW:
+        this.maybeSlideCarousel_(/*Next*/ 1);
+        return;
+      default:
+        return;
+    }
+
+  }
+
+  /**
+   * @param {number} direction 1 for forward or -1 for backwards.
+   * @private
+   */
+  maybeSlideCarousel_(direction) {
+    const isGalleryView = this.container_.hasAttribute('gallery-view');
+    if (isGalleryView) {
+      return;
+    }
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.goCallback(direction, /* animate */ true, /* autoplay */ false);
+    });
   }
 
   /**
