@@ -51,27 +51,38 @@ export class LocalSubscriptionPlatformRenderer {
   }
 
   /**
-   *
+   * @param {!Node} rootNode
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   renderActions_(renderState) {
-    return this.ampdoc_.whenReady().then(() => {
-      // Find the matching actions and sections and make them visible if evalutes to true.
-      const querySelectors =
-          '[subscriptions-action], [subscriptions-section="actions"],'
-              + ' [subscriptions-actions]';
-      const actionCandidates =
-          this.rootNode_.querySelectorAll(querySelectors);
-      for (let i = 0; i < actionCandidates.length; i++) {
-        const candidate = actionCandidates[i];
-        const expr = candidate.getAttribute('subscriptions-display');
-        if (expr && evaluateExpr(expr,
-            /** @type {!JsonObject} */(renderState))) {
-          candidate.setAttribute('i-amphtml-subs-display', '');
-        }
-      }
-    });
+    renderActions(this.ampdoc_, renderState, this.rootNode_);
   }
+}
+
+/**
+ * Renders actions inside a given node according to an authResponse
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./amp-subscriptions.RenderState} renderState
+ * @param {!Node} rootNode
+ * @return {!Promise<Node>}
+ */
+export function renderActions(ampdoc, renderState, rootNode) {
+  return ampdoc.whenReady().then(() => {
+    // Find the matching actions and sections and make them visible if evalutes to true.
+    const querySelectors =
+        '[subscriptions-action], [subscriptions-section="actions"],'
+            + ' [subscriptions-actions]';
+    const actionCandidates = rootNode.querySelectorAll(querySelectors);
+    for (let i = 0; i < actionCandidates.length; i++) {
+      const candidate = actionCandidates[i];
+      const expr = candidate.getAttribute('subscriptions-display');
+      if (expr && evaluateExpr(expr,
+          /** @type {!JsonObject} */(renderState))) {
+        candidate.setAttribute('i-amphtml-subs-display', '');
+      }
+    }
+    return rootNode;
+  });
 }
 
 /**

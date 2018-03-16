@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import * as LocalRenderer from '../local-subscription-platform-renderer';
 import * as sinon from 'sinon';
 import {Dialog} from '../dialog';
 import {DialogRenderer} from '../dialog-renderer';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-
 
 describes.realWin('amp-subscriptions DialogRenderer', {
   amp: {},
@@ -29,12 +29,15 @@ describes.realWin('amp-subscriptions DialogRenderer', {
   let dialogMock;
   let renderer;
   let dialog0, dialog1, dialog2, dialog3;
+  let actionRendererStub;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
     templatesMock = sandbox.mock(Services.templatesFor(win));
+    actionRendererStub = sandbox.stub(LocalRenderer, 'renderActions').callsFake(
+        (ampdoc, rootNode, element) => Promise.resolve(element));
     const dialog = new Dialog(ampdoc);
     dialogMock = sandbox.mock(dialog);
     renderer = new DialogRenderer(ampdoc, dialog);
@@ -104,6 +107,7 @@ describes.realWin('amp-subscriptions DialogRenderer', {
         .once();
     return renderer.render(data).then(() => {
       expect(content).to.equal(rendered);
+      expect(actionRendererStub).to.be.calledOnce;
     });
   });
 

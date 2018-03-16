@@ -16,7 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {evaluateExpr} from './expr';
-
+import {renderActions} from './local-subscription-platform-renderer';
 
 export class DialogRenderer {
   /**
@@ -56,7 +56,9 @@ export class DialogRenderer {
         return;
       }
       if (candidate.tagName == 'TEMPLATE') {
-        return this.templates_.renderTemplate(candidate, authResponse);
+        return this.templates_.renderTemplate(candidate, authResponse)
+            .then(element =>
+              renderActions(this.ampdoc_, authResponse, element));
       }
       const clone = candidate.cloneNode(true);
       clone.removeAttribute('subscriptions-dialog');

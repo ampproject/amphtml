@@ -110,6 +110,9 @@ const WHITELISTED_ATTRS = [
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
+  /* Attributes for amp-subscriptions */
+  'subscriptions-action',
+  'subscriptions-section',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
