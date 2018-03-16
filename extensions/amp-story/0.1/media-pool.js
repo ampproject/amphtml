@@ -205,13 +205,18 @@ export class MediaPool {
     this.forEachMediaType_(key => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
+
+      // Small optimization. Cloning nodes is faster than building them, so
+      // constructing a seed element makes sense for initialization.
+      const seed = this.mediaFactory_[type].call(this);
+
       this.allocated[type] = [];
       this.unallocated[type] = [];
       for (let i = 0; i < count; i++) {
         this.vsync_.mutate(() => {
-          const mediaEl = this.mediaFactory_[type].call(this);
-          mediaEl.setAttribute('pool-element', elId++);
+          const mediaEl = seed.cloneNode();
           const sources = this.getDefaultSource_(type);
+          mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
               new UpdateSourcesTask(sources, this.vsync_));
           // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
