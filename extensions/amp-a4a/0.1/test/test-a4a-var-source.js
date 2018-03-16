@@ -69,7 +69,8 @@ describe('A4AVariableSource', () => {
   });
 
   it('should replace HTML_ATTR', () => {
-    expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal("[{\"id\":\"parent\"}]");
+    expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal(
+        '[{\"id\":\"parent\"}]');
   });
 
   function undefinedVariable(varName) {
