@@ -24,6 +24,10 @@ limitations under the License.
     <td>Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
   </tr>
@@ -40,12 +44,21 @@ The `amp-date-picker` provides two modes to render the date picker:
 * `mode="static"`: renders a static calendar view.
 * `mode="overlay"`: shows only when the user interacts with its input elements.
 
+The `amp-date-picker` also provides two types.
+
+* `type="single"`: renders a date picker for selecting a single date.
+* `type="range"`: renders a date picker for selecting a date range.
+
+Both types and modes work together. i.e. A single or range picker may render either
+as an overlay or as a static picker.
 
 ### `mode="static"`
 
-Using `mode="static"` (default mode), the `amp-date-picker` renders a static calendar view. The calendar overlay positions itself relative to the `<amp-date-picker>` tag, so you must use a size-defined layout. 
+Using `mode="static"` (default mode), the `amp-date-picker` renders a static calendar view.
+You must use a size-defined layout for `static` date pickers (`fixed`, `fixed-height`, `responsive`, `fill` or `flex-item`).
+If no `mode` attribute is presnet, the mode will be `static` by default.
 
-When the `static` amp-date-picker is rendered in a `<form>`, the amp-date-picker creates hidden input elements if it does not have any existing inputs specified with `*date-selector`. It will name them `input` or `start-date` and `end-date` if those names are not taken in the form, and otherwise attempts to name them with the `id` of the `<amp-date-picker>`.
+When the `static` amp-date-picker is rendered in a `<form>`, the amp-date-picker creates hidden input elements if it does not have any existing [inputs specified with `*input-selector`](#input-selector-(optional)]. It will name them `input` or `start-date` and `end-date` if those names are not taken in the form, and otherwise attempts to name them with the `id` of the `<amp-date-picker>`.
 
 ```html
 <form
@@ -76,9 +89,9 @@ When the `static` amp-date-picker is rendered in a `<form>`, the amp-date-picker
 
 ### `mode="overlay"`
 
-A static picker must use `layout="container"` and contain the input fields that it will render.
-When the user clicks, focuses, or presses the down-arrow in an input field the overlay will appear as an overlay
-near the input field.
+An `overlay` picker must use `layout="container"` and contain the input fields that it will render.
+When the user clicks, focuses, or presses the down-arrow in a connected input field, the calendar will appear.
+The calendar overlay positions itself relative to the `<amp-date-picker>` tag.
 
 ```html
 <form
@@ -109,7 +122,30 @@ near the input field.
 </form>
 ```
 
-<!-- TODO(cvializ): talk about why type="tel" on the inputs -->
+<!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
+
+### `type="single"`
+
+Using `type="single"`, the date picker optionally attaches to a single input,
+and the user can select a single date.
+If no `type` attribute is present, the type will be `single` by default.
+
+```html
+<amp-date-picker type="single"></amp-date-picker>
+```
+
+<!-- TODO(cvializ): add image -->
+
+### `type="range"`
+
+Using `type="range"`, the date picker optionally attaches to two inputs,
+and the user can select a date range.
+
+```html
+<amp-date-picker type="range"></amp-date-picker>
+```
+
+<!-- TODO(cvializ): add image -->
 
 {% call callout('Read on', type='read') %}
 Learn more about layouts in the [AMP HTML Layout System](https://www.ampproject.org/docs/design/amp-html-layout) spec and [Supported Layouts](https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute).
@@ -131,8 +167,8 @@ with required input field(s) nested in the `&lt;amp-date-picker>`.
 
 Specifies the selection type for the date picker. Allowed values are:
 
-- **`single`** (default): The date picker selects a single date
-- **`range`**: The date picker selects a date range
+- **`single`** (default): The user can select a single date.
+- **`range`**: The user can select a date range.
 
 ##### input-selector (optional)
 
@@ -157,23 +193,28 @@ with an existing element in the form, an error is emitted.
 
 ##### min (optional)
 
-The earliest date that the user may select. The default value is the current date.
+The earliest date that the user may select.
+If no `min` attribute is present, the current date will be the minimum date.
 
 ##### max (optional)
 
-The latest date that the user may select. The default value is no end date.
+The latest date that the user may select.
+If no `max` attribute is present, the date picker will have no maximum date.
 
 #####  month-format (optional)
 
-The format to use for displaying the month in the calendar view. The default format is: `"MMMM YYYY"`.
+The format to use for displaying the month in the calendar view.
+The default format is: `"MMMM YYYY"`.
 
 ##### format (optional)
 
-The format to use for displaying and parsing the date in the input boxes. Default: `"YYYY-MM-DD"`.
+The format to use for displaying and parsing the date in the input boxes.
+The default format is `"YYYY-MM-DD"`.
 
 ##### week-day-format (optional)
 
-The format to use for displaying the day of the week in the calendar view. The default format is the non-ISO-standard single character weekday.
+The format to use for displaying the day of the week in the calendar view.
+If no `week-day-format` is present, the weekdays will display as the first character of the weekday.
 
 ##### locale (optional)
 
@@ -193,7 +234,8 @@ A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user f
 
 ##### highlighted (optional)
 
-A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention. Default styling is a blue dot on the date.
+A list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
+Default styling is a blue dot on the date.
 
 ##### day-size (optional)
 
@@ -201,7 +243,8 @@ The size in `px` of the date cells in the calendar view table. The default is `3
 
 ##### allow-blocked-ranges (optional)
 
-If present, this attribute prevents the user from selecting a range with a blocked date. By default, this attribute is not present.
+If present, this attribute prevents the user from selecting a range with a blocked date.
+By default, this attribute is not present.
 
 ##### src (optional)
 
@@ -258,21 +301,36 @@ If present, keeps the date picker open after the user clears the date or dates. 
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+
 ## Events
+
+These events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="activate: my-lightbox.open"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 
 ##### activate
 
-`activate` is triggered when the user begins an interaction with the calendar view.
+The date picker triggers the `activate` event when the user begins
+an interaction with the calendar view, i.e. when the overlay would open.
 
 ##### deactivate
 
-`deactivate` is triggered when the user ends their interaction with the calendar view, i.e. when the overlay would close.
+The date picker triggers the  `deactivate` event when the user ends
+their interaction with the calendar view, i.e. when the overlay would close.
+
 
 ## Actions
 
+These actions may be triggered by other components using the `on` attribute.
+e.g. `on="tap: date-picker.setDate(date=state.value)"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+
 ##### setDate
 
-This action sets the selected date in a single date picker.
+The `setDate` action assigns the value of the `date` argument to
+the single date picker with the specified `id`, e.g. `date-picker`.
 
 ```html
 <button on="tap: date-picker.setDate(date='2018-01-01')">
@@ -282,7 +340,8 @@ This action sets the selected date in a single date picker.
 
 ##### setDates
 
-This action sets the selected start and end dates in a date range picker.
+The `setDate` action assigns the value of the `start` and `end` arguments to
+the date range picker with the specified `id`, e.g. `date-picker`.
 
 ```html
 <button on="tap: date-picker.setDates(start='2018-01-01', end='2018-01-07')">
@@ -291,6 +350,9 @@ This action sets the selected start and end dates in a date range picker.
 ```
 
 ##### clear
+
+The `clear` action clears the date value or values from the single date picker
+or date range picker with the specified `id`, e.g. `date-picker`.
 
 ```html
 <button on="tap: date-picker.clear">Clear</button>
