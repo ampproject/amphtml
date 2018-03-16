@@ -22,7 +22,7 @@
   color: #4285F4 !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 0px !important;
-  font-weight: bold;
+  font-weight: bold !important;
   height: 36px !important;
   left: 50% !important;
   letter-spacing: 0.2px !important;
@@ -71,7 +71,7 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   color: #FFFFFF !important;
   font-size: 18px !important;
   font-family: 'Roboto', sans-serif !important;
-  font-weight: bold;
+  font-weight: bold !important;
   letter-spacing: 0.5px !important;
   margin: 0 0 0 16px !important;
   padding: 0 !important;
