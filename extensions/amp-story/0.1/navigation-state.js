@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventType} from './events';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
 
 
 /**
@@ -38,35 +39,44 @@ export let StateChangeEventDef;
  */
 export class NavigationState {
   /**
-   * @param {!Element} storyElement
+   * @param {!Window} win
    * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(storyElement, hasBookend) {
+  constructor(win, hasBookend) {
     /** @private @const {!function():Promise<boolean>} */
     this.hasBookend_ = hasBookend;
 
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
 
-    this.attachEvents_(storyElement);
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
+
+    this.initializeListeners_();
   }
 
   /**
-   * @param {!Element} storyElement
    * @private
    */
-  attachEvents_(storyElement) {
-    storyElement.addEventListener(EventType.SHOW_BOOKEND, () => {
-      this.fire_(StateChangeType.BOOKEND_ENTER);
-      this.fire_(StateChangeType.END);
-    });
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      if (isActive) {
+        this.fire_(StateChangeType.BOOKEND_ENTER);
+        this.fire_(StateChangeType.END);
+      }
 
-    storyElement.addEventListener(EventType.CLOSE_BOOKEND, () => {
-      this.fire_(StateChangeType.BOOKEND_EXIT);
+      if (!isActive) {
+        this.fire_(StateChangeType.BOOKEND_EXIT);
+      }
     });
   }
 
-  /** @param {function(!StateChangeEventDef):void} stateChangeFn */
+  /**
+   * @param {function(!StateChangeEventDef):void} stateChangeFn
+   */
   observe(stateChangeFn) {
     this.observable_.add(stateChangeFn);
   }
@@ -74,14 +84,14 @@ export class NavigationState {
   /**
    * @param {number} pageIndex
    * @param {number} totalPages
-   * @param {string=} opt_pageId
+   * @param {string=} pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(pageIndex, totalPages, opt_pageId) {
+  updateActivePage(pageIndex, totalPages, pageId = undefined) {
     const changeValue = {pageIndex, totalPages};
 
-    if (opt_pageId) {
-      changeValue.pageId = opt_pageId;
+    if (pageId) {
+      changeValue.pageId = pageId;
     }
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);

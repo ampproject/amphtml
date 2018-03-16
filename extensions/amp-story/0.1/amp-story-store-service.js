@@ -66,6 +66,9 @@ export const Action = {
 const actions = (state, action, data) => {
   switch (action) {
     case Action.TOGGLE_BOOKEND:
+      if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
+        return state;
+      }
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
     default:
