@@ -92,6 +92,7 @@
       <option>umenganalytics</option>
       <option>treasuredata</option>
       <option>webtrekk</option>
+      <option>webtrekk_v2</option>
     </select>
     <input type="submit" value="Go">
   </form>
@@ -1022,6 +1023,25 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Webtrekk example -->
+
+<!-- Webtrekk_v2 tracking -->
+<amp-analytics type="webtrekk_v2" id="webtrekk_v2">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackDomain": "analytics.webtrekk.net",
+        "trackId": "111111111111111"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Webtrekk_v2 example -->
 
 <!-- Rakam tracking -->
 <amp-analytics type="rakam" id="rakam">
