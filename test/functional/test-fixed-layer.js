@@ -436,7 +436,7 @@ describe('FixedLayer', () => {
     });
 
     it('should throw user error for inline style', () => {
-      element1.setAttribute('style', '');
+      element1.setAttribute('style', 'color:blue;');
       toggleExperiment(
           ampdoc.win,
           'inline-styles',
