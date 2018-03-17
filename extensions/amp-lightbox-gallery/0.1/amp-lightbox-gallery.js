@@ -404,6 +404,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.descriptionBox_.classList.remove('standard');
         this.descriptionBox_.classList.add('overflow');
       } else {
+        this.descriptionBox_./*OK*/scrollTop = 0;
         this.descriptionBox_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
       }
