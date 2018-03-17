@@ -298,6 +298,22 @@
     "actionParameter": "&ck1=$actionParameter1&ck2=$actionParameter2&ck3=$actionParameter3&ck4=$actionParameter4&ck5=$actionParameter5",
     "event": "https://$trackDomain/$trackId/wt?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&ct=$actionName&ck1=$actionParameter1&ck2=$actionParameter2&ck3=$actionParameter3&ck4=$actionParameter4&ck5=$actionParameter5&pu=_source_url_"
   },
+  "webtrekk_v2": {
+    "trackURL": "https://$trackDomain/$trackId/wt",
+    "basePrefix": "?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,",
+    "baseSuffix": ",_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
+    "parameterPrefix": "?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
+    "parameterSuffix": "&pu=_source_url_&eor=1",
+    "pageview": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&&cp570=_page_load_time_&pu=_source_url_&eor=1",
+    "event": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&ct=webtrekk_ignore&&pu=_source_url_&eor=1",
+    "scroll": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&ct=webtrekk_ignore&ck540=$verticalScrollBoundary&pu=_source_url_&eor=1",
+    "mediaPrefix": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&mi=$mediaName",
+    "mediaSuffix": "&mt1=$currentTime&mt2=$duration&&pu=_source_url_&eor=1&x=$playedTotal",
+    "mediaPlay": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&mi=$mediaName&mk=play&mt1=$currentTime&mt2=$duration&&pu=_source_url_&eor=1&x=$playedTotal",
+    "mediaPause": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&mi=$mediaName&mk=pause&mt1=$currentTime&mt2=$duration&&pu=_source_url_&eor=1&x=$playedTotal",
+    "mediaPosition": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&mi=$mediaName&mk=pos&mt1=$currentTime&mt2=$duration&&pu=_source_url_&eor=1&x=$playedTotal",
+    "mediaEnded": "https://$trackDomain/$trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&mi=$mediaName&mk=eof&mt1=$currentTime&mt2=$duration&&pu=_source_url_&eor=1&x=$playedTotal",
+  },
   "mpulse": {
     "onvisible": "https://$beacon_url?h.d=$h.d&h.key=$h.key&h.t=$h.t&h.cr=$h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_",
   },
