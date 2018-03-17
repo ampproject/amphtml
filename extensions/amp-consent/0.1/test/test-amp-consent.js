@@ -15,7 +15,6 @@
  */
 
 import {AmpConsent} from '../amp-consent';
-import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
