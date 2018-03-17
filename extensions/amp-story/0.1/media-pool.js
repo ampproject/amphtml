@@ -205,21 +205,39 @@ export class MediaPool {
     this.forEachMediaType_(key => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
+
+      if (count <= 0) {
+        return;
+      }
+
+      const ctor = dev().assert(this.mediaFactory_[type],
+          `Factory for media type \`${type}\` unset.`);
+
+      // Cloning nodes is faster than building them.
+      // Construct a seed media element as a small optimization.
+      const mediaElSeed = ctor.call(this);
+
       this.allocated[type] = [];
       this.unallocated[type] = [];
-      for (let i = 0; i < count; i++) {
-        this.vsync_.mutate(() => {
-          const mediaEl = this.mediaFactory_[type].call(this);
-          mediaEl.setAttribute('pool-element', elId++);
+
+      this.vsync_.mutate(() => {
+        // Reverse-looping is generally faster and Closure would usually make
+        // this optimization automatically. However, it skips it due to a
+        // comparison with the itervar below, so we have to roll it by hand.
+        for (let i = count; i > 0; i--) {
+          const mediaEl = /** @type {!HTMLMediaElement} */
+              // Use seed element at end of set to prevent wasting it.
+              (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
           const sources = this.getDefaultSource_(type);
+          mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
               new UpdateSourcesTask(sources, this.vsync_));
           // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
           // is returned.  If so, we should adjust the pool size/distribution
           // between media types.
           this.unallocated[type].push(mediaEl);
-        });
-      }
+        }
+      });
     });
   }
 
@@ -515,11 +533,13 @@ export class MediaPool {
     return swapOutOfDom;
   }
 
-
+  /**
+   * @param {function(string)} callbackFn
+   * @private
+   */
   forEachMediaType_(callbackFn) {
     Object.keys(MediaType).forEach(callbackFn.bind(this));
   }
-
 
   /**
    * Invokes a function for all media managed by the media pool.
@@ -528,16 +548,15 @@ export class MediaPool {
    * @private
    */
   forEachMediaElement_(callbackFn) {
-    this.forEachMediaType_(key => {
-      const type = MediaType[key];
-      const allocatedEls = this.allocated[type];
-      allocatedEls.forEach(callbackFn.bind(this));
-    });
-
-    this.forEachMediaType_(key => {
-      const type = MediaType[key];
-      const unallocatedEls = this.unallocated[type];
-      unallocatedEls.forEach(callbackFn.bind(this));
+    [this.allocated, this.unallocated].forEach(mediaSet => {
+      this.forEachMediaType_(key => {
+        const type = MediaType[key];
+        const els = mediaSet[type];
+        if (!els) {
+          return;
+        }
+        els.forEach(callbackFn.bind(this));
+      });
     });
   }
 
