@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
-import {AmpEvents} from '../../src/amp-events';
 
-describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
+describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
   const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
   let fixture;
@@ -35,23 +35,25 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   });
 
   it('should be present', () => {
-    expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
-    // 5 image visible in 500 pixel height.
+    expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(16);
+    // 5 image visible in 500 pixel height. Note that there will be no load
+    // event for the inabox image.
     return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]')).to
-          .have.length(3);
+          .have.length(4);
     });
   });
 
   it('should resize and load more elements', () => {
+    // Note that there will be no load event for the inabox image.
     const p = fixture.awaitEvent(AmpEvents.LOAD_START, 11).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]'))
-          .to.have.length(11);
+          .to.have.length(12);
       fixture.iframe.height = 2000;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent(AmpEvents.LOAD_START, 13).then(function() {
         expect(fixture.doc.querySelectorAll('amp-img img[src]'))
-            .to.have.length(13);
+            .to.have.length(14);
       });
     });
     fixture.iframe.height = 1500;
@@ -78,6 +80,14 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
         expect(smallScreen.offsetHeight).to.equal(0);
         expect(largeScreen.offsetHeight).to.not.equal(0);
       });
+    });
+  });
+
+  it('should not load image if already present (inabox)', () => {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
+      const ampImage = fixture.doc.getElementById('img8');
+      expect(ampImage).is.ok;
+      expect(ampImage.querySelectorAll('img').length).to.equal(1);
     });
   });
 });

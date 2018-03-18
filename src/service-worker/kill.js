@@ -22,7 +22,7 @@ self.addEventListener('install', function(event) {
   // we can cleanly denote that the global object is ServiceWorkerGlobalScope
   // and not Window.
   event.waitUntil(/** @type {!ServiceWorkerGlobalScope} */ (
-      self).skipWaiting());
+    self).skipWaiting());
 });
 
 self.addEventListener('activate', function(event) {

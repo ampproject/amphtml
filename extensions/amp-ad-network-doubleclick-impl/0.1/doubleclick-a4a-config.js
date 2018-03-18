@@ -19,35 +19,29 @@
 // implementation is located in the ads/google/a4a directory rather than here.
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
-
 import {
-  MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
-  addExperimentIdToElement,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
+  getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {
+  MANUAL_EXPERIMENT_ID,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {dev} from '../../../src/log';
+import {
+  isCdnProxy,
+} from '../../../ads/google/a4a/utils';
+import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
-/** @const {string} */
-export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
-
-/** @const {string} */
-export const UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME =
-    'expUnconditionedCanonical';
-
-/** @const {string} */
-export const UNCONDITIONED_IDENTITY_EXPERIMENT_NAME =
-    'expUnconditionedDfpIdentity';
+export const UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME =
+  'expUnconditionedCanonicalHoldback';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -58,20 +52,19 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   DELAYED_REQUEST: '21060729',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
-  CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
-  IDENTITY_CONTROL: '21060937',
-  IDENTITY_EXPERIMENT: '21060938',
+  REMOTE_HTML_CONTROL: '21061728',
+  REMOTE_HTML_EXPERIMENT: '21061729',
+  USDRUD_CONTROL: '21061759',
+  USDRUD_EXPERIMENT: '21061760',
 };
 
 /** @const @enum{string} */
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
-  FF_CANONICAL_CTL: '21061145',
-  FF_CANONICAL_EXP: '21061146',
-  IDENTITY_CONTROL: '21061304',
-  IDENTITY_EXPERIMENT: '21061305',
+  CANONICAL_HLDBK_CTL: '21061372',
+  CANONICAL_HLDBK_EXP: '21061373',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -81,15 +74,13 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-  // Identity
-  '5': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
-  '6': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-  // AMP Cache extension injection
-  '9': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
-  '10': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
+  '9': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+  '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+  '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+  '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
 };
 
 /**
@@ -99,24 +90,12 @@ export const URL_EXPERIMENT_MAPPING = {
  */
 export class DoubleclickA4aEligibility {
   /**
-   * Returns whether win supports native crypto. Is just a wrapper around
-   * supportsNativeCrypto, but this way we can mock out for testing.
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  supportsCrypto(win) {
-    return supportsNativeCrypto(win);
-  }
-
-  /**
    * Returns whether we are running on the AMP CDN.
    * @param {!Window} win
    * @return {boolean}
    */
   isCdnProxy(win) {
-    const googleCdnProxyRegex =
-        /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-    return googleCdnProxyRegex.test(win.location.origin);
+    return isCdnProxy(win);
   }
 
   /**
@@ -127,15 +106,9 @@ export class DoubleclickA4aEligibility {
   unconditionedExperimentSelection(win, element) {
     this.selectAndSetUnconditionedExp(
         win, element,
-        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
-        UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
-
-    this.selectAndSetUnconditionedExp(
-        win, element,
-        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT],
-        UNCONDITIONED_IDENTITY_EXPERIMENT_NAME);
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP],
+        UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
   }
 
   /**
@@ -143,7 +116,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} branches
-   * @param {!string} expName
+   * @param {string} expName
    */
   selectAndSetUnconditionedExp(win, element, branches, expName) {
     const experimentId = this.maybeSelectExperiment(
@@ -157,73 +130,79 @@ export class DoubleclickA4aEligibility {
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!boolean} useRemoteHtml
+   * @param {boolean} useRemoteHtml
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
-    if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
-        'useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
-      return false;
+    const warnDeprecation = feature => user().warn(
+        TAG, `${feature} will no longer ` +
+          'be supported starting on March 29, 2018. Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
+    const usdrd = 'useSameDomainRenderingUntilDeprecated';
+    const hasUSDRD = usdrd in element.dataset ||
+          (tryParseJson(element.getAttribute('json')) || {})[usdrd];
+    if (hasUSDRD) {
+      warnDeprecation(usdrd);
+    }
+    if (useRemoteHtml) {
+      warnDeprecation('remote.html');
     }
     let experimentId;
-    const urlExperimentId = extractUrlExperimentId(win, element);
-    let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
+    if (hasUSDRD &&
+        ![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+          DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
+            URL_EXPERIMENT_MAPPING[urlExperimentId])) {
+      return false;
+    }
+    if (useRemoteHtml && !element.getAttribute('rtc-config') &&
+        ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+          DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
+            URL_EXPERIMENT_MAPPING[urlExperimentId])) {
+      return false;
+    }
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
       if (urlExperimentId == -1 &&
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
-        let unconditionedExp;
-        // For unconditioned canonical experiment, in the experiment branch
-        // we allow Fast Fetch on non-CDN pages, but in the control we do not.
-        if ((unconditionedExp = getExperimentBranch(
-            win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME))) {
-          return unconditionedExp ==
-              DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
+        // For unconditioned canonical holdback, in the control branch
+        // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
+        if (getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP) {
+          addExperimentIdToElement(
+              DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT, element);
+          return true;
         }
-        experimentId = this.maybeSelectExperiment(win, element, [
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
-      }
-      // If no experiment selected, return false.
-      if (!experimentId) {
         return false;
       }
     } else {
-      experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        // Do not select into Identity experiment if in corresponding
-        // unconditioned experiment.
-        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
-             experimentId ==
-             DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
-            getExperimentBranch(win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME)) {
-          experimentId = null;
-        } else {
-          dev().info(
-              TAG,
-              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-        }
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
       }
     }
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL != experimentId;
+    return ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
+        experimentId);
   }
 
   /**
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
-   * @param {!string} experimentName}
+   * @param {string} experimentName}
    * @return {?string} Experiment branch ID or null if not selected.
    * @visibileForTesting
    */
@@ -245,7 +224,7 @@ const singleton = new DoubleclickA4aEligibility();
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {

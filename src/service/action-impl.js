@@ -17,17 +17,17 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {Services} from '../services';
-import {debounce} from '../utils/rate-limit';
+import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
-import {isArray, isFiniteNumber, toWin} from '../types';
-import {isEnabled} from '../dom';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {map} from '../utils/object';
 import {
-  registerServiceBuilderForDoc,
   installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
 } from '../service';
+import {isArray, isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../dom';
+import {map} from '../utils/object';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -52,6 +52,9 @@ const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
+/** @const {number} */
+const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
@@ -118,11 +121,12 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JsonObject} args
-   * @param {?Element} source
+   * @param {?Element} source Element where the action was triggered.
+   * @param {?Element} caller Element where the action is being handled.
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    */
-  constructor(target, method, args, source, event, trust) {
+  constructor(target, method, args, source, caller, event, trust) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
@@ -131,6 +135,8 @@ export class ActionInvocation {
     this.args = args;
     /** @const {?Element} */
     this.source = source;
+    /** @const {?Element} */
+    this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
     /** @const {ActionTrust} */
@@ -198,6 +204,7 @@ export class ActionService {
     this.addEvent('submit');
     this.addEvent('change');
     this.addEvent('input-debounced');
+    this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
   }
@@ -259,6 +266,18 @@ export class ActionService {
         this.addTargetPropertiesAsDetail_(deferredEvent);
         debouncedInput(deferredEvent);
       });
+    } else if (name == 'input-throttled') {
+      const throttledInput = throttle(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH);
+      }, DEFAULT_THROTTLE_INTERVAL);
+
+      this.root_.addEventListener('input', event => {
+        const deferredEvent = new DeferredEvent(event);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
+        throttledInput(deferredEvent);
+      });
     } else if (name == 'valid' || name == 'invalid') {
       this.root_.addEventListener(name, event => {
         const element = dev().assertElement(event.target);
@@ -303,12 +322,13 @@ export class ActionService {
    * @param {string} method
    * @param {?JsonObject} args
    * @param {?Element} source
+   * @param {?Element} caller
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    */
-  execute(target, method, args, source, event, trust) {
-    const invocation =
-        new ActionInvocation(target, method, args, source, event, trust);
+  execute(target, method, args, source, caller, event, trust) {
+    const invocation = new ActionInvocation(
+        target, method, args, source, caller, event, trust);
     this.invoke_(invocation, /* actionInfo */ null);
   }
 
@@ -324,7 +344,7 @@ export class ActionService {
     const debugid = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-        'AMP element or a whitelisted target element is expected: %s', debugid);
+    'AMP element or a whitelisted target element is expected: %s', debugid);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
@@ -382,7 +402,7 @@ export class ActionService {
         const globalTarget = this.globalTargets_[actionInfo.target];
         if (globalTarget) {
           const invocation = new ActionInvocation(this.root_, actionInfo.method,
-              args, action.node, event, trust);
+              args, source, action.node, event, trust);
           return globalTarget(invocation, i, action.actionInfos);
         }
 
@@ -390,7 +410,7 @@ export class ActionService {
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
           const invocation = new ActionInvocation(target, actionInfo.method,
-              args, action.node, event, trust);
+              args, source, action.node, event, trust);
           return this.invoke_(invocation, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
@@ -399,8 +419,8 @@ export class ActionService {
 
       // Wait for the previous action, if applicable.
       currentPromise = (currentPromise)
-          ? currentPromise.then(invoke)
-          : invoke();
+        ? currentPromise.then(invoke)
+        : invoke();
     });
   }
 
@@ -443,7 +463,7 @@ export class ActionService {
         this.actionInfoError_('Unrecognized AMP element "' +
             lowerTagName + '". ' +
             'Did you forget to include it via <script custom-element>?',
-            actionInfo, target);
+        actionInfo, target);
       }
       return null;
     }
@@ -661,14 +681,14 @@ export function parseActionMap(s, context) {
 
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-          toks.next();  // Skip '.'
+          toks.next(); // Skip '.'
           method = assertToken(
               toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
           if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
-            toks.next();  // Skip '('
+            toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
         }
@@ -678,7 +698,7 @@ export function parseActionMap(s, context) {
           target,
           method,
           args: (args && getMode().test && Object.freeze) ?
-              Object.freeze(args) : args,
+            Object.freeze(args) : args,
           str: s,
         });
 
@@ -740,8 +760,8 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         // Expressions have one or more dereferences: ".identifier"
         if (tok.type == TokenType.ID) {
           for (peek = toks.peek();
-              peek.type == TokenType.SEPARATOR && peek.value == '.';
-              peek = toks.peek()) {
+            peek.type == TokenType.SEPARATOR && peek.value == '.';
+            peek = toks.peek()) {
             toks.next(); // Skip '.'.
             tok = assertToken(toks.next(false), [TokenType.ID]);
             argValueTokens.push(tok);

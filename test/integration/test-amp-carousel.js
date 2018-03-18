@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
-import {AmpEvents} from '../../src/amp-events';
 
 describe.skip('integration amp-carousel', () => {
 

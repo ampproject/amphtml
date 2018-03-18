@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   IntersectionObserver,
@@ -21,7 +22,6 @@ import {
 } from '../../src/intersection-observer';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {
@@ -450,8 +450,8 @@ describe('IntersectionObserver', () => {
     ioInstance.fire();
     clock.tick(1);
     ioInstance.fire();
-    ioInstance.fire();  // Same time
-    ioInstance.fire();  // Same time
+    ioInstance.fire(); // Same time
+    ioInstance.fire(); // Same time
     expect(ioInstance.pendingChanges_).to.have.length(2);
     expect(messages).to.have.length(1);
     clock.tick(1);

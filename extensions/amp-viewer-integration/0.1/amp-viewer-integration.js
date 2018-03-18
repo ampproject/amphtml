@@ -19,15 +19,15 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
+import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {getAmpdoc} from '../../../src/service';
-import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {Services} from '../../../src/services';
+import {isIframed} from '../../../src/dom';
+import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';
@@ -89,7 +89,7 @@ export class AmpViewerIntegration {
     }
 
     const port = new WindowPortEmulator(
-      this.win, origin, this.win.parent/* target */);
+        this.win, origin, this.win.parent/* target */);
     return this.openChannelAndStart_(
         viewer, ampdoc, origin, new Messaging(this.win, port, this.isWebView_));
   }
@@ -111,13 +111,13 @@ export class AmpViewerIntegration {
         }
         // Viewer says: "I'm ready for you"
         if (
-            e.origin === origin &&
+          e.origin === origin &&
             e.source === source &&
             data.app == APP &&
             data.name == 'handshake-poll') {
           if (this.isWebView_ && (!e.ports || !e.ports.length)) {
             throw new Error(
-              'Did not receive communication port from the Viewer!');
+                'Did not receive communication port from the Viewer!');
           }
           const port = e.ports && e.ports.length > 0 ? e.ports[0] :
             new WindowPortEmulator(this.win, origin, this.win.parent);
@@ -144,7 +144,7 @@ export class AmpViewerIntegration {
       'url': ampdocUrl,
       'sourceUrl': srcUrl,
     }),
-        true /* awaitResponse */)
+    true /* awaitResponse */)
         .then(() => {
           dev().fine(TAG, 'Channel has been opened!');
           this.setup_(messaging, viewer, origin);

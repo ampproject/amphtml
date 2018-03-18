@@ -19,15 +19,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the user clicks the exit full screen button
-  EXIT_FULLSCREEN: 'ampstory:exitfullscreen',
-
-  // Triggered when the user clicks the enter full screen button
-  ENTER_FULLSCREEN: 'ampstory:enterfullscreen',
-
-  // Triggered when the user clicks the close bookend button
-  CLOSE_BOOKEND: 'ampstory:closebookend',
-
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',
 
@@ -43,6 +34,15 @@ export const EventType = {
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
 
+  // Triggered when the story should switch to the previous page
+  PREVIOUS_PAGE: 'ampstory:previouspage',
+
+  // Triggered when the story should switch to the next page
+  NEXT_PAGE: 'ampstory:nextpage',
+
+  // Triggered when the story should navigate after a tap on active page.
+  TAP_NAVIGATION: 'ampstory:tapnavigation',
+
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
@@ -52,11 +52,20 @@ export const EventType = {
   // DEVELOPMENT MODE ONLY: Triggered when a story page has log entries (e.g.
   // warnings or errors).
   DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
+
+  // Triggered when user clicks on left 25% of the first page
+  SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
+
+  // Triggered when a story has loaded at least its initial set of pages.
+  STORY_LOADED: 'ampstory:load',
+
+  // Triggered when a page has loaded at least one frame of all of its media.
+  PAGE_LOADED: 'ampstory:pageload',
 };
 
 
 /**
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {boolean=} opt_bubbles
  */
@@ -72,7 +81,7 @@ export function dispatch(source, eventName, opt_bubbles) {
 
 /**
  * @param {!Window} win
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {!Object} payload
  * @param {!CustomEventInit=} opt_eventInit

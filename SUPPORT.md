@@ -10,4 +10,4 @@ There are many ways to get help for questions and issues related to AMP:
 - If you **encounter a bug in AMP or have a feature request for AMP**, see [Reporting issues with AMP](CONTRIBUTING.md#reporting-issues-with-amp) for information on filing an issue.
 - For **AMP on Google Search** questions or issues, please use [Google's AMP forum](https://goo.gl/utQ1KZ).
 - If you are **contributing code to the AMP Project**, the ["Contributing code" section of CONTRIBUTING.md](CONTRIBUTING.md#contributing-code) provides ways to get help.
-
+- To check the status of AMP serving and its related services, see the [AMP Status](https://status.ampproject.org/) page.

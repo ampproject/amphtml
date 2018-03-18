@@ -104,8 +104,9 @@ Supported via `json` attribute:
 - `targeting`
 - `useSameDomainRenderingUntilDeprecated`
 
-### Temporary use of useSameDomainRenderingUntilDeprecated
-An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated once the [new window.context implementation](https://github.com/ampproject/amphtml/issues/6829) is complete. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe.
+### Temporary use of useSameDomainRenderingUntilDeprecated until March 29, 2018
+Support for this attribute will be dropped on March 29, 2018. 
+An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated on March 29, 2018. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe. For more information, please refer to https://github.com/ampproject/amphtml/issues/11834;
 
 Example:
 ```html
@@ -117,21 +118,12 @@ Example:
 ```
 
 
-### Unsupported DFP Features & Formats
-
-#### Unsupported Features:
-- Guaranteed Roadblocks. Non-guaranteed roadblocks (As many as possible, One or More) delivery is supported
-
-#### Unsupported Formats/Creatives:
+### Unsupported DFP Formats
 - Interstitials
 - Expandables. Although expandables on interaction/click is a format that is work in progress.
 - Flash
 - Anchor Ads / Adhesion Units
 - Creatives served over HTTP.
-
-### DFP Implementation Examples
-[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features.
-
 
 
 

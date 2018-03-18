@@ -22,37 +22,15 @@
 
 import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  forceExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {forceExperimentBranch} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
-
-/** @const {string} @visibleForTesting */
-export const UNCONDITIONED_IDENTITY_ADX_EXP_NAME =
-    'expUnconditionedAdxIdentity';
-
-/** @const @enum{string} @visibleForTesting */
-export const ADSENSE_EXPERIMENT_FEATURE = {
-  CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
-  CACHE_EXTENSION_INJECTION_EXP: '21060954',
-  IDENTITY_CONTROL: '21060939',
-  IDENTITY_EXPERIMENT: '21060940',
-};
-
-export const ADSENSE_UNCONDITIONED_EXPERIMENTS = {
-  IDENTITY_CONTROL: '21061302',
-  IDENTITY_EXPERIMENT: '21061303',
-};
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adsense-impl';
@@ -61,22 +39,15 @@ const TAG = 'amp-ad-network-adsense-impl';
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // AMP Cache extension injection
-  '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
-  '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
-  // Identity
-  '7': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
-  '8': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
-  unconditionedExperimentSelection(win, element);
   if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
@@ -86,66 +57,12 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   const urlExperimentId = extractUrlExperimentId(win, element);
   if (urlExperimentId != undefined) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    // Do not select into Identity experiment if in corresponding
-    // unconditioned experiment.
-    if ((experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
-         experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
-        getExperimentBranch(win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME)) {
-      experimentId = null;
-    } else {
-      dev().info(
-          TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-    }
+    dev().info(
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
   return true;
-}
-
-/**
- * Attempts all unconditioned experiment selection.
- * @param {!Window} win
- * @param {!Element} element
- */
-function unconditionedExperimentSelection(win, element) {
-  selectAndSetUnconditionedExp(
-      win, element,
-      [ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
-        ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL],
-      UNCONDITIONED_IDENTITY_ADX_EXP_NAME);
-}
-
-/**
- * Attempts to select into experiment and forces branch if selected.
- * @param {!Window} win
- * @param {!Element} element
- * @param {!Array<string>} branches
- * @param {!string} expName
- */
-function selectAndSetUnconditionedExp(win, element, branches, expName) {
-  const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
-  experimentInfoMap[expName] = {
-    isTrafficEligible: () => true,
-    branches,
-  };
-  randomlySelectUnsetExperiments(win, experimentInfoMap);
-  const experimentId = getExperimentBranch(win, expName);
-  if (!!experimentId) {
-    addExperimentIdToElement(experimentId, element);
-    forceExperimentBranch(win, expName, experimentId);
-  }
-}
-
-/**
-+ * @param {!Window} win
-+ * @return {boolean} whether identity enabled.
-+ */
-export function identityEnabled(win) {
-  return (getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
-          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
-      (getExperimentBranch(win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME) ==
-          ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
 }

@@ -16,6 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+[TOC]
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -343,6 +345,20 @@ sort([2, 1, 3])</pre>
 <sup>2</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`.<br>
 <sup>3</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
+#### Defining macros with `amp-bind-macro`
+
+`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
+
+```html
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius" />
+
+<div>
+  The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
+</div>
+```
+
+A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
+
 ### Bindings
 
 A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions).
@@ -569,7 +585,7 @@ There are several types of runtime errors that may be encountered when working w
 
 ### Debugging State
 
-In development mode, use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console.
 
 ## Appendix
 
@@ -603,7 +619,7 @@ The URL of the remote endpoint that will return the JSON that will update this `
 The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 {% call callout('Important', type='caution') %}
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](../../spec/amp-cors-requests.md) spec.
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
 {% endcall %}
 
 
@@ -614,7 +630,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Supported values: `omit`, `include`
 * Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 ### Deep-merge with `AMP.setState()`
 

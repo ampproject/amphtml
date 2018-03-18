@@ -37,6 +37,8 @@ export const MessageType = {
   EMBED_SIZE_CHANGED: 'embed-size-changed',
   EMBED_SIZE_DENIED: 'embed-size-denied',
   NO_CONTENT: 'no-content',
+  GET_HTML: 'get-html',
+  GET_HTML_RESULT: 'get-html-result',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',
@@ -81,7 +83,7 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @returns {string}
  */
 export function serializeMessage(type, sentinel, data = dict(),
-    rtvVersion = null) {
+  rtvVersion = null) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
   message['type'] = type;
@@ -115,7 +117,7 @@ export function deserializeMessage(message) {
 /**
  *  Returns true if message looks like it is an AMP postMessage
  *  @param {*} message
- *  @return {!boolean}
+ *  @return {boolean}
  */
 export function isAmpMessage(message) {
   return (typeof message == 'string' &&

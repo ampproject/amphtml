@@ -39,7 +39,6 @@ html.i-amphtml-fie {
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
  * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
- * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
   margin: 0 !important;
@@ -145,31 +144,55 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   display: inline-block;
 }
 
-.i-amphtml-layout-nodisplay {
+.i-amphtml-layout-nodisplay,
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
+{
   /* Display is set/reset in JS */
 }
 
-.i-amphtml-layout-fixed {
+.i-amphtml-layout-fixed,
+[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+{
   display: inline-block;
   position: relative;
 }
 
-.i-amphtml-layout-responsive {
+.i-amphtml-layout-responsive,
+[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive)
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fixed-height {
+.i-amphtml-layout-intrinsic
+{
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+}
+
+.i-amphtml-intrinsic-sizer {
+  max-width: 100%;
+}
+
+.i-amphtml-layout-fixed-height,
+[layout=fixed-height][height]
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-container {
+.i-amphtml-layout-container,
+[layout=container]
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fill {
+.i-amphtml-layout-fill,
+[layout=fill]:not(.i-amphtml-layout-fill)
+{
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -179,7 +202,9 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   right: 0;
 }
 
-.i-amphtml-layout-flex-item {
+.i-amphtml-layout-flex-item,
+[layout=flex-item]:not(.i-amphtml-layout-flex-item)
+{
   display: block;
   position: relative;
   flex: 1 1 auto;
@@ -221,6 +246,10 @@ i-amphtml-sizer {
   right: 0;
 }
 
+.i-amphtml-layout-intrinsic .i-amphtml-sizer {
+  max-width: 100%;
+}
+
 .i-amphtml-replaced-content {
   padding: 0 !important;
   border: none !important;
@@ -245,8 +274,8 @@ i-amphtml-sizer {
   left: 0px !important;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
      before allowing buttons to be activated. */
-  width: 2px !important;
-  height: 2px !important;
+  width: 4px !important;
+  height: 4px !important;
   /* visually hide it with overflow and opacity */
   opacity: 0 !important;
   overflow: hidden !important;
@@ -257,6 +286,16 @@ i-amphtml-sizer {
   /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
+}
+
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 8px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 12px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 16px !important;
 }
 
 /* For author styling. */
@@ -285,13 +324,17 @@ i-amphtml-sizer {
   /* For author styling. */
 }
 
-.i-amphtml-notbuilt {
+.i-amphtml-notbuilt,
+[layout]:not(.i-amphtml-element)
+{
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
+{
   display: none;
 }
 
@@ -312,7 +355,8 @@ i-amphtml-sizer {
   display: none !important;
 }
 
-.i-amphtml-element > [placeholder] {
+.i-amphtml-element > [placeholder],
+[layout]:not(.i-amphtml-element) > [placeholder] {
   display: block;
 }
 
@@ -539,9 +583,9 @@ amp-instagram {
 
 
 /**
- * Analytics tags should never be visible. keep them hidden.
+ * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics {
+amp-analytics, amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -567,6 +611,17 @@ amp-iframe iframe {
   display: none;
 }
 
+/**
+ * Minimal Subscriptions CSS. This part initially disables all of the UI
+ * until the complete rules are loaded as part of amp-subscriptions extension.
+ * Notice that, the `[subscription-dialog]` elements are always hidden.
+ */
+html:not(.i-amphtml-subs-ready) [subscriptions-section],
+html:not(.i-amphtml-subs-ready) [subscriptions-action],
+[subscriptions-dialog] {
+  display: none !important;
+}
+
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -574,6 +629,13 @@ amp-iframe iframe {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
   display: none;
 }
 
@@ -765,15 +827,24 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
-  display: block;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 100%;
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
 }
 
 amp-story-page {
   background-color: #757575;
+}
+
+amp-story .i-amphtml-loader {
+  display: none !important;
 }

@@ -27,7 +27,7 @@
   </head>
 
   <body>
-    <amp-story standalone>
+    <amp-story standalone bookend-config-src="bookend.json">
 
       <amp-story-page id="cover">
           <amp-story-grid-layer template="fill">
@@ -52,6 +52,13 @@
         <amp-story-grid-layer template="vertical">
           <h1>Second Page</h1>
           <p>This is the second page of this story.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="vertical">
+          <h1>Third Page</h1>
+          <p>This is the third page of this story.</p>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>

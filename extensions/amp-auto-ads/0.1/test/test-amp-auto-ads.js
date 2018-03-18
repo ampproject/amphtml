@@ -15,17 +15,17 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
-import {AmpAutoAds} from '../amp-auto-ads';
-import {
-  toggleExperiment,
-  forceExperimentBranch,
-} from '../../../../src/experiments';
-import {Services} from '../../../../src/services';
-import {waitForChild} from '../../../../src/dom';
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {AmpAutoAds} from '../amp-auto-ads';
+import {Services} from '../../../../src/services';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
+import {waitForChild} from '../../../../src/dom';
 
 describes.realWin('amp-auto-ads', {
   amp: {
@@ -65,7 +65,7 @@ describes.realWin('amp-auto-ads', {
     sandbox = env.sandbox;
 
     const extensions = Services.extensionsFor(env.win);
-    sandbox.stub(extensions, 'loadElementClass',
+    sandbox.stub(extensions, 'loadElementClass').callsFake(
         () => Promise.resolve(() => {}));
 
     const viewportMock =

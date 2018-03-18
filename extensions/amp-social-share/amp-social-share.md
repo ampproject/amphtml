@@ -93,6 +93,16 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <th>Parameters</th>
   </tr>
   <tr>
+    <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (triggers OS share dialog)</td>
+    <td><code>system</code></td>
+    <td>
+      <ul>
+        <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
+        <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Email</td>
     <td><code>email</code></td>
     <td>
@@ -175,16 +185,6 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     </td>
   </tr>
   <tr>
-    <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (available in Chrome as an <a href="https://github.com/jpchase/OriginTrials/blob/gh-pages/developer-guide.md">origin trial</a>)</td>
-    <td><code>system</code></td>
-    <td>
-      <ul>
-        <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
-        <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
     <td>SMS</td>
     <td><code>sms</code></td>
     <td>
@@ -195,22 +195,22 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
 </table>
 
 
-### Non-configured Providers
+## Non-configured providers
 
 In addition to pre-configured providers, you can use non-configured providers by specifying additional attributes in the `amp-social-share` component.
 
 **Example: Creating a share button for a non-configured provider**
 
-The following example creates a share button through WhatsApp by setting the `data-share-endpoint` attribute to the correct endpoint for the WhatsApp custom protocol.
+The following example creates a share button through Facebook Messenger by setting the `data-share-endpoint` attribute to the correct endpoint for the Facebook Messenger custom protocol.
 
 ```html
-<amp-social-share type="whatsapp"
-    layout="container"
-    data-share-endpoint="whatsapp://send"
+<amp-social-share type="facebookmessenger"
+    data-share-endpoint="fb-messenger://share"
     data-param-text="Check out this article: TITLE - CANONICAL_URL">
-    Share on Whatsapp
 </amp-social-share>
 ```
+
+As these providers are not pre-configured, you'll need to create the appropriate button image and styles for the provider.
 
 ## Styles
 
@@ -237,10 +237,7 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 
 ```html
 <amp-social-share type="whatsapp"
-    layout="container"
-    data-share-endpoint="whatsapp://send"
     data-param-text="Check out this article: TITLE - CANONICAL_URL">
-    Share on Whatsapp
 </amp-social-share>
 ```
 

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Resources} from '../../src/service/resources-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {Services} from '../../src/services';
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {Resource, ResourceState} from '../../src/service/resource';
+import {Resources} from '../../src/service/resources-impl';
+import {Services} from '../../src/services';
+import {layoutRectLtwh} from '../../src/layout-rect';
 
 
 describes.realWin('Resource', {amp: true}, env => {
@@ -35,11 +35,11 @@ describes.realWin('Resource', {amp: true}, env => {
     doc = win.document;
 
     element = env.createAmpElement('amp-ad');
-    sandbox.stub(element, 'getPriority', () => 2);
+    sandbox.stub(element, 'getLayoutPriority').callsFake(() => 2);
     elementMock = sandbox.mock(element);
 
     const viewer = Services.viewerForDoc(document);
-    sandbox.stub(viewer, 'isRuntimeOn', () => false);
+    sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
@@ -48,7 +48,7 @@ describes.realWin('Resource', {amp: true}, env => {
       document,
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
   });
@@ -61,7 +61,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should initialize correctly', () => {
     expect(resource.getId()).to.equal(1);
     expect(resource.debugid).to.equal('amp-ad#1');
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
     expect(resource.getLayoutBox().width).to.equal(0);
     expect(resource.getLayoutBox().height).to.equal(0);
@@ -97,7 +97,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should not build if permission is not granted', () => {
     let permission = false;
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    sandbox.stub(resources, 'grantBuildPermission', () => permission);
+    sandbox.stub(resources, 'grantBuildPermission').callsFake(() => permission);
     elementMock.expects('updateLayoutBox').never();
     expect(resource.build()).to.be.null;
     expect(resource.getState()).to.equal(ResourceState.NOT_BUILT);
@@ -158,6 +158,9 @@ describes.realWin('Resource', {amp: true}, env => {
       isDeclaredFixed() {
         return false;
       },
+      supportsPositionFixed() {
+        return true;
+      },
     };
     resource.resources_.getViewport = () => viewport;
     expect(() => {
@@ -205,13 +208,13 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('build').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       element.getBoundingClientRect = () =>
-          ({left: 11, top: 12, width: 111, height: 222});
+        ({left: 11, top: 12, width: 111, height: 222});
       resource.measure();
       expect(resource.getLayoutBox().top).to.equal(12);
       expect(resource.getInitialLayoutBox().top).to.equal(12);
 
       element.getBoundingClientRect = () =>
-          ({left: 11, top: 22, width: 111, height: 222});
+        ({left: 11, top: 22, width: 111, height: 222});
       resource.measure();
       expect(resource.getLayoutBox().top).to.equal(22);
       expect(resource.getInitialLayoutBox().top).to.equal(12);
@@ -401,7 +404,7 @@ describes.realWin('Resource', {amp: true}, env => {
     const owner = {
       collapsedCallback: sandbox.spy(),
     };
-    sandbox.stub(resource, 'getOwner', () => {
+    sandbox.stub(resource, 'getOwner').callsFake(() => {
       return owner;
     });
     resource.completeCollapse();
@@ -512,7 +515,7 @@ describes.realWin('Resource', {amp: true}, env => {
     return promise.then(() => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
-      return loaded;  // Just making sure this doesn't time out.
+      return loaded; // Just making sure this doesn't time out.
     });
   });
 
@@ -563,6 +566,26 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should record layout schedule time', () => {
+    resource.layoutScheduled(300);
+    expect(resource.element.layoutScheduleTime).to.equal(300);
+
+    // The time should be updated if scheduled multiple times.
+    resource.layoutScheduled(400);
+    expect(resource.element.layoutScheduleTime).to.equal(400);
+
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
+  it('should not record layout schedule time in startLayout', () => {
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    resource.startLayout();
+
+    expect(resource.element.layoutScheduleTime).to.be.undefined;
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
   it('should change size and update state', () => {
     expect(resource.isMeasureRequested()).to.be.false;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
@@ -581,19 +604,19 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 
   it('should update priority', () => {
-    expect(resource.getPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
 
-    resource.updatePriority(2);
-    expect(resource.getPriority()).to.equal(2);
+    resource.updateLayoutPriority(2);
+    expect(resource.getLayoutPriority()).to.equal(2);
 
-    resource.updatePriority(3);
-    expect(resource.getPriority()).to.equal(3);
+    resource.updateLayoutPriority(3);
+    expect(resource.getLayoutPriority()).to.equal(3);
 
-    resource.updatePriority(1);
-    expect(resource.getPriority()).to.equal(1);
+    resource.updateLayoutPriority(1);
+    expect(resource.getLayoutPriority()).to.equal(1);
 
-    resource.updatePriority(0);
-    expect(resource.getPriority()).to.equal(0);
+    resource.updateLayoutPriority(0);
+    expect(resource.getLayoutPriority()).to.equal(0);
   });
 
 
@@ -823,6 +846,63 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 });
 
+describe('Resource idleRenderOutsideViewport', () => {
+  let sandbox;
+  let element;
+  let resources;
+  let resource;
+  let idleRenderOutsideViewport;
+  let withinViewportMultiplier;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.create();
+    idleRenderOutsideViewport = sandbox.stub();
+    element = {
+      idleRenderOutsideViewport,
+      ownerDocument: {defaultView: window},
+      tagName: 'AMP-AD',
+      hasAttribute: () => false,
+      isBuilt: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: () => false,
+      getBoundingClientRect: () => null,
+      updateLayoutBox: () => {},
+      isRelayoutNeeded: () => false,
+      layoutCallback: () => {},
+      changeSize: () => {},
+      unlayoutOnPause: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
+      viewportCallback: () => {},
+      getLayoutPriority: () => 0,
+    };
+    resources = new Resources(new AmpDocSingle(window));
+    resource = new Resource(1, element, resources);
+    withinViewportMultiplier =
+        sandbox.stub(resource, 'withinViewportMultiplier');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should return true if withinViewportMultiplier', () => {
+    idleRenderOutsideViewport.returns(5);
+    withinViewportMultiplier.withArgs(5).returns(true);
+    expect(resource.idleRenderOutsideViewport()).to.equal(true);
+  });
+
+  it('should return false for false element idleRenderOutsideViewport', () => {
+    idleRenderOutsideViewport.returns(false);
+    withinViewportMultiplier.withArgs(false).returns(false);
+    expect(resource.idleRenderOutsideViewport()).to.equal(false);
+  });
+});
+
 describe('Resource renderOutsideViewport', () => {
   let sandbox;
   let element;
@@ -854,7 +934,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getPriority: () => 0,
+      getLayoutPriority: () => 0,
     };
 
     resources = new Resources(new AmpDocSingle(window));
@@ -892,7 +972,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when bottom falls outside', () => {
@@ -928,7 +1008,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -964,7 +1044,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1005,7 +1085,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1046,7 +1126,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1082,7 +1162,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1123,7 +1203,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1166,7 +1246,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when bottom falls outside', () => {
@@ -1202,7 +1282,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1238,7 +1318,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1279,7 +1359,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1320,7 +1400,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1356,7 +1436,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering when scrolling towards', () => {
@@ -1397,7 +1477,7 @@ describe('Resource renderOutsideViewport', () => {
 
         describe('when element is owned', () => {
           beforeEach(() => {
-            sandbox.stub(resource, 'hasOwner', () => true);
+            sandbox.stub(resource, 'hasOwner').callsFake(() => true);
           });
 
           it('should allow rendering', () => {
@@ -1441,7 +1521,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when bottom falls outside', () => {
@@ -1477,7 +1557,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1513,7 +1593,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1554,7 +1634,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1595,7 +1675,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1631,7 +1711,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering when scrolling towards', () => {
@@ -1672,7 +1752,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1718,7 +1798,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1764,7 +1844,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1810,7 +1890,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {
@@ -1856,7 +1936,7 @@ describe('Resource renderOutsideViewport', () => {
 
       describe('when element is owned', () => {
         beforeEach(() => {
-          sandbox.stub(resource, 'hasOwner', () => true);
+          sandbox.stub(resource, 'hasOwner').callsFake(() => true);
         });
 
         it('should allow rendering', () => {

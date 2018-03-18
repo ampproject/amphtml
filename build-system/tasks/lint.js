@@ -17,20 +17,19 @@
 
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
-const util = require('gulp-util');
+const log = require('fancy-log');
 const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
 
 const options = {
   fix: false,
-  rulePaths: ['build-system/eslint-rules/'],
-  plugins: ['eslint-plugin-google-camelcase'],
 };
 
 /**
@@ -59,29 +58,61 @@ function initializeStream(globs, streamOptions) {
 }
 
 /**
+ * Logs a message on the same line to indicate progress
+ * @param {string} message
+ */
+function logOnSameLine(message) {
+  if (!process.env.TRAVIS && process.stdout.isTTY) {
+    process.stdout.moveCursor(0, -1);
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
+  }
+  log(message);
+}
+
+/**
  * Runs the linter on the given stream using the given options.
- * @param {!string} path
+ * @param {string} path
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}
  */
 function runLinter(path, stream, options) {
   let errorsFound = false;
+  if (!process.env.TRAVIS) {
+    log(colors.green('Starting linter...'));
+  }
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         errorsFound = true;
-        util.log(msg);
+        logOnSameLine(colors.red('Linter error:') + msg + '\n');
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslint.result(function(result) {
+        if (!process.env.TRAVIS) {
+          logOnSameLine(colors.green('Linting: ') + result.filePath);
+        }
+      }))
+      .pipe(eslint.results(function(results) {
+        if (results.errorCount == 0) {
+          if (!process.env.TRAVIS) {
+            logOnSameLine(colors.green('Success: ') + 'No linter errors');
+          }
+        } else {
+          logOnSameLine(colors.red('Error: ') + results.errorCount +
+              ' linter error(s) found.');
+          process.exit(1);
+        }
+      }))
       .pipe(eslint.failAfterError())
       .on('error', function() {
         if (errorsFound && !options.fix) {
-          util.log(util.colors.red('ERROR:'),
+          log(colors.red('ERROR:'),
               'Lint errors found.');
-          util.log(util.colors.yellow('NOTE:'),
-              'You can run', util.colors.cyan('gulp lint --fix'),
+          log(colors.yellow('NOTE:'),
+              'You can run', colors.cyan('gulp lint --fix'),
               'to automatically fix some of these lint errors.');
-          util.log(util.colors.yellow('WARNING:'),
+          log(colors.yellow('WARNING:'),
               'Since this is a destructive operation (operates on the file',
               'system), make sure you commit before running the command.');
         }
@@ -96,12 +127,19 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
+  if (argv.files) {
+    config.lintGlobs[config.lintGlobs.indexOf('**/*.js')] = argv.files;
+  }
   const stream = initializeStream(config.lintGlobs, {});
   return runLinter('.', stream, options);
 }
 
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
+gulp.task(
+    'lint',
+    'Validates against Google Closure Linter',
+    ['update-packages'],
+    lint,
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',

@@ -16,12 +16,14 @@
 
 import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
-import {getData} from './event-helper';
+import {Services} from './services';
+import {dev, user} from './log';
+import {getData, listen} from './event-helper';
+import {getMode} from './mode';
+import {isArray, toWin} from './types';
+import {isExperimentOn} from './experiments';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray, toWin} from './types';
-import {Services} from './services';
-import {user} from './log';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -156,6 +158,16 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+
+    /**
+     * The time at which this element was scheduled for layout relative to the
+     * epoch. This value will be set to 0 until the this element has been
+     * scheduled.
+     * Note that this value may change over time if the element is enqueued,
+     * then dequeued and re-enqueued by the scheduler.
+     * @public {number}
+     */
+    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -167,12 +179,16 @@ export class BaseElement {
   }
 
   /**
-  * This is the priority of loading elements (layoutCallback).
+  * This is the priority of loading elements (layoutCallback). Used only to
+  * determine layout timing and preloading priority. Does not affect build time,
+  * etc.
+  *
   * The lower the number, the higher the priority.
+  *
   * The default priority for base elements is 0.
   * @return {number}
   */
-  getPriority() {
+  getLayoutPriority() {
     return 0;
   }
 
@@ -184,11 +200,12 @@ export class BaseElement {
    * available. It's a restricted API and special review is required to
    * allow individual extensions to request priority upgrade.
    *
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(newPriority) {
-    this.element.getResources().updatePriority(this.element, newPriority);
+  updateLayoutPriority(newLayoutPriority) {
+    this.element.getResources().updateLayoutPriority(
+        this.element, newLayoutPriority);
   }
 
   /** @return {!Layout} */
@@ -389,7 +406,20 @@ export class BaseElement {
    * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return 3;
+    // Inabox allow layout independent of viewport location.
+    return getMode(this.win).runtime == 'inabox' &&
+        isExperimentOn(this.win, 'inabox-rov') ? true : 3;
+  }
+
+  /**
+   * Allows for rendering outside of the constraint set by renderOutsideViewport
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
+   * @return {boolean|number}
+   */
+  idleRenderOutsideViewport() {
+    return false;
   }
 
   /**
@@ -616,14 +646,15 @@ export class BaseElement {
    * @param  {string|!Array<string>} events
    * @param  {!Element} element
    * @public @final
+   * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    events = isArray(events) ? events : [events];
-    for (let i = 0; i < events.length; i++) {
-      element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], getData(event) || {});
-      });
-    }
+    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
+      listen(element, eventType, event => {
+        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+      }));
+
+    return () => unlisteners.forEach(unlisten => unlisten());
   }
 
   /**
@@ -854,7 +885,7 @@ export class BaseElement {
         this.element, newHeight, /* newWidth */ undefined);
   }
 
- /**
+  /**
   * Return a promise that requests the runtime to update
   * the size of this element to the specified value.
   * The runtime will schedule this request and attempt to process it
@@ -874,32 +905,53 @@ export class BaseElement {
         this.element, newHeight, newWidth);
   }
 
- /**
-  * Runs the specified mutation on the element and ensures that measures
-  * and layouts performed for the affected elements.
-  *
-  * This method should be called whenever a significant mutations are done
-  * on the DOM that could affect layout of elements inside this subtree or
-  * its siblings. The top-most affected element should be specified as the
-  * first argument to this method and all the mutation work should be done
-  * in the mutator callback which is called in the "mutation" vsync phase.
-  *
-  * @param {function()} mutator
-  * @param {Element=} opt_element
-  * @return {!Promise}
-  */
-  mutateElement(mutator, opt_element) {
-    return this.element.getResources().mutateElement(
-        opt_element || this.element, mutator);
+  /**
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {
+    return this.element.getResources().measureElement(measurer);
   }
 
   /**
-   * Schedules callback to be complete within the next batch. This call is
-   * intended for heavy DOM mutations that typically cause re-layouts.
-   * @param {!Function} callback
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
    */
-  deferMutate(callback) {
-    this.element.getResources().deferMutate(this.element, callback);
+  mutateElement(mutator, opt_element) {
+    return this.measureMutateElement(null, mutator, opt_element);
+  }
+
+  /**
+   * Runs the specified measure, then runs the mutation on the element and
+   * ensures that remeasures and layouts performed for the affected elements.
+   *
+   * This method should be called whenever a measure and significant mutations
+   * are done on the DOM that could affect layout of elements inside this
+   * subtree or its siblings. The top-most affected element should be specified
+   * as the first argument to this method and all the mutation work should be
+   * done in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @param {Element=} opt_element
+   * @return {!Promise}
+   */
+  measureMutateElement(measurer, mutator, opt_element) {
+    return this.element.getResources().measureMutateElement(
+        opt_element || this.element, measurer, mutator);
   }
 
   /**
@@ -953,5 +1005,18 @@ export class BaseElement {
 
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Declares a child element (or ourselves) as a Layer
+   * @param {!Element=} opt_element
+   */
+  declareLayer(opt_element) {
+    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+        ' to declare layer.');
+    if (opt_element) {
+      dev().assert(this.element.contains(opt_element));
+    }
+    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

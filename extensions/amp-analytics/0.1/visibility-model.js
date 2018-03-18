@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {dev} from '../../../src/log';
-
 
 /**
  * This class implements visibility calculations based on the
@@ -50,13 +50,28 @@ export class VisibilityModel {
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
+    // Above, if visiblePercentageMax was not specified, assume 100%.
+    // Here, do allow 0% to be the value if that is what was specified.
+    if (String(spec['visiblePercentageMax']).trim() === '0') {
+      this.spec_.visiblePercentageMax = 0;
+    }
+
+    /** @private {boolean} */
+    this.repeat_ = spec['repeat'] === true;
 
     /** @private {?function()} */
     this.eventResolver_ = null;
 
-    /** @const @private */
+    /** @private {?Observable} */
+    this.onTriggerObservable_ = new Observable();
+
+    /** @private */
     this.eventPromise_ = new Promise(resolve => {
       this.eventResolver_ = resolve;
+    });
+
+    this.eventPromise_.then(() => {
+      this.onTriggerObservable_.fire();
     });
 
     /** @private {!Array<!UnlistenDef>} */
@@ -75,7 +90,7 @@ export class VisibilityModel {
     this.createReportReadyPromise_ = null;
 
     /** @private {?number} */
-    this.scheduledRunId_ = null;
+    this.scheduledUpdateTimeoutId_ = null;
 
     /** @private {boolean} */
     this.matchesVisibility_ = false;
@@ -115,19 +130,75 @@ export class VisibilityModel {
 
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
+
+    /** @private {boolean} */
+    this.waitToReset_ = false;
+
+    /** @private {?number} */
+    this.scheduleRepeatId_ = null;
+  }
+
+  /**
+   * Refresh counter on visible reset.
+   * TODO: Right now all state value are scoped state values that gets reset.
+   * We may need to add support to global state values,
+   * that never reset like globalTotalVisibleTime.
+   * Note: loadTimeVisibility is an exception.
+   * @private
+   */
+  reset_() {
+    dev().assert(!this.eventResolver_,
+        'Attempt to refresh visible event before previous one resolve');
+    this.eventPromise_ = new Promise(resolve => {
+      this.eventResolver_ = resolve;
+    });
+    this.eventPromise_.then(() => {
+      this.onTriggerObservable_.fire();
+    });
+    this.scheduleRepeatId_ = null;
+    this.everMatchedVisibility_ = false;
+    this.matchesVisibility_ = false;
+    this.continuousTime_ = 0;
+    this.maxContinuousVisibleTime_ = 0;
+    this.totalVisibleTime_ = 0;
+    this.firstVisibleTime_ = 0;
+    this.firstSeenTime_ = 0;
+    this.lastSeenTime_ = 0;
+    this.lastVisibleTime_ = 0;
+    this.minVisiblePercentage_ = 0;
+    this.maxVisiblePercentage_ = 0;
+    this.lastVisibleUpdateTime_ = 0;
+    this.waitToReset_ = false;
+  }
+
+  /**
+   * Function that visibilityManager can used to dispose model or reset model
+   */
+  maybeDispose() {
+    if (!this.repeat_) {
+      this.dispose();
+    }
   }
 
   /** @override */
   dispose() {
-    if (this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    if (this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
+    }
+    if (this.scheduleRepeatId_) {
+      clearTimeout(this.scheduleRepeatId_);
+      this.scheduleRepeatId_ = null;
     }
     this.unsubscribe_.forEach(unsubscribe => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.removeAll();
+      this.onTriggerObservable_ = null;
+    }
   }
 
   /**
@@ -145,7 +216,13 @@ export class VisibilityModel {
    * @param {function()} handler
    */
   onTriggerEvent(handler) {
-    this.eventPromise_.then(handler);
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.add(handler);
+    }
+    if (this.eventPromise_ && !this.eventResolver_) {
+      // If eventPromise has already resolved, need to call handler manually.
+      handler();
+    }
   }
 
   /**
@@ -162,7 +239,7 @@ export class VisibilityModel {
   /**
    * Sets that the model needs to wait on extra report ready promise
    * after all visibility conditions have been met to call report handler
-   * @param {!function():!Promise} callback
+   * @param {function():!Promise} callback
    */
   setReportReady(callback) {
     this.reportReady_ = false;
@@ -213,19 +290,31 @@ export class VisibilityModel {
    * @private
    */
   update_(visibility) {
+    // Update state and check if all conditions are satisfied
+    if (this.waitToReset_) {
+      if (!this.isVisibilityMatch_(visibility)) {
+        // We were waiting for a condition to become unmet, and now it has
+        this.reset_();
+      }
+      return;
+    }
     if (!this.eventResolver_) {
       return;
     }
-    // Update state and check if all conditions are satisfied
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
-      if (this.scheduledRunId_) {
-        clearTimeout(this.scheduledRunId_);
-        this.scheduledRunId_ = null;
+      if (this.scheduledUpdateTimeoutId_) {
+        clearTimeout(this.scheduledUpdateTimeoutId_);
+        this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
+        // TODO(jonkeller): Can we eliminate eventResolver_?
         this.eventResolver_();
         this.eventResolver_ = null;
+        if (this.repeat_) {
+          this.waitToReset_ = true;
+          this.continuousTime_ = 0;
+        }
       } else if (this.createReportReadyPromise_) {
         // Report when report ready promise resolve
         const reportReadyPromise = this.createReportReadyPromise_();
@@ -237,19 +326,41 @@ export class VisibilityModel {
           this.update();
         });
       }
-    } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
+    } else if (this.matchesVisibility_ && !this.scheduledUpdateTimeoutId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
-        this.scheduledRunId_ = setTimeout(() => {
-          this.scheduledRunId_ = null;
+        this.scheduledUpdateTimeoutId_ = setTimeout(() => {
+          this.scheduledUpdateTimeoutId_ = null;
           this.update();
         }, timeToWait);
       }
-    } else if (!this.matchesVisibility_ && this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
+  }
+
+  /**
+   * Check if visibility fall into the percentage range
+   * @param {number} visibility
+   * @return {boolean}
+   */
+  isVisibilityMatch_(visibility) {
+    dev().assert(visibility >= 0 && visibility <= 1,
+        'invalid visibility value: %s', visibility);
+    // Special case: If visiblePercentageMin is 100%, then it doesn't make
+    // sense to do the usual (min, max] since that would never be true.
+    if (this.spec_.visiblePercentageMin == 1) {
+      return visibility == 1;
+    }
+    // Special case: If visiblePercentageMax is 0%, then we
+    // want to ping when the creative becomes not visible.
+    if (this.spec_.visiblePercentageMax == 0) {
+      return visibility == 0;
+    }
+    return visibility > this.spec_.visiblePercentageMin &&
+        visibility <= this.spec_.visiblePercentageMax;
   }
 
   /**
@@ -275,10 +386,7 @@ export class VisibilityModel {
     const prevMatchesVisibility = this.matchesVisibility_;
     const timeSinceLastUpdate =
         this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
-    this.matchesVisibility_ = (
-        visibility > this.spec_.visiblePercentageMin &&
-        visibility <= this.spec_.visiblePercentageMax);
-
+    this.matchesVisibility_ = this.isVisibilityMatch_(visibility);
     if (this.matchesVisibility_) {
       this.everMatchedVisibility_ = true;
       if (prevMatchesVisibility) {
@@ -295,8 +403,8 @@ export class VisibilityModel {
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
           this.minVisiblePercentage_ > 0 ?
-          Math.min(this.minVisiblePercentage_, visibility) :
-          visibility;
+            Math.min(this.minVisiblePercentage_, visibility) :
+            visibility;
       this.maxVisiblePercentage_ =
           Math.max(this.maxVisiblePercentage_, visibility);
       this.lastVisibleTime_ = now;
@@ -311,7 +419,7 @@ export class VisibilityModel {
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
       this.totalVisibleTime_ += timeSinceLastUpdate;
-      this.continuousTime_ = 0;  // Clear only after max is calculated above.
+      this.continuousTime_ = 0; // Clear only after max is calculated above.
       this.lastVisibleTime_ = now;
     }
 

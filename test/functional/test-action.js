@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../src/action-trust';
+import * as sinon from 'sinon';
 import {
   ActionInvocation,
   ActionService,
@@ -23,11 +23,11 @@ import {
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
+import {ActionTrust} from '../../src/action-trust';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import * as sinon from 'sinon';
 
 
 /**
@@ -52,10 +52,12 @@ function createExecElement(id, enqueAction) {
 }
 
 
-function assertInvocation(inv, target, method, source, opt_event, opt_args) {
+function assertInvocation(inv, target, method, source, caller, opt_event,
+  child, opt_args) {
+
   expect(inv.target).to.equal(target);
   expect(inv.method).to.equal(method);
-  expect(inv.source).to.equal(source);
+  expect(inv.caller).to.equal(caller);
 
   if (opt_event !== undefined) {
     expect(inv.event).to.equal(opt_event);
@@ -622,24 +624,26 @@ describe('Action method', () => {
 
   it('should invoke on the AMP element', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', /* args */ null,
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
+    expect(inv.caller).to.equal('caller1');
     expect(inv.event).to.equal('event1');
     expect(inv.args).to.be.null;
   });
 
   it('should invoke on the AMP element with args', () => {
     action.invoke_(new ActionInvocation(execElement, 'method1', {'key1': 11},
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     expect(onEnqueue).to.be.calledOnce;
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
+    expect(inv.caller).to.equal('caller1');
     expect(inv.event).to.equal('event1');
     expect(inv.args['key1']).to.equal(11);
   });
@@ -666,7 +670,8 @@ describe('Action method', () => {
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
-    expect(inv.source).to.equal(targetElement);
+    expect(inv.source).to.equal(child);
+    expect(inv.caller).to.equal(targetElement);
   });
 
   it('should execute method', () => {
@@ -698,13 +703,14 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
     const callArgs = handlerSpy.getCall(0).args[0];
     expect(callArgs.target).to.be.equal(target);
     expect(callArgs.method).to.be.equal('submit');
     expect(callArgs.args).to.be.equal(null);
     expect(callArgs.source).to.be.equal('button');
+    expect(callArgs.caller).to.be.equal('button');
     expect(callArgs.event).to.be.equal('tap');
   });
 
@@ -714,11 +720,11 @@ describe('installActionHandler', () => {
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.LOW));
+        'button', 'button', 'tap', ActionTrust.LOW));
     expect(handlerSpy).to.not.be.called;
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'tap', ActionTrust.HIGH));
+        'button', 'button', 'tap', ActionTrust.HIGH));
     expect(handlerSpy).to.be.calledOnce;
   });
 });
@@ -758,9 +764,9 @@ describe('Multiple handlers action method', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue1).to.be.calledOnce;
     assertInvocation(onEnqueue1.getCall(0).args[0], execElement1, 'method1',
-        targetElement);
+        child, targetElement);
     assertInvocation(onEnqueue2.getCall(0).args[0], execElement2, 'method2',
-        targetElement);
+        child, targetElement);
   });
 
   it('should chain asynchronous actions', () => {
@@ -842,9 +848,9 @@ describe('Action interceptor', () => {
 
   it('should queue actions', () => {
     action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
-        'source1', 'event1'));
+        'source1', 'caller1', 'event1'));
     action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
-        'source2', 'event2'));
+        'source2', 'caller2', 'event2'));
 
     const queue = getQueue();
     expect(Array.isArray(queue)).to.be.true;
@@ -854,20 +860,22 @@ describe('Action interceptor', () => {
     expect(inv0.target).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
+    expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = queue[1];
     expect(inv1.target).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
+    expect(inv1.caller).to.equal('caller2');
     expect(inv1.event).to.equal('event2');
   });
 
   it('should dequeue actions after handler set', () => {
     action.invoke_(new ActionInvocation(target, 'method1', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     action.invoke_(new ActionInvocation(target, 'method2', /* args */ null,
-        'source2', 'event2', ActionTrust.HIGH));
+        'source2', 'caller2', 'event2', ActionTrust.HIGH));
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getActionHandler()).to.be.undefined;
@@ -885,21 +893,24 @@ describe('Action interceptor', () => {
     expect(inv0.target).to.equal(target);
     expect(inv0.method).to.equal('method1');
     expect(inv0.source).to.equal('source1');
+    expect(inv0.caller).to.equal('caller1');
     expect(inv0.event).to.equal('event1');
 
     const inv1 = handler.getCall(1).args[0];
     expect(inv1.target).to.equal(target);
     expect(inv1.method).to.equal('method2');
     expect(inv1.source).to.equal('source2');
+    expect(inv1.caller).to.equal('caller2');
     expect(inv1.event).to.equal('event2');
 
     action.invoke_(new ActionInvocation(target, 'method3', /* args */ null,
-        'source3', 'event3', ActionTrust.HIGH));
+        'source3', 'caller3', 'event3', ActionTrust.HIGH));
     expect(handler).to.have.callCount(3);
     const inv2 = handler.getCall(2).args[0];
     expect(inv2.target).to.equal(target);
     expect(inv2.method).to.equal('method3');
     expect(inv2.source).to.equal('source3');
+    expect(inv2.caller).to.equal('caller3');
     expect(inv2.event).to.equal('event3');
   });
 });
@@ -930,12 +941,12 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action2', action2);
 
     action.invoke_(new ActionInvocation(target, 'action1', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(action1).to.be.calledOnce;
     expect(action2).to.have.not.been.called;
 
     action.invoke_(new ActionInvocation(target, 'action2', /* args */ null,
-        'source2', 'event2', ActionTrust.HIGH));
+        'source2', 'caller2', 'event2', ActionTrust.HIGH));
     expect(action2).to.be.calledOnce;
     expect(action1).to.be.calledOnce;
 
@@ -947,11 +958,11 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'event1', ActionTrust.LOW));
+        'source1', 'caller1', 'event1', ActionTrust.LOW));
     expect(handler).to.not.be.called;
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'event1', ActionTrust.HIGH));
+        'source1', 'caller1', 'event1', ActionTrust.HIGH));
     expect(handler).to.be.calledOnce;
   });
 });
@@ -976,8 +987,8 @@ describes.sandboxed('Action global target', {}, () => {
     action.trigger(element, 'tap', event);
     expect(target2).to.not.be.called;
     expect(target1).to.be.calledOnce;
-    assertInvocation(target1.args[0][0], document, 'action1', element, event,
-        {a: 'b'});
+    assertInvocation(target1.args[0][0], document, 'action1', element, element,
+        event, {a: 'b'});
 
     const element2 = document.createElement('div');
     element2.setAttribute('on', 'tap:target2.action1');
@@ -996,8 +1007,8 @@ describes.sandboxed('Action global target', {}, () => {
     action.trigger(element4, 'tap', event);
     expect(target2).to.be.calledThrice;
     expect(target1).to.be.calledThrice;
-    assertInvocation(target2.args[2][0], document, 'action2', element4, event,
-        {x: 'y'});
+    assertInvocation(target2.args[2][0], document, 'action2', element4,
+        element4, event, {x: 'y'});
   });
 });
 
@@ -1018,7 +1029,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger', () => {
+      sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1095,7 +1106,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object =>
-            object.detail.checked && object.detail.value == 'foo'));
+          object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {
@@ -1181,6 +1192,28 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
           element,
           'input-debounced',
+          sinon.match(event => {
+            const value = event.target.value;
+            return value == 'foo bar baz';
+          }));
+    });
+  });
+
+  it('should trigger input-throttled event on input', () => {
+    sandbox.stub(action, 'invoke_');
+    const handler = window.document.addEventListener.getCall(5).args[1];
+    const element = document.createElement('input');
+    element.id = 'test';
+    element.setAttribute('on', 'input-throttled:test.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-throttled',
           sinon.match(event => {
             const value = event.target.value;
             return value == 'foo bar baz';

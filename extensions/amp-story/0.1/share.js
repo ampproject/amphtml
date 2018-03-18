@@ -23,8 +23,9 @@ import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
+import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {scopedQuerySelector} from '../../../src/dom';
+import {throttle} from '../../../src/utils/rate-limit';
 
 
 /**
@@ -39,6 +40,19 @@ const SHARE_PROVIDER_NAME = dict({
   'system': 'More',
   'whatsapp': 'WhatsApp',
 });
+
+
+/**
+ * Default left/right padding for share buttons.
+ * @private @const {number}
+ */
+const DEFAULT_BUTTON_PADDING = 16;
+
+/**
+ * Minimum left/right padding for share buttons.
+ * @private @const {number}
+ */
+const MIN_BUTTON_PADDING = 10;
 
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -59,7 +73,10 @@ const TEMPLATE = {
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+const SHARE_ITEM_TEMPLATE = {
+  tag: 'li',
+  attrs: dict({'class': 'i-amphtml-story-share-item'}),
+};
 
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -73,6 +90,10 @@ const LINK_SHARE_ITEM_TEMPLATE = {
 };
 
 
+/** @private @const {string} */
+const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
+
+
 /**
  * @param {!JsonObject=} opt_params
  * @return {!JsonObject}
@@ -81,7 +102,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params || {}).forEach(field => {
+    Object.keys(opt_params).forEach(field => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -200,9 +221,9 @@ export class ShareWidget {
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_))).canonicalUrl;
+          dev().assert(this.ampdoc_))).canonicalUrl;
 
-    if (!copyTextToClipboard(this.win_.document, url)) {
+    if (!copyTextToClipboard(this.win_, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
       return;
     }
@@ -218,9 +239,10 @@ export class ShareWidget {
       return;
     }
 
-    const container = scopedQuerySelector(
-        dev().assertElement(this.root_),
+    const container = dev().assertElement(this.root_).querySelector(
         '.i-amphtml-story-share-system');
+
+    this.loadRequiredExtensions_();
 
     container.appendChild(buildProvider(this.win_.document, 'system'));
   }
@@ -231,7 +253,7 @@ export class ShareWidget {
   isSystemShareSupported_() {
     const viewer = Services.viewerForDoc(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_)));
+          dev().assert(this.ampdoc_)));
 
     const platform = Services.platformFor(this.win_);
 
@@ -281,7 +303,7 @@ export class ShareWidget {
   /** @private */
   loadRequiredExtensions_() {
     const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_));
+      dev().assert(this.ampdoc_));
 
     Services.extensionsFor(this.win_)
         .installExtensionForDoc(ampdoc, 'amp-social-share');
@@ -300,5 +322,142 @@ export class ShareWidget {
     // `lastElementChild` is the system share button container, which should
     // always be last in list
     list.insertBefore(item, list.lastElementChild);
+  }
+}
+
+
+/**
+ * Social share widget for story bookend with a scrollable layout.
+ * This class is coupled to the DOM structure for ShareWidget, but that's ok.
+ */
+export class ScrollableShareWidget {
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
+    /** @private @const {!ShareWidget} */
+    this.mixin_ = ShareWidget.create(win);
+
+    /**
+     * Container width is being tracked to prevent unnecessary layout
+     * calculations.
+     * @private {?number}
+     */
+    this.containerWidth_ = null;
+
+    /** @private {?Element} */
+    this.root_ = null;
+  }
+
+  /** @param {!Window} win */
+  static create(win) {
+    return new ScrollableShareWidget(win);
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
+    this.root_ = this.mixin_.build(ampdoc);
+
+    this.root_.classList.add(SCROLLABLE_CLASSNAME);
+
+    Services.viewportForDoc(ampdoc).onResize(
+        // we don't require a lot of smoothness here, so we throttle
+        throttle(this.win_, () => this.applyButtonPadding_(), 100));
+
+    return this.root_;
+  }
+
+  /**
+   * Calculates padding between buttons so that the result is that there's
+   * always one item visually "cut off" for scroll affordance.
+   * @private
+   */
+  applyButtonPadding_() {
+    const items = this.getVisibleItems_();
+
+    if (!items.length) {
+      return;
+    }
+
+    this.vsync_.run({
+      measure: state => {
+        const containerWidth = this.root_./*OK*/clientWidth;
+
+        if (containerWidth == this.containerWidth_) {
+          // Don't recalculate if width has not changed (i.e. onscreen keyboard)
+          state.noop = true;
+          return;
+        }
+
+        const icon = dev().assert(items[0].firstElementChild);
+
+        const leftMargin = icon./*OK*/offsetLeft - this.root_./*OK*/offsetLeft;
+        const iconWidth = icon./*OK*/offsetWidth;
+
+        // Total width that the buttons will occupy with minimum padding.
+        const totalItemWidth =
+            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+                (items.length - 1));
+
+        // If buttons don't fit within the available area, calculate padding so
+        // that there will be an element cut-off.
+        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
+          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+          const amountVisible =
+              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+
+          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+        } else {
+          // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
+          // so that all elements fit and take as much area as possible.
+          const totalPadding =
+              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
+              (items.length - 1);
+
+          state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
+        }
+
+        this.containerWidth_ = containerWidth;
+      },
+      mutate: state => {
+        if (state.noop) {
+          return;
+        }
+        items.forEach((el, i) => {
+          if (i != 0) {
+            setImportantStyles(el, {'padding-left': px(state.padding)});
+          }
+          if (i != items.length - 1) {
+            setImportantStyles(el, {'padding-right': px(state.padding)});
+          }
+        });
+      },
+    }, {});
+  }
+
+  /**
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getVisibleItems_() {
+    return Array.prototype.filter.call(
+        dev().assertElement(this.root_).querySelectorAll('li'),
+        el => !!el.firstElementChild);
+  }
+
+  /**
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @public
+   */
+  setProviders(providers) {
+    this.mixin_.setProviders(providers);
+    this.applyButtonPadding_();
   }
 }

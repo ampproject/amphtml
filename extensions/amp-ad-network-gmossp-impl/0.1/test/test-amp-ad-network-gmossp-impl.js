@@ -21,8 +21,8 @@ import {
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {gmosspIsA4AEnabled} from '../gmossp-a4a-config';
 
 
 describes.realWin('gmossp-a4a-config', {amp: false}, env => {
@@ -91,7 +91,8 @@ describes.realWin('amp-ad-network-gmossp-impl', {
     gmosspImplElem = doc.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
-    sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
+    sandbox.stub(
+        AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });

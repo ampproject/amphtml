@@ -17,33 +17,31 @@
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
+import {Services} from '../../services';
+import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingIosEmbedWrapper_,
+} from './viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {dev} from '../../log';
+import {dict} from '../../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
+import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
+import {installLayersServiceForDoc} from '../layers-impl';
+import {isExperimentOn} from '../../experiments';
+import {isIframed} from '../../dom';
 import {
+  layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-  layoutRectFromDomRect,
 } from '../../layout-rect';
-import {dev} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
-import {isExperimentOn} from '../../experiments';
 import {numeric} from '../../transition';
-import {Services} from '../../services';
 import {setStyle} from '../../style';
-import {isIframed} from '../../dom';
-import {getMode} from '../../mode';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {
-  ViewportBindingIosEmbedWrapper_,
-} from './viewport-binding-ios-embed-wrapper';
-import {
-  ViewportBindingNaturalIosEmbed_,
-} from './viewport-binding-natural-ios-embed';
 
 
 const TAG_ = 'Viewport';
@@ -158,6 +156,14 @@ export class Viewport {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    if (this.useLayers_) {
+      this.layersSetupDone_ = true;
+      installLayersServiceForDoc(this.ampdoc,
+          this.binding_.getScrollingElement());
+    }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -361,13 +367,30 @@ export class Viewport {
   }
 
   /**
+   * Returns the height of the content of the document, including the
+   * padding top for the viewer header.
+   * contentHeight will match scrollHeight in all cases unless the viewport is
+   * taller than the content.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
+   * @return {number}
+   */
+  getContentHeight() {
+    return this.binding_.getContentHeight();
+  }
+
+  /**
    * Returns the rect of the viewport which includes scroll positions and size.
    * @return {!../../layout-rect.LayoutRectDef}}
    */
   getRect() {
     if (this.rect_ == null) {
-      const scrollTop = this.getScrollTop();
-      const scrollLeft = this.getScrollLeft();
+      let scrollTop = 0;
+      let scrollLeft = 0;
+      if (!this.useLayers_) {
+        scrollTop = this.getScrollTop();
+        scrollLeft = this.getScrollLeft();
+      }
       const size = this.getSize();
       this.rect_ =
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
@@ -409,6 +432,12 @@ export class Viewport {
    * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
+    if (this.useLayers_) {
+      return this.vsync_.measurePromise(() => {
+        return this.getLayoutRect(el);
+      });
+    }
+
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
@@ -432,6 +461,14 @@ export class Viewport {
   }
 
   /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {
+    return this.binding_.supportsPositionFixed();
+  }
+
+  /**
    * Whether the element is declared as fixed in any of the user's stylesheets.
    * Will include any matches, not necessarily currently fixed elements.
    * @param {!Element} element
@@ -448,7 +485,12 @@ export class Viewport {
    */
   scrollIntoView(element) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    let newScrollTop;
+    if (this.useLayers_) {
+      newScrollTop = elementTop + this.getScrollTop();
+    } else {
+      newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    }
     this.binding_.setScrollTop(newScrollTop);
   }
 
@@ -464,9 +506,9 @@ export class Viewport {
    * @return {!Promise}
    */
   animateScrollIntoView(element,
-                        duration = 500,
-                        curve = 'ease-in',
-                        pos = 'top') {
+    duration = 500,
+    curve = 'ease-in',
+    pos = 'top') {
     const elementRect = this.binding_.getLayoutRect(element);
     let offset;
     switch (pos) {
@@ -480,9 +522,17 @@ export class Viewport {
         offset = 0;
         break;
     }
-    const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-    const newScrollTop = Math.max(0, calculatedScrollTop);
-    const curScrollTop = this.getScrollTop();
+    let newScrollTop;
+    let curScrollTop;
+
+    if (this.useLayers_) {
+      newScrollTop = elementRect.top + offset;
+      curScrollTop = 0;
+    } else {
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      newScrollTop = Math.max(0, calculatedScrollTop);
+      curScrollTop = this.getScrollTop();
+    }
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }
@@ -498,7 +548,7 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportChangedEventDef events.
-   * @param {!function(!ViewportChangedEventDef)} handler
+   * @param {function(!ViewportChangedEventDef)} handler
    * @return {!UnlistenDef}
    */
   onChanged(handler) {
@@ -511,7 +561,7 @@ export class Viewport {
    * event handler. The primary use case for this handler is to inform that
    * scrolling might be going on. To get more information {@link onChanged}
    * handler should be used.
-   * @param {!function()} handler
+   * @param {function()} handler
    * @return {!UnlistenDef}
    */
   onScroll(handler) {
@@ -520,9 +570,14 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportResizedEventDef events.
-   * @param {!function(!ViewportResizedEventDef)} handler
+   * @param {function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
+
+  // Note that there is a known bug in Webkit that causes window.innerWidth
+  // and window.innerHeight values to be incorrect after resize. A temporary
+  // fix is to add a 500 ms delay before computing these values.
+  // Link: https://bugs.webkit.org/show_bug.cgi?id=170595
   onResize(handler) {
     return this.resizeObservable_.add(handler);
   }
@@ -784,7 +839,7 @@ export class Viewport {
     }
     if (this.viewportMeta_ === undefined) {
       this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
-          this.globalDoc_.querySelector('meta[name=viewport]'));
+        this.globalDoc_.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -964,7 +1019,7 @@ export class Viewport {
   resize_() {
     this.rect_ = null;
     const oldSize = this.size_;
-    this.size_ = null;  // Need to recalc.
+    this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
@@ -1078,13 +1133,7 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    // The overriding of document.body fails in iOS7.
-    // Also, iOS8 sometimes freezes scrolling.
-    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
-    } else {
-      binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
@@ -1108,7 +1157,6 @@ const ViewportType = {
    * device.
    * See:
    * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };

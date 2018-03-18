@@ -63,7 +63,7 @@ function readFromFile(name) {
       if (err) {
         reject(err);
       } else {
-        resolve(data);
+        resolve(data.trim());
       }
     });
   });
@@ -404,11 +404,9 @@ function main() {
           '--user-agent <userAgent>', 'User agent string to use in requests.',
           DEFAULT_USER_AGENT)
       .option(
-          '--html_format <AMP|AMP4ADS>',
+          '--html_format <AMP|AMP4ADS|AMP4EMAIL|EXPERIMENTAL>',
           'The input format to be validated.\n' +
-              '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
-              '  still in draft; this requires specifying\n' +
-              '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
+              '  AMP by default.',
           'AMP')
       .option(
           '--format <color|text|json>',
@@ -425,9 +423,13 @@ function main() {
     program.outputHelp();
     process.exit(1);
   }
-  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS') {
+  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS' &&
+      program.html_format !== 'AMP4EMAIL' &&
+      program.html_format !== 'EXPERIMENTAL') {
     process.stderr.write(
-        '--html_format must be set to "AMP" or "AMP4ADS".\n', function() {
+        '--html_format must be set to "AMP", "AMP4ADS", "AMP4EMAIL", or ' +
+            '"EXPERIMENTAL.\n',
+        function() {
           process.exit(1);
         });
   }

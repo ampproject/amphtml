@@ -135,12 +135,12 @@ function buildKeyframes(keyframesRule) {
   const array = [];
   for (let i = 0; i < keyframesRule.cssRules.length; i++) {
     const keyframeRule = /** @type {!CSSKeyframeRule} */ (
-        keyframesRule.cssRules[i]);
+      keyframesRule.cssRules[i]);
     const keyframe = {};
     keyframe['offset'] =
         keyframeRule.keyText == 'from' ? 0 :
-        keyframeRule.keyText == 'to' ? 1 :
-        parseFloat(keyframeRule.keyText) / 100;
+          keyframeRule.keyText == 'to' ? 1 :
+            parseFloat(keyframeRule.keyText) / 100;
     const style = keyframeRule.style;
     for (let j = 0; j < style.length; j++) {
       const styleName = style[j];

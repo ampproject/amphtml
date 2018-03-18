@@ -13,31 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {EventType, dispatch} from './events';
-import {renderAsElement} from './simple-template';
-import {dict} from '../../../src/utils/object';
-import {dev} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
+import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
-import {KeyCodes} from '../../../src/utils/key-codes';
+import {matches} from '../../../src/dom';
+import {renderAsElement} from './simple-template';
+
 
 
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
-const ENTER_FULLSCREEN_CLASS = 'i-amphtml-story-enter-fullscreen';
-
-const EXIT_FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
-
-const CLOSE_CLASS = 'i-amphtml-story-bookend-close';
-
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({'class': 'i-amphtml-story-system-layer'}),
+  attrs: dict(
+      {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
   children: [
     {
       tag: 'div',
@@ -77,30 +74,6 @@ const TEMPLATE = {
             'class': MUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': ENTER_FULLSCREEN_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': EXIT_FULLSCREEN_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': CLOSE_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
       ],
     },
   ],
@@ -108,26 +81,9 @@ const TEMPLATE = {
 
 
 /**
- * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {!Element} el
- * @param {boolean} isHidden
- */
-function toggleHiddenAttribute(vsync, el, isHidden) {
-  vsync.mutate(() => {
-    if (isHidden) {
-      el.setAttribute('hidden', 'hidden');
-    } else {
-      el.removeAttribute('hidden');
-    }
-  });
-}
-
-
-/**
  * System Layer (i.e. UI Chrome) for <amp-story>.
  * Chrome contains:
  *   - mute/unmute button
- *   - fullscreen button
  *   - story progress bar
  *   - bookend close butotn
  */
@@ -146,15 +102,6 @@ export class SystemLayer {
     this.root_ = null;
 
     /** @private {?Element} */
-    this.exitFullScreenBtn_ = null;
-
-    /** @private {?Element} */
-    this.enterFullScreenBtn_ = null;
-
-    /** @private {?Element} */
-    this.closeBookendBtn_ = null;
-
-    /** @private {?Element} */
     this.muteAudioBtn_ = null;
 
     /** @private {?Element} */
@@ -171,13 +118,16 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
   }
 
   /**
-   * @param {number} pageCount The number of pages in the story.
+   * @param {!Array<string>} pageIds the ids of each page in the story
    * @return {!Element}
    */
-  build(pageCount) {
+  build(pageIds) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -187,23 +137,19 @@ export class SystemLayer {
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
     this.root_.insertBefore(
-        this.progressBar_.build(pageCount), this.root_.firstChild);
+        this.progressBar_.build(pageIds), this.root_.lastChild);
 
     this.leftButtonTray_ =
         this.root_.querySelector('.i-amphtml-story-ui-left');
 
     this.buildForDevelopmentMode_();
 
-    this.exitFullScreenBtn_ =
-        this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
-
-    this.enterFullScreenBtn_ =
-        this.root_.querySelector('.i-amphtml-story-enter-fullscreen');
-
-    this.closeBookendBtn_ =
-        this.root_.querySelector('.i-amphtml-story-bookend-close');
-
     this.addEventHandlers_();
+
+    // TODO(newmuis): Observe this value.
+    if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
+      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+    }
 
     return this.getRoot();
   }
@@ -229,25 +175,10 @@ export class SystemLayer {
     this.root_.addEventListener('click', e => {
       const target = dev().assertElement(e.target);
 
-      if (target.matches(
-          `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
-        this.onExitFullScreenClick_(e);
-      } else if (target.matches(
-          `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
-        this.onEnterFullScreenClick_(e);
-      } else if (target.matches(`.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
-        this.onCloseBookend_(e);
-      } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
+      if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
-      } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
+      } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
-      }
-    });
-
-    this.win_.addEventListener('keyup', e => {
-      if (!this.closeBookendBtn_.hasAttribute('hidden')
-          && e.keyCode == KeyCodes.ESCAPE) {
-        this.onCloseBookend_(e);
       }
     });
   }
@@ -258,70 +189,6 @@ export class SystemLayer {
    */
   getRoot() {
     return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @param {boolean} inFullScreen
-   */
-  setInFullScreen(inFullScreen) {
-    this.toggleExitFullScreenBtn_(inFullScreen);
-    this.toggleEnterFullScreenBtn_(inFullScreen);
-  }
-
-  /**
-   * @param {boolean} isEnabled
-   * @private
-   */
-  toggleExitFullScreenBtn_(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.exitFullScreenBtn_),
-        /* opt_isHidden */ !isEnabled);
-  }
-
-  /**
-   * @param {boolean} isEnabled
-   * @private
-   */
-  toggleEnterFullScreenBtn_(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.enterFullScreenBtn_),
-        /* opt_isHidden */ isEnabled);
-  }
-
-  /**
-   * @param {boolean} isEnabled
-   */
-  toggleCloseBookendButton(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.closeBookendBtn_),
-        /* opt_isHidden */ !isEnabled);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onExitFullScreenClick_(e) {
-    this.dispatch_(EventType.EXIT_FULLSCREEN, e);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onEnterFullScreenClick_(e) {
-    this.dispatch_(EventType.ENTER_FULLSCREEN, e);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onCloseBookend_(e) {
-    this.dispatch_(EventType.CLOSE_BOOKEND, e);
   }
 
   /**
@@ -354,22 +221,24 @@ export class SystemLayer {
   }
 
   /**
-   * @param {number} pageIndex The index of the new active page.
+   * @param {string} pageId The page id of the new active page.
    * @public
    */
-  setActivePageIndex(pageIndex) {
-    this.progressBar_.setActivePageIndex(pageIndex);
+  setActivePageId(pageId) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
+    this.progressBar_.setActiveSegmentId(pageId);
   }
 
   /**
-   * @param {number} pageIndex The index of the page whose progress should be
+   * @param {string} pageId The id of the page whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current page.
    * @public
    */
-  updateProgress(pageIndex, progress) {
-    this.progressBar_.updateProgress(pageIndex, progress);
+  updateProgress(pageId, progress) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
+    this.progressBar_.updateProgress(pageId, progress);
   }
 
   /**

@@ -48,7 +48,7 @@ module.exports = {
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: 10000,
+    nbDotsPerLine: 100000,
     color: {
       success: 'green',
       failure: 'red',
@@ -121,6 +121,10 @@ module.exports = {
       // Dramatically speeds up iframe creation time.
       flags: ['--disable-extensions'],
     },
+    Chrome_no_extensions_headless: {
+      base: 'ChromeHeadless',
+      flags: ['--disable-extensions'],
+    },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
@@ -139,29 +143,44 @@ module.exports = {
       browserName: 'chrome',
       version: '45',
     },
-    SL_iOS_8_4: {
+    SL_iOS_latest: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '8.4',
-    },
-    SL_iOS_9_1: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
+      version: 'latest',
     },
     SL_iOS_10_0: {
       base: 'SauceLabs',
       browserName: 'iphone',
       version: '10.0',
     },
-    SL_iOS_11_0: {
+    SL_iOS_9_3: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '11.0',
+      version: '9.3',
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
+      version: 'latest',
+    },
+    SL_Safari_latest: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: 'latest',
+    },
+    SL_Safari_10: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: 10,
+    },
+    SL_Safari_9: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: 9,
+    },
+    SL_Edge_latest: {
+      base: 'SauceLabs',
+      browserName: 'microsoftedge',
       version: 'latest',
     },
     SL_IE_11: {
@@ -169,31 +188,12 @@ module.exports = {
       browserName: 'internet explorer',
       version: 11,
     },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
-      version: 'latest',
-    },
-    SL_Safari_9: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 9,
-    },
-    SL_Safari_8: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      version: 8,
-    },
   },
 
   sauceLabs: {
     testName: 'AMP HTML on Sauce',
     tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
     startConnect: false,
-    connectOptions: {
-      port: 5757,
-      logfile: 'sauce_connect.log',
-    },
   },
 
   client: {

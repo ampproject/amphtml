@@ -25,7 +25,7 @@ const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
 
 
 describes.fakeWin('dynamic classes are inserted at runtime', {
-  amp: true,  // Extension will be installed manually in tests.
+  amp: true, // Extension will be installed manually in tests.
   location: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
 }, env => {
   let win, doc, ampdoc;
@@ -50,7 +50,8 @@ describes.fakeWin('dynamic classes are inserted at runtime', {
       win.navigator.userAgent = userAgent;
     }
     if (referrer !== undefined) {
-      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl', () => referrer);
+      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl').callsFake(
+          () => referrer);
     }
     env.installExtension('amp-dynamic-css-classes');
   }

@@ -30,7 +30,7 @@ describes.realWin('amp-instagram', {
   });
 
   function getIns(shortcode, opt_responsive,
-      opt_beforeLayoutCallback, opt_captioned) {
+    opt_beforeLayoutCallback, opt_captioned) {
     const ins = doc.createElement('amp-instagram');
     ins.setAttribute('data-shortcode', shortcode);
     ins.setAttribute('width', '111');
@@ -161,7 +161,7 @@ describes.realWin('amp-instagram', {
     return getIns('fBwFP', true).then(ins => {
       const impl = ins.implementation_;
       const iframe = ins.querySelector('iframe');
-      const attemptChangeHeight = sandbox.spy(impl, 'attemptChangeHeight');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
       const newHeight = 977;
 
       expect(iframe).to.not.be.null;
@@ -170,9 +170,9 @@ describes.realWin('amp-instagram', {
         height: newHeight,
       });
 
-      expect(attemptChangeHeight).to.be.calledOnce;
+      expect(changeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(attemptChangeHeight.firstCall.args[0]).to.equal(newHeight - 64);
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight - 64);
     });
   });
 

@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
+import '../amp-sidebar';
+import * as lolex from 'lolex';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
-import '../amp-sidebar';
-import * as lolex from 'lolex';
 
 
 describes.realWin('amp-sidebar 0.1 version', {
@@ -70,7 +69,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     if (options.closeText) {
       ampSidebar.setAttribute('data-close-button-aria-label',
           options.closeText);
-    };
+    }
     ampSidebar.setAttribute('id', 'sidebar1');
     ampSidebar.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(ampSidebar);
@@ -78,7 +77,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       return ampSidebar.layoutCallback();
     }).then(() => {
       if (options.toolbars) {
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
       }
@@ -90,15 +89,13 @@ describes.realWin('amp-sidebar 0.1 version', {
     // Stub our sidebar operations, doing this here as it will
     // Ease testing our media queries
     const impl = ampSidebar.implementation_;
-    sandbox.stub(impl.vsync_,
-        'mutate', callback => {
-          callback();
-        });
-    sandbox.stub(impl.vsync_,
-        'mutatePromise', callback => {
-          callback();
-          return Promise.resolve();
-        });
+    sandbox.stub(impl.vsync_, 'mutate').callsFake(callback => {
+      callback();
+    });
+    sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
+      callback();
+      return Promise.resolve();
+    });
     // Create our individual toolbars
     options.toolbars.forEach(toolbarObj => {
       const navToolbar = doc.createElement('nav');
@@ -136,19 +133,19 @@ describes.realWin('amp-sidebar 0.1 version', {
   describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
-        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+        assert(sidebarElement.classList.contains('i-amphtml-overlay'));
       });
     });
 
     it('should replace text to screen reader \
     button in data-close-button-aria-label', () => {
-      return getAmpSidebar({'closeText':
+          return getAmpSidebar({'closeText':
         'data-close-button-aria-label'}).then(sidebarElement => {
-          const closeButton = sidebarElement.lastElementChild;
-          expect(closeButton.textContent)
-              .to.equal('data-close-button-aria-label');
+            const closeButton = sidebarElement.lastElementChild;
+            expect(closeButton.textContent)
+                .to.equal('data-close-button-aria-label');
+          });
         });
-    });
 
     it('should open from left is side is not specified', () => {
       return getAmpSidebar().then(sidebarElement => {
@@ -178,24 +175,25 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     it('should create an invisible close \
     button for screen readers only', () => {
-      return getAmpSidebar().then(sidebarElement => {
-        const impl = sidebarElement.implementation_;
-        impl.close_ = sandbox.spy();
-        const closeButton = sidebarElement.lastElementChild;
-        expect(closeButton).to.exist;
-        expect(closeButton.tagName).to.equal('BUTTON');
-        assertScreenReaderElement(closeButton);
-        expect(closeButton.textContent).to.equal('Close the sidebar');
-        expect(impl.close_).to.have.not.been.called;
-        closeButton.click();
-        expect(impl.close_).to.be.calledOnce;
-      });
-    });
+          return getAmpSidebar().then(sidebarElement => {
+            const impl = sidebarElement.implementation_;
+            impl.close_ = sandbox.spy();
+            const closeButton = sidebarElement.lastElementChild;
+            expect(closeButton).to.exist;
+            expect(closeButton.tagName).to.equal('BUTTON');
+            assertScreenReaderElement(closeButton);
+            expect(closeButton.textContent).to.equal('Close the sidebar');
+            expect(impl.close_).to.have.not.been.called;
+            closeButton.click();
+            expect(impl.close_).to.be.calledOnce;
+          });
+        });
 
     it('should open sidebar on button click', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
         impl.scheduleLayout = sandbox.spy();
@@ -245,7 +243,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should close sidebar on button click', () => {
       return getAmpSidebar({'open': true}).then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
@@ -289,7 +288,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should toggle sidebar on button click', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.scheduleLayout = sandbox.spy();
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
@@ -321,7 +321,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should close sidebar on escape', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
@@ -333,7 +334,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = doc.createEventObject ?
-            doc.createEventObject() : doc.createEvent('Events');
+          doc.createEventObject() : doc.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('keydown', true, true);
         }
@@ -341,7 +342,7 @@ describes.realWin('amp-sidebar 0.1 version', {
         eventObj.which = KeyCodes.ESCAPE;
         const el = doc.documentElement;
         el.dispatchEvent ?
-            el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
+          el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         clock.tick(600);
@@ -353,7 +354,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should reflect state of the sidebar', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.scheduleResume = sandbox.spy();
         impl.vsync_ = {
@@ -399,7 +401,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
@@ -418,7 +420,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         const compensateIosBottombarSpy =
@@ -437,7 +439,8 @@ describes.realWin('amp-sidebar 0.1 version', {
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
@@ -449,11 +452,11 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = doc.createEventObject ?
-            doc.createEventObject() : doc.createEvent('Events');
+          doc.createEventObject() : doc.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
-        sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
           return {
             win: {
               location: {
@@ -463,8 +466,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           };
         });
         anchor.dispatchEvent ?
-            anchor.dispatchEvent(eventObj) :
-            anchor.fireEvent('onkeydown', eventObj);
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         clock.tick(600);
@@ -475,47 +478,49 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     it('should not close sidebar if \
        clicked on a new origin navigation', () => {
-      return getAmpSidebar().then(sidebarElement => {
-        const anchor = sidebarElement.getElementsByTagName('a')[0];
-        anchor.href = '#newloc';
-        const impl = sidebarElement.implementation_;
-        impl.schedulePause = sandbox.spy();
-        impl.vsync_ = {
-          mutate(callback) {
-            callback();
-          },
-        };
-        sandbox.stub(timer, 'delay', function(callback) {
-          callback();
-        });
-        expect(sidebarElement.hasAttribute('open')).to.be.false;
-        impl.open_();
-        expect(sidebarElement.hasAttribute('open')).to.be.true;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-        const eventObj = doc.createEventObject ?
-            doc.createEventObject() : doc.createEvent('Events');
-        if (eventObj.initEvent) {
-          eventObj.initEvent('click', true, true);
-        }
-        sandbox.stub(sidebarElement, 'getAmpDoc', () => {
-          return {
-            win: {
-              location: {
-                // Mocking navigating from example.com -> localhost:9876
-                href: 'http://example.com',
+          return getAmpSidebar().then(sidebarElement => {
+            const anchor = sidebarElement.getElementsByTagName('a')[0];
+            anchor.href = '#newloc';
+            const impl = sidebarElement.implementation_;
+            impl.schedulePause = sandbox.spy();
+            impl.vsync_ = {
+              mutate(callback) {
+                callback();
               },
-            },
-          };
+            };
+            sandbox.stub(timer, 'delay').callsFake(function(callback) {
+              callback();
+            });
+            expect(sidebarElement.hasAttribute('open')).to.be.false;
+            impl.open_();
+            expect(sidebarElement.hasAttribute('open')).to.be.true;
+            expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
+                'false');
+            const eventObj = doc.createEventObject ?
+              doc.createEventObject() : doc.createEvent('Events');
+            if (eventObj.initEvent) {
+              eventObj.initEvent('click', true, true);
+            }
+            sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
+              return {
+                win: {
+                  location: {
+                    // Mocking navigating from example.com -> localhost:9876
+                    href: 'http://example.com',
+                  },
+                },
+              };
+            });
+            anchor.dispatchEvent ?
+              anchor.dispatchEvent(eventObj) :
+              anchor.fireEvent('onkeydown', eventObj);
+            expect(sidebarElement.hasAttribute('open')).to.be.true;
+            expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
+                'false');
+            expect(sidebarElement.style.display).to.equal('');
+            expect(impl.schedulePause).to.have.not.been.called;
+          });
         });
-        anchor.dispatchEvent ?
-            anchor.dispatchEvent(eventObj) :
-            anchor.fireEvent('onkeydown', eventObj);
-        expect(sidebarElement.hasAttribute('open')).to.be.true;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
-        expect(sidebarElement.style.display).to.equal('');
-        expect(impl.schedulePause).to.have.not.been.called;
-      });
-    });
 
     it('should not close sidebar if clicked on new page navigation', () => {
       return getAmpSidebar().then(sidebarElement => {
@@ -528,7 +533,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -536,11 +541,11 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = doc.createEventObject ?
-            doc.createEventObject() : doc.createEvent('Events');
+          doc.createEventObject() : doc.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
-        sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
           return {
             win: {
               location: {
@@ -552,8 +557,8 @@ describes.realWin('amp-sidebar 0.1 version', {
           };
         });
         anchor.dispatchEvent ?
-            anchor.dispatchEvent(eventObj) :
-            anchor.fireEvent('onkeydown', eventObj);
+          anchor.dispatchEvent(eventObj) :
+          anchor.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
@@ -571,7 +576,7 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -579,13 +584,13 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         const eventObj = doc.createEventObject ?
-            doc.createEventObject() : doc.createEvent('Events');
+          doc.createEventObject() : doc.createEvent('Events');
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
         li.dispatchEvent ?
-            li.dispatchEvent(eventObj) :
-            li.fireEvent('onkeydown', eventObj);
+          li.dispatchEvent(eventObj) :
+          li.fireEvent('onkeydown', eventObj);
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
         expect(sidebarElement.style.display).to.equal('');
@@ -596,7 +601,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should listen to animationend/transitionend event', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install(impl.win, 0, ['Date', 'setTimeout']);
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.boundOnAnimationEnd_ = sandbox.spy();
         impl.buildCallback();
         impl.vsync_ = {
@@ -605,14 +611,14 @@ describes.realWin('amp-sidebar 0.1 version', {
           },
         };
         const animationEndEvent = new Event(
-          'animationend',
-          {bubbles: true}
+            'animationend',
+            {bubbles: true}
         );
         sidebarElement.firstChild.dispatchEvent(animationEndEvent);
         expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
         const transitionEndEvent = new Event(
-          'transitionend',
-          {bubbles: true}
+            'transitionend',
+            {bubbles: true}
         );
         sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
@@ -621,10 +627,6 @@ describes.realWin('amp-sidebar 0.1 version', {
   });
 
   describe('amp-sidebar - toolbars in amp-sidebar', () => {
-
-    beforeEach(() => {
-      toggleExperiment(win, 'amp-sidebar toolbar', true);
-    });
 
     // Tests for amp-sidebar 1.0
     it('should not create toolbars without <nav toolbar />', () => {
@@ -648,16 +650,16 @@ describes.realWin('amp-sidebar 0.1 version', {
 
     it('should create multiple toolbar elements, \
      within their respective containers', () => {
-      return getAmpSidebar({
-        toolbars: [{},
-          {
-            media: '(min-width: 1024px)',
-          },
-        ],
-      }).then(sidebarElement => {
-        expect(sidebarElement.implementation_.toolbars_.length)
-            .to.be.equal(2);
-      });
-    });
+          return getAmpSidebar({
+            toolbars: [{},
+              {
+                media: '(min-width: 1024px)',
+              },
+            ],
+          }).then(sidebarElement => {
+            expect(sidebarElement.implementation_.toolbars_.length)
+                .to.be.equal(2);
+          });
+        });
   });
 });

@@ -15,13 +15,14 @@
  */
 
 import {Observable} from '../../observable';
-import {layoutRectLtwh} from '../../layout-rect';
-import {dev} from '../../log';
-import {whenDocumentReady} from '../../document-ready';
 import {Services} from '../../services';
+import {ViewportBindingDef} from './viewport-binding-def';
+import {dev} from '../../log';
+import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
 import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
 
@@ -42,6 +43,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
     const topClasses = this.win.document.documentElement.className;
     this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
@@ -65,6 +67,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     // Setup UI.
     /** @private {boolean} */
@@ -142,6 +147,11 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  supportsPositionFixed() {
+    return true;
+  }
+
+  /** @override */
   onScroll(callback) {
     this.scrollObservable_.add(callback);
   }
@@ -172,11 +182,13 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   disableScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.add('i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
   }
 
@@ -217,14 +229,30 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  getContentHeight() {
+    // The reparented body inside wrapper will have the correct content height.
+    // Body is overflow: hidden so that the scrollHeight include the margins of
+    // body's first and last child.
+    // Body height doesn't include paddingTop on the parent, so we add on the
+    // position of the body from the top of the viewport and subtract the
+    // scrollTop (as position relative to the viewport changes as you scroll).
+    const rect = this.win.document.body./*OK*/getBoundingClientRect();
+    return rect.height + rect.top + this.getScrollTop();
+  }
+
+  /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const scrollTop = opt_scrollTop != undefined
-        ? opt_scrollTop
-        : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-        ? opt_scrollLeft
-        : this.getScrollLeft();
     const b = el./*OK*/getBoundingClientRect();
+    if (this.useLayers_) {
+      return layoutRectLtwh(b.left, b.top, b.width, b.height);
+    }
+
+    const scrollTop = opt_scrollTop != undefined
+      ? opt_scrollTop
+      : this.getScrollTop();
+    const scrollLeft = opt_scrollLeft != undefined
+      ? opt_scrollLeft
+      : this.getScrollLeft();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -262,5 +290,10 @@ export class ViewportBindingIosEmbedWrapper_ {
     if (opt_event) {
       this.scrollObservable_.fire();
     }
+  }
+
+  /** @override */
+  getScrollingElement() {
+    return this.wrapper_;
   }
 }

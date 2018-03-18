@@ -19,11 +19,13 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
+  getCorsUrl,
   getSourceOrigin,
   getSourceUrl,
-  isProxyOrigin,
+  getWinOrigin,
   isLocalhostOrigin,
   isProtocolValid,
+  isProxyOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -31,8 +33,6 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-  getCorsUrl,
-  getWinOrigin,
 } from '../../src/url';
 
 describe('getWinOrigin', () => {
@@ -82,9 +82,6 @@ describe('getWinOrigin', () => {
       },
     })).to.equal('null');
   });
-
-
-
 });
 
 
@@ -119,6 +116,26 @@ describe('parseUrl', () => {
     const a1 = parseUrl(url);
     const a2 = parseUrl(url);
     expect(a1).to.equal(a2);
+  });
+  it('caches up to 100 results', () => {
+    const url = 'https://foo.com:123/abc?123#foo';
+    const a1 = parseUrl(url);
+
+    // should grab url from the cache
+    expect(a1).to.equal(parseUrl(url));
+
+    // cache 99 more urls in order to reach max capacity of LRU cache: 100
+    for (let i = 0; i < 100; i++) {
+      parseUrl(`${url}-${i}`);
+    }
+
+    const a2 = parseUrl(url);
+
+    // the old cached url should not be in the cache anymore
+    // the newer instance should
+    expect(a1).to.not.equal(parseUrl(url));
+    expect(a2).to.equal(parseUrl(url));
+    expect(a1).to.not.equal(a2);
   });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
@@ -594,6 +611,10 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/a/www.origin.com/foo/?f=0#h',
       'http://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://cdn.ampproject.org/ad/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
+
 
   // Prefixed CDN
   testOrigin(
@@ -633,10 +654,42 @@ describe('getSourceOrigin/Url', () => {
       'http://o.com/foo/?f_amp_js_param=5&d=5');
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5?d=5',
-      'http://o.com/foo/');  // Treats amp_js_param=5?d=5 as one param.
+      'http://o.com/foo/'); // Treats amp_js_param=5?d=5 as one param.
   testOrigin(
       'https://cdn.ampproject.org/c/o.com/foo/&amp_js_param=5&d=5',
-      'http://o.com/foo/&amp_js_param=5&d=5');  // Treats &... as part of path.
+      'http://o.com/foo/&amp_js_param=5&d=5'); // Treats &... as part of path.
+
+  // Removes google experimental queryString parameters.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&amp_js_param=5',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5&usqp=mq331AQCCAE',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&bar=1&amp_js_param=5',
+      'http://o.com/foo/?bar=1');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&usqp=mq331AQCCAE#something',
+      'http://o.com/foo/?f=0#something');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&f=0#bar',
+      'http://o.com/foo/?f=0#bar');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&usqp=mq331AQCCAE&d=5#baz',
+      'http://o.com/foo/?f=0&d=5#baz');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f_usqp=mq331AQCCAE&d=5',
+      'http://o.com/foo/?f_usqp=mq331AQCCAE&d=5');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE?d=5',
+      'http://o.com/foo/'); // Treats amp_js_param=5?d=5 as one param.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/&usqp=mq331AQCCAE&d=5',
+      'http://o.com/foo/&usqp=mq331AQCCAE&d=5'); // Treats &... as part of path.
 
   // Non-CDN.
   testOrigin(
@@ -681,10 +734,12 @@ describe('resolveRelativeUrl', () => {
       '//acme.org/path/file?f=0#h',
       'http://base.org/bpath/bfile?bf=0#bh',
       'http://acme.org/path/file?f=0#h');
-  testRelUrl(
-      '\\\\acme.org/path/file?f=0#h',
-      'http://base.org/bpath/bfile?bf=0#bh',
-      'http://acme.org/path/file?f=0#h');
+
+  // TODO(camelburrito, #11827): This resolves to file:// on Sauce Labs.
+  // testRelUrl(
+  //     '\\\\acme.org/path/file?f=0#h',
+  //     'http://base.org/bpath/bfile?bf=0#bh',
+  //     'http://acme.org/path/file?f=0#h');
 
   // Absolute path.
   testRelUrl(

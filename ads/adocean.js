@@ -15,8 +15,8 @@
  */
 
 
-import {writeScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @const {Object<string, string>}
@@ -35,7 +35,7 @@ function isFalseString(str) {
 }
 
 /**
- * @param {!string} mode
+ * @param {string} mode
  * @param {!Window} global
  */
 function setupAdoConfig(mode, global) {
@@ -67,7 +67,7 @@ function setupPreview(global, data) {
 }
 
 /**
- * @param {!string} str
+ * @param {string} str
  * @returns (Object|undefined}
  * @throws {SyntaxError}
  */
@@ -112,7 +112,7 @@ let runSyncCount = 0;
 
 /**
  * @param {!Window} global
- * @param {!function()} cb
+ * @param {function()} cb
  */
 function runSync(global, cb) {
   global['__aoPrivFnct' + ++runSyncCount] = cb;
@@ -122,7 +122,7 @@ function runSync(global, cb) {
 }
 
 /**
- * @param {!string} mode
+ * @param {string} mode
  * @param {!Window} global
  * @param {!Object} data
  */

@@ -161,6 +161,11 @@ The following properties are defined in this configuration:
     <td>"client" or "server"</td>
     <td>Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.</td>
   </tr>
+  <tr>
+      <td class="col-fourty"><code>namespace</code></td>
+      <td>string</td>
+      <td>Default is empty. Namespace is required if multiple access providers are specified.</td>
+    </tr>
 </table>
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
@@ -180,6 +185,25 @@ Here’s an example of the AMP Access configuration:
 }
 </script>
 ```
+
+#### Multiple access providers
+
+It is possible to specify multiple access providers using an array instead of a single object and providing a `namespace` for each entry.
+
+```html
+<script id="amp-access" type="application/json">
+[
+  {
+    "property": value,
+    ...
+    "namespace": value
+  },
+  ...
+[
+</script>
+```
+
+
 ### Access URL Variables
 
 When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
@@ -238,7 +262,7 @@ https://pub.com/access?
 
 AUTHDATA variable is available to Pingback and Login URLs. It allows passing any field in the authorization
 response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
-`AUTHDATA(other.isSubscriber)`.
+`AUTHDATA(other.isSubscriber)`. If using namespaces, namespaces can be prepended to the field e.g. `AUTHDATA(anamespace.afield)`.
 
 ### Access Content Markup
 
@@ -250,7 +274,7 @@ The `amp-access` value is a boolean expression defined in a SQL-like language. T
 ```html
 <div amp-access="expression">...</div>
 ```
-Properties and values refer to the properties and values of the Authorization response returned by the Authorization endpoint. This provides a flexible system to support different access scenarios.
+Properties and values refer to the properties and values of the Authorization response returned by the Authorization endpoint. This provides a flexible system to support different access scenarios. If using namespaces, just prepend namespaces to property names, e.g. `anamespace.aproperty`.
 
 The `amp-access-hide` attribute can be used to optimistically hide the element before the Authorization response has been received, which can show it. It provides the semantics of “invisible by default”. The authorization response returned by the Authorization later may rescind this default and make section visible. When `amp-access-hide` attribute is omitted, the section will be shown/included by default. The `amp-access-hide` attribute can only be used in conjunction with the `amp-access` attribute.
 ```html
@@ -316,7 +340,7 @@ https://publisher.com/amp-access.json?
   &url=SOURCE_URL
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
- - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
+ - The property names have to conform to the restrictions defined by the `amp-access` expressions grammar (see [Appendix A][1]). This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
  - The property values can only be one of the types: string, number, boolean.
  - Values can also be nested as objects with values of the same types: string, number, boolean.
  - The total size of the serialized authorization response cannot exceed 500 bytes.
@@ -446,6 +470,8 @@ When multiple Login URLs are configured, the format is `tap:amp-access.login-{ty
 <a on="tap:amp-access.login-signup">Subscribe</a>
 ```
 
+When namespaces are used, the format is `tap:amp-access.login-{namespace}` or `tap:amp-access.login-{namespace}-{type}`.
+
 AMP makes no distinction between login and subscribe. This distinction can be configured by the Publisher using multiple Login URLs/links or on the Publisher’s side.
 
 ## Integration with *amp-analytics*
@@ -455,7 +481,7 @@ The integration with *amp-analytics* is documented in the [amp-access-analytics.
 ## CORS Origin Security
 
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
-[AMP CORS Security Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+[AMP CORS Security Spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
 
 ## Metering
 
@@ -497,7 +523,7 @@ As usual, the Reader ID should be included in the call to Login Page and can be 
  - **Google AMP Cache** - the proxying cache for AMP documents.
  - **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
  - **Publisher.com** - the site of an AMP publisher.
- - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for how such requests can be secured.
+ - **CORS endpoint** - cross-origin HTTPS endpoint. See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for more info. See [CORS Origin Security][9] for how such requests can be secured.
  - **Reader** - the actual person viewing AMP documents.
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 

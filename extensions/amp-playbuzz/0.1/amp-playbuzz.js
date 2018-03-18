@@ -38,21 +38,21 @@
  * the example above and will produce the correct aspect ratio.
  */
 
-import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
-import {logo, showMoreArrow} from './images';
-import * as utils from './utils';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
-import {dict} from '../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
+import * as utils from './utils';
+import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {
+  assertAbsoluteHttpOrHttpsUrl,
   parseUrl,
   removeFragment,
-  assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-
+import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
+import {logo, showMoreArrow} from './images';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 /** @const */
 const EXPERIMENT = 'amp-playbuzz';
 
@@ -215,7 +215,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
               createElement('div', 'pb_feed_placeholder_content',
                   createElement('div', 'pb_feed_placeholder_preloader',
                       loaderImage)
-          )));
+              )));
 
     return loadingPlaceholder;
   }
@@ -255,15 +255,16 @@ class AmpPlaybuzz extends AMP.BaseElement {
    *
    */
   generateEmbedSourceUrl_() {
-    const winUrl = this.win.location;
+    const canonicalUrl = Services.documentInfoForDoc(this.element).canonicalUrl;
+    const parsedPageUrl = parseUrl(canonicalUrl);
     const params = {
       itemUrl: this.iframeSrcUrl_,
       relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
-      parentUrl: removeFragment(winUrl.href),
-      parentHost: winUrl.hostname,
+      parentUrl: removeFragment(parsedPageUrl.href),
+      parentHost: parsedPageUrl.host,
     };
 
     const embedUrl = utils.composeEmbedUrl(params);
@@ -302,7 +303,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.iframe_ = null;
       this.iframePromise_ = null;
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 }
 

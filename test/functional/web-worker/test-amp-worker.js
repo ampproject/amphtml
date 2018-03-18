@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
-import {
-  invokeWebWorker,
-  ampWorkerForTesting,
-} from '../../../src/web-worker/amp-worker';
-import {installXhrService} from '../../../src/service/xhr-impl';
-import {Services} from '../../../src/services';
 import * as sinon from 'sinon';
+import {Services} from '../../../src/services';
+import {
+  ampWorkerForTesting,
+  invokeWebWorker,
+} from '../../../src/web-worker/amp-worker';
+import {dev} from '../../../src/log';
+import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
   let sandbox;
@@ -53,11 +53,12 @@ describe('invokeWebWorker', () => {
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText', () => Promise.resolve({
-      text() {
-        return Promise.resolve();
-      },
-    }));
+    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText').callsFake(
+        () => Promise.resolve({
+          text() {
+            return Promise.resolve();
+          },
+        }));
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();

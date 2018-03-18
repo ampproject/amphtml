@@ -105,9 +105,10 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to rebase relative URLs found in the document so that the URL remains the same when loaded from the AMP Cache. The other reason is to improve performance by selecting a different equivalent resource. This includes rewriting image and font URLs to use a cached copy and rewriting AMP javascript URLs to use a copy with longer cache lifetimes.
 
-#### All relative `href` , `src`, `data-iframe-src` and `data-no-service-worker-fallback-shell-url` URLs are rewritten as absolute URLs
+#### All relative `href` , `src`, `bookend-config-src`, `data-iframe-src` and `data-no-service-worker-fallback-shell-url` URLs are rewritten as absolute URLs
 
-`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker).
+`bookend-confg-src` is part of `<amp-story>` [spec](https://www.ampproject.org/docs/reference/components/amp-story)
+`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker)
 
 <details>
 <summary>example</summary>
@@ -153,6 +154,7 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 | `<amp-img srcset="https://example.com/bar.png 1080w, https://example.com/bar-400.png 400w">`| `<amp-img src="/i/s/example.com/bar.png 1080w, /i/s/example.com/bar-400.png 400w">` |
 | `<amp-anim src=foo.gif></amp-anim>` | `<amp-anim src=/i/s/example.com/foo.gif></amp-anim>` |
 | `<amp-video poster=bar.png>` | `<amp-video poster=/i/s/example.com/bar.png>` |
+| `<svg class="icon" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="https://example.com/icon.svg#icon"></use></svg>` | `<svg class=icon xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="/i/s/example.com/icon.svg#icon"></use></svg>` |
 
 </details>
 
@@ -290,7 +292,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 Remove any `<meta>` tags except for those that:
  - have attribute `charset`
  - do not have attributes `content`, `itemprop`, `name` and `property`
- - have attribute `http-equiv`
+ - have attribute `http-equiv` where attribute value is not `x-dns-prefetch-control`
  - have attribute `name` with case-insensitive prefix `amp-`
  - have attribute `name` with case-insensitive prefix `amp4ads-`
  - have attribute `name` with case-insensitive prefix `dc.`
@@ -311,6 +313,7 @@ Remove any `<meta>` tags except for those that:
 | before | after |
 | --- | --- |
 | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=description content="An example AMP page">`<br>`<meta name=twitter:title content="AMP Example">` | `<meta charset=utf-8>`<br>`<meta http-equiv=content-language content=en>`<br>`<meta name=twitter:title content="AMP Example">` |
+| `<meta charset=utf-8>`<br>`<meta http-equiv=x-dns-prefetch-control content=on>` | `<meta charset=utf-8>` |
 
 </details>
 

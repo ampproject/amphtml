@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from '../navigation-state';
 import {AmpStoryVariableService} from '../variable-service';
+import {StateChangeType} from '../navigation-state';
 
 
 describes.fakeWin('amp-story variable service', {}, () => {
@@ -33,7 +33,8 @@ describes.fakeWin('amp-story variable service', {}, () => {
       },
     });
 
-    expect(variableService.pageIndex).to.equal(123);
-    expect(variableService.pageId).to.equal('my-page-id');
+    const variables = variableService.get();
+    expect(variables.pageIndex).to.equal(123);
+    expect(variables.pageId).to.equal('my-page-id');
   });
 });

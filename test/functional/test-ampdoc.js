@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
+import * as docready from '../../src/document-ready';
+import * as dom from '../../src/dom';
+import * as sinon from 'sinon';
 import {
   AmpDocService,
-  AmpDocSingle,
   AmpDocShadow,
   AmpDocShell,
+  AmpDocSingle,
   declareExtension,
   installShadowDoc,
   installShadowDocForShell,
   shadowDocHasBody,
   shadowDocReady,
 } from '../../src/service/ampdoc-impl';
-import * as dom from '../../src/dom';
-import * as docready from '../../src/document-ready';
-import {createShadowRoot} from '../../src/shadow-embed';
 import {
   ShadowDomVersion,
-  isShadowDomSupported,
   getShadowDomSupportedVersion,
+  isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
-import * as sinon from 'sinon';
+import {createShadowRoot} from '../../src/shadow-embed';
 
 
 describe('AmpDocService', () => {
@@ -166,7 +166,8 @@ describe('AmpDocService', () => {
       }).to.throw(/The shadow root already contains ampdoc/);
     });
 
-    it('should navigate via host', () => {
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should navigate via host', () => {
       if (!shadowRoot) {
         return;
       }
@@ -271,7 +272,7 @@ describe('AmpDocService', () => {
       const mockDoc = {body: {nodeType: 1}};
 
       let readyCallback;
-      sandbox.stub(docready, 'whenDocumentReady', () => {
+      sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
         return new Promise(resolve => {
           readyCallback = resolve;
         });
@@ -346,17 +347,17 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise', () => {
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady', () => {
+    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady', () => {
+    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });

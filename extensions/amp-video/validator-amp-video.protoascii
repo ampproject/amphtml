@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-video
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   # Typically the extension_spec takes care of this, but we have
   # a unique situation where we need to refer to this earlier in
@@ -86,9 +88,11 @@ attr_lists: {
   attrs: { name: "[title]" }
 }
 
-tags: {  # <amp-video>
+tags: {  # <amp-video> not in amp-story.
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
-  # amp-story is disallowed_ancestor because the 'poster' attr is optional here.
+  # There is an alternate spec for amp-video in amp-story.
   disallowed_ancestor: "AMP-STORY"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded and we warn, instead
@@ -97,6 +101,7 @@ tags: {  # <amp-video>
   attrs: { name: "poster" }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
+  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
@@ -108,11 +113,18 @@ tags: {  # <amp-video>
   }
 }
 
-tags: {  # <amp-video>
+tags: {  # <amp-video> in amp-story
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
   spec_name: "amp-story >> amp-video"
   mandatory_ancestor: "AMP-STORY"
   requires_extension: "amp-video"
+  attrs: {
+    name: "autoplay"
+    value: ""
+    mandatory: true
+  }
   attrs: {
     name: "poster"
     mandatory: true

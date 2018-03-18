@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-import {dev, user} from './log';
-import {isExperimentOn} from './experiments';
 import {Services} from './services';
 import {
-  isProxyOrigin,
-  parseUrl,
-  parseQueryString,
   addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+  parseUrl,
 } from './url';
+import {dev, user} from './log';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 
 const TIMEOUT_VALUE = 8000;
 
 let trackImpressionPromise = null;
+
+const DEFAULT_APPEND_URL_PARAM = [
+  'gclid',
+  'gclsrc',
+];
 
 /**
  * A function to get the trackImpressionPromise;
@@ -59,8 +64,8 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
-        dev().warn('IMPRESSION', error);
-      });
+    dev().warn('IMPRESSION', error);
+  });
 
   const viewer = Services.viewerForDoc(win.document);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
@@ -166,7 +171,7 @@ function handleClickUrl(win) {
     win.location.hash = '';
   }
 
-    // TODO(@zhouyx) need test with a real response.
+  // TODO(@zhouyx) need test with a real response.
   return viewer.whenFirstVisible().then(() => {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
@@ -234,4 +239,67 @@ function applyResponse(win, response) {
     const newHref = addParamsToUrl(currentHref, params);
     win.history.replaceState(null, '', newHref);
   }
+}
+
+/**
+ * Return a promise that whether appending extra url params to outgoing link is required.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<boolean>}
+ */
+export function shouldAppendExtraParams(ampdoc) {
+  return ampdoc.whenReady().then(() => {
+    return !!ampdoc.getBody().querySelector(
+        'amp-analytics[type=googleanalytics]');
+  });
+}
+
+/**
+ * Return the extra url params string that should be appended to outgoing link
+ * @param {!Window} win
+ * @param {!Element} target
+ * @return {string}
+ */
+export function getExtraParamsUrl(win, target) {
+  // Get an array with extra params that needs to append.
+  const url = parseUrl(win.location.href);
+  const params = parseQueryString(url.search);
+  const appendParams = [];
+  for (let i = 0; i < DEFAULT_APPEND_URL_PARAM.length; i++) {
+    const param = DEFAULT_APPEND_URL_PARAM[i];
+    if (typeof params[param] !== 'undefined') {
+      appendParams.push(param);
+    }
+  }
+
+  // Check if the param already exists
+  const additionalUrlParams = target.getAttribute('data-amp-addparams');
+  let href = target.href;
+  if (additionalUrlParams) {
+    href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
+  }
+  const loc = parseUrl(href);
+  const existParams = parseQueryString(loc.search);
+  for (let i = appendParams.length - 1; i >= 0; i--) {
+    const param = appendParams[i];
+    if (typeof existParams[param] !== 'undefined') {
+      appendParams.splice(i, 1);
+    }
+  }
+  return getQueryParamUrl(appendParams);
+}
+
+/**
+ * Helper method to convert an query param array to string
+ * @param {!Array<string>} params
+ * @return {string}
+ */
+function getQueryParamUrl(params) {
+  let url = '';
+  for (let i = 0; i < params.length; i++) {
+    const param = params[i];
+    url += (i == 0) ?
+      `${param}=QUERY_PARAM(${param})` :
+      `&${param}=QUERY_PARAM(${param})`;
+  }
+  return url;
 }

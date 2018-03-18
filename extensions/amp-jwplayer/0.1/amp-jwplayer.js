@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
@@ -53,7 +53,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.contentid_ = user().assert(
-      (this.element.getAttribute('data-playlist-id') ||
+        (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
         'Either the data-media-id or the data-playlist-id ' +
       'attributes must be specified for <amp-jwplayer> %s',

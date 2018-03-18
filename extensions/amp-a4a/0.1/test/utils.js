@@ -15,6 +15,7 @@
  */
 
 import {AmpA4A} from '../amp-a4a';
+import {dict} from '../../../../src/utils/object';
 
 /** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +
@@ -25,7 +26,7 @@ export class MockA4AImpl extends AmpA4A {
     return Promise.resolve(TEST_URL);
   }
 
-  updatePriority() {
+  updateLayoutPriority() {
     // Do nothing.
   }
 
@@ -37,12 +38,17 @@ export class MockA4AImpl extends AmpA4A {
     // Do nothing.
   }
 
-  deferMutate(callback) {
+  mutateElement(callback) {
     callback();
   }
 
   /** @override */
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return dict();
   }
 }

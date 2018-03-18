@@ -17,8 +17,8 @@
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {
-    createElementWithAttributes,
-    removeElement,
+  createElementWithAttributes,
+  removeElement,
 } from './dom';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -34,7 +34,7 @@ import {triggerAnalyticsEvent} from './analytics';
  * @return {!Element} created analytics element
  */
 export function insertAnalyticsElement(
-    parentElement, config, loadAnalytics = false) {
+  parentElement, config, loadAnalytics = false) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
   const analyticsElem = createElementWithAttributes(
       doc,
@@ -172,7 +172,7 @@ export class CustomEventReporterBuilder {
   build() {
     dev().assert(this.config_, 'CustomEventReporter already built');
     const report = new CustomEventReporter(
-            this.parent_, /** @type {!JsonObject} */ (this.config_));
+        this.parent_, /** @type {!JsonObject} */ (this.config_));
     this.config_ = null;
     return report;
   }

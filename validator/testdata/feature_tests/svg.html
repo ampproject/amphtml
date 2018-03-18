@@ -82,5 +82,10 @@
       <stop offset="0%" stop-color="#333" offset="100%" />
     </radialgradient>
   </svg>
+
+  <!-- Invalid xml:base present -->
+  <svg xml:base="javascript:alert('hello world')">
+    <a href="#"><circle r="10"></a>
+  </svg>
 </body>
 </html>

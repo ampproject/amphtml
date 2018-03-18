@@ -25,7 +25,10 @@ goog.provide('parse_css.ParseCssTest');
 goog.require('goog.asserts');
 goog.require('json_testutil.makeJsonKeyCmpFn');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.BlockType');
+goog.require('parse_css.QualifiedRule');
 goog.require('parse_css.RuleVisitor');
+goog.require('parse_css.Selector');
 goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractUrls');
@@ -36,6 +39,8 @@ goog.require('parse_css.parseASimpleSelectorSequence');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseATypeSelector');
 goog.require('parse_css.parseAnIdSelector');
+goog.require('parse_css.parseMediaQueries');
+goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.traverseSelectors');
 
@@ -48,6 +53,19 @@ goog.require('parse_css.traverseSelectors');
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
+
+describe('stripVendorPrefix', () => {
+  it('removes typical vendor prefixes', () => {
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-moz-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-ms-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-o-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-webkit-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('foo'));
+    assertStrictEqual('foo-foo', parse_css.stripVendorPrefix('foo-foo'));
+    assertStrictEqual('-d-foo-foo', parse_css.stripVendorPrefix('-d-foo-foo'));
+    assertStrictEqual('-foo', parse_css.stripVendorPrefix('-foo'));
+  });
+});
 
 /**
  * For emitting json output with keys in logical order for the CSS parser's AST.
@@ -668,7 +686,7 @@ describe('parseAStylesheet', () => {
         'color: red;\n';  // declaration outside qualified rule.
     const errors = [];
     const tokenlist = parse_css.tokenize(css, 1, 0, errors);
-    const sheet = parse_css.parseAStylesheet(
+    parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
@@ -1083,6 +1101,140 @@ describe('extractUrls', () => {
     assertJSONEquals([], parsedUrls);
   });
 });
+
+/**
+ * Helper function for parseMediaQueries tests.
+ * @param {string} mediaQuery
+ * @return  {!parse_css.Stylesheet}
+ */
+function mediaQueryStylesheet(mediaQuery) {
+  const css = '@media ' + mediaQuery + ' {}';
+  const errors = [];
+  const tokenList = parse_css.tokenize(css, 1, 0, errors);
+  const sheet = parse_css.parseAStylesheet(
+      tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+      errors);
+  assertJSONEquals([], errors);
+  return sheet;
+}
+
+describe('parseMediaQueries', () => {
+  // Tests demonstrates the error position reported for a simple error media
+  // query. Note that the position is actually the @media AT rule.
+  it('identifies error position', () => {
+    const sheet = mediaQueryStylesheet('screen,');
+    const errors = [];
+    const mediaTypes = [];
+    const mediaFeatures = [];
+    parse_css.parseMediaQueries(sheet, mediaTypes, mediaFeatures, errors);
+    assertJSONEquals(
+        [{
+          'line': 1,
+          'col': 0,
+          'code': 'CSS_SYNTAX_MALFORMED_MEDIA_QUERY',
+          'params': ['style'],
+          'tokenType': 'ERROR'
+        }],
+        errors);
+  });
+
+  // Tests demonstrates a series of media queries which are expected to produce
+  // errors.
+  it('fails on error queries', () => {
+    const cases = [
+      'screen, ',
+      'screen and',
+      'screen (',
+      '((min-width:500px)',
+      '(min-width:500px))',
+      '((min-width:500px))',
+      'not only screen and (color)',
+      '(example, all), speech',
+      '&test, screen',
+      'all and(color)',
+    ];
+
+    for (const testcase of cases) {
+      const sheet = mediaQueryStylesheet(testcase);
+      const errors = [];
+      const mediaTypes = [];
+      const mediaFeatures = [];
+      parse_css.parseMediaQueries(sheet, mediaTypes, mediaFeatures, errors);
+      assertStrictEqual(1, errors.length);
+    }
+  });
+
+  // Tests demonstrates a series of media queries which are expected to not
+  // produce errors.
+  it('succeeds on non-error queries', () => {
+    const cases = [
+      'screen, braille, hologram, greetingcard',
+      'screen and (color), projection and (color)',
+      'all and (min-width:500px)',
+      'all and (min-width: 500px)',
+      '(min-width:500px)',
+      'not screen and (color)',
+      'only screen and (color)',
+      'NOT screen AND (color)',
+      'screen \t \n , \t \n braille',
+    ];
+
+    for (const testcase of cases) {
+      const sheet = mediaQueryStylesheet(testcase);
+      const errors = [];
+      const mediaTypes = [];
+      const mediaFeatures = [];
+      parse_css.parseMediaQueries(sheet, mediaTypes, mediaFeatures, errors);
+      assertStrictEqual(0, errors.length);
+    }
+  });
+
+  // Tests demonstrates that media type and media feature extraction.
+  it('extracts media types and features', () => {
+    const cases = [
+      // Query,              Types,    Features
+      ['screen and (color)', 'screen', 'color'],
+      ['screen and (color), braille', 'screen,braille', 'color'],
+      [
+        'screen and (min-width: 50px) and (max-width:51px)', 'screen',
+        'min-width,max-width'
+      ],
+      ['(color) and (max-width:abc)', '', 'color,max-width'],
+      ['only screen', 'screen', ''],
+      ['not screen', 'screen', ''],
+      ['screen, not braille', 'screen,braille', ''],
+      ['SCREEN AND (COLOR)', 'SCREEN', 'COLOR'],
+    ];
+
+    for (const testcase of cases) {
+      assertStrictEqual(3, testcase.length);
+      const query = testcase[0];
+      const expectedTypes = testcase[1];
+      const expectedFeatures = testcase[2];
+
+      const sheet = mediaQueryStylesheet(query);
+      const errors = [];
+      const mediaTypes = [];
+      const mediaFeatures = [];
+      parse_css.parseMediaQueries(sheet, mediaTypes, mediaFeatures, errors);
+      assertStrictEqual(0, errors.length);
+
+      let seenTypes = '';
+      for (const token of mediaTypes) {
+        if (seenTypes !== '') seenTypes += ',';
+        seenTypes += token.value;
+      }
+      let seenFeatures = '';
+      for (const token of mediaFeatures) {
+        if (seenFeatures !== '') seenFeatures += ',';
+        seenFeatures += token.value;
+      }
+
+      assertStrictEqual(expectedTypes, seenTypes);
+      assertStrictEqual(expectedFeatures, seenFeatures);
+    }
+  });
+});  // describe('parseMediaQueries')
 
 /**
  * @param {string} selector
@@ -1655,7 +1807,6 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest('foo bar 9');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const errors = [];
     const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {

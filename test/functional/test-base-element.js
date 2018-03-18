@@ -16,10 +16,11 @@
 
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
+import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {
@@ -41,9 +42,10 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should delegate update priority to resources', () => {
     const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
-    const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
-    element.updatePriority(1);
-    expect(updatePriorityStub).to.be.calledOnce;
+    const updateLayoutPriorityStub = sandbox.stub(
+        resources, 'updateLayoutPriority');
+    element.updateLayoutPriority(1);
+    expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 
   it('propagateAttributes - niente', () => {
@@ -152,12 +154,22 @@ describes.realWin('BaseElement', {amp: true}, env => {
         .returns(resource);
     const layoutBox = layoutRectLtwh(0, 50, 100, 200);
     const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
-    sandbox.stub(resource, 'getLayoutBox', () => layoutBox);
-    sandbox.stub(resource, 'getPageLayoutBox', () => pageLayoutBox);
+    sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
+    sandbox.stub(resource, 'getPageLayoutBox').callsFake(() => pageLayoutBox);
     expect(element.getLayoutBox()).to.eql(layoutBox);
     expect(customElement.getLayoutBox()).to.eql(layoutBox);
     expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);
     expect(customElement.getPageLayoutBox()).to.eql(pageLayoutBox);
+  });
+
+  it('should return true for inabox experiment renderOutsideViewport', () => {
+    expect(element.renderOutsideViewport()).to.eql(3);
+    // Still 3 if inabox w/o experiment.
+    env.win.AMP_MODE.runtime = 'inabox';
+    expect(element.renderOutsideViewport()).to.eql(3);
+    // Enable experiment and now should be true.
+    toggleExperiment(env.win, 'inabox-rov', true);
+    expect(element.renderOutsideViewport()).to.be.true;
   });
 
   describe('forwardEvents', () => {

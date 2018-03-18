@@ -14,13 +14,29 @@
  * limitations under the License.
  */
 
-import {startsWith, endsWith} from './string';
-import {user} from './log';
+import {LRUCache} from './utils/lru-cache';
+import {dict} from './utils/object';
+import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
-import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {urls} from './config';
+import {user} from './log';
+
+/**
+ * @type {!JsonObject}
+ */
+const SERVING_TYPE_PREFIX = dict({
+  // No viewer
+  'c': true,
+  // In viewer
+  'v': true,
+  // Ad landing page
+  'a': true,
+  // Ad
+  'ad': true,
+});
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -36,8 +52,11 @@ let a;
  */
 let cache;
 
-/** @private @const Matches amp_js_* paramters in query string. */
+/** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+/** @private @const Matches usqp parameters from goog experiment in query string. */
+const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
 
 const INVALID_PROTOCOLS = [
   /*eslint no-script-url: 0*/ 'javascript:',
@@ -69,10 +88,11 @@ export function getWinOrigin(win) {
 export function parseUrl(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+    cache = self.UrlCache || (self.UrlCache = new LRUCache(100));
   }
 
-  const fromCache = cache[url];
+  const fromCache = cache.get(url);
+
   if (fromCache) {
     return fromCache;
   }
@@ -85,7 +105,10 @@ export function parseUrl(url, opt_nocache) {
   if (opt_nocache) {
     return frozen;
   }
-  return cache[url] = frozen;
+
+  cache.put(url, frozen);
+
+  return frozen;
 }
 
 /**
@@ -114,7 +137,7 @@ export function parseUrlWithA(a, url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
-    origin: null,  // Set below.
+    origin: null, // Set below.
   });
 
   // Some IE11 specific polyfills.
@@ -160,11 +183,11 @@ export function appendEncodedParamStringToUrl(url, paramString,
   const mainAndQuery = mainAndFragment[0].split('?', 2);
 
   let newUrl = mainAndQuery[0] + (
-      mainAndQuery[1]
-          ? (opt_addToFront
-              ? `?${paramString}&${mainAndQuery[1]}`
-              : `?${mainAndQuery[1]}&${paramString}`)
-          : `?${paramString}`);
+    mainAndQuery[1]
+      ? (opt_addToFront
+        ? `?${paramString}&${mainAndQuery[1]}`
+        : `?${mainAndQuery[1]}&${paramString}`)
+      : `?${paramString}`);
   newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
@@ -244,7 +267,7 @@ export function isSecureUrl(url) {
  * @return {string}
  */
 export function assertHttpsUrl(
-    urlString, elementContext, sourceName = 'source') {
+  urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
   // (erwinm, #4560): type cast necessary until #4560 is fixed.
@@ -364,7 +387,8 @@ function removeAmpJsParams(urlSearch) {
   }
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
-      .replace(/^[?&]/, '');  // Removes first ? or &.
+      .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
+      .replace(/^[?&]/, ''); // Removes first ? or &.
   return search ? '?' + search : '';
 }
 
@@ -390,12 +414,12 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
+  user().assert(SERVING_TYPE_PREFIX[prefix],
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
-      ? 'https://' + decodeURIComponent(path[3])
-      : 'http://' + decodeURIComponent(domainOrHttpsSignal);
+    ? 'https://' + decodeURIComponent(path[3])
+    : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
   user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);

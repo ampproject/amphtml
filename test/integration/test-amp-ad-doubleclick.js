@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
-  pollForLayout,
   poll,
+  pollForLayout,
 } from '../../testing/iframe';
-import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
     ' one ad', () => {
@@ -94,7 +94,7 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-      }, undefined,  /* timeout */ 5000);
+      }, undefined, /* timeout */ 5000);
     }).then(() => {
       return poll('render-start message received', () => {
         return fixture.messages.filter(message => {

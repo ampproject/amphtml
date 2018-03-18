@@ -40,6 +40,18 @@
       }
     }
   },
+  "validatorNotPresentBadge": {
+    "message": "ERR",
+    "description": "Text displayed in the extension icon informing the user there was an error."
+  },
+  "validatorNotPresentText": {
+    "message": "Unable to load the AMP Validator. This may be due to internet connectivity issues. Please reload the browser when a working internet connection is available.",
+    "description": "Warning message displayed to the user when the AMP Validator JavaScript could not be loaded."
+  },
+  "validatorNotPresentTitle": {
+    "message": "Error loading AMP Validator.",
+    "description": "Extension title stating that the extension could not load the AMP Validator JavaScript."
+  },
   "warningsTabText": {
     "message": "Warnings: $count$",
     "description": "Number of warnings.",

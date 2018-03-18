@@ -21,7 +21,7 @@ export let QueryParameterDef;
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Object<string,!string|number|null>} queryParams query parameters for
+ * @param {!Object<string,string|number|null>} queryParams query parameters for
  *     the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
  * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to
@@ -29,15 +29,15 @@ export let QueryParameterDef;
  * @return {string} the fully constructed URL.
  */
 export function buildUrl(
-    baseUrl, queryParams, maxLength, opt_truncationQueryParam) {
+  baseUrl, queryParams, maxLength, opt_truncationQueryParam) {
   const encodedParams = [];
   const encodedTruncationParam =
       opt_truncationQueryParam &&
       !(opt_truncationQueryParam.value == null ||
       opt_truncationQueryParam.value === '') ?
-      encodeURIComponent(opt_truncationQueryParam.name) + '=' +
+        encodeURIComponent(opt_truncationQueryParam.name) + '=' +
       encodeURIComponent(String(opt_truncationQueryParam.value)) :
-      null;
+        null;
   let capacity = maxLength - baseUrl.length;
   if (encodedTruncationParam) {
     capacity -= encodedTruncationParam.length + 1;
@@ -55,7 +55,7 @@ export function buildUrl(
     if (fullLength > capacity) {
       const truncatedValue = encodedValue
           .substr(0, capacity - encodedNameAndSep.length - 1)
-      // Don't end with a partially truncated escape sequence
+        // Don't end with a partially truncated escape sequence
           .replace(/%\w?$/, '');
       if (truncatedValue) {
         encodedParams.push(encodedNameAndSep + truncatedValue);

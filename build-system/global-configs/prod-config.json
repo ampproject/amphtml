@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["visibility-v3", "amp-animation", "ampdoc-shell", "amp-ima-video"],
+  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
@@ -12,25 +12,23 @@
   "ad-type-custom": 1,
   "ios-embed-wrapper": 1,
   "amp-apester-media": 1,
+  "amp-ima-video": 1,
   "amp-playbuzz": 1,
   "chunked-amp": 1,
-  "sticky-ad-early-load": 1,
   "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
   "slidescroll-disable-css-snap": 1,
   "version-locking": 1,
-  "visibility-v3": 1,
   "a4aFastFetchDoubleclickLaunched": 0,
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-new-signature-verifier": 1,
   "pump-early-frame": 1,
   "a4a-measure-get-ad-urls": 0,
-  "ad-loader-v2": 1,
-  "3p-use-ampcontext": 0,
+  "3p-use-ampcontext": 1,
   "amp-animation": 1,
   "amp-sidebar toolbar": 1,
-  "amp-position-observer": 1,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
-  "expUnconditionedAdxIdentity": 0.01
+  "expUnconditionedDfpIdentity": 0.01,
+  "expUnconditionedCanonicalHoldback": 0.01
 }

@@ -56,7 +56,7 @@ As expected, this emits errors because the provided string in the example, `<htm
   argument for validateString function in the API.
 
 ### 1.0.12
-* Added support for --user-agent option
+* Added support for --user-agent option.
 
 ### 1.0.13
 * Added newInstance method, a simple API that's not async.
@@ -81,4 +81,15 @@ As expected, this emits errors because the provided string in the example, `<htm
 * Set correct process exit status for old versions of Node.js (v0.10.25).
 
 ### 1.0.20
-* Better npm post-install for virtual machines, running debian over windows with SMB shared folder
+* Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
+
+### 1.0.21
+* --html_format=AMP4ADS is no longer experimental.
+
+### 1.0.22
+* --html_format=AMP4EMAIL added.
+
+### 1.0.23
+* The amphtml-validator binary now requires the Node.js binary to be called node.
+  On systems where the Node.js binary is called nodejs, consider installing
+  the nodejs-legacy Debian package or better yet, NVM.
