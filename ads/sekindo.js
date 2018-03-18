@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, loadScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -37,10 +37,10 @@ export function sekindo(global, data) {
       }
     }
   }
-  loadScript(global, 
-  'https://live.sekindo.com/live/liveView.php?' + query, () => {
-    global.context.renderStart();
-  }, () => {
-    global.context.noContentAvailable();
-  });
+  loadScript(global,
+      'https://live.sekindo.com/live/liveView.php?' + query, () => {
+        global.context.renderStart();
+      }, () => {
+        global.context.noContentAvailable();
+      });
 }
