@@ -59,6 +59,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   REMOTE_HTML_EXPERIMENT: '21061729',
   USDRUD_CONTROL: '21061759',
   USDRUD_EXPERIMENT: '21061760',
+  DF_DEP_LAUNCH_CONTROL: '21061783',
+  DF_DEP_LAUNCH_EXPERIMENT: '21061784',
 };
 
 /** @const @enum{string} */
@@ -81,6 +83,8 @@ export const URL_EXPERIMENT_MAPPING = {
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
   '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
   '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+  '13': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+  '14': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT,
 };
 
 /**
@@ -151,17 +155,16 @@ export class DoubleclickA4aEligibility {
     }
     let experimentId;
     const urlExperimentId = extractUrlExperimentId(win, element) || '';
-    if (hasUSDRD &&
-        ![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
-          DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
-            URL_EXPERIMENT_MAPPING[urlExperimentId])) {
-      return false;
-    }
-    if (useRemoteHtml && !element.getAttribute('rtc-config') &&
-        ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
-          DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL].includes(
-            URL_EXPERIMENT_MAPPING[urlExperimentId])) {
-      return false;
+    if (![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT].includes(
+        URL_EXPERIMENT_MAPPING[urlExperimentId])) {
+      if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
+        return false;
+      }
     }
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
@@ -193,9 +196,18 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return ![DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL].includes(
-        experimentId);
+    // If we are in the Remote.html or USDRUD controls, then we are supposed
+    // to use Delayed Fetch in accordance with the existing carveouts.
+    switch (experimentId) {
+      case DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT:
+        return true;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT:
+        return !hasUSDRD;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT:
+        return !useRemoteHtml;
+    }
+    return !hasUSDRD &&
+        (!useRemoteHtml || !!element.getAttribute('rtc-config'));
   }
 
   /**
