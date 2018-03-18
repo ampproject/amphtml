@@ -571,28 +571,27 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse
    */
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
-    const resizeAndMeasure = () => {
-      this.resizeIframe(height, width);
-      this.isCollapsed_ = !!optIsCollapse;
-      // We need to force a measure right now, as without remeasuring, we
-      // will have the wrong size information for the amp-ad and the
-      // safeframe when we send the response message into the safeframe.
-      // This would be an issue specifically for when expand is successful
-      // while amp-ad is out of the viewport, for example.
-      this.baseInstance_.measureElement(() => {
-        this.baseInstance_.getResource().measure();
-      });
-      this.sendResizeResponse(true, messageType);
-    };
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      resizeAndMeasure();
-    }).catch(() => {
-      this.baseInstance_.getResource().resetPendingChangeSize();
-      if (optIsCollapse) {
-        resizeAndMeasure();
+      const success = !!this.baseInstance_.element.style.height.match(height)
+            && !!this.baseInstance_.element.style.width.match(width);
+      if (success || optIsCollapse) {
+        this.resizeIframe(height, width);
+        this.isCollapsed_ = !!optIsCollapse;
+        // We need to force a measure right now, as without remeasuring, we
+        // will have the wrong size information for the amp-ad and the
+        // safeframe when we send the response message into the safeframe.
+        // This would be an issue specifically for when expand is successful
+        // while amp-ad is out of the viewport, for example.
+        this.baseInstance_.measureElement(() => {
+          this.baseInstance_.getResource().measure();
+        });
+        this.sendResizeResponse(true, messageType);
       } else {
+        this.baseInstance_.getResource().resetPendingChangeSize();
         this.sendResizeResponse(false, messageType);
       }
+    }).catch(() => {
+      this.sendResizeResponse(false, messageType);
     });
   }
 

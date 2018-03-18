@@ -512,13 +512,15 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(100, 100);
-      expect(safeframeMock.style.height).to.equal('100px');
-      expect(safeframeMock.style.width).to.equal('100px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeIframeSpy).to.be.calledOnce;
+        expect(resizeIframeSpy).to.be.calledWith(100, 100);
+        expect(safeframeMock.style.height).to.equal('100px');
+        expect(safeframeMock.style.width).to.equal('100px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      });
     });
 
     /**
@@ -540,13 +542,15 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.returns({then});
       sendExpandMessage(550,550);
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(600, 600);
-      expect(safeframeMock.style.height).to.equal('600px');
-      expect(safeframeMock.style.width).to.equal('600px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+           expect(resizeIframeSpy).to.be.calledOnce;
+           expect(resizeIframeSpy).to.be.calledWith(600, 600);
+           expect(safeframeMock.style.height).to.equal('600px');
+           expect(safeframeMock.style.width).to.equal('600px');
+           expect(sendResizeResponseSpy).to.be.calledWith(
+               true, SERVICE.EXPAND_RESPONSE);
+           expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+         });
     });
 
     /**
@@ -582,12 +586,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
       sendExpandMessage(550, 550);
 
-      expect(resizeIframeSpy).to.not.be.called;
-      expect(safeframeMock.height).to.equal('50');
-      expect(safeframeMock.width).to.equal('50');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          false, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeIframeSpy).to.not.be.called;
+        expect(safeframeMock.height).to.equal('50');
+        expect(safeframeMock.width).to.equal('50');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     function sendCollapseMessage() {
@@ -618,13 +624,15 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeIframeSpy).to.be.calledOnce;
+        expect(resizeIframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     it('should collapse safeframe on amp-ad resize success', () => {
@@ -644,13 +652,15 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeIframeSpy).to.be.calledOnce;
+        expect(resizeIframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
   });
 });

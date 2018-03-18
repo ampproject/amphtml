@@ -1046,7 +1046,7 @@ export class AmpA4A extends AMP.BaseElement {
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    return super.attemptChangeSize(newHeight, newWidth);
+    return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
   }
 
   /** @override  */
