@@ -130,11 +130,8 @@ describes.realWin(
               .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('editorial');
-          setTimeout(() => {
-            expect(changeSizeSpy).to.be.calledOnce;
-            expect(changeSizeSpy.args[0][0]).to.equal('404');
-          },1000);
-
+          expect(changeSizeSpy).to.be.calledOnce;
+          expect(changeSizeSpy.args[0][0]).to.equal('404');
         });
       });
 
@@ -152,11 +149,8 @@ describes.realWin(
               .to.equal('/interaction/5aaa70c79aaf0c5443078d31');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('playlist');
-          setTimeout(() => {
-            expect(attemptChangeSizeSpy).to.be.calledOnce;
-            expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
-          },1000);
-
+          expect(attemptChangeSizeSpy).to.be.calledOnce;
+          expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
         });
       });
 

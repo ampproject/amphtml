@@ -353,36 +353,33 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
+          }).then(() => {
             return this.loadPromise(iframe).then(() => {
-              return vsync
-                  .mutatePromise(() => {
-                    this.iframe_.classList
-                        .add('i-amphtml-apester-iframe-ready');
-                    if (media['campaignData']) {
-                      this.iframe_.contentWindow./*OK*/ postMessage(
-                          /** @type {JsonObject} */ ({type: 'campaigns',
-                            data: media['campaignData']}),
-                          '*'
-                      );
-                    }
-                    this.togglePlaceholder(false);
-                    this.ready_ = true;
-                    let height = 0;
-                    if (media && media['data'] && media['data']['size']) {
-                      height = media['data']['size']['height'];
-                    }
-                    if (height != this.height_) {
-                      this.height_ = height;
-                      if (this.random_) {
-                        this./*OK*/ attemptChangeHeight(height);
-                      } else {
-                        this./*OK*/ changeHeight(height);
-                      }
-                    }
-                  })
-                  .then(() => {
-                    return this.loadPromise(iframe);
-                  });
+              return vsync.mutatePromise(() => {
+                this.iframe_.classList
+                    .add('i-amphtml-apester-iframe-ready');
+                if (media['campaignData']) {
+                  this.iframe_.contentWindow./*OK*/ postMessage(
+                      /** @type {JsonObject} */ ({type: 'campaigns',
+                        data: media['campaignData']}),
+                      '*'
+                  );
+                }
+                this.togglePlaceholder(false);
+                this.ready_ = true;
+                let height = 0;
+                if (media && media['data'] && media['data']['size']) {
+                  height = media['data']['size']['height'];
+                }
+                if (height != this.height_) {
+                  this.height_ = height;
+                  if (this.random_) {
+                    this./*OK*/ attemptChangeHeight(height);
+                  } else {
+                    this./*OK*/ changeHeight(height);
+                  }
+                }
+              });
             });
           });
         },
