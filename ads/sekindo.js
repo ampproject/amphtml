@@ -32,7 +32,7 @@ export function sekindo(global, data) {
     if (data.hasOwnProperty(key)) {
       if (typeof excludesSet[key] == 'undefined') {
         getParam = (typeof customParamMap[key] == 'undefined') ?
-            key : customParamMap[key];
+          key : customParamMap[key];
         query += getParam + '=' + encodeURIComponent(data[key]) + '&';
       }
     }
