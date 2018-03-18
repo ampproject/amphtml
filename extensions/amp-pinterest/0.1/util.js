@@ -36,12 +36,12 @@ function log(queryParams) {
   }
   query = query + '&via=' + encodeURIComponent(window.location.href);
   call.src = query;
-};
+}
 
 /**
  * Strip data from string
  * @param {string} str - the string to filter
- * @returns {string}
+ * @return {string}
  */
 function filter(str) {
   let decoded, ret;
@@ -53,16 +53,16 @@ function filter(str) {
   ret = decoded.replace(/</g, '&lt;');
   ret = ret.replace(/>/g, '&gt;');
   return ret;
-};
+}
 
 /**
  * Create a DOM element with attributes
- * @param {!Document} doc
+ * @param {Document} doc
  * @param {Object} data - the string to filter
- * @returns {DOMElement}
+ * @return {Element}
  */
 function make(doc, data) {
-  let el = false, tag, attr;
+  let el = null, tag, attr;
   for (tag in data) {
     el = doc.createElement(tag);
     for (attr in data[tag]) {
@@ -73,11 +73,11 @@ function make(doc, data) {
     break;
   }
   return el;
-};
+}
 
 /**
  * Set a DOM element attribute
- * @param {DOMElement} data - the string to filter
+ * @param {Element} el - The element
  * @param {string} attr - the attribute key
  * @param {string} value - the attribute value
  */
@@ -87,6 +87,6 @@ function set(el, attr, value) {
   } else {
     el.setAttribute(attr, value);
   }
-};
+}
 
 export const Util = {filter, guid, log, make, set};

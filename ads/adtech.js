@@ -15,12 +15,11 @@
  */
 
 import {
-  writeScript,
-  checkData,
-  validateSrcPrefix,
+  validateData,
   validateSrcContains,
-  validateDataExists,
-  } from '../3p/3p';
+  validateSrcPrefix,
+  writeScript,
+} from '../3p/3p';
 
 
 export function adtech(global, data) {
@@ -30,12 +29,11 @@ export function adtech(global, data) {
     validateSrcContains('/addyn/', adsrc);
     writeScript(global, adsrc);
   } else {
-    checkData(data, [
-      'atwco', 'atwdiv', 'atwheight', 'atwhtnmat',
-      'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
+    validateData(data, ['atwmn', 'atwdiv'], [
+      'atwco', 'atwheight', 'atwhtnmat',
+      'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
       'atwpolar', 'atwsizes', 'atwwidth',
     ]);
-    validateDataExists(data,['atwmn', 'atwdiv']);
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
     global.atwheight = data.atwheight;
@@ -50,5 +48,4 @@ export function adtech(global, data) {
     global.atwwidth = data.atwwidth;
     writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
   }
-
 }

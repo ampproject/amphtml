@@ -22,16 +22,12 @@ limitations under the License.
     <td>Adds several dynamic CSS class names onto the <code>&lt;body></code> element.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
   </tr>
 </table>
 

@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
-var $$ = require('gulp-load-plugins')();
-var BBPromise = require('bluebird');
-var babel = require('babelify');
-var browserify = require('browserify');
-var buffer = require('vinyl-buffer');
-var depCheckConfig = require('../dep-check-config');
-var fs = BBPromise.promisifyAll(require('fs-extra'));
-var gulp = require('gulp-help')(require('gulp'));
-var minimatch = require('minimatch');
-var minimist = require('minimist');
-var path = require('path');
-var source = require('vinyl-source-stream');
-var through = require('through2');
-var util = require('gulp-util');
+const babel = require('babelify');
+const BBPromise = require('bluebird');
+const browserify = require('browserify');
+const colors = require('ansi-colors');
+const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
+const depCheckConfig = require('../dep-check-config');
+const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
+const fs = BBPromise.promisifyAll(require('fs-extra'));
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const minimatch = require('minimatch');
+const path = require('path');
+const source = require('vinyl-source-stream');
+const through = require('through2');
 
 
-var root = process.cwd();
-var absPathRegExp = new RegExp(`^${root}/`);
-var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
-var red = (msg) => $$.util.log($$.util.colors.red(msg));
+const root = process.cwd();
+const absPathRegExp = new RegExp(`^${root}/`);
+const red = msg => log(colors.red(msg));
 
 
 /**
@@ -43,23 +43,22 @@ var red = (msg) => $$.util.log($$.util.colors.red(msg));
  *   deps: ?Array<!Object<string, !ModuleDef>
  * }}
  */
-var ModuleDef;
+let ModuleDef;
 
 /**
  * @typedef {string}
  */
-var GlobDef;
+let GlobDef;
 
 /**
  * @typedef {!Array<!GlobDef>}
  */
-var GlobsDef;
+let GlobsDef;
 
 /**
  * @constructor @final @struct
  */
 function Rule(config) {
-
   /** @private @const {!RuleConfigDef} */
   this.config_ = config;
 
@@ -85,7 +84,7 @@ function Rule(config) {
  * @return {!Array<string>}
  */
 Rule.prototype.run = function(moduleName, deps) {
-  var errors = [];
+  const errors = [];
 
   // If forbidden rule and current module has no dependencies at all
   // then no need to match.
@@ -106,22 +105,22 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
     return [];
   }
 
-  var isFilenameMatch = this.filesMatching_
+  const isFilenameMatch = this.filesMatching_
       .some(x => minimatch(moduleName, x));
   if (!isFilenameMatch) {
     return [];
   }
 
-  var mustNotDependErrors = [];
+  const mustNotDependErrors = [];
   // These nested loops are ok as we usually only have a few rules
   // to run against.
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
-        var inWhitelist = this.whitelist_.some(entry => {
-          var pair = entry.split('->');
-          var whitelistedModuleName = pair[0];
-          var whitelistedDep = pair[1];
+        const inWhitelist = this.whitelist_.some(entry => {
+          const pair = entry.split('->');
+          const whitelistedModuleName = pair[0];
+          const whitelistedDep = pair[1];
           if (!minimatch(moduleName, whitelistedModuleName)) {
             return false;
           }
@@ -138,25 +137,25 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   return mustNotDependErrors;
 };
 
-var rules = depCheckConfig.rules.map(config => new Rule(config));
+const rules = depCheckConfig.rules.map(config => new Rule(config));
 
 /**
  * Returns a list of entryPoint modules.
- * extenstions/0.1/*.js/amp.js/integration.js
+ * extensions/{$extension}/{$version}/{$extension}.js
+ * src/amp.js
+ * 3p/integration.js
  *
  * @return {!Promise<!Array<string>>}
  */
 function getSrcs() {
   return fs.readdirAsync('extensions').then(dirItems => {
     // Look for extension entry points
-    return dirItems
-      .map(x => `extensions/${x}`)
-      .filter(x => fs.statSync(x).isDirectory())
-      // If we ever need more than 0.1, just return an array and flatten
-      // the Array.
-      .map(getEntryModule)
-      // Concat the core binary and integration binary as entry points.
-      .concat(`src/amp.js`, `3p/integration.js`);
+    return flatten(dirItems
+        .map(x => `extensions/${x}`)
+        .filter(x => fs.statSync(x).isDirectory())
+        .map(getEntryModule)
+        // Concat the core binary and integration binary as entry points.
+        .concat('src/amp.js', '3p/integration.js'));
   });
 }
 
@@ -165,20 +164,18 @@ function getSrcs() {
  * @return {!Promise<!ModuleDef>}
  */
 function getGraph(entryModule) {
-  var resolve;
-  var promise = new BBPromise(r => {
+  let resolve;
+  const promise = new BBPromise(r => {
     resolve = r;
   });
-  var module = Object.create(null);
+  const module = Object.create(null);
   module.name = entryModule;
   module.deps = [];
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  var bundler = browserify(entryModule, {debug: true, deps: true})
-      .transform(babel, {
-        loose: argv.strictBabelTransform ? undefined : 'all'
-      });
+  const bundler = browserify(entryModule, {debug: true, deps: true})
+      .transform(babel.configure({}));
 
   bundler.pipeline.get('deps').push(through.obj(function(row, enc, next) {
     module.deps.push({
@@ -201,8 +198,13 @@ function getGraph(entryModule) {
  * @return {!Array<!ModuleDef>}
  */
 function getEntryModule(extensionFolder) {
-  // TODO: handle more than just 0.1
-  return `${extensionFolder}/0.1/${path.basename(extensionFolder)}.js`;
+  const extension = path.basename(extensionFolder);
+  return fs.readdirSync(extensionFolder)
+      .map(x => `${extensionFolder}/${x}`)
+      .filter(x => fs.statSync(x).isDirectory())
+      .map(x => `${x}/${extension}.js`)
+      .filter(x => fs.existsSync(x))
+      .filter(x => fs.statSync(x).isFile());
 }
 
 /**
@@ -220,8 +222,8 @@ function flattenGraph(entryPoints) {
   entryPoints = entryPoints.map(entryPoint => entryPoint.deps);
   // Now make the graph have unique entries
   return flatten(entryPoints)
-      .reduce((acc, cur, i, arr) => {
-        var name = cur.name;
+      .reduce((acc, cur) => {
+        const name = cur.name;
         if (!acc[name]) {
           acc[name] = Object.keys(cur.deps)
               // Get rid of the absolute path for minimatch'ing
@@ -237,11 +239,11 @@ function flattenGraph(entryPoints) {
  * @param {!Array<!ModuleDef>} modules
  */
 function runRules(modules) {
-  var errorsFound = false;
+  let errorsFound = false;
   Object.keys(modules).forEach(moduleName => {
-    var deps = modules[moduleName];
+    const deps = modules[moduleName];
     // Run Rules against the modules and flatten for reporting.
-    var errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
+    const errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
 
     if (errors.length) {
       errorsFound = true;
@@ -253,20 +255,17 @@ function runRules(modules) {
 }
 
 function depCheck() {
-  var errorsFound = false;
+  const handlerProcess = createCtrlcHandler('dep-check');
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
     // an extension entry point module yet.
     entryPoints = entryPoints.filter(x => fs.existsSync(x));
     return BBPromise.all(entryPoints.map(getGraph));
-  })
-  .then(flattenGraph)
-  .then(runRules)
-  .then(errorsFound => {
+  }).then(flattenGraph).then(runRules).then(errorsFound => {
     if (errorsFound) {
       process.exit(1);
     }
-  });
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -280,7 +279,7 @@ function toArrayOrDefault(value, defaultValue) {
   if (Array.isArray(value)) {
     return value;
   }
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return [value];
   }
   return defaultValue;
@@ -295,4 +294,8 @@ function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task('dep-check', 'Runs a dependency check on each module', depCheck);
+gulp.task(
+    'dep-check',
+    'Runs a dependency check on each module',
+    ['update-packages', 'css'],
+    depCheck);

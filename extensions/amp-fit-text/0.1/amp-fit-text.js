@@ -14,16 +14,35 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import * as st from '../../../src/style';
 
-
-/** @private @const {number} */
+const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;
 
 
 class AmpFitText extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.content_ = null;
+
+    /** @private {?Element} */
+    this.contentWrapper_ = null;
+
+    /** @private {?Element} */
+    this.measurer_ = null;
+
+    /** @private {number} */
+    this.minFontSize_ = -1;
+
+    /** @private {number} */
+    this.maxFontSize_ = -1;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -32,26 +51,21 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
-    /** @private @const */
     this.content_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.content_);
-    this.content_.classList.add('-amp-fit-text-content');
+    this.content_.classList.add('i-amphtml-fit-text-content');
     st.setStyles(this.content_, {zIndex: 2});
 
-    /** @private @const */
     this.contentWrapper_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
     this.content_.appendChild(this.contentWrapper_);
 
-    /** @private @const */
     this.measurer_ = this.element.ownerDocument.createElement('div');
     // Note that "measurer" cannot be styled with "bottom:0".
     st.setStyles(this.measurer_, {
       position: 'absolute',
       top: 0,
       left: 0,
-      right: 0,
       zIndex: 1,
       visibility: 'hidden',
       lineHeight: `${LINE_HEIGHT_EM_}em`,
@@ -64,11 +78,9 @@ class AmpFitText extends AMP.BaseElement {
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
-    /** @private @const {number} */
     this.minFontSize_ = getLengthNumeral(this.element.getAttribute(
         'min-font-size')) || 6;
 
-    /** @private @const {number} */
     this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
         'max-font-size')) || 72;
   }
@@ -92,9 +104,10 @@ class AmpFitText extends AMP.BaseElement {
   /** @private */
   updateFontSize_() {
     const maxHeight = this.element./*OK*/offsetHeight;
-    const fontSize = calculateFontSize_(this.measurer_, maxHeight,
+    const maxWidth = this.element./*OK*/offsetWidth;
+    const fontSize = calculateFontSize_(this.measurer_, maxHeight, maxWidth,
         this.minFontSize_, this.maxFontSize_);
-    this.contentWrapper_.style.fontSize = st.px(fontSize);
+    st.setStyle(this.contentWrapper_, 'fontSize', st.px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
         fontSize);
   }
@@ -102,49 +115,52 @@ class AmpFitText extends AMP.BaseElement {
 
 
 /**
- * @param {!Element} measurer
+ * @param {Element} measurer
  * @param {number} expectedHeight
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
  * @private  Visible for testing only!
  */
-export function calculateFontSize_(measurer, expectedHeight,
-    minFontSize, maxFontSize) {
+export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
+  minFontSize, maxFontSize) {
   maxFontSize++;
   // Binomial search for the best font size.
   while (maxFontSize - minFontSize > 1) {
     const mid = Math.floor((minFontSize + maxFontSize) / 2);
-    measurer.style.fontSize = st.px(mid);
+    st.setStyle(measurer, 'fontSize', st.px(mid));
     const height = measurer./*OK*/offsetHeight;
-    if (height > expectedHeight) {
+    const width = measurer./*OK*/offsetWidth;
+    if (height > expectedHeight || width > expectedWidth) {
       maxFontSize = mid;
     } else {
       minFontSize = mid;
     }
   }
   return minFontSize;
-};
+}
 
 
 /**
- * @param {!Element} content
- * @param {!Element} measurer
+ * @param {Element} content
+ * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
  * @private  Visible for testing only!
  */
 export function updateOverflow_(content, measurer, maxHeight, fontSize) {
-  measurer.style.fontSize = st.px(fontSize);
+  st.setStyle(measurer, 'fontSize', st.px(fontSize));
   const overflown = measurer./*OK*/offsetHeight > maxHeight;
   const lineHeight = fontSize * LINE_HEIGHT_EM_;
   const numberOfLines = Math.floor(maxHeight / lineHeight);
-  content.classList.toggle('-amp-fit-text-content-overflown', overflown);
+  content.classList.toggle('i-amphtml-fit-text-content-overflown', overflown);
   st.setStyles(content, {
     lineClamp: overflown ? numberOfLines : '',
     maxHeight: overflown ? st.px(lineHeight * numberOfLines) : '',
   });
-};
+}
 
 
-AMP.registerElement('amp-fit-text', AmpFitText, CSS);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpFitText, CSS);
+});

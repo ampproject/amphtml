@@ -144,52 +144,92 @@
       background-color: #f4f4f4;
     }
 
+    amp-user-notification {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-user-notification button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    @-webkit-keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @-moz-keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    amp-user-notification.amp-active {
+      opacity: 0;
+      -webkit-animation: fadeIn ease-in 1s 1 forwards;
+      -moz-animation: fadeIn ease-in 1s 1 forwards;
+      animation: fadeIn ease-in 1s 1 forwards;
+    }
+
   </style>
-  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
-  <script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
+<body>
   <header>
     <div class="brand-logo">
       PublisherLogo
     </div>
   </header>
   <main role="main">
+
+  <amp-user-notification
+          layout=nodisplay
+          id="amp-user-notification6"
+          data-persist-dismissal="false">
+    This notification should ALSO ALWAYS show.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification6.dismiss" role="button" tabindex="5">Dismiss</button>
+  </amp-user-notification>
+
+
   <amp-sticky-ad layout="nodisplay">
-    <amp-ad width="320"
-      height="50"
-      type="imobile"
-      data-pid="1847"
-      data-adtype="banner"
-      data-asid="813689">
+    <amp-ad width=300 height=50
+        data-consent-notification-id="amp-user-notification6"
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=50>
+    </amp-ad>
   </amp-sticky-ad>
     <article>
-      <figure>
-        <amp-img
-            src="img/hero@1x.jpg"
-            srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
-            layout="responsive" width="360" placeholder
-            alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox" role="img" tabindex="0">
-        </amp-img>
-      </figure>
 
-      <amp-lightbox id="headline-img-lightbox" class="lightbox"
-          layout="nodisplay">
-
-        <div class="lightbox-content">
-          <amp-img id="floating-headline-img"
-              src="img/hero@1x.jpg"
-              srcset="hero@1x.jpg 1x, img/hero@2x.jpg 2x"
-              placeholder
-              width="360" height="216" layout="responsive">
-          </amp-img>
-          <p>
-            Fusce pretium tempor justo, vitae consequat dolor maximus eget.
-          </p>
-        </div>
-      </amp-lightbox>
 
       <div class="content-container">
         <header>
@@ -234,15 +274,6 @@
             Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
             Nullam in libero nisi.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=250
-                type="a9"
-                data-aax_size="300x250"
-                data-aax_pubname="abc123"
-                data-aax_src="302">
-            </amp-ad>
-          </div>
 
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
@@ -302,13 +333,6 @@
             Ut elementum velit fermentum felis volutpat sodales in non libero.
             Aliquam erat volutpat.
           </p>
-
-          <div class="ad-container">
-            <amp-ad width=300 height=200
-                type="adsense"
-                data-ad-client="ca-pub-9350112648257122">
-            </amp-ad>
-          </div>
 
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.

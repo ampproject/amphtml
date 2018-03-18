@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
+import {map} from './utils/object.js';
+import {startsWith} from './string';
 
-/** @private @const {!Object<string>} */
-const propertyNameCache_ = Object.create(null);
 
-/** @private @const {!Array<string>} */
-const vendorPrefixes_ = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
+/** @type {Object<string, string>} */
+let propertyNameCache;
+
+/** @const {!Array<string>} */
+const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 
 /**
@@ -34,17 +36,17 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the object if a prefixed version of a property exists and returns
+ * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!Object} object
+ * @param {!Object} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
-function getVendorJsPropertyName_(object, titleCase) {
-  for (let i = 0; i < vendorPrefixes_.length; i++) {
-    const propertyName = vendorPrefixes_[i] + titleCase;
-    if (object[propertyName] !== undefined) {
+function getVendorJsPropertyName_(style, titleCase) {
+  for (let i = 0; i < vendorPrefixes.length; i++) {
+    const propertyName = vendorPrefixes[i] + titleCase;
+    if (style[propertyName] !== undefined) {
       return propertyName;
     }
   }
@@ -56,26 +58,33 @@ function getVendorJsPropertyName_(object, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @export
- * @param {!Object} object
+ * @param {!Object} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
  * @return {string}
  */
-export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
-  let propertyName = propertyNameCache_[camelCase];
+export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
+  if (startsWith(camelCase, '--')) {
+    // CSS vars are returned as is.
+    return camelCase;
+  }
+  if (!propertyNameCache) {
+    propertyNameCache = map();
+  }
+  let propertyName = propertyNameCache[camelCase];
   if (!propertyName || opt_bypassCache) {
     propertyName = camelCase;
-    if (object[camelCase] === undefined) {
+    if (style[camelCase] === undefined) {
       const titleCase = camelCaseToTitleCase(camelCase);
-      const prefixedPropertyName = getVendorJsPropertyName_(object, titleCase);
+      const prefixedPropertyName = getVendorJsPropertyName_(style, titleCase);
 
-      if (object[prefixedPropertyName] !== undefined) {
+      if (style[prefixedPropertyName] !== undefined) {
         propertyName = prefixedPropertyName;
       }
     }
     if (!opt_bypassCache) {
-      propertyNameCache_[camelCase] = propertyName;
+      propertyNameCache[camelCase] = propertyName;
     }
   }
   return propertyName;
@@ -83,8 +92,22 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
 
 
 /**
- * Sets the CSS style of the specified element with optional units, e.g. "px".
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
  * @param {!Element} element
+ * @param {!Object<string, *>} styles
+ */
+export function setImportantStyles(element, styles) {
+  for (const k in styles) {
+    element.style.setProperty(
+        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+  }
+}
+
+
+/**
+ * Sets the CSS style of the specified element with optional units, e.g. "px".
+ * @param {Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -94,7 +117,8 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
   const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
-    element.style[propertyName] = opt_units ? value + opt_units : value;
+    element.style[propertyName] =
+      /** @type {string} */ (opt_units ? value + opt_units : value);
   }
 }
 
@@ -136,9 +160,9 @@ export function setStyles(element, styles) {
  */
 export function toggle(element, opt_display) {
   if (opt_display === undefined) {
-    opt_display = !(element.style.display != 'none');
+    opt_display = getStyle(element, 'display') == 'none';
   }
-  element.style.display = opt_display ? '' : 'none';
+  setStyle(element, 'display', opt_display ? '' : 'none');
 }
 
 
@@ -148,9 +172,17 @@ export function toggle(element, opt_display) {
  * @return {string}
  */
 export function px(value) {
-  return value + 'px';
+  return `${value}px`;
 }
 
+/**
+ * Returns a degree value.
+ * @param {number} value
+ * @return {string}
+ */
+export function deg(value) {
+  return `${value}deg`;
+}
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -181,7 +213,7 @@ export function translate(x, opt_y) {
   if (typeof opt_y == 'number') {
     opt_y = px(opt_y);
   }
-  return `translate(${x},${opt_y})`;
+  return `translate(${x}, ${opt_y})`;
 }
 
 
@@ -192,4 +224,55 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Returns a "rotate" for CSS "transform" property.
+ * @param {number|string} value
+ * @return {string}
+ */
+export function rotate(value) {
+  if (typeof value == 'number') {
+    value = deg(value);
+  }
+  return `rotate(${value})`;
+}
+
+/**
+ * Remove alpha value from a rgba color value.
+ * Return the new color property with alpha equals if has the alpha value.
+ * Caller needs to make sure the input color value is a valid rgba/rgb value
+ * @param {string} rgbaColor
+ * @return {string}
+ */
+export function removeAlphaFromColor(rgbaColor) {
+  return rgbaColor.replace(
+      /\(([^,]+),([^,]+),([^,)]+),[^)]+\)/g, '($1,$2,$3, 1)');
+}
+
+/**
+ * Gets the computed style of the element. The helper is necessary to enforce
+ * the possible `null` value returned by a buggy Firefox.
+ *
+ * @param {!Window} win
+ * @param {!Element} el
+ * @return {!Object<string, string>}
+ */
+export function computedStyle(win, el) {
+  const style = /** @type {?CSSStyleDeclaration} */(win.getComputedStyle(el));
+  return /** @type {!Object<string, string>} */(style) || map();
+}
+
+
+/**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+export function resetStyles(element, properties) {
+  const styleObj = {};
+  properties.forEach(prop => {
+    styleObj[prop] = null;
+  });
+  setStyles(element, styleObj);
 }

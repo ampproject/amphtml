@@ -14,42 +14,56 @@
  * limitations under the License.
  */
 
-import {cidForOrNull} from './cid';
-import {clientIdScope} from '../ads/_config';
-import {userNotificationManagerFor} from './user-notification';
+import {Services} from './services';
+import {adConfig} from '../ads/_config';
 import {dev} from '../src/log';
 
-
 /**
- * @param {BaseElement} adElement
+ * @param {AMP.BaseElement} adElement
  * @return {!Promise<string|undefined>} A promise for a CID or undefined if
  *     - the ad network does not request one or
  *     - `amp-analytics` which provides the CID service was not installed.
  */
 export function getAdCid(adElement) {
-  const scope = clientIdScope[adElement.element.getAttribute('type')];
-  const consentId = adElement.element.getAttribute(
-    'data-consent-notification-id');
-  if (!(scope || consentId)) {
+  const config = adConfig[adElement.element.getAttribute('type')];
+  if (!config || !config.clientIdScope) {
     return Promise.resolve();
   }
-  return cidForOrNull(adElement.getWin()).then(cidService => {
+  return getOrCreateAdCid(adElement.getAmpDoc(), config.clientIdScope,
+      config.clientIdCookieName);
+}
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc|!Node} ampDoc
+ * @param {string} clientIdScope
+ * @param {string=} opt_clientIdCookieName
+ * @param {number=} opt_timeout
+ * @return {!Promise<string|undefined>} A promise for a CID or undefined.
+ */
+export function getOrCreateAdCid(
+  ampDoc, clientIdScope, opt_clientIdCookieName, opt_timeout) {
+  const timeout = isNaN(opt_timeout) || opt_timeout == null ?
+    1000 : opt_timeout;
+  const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;
     }
-    let consent = Promise.resolve();
-    if (consentId) {
-      consent = userNotificationManagerFor(adElement.getWin()).then(service => {
-        return service.get(consentId);
-      });
-      if (!scope && consentId) {
-        return consent;
-      }
-    }
-    return cidService.get(scope, consent).catch(error => {
+    return cidService.get({
+      scope: dev().assertString(clientIdScope),
+      createCookieIfNotPresent: true,
+      cookieName: opt_clientIdCookieName,
+    }, Promise.resolve(undefined)).catch(error => {
       // Not getting a CID is not fatal.
-      dev.error('ad-cid', error);
+      dev().error('AD-CID', error);
       return undefined;
     });
   });
+  // The CID should never be crucial for an ad. If it does not come within
+  // 1 second, assume it will never arrive.
+  return Services.timerFor(ampDoc.win)
+      .timeoutPromise(timeout, cidPromise, 'cid timeout').catch(error => {
+        // Timeout is not fatal.
+        dev().warn('AD-CID', error);
+        return undefined;
+      });
 }

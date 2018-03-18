@@ -22,7 +22,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="javascript://llamas" />
+  <link rel="canonical" href="javascript://llamas">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script src="https://cdn.ampproject.org/v0.js" async></script>
@@ -64,6 +64,7 @@
   <amp-img srcset="image 1x.png 1x, image 2x.png 2x" layout="fill"></amp-img>
   <!-- valid (URL has encoded spaces) -->
   <amp-img srcset=", image%201x.png 1x, image%202x.png 2x" layout="fill"></amp-img>
+  <a href="http://foobarbazexample.com\x10.com/">Interesting Case</a>
 
   <!-- Missing src -->
   <amp-ad src="" width="42" height="42" type=""></amp-ad>
@@ -73,11 +74,44 @@
   <amp-img src="" layout="responsive" width="42" height="42"></amp-img>
   <amp-pixel src="" layout="fixed" width="42"></amp-pixel>
   <amp-video src="" width="42" height="42"></amp-video>
+  <!-- src contains only whitespace: regular space followed by non-breaking
+       space followed by tab. -->
+  <amp-ad src="  	" width="42" height="42" type=""></amp-ad>
   <!-- Invalid protocol -->
   <amp-ad src="http://amp-ad" width="42" height="42" type=""></amp-ad>
   <amp-iframe src="http://amp-iframe" width="42" height="42"></amp-iframe>
   <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
   <amp-video src="http://amp-video" width="42" height="42"></amp-video>
   <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
+
+  <!-- Valid ipv6 addresses -->
+  <a href="https://[2001:0db8::85a3]/">Valid</a>
+  <a href="https://[::1]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:0:1]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.8.8.8]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.124.8.8]/">Valid</a>
+  <a href="https://[0:0:0:0:0:0:8.8.8.22]/">Valid</a>
+  <a href="https://[::8.8.8.8]/">Valid</a>
+  <!-- Invalid ipv6 addresses -->
+  <a href="https://[2001:0db8:85a3]/">Invalid</a>
+  <a href="https://[20012:0db8::85a3]/">Invalid</a>
+  <a href="https://[200g:0db8:85a3]/">Invalid</a>
+  <a href="https://[:::1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:0:0:1]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:0:0:8.8.8.8]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:8.8.8.8]/">Invalid</a>
+  <a href="https://[0:0:0:0:0:8.8.8.8:1]/">Invalid</a>
+
+  <!-- __amp_source_origin is not an allowed value for URLs. -->
+  <a href="__amp_source_origin">uhm, no</a>
+  <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
+  <amp-anim src="__amp_source_origin" width="42" height="42"></amp-anim>
+  <amp-audio src="__amp_source_origin" layout="fixed" width="42"></amp-audio>
+  <amp-iframe src="__amp_source_origin" width="42" height="42"></amp-iframe>
+  <amp-img src="__amp_source_origin" layout="responsive" width="42" height="42"></amp-img>
+  <amp-pixel src="__amp_source_origin" layout="fixed" width="42"></amp-pixel>
+  <amp-video src="__amp_source_origin" width="42" height="42"></amp-video>
+  <amp-video src="%5f_amp_source%5forigin" width="42" height="42"></amp-video>
 </body>
 </html>

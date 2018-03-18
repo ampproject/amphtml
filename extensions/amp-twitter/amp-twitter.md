@@ -22,52 +22,100 @@ limitations under the License.
     <td>Displays a Twitter Tweet.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-twitter">amp-twitter.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/twitter.amp.html">twitter.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
-**CAVEAT**
+The `amp-twitter` component allows you to embed a Tweet for the specified Twitter ID.  
 
-Twitter does not currently provide an API that yields fixed aspect ratio Tweet embeds. We currently automatically proportionally scale the Tweet to fit the provided size, but this may yield less than ideal appearance. Authors may need to manually tweak the provided width and height. You may also use the `media` attribute to select the aspect ratio based on screen width. We are looking for feedback how feasible this approach is in practice.
+Here's an example of a basic embedded Tweet:
 
-Example:
+<!--embedded example - displays in ampproject.org -->
+<div>
+<amp-iframe height="164"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.basic.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
 
-```html
-<amp-twitter width=486 height=657
-    layout="responsive"
-    data-tweetid="585110598171631616"
-    data-cards="hidden">
-    <blockquote placeholder class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">The story how I became what some people would call a frontend engineer and an exploration into what that even means<a href="https://t.co/HrVz4cGMWG">https://t.co/HrVz4cGMWG</a></p>&mdash; Malte Ubl (@cramforce) <a href="https://twitter.com/cramforce/status/585110598171631616">April 6, 2015</a></blockquote>
-</amp-twitter>
-```
+## Appearance
 
-Copy the placeholder from Twitter's embed dialog, but remove the `script`. Then add the `placeholder` attribute to the `blockquote` tag.
+Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets. Currently, AMP automatically proportionally scales the Tweet to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+
+## Placeholders & fallbacks
+
+An element marked with a `placeholder` attribute displays while the content for the Tweet is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet doesn't exist or has been deleted.
+
+Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
+
+*Example: Specifying a placeholder*
+<!--embedded example - displays in ampproject.org -->
+<div>
+  <amp-iframe height="278"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
+
+*Example: Specifying a placeholder and a fallback*
+
+<div>
+  <amp-iframe height="354"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.placeholder-and-fallback.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
 
 ## Attributes
 
-**data-tweetid**
+##### data-tweetid (required)
 
-The ID of the tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888 `640300967154597888` is the tweetID.
+The ID of the Tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888,  `640300967154597888` is the tweetID.
 
-**data-nameofoption**
+##### data-* (optional)
 
-Options for the Tweet appearance can be set using `data-` attributes. E.g. `data-cards="hidden"` deactivates Twitter cards. For documentation of the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+You can specify options for the Tweet appearance by setting `data-` attributes. For example, `data-cards="hidden"` deactivates Twitter cards. For details on the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
+
+<div>
+<amp-iframe height="202"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/amptwitter.options.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii) in the AMP validator specification.
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.

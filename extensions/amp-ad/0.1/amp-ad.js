@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
-import {a4aRegistry} from '../../../ads/_a4a-config';
-import {dev} from '../../../src/log';
-import {extensionsFor} from '../../../src/extensions';
+import {AmpAdCustom} from './amp-ad-custom';
+import {CSS} from '../../../build/amp-ad-0.1.css';
+import {Services} from '../../../src/services';
+import {adConfig} from '../../../ads/_config';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
+import {hasOwn} from '../../../src/utils/object';
+import {user} from '../../../src/log';
 
 
 /**
@@ -25,7 +28,7 @@ import {extensionsFor} from '../../../src/extensions';
  * omits the version number and '.js' suffix for the extension script, which
  * will be handled by the extension loader.
  *
- * @param {!string} type
+ * @param {string} type
  * @return !string
  * @private
  */
@@ -33,78 +36,79 @@ function networkImplementationTag(type) {
   return `amp-ad-network-${type}-impl`;
 }
 
-/** @private @enum {!number} */
-const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
-
-/**
- * Copies (almost) all attributes from one Element to another.  Skips AMP
- * and other bookkeeping attributes.  Doesn't check for existence of any
- * attribute on the target Element, so may overwrite existing attributes.
- *
- * @param {!Element} sourceElement  Element to copy attributes from.
- * @param {!Element} targetElement  Element to copy attributes to.
- */
-function copyAttributes(sourceElement, targetElement) {
-  const attrs = sourceElement.attributes;
-  for (let i = attrs.length - 1; i >= 0; --i) {
-    const attr = attrs[i];
-    if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
-      targetElement.setAttribute(attr.name, attr.value);
-    }
-  }
-}
-
 export class AmpAd extends AMP.BaseElement {
 
   /** @override */
+  isLayoutSupported(unusedLayout) {
+    // TODO(jridgewell, #5980, #8218): ensure that unupgraded calls are not
+    // done for `isLayoutSupported`.
+    return true;
+  }
+
+  /** @override */
   upgradeCallback() {
-    const type = this.element.getAttribute('type');
-    if (!type) {
-      // Unspecified or empty type.  Nothing to do here except bail out.
-      return null;
-    }
-    // TODO(tdrl): Check amp-ad registry to see if they have this already.
-    if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.getWin(), this.element)) {
-      // Network either has not provided any A4A implementation or the
-      // implementation exists, but has explicitly chosen not to handle this
-      // tag as A4A.  Fall back to the 3p implementation.
-      return new AmpAd3PImpl(this.element);
-    }
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
-    // as following:
-    /*
-      const extensions = extensionsFor(this.getWin());
-      return extensions.loadElementClass(extensionTag).then(ctor => {
-        return new ctor(this.element);
+    const a4aRegistry = getA4ARegistry();
+    // Block whole ad load if a consent is needed.
+    /** @const {string} */
+    const consentId = this.element.getAttribute('data-consent-notification-id');
+    const consent = consentId
+      ? Services.userNotificationManagerForDoc(this.element)
+          .then(service => service.get(consentId))
+      : Promise.resolve();
+
+    return consent.then(() => {
+      const type = this.element.getAttribute('type');
+      const isCustom = type === 'custom';
+      user().assert(isCustom || hasOwn(adConfig, type)
+          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+
+      // Check for the custom ad type (no ad network, self-service)
+      if (isCustom) {
+        return new AmpAdCustom(this.element);
+      }
+
+      this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
+      const slotId = this.win.ampAdSlotIdCounter++;
+
+      return new Promise(resolve => {
+        this.getVsync().mutate(() => {
+          this.element.setAttribute('data-amp-slot-index', slotId);
+
+          const useRemoteHtml = (!(adConfig[type] || {}).remoteHTMLDisabled &&
+              this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
+          // TODO(tdrl): Check amp-ad registry to see if they have this already.
+          // TODO(a4a-cam): Shorten this predicate.
+          if (!a4aRegistry[type] ||
+              // Note that predicate execution may have side effects.
+              !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
+            // Either this ad network doesn't support Fast Fetch, its Fast
+            // Fetch implementation has explicitly opted not to handle this
+            // tag, or this page uses remote.html which is inherently
+            // incompatible with Fast Fetch. Fall back to Delayed Fetch.
+            return resolve(new AmpAd3PImpl(this.element));
+          }
+
+          const extensionTagName = networkImplementationTag(type);
+          this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+          resolve(Services.extensionsFor(this.win)
+              .loadElementClass(extensionTagName)
+              .then(ctor => new ctor(this.element))
+              .catch(error => {
+              // Work around presubmit restrictions.
+                const TAG = this.element.tagName;
+                // Report error and fallback to 3p
+                this.user().error(
+                    TAG, 'Unable to load ad implementation for type ',
+                    type, ', falling back to 3p, error: ', error);
+                return new AmpAd3PImpl(this.element);
+              }));
+        });
       });
-     */
-    return null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    // This is only called for a4a. All other cases are redirected to
-    // `AmpAd3PImpl` in `upgradeCallback`.
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
-    const type = dev.assert(this.element.getAttribute('type'),
-        'Required attribute type');
-    // Note: The loadExtension method will pick the version number.
-    // If we ever reach a point at which there are different extensions with
-    // different version numbers at play simultaneously, we'll have to make sure
-    // that the loader can handle the case.
-    const extensionTag = networkImplementationTag(type);
-    const newChild = this.element.ownerDocument.createElement(extensionTag);
-    extensionsFor(this.getWin()).loadExtension(extensionTag);
-    copyAttributes(this.element, newChild);
-    this.element.appendChild(newChild);
+    });
   }
 }
 
-AMP.registerElement('amp-ad', AmpAd);
-AMP.registerElement('amp-embed', AmpAd);
+AMP.extension('amp-ad', '0.1', AMP => {
+  AMP.registerElement('amp-ad', AmpAd, CSS);
+  AMP.registerElement('amp-embed', AmpAd);
+});

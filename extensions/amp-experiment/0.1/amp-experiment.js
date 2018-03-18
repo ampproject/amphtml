@@ -14,60 +14,59 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {waitForBodyPromise} from '../../../src/dom';
+import {Layout} from '../../../src/layout';
 import {allocateVariant} from './variant';
-import {getService} from '../../../src/service';
+import {dev, user} from '../../../src/log';
+import {parseJson} from '../../../src/json';
+import {registerServiceBuilder} from '../../../src/service';
+import {waitForBodyPromise} from '../../../src/dom';
 
-/** @const */
-const EXPERIMENT = 'amp-experiment';
+const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
+
 
 export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
   }
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      return;
-    }
-
     const config = this.getConfig_();
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(this.getWin(), config[experimentName])
+      return allocateVariant(
+          this.getAmpDoc(), experimentName, config[experimentName])
           .then(variantName => {
             results[experimentName] = variantName;
           });
     });
 
+
     /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
+    const experimentVariants = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    getService(this.getWin(), 'variant', () => this.experimentVariants_);
+    registerServiceBuilder(this.win, 'variant', function() {
+      return experimentVariants;
+    });
   }
 
+  /** @return {!JsonObject} [description] */
   getConfig_() {
     const children = this.element.children;
-    user.assert(
+    user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
         '<amp-experiment> should contain exactly one ' +
         '<script type="application/json"> child.');
 
-    return JSON.parse(children[0].textContent);
+    return /** @type {!JsonObject} */ (
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -79,11 +78,12 @@ export class AmpExperiment extends AMP.BaseElement {
    * @private
    */
   addToBody_(experiments) {
-    const doc = this.getWin().document;
+    const doc = this.win.document;
     return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+          doc.body.setAttribute(ATTR_PREFIX + name,
+              dev().assertString(experiments[name]));
         }
       }
       return experiments;
@@ -91,4 +91,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-experiment', AmpExperiment);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpExperiment);
+});

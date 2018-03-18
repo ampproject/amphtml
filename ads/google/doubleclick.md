@@ -57,9 +57,44 @@ Example:
 </amp-ad>
 ```
 
+### Multi-size Ad
+
+To request an ad with multiple sizes, pass a string of comma-separated sizes to
+the `data-multi-size` attribute. Each size in the list must be a width followed
+by a lowercase 'x' followed by a height. Secondary sizes must not be larger than
+their corresponding dimensions specified by the `width` and `height` attributes,
+or the `data-override-width` and `data-override-height` attributes, if they are
+set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
+two dimensions, of their primary size counterpart, unless 
+`data-multi-size-validation` is explicitly set to false.
+
+Examples:
+
+#### With multi-size request
+```html
+<amp-ad width=728 height=90
+    type="doubleclick"
+    data-slot="/6355419/Travel"
+    data-multi-size="700x90,700x60,500x60">
+</amp-ad>
+```
+
+#### With multi-size request ignoring size validation
+```html
+<amp-ad width=728 height=90
+    type="doubleclick"
+    data-slot="/6355419/Travel"
+    data-multi-size="300x25"
+    data-multi-size-validation="false">
+</amp-ad>
+```
+
+
 ### Supported parameters
 
 - `data-slot`
+- `data-multi-size`
+- `data-multi-size-validation`
 
 Supported via `json` attribute:
 
@@ -69,8 +104,9 @@ Supported via `json` attribute:
 - `targeting`
 - `useSameDomainRenderingUntilDeprecated`
 
-### Temporary use of useSameDomainRenderingUntilDeprecated
-An experiment to use the higher performance GLADE tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated by the end of June 2016, when the GLADE tag will become the default, and all ads will always be rendered inside a second cross domain iframe
+### Temporary use of useSameDomainRenderingUntilDeprecated until March 29, 2018
+Support for this attribute will be dropped on March 29, 2018. 
+An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated on March 29, 2018. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe. For more information, please refer to https://github.com/ampproject/amphtml/issues/11834;
 
 Example:
 ```html
@@ -82,21 +118,14 @@ Example:
 ```
 
 
-### Unsupported DFP Features & Formats
-
-#### Unsupported Features:
-- Multisize requests. Since the size of the adslot needs to be defined prior to the ad request, multisize requests are not supported.
-- Guaranteed Roadblocks. Non-guaranteed roadblocks (As many as possible, One or More) delivery is supported
-
-#### Unsupported Formats/Creatives:
+### Unsupported DFP Formats
 - Interstitials
 - Expandables. Although expandables on interaction/click is a format that is work in progress.
 - Flash
 - Anchor Ads / Adhesion Units
 - Creatives served over HTTP.
 
-### DFP Implementation Examples
-[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features.
+
 
 
 

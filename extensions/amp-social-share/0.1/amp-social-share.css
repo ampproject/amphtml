@@ -25,32 +25,58 @@ amp-social-share {
   position: relative;
 }
 
+/**
+ * Note: Attribute selectors were used initially here but we switched to using
+ * class-based selector to style each type because of a bug on iOS Safari 8.
+ * See https://github.com/ampproject/amphtml/issues/4277 for more details.
+ */
+
 /* Twitter Styling */
-amp-social-share[type=twitter] {
-  background-color: #55acee;
+.amp-social-share-twitter {
+  background-color: #1da1f2;
 }
 
 /* Facebook Styling */
-amp-social-share[type=facebook] {
+.amp-social-share-facebook {
   background-color: #3b5998;
 }
 
 /* Pinterest Styling */
-amp-social-share[type=pinterest] {
+.amp-social-share-pinterest {
   background-color: #bd081c;
 }
 
 /* LinkedIn Styling */
-amp-social-share[type=linkedin] {
+.amp-social-share-linkedin {
   background-color: #0077b5;
 }
 
 /* Google+ Styling */
-amp-social-share[type=gplus] {
+.amp-social-share-gplus {
   background-color: #dc4e41;
 }
 
+/* Tumblr Styling */
+.amp-social-share-tumblr {
+  background-color: #3c5a77;
+}
+
 /* Email Styling */
-amp-social-share[type=email] {
+.amp-social-share-email {
+  background-color: #000000;
+}
+
+/* Whatsapp Styling */
+.amp-social-share-whatsapp {
+  background-color: #25d366;
+}
+
+/* SMS Styling */
+.amp-social-share-sms {
+  background-color: #CA2B63;
+}
+
+/* "system" styling */
+.amp-social-share-system {
   background-color: #000000;
 }

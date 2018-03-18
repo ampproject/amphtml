@@ -5,6 +5,7 @@
   <title>Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script src="/dist/v0/examples/amp-viewer-host.max.js"></script>
   <style>
     html, body {
       overflow: hidden;
@@ -85,11 +86,15 @@
       bottom: 0;
       overflow-x: hidden;
       visibility: hidden;
+      -webkit-transform: translateX(-100%);
+      -ms-transform: translateX(-100%);
       transform: translateX(-100%);
     }
 
     viewer[data-show-container="1"] #container1 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -99,6 +104,8 @@
 
     viewer[data-show-container="2"] #container2 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -108,6 +115,8 @@
 
     viewer[data-show-container="3"] #container3 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
@@ -117,10 +126,23 @@
 
     viewer[data-show-container="4"] #container4 {
       visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
       transform: none;
     }
 
     viewer[data-show-container="4"] #show-container4-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="5"] #container5 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="5"] #show-container5-anchor {
       text-decoration: underline;
     }
 
@@ -140,13 +162,9 @@
     }
   </style>
 
-  <script src="./viewer-integr-messaging.js"></script>
-
   <script>
-
-    var SENTINEL = '__AMP__';
-
     var allViewers = [];
+    var currentContainerId = null;
 
     function Viewer(containerId, id, url, visible) {
       this.id = id;
@@ -171,13 +189,12 @@
       //     ' allow-popups-to-escape-sandbox allow-same-origin');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
-      this.visibilityToggle_.onclick = function() {
-        this.toggleVisibility(this.visibilityState_ != 'visible');
-      }.bind(this);
-      if (visible) {
-        this.updateVisibilityToggle_();
-      }
-
+      this.visibilityToggle_.addEventListener('click', function() {
+        var activeId = this.viewer.getAttribute('data-show-container');
+        if (activeId == this.id) {
+          this.toggleVisibility(this.visibilityState_ != 'visible', true);
+        }
+      }.bind(this));
       this.viewer.classList.add(this.viewportType_);
 
       if (this.viewportType_ == 'natural' && !this.isIos_) {
@@ -202,9 +219,9 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        viewerorigin: parseUrl(window.location.href).origin,
+        origin: parseUrl(window.location.href).origin,
         csi: this.csi_,
-        cap: 'foo,a2a',
+        cap: 'foo,a2a,swipe',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -219,10 +236,9 @@
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
-      // Notice that name can only be set once the IFrame is in the DOM.
-      this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
-
-      this.awaitHandshake_();
+      this.ampViewerHost_ = new AmpViewerHost(window, this.iframe,
+        this.frameOrigin_, this.processRequest_.bind(this),
+        /* logs id */ this.id);
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -232,45 +248,17 @@
       }.bind(this));
     };
 
-
-    Viewer.prototype.awaitHandshake_ = function() {
-      var targetId = this.iframe.id;
-      var target = this.iframe.contentWindow;
-      var targetOrigin = this.frameOrigin_;
-      var listener = function(event) {
-        if (event.origin == targetOrigin &&
-                event.data == 'amp-handshake-request' &&
-                (!event.source || event.source == target)) {
-          log('Viewer ' + this.id + ' messaging established with ',
-              targetOrigin);
-          window.removeEventListener('message', listener, false);
-
-          target./*OK*/postMessage('amp-handshake-response', targetOrigin);
-
-          this.messaging_ = new ViewerMessaging(target, targetOrigin,
-              this.processRequest_.bind(this), targetId);
-          this.sendRequest_('visibilitychange', {
-            state: this.visibilityState_,
-            prerenderSize: this.prerenderSize
-          }, true);
-        }
-      }.bind(this);
-      window.addEventListener('message', listener, false);
-    };
-
-
-    Viewer.prototype.toggleVisibility = function(visible) {
+    Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.sendRequest_('visibilitychange', {
+      this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
         prerenderSize: this.prerenderSize
       }, true);
-      if (visible) {
+      if (updateToggle) {
         this.updateVisibilityToggle_();
       }
     };
-
 
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
@@ -278,15 +266,12 @@
       }
       log('AMP Loaded');
       this.alreadyLoaded_ = true;
-
       var waiter = this.container.querySelector('.wait');
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
-
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
-
       this.iframe.contentWindow.onbeforeunload = (function() {
         this.container.style.paddingTop = '120px';
         this.container.textContent =
@@ -303,7 +288,8 @@
 
 
     Viewer.prototype.onScroll_ = function() {
-      this.sendRequest_('viewport', {
+      log('Viewer.prototype.onScroll_');
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
@@ -314,7 +300,7 @@
           this.container./*OK*/offsetHeight,
           this.header./*OK*/offsetHeight,
           this.container./*OK*/scrollTop);
-      this.sendRequest_('viewport', {
+      this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
@@ -365,7 +351,7 @@
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendRequest_('historyPopped', {
+      this.ampViewerHost_.sendRequest('historyPopped', {
         newStackIndex: this.stackIndex_
       }, false);
       log('history popped to ', this.stackIndex_);
@@ -376,6 +362,7 @@
       this.visibilityToggle_.textContent = this.visibilityState_ == 'visible' ?
           'Visible' : 'Prerendering';
     };
+
 
     Viewer.prototype.broadcast_ = function(message) {
       log('broadcast: ', message);
@@ -388,55 +375,63 @@
     };
 
 
-    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
-      if (type == 'documentLoaded') {
-        return this.documentReady_();
-      }
-      if (type == 'requestFullOverlay') {
-        return this.requestFullOverlay_();
-      }
-      if (type == 'cancelFullOverlay') {
-        return this.cancelFullOverlay_();
-      }
-      if (type == 'pushHistory') {
-        return this.pushHistory_(data.stackIndex);
-      }
-      if (type == 'popHistory') {
-        return this.popHistory_(data.stackIndex);
-      }
-      if (type == 'broadcast') {
-        return this.broadcast_(data);
-      }
-      if (type == 'setFlushParams') {
-        return;
-      }
-      if (type == 'prerenderComplete') {
-        return;
-      }
-      if (type == 'tick') {
-        log('[CSI] tick. label:', data.label);
-        return;
-      }
-      if (type == 'sendCsi') {
-        log('[CSI] sendCsi.');
-        return;
-      }
-      if (type == 'scroll') {
-        return;
-      }
-      if (type == 'a2a') {
-        log('a2a navigation', data);
-        return;
-      }
-      return Promise.reject('request not supported: ' + type);
+    Viewer.prototype.scrollAmpDoc = function(scrollTop) {
+      log('viewer scroll amp doc: ', scrollTop);
+      this.ampViewerHost_.sendRequest('scroll', {scrollTop: scrollTop}, true);
     };
 
 
-    Viewer.prototype.sendRequest_ = function(type, data, awaitResponse) {
-      if (!this.messaging_) {
-        return;
+    Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
+      log(this.id + ': Viewer.prototype.processRequest_', name);
+      switch(name) {
+        case 'documentLoaded':
+          return this.documentReady_();
+        case 'requestFullOverlay':
+          return this.requestFullOverlay_();
+        case 'cancelFullOverlay':
+          return this.cancelFullOverlay_();
+        case 'pushHistory':
+          return this.pushHistory_(data.stackIndex);
+        case 'popHistory':
+          return this.popHistory_(data.stackIndex);
+        case 'broadcast':
+          return this.broadcast_(data);
+        case 'unloaded':
+          log('unloaded');
+          return this.handleUnload_();
+        case 'tick':
+          log('[CSI] tick. label:', data.label);
+          return Promise.resolve();
+        case 'a2aNavigate':
+          log('a2a navigation', data);
+          return Promise.resolve();
+        case 'sendCsi':
+          log('[CSI] sendCsi.');
+          return Promise.resolve();
+        case 'touchstart':
+        case 'touchmove':
+        case 'touchend':
+          log('touch event!', name);
+          return Promise.resolve();
+        case 'documentHeight':
+        case 'setFlushParams':
+        case 'prerenderComplete':
+        case 'scroll':
+        case 'replaceHistory':
+        case 'visibilitychange':
+          return Promise.resolve();
+        default:
+          return Promise.reject('request not supported: ', name);
       }
-      return this.messaging_.sendRequest(type, data, awaitResponse);
+    };
+
+
+    Viewer.prototype.handleUnload_ = function(type, data, awaitResponse) {
+      log('Viewer.prototype.handleUnload_');
+      if (this.messaging_) {
+        this.messaging_ = null;
+      }
+      return Promise.resolve();
     };
 
 
@@ -445,7 +440,6 @@
       var_args.unshift('[VIEWER]');
       console/*OK*/.log.apply(console, var_args);
     }
-
 
     function parseUrl(urlString) {
       var a = document.createElement('a');
@@ -484,30 +478,37 @@
       new Viewer(
           'container1',
           '1',
-          './everything.amp.max.html',
+          './everything.amp.html?amp_js_v=0.1',
           true).start();
       addShowContainer('1');
 
       new Viewer(
           'container2',
           '2',
-          './article-access.amp.max.html',
+          './article.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('2');
 
       new Viewer(
           'container3',
           '3',
-          './article-access.amp.max.html',
+          './article-access.amp.html?amp_js_v=0.1',
           false).start();
       addShowContainer('3');
 
       new Viewer(
           'container4',
           '4',
-          'http://localhost:8000/examples.build/alp.amp.max.html',
+          './alp.amp.html',
           false).start();
       addShowContainer('4');
+
+      new Viewer(
+          'container5',
+          '5',
+          './article-fixed-header.amp.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('5');
 
       showContainer('1');
     }
@@ -524,8 +525,19 @@
       var viewerEl = document.querySelector('viewer');
       viewerEl.setAttribute('data-show-container', id);
       allViewers.forEach(function(viewer) {
-        viewer.toggleVisibility(viewer.id == id);
+        viewer.toggleVisibility(viewer.id == id, viewer.id == id);
       });
+      currentContainerId = id;
+    }
+
+    function getContainer(id) {
+      return allViewers[id - 1];
+    }
+
+    function viewerScrollCurrentAmpDoc(scrollTop) {
+      if (currentContainerId) {
+        getContainer(currentContainerId).scrollAmpDoc(scrollTop);
+      }
     }
 
     window.onload = loadAmpDoc;
@@ -539,6 +551,7 @@
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
+      <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -558,6 +571,11 @@
       </div>
     </container>
     <container id="container4">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container5">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

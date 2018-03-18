@@ -14,31 +14,46 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   IntersectionObserver,
   getIntersectionChangeEntry,
 } from '../../src/intersection-observer';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.useFakeTimers();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   it('intersect correctly base', () => {
-    const time = 123;
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
-    const change = getIntersectionChangeEntry(time, rootBounds, layoutBox);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change).to.be.object;
-    expect(change.time).to.equal(123);
+    expect(change).to.be.an('object');
+    expect(change.time).to.equal(Date.now());
 
-    expect(change.rootBounds).to.equal(rootBounds);
-    expect(change.rootBounds.x).to.equal(0);
-    expect(change.rootBounds.y).to.equal(100);
-    expect(change.boundingClientRect).to.jsonEqual({
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 100,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
       'top': -50,
       'width': 150,
@@ -48,43 +63,81 @@ describe('getIntersectionChangeEntry', () => {
       'x': 50,
       'y': -50,
     });
-    expect(change.intersectionRect.height).to.equal(100);
-    expect(change.intersectionRect).to.jsonEqual({
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 50,
+      'top': 0,
+      'width': 50,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 50,
+      'y': 0,
+    });
+    expect(change.intersectionRatio).to.be.closeTo(0.1666666, .0001);
+  });
+
+  it('intersects on the edge', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 200, 150, 200);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
+
+    expect(change).to.be.an('object');
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 100,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 100,
+      'width': 150,
+      'height': 200,
+      'bottom': 300,
+      'right': 200,
+      'x': 50,
+      'y': 100,
+    });
+    expect(change.intersectionRect).to.deep.equal({
       'left': 50,
       'top': 100,
       'width': 50,
-      'height': 100,
-      'bottom': 200,
+      'height': 0,
+      'bottom': 100,
       'right': 100,
       'x': 50,
       'y': 100,
     });
+    expect(change.intersectionRatio).to.equal(0);
   });
 
   it('intersect correctly 2', () => {
-    const time = 111;
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
-    const change = getIntersectionChangeEntry(time, rootBounds, layoutBox);
-    expect(change.time).to.equal(111);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change.intersectionRect.height).to.equal(1);
-    expect(change.intersectionRect).to.jsonEqual({
+    expect(change.intersectionRect).to.deep.equal({
       'left': 50,
-      'top': 199,
+      'top': 99,
       'width': 50,
       'height': 1,
-      'bottom': 200,
+      'bottom': 100,
       'right': 100,
       'x': 50,
-      'y': 199,
+      'y': 99,
     });
   });
 
   it('intersect correctly 3', () => {
     const rootBounds = layoutRectLtwh(198, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    const change = getIntersectionChangeEntry(111, rootBounds, layoutBox);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(1);
     expect(change.intersectionRect.width).to.equal(2);
@@ -93,10 +146,139 @@ describe('getIntersectionChangeEntry', () => {
   it('intersect correctly 3', () => {
     const rootBounds = layoutRectLtwh(202, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    const change = getIntersectionChangeEntry(111, rootBounds, layoutBox);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(0);
     expect(change.intersectionRect.width).to.equal(0);
+  });
+
+  it('intersects with an owner element', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(40, 110, 20, 20);
+    const layoutBox = layoutRectLtwh(50, 50, 150, 200);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
+
+    expect(change).to.be.an('object');
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 100,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': -50,
+      'width': 150,
+      'height': 200,
+      'bottom': 150,
+      'right': 200,
+      'x': 50,
+      'y': -50,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 50,
+      'top': 10,
+      'width': 10,
+      'height': 20,
+      'bottom': 30,
+      'right': 60,
+      'x': 50,
+      'y': 10,
+    });
+    expect(change.intersectionRatio).to.be.closeTo(0.0066666, .0001);
+  });
+
+  it('does not intersect with an elements out of viewport', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(0, 200, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
+
+    expect(change).to.be.an('object');
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 100,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 125,
+      'width': 100,
+      'height': 100,
+      'bottom': 225,
+      'right': 150,
+      'x': 50,
+      'y': 125,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 0,
+      'height': 0,
+      'bottom': 0,
+      'right': 0,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.intersectionRatio).to.equal(0);
+  });
+
+  it('does not intersect with an element out of viewport', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(0, 100, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
+
+    expect(change).to.be.an('object');
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 100,
+      'height': 100,
+      'bottom': 100,
+      'right': 100,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 125,
+      'width': 100,
+      'height': 100,
+      'bottom': 225,
+      'right': 150,
+      'x': 50,
+      'y': 125,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 0,
+      'height': 0,
+      'bottom': 0,
+      'right': 0,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.intersectionRatio).to.equal(0);
   });
 });
 
@@ -143,11 +325,11 @@ describe('IntersectionObserver', () => {
   }
 
   const ElementClass = document.registerElement('amp-int', {
-    prototype: createAmpElementProto(window, 'amp-int', TestElement),
+    prototype: createAmpElementProtoForTesting(window, 'amp-int', TestElement),
   });
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection.html';
+      '/test/fixtures/served/iframe-intersection.html';
 
   let sandbox;
   let testIframe;
@@ -184,32 +366,32 @@ describe('IntersectionObserver', () => {
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
+    element.win = window;
     element.getVsync = function() {
       return {
-        measure: function(fn) {
+        measure(fn) {
           fn();
         },
       };
     };
     element.getViewport = function() {
       return {
-        onScroll: function() {
+        onScroll() {
           onScrollSpy();
           return function() {};
         },
-        onChanged: function() {
+        onChanged() {
           onChangeSpy();
           return function() {};
         },
       };
     };
     element.element = {
-      getIntersectionChangeEntry: function() {
+      getIntersectionChangeEntry() {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(new Date().getTime(),
-            rootBounds, layoutBox);
+        return getIntersectionChangeEntry(layoutBox, null, rootBounds);
       },
     };
     element.isInViewport = () => false;
@@ -226,7 +408,7 @@ describe('IntersectionObserver', () => {
     const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
         'postMessage');
     ioInstance.sendElementIntersection_();
-    expect(postMessageSpy.callCount).to.equal(0);
+    expect(postMessageSpy).to.have.not.been.called;
     expect(ioInstance.pendingChanges_).to.have.length(0);
   });
 
@@ -234,14 +416,15 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     clock.tick(33);
-    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
     expect(messages[0].changes).to.have.length(1);
@@ -252,13 +435,14 @@ describe('IntersectionObserver', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
-    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    };
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(messages[0].changes).to.have.length(1);
     expect(messages[0].changes[0].time).to.equal(0);
@@ -266,8 +450,8 @@ describe('IntersectionObserver', () => {
     ioInstance.fire();
     clock.tick(1);
     ioInstance.fire();
-    ioInstance.fire();  // Same time
-    ioInstance.fire();  // Same time
+    ioInstance.fire(); // Same time
+    ioInstance.fire(); // Same time
     expect(ioInstance.pendingChanges_).to.have.length(2);
     expect(messages).to.have.length(1);
     clock.tick(1);
@@ -297,9 +481,9 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    expect(fireSpy.callCount).to.equal(1);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(fireSpy).to.be.calledOnce;
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 
@@ -309,7 +493,7 @@ describe('IntersectionObserver', () => {
     insert(testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
-    expect(fireSpy.callCount).to.equal(2);
+    expect(fireSpy).to.have.callCount(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });
 
@@ -318,9 +502,30 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
-    expect(onScrollSpy.callCount).to.equal(1);
-    expect(onChangeSpy.callCount).to.equal(1);
+    expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
+    expect(onScrollSpy).to.be.calledOnce;
+    expect(onChangeSpy).to.be.calledOnce;
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
+  });
+
+  it('should not send intersection after destroy is called', () => {
+    const messages = [];
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    insert(testIframe);
+    ioInstance.onViewportCallback(true);
+    testIframe.contentWindow.postMessage = message => {
+      // Copy because arg is modified in place.
+      messages.push(JSON.parse(JSON.stringify(message)));
+    };
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.startSendingIntersectionChanges_();
+    expect(messages).to.have.length(1);
+    ioInstance.fire();
+    clock.tick(50);
+    ioInstance.destroy();
+    clock.tick(50);
+    expect(messages).to.have.length(1);
+    expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });
 });

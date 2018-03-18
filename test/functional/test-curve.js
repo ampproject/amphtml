@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Curves, bezierCurve, getCurve} from '../../src/curve';
 import * as sinon from 'sinon';
+import {Curves, bezierCurve, getCurve} from '../../src/curve';
 
 describe('Curve', () => {
 
@@ -41,7 +41,7 @@ describe('Curve', () => {
     expect(curve(0.9)).to.be.closeTo(0.982973389, 1e-6);
   });
 
-  it('getCurve', () => {
+  it('getCurve on common curves', () => {
     // Null case.
     expect(getCurve(null)).to.equal(null);
     expect(getCurve(undefined)).to.equal(null);
@@ -56,6 +56,19 @@ describe('Curve', () => {
     expect(getCurve('ease-in')).to.equal(Curves.EASE_IN);
     expect(getCurve('ease-out')).to.equal(Curves.EASE_OUT);
     expect(getCurve('ease-in-out')).to.equal(Curves.EASE_IN_OUT);
+  });
+
+  it('getCurve on cubic-bezier curves', () => {
+    expect(getCurve('cubic-bezier(1)')).to.equal(null);
+    expect(getCurve('cubic-bezier(a)')).to.equal(null);
+    expect(getCurve('cubic-bezier(0.4, 0, 0.2)')).to.equal(null);
+    expect(getCurve('cubic-bezier(0.4, 0, 0.2, a)')).to.equal(null);
+
+    const curveExpected = bezierCurve(0.4, 0, 0.2, 1);
+    const curveGet = getCurve('cubic-bezier(0.4, 0, 0.2, 1)');
+    expect(curveExpected(0.2)).to.be.closeTo(curveGet(0.2), 1e-6);
+    expect(curveExpected(0.6)).to.be.closeTo(curveGet(0.6), 1e-6);
+    expect(curveExpected(0.9)).to.be.closeTo(curveGet(0.9), 1e-6);
   });
 
 });

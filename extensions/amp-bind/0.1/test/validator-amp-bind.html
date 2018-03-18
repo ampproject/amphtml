@@ -1,0 +1,78 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description: Basic test for amp-bind.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Basic</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+</head>
+
+<body>
+  <!-- VALID BINDINGS -->
+  <p [text]="foo.bar" [class]="foo.bar">p</p>
+  <a [href]="foo.bar">a</a>
+  <amp-img src="http://pictures.com/image.jpg" alt="pic" width=10 height=10
+      [src]="foo.bar" [alt]="foo.bar" [width]="foo.bar" [height]="foo.bar">
+  </amp-img>
+  <button [disabled]="foo.bar" [type]="foo.bar" [value]="foo.bar">
+    button
+  </button>
+
+  <amp-bind-macro id="macroWithArgs" arguments="arg1, arg2" expression="arg1 + arg2"></amp-bind-macro>
+  <amp-bind-macro id="macroWithoutArgs" expression="foo.bar + 'baz'"></amp-bind-macro>
+
+  <!-- AMP-STATE -->
+  <!-- amp-state with child script -->
+  <amp-state id="withChildScript">
+    <script type="application/json">
+      {
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+  <!-- amp-state with `src` attr -->
+  <amp-state id="withSrc" src="https://www.foo.com/data.json">
+  </amp-state>
+  <!-- amp-state with `src` and `credentials` attrs -->
+  <amp-state id="withSrcPlusCredentials" src="https://www.foo.com/data.json" credentials="omit">
+  </amp-state>
+  <!-- amp-state with child script and `src` attr -->
+  <amp-state id="withChildScriptAndSrc" src="https://www.foo.com/data.json">
+    <script type="application/json">
+      {
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+  <!-- amp-state with child script and `src` and `credentials` attrs -->
+  <amp-state id="withChildScriptAndSrcPlusCredentials" src="https://www.foo.com/data.json" credentials="include">
+    <script type="application/json">
+      {
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+</body>
+</html>

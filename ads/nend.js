@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 const nendFields = ['nend_params'];
 
@@ -23,8 +23,7 @@ const nendFields = ['nend_params'];
  * @param {!Object} data
  */
 export function nend(global, data) {
-  checkData(data, nendFields);
-  validateDataExists(data, nendFields);
+  validateData(data, nendFields, []);
 
   global.nendParam = data;
   writeScript(global, 'https://js1.nend.net/js/amp.js');

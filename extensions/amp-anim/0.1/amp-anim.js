@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-import {srcsetFromElement} from '../../../src/srcset';
 import * as st from '../../../src/style';
+import {dev} from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {srcsetFromElement} from '../../../src/srcset';
 
-class AmpAnim extends AMP.BaseElement {
+const TAG = 'amp-anim';
+
+
+export class AmpAnim extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.img_ = null;
+
+    /** @private {?../../../src/srcset.Srcset} */
+    this.srcset_ = null;
+
+    /** @private {boolean} */
+    this.hasLoaded_ = false;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -28,23 +45,28 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Element} */
     this.img_ = new Image();
-    this.propagateAttributes(['alt'], this.img_);
+    this.img_.setAttribute('decoding', 'async');
+    this.propagateAttributes(['alt', 'aria-label',
+      'aria-describedby', 'aria-labelledby'], this.img_);
     this.applyFillContent(this.img_, true);
-    this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
-    this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
+
+    // Remove role=img otherwise this breaks screen-readers focus and
+    // only read "Graphic" when using only 'alt'.
+    if (this.element.getAttribute('role') == 'img') {
+      this.element.removeAttribute('role');
+      this.user().error(
+          'AMP-ANIM', 'Setting role=img on amp-anim elements ' +
+          'breaks screen readers. Please just set alt or ARIA attributes, ' +
+          'they will be correctly propagated for the underlying <img> ' +
+          'element.');
+    }
 
     // The image is initially hidden if a placeholder is available.
-    st.toggle(this.img_, !this.getPlaceholder());
+    st.toggle(dev().assertElement(this.img_),
+        !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
-
-    /** @private @const {!Srcset} */
-    this.srcset_ = srcsetFromElement(this.element);
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -54,27 +76,34 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.srcset_) {
+      this.srcset_ = srcsetFromElement(this.element);
+    }
     return this.updateImageSrc_();
   }
 
   /** @override */
   firstLayoutCompleted() {
     // Keep the placeholder: amp-anim is using it to start/stop playing.
+    this.hasLoaded_ = true;
+    this.updateInViewport_();
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    if (!inViewport || !this.loadPromise_) {
-      this.updateInViewport_();
-    } else {
-      this.loadPromise_.then(() => this.updateInViewport_());
+  viewportCallback(unusedInViewport) {
+    if (!this.hasLoaded_) {
+      // do nothing if element has not laid out.
+      return;
     }
+    this.updateInViewport_();
   }
 
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
-    this.img_.src = '';
+    this.img_.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///' +
+        'yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    this.hasLoaded_ = false;
     return true;
   }
 
@@ -82,7 +111,7 @@ class AmpAnim extends AMP.BaseElement {
   updateInViewport_() {
     const inViewport = this.isInViewport();
     this.togglePlaceholder(!inViewport);
-    st.toggle(this.img_, inViewport);
+    st.toggle(dev().assertElement(this.img_), inViewport);
   }
 
   /**
@@ -93,21 +122,26 @@ class AmpAnim extends AMP.BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(),
-        this.getDpr()).url;
+    const src = this.srcset_.select(
+        // The width should never be 0, but we fall back to the screen width
+        // just in case.
+        this.getViewport().getWidth() || this.win.screen.width,
+        this.getDpr());
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_)
+    return this.loadPromise(this.img_)
         .catch(error => {
           if (!this.img_.getAttribute('src')) {
             return;
           }
           throw error;
         });
-    return this.loadPromise_;
   }
-};
+}
 
-AMP.registerElement('amp-anim', AmpAnim);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAnim);
+});

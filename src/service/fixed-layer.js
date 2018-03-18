@@ -14,64 +14,78 @@
  * limitations under the License.
  */
 
-import {documentContains} from '../dom';
+import {Services} from '../services';
+import {
+  computedStyle,
+  getVendorJsPropertyName,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from '../style';
 import {dev, user} from '../log';
-import {platform} from '../platform';
-import {setStyle, setStyles} from '../style';
+import {endsWith} from '../string';
 
 const TAG = 'FixedLayer';
 
 const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
+const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
- * child of documentElement. It's used to manage the `postition:fixed`
- * elements in iOS-iframe case due to the
+ * child of documentElement. It's used to manage the `postition:fixed` and
+ * `position:sticky` elements in iOS-iframe case due to the
  * https://bugs.webkit.org/show_bug.cgi?id=154399 bug, which is itself
  * a result of workaround for the issue where scrolling is not supported
  * in iframes (https://bugs.webkit.org/show_bug.cgi?id=149264).
- * This implementation finds all elements that could be `fixed` and checks
- * on major relayouts if they are indeed `fixed`. All `fixed` elements are
- * moved into the fixed layer.
+ * This implementation finds all elements that could be `fixed` or `sticky`
+ * and checks on major relayouts if they are indeed `fixed`/`sticky`.
+ * Some `fixed` elements may be moved into the "transfer layer".
  */
 export class FixedLayer {
   /**
-   * @param {!Document} doc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!./vsync-impl.Vsync} vsync
+   * @param {number} borderTop
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
-  constructor(doc, vsync, paddingTop, transfer) {
-    /** @const {!Document} */
-    this.doc = doc;
+  constructor(ampdoc, vsync, borderTop, paddingTop, transfer) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @private @const */
     this.vsync_ = vsync;
 
+    /** @const @private {number} */
+    this.borderTop_ = borderTop;
+
     /** @private {number} */
     this.paddingTop_ = paddingTop;
 
+    /** @private {number} */
+    this.committedPaddingTop_ = paddingTop;
+
     /** @private @const {boolean} */
-    this.transfer_ = transfer;
+    this.transfer_ = transfer && ampdoc.isSingleDoc();
 
     /** @private {?Element} */
-    this.fixedLayer_ = null;
+    this.transferLayer_ = null;
 
     /** @private {number} */
     this.counter_ = 0;
 
-    /** @const @private {!Array<!FixedElementDef>} */
-    this.fixedElements_ = [];
+    /** @const @private {!Array<!ElementDef>} */
+    this.elements_ = [];
   }
 
   /**
    * @param {boolean} visible
    */
   setVisible(visible) {
-    if (this.fixedLayer_) {
+    if (this.transferLayer_) {
       this.vsync_.mutate(() => {
-        setStyle(this.fixedLayer_, 'visibility',
+        setStyle(this.transferLayer_, 'visibility',
             visible ? 'visible' : 'hidden');
       });
     }
@@ -81,13 +95,14 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
-    const stylesheets = this.doc.styleSheets;
+    const stylesheets = this.ampdoc.getRootNode().styleSheets;
     if (!stylesheets) {
       return;
     }
 
-    // Find all `position:fixed` elements.
+    // Find all `position:fixed` and `sticky` elements.
     const fixedSelectors = [];
+    const stickySelectors = [];
     for (let i = 0; i < stylesheets.length; i++) {
       const stylesheet = stylesheets[i];
       if (stylesheet.disabled ||
@@ -98,33 +113,20 @@ export class FixedLayer {
               stylesheet.ownerNode.hasAttribute('amp-extension')) {
         continue;
       }
-      this.discoverFixedSelectors_(stylesheet.cssRules, fixedSelectors);
+      this.discoverSelectors_(
+          stylesheet.cssRules, fixedSelectors, stickySelectors);
     }
 
-    try {
-      fixedSelectors.forEach(selector => {
-        const elements = this.doc.querySelectorAll(selector);
-        for (let i = 0; i < elements.length; i++) {
-          if (i > 10) {
-            // We shouldn't have too many of `fixed` elements.
-            break;
-          }
-          this.setupFixedElement_(elements[i], selector);
-        }
-      });
-    } catch (e) {
-      // Fail quietly.
-      dev.error(TAG, 'Failed to setup fixed elements:', e);
-    }
+    this.trySetupSelectorsNoInline(fixedSelectors, stickySelectors);
 
     // Sort in document order.
     this.sortInDomOrder_();
 
-    if (this.fixedElements_.length > 0 && !this.transfer_ &&
-            platform.isIos()) {
-      user.warn(TAG, 'Please test this page inside of an AMP Viewer such' +
-          ' as Google\'s because the fixed positioning might have slightly' +
-          ' different layout.');
+    const platform = Services.platformFor(this.ampdoc.win);
+    if (this.elements_.length > 0 && !this.transfer_ && platform.isIos()) {
+      user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
+          ' as Google\'s because the fixed or sticky positioning might have' +
+          ' slightly different layout.');
     }
 
     this.update();
@@ -132,33 +134,93 @@ export class FixedLayer {
 
   /**
    * Updates the viewer's padding-top position and recalculates offsets of
-   * all elements.
+   * all elements. The padding update can be transient, in which case the
+   * UI itself is not updated leaving the blank space up top, which is invisible
+   * due to scroll position. This mode saves significant resources. However,
+   * eventhough layout is not updated, the fixed/sticky coordinates still need
+   * to be recalculated.
    * @param {number} paddingTop
+   * @param {boolean} opt_transient
    */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_transient) {
     this.paddingTop_ = paddingTop;
+    if (!opt_transient) {
+      this.committedPaddingTop_ = paddingTop;
+    }
     this.update();
   }
 
   /**
-   * Adds the element directly into the fixed layer, bypassing discovery.
-   * @param {!Element} element
+   * Apply or reset transform style to fixed elements. The existing transition,
+   * if any, is disabled when custom transform is supplied.
+   * @param {?string} transform
    */
-  addElement(element) {
-    this.setupFixedElement_(element, /* selector */ '*');
-    this.sortInDomOrder_();
-    this.update();
+  transformMutate(transform) {
+    // Unfortunately, we can't do anything with sticky elements here. Updating
+    // `top` in animation frames causes reflow on all platforms and we can't
+    // determine whether an element is currently docked to apply transform.
+    if (transform) {
+      // Apply transform style to all fixed elements
+      this.elements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          setStyle(e.element, 'transition', 'none');
+          if (e.transform && e.transform != 'none') {
+            setStyle(e.element, 'transform', e.transform + ' ' + transform);
+          } else {
+            setStyle(e.element, 'transform', transform);
+          }
+        }
+      });
+    } else {
+      // Reset transform style to all fixed elements
+      this.elements_.forEach(e => {
+        if (e.fixedNow && e.top) {
+          setStyles(e.element, {
+            transform: '',
+            transition: '',
+          });
+        }
+      });
+    }
   }
 
   /**
-   * Removes the element from the fixed layer.
+   * Adds the element directly into the fixed/sticky layer, bypassing discovery.
+   * @param {!Element} element
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the transfer layer.
+   * @return {!Promise}
+   */
+  addElement(element, opt_forceTransfer) {
+    const win = this.ampdoc.win;
+    if (!element./*OK*/offsetParent &&
+        computedStyle(win, element).display === 'none') {
+      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
+          element.tagName);
+    }
+    this.setupElement_(
+        element,
+        /* selector */ '*',
+        /* position */ 'fixed',
+        opt_forceTransfer);
+    this.sortInDomOrder_();
+    return this.update();
+  }
+
+  /**
+   * Removes the element from the fixed/sticky layer.
    * @param {!Element} element
    */
   removeElement(element) {
-    this.removeFixedElement_(element);
-    if (this.fixedLayer_) {
+    const removed = this.removeElement_(element);
+    if (removed.length > 0 && this.transferLayer_) {
       this.vsync_.mutate(() => {
-        this.returnFromFixedLayer_(element);
+        for (let i = 0; i < removed.length; i++) {
+          const fe = removed[i];
+          if (fe.position == 'fixed') {
+            this.returnFromTransferLayer_(fe);
+          }
+        }
       });
     }
   }
@@ -174,101 +236,114 @@ export class FixedLayer {
   }
 
   /**
-   * Performs fixed actions.
+   * Whether the element is declared as sticky in any of the user's stylesheets.
+   * Will include any matches, not necessarily currently sticky elements.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isDeclaredSticky(element) {
+    return !!element[DECLARED_STICKY_PROP];
+  }
+
+  /**
+   * Performs fixed/sticky actions.
    * 1. Updates `top` styling if necessary.
    * 2. On iOS/Iframe moves elements between fixed layer and BODY depending on
-   * whether they are currently visible and fixed.
+   * whether they are currently visible and fixed
    * @return {!Promise}
    */
   update() {
-    if (this.fixedElements_.length == 0) {
+    // Some of the elements may no longer be in DOM.
+    /** @type {!Array<!ElementDef>} */
+    const toRemove = this.elements_.filter(
+        fe => !this.ampdoc.contains(fe.element));
+    toRemove.forEach(fe => this.removeElement_(fe.element));
+
+    if (this.elements_.length == 0) {
       return Promise.resolve();
     }
 
-    // Some of the elements may no longer be in DOM.
-    /** @type {!Array<!FixedElementDef>} */
-    const toRemove = this.fixedElements_.filter(
-        fe => !documentContains(this.doc, fe.element));
-    toRemove.forEach(fe => this.removeFixedElement_(fe.element));
-
     // Next, the positioning-related properties will be measured. If a
-    // potentially fixed element turns out to be actually fixed, it will
-    // be decorated and possibly move to a separate layer.
+    // potentially fixed/sticky element turns out to be actually fixed/sticky,
+    // it will be decorated and possibly move to a separate layer.
     let hasTransferables = false;
     return this.vsync_.runPromise({
       measure: state => {
-        const autoTopMap = {};
+        const elements = this.elements_;
+        const autoTops = [];
+        const win = this.ampdoc.win;
 
         // Notice that this code intentionally breaks vsync contract.
         // Unfortunately, there's no way to reliably test whether or not
         // `top` has been set to a non-auto value on all platforms. To work
-        // this around, this code compares `offsetTop` values with and without
-        // `style.top = auto`.
+        // this around, this code compares `style.top` values with a new
+        // `style.bottom` value.
+        // 1. Unset top from previous mutates and set bottom to an extremely
+        // large value (to catch cases where sticky-tops are in a long way
+        // down inside a scroller).
+        for (let i = 0; i < elements.length; i++) {
+          setImportantStyles(elements[i].element, {
+            top: '',
+            bottom: '-9999vh',
+            transition: 'none',
+          });
+        }
+        // 2. Capture the `style.top` with this new `style.bottom` value. If
+        // this element has a non-auto top, this value will remain constant
+        // regardless of bottom.
+        for (let i = 0; i < elements.length; i++) {
+          autoTops.push(computedStyle(win, elements[i].element).top);
+        }
+        // 3. Cleanup the `style.bottom`.
+        for (let i = 0; i < elements.length; i++) {
+          setStyle(elements[i].element, 'bottom', '');
+        }
 
-        // 1. Set all style top to `auto` and calculate the auto-offset.
-        this.fixedElements_.forEach(fe => {
-          fe.element.style.top = 'auto';
-        });
-        this.fixedElements_.forEach(fe => {
-          autoTopMap[fe.id] = fe.element./*OK*/offsetTop;
-        });
+        for (let i = 0; i < elements.length; i++) {
+          const fe = elements[i];
+          const {element} = fe;
+          const style = computedStyle(win, element);
 
-        // 2. Reset style top.
-        this.fixedElements_.forEach(fe => {
-          fe.element.style.top = '';
-        });
+          const {offsetWidth, offsetHeight, offsetTop} = element;
+          const {
+            position = '',
+            display = '',
+            bottom,
+            zIndex,
+          } = style;
+          const opacity = parseFloat(style.opacity);
+          const transform = style[getVendorJsPropertyName(style, 'transform')];
+          let {top} = style;
 
-        // 3. Calculated fixed info.
-        this.fixedElements_.forEach(fe => {
-          const element = fe.element;
-          const styles = this.doc.defaultView./*OK*/getComputedStyle(
-              element, null);
-          if (!styles) {
-            // Notice that `styles` can be `null`, courtesy of long-standing
-            // Gecko bug: https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-            // See #3096 for more details.
-            state[fe.id] = {
-              fixed: false,
-              transferrable: false,
-              top: '',
-              zIndex: '',
-            };
-            return;
-          }
-
-          const position = styles.getPropertyValue('position');
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
-              position == 'fixed' &&
-              element./*OK*/offsetWidth > 0 &&
-              element./*OK*/offsetHeight > 0);
-          if (!isFixed) {
+            position == 'fixed' &&
+              (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
+          // Element is indeed sticky.
+          const isSticky = endsWith(position, 'sticky');
+          const isDisplayed = display !== 'none';
+
+          if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
               fixed: false,
+              sticky: false,
               transferrable: false,
               top: '',
               zIndex: '',
             };
-            return;
+            continue;
           }
 
-          // Calculate top, assuming that it could implicitly be `auto`.
-          // `getComputedStyle().top` will return `auto` in Safari and the
-          // actual calculated value in all other browsers. To find out whether
-          // or not the `top` was actually set in CSS, this method compares
-          // `offsetTop` with `style.top = 'auto'` and without.
-          let top = styles.getPropertyValue('top');
-          const currentOffsetTop = element./*OK*/offsetTop;
-          const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
-          if ((top == 'auto' || isImplicitAuto) &&
-                  top != '0px' &&
-                  currentOffsetTop != 0) {
-            top = '';
+          if (top === 'auto' || autoTops[i] !== top) {
+            if (isFixed &&
+                offsetTop === this.committedPaddingTop_ + this.borderTop_) {
+              top = '0px';
+            } else {
+              top = '';
+            }
           }
 
-          const bottom = styles.getPropertyValue('bottom');
-          const opacity = parseFloat(styles.getPropertyValue('opacity'));
           // Transferability requires element to be fixed and top or bottom to
           // be styled with `0`. Also, do not transfer transparent
           // elements - that's a lot of work for no benefit.  Additionally,
@@ -278,39 +353,54 @@ export class FixedLayer {
           // `height` is constrained to at most 300px. This is to avoid
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
-          const isTransferrable = (
-              isFixed &&
+          const isTransferrable = isFixed && (
+            fe.forceTransfer || (
               opacity > 0 &&
-              element./*OK*/offsetHeight < 300 &&
-              (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom)));
+                  offsetHeight < 300 &&
+                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
           if (isTransferrable) {
             hasTransferables = true;
           }
           state[fe.id] = {
             fixed: isFixed,
+            sticky: isSticky,
             transferrable: isTransferrable,
             top,
-            zIndex: styles.getPropertyValue('z-index'),
+            zIndex,
+            transform,
           };
-        });
+        }
       },
       mutate: state => {
         if (hasTransferables && this.transfer_) {
-          const fixedLayer = this.getFixedLayer_();
-          if (fixedLayer.className != this.doc.body.className) {
-            fixedLayer.className = this.doc.body.className;
+          const transferLayer = this.getTransferLayer_();
+          if (transferLayer.className != this.ampdoc.getBody().className) {
+            transferLayer.className = this.ampdoc.getBody().className;
           }
         }
-        this.fixedElements_.forEach((fe, i) => {
+        const elements = this.elements_;
+        for (let i = 0; i < elements.length; i++) {
+          const fe = elements[i];
           const feState = state[fe.id];
+
+          // Fix a bug with Safari. For some reason, you cannot unset
+          // transition when it's important. You can, however, set it to a valid
+          // non-important value, then unset it.
+          setStyle(fe.element, 'transition', 'none');
+          // Note: This MUST be done after measurements are taken.
+          // Transitions will mess up everything and, depending on when paints
+          // happen, mutates of transition and bottom at the same time may be
+          // make the transition active.
+          setStyle(fe.element, 'transition', '');
+
           if (feState) {
-            this.mutateFixedElement_(fe, i, feState);
+            this.mutateElement_(fe, i, feState);
           }
-        });
+        }
       },
     }, {}).catch(error => {
       // Fail silently.
-      dev.error(TAG, 'Failed to mutate fixed elements:', error);
+      dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
   }
 
@@ -324,60 +414,129 @@ export class FixedLayer {
   }
 
   /**
-   * This method records the potentially fixed element. One of a more critical
-   * function - it records all selectors that may apply "fixed" to this element
-   * to check them later.
+   * Calls `setupSelectors_` in a try-catch.
+   * Fails quietly with a dev error if call fails.
+   * This method should not be inlined to prevent TryCatch deoptimization.
+   * NoInline keyword at the end of function name also prevents Closure compiler
+   * from inlining the function.
+   * @param {!Array<string>} fixedSelectors
+   * @param {!Array<string>} stickySelectors
+   * @private
+   */
+  trySetupSelectorsNoInline(fixedSelectors, stickySelectors) {
+    try {
+      this.setupSelectors_(fixedSelectors, stickySelectors);
+    } catch (e) {
+      // Fail quietly.
+      dev().error(TAG, 'Failed to setup fixed elements:', e);
+    }
+  }
+
+  /**
+   * Calls `setupElement_` for up to 10 elements matching each selector
+   * in `fixedSelectors` and for all selectors in `stickySelectors`.
+   * @param {!Array<string>} fixedSelectors
+   * @param {!Array<string>} stickySelectors
+   * @private
+   */
+  setupSelectors_(fixedSelectors, stickySelectors) {
+    for (let i = 0; i < fixedSelectors.length; i++) {
+      const fixedSelector = fixedSelectors[i];
+      const elements = this.ampdoc.getRootNode().querySelectorAll(
+          fixedSelector);
+      for (let j = 0; j < elements.length; j++) {
+        if (j > 10) {
+          // We shouldn't have too many of `fixed` elements.
+          break;
+        }
+        this.setupElement_(elements[j], fixedSelector, 'fixed');
+      }
+    }
+    for (let i = 0; i < stickySelectors.length; i++) {
+      const stickySelector = stickySelectors[i];
+      const elements = this.ampdoc.getRootNode().querySelectorAll(
+          stickySelector);
+      for (let j = 0; j < elements.length; j++) {
+        this.setupElement_(elements[j], stickySelector, 'sticky');
+      }
+    }
+  }
+
+  /**
+   * This method records the potentially fixed or sticky element. One of a more
+   * critical functions - it records all selectors that may apply "fixed"
+   * or "sticky" to this element to check them later.
    *
    * @param {!Element} element
    * @param {string} selector
+   * @param {string} position
+   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
+   *    to be forcefully transferred to the transfer layer.
    * @private
    */
-  setupFixedElement_(element, selector) {
+  setupElement_(element, selector, position, opt_forceTransfer) {
     let fe = null;
-    for (let i = 0; i < this.fixedElements_.length; i++) {
-      if (this.fixedElements_[i].element == element) {
-        fe = this.fixedElements_[i];
+    for (let i = 0; i < this.elements_.length; i++) {
+      if (this.elements_[i].element == element &&
+              this.elements_[i].position == position) {
+        fe = this.elements_[i];
         break;
       }
     }
+    const isFixed = position == 'fixed';
     if (fe) {
-      // Already seen.
-      fe.selectors.push(selector);
+      if (!fe.selectors.includes(selector)) {
+        // Already seen.
+        fe.selectors.push(selector);
+      }
     } else {
       // A new entry.
-      const fixedId = 'F' + (this.counter_++);
-      element.setAttribute('i-amp-fixedid', fixedId);
-      element[DECLARED_FIXED_PROP] = true;
+      const id = 'F' + (this.counter_++);
+      element.setAttribute('i-amphtml-fixedid', id);
+      if (isFixed) {
+        element[DECLARED_FIXED_PROP] = true;
+      } else {
+        element[DECLARED_STICKY_PROP] = true;
+      }
       fe = {
-        id: fixedId,
+        id,
         element,
+        position,
         selectors: [selector],
+        fixedNow: false,
+        stickyNow: false,
       };
-      this.fixedElements_.push(fe);
+      this.elements_.push(fe);
     }
+
+    fe.forceTransfer = isFixed && !!opt_forceTransfer;
   }
 
   /**
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
+   * @return {!Array<!ElementDef>}
    * @private
    */
-  removeFixedElement_(element) {
-    for (let i = 0; i < this.fixedElements_.length; i++) {
-      if (this.fixedElements_[i].element == element) {
+  removeElement_(element) {
+    const removed = [];
+    for (let i = 0; i < this.elements_.length; i++) {
+      if (this.elements_[i].element == element) {
         this.vsync_.mutate(() => {
-          element.style.top = '';
+          setStyle(element, 'top', '');
         });
-        this.fixedElements_.splice(i, 1);
-        break;
+        const fe = this.elements_[i];
+        this.elements_.splice(i, 1);
+        removed.push(fe);
       }
     }
+    return removed;
   }
 
   /** @private */
   sortInDomOrder_() {
-    this.fixedElements_.sort(function(fe1, fe2) {
+    this.elements_.sort(function(fe1, fe2) {
       // 8 | 2 = 0x0A
       // 2 - preceeding
       // 8 - contains
@@ -389,87 +548,98 @@ export class FixedLayer {
   }
 
   /**
-   * Mutates the fixed element. At this point it's determined that the element
-   * is indeed fixed. There are two main functions here:
+   * Mutates the fixed/sticky element. At this point it's determined that the
+   * element is indeed fixed/sticky. There are two main functions here:
    *  1. `top` has to be updated to reflect viewer's paddingTop.
    *  2. The element may need to be transfered to the separate fixed layer.
    *
-   * @param {!FixedElementDef} fe
+   * @param {!ElementDef} fe
    * @param {number} index
-   * @param {!FixedElementStateDef} state
+   * @param {!ElementStateDef} state
    * @private
    */
-  mutateFixedElement_(fe, index, state) {
+  mutateElement_(fe, index, state) {
     const element = fe.element;
     const oldFixed = fe.fixedNow;
 
     fe.fixedNow = state.fixed;
-    if (state.fixed) {
-      // Update `top`. This is necessary to adjust position to the viewer's
-      // paddingTop.
-      element.style.top = state.top ?
-          `calc(${state.top} + ${this.paddingTop_}px)` :
-          '';
+    fe.stickyNow = state.sticky;
+    fe.top = (state.fixed || state.sticky) ? state.top : '';
+    fe.transform = state.transform;
 
-      // Move element to the fixed layer.
-      if (!oldFixed && this.transfer_) {
-        if (state.transferrable) {
-          this.transferToFixedLayer_(fe, index, state);
+    // Move back to the BODY layer and reset transfer z-index.
+    if (oldFixed && (!state.fixed || !state.transferrable)) {
+      this.returnFromTransferLayer_(fe);
+    }
+
+    // Update `top`. This is necessary to adjust position to the viewer's
+    // paddingTop.
+    if (state.top && (state.fixed || state.sticky)) {
+      if (state.fixed || !this.transfer_) {
+        // Fixed positions always need top offsetting, as well as stickies on
+        // non iOS Safari.
+        setStyle(element, 'top', `calc(${state.top} + ${this.paddingTop_}px)`);
+      } else {
+        // On iOS Safari (this.transfer_ = true), stickies need to be cannot
+        // have an offset because they are already offset by the padding-top.
+        if (this.committedPaddingTop_ === this.paddingTop_) {
+          // So, when the header is shown, just use top.
+          setStyle(element, 'top', state.top);
         } else {
-          this.returnFromFixedLayer_(fe);
+          // When the header is not shown, we need to subtract the padding top.
+          setStyle(element, 'top',
+              `calc(${state.top} - ${this.committedPaddingTop_}px)`);
         }
       }
-    } else if (oldFixed) {
-      // Reset `top` which was assigned above.
-      if (element.style.top) {
-        element.style.top = '';
-      }
+    }
 
-      // Move back to the BODY layer and reset transfer z-index.
-      this.returnFromFixedLayer_(fe);
+    // Move element to the fixed layer.
+    if (this.transfer_ && state.fixed && !oldFixed && state.transferrable) {
+      this.transferToTransferLayer_(fe, index, state);
     }
   }
 
   /**
-   * @param {!FixedElementDef} fe
+   * @param {!ElementDef} fe
    * @param {number} index
-   * @param {!FixedElementStateDef} state
+   * @param {!ElementStateDef} state
    * @private
    */
-  transferToFixedLayer_(fe, index, state) {
+  transferToTransferLayer_(fe, index, state) {
     const element = fe.element;
-    if (element.parentElement == this.fixedLayer_) {
+    if (element.parentElement == this.transferLayer_) {
       return;
     }
 
-    dev.fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user.warn(TAG, 'In order to improve scrolling performance in Safari,' +
+    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
         ' we now move the element to a fixed positioning layer:', fe.element);
 
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      fe.placeholder = this.doc.createElement('i-amp-fp');
-      fe.placeholder.setAttribute('i-amp-fixedid', fe.id);
+      fe.placeholder = this.ampdoc.win.document.createElement('i-amphtml-fp');
+      fe.placeholder.setAttribute('i-amphtml-fixedid', fe.id);
       setStyle(fe.placeholder, 'display', 'none');
     }
 
     // Calculate z-index based on the declared z-index and DOM position.
-    element.style.zIndex = `calc(${10000 + index} + ${state.zIndex || 0})`;
+    setStyle(element, 'zIndex',
+        `calc(${10000 + index} + ${state.zIndex || 0})`);
 
     element.parentElement.replaceChild(fe.placeholder, element);
-    this.getFixedLayer_().appendChild(element);
+    this.getTransferLayer_().appendChild(element);
 
-    // Test if the element still matches one of the `fixed ` selectors. If not
+    // Test if the element still matches one of the `fixed` selectors. If not
     // return it back to BODY.
     const matches = fe.selectors.some(
         selector => this.matches_(element, selector));
     if (!matches) {
-      user.warn(TAG,
+      user().warn(TAG,
           'Failed to move the element to the fixed position layer.' +
           ' This is most likely due to the compound CSS selector:',
           fe.element);
-      this.returnFromFixedLayer_(fe);
+      this.returnFromTransferLayer_(fe);
     }
   }
 
@@ -490,24 +660,22 @@ export class FixedLayer {
       }
     } catch (e) {
       // Fail silently.
-      dev.error(TAG, 'Failed to test query match:', e);
+      dev().error(TAG, 'Failed to test query match:', e);
     }
     return false;
   }
 
   /**
-   * @param {!FixedElementDef} fe
+   * @param {!ElementDef} fe
    * @private
    */
-  returnFromFixedLayer_(fe) {
-    if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
+  returnFromTransferLayer_(fe) {
+    if (!fe.placeholder || !this.ampdoc.contains(fe.placeholder)) {
       return;
     }
-    dev.fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (documentContains(this.doc, fe.element)) {
-      if (fe.element.style.zIndex) {
-        fe.element.style.zIndex = '';
-      }
+    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
+    if (this.ampdoc.contains(fe.element)) {
+      setStyle(fe.element, 'zIndex', '');
       fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
     } else {
       fe.placeholder.parentElement.removeChild(fe.placeholder);
@@ -517,13 +685,15 @@ export class FixedLayer {
   /**
    * @return {?Element}
    */
-  getFixedLayer_() {
-    if (!this.transfer_ || this.fixedLayer_) {
-      return this.fixedLayer_;
+  getTransferLayer_() {
+    // This mode is only allowed for a single-doc case.
+    if (!this.transfer_ || this.transferLayer_) {
+      return this.transferLayer_;
     }
-    this.fixedLayer_ = this.doc.createElement('body');
-    this.fixedLayer_.id = '-amp-fixedlayer';
-    setStyles(this.fixedLayer_, {
+    const doc = this.ampdoc.win.document;
+    this.transferLayer_ = doc.body.cloneNode(/* deep */ false);
+    this.transferLayer_.removeAttribute('style');
+    setStyles(this.transferLayer_, {
       position: 'absolute',
       top: 0,
       left: 0,
@@ -549,26 +719,31 @@ export class FixedLayer {
       transition: 'none',
       visibility: 'visible',
     });
-    this.doc.documentElement.appendChild(this.fixedLayer_);
-    return this.fixedLayer_;
+    doc.documentElement.appendChild(this.transferLayer_);
+    return this.transferLayer_;
   }
 
   /**
    * @param {!Array<CSSRule>} rules
    * @param {!Array<string>} foundSelectors
+   * @param {!Array<string>} stickySelectors
    * @private
    */
-  discoverFixedSelectors_(rules, foundSelectors) {
+  discoverSelectors_(rules, foundSelectors, stickySelectors) {
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
       if (rule.type == /* CSSStyleRule */ 1) {
-        if (rule.selectorText != '*' && rule.style.position == 'fixed') {
-          foundSelectors.push(rule.selectorText);
+        if (rule.selectorText != '*' && rule.style.position) {
+          if (rule.style.position == 'fixed') {
+            foundSelectors.push(rule.selectorText);
+          } else if (endsWith(rule.style.position, 'sticky')) {
+            stickySelectors.push(rule.selectorText);
+          }
         }
       } else if (rule.type == /* CSSMediaRule */ 4) {
-        this.discoverFixedSelectors_(rule.cssRules, foundSelectors);
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       } else if (rule.type == /* CSSSupportsRule */ 12) {
-        this.discoverFixedSelectors_(rule.cssRules, foundSelectors);
+        this.discoverSelectors_(rule.cssRules, foundSelectors, stickySelectors);
       }
     }
   }
@@ -580,18 +755,24 @@ export class FixedLayer {
  *   id: string,
  *   selectors: !Array,
  *   element: !Element,
- *   placeholder: ?Element,
+ *   position: string,
+ *   placeholder: (?Element|undefined),
  *   fixedNow: boolean,
+ *   stickyNow: boolean,
+ *   top: (string|undefined),
+ *   transform: (string|undefined),
+ *   forceTransfer: (boolean|undefined),
  * }}
  */
-let FixedElementDef;
+let ElementDef;
 
 /**
  * @typedef {{
  *   fixed: boolean,
+ *   sticky: boolean,
  *   transferrable: boolean,
  *   top: string,
  *   zIndex: string,
  * }}
  */
-let FixedElementStateDef;
+let ElementStateDef;

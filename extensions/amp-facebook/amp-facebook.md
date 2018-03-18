@@ -16,14 +16,12 @@ limitations under the License.
 
 # <a name="amp-facebook"></a> `amp-facebook`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Facebook Post or Video. </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable.</td>
+    <td>Displays a Facebook post or video. </td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,47 +29,81 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-facebook">amp-facebook.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/facebook.amp.html">facebook.amp.html</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-facebook/">annotated amp-facebook</a> example.</td>
   </tr>
 </table>
 
-## Examples
+## Overview 
 
-Example - Embedding a post:
+You can use the `amp-facebook` component to embed a Facebook post or a Facebook video.
+
+#### Example: Embedding a post
+
+Code:
 ```html
-<amp-facebook width=486 height=657
+<amp-facebook width="552" height="310"
     layout="responsive"
-    data-href="https://www.facebook.com/zuck/posts/10102593740125791">
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
 </amp-facebook>
 ```
+Renders as:
+<amp-facebook width="552" height="310"
+    layout="responsive"
+    data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
+</amp-facebook>
 
-Example - Embedding a video:
+#### Example: Embedding a video
+
+Code:
 ```html
-<amp-facebook width=552 height=574
+<amp-facebook width="476" height="316"
     layout="responsive"
     data-embed-as="video"
-    data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
 ```
+Renders as:
+<amp-facebook width="476" height="316"
+    layout="responsive"
+    data-embed-as="video"
+    data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
+</amp-facebook>
+
 
 ## Attributes
 
-**data-href**
+##### data-href (required)
 
-The URL of the facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
+The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
 
-**data-embed-as**
-_Optional_
-Either `post` or `video` (default: `post`).
+##### data-embed-as
 
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embed the player of the video ignoring the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+The value is either `post` or `video`.  The default is `post`.
 
-Checkout the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+
+Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+
+##### data-align-center
+
+The value is either `true` or `false`.  The default is `false`.
+
+Having this attribute set to true would align the post/video container to center.
+
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well. 
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii) in the AMP validator specification.
+See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/validator-amp-facebook.protoascii) in the AMP validator specification.

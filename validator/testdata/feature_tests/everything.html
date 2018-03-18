@@ -1,0 +1,468 @@
+<!--
+  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      max-width: 736px;
+      margin: 8px;
+    }
+
+    amp-lightbox {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    .bordered {
+      border: 1px solid black;
+    }
+
+    .box1 {
+      border: 1px solid black;
+      margin: 8px 0;
+    }
+
+    .logo {
+      background: yellow;
+      border: 5px solid black;
+      border-radius: 50%;
+      opacity: 0.7;
+      position: fixed;
+      z-index: 1000;
+      top: 100px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .ear {
+      background: lime;
+      border: 5px solid black;
+      opacity: 0.7;
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    @media screen and (min-width: 380px) {
+      .logo {
+        top: auto;
+      }
+    }
+
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
+    .goto {
+      display: block;
+      margin: 16px;
+    }
+    @font-face {
+      font-family: 'Comic AMP';
+      font-style: bold;
+      font-weight: 700;
+      src: url(fonts/ComicAMP.ttf) format('truetype');
+    }
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+
+    .comic-amp-font-loading .comic-amp {
+      color: #0ff;
+    }
+
+    .comic-amp-font-missing .comic-amp {
+      color: #f00;
+    }
+
+    .lightbox-close-button {
+      background: white;
+    }
+
+    .lightbox-text {
+      color: white;
+    }
+
+    #amp-iframe:target {
+      border: 1px solid green;
+    }
+
+    #breaker {
+      height: 100px;
+      background: green;
+    }
+
+    #breaking {
+      height: 200px;
+      width: 200vw;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+
+  </style>
+  <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body class="comic-amp-font-loading">
+<div class="logo"></div>
+<div class="ear"></div>
+
+<article>
+
+<h1 id="top">AMP #0</h1>
+<a href="#amp-iframe">Go to iframe</a>
+  <p class="comic-amp">
+    Quisque ultricies id augue a convallis. Vivamus euismod est quis tellus laoreet lacinia. In quam tellus, mollis nec porta eget, volutpat sit amet nibh. Duis ac odio sem. Sed consequat, ante gravida fringilla suscipit, libero libero ullamcorper metus, nec porta est elit at est. Curabitur vel diam ligula. Nulla bibendum malesuada odio.
+  </p>
+  <p>
+    <amp-fit-text width="300" height="200" layout="responsive" class="box1">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+    </amp-fit-text>
+  </p>
+  <p>
+    <div class="box1">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+    </div>
+  </p>
+
+  <p>
+    <a class="goto" href="#top">Top</a>
+    <a class="goto" href="#img0">Image0</a>
+    <a class="goto" href="#footer">Footer</a>
+  </p>
+
+  <p>
+    <amp-carousel width=400 height=300 layout=responsive type=slides>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
+      <amp-anim
+          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+          width="400" height="300">
+        <amp-img placeholder
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
+            width="400" height="300"></amp-img>
+      </amp-anim>
+    </amp-carousel>
+  </p>
+  <p>
+    <amp-carousel width=auto height=200>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no-n" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no-n" width=300 height=200></amp-img>
+      <amp-anim
+          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no"
+          width="300" height="200">
+        <amp-img placeholder
+            src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no-k"
+            width="300" height="200"></amp-img>
+      </amp-anim>
+    </amp-carousel>
+  </p>
+  <p>
+    <amp-anim
+        src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no"
+        width="400" height="225" layout="responsive">
+      <amp-img placeholder
+          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no-k"
+          width="400" height="225" layout="responsive"></amp-img>
+    </amp-anim>
+  </p>
+
+  <h2>Video</h2>
+  <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="responsive"
+      controls></amp-video>
+
+  <h2>Youtube</h2>
+  <amp-youtube
+      data-videoid="mGENRKrdoGY"
+      width="480" height="270"></amp-youtube>
+
+  <amp-youtube
+      data-videoid="mGENRKrdoGY"
+      layout="responsive"
+      width="480" height="270"></amp-youtube>
+
+
+  <h2>Audio</h2>
+    <amp-audio src="/examples/av/audio.mp3"></amp-audio>
+
+  <h2>Lightbox</h2>
+  <amp-lightbox id="lightbox" layout="nodisplay">
+    <p>
+      <button on="tap:lightbox.close" class="lightbox-close-button">
+          Close Lightbox
+      </button>
+    </p>
+    <p>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+  </amp-lightbox>
+
+  <button on="tap:lightbox">
+      Open Lightbox
+  </button>
+
+  <h2>Scrollable Lightbox</h2>
+  <amp-lightbox scrollable id="lightbox-scrollable" layout="nodisplay">
+    <button on="tap:lightbox-scrollable.close" class="lightbox-close-button">
+      Close Scrollable Lightbox
+    </button>
+    <p>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <p>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no" width=300 height=200></amp-img>
+    </p>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+    <amp-twitter width=486 height=657
+                 media="(min-width: 401px)"
+                 layout="responsive"
+                 data-tweetID="585110598171631616"></amp-twitter>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        layout="responsive"
+        width="480" height="270"></amp-youtube>
+    <p class="lightbox-text">
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+    </p>
+  </amp-lightbox>
+
+  <button on="tap:lightbox-scrollable">
+    Open Scrollable Lightbox
+  </button>
+
+  <h2>Images</h2>
+  <p>
+  Responsive (w/srcset, w/image-lightbox)
+  <p>
+    <amp-image-lightbox id="imagelightbox1" layout="nodisplay"></amp-image-lightbox>
+    <amp-img id="img0"
+        srcset="
+            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
+            https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
+        width=527 height=193 layout="responsive"
+        on="tap:imagelightbox1" role="button" tabindex="0"></amp-img>
+  </p>
+
+  <p>
+  Fixed
+  <p>
+    <amp-img id="img1" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=264 height=96></amp-img>
+  </p>
+
+  <p>
+  None
+  <p class="bordered">
+    <amp-img id="img2" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="nodisplay"></amp-img>
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet.
+  </p>
+  <amp-ad width=300 height=250
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="abc123"
+      data-aax_src="302">
+  </amp-ad>
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+  <p>
+    <amp-img id="img3" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img id="img4" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img id="img5" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+  <section>
+    <h1>Media query selection<h1>
+    <amp-img
+        media="(min-width: 650px)"
+        id="img6" src="https://lh5.googleusercontent.com/-vmSp-YN10lA/VcH6S35gAWI/AAAAAAABYqk/6wuA5T3ApSk/w1832-h1376-no/IMG_20150805_131745-ANIMATION.gif"
+        width=466
+        height=355 layout="responsive" ></amp-img>
+    <amp-img
+        media="(max-width: 649px)"
+        id="img7" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg"
+        width=527
+        height=193 layout="responsive" ></amp-img>
+  </section>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <h2>Twitter</h2>
+  <amp-twitter width=486 height=657
+      media="(min-width: 401px)"
+      layout="responsive"
+      data-tweetID="585110598171631616">
+  </amp-twitter>
+  <amp-twitter width=306 height=525
+      media="(max-width: 400px)"
+      layout="responsive"
+      data-tweetID="585110598171631616">
+  </amp-twitter>
+  <!-- no cards -->
+  <amp-twitter width=486 height=256
+      layout="responsive"
+      data-tweetID="585110598171631616"
+      data-cards="hidden">
+  </amp-twitter>
+  <p>
+    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+  <h2>Instagram</h2>
+  <amp-instagram
+    data-shortcode="fBwFP"
+    width="320"
+    height="320"
+    layout="responsive">
+  </amp-instagram>
+
+  <h2 id="amp-iframe">IFrame</h2>
+  <amp-iframe width=300 height=300
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      layout="responsive"
+      frameborder="0"
+      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+  </amp-iframe>
+  <div>
+    <a on="tap:AMP.goBack">Go back</a>
+  </div>
+  </p>
+  <amp-ad width=300 height=200
+      type="adsense"
+      data-ad-client="ca-pub-9350112648257122">
+  </amp-ad>
+
+  <h2>SVG</h2>
+  <svg width="400" height="296" viewBox="1400 500 3000 2500">
+    <path d="m 3766.9354,1578.1181 c 58.2769,-756.81944 -408.1876,-717.21057 -510.4769,-701.02201 -79.902,12.64545 -239.2559,90.53098 -313.8601,318.92831 -82.3686,252.1683 143.3895,461.6098 259.4436,801.3231 172.8182,640.8523 -882.0196,923.1062 -1227.7959,798.7381 -69.3048,-30.0286 -182.3973,-108.7232 -158.8806,-186.5382 8.5153,-72.4218 -105.5719,-107.3077 -82.4098,-11.1024 95.373,379.694 618.3608,323.5968 1066.1849,144.2115 250.0432,-100.16 489.5859,-347.2474 489.7608,-633.164 -50.7024,-386.8592 -391.2774,-599.5297 -282.7825,-917.5279 173.2946,-330.57664 355.7612,-318.24308 596.6594,-169.4657 82.8022,96.8444 115.4521,181.225 119.5309,313.0092 2.5525,82.4609 -36.2889,260.8703 44.6262,242.61 z" fill="#669900"/>
+    <path d="m 4416.0026,1455.3672 c 77.2745,23.6811 73.5053,107.3467 75.9575,166.8979 15.3869,149.8221 -6.2292,300.1828 4.2896,450.1688 -8.5601,219.3654 0.7438,438.9849 -1.682,658.4723 -9.842,56.6077 34.5512,148.3936 -55.7836,165.4604 -81.0177,12.4369 -163.7234,-0.9781 -245.5127,3.3739 -248.997,-1.7285 -498.1326,1.9053 -747.01,-2.3009 -86.3231,6.2887 -77.5196,-71.1333 -75.8856,-133.0733 43.1106,-461.6582 -55.107,-895.0067 58.8105,-1302.5316 173.2754,-4.339 702.7558,-6.7657 986.8163,-6.4675 z" fill="#6699ff"/>
+    <path d="m 3534.2772,1717.8648 c 221.2517,21.2119 572.0499,-17.0571 851.7094,28.1009 -21.0892,135.2035 -26.2108,343.7127 -18.8464,481.1314 0.6629,160.8137 -8.6026,320.1194 -0.3032,497.6322 -118.3583,29.6629 -269.1727,23.1546 -403.9033,17.3782 -156.4796,-6.7087 -363.7832,20.958 -488.8767,-22.9287 16.6915,-141.6537 14.7827,-372.2907 21.3755,-514.5289 7.5082,-162.6119 26.4066,-324.4933 38.8447,-486.7851 z" fill="#3366cc"/>
+    <path d="m 3889.2766,1650.5266 c 27.7364,23.6886 72.1445,20.4506 101.2331,1.0458 22.3604,-17.6131 19.1236,-56.6446 -8.0767,-68.5575 -51.3171,-39.4426 -125.0811,27.5752 -93.1564,67.5117 z" fill="#ff6600"/>
+    <path d="m 3985.4115,1806.5993 c -54.1134,86.3413 -120.9065,155.5988 -208.7186,279.6705 -98.9752,111.8484 -122.1792,163.717 136.357,69.2462 175.8375,-36.4294 35.4891,130.704 -15.9848,267.0009 -45.1026,119.4263 -83.2501,196.2986 -92.2725,256.8308 139.8358,-155.934 233.9965,-339.5471 357.0405,-505.614 167.1182,-233.0853 -225.0018,-15.3832 -266.0121,-102.9119 38.3338,-115.9788 97.6167,-173.7877 89.7826,-252.6178 l -0.1926,-11.6047 0,0 z" fill="#ffcc00"/>
+    <path d="m 4099.9162,1659.9255 c 27.7366,23.6887 72.1447,20.4507 101.2333,1.046 22.3604,-17.6133 19.1235,-56.6446 -8.0768,-68.5575 -51.3168,-39.4426 -125.0812,27.5752 -93.1565,67.5115 z" fill="#ff6600"/>
+    <path d="m 3681.6605,1651.4038 c 27.7364,23.6888 72.1445,20.4506 101.2332,1.046 22.3603,-17.6132 19.1234,-56.6448 -8.0769,-68.5575 -51.3169,-39.4428 -125.0811,27.5751 -93.1563,67.5115 z" fill="#ff6600"/>
+    <path d="m 2575.0536,1072.0944 c -41.7949,-215.28999 -198.1073,64.4153 -379.7157,193.092 -133.7465,94.7647 -234.5954,11.3165 -570.0903,133.4228 -401.8972,146.2742 -388.2427,684.9442 -224.4598,986.8548 366.0107,674.6879 1103.0419,131.271 1216.6407,-55.3662 104.6211,-171.8874 330.8926,-138.9279 453.9675,-237.6837 59.7216,-47.9209 -5.9599,-359.9096 -105.7909,-337.7945 -648.2816,143.6118 -380.3137,-629.7889 -390.5515,-682.5252 z" fill="#ffcc00"/>
+    <path d="m 2058.3207,1381.3517 c -555.3851,-61.9665 -825.72,463.8013 -645.5204,442.4364 185.0637,-21.9416 158.9799,-504.669 310.9149,49.8713 57.2299,208.8816 401.8092,439.7925 494.821,638.6355 11.6767,57.5407 75.9987,46.3975 104.7889,25.124 31.5505,-23.313 18.9107,-80.0105 6.3288,-117.0635 -83.6721,-143.0048 -274.9312,-272.5734 -377.898,-377.9464 -120.8368,-136.4516 -208.1109,-334.9469 -151.0128,-495.0356 34.8137,-61.4683 63.3834,-80.7131 124.7882,-78.1048 55.22,9.7787 202.4079,237.5436 211.6533,157.296 6.1561,-44.3048 11.1555,-235.1689 -78.8639,-245.2129 z" fill="#ff6600"/>
+    <path d="m 4005.3105,689.39563 c -132.1157,120.32132 -1412.0359,816.95107 -1555.1646,911.30147 160.4961,184.2922 15.234,-12.8488 95.6898,137.9579 550.1675,-329.2476 954.2058,-586.1938 1528.6046,-873.93017 75.1515,-104.89315 -12.1136,-113.30773 -69.1298,-175.3292 z" fill="#3366cc"/>
+    <path d="m 2194.3681,1352.5268 c 9.2935,-33.3595 115.3351,-96.1488 116.2957,-60.9354 14.1803,519.7676 226.8596,740.1443 346.5092,899.2496 -9.1403,53.8137 -95.4967,108.843 -112.5912,76.6163 -104.516,-105.815 -172.0892,-466.006 -263.1765,-522.0611 -35.4594,-21.8216 12.7645,157.4396 -44.8138,184.0385 -77.4149,35.7627 -124.043,-138.0522 -229.1002,-113.7727 -18.3195,211.0153 555.9431,443.0665 505.2979,529.8185 -23.9237,43.5892 -81.9643,131.8588 -116.5557,78.0317 -146.1854,-207.6808 -213.2253,-245.8824 -420.072,-434.4752 -155.6003,-141.8688 -136.5394,-403.4861 -68.1091,-424.1442 116.1363,-27.4812 191.9444,245.9541 275.2956,188.1784 65.7711,-140.9662 -10.6629,-310.5452 11.0201,-400.5444 z" fill="#669900"/>
+    <path d="m 1640.1413,1783.8678 c -1.2739,288.86 586.9469,664.0874 521.3165,807.9936 -69.3201,51.7542 -264.7475,48.6232 -223.0496,-59.7663 40.7522,-117.7527 -130.0456,-272.4627 -303.3394,-291.2684 -296.5803,-32.1851 105.9828,212.4171 191.594,291.2294 36.2581,33.3788 125.7201,137.2209 -60.6765,119.5389 -142.0502,-35.061 -243.6721,-174.3502 -325.3694,-295.8032 -78.4159,-116.5746 -186.0507,-483.4195 -48.246,-480.286 125.3372,6.1146 22.5452,202.8366 86.2367,275.034 41.4944,47.0359 443.4581,128.9297 80.3823,-189.183 -157.9532,-138.3924 81.516,-260.2092 81.1514,-177.489 z" fill="#3366cc"/>
+    <path d="m 4079.5806,868.74488 c -18.4503,-3.3062 -24.5591,-6.34261 -33.5316,-16.66736 -4.696,-5.40376 -13.8197,-14.12548 -20.2749,-19.38163 -15.4956,-12.61776 -67.3382,-71.44012 -79.5473,-90.25706 -5.3049,-8.17621 -11.2871,-16.48111 -13.2935,-18.45531 -3.2617,-3.20909 -2.0572,-6.35995 11.3672,-29.73174 8.2588,-14.37823 17.879,-28.42525 21.3781,-31.21559 5.1887,-4.13699 12.0245,-5.80701 37.0394,-9.04885 16.8723,-2.18653 54.8305,-8.80671 84.352,-14.71151 29.5216,-5.90476 65.0265,-12.78154 78.8997,-15.28165 l 25.2242,-4.54567 23.7713,9.77618 c 62.8275,25.83824 111.7721,65.33019 111.7721,90.18546 1e-4,5.06675 -4.6709,12.80857 -17.366,28.78381 -52.1377,65.60993 -108.3882,110.96089 -146.1569,117.83656 -19.9034,3.62333 -69.5666,5.23515 -83.6338,2.71436 z" fill="#ff6600"/>
+    <path d="m 2377.3238,1269.2624 c -26.787,279.7212 111.0044,672.201 309.1165,843.6212 80.8729,69.9767 240.8138,-4.026 318.9086,-41.6454 45.2094,-35.9724 35.0313,-101.296 26.1997,-150.9873 -17.4339,-69.7557 -49.832,-121.797 -100.685,-116.1204 -45.4057,5.0682 -68.5356,8.8251 -64.9322,120.9642 1.3601,42.327 -40.4759,93.1741 -89.0657,90.4079 -52.9357,4.327 -75.8994,-38.881 -101.1012,-69.9814 -212.4085,-262.1247 -233.2146,-599.5762 -162.849,-813.093 10.758,-32.6441 5.6189,-86.0919 -34.34,-65.3213 -75.6217,39.3078 -93.8408,124.7689 -101.2517,202.1555 z" fill="#ff6600"/>
+  </svg>
+
+  <div id="footer">The end. <a href="#top">Back to top.</a></div>
+
+  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
+
+  <amp-font
+    layout="nodisplay"
+    font-family="Comic Amp"
+    timeout="3000"
+    on-load-remove-class="comic-amp-font-loading"
+    on-error-remove-class="comic-amp-font-loading"
+    on-error-add-class="comic-amp-font-missing"
+    on-load-add-class="comic-amp-font-loaded">
+  </amp-font>
+
+  <div id="breaker">
+    <div id="breaking"></div>
+  </div>
+</article>
+</body>
+</html>

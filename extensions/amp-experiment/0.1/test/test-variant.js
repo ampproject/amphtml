@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {allocateVariant} from '../variant';
-import {stubService} from '../../../../testing/test-helper';
+import {stubService, stubServiceForDoc} from '../../../../testing/test-helper';
 
-describe('allocateVariant', () => {
 
-  let sandbox;
+describes.sandboxed('allocateVariant', {}, () => {
   let fakeWin;
+  let ampdoc;
   let getCidStub;
   let uniformStub;
+  let getParamStub;
   let getNotificationStub;
 
   beforeEach(() => {
@@ -33,46 +34,48 @@ describe('allocateVariant', () => {
           return 0.567;
         },
       },
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {},
+      },
     };
+    fakeWin.document.defaultView = fakeWin;
+    ampdoc = new AmpDocSingle(fakeWin);
 
-    sandbox = sinon.sandbox.create();
     getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
     uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
+    getParamStub = stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getParam');
     getNotificationStub = stubService(
         sandbox, fakeWin, 'userNotificationManager', 'getNotification');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should throw for invalid config', () => {
     expect(() => {
-      allocateVariant(fakeWin, null);
+      allocateVariant(ampdoc, 'name', null);
     }).to.throw();
 
     expect(() => {
-      allocateVariant(fakeWin, undefined);
+      allocateVariant(ampdoc, 'name', undefined);
     }).to.throw();
 
     expect(() => {
-      allocateVariant(fakeWin, {});
+      allocateVariant(ampdoc, 'name', {});
     }).to.throw(/Missing experiment variants config/);
 
     expect(() => {
-      allocateVariant(fakeWin, {variants: {}});
+      allocateVariant(ampdoc, 'name', {variants: {}});
     }).to.throw(/Missing experiment variants config/);
 
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'invalid_char_%_in_name': 1,
         },
       });
-    }).to.throw(/Invalid variant name/);
+    }).to.throw(/Invalid name/);
 
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'variant_1': 50,
           'variant_2': 51,
@@ -81,7 +84,7 @@ describe('allocateVariant', () => {
     }).to.throw(/Total percentage is bigger than 100/);
 
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'negative_percentage': -1,
         },
@@ -89,7 +92,7 @@ describe('allocateVariant', () => {
     }).to.throw(/Invalid percentage/);
 
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'too_big_percentage': 101,
         },
@@ -97,17 +100,42 @@ describe('allocateVariant', () => {
     }).to.throw(/Invalid percentage/);
 
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'non_number_percentage': '50',
         },
       });
     }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+      allocateVariant(ampdoc, 'invalid_name!', {
+        variants: {
+          'variant_1': 50,
+        },
+      });
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
+      allocateVariant(ampdoc, '', {
+        variants: {
+          'variant_1': 50,
+        },
+      });
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
+      allocateVariant(ampdoc, 'name', {
+        group: 'invalid_group_name!',
+        variants: {
+          'variant_1': 50,
+        },
+      });
+    }).to.throw(/Invalid name/);
   });
 
   it('should work around float rounding error', () => {
     expect(() => {
-      allocateVariant(fakeWin, {
+      allocateVariant(ampdoc, 'name', {
         variants: {
           'a': 50.1,
           'b': 40.3,
@@ -120,7 +148,7 @@ describe('allocateVariant', () => {
   });
 
   it('should work in non-sticky mode', () => {
-    return expect(allocateVariant(fakeWin, {
+    return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
         '-Variant_1': 56.1,
@@ -130,7 +158,7 @@ describe('allocateVariant', () => {
   });
 
   it('should allocate variant in name order', () => {
-    return expect(allocateVariant(fakeWin, {
+    return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
         '-Variant_2': 50,
@@ -140,7 +168,7 @@ describe('allocateVariant', () => {
   });
 
   it('can have no variant allocated if variants don\'t add up to 100', () => {
-    return expect(allocateVariant(fakeWin, {
+    return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
         '-Variant_1': 2.1,
@@ -150,13 +178,35 @@ describe('allocateVariant', () => {
     })).to.eventually.equal(null);
   });
 
+  it('allow variant override from URL fragment', () => {
+    getParamStub.withArgs('amp-x-Name').returns('-Variant_1');
+    return expect(allocateVariant(ampdoc, 'Name', {
+      sticky: false,
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('variant override should ignore non-existed variant name', () => {
+    getParamStub.withArgs('amp-x-name').returns('-Variant_3');
+    return expect(allocateVariant(ampdoc, 'name', {
+      sticky: false,
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_2');
+  });
+
   it('should work in sticky mode with default CID scope', () => {
     getCidStub.withArgs({
       scope: 'amp-experiment',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
-    return expect(allocateVariant(fakeWin, {
+    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(ampdoc, 'name', {
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -169,9 +219,24 @@ describe('allocateVariant', () => {
       scope: 'custom-scope',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
-    return expect(allocateVariant(fakeWin, {
+    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(ampdoc, 'name', {
       cidScope: 'custom-scope',
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('should work in sticky mode with custom group', () => {
+    getCidStub.withArgs({
+      scope: 'amp-experiment',
+      createCookieIfNotPresent: true,
+    }).returns(Promise.resolve('123abc'));
+    uniformStub.withArgs('custom-group:123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(ampdoc, 'name', {
+      group: 'custom-group',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -191,8 +256,8 @@ describe('allocateVariant', () => {
       scope: 'amp-experiment',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
-    return expect(allocateVariant(fakeWin, {
+    uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
         '-Variant_1': 50,
@@ -205,7 +270,7 @@ describe('allocateVariant', () => {
     getNotificationStub.withArgs('notif-1')
         .returns(Promise.resolve(null));
 
-    return expect(allocateVariant(fakeWin, {
+    return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
         '-Variant_1': 50,
@@ -224,7 +289,7 @@ describe('allocateVariant', () => {
 
     getCidStub.returns(Promise.resolve('123abc'));
     uniformStub.returns(Promise.resolve(0.4));
-    return expect(allocateVariant(fakeWin, {
+    return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
         '-Variant_1': 50,

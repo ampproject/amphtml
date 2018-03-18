@@ -15,32 +15,62 @@
  */
 
 /**
- * @param {string} name Attribute name with dashes
- * @return {string} Dashes removed and character after to upper case.
- * visibleForTesting
+ * @param {string} _match
+ * @param {string} character
+ * @return {string}
  */
-export function dashToCamelCase(name) {
-  return name.replace(/-([a-z])/g, function(_all, character) {
-    return character.toUpperCase();
-  });
+function toUpperCase(_match, character) {
+  return character.toUpperCase();
 }
 
 /**
- * Polyfill for String.prototype. endsWith.
+ * @param {string} match
+ * @return {string}
+ */
+function prependDashAndToLowerCase(match) {
+  return '-' + match.toLowerCase();
+}
+
+/**
+ * @param {string} name Attribute name containing dashes.
+ * @return {string} Dashes removed and successive character sent to upper case.
+ * visibleForTesting
+ */
+export function dashToCamelCase(name) {
+  return name.replace(/-([a-z])/g, toUpperCase);
+}
+
+/**
+ * Converts a string that is in camelCase to one that is in dash-case.
+ *
+ * @param {string} string The string to convert.
+ * @return {string} The string in dash-case.
+ */
+export function camelCaseToDash(string) {
+  return string.replace(/(?!^)[A-Z]/g, prependDashAndToLowerCase);
+}
+
+/**
+ * @param {string} name Attribute name with dashes
+ * @return {string} Dashes replaced by underlines.
+ */
+export function dashToUnderline(name) {
+  return name.replace('-', '_');
+}
+
+/**
+ * Polyfill for String.prototype.endsWith.
  * @param {string} string
  * @param {string} suffix
  * @return {boolean}
  */
 export function endsWith(string, suffix) {
-  if (suffix.length > string.length) {
-    return false;
-  }
   const index = string.length - suffix.length;
-  return string.indexOf(suffix, index) == index;
+  return index >= 0 && string.indexOf(suffix, index) == index;
 }
 
 /**
- * Polyfill for String.prototype. startsWith.
+ * Polyfill for String.prototype.startsWith.
  * @param {string} string
  * @param {string} prefix
  * @return {boolean}
@@ -59,7 +89,7 @@ export function startsWith(string, prefix) {
  * returned from the given getter function.
  *
  * @param {string} template The template string to expand.
- * @param {!function(string):*} getter Function used to retrieve a value for a
+ * @param {function(string):*} getter Function used to retrieve a value for a
  *   placeholder. Returns values will be coerced into strings.
  * @param {number=} opt_maxIterations Number of times to expand the template.
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
@@ -81,3 +111,19 @@ export function expandTemplate(template, getter, opt_maxIterations) {
   return template;
 }
 
+/**
+ * Hash function djb2a
+ * This is intended to be a simple, fast hashing function using minimal code.
+ * It does *not* have good cryptographic properties.
+ * @param {string} str
+ * @return {string} 32-bit unsigned hash of the string
+ */
+export function stringHash32(str) {
+  const length = str.length;
+  let hash = 5381;
+  for (let i = 0; i < length; i++) {
+    hash = hash * 33 ^ str.charCodeAt(i);
+  }
+  // Convert from 32-bit signed to unsigned.
+  return String(hash >>> 0);
+}

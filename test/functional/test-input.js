@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Input} from '../../src/input';
 import * as sinon from 'sinon';
+import {Input} from '../../src/input';
+import {installTimerService} from '../../src/service/timer-impl.js';
 
 
 describe('Input', () => {
@@ -48,7 +49,9 @@ describe('Input', () => {
       document: documentApi,
       navigator: {},
       ontouchstart: '',
+      setTimeout: window.setTimeout,
     };
+    installTimerService(windowApi);
 
     input = new Input(windowApi);
   });

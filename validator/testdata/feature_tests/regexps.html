@@ -22,7 +22,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html" />
+  <link rel="canonical" href="./regular-html-version.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style>invalid body</style>
   <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -30,23 +30,64 @@
 
   <!--
   src value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
-  The first example is valid. The latter two examples are invalid.
+  The first example is valid. The latter three examples are invalid.
   -->
-  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"></script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
   <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
   <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+  <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
+
+  <!--
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
 
   <!--
   href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
-  The first example is valid, the second example is invalid.
+  The first two examples are valid, the third example is invalid.
   -->
   <link rel="stylesheet" type="text/css"
         href="https://fonts.googleapis.com/css?foobar">
   <link rel="stylesheet" type="text/css"
+        href="https://cloud.typography.com/6256354/724768/css/fonts.css">
+  <link rel="stylesheet" type="text/css"
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
 
   <!--
-  rel value_regex: lenghty, see protoascii
+    Regexp to allow typekit fonts.
+    href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+    The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/oeg4hgb.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/css/oeg4hgb.css">
+
+  <!--
+    Regexp to allow font-awesome css, but not path traversal.
+    The first example is valid, the second is not.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+  <!--
+    New Font Awesome url format the first four are valid the last two are not.
+  -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/all.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" rel="stylesheet">
+  <!-- invalid -->
+  <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
+  <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
+
+  <!--
+  rel value_regex: lengthy, see protoascii
   The first three examples are valid. The latter three examples are invalid.
   -->
   <link rel="accessibility">
@@ -65,18 +106,48 @@
   <meta name="content-disposition" content="">
   <meta name="invalid content-disposition" content="">
 
+  <!--
+  css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter four are invalid.
+  -->
+  <style amp-custom>
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+    .i-amphtml-hidden {}
+    #i-amphtml-wrapper {}
+    i-amphtml-sizer {}
+    [i-amphtml-section] {}
+  </style>
+
 </head>
 <body>
 
   <!--
-  autoplay value_regex: "^$|desktop|tablet|mobile"
-  The first two examples are valid, the latter three examples are invalid.
+  class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter two are invalid.
   -->
-  <amp-audio src="https://exmaple.com/audio" layout="fixed" autoplay="">
-  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktop">
-  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="invalid">
-  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktopfoo">
-  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="foodesktop">
+  <div class="example-amp-font"></div>
+  <div class="example-amp-font i-amphtml-hidden"></div>
+  <div class="i-amphtml-hidden example-amp-font"></div>
+
+  <!--
+  id blacklisted_value_regex: lengthy, see protoascii
+  The first example is valid. The latter two are invalid.
+  -->
+  <div id="exampe-amp-font"></div>
+  <div id="i-amphtml-abc"></div>
+  <div id="AMP"></div>
+
+  <!--
+  name blacklisted_value_regex: lengthy, see protoascii
+  The first two examples are valid. The latter three are invalid.
+  -->
+  <input name="" />
+  <input name="email" />
+  <input name="innerHTML" />
+  <input name="__amp_source_origin" />
+  <input name="webkitRequestFullscreen" />
 
 </body>
 </html>

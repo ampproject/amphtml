@@ -16,14 +16,12 @@ limitations under the License.
 
 # <a name="amp-carousel"></a> `amp-carousel`
 
+[TOC]
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -31,11 +29,13 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-carousel">amp-carousel.html</a><br /><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel">image_galleries_with_amp-carousel.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td>AMP By Example's:<ul>
+      <li><a href="https://ampbyexample.com/components/amp-carousel/">amp-carousel example</a></li>
+      <li><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
   </tr>
 </table>
 
@@ -46,80 +46,125 @@ Each of the `amp-carousel` component’s immediate children is considered an ite
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
-```html
-<amp-carousel width=300 height=400>
-  <amp-img src="my-img1.png" width=300 height=400></amp-img>
-  <amp-img src="my-img2.png" width=300 height=400></amp-img>
-  <amp-img src="my-img3.png" width=300 height=400></amp-img>
-</amp-carousel>
-```
 
-Note that while the example shows a carousel of images, `amp-carousel` support arbitrary children.
+<!--embedded example - displays in ampproject.org -->
+<div>
+  <amp-iframe height="313"
+              layout="fixed-height"
+              sandbox="allow-scripts allow-forms allow-same-origin"
+              resizable
+              src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.basic.embed.html">
+    <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+    <div placeholder></div> 
+  </amp-iframe>
+</div>
+
+
+### Advancing to a specific slide
+
+Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID  to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+
+In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
+
+<!--embedded example - displays in ampproject.org -->
+<div>
+<amp-iframe height="878"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.advance-slide.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
 
 ## Attributes
 
-**controls**
+##### type 
 
-If present, displays left and right arrows for the user to use in navigation on mobile.
-Visibility of arrows can also be controlled via styling, and a media query can be used to
-only display arrows at certain screen widths. On desktop, arrows will always be displayed
-unless only a single child is present.
+Specifies the display type for the carousel items, which can be:
 
-**type**
-- `carousel` (default) - All slides are shown and are scrollable horizontally.
-  Be aware that `type=carousel` does not currently support `layout=responsive`.
-- `slides` - Shows a single slide at a time. Supports `layout=responsive`.
+- **`carousel`** (default): All slides are shown and are scrollable horizontally. This type  supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.
+- **`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
 
-**loop** (type=slides only)
+##### height (required)
 
-If present, the user may advance past the first item or the final item.
+Specifies the height of the carousel, in pixels.
 
-**autoplay** (type=slides only)
+##### controls (optional)
 
-If present, advances the slide to the next slide without user interaction.
-By default it will advance a slide in 5000 millisecond intervals (5 seconds)
-and can be overridden by the `delay` attribute.
-If `autoplay` is present it will also attach the `loop` attribute to
-`amp-carousel` if `loop` is not already present.
+Displays left and right arrows for the user to navigate carousel items on mobile devices. The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
 
-**delay** (type=slides only)
-By default a slide will advance in 5000 millisecond intervals (5 seconds)
-when `autoplay` is specified and will use the value of the `delay`
-attribute if present (minimum of 1000 ms; an error will be thrown if it's any lower).
-The value of `delay` must be a number of milliseconds, e.g. `delay=5000`.
+##### data-next-button-aria-label (optional)
+
+Sets the aria-label for the `amp-carousel-button-next`. If no value is given, the aria-label defaults to 'Next item in carousel'.
+
+##### data-prev-button-aria-label (optional)
+
+Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
+
+#####  autoplay (optional)
+
+Advances the slide to the next slide without user interaction.
+
+If present:
+
+- By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
+- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
+- Requires at least 3 slides for autoplay to occur.
+- Applies only to carousels with `type=slides`.
+
+##### delay (optional)
+
+Specifies the duration (in milliseconds) to delay advancing to the next slide when `autoplay` is enabled. The `delay` attribute is only applicable to carousels with `type=slides`.  
+
+##### loop  (optional)
+
+Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The `loop` attribute is only applicable to carousels with `type=slides`. 
+
+*Example: Displays a slides carousel with controls, looping, and delayed autoplay* 
+
+<!--embedded example - displays in ampproject.org -->
+<div>
+<amp-iframe height="446"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-forms allow-same-origin"
+            resizable
+            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
+  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+  <div placeholder></div> 
+</amp-iframe>
+</div>
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Styling
 - You may use the `amp-carousel` element selector to style it freely.
-- `.amp-carousel-button` by default uses an inlined SVG as the background-image of the buttons.
-You may override this with your own SVG or image like so:
+- You may use the `.amp-carousel-slide` class selector to target carousel items.
+- The visual state of an `amp-carousel` button when it's disabled is hidden.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
-  **default**
+
+*Example: Default `.amp-carousel-button` inlined SVG*
 
 ```css
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
 }
 ```
 
-  **override**
+*Example: Overriding the default `.amp-carousel-button` inlined SVG*
+
 ```css
 .amp-carousel-button-prev {
   left: 5%;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
 }
 ```
-- By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
-  You may override this visual state of an `amp-carousel` button in the disabled state by:
 
-```css
-.amp-carousel-button.amp-disabled {
-  /* make sure we make it visible */
-  visibility: visible;
-  /* choose our own background styling, red'ish */
-  background-color: rgba(255, 0, 0, .5);
-}
-```
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii) in the AMP validator specification.
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.

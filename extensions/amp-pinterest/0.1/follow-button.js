@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 
-import {Util} from './util';
+import {user} from '../../../src/log';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,
@@ -34,13 +34,14 @@ export class FollowButton {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    user.assert(rootElement.getAttribute('data-href'),
-      'The data-href attribute is required for follow buttons');
-    user.assert(rootElement.getAttribute('data-label'),
-      'The data-label attribute is required for follow buttons');
+    user().assert(rootElement.getAttribute('data-href'),
+        'The data-href attribute is required for follow buttons');
+    user().assert(rootElement.getAttribute('data-label'),
+        'The data-label attribute is required for follow buttons');
     this.element = rootElement;
     this.label = rootElement.getAttribute('data-label');
-    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'));
+    this.href = assertHttpsUrl(rootElement.getAttribute('data-href'),
+        rootElement);
   }
 
   /**
@@ -49,7 +50,7 @@ export class FollowButton {
    */
   handleClick(event) {
     event.preventDefault();
-    openWindowDialog(window, this.href, 'pin' + new Date().getTime(),
+    openWindowDialog(window, this.href, 'pin' + Date.now(),
         POP_FOLLOW);
     Util.log(`&type=button_follow&href=${this.href}`);
   }

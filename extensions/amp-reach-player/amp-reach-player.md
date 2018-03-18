@@ -20,13 +20,8 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>
-    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="https://platform.beachfrontreach.com">Beachfront Reach</a> platform.
+    <td>Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
     </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Beta</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -34,15 +29,17 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-    <a href="https://github.com/ampproject/amphtml/blob/master/examples/reach-player.amp.html">reach-player.amp.html</a>
+    <a href="https://ampbyexample.com/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
     </td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -56,15 +53,19 @@ Example:
       layout="responsive"
       width="560"
       height="315">
-</amp-reach>
+</amp-reach-player>
 ```
 
 ## Attributes
 
-**data-embed-id**
+##### data-embed-id
 
 The Reach player embed id found in the "players" section or in the generated embed itself.
 
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
 ## Validation
 
-See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/0.1/validator-amp-reach-player.protoascii) in the AMP validator specification.
+See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/validator-amp-reach-player.protoascii) in the AMP validator specification.

@@ -1,0 +1,32 @@
+{
+  "name": "amphtml-validator",
+  "version": "1.0.23",
+  "description": "Official validator for AMP HTML (www.ampproject.org)",
+  "keywords": [
+    "AMP",
+    "validator",
+    "validate",
+    "AMP HTML",
+    "Accelerated Mobile Pages"
+  ],
+  "engines": {
+    "node": ">=0.10.25"
+  },
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs/"
+  },
+  "bin": {
+    "amphtml-validator": "index.js"
+  },
+  "dependencies": {
+    "colors": "1.1.2",
+    "commander": "2.9.0",
+    "promise": "7.1.1"
+  },
+  "devDependencies": {
+    "jasmine": "2.3.2"
+  }
+}

@@ -19,6 +19,7 @@
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
 <dom-module id="webui-urlform">
   <style scope="webui-urlform">
     .flex-horizontal {
@@ -35,14 +36,32 @@
       min-width: auto;
       right: 0;
     }
+    #htmlFormatDropdown {
+      min-width: 120px;
+      max-width: 120px;
+    }
   </style>
   <template>
     <paper-toast id="urlToast" text="Could not fetch the given URL."></paper-toast>
     <div class="container flex-horizontal">
-      <paper-input auto-validate required pattern="[^ \s]+(://.*|\.[a-z]+($|(/.*)))"
-          error-message="Please enter a valid URL" on-focus="checkURL"
-          on-input="checkURL" on-keypress="keyPress" label="URL" id="urlToFetch"
-          class="flexchild"></paper-input>
+      <paper-material elevation="0" class="flexchild">
+        <paper-input
+           auto-validate required pattern="[^ \s]+(://.*|\.[a-z]+($|(/.*)))"
+           error-message="Please enter a valid URL" on-focus="checkURL"
+           on-input="checkURL" on-keypress="keyPress" label="URL" id="urlToFetch">
+        </paper-input>
+      </paper-material>
+      <paper-material elevation="0">
+        <paper-dropdown-menu label="HTML Format" id="htmlFormatDropdown">
+          <paper-listbox class="dropdown-content" selected="AMP"
+                         id="htmlFormatSelector" attr-for-selected="htmlFormat"
+                         on-iron-select="htmlFormatChange">
+            <paper-item htmlFormat="AMP">AMP</paper-item>
+            <paper-item htmlFormat="AMP4ADS">AMP4ADS</paper-item>
+            <paper-item htmlFormat="AMP4EMAIL">AMP4EMAIL</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </paper-material>
       <paper-material elevation="0">
         <paper-button disabled$="{{!validURL}}" raised
             id="validateButton">Validate</paper-button>
@@ -57,6 +76,10 @@
           type: Boolean,
           value: false
         }
+      },
+      htmlFormatChange: function() {
+        this.fire('webui-urlform-html-format-changes',
+                  {'htmlFormat': this.$.htmlFormatSelector.selected});
       },
       checkURL: function(e) {
         this.validURL = !this.$.urlToFetch.invalid;
@@ -75,6 +98,12 @@
         this.checkURL();
         this.$.urlToFetch.validate();
         this.$.validateButton.click();
+      },
+      getHtmlFormat: function() {
+        return this.$.htmlFormatSelector.selected;
+      },
+      setHtmlFormat: function(htmlFormat) {
+        this.$.htmlFormatSelector.selected = htmlFormat;
       }
     });
   </script>

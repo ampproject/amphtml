@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
-var test = require('ava');
-var m = require('./');
+const m = require('./');
+const test = require('ava');
 
-
+/*eslint "max-len": 0*/
 test('sync - parse size.txt', t => {
   t.plan(2);
-  var sizeFiles = [
+  const sizeFiles = [
     `  max    |    min    |    gzip   |    brotli    | file
         --    |    ---    |    ---    |    ---       |  ---
     12.04  kB |   5.5  kB |   3.2  kB |     1.12 kB  |  v0.js / amp.js
@@ -29,39 +30,39 @@ test('sync - parse size.txt', t => {
     `,
     `  max    |    size   |   file
         --    |    ---    |    ---
-    13.04  kB |   8.5  kB |  v0.js / amp.js
+    13 B |   12  B |  v0.js / amp.js
     120.46 kB |  70.11 kB |  current-min/f.js
-    `
+    `,
   ];
-  var table1 = m.parseSizeFile(sizeFiles[0]);
+  const table1 = m.parseSizeFile(sizeFiles[0]);
   t.deepEqual(table1, [
-    {name:'"v0.js"', size:'"5.5  kB"'},
-    {name:'"f.js"', size:'"60.11 kB"'},
+    {name: '"v0.js"', size: '"5500.000"'},
+    {name: '"f.js"', size: '"60110.000"'},
   ]);
-  var table2 = m.parseSizeFile(sizeFiles[1]);
+  const table2 = m.parseSizeFile(sizeFiles[1]);
   t.deepEqual(table2, [
-    {name:'"v0.js"', size:'"8.5  kB"'},
-    {name:'"f.js"', size:'"70.11 kB"'},
+    {name: '"v0.js"', size: '"12.000"'},
+    {name: '"f.js"', size: '"70110.000"'},
   ]);
 });
 
 test('sync - parse table typedef', t => {
   t.plan(1);
-  var dateTimes = ['"0"', '"1"', '"2"'];
-  var tables = [
+  const dateTimes = ['"0"', '"1"', '"2"'];
+  const tables = [
     [
-      {name:'"v0.js"', size:'"5.5  kB"', dateTime: '"0"'},
+      {name: '"v0.js"', size: '"5.5"', dateTime: '"0"'},
     ],
     [
-      {name:'"v0.js"', size:'"8.5  kB"', dateTime: '"1"'},
-      {name:'"f.js"', size:'"70.11 kB"', dateTime: '"1"'},
+      {name: '"v0.js"', size: '"8.5"', dateTime: '"1"'},
+      {name: '"f.js"', size: '"70.11"', dateTime: '"1"'},
     ],
     [
-      {name:'"v0.js"', size:'"8.53  kB"', dateTime: '"2"'},
-      {name:'"f.js"', size:'"71.11 kB"', dateTime: '"2"'},
+      {name: '"v0.js"', size: '"8.53"', dateTime: '"2"'},
+      {name: '"f.js"', size: '"71.11"', dateTime: '"2"'},
     ],
   ];
-  var csv = m.mergeTables(dateTimes, tables);
+  const csv = m.mergeTables(dateTimes, tables);
   t.deepEqual(csv, [
     ['"0"', '""', '"5.5"'],
     ['"1"', '"70.11"', '"8.5"'],

@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var dirname = require('path').dirname;
-var exec = require('child_process').exec;
-var fs = require('fs-extra');
-var gulp = require('gulp');
-var imageDiff = require('gulp-image-diff');
-var util = require('gulp-util');
-
+const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
+const dirname = require('path').dirname;
+const exec = require('child_process').exec;
+const fs = require('fs-extra');
+const gulp = require('gulp');
+// imageDiff is currently a bad dependency as it has a fixed node 0.8 engine
+// requirement.
+const imageDiff = require('gulp-image-diff');
+const log = require('fancy-log');
 
 /**
  * Use phantomjs to take a screenshot of a page at the given url and save it
@@ -37,7 +40,7 @@ var util = require('gulp-util');
 function doScreenshot(host, path, output, device, verbose, cb) {
   fs.mkdirpSync(dirname(output));
   if (verbose) {
-    util.log('Output to: ', output);
+    log('Output to: ', output);
   }
   exec('phantomjs --ssl-protocol=any --ignore-ssl-errors=true ' +
        '--load-images=true ' +
@@ -46,34 +49,34 @@ function doScreenshot(host, path, output, device, verbose, cb) {
       '"' + path + '" ' +
       '"' + output + '" ' +
       '"' + device + '" ',
-      function(err, stdout, stderr) {
-        if (verbose) {
-          util.log(util.colors.gray('stdout: ', stdout));
-          if (stderr.length) {
-            util.log(util.colors.red('stderr: ', stderr));
-          }
-        }
-        if (err != null) {
-          util.log(util.colors.red('exec error: ', err));
-        }
-        cb();
-      });
+  function(err, stdout, stderr) {
+    if (verbose) {
+      log(colors.gray('stdout: ', stdout));
+      if (stderr.length) {
+        log(colors.red('stderr: ', stderr));
+      }
+    }
+    if (err != null) {
+      log(colors.red('exec error: ', err));
+    }
+    cb();
+  });
 }
 
 
 /**
  * Make a golden image of the url.
  * Ex:
- * `gulp make-golden --path=examples.build/everything.amp.max.html \
+ * `gulp make-golden --path=examples/everything.amp.html \
  *     --host=http://localhost:8000`
  *  @param {function} cb callback function
  */
 function makeGolden(cb) {
-  var path = argv.path;
-  var host = argv.host || 'http://localhost:8000';
-  var output = argv.output;
-  var device = argv.device || 'iPhone6+';
-  var verbose = (argv.verbose || argv.v);
+  const path = argv.path;
+  const host = argv.host || 'http://localhost:8000';
+  let output = argv.output;
+  const device = argv.device || 'iPhone6+';
+  const verbose = (argv.verbose || argv.v);
 
   if (!output) {
     output = 'screenshots' + (path && path[0] != '/' ? '/' : '') +
@@ -92,17 +95,17 @@ function makeGolden(cb) {
  * @param {function} cb callback function
  */
 function testScreenshots(cb) {
-  var host = argv.host || 'http://localhost:8000';
-  var name = argv.name || 'screenshots';
-  var dir = 'build/' + name;
-  var verbose = (argv.verbose || argv.v);
+  const host = argv.host || 'http://localhost:8000';
+  const name = argv.name || 'screenshots';
+  const dir = 'build/' + name;
+  const verbose = (argv.verbose || argv.v);
 
   fs.mkdirpSync(dir);
   fs.emptyDirSync(dir);
 
-  var reportFile = dir + '/report.html';
+  const reportFile = dir + '/report.html';
   reportPreambule(reportFile);
-  var errorCount = 0;
+  let errorCount = 0;
 
   /**
    * Check if file ends with suffix specified
@@ -114,7 +117,7 @@ function testScreenshots(cb) {
     return s.indexOf(suffix, s.length - suffix.length) != -1;
   }
 
-  var goldenFiles = [];
+  const goldenFiles = [];
 
   /**
    * Recursively scan a directory for png files collecting the
@@ -124,7 +127,7 @@ function testScreenshots(cb) {
    */
   function scanDir(dir) {
     fs.readdirSync(dir).forEach(function(file) {
-      var path = dir + '/' + file;
+      const path = dir + '/' + file;
       if (endsWith(file, '.png')) {
         goldenFiles.push(path.replace('screenshots/', ''));
       } else if (fs.statSync(path).isDirectory()) {
@@ -134,28 +137,28 @@ function testScreenshots(cb) {
   }
   scanDir('screenshots');
 
-  var todo = goldenFiles.length;
+  let todo = goldenFiles.length;
   if (verbose) {
-    util.log('Diffs to be done: ', todo, goldenFiles);
+    log('Diffs to be done: ', todo, goldenFiles);
   }
   goldenFiles.forEach(function(file) {
     diffScreenshot_(file, dir, host, verbose, function(res) {
       reportRecord(reportFile, file, dir, res);
       if (res.error || res.disparity > 0) {
         errorCount++;
-        util.log(util.colors.red('Screenshot diff failed: ', file,
+        log(colors.red('Screenshot diff failed: ', file,
             JSON.stringify(res)));
       } else if (verbose) {
-        util.log(util.colors.green('Screenshot diff successful: ', file));
+        log(colors.green('Screenshot diff successful: ', file));
       }
 
       todo--;
       if (todo == 0) {
         reportPostambule(reportFile);
         if (errorCount == 0) {
-          util.log(util.colors.green('Screenshots tests successful'));
+          log(colors.green('Screenshots tests successful'));
         } else {
-          util.log(util.colors.red('Screenshots tests failed: ', errorCount,
+          log(colors.red('Screenshots tests failed: ', errorCount,
               reportFile));
           process.exit(1);
         }
@@ -176,14 +179,14 @@ function testScreenshots(cb) {
  */
 function diffScreenshot_(file, dir, host, verbose, cb) {
   if (verbose) {
-    util.log('Screenshot diff for ', file);
+    log('Screenshot diff for ', file);
   }
 
-  var goldenFile = 'screenshots/' + file;
-  var goldenCopyFile = dir + '/' + file;
-  var htmlPath = file.replace('.png', '');
-  var tmpFile = dir + '/' + file.replace('.png', '.tmp.png');
-  var diffFile = dir + '/' + file.replace('.png', '.diff.png');
+  const goldenFile = 'screenshots/' + file;
+  const goldenCopyFile = dir + '/' + file;
+  const htmlPath = file.replace('.png', '');
+  const tmpFile = dir + '/' + file.replace('.png', '.tmp.png');
+  const diffFile = dir + '/' + file.replace('.png', '.diff.png');
 
   fs.copySync(goldenFile, goldenCopyFile, {clobber: true});
 
@@ -193,17 +196,17 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
         .pipe(imageDiff({
           referenceImage: goldenCopyFile,
           differenceMapImage: diffFile,
-          logProgress: verbose
+          logProgress: verbose,
         }))
         .pipe(imageDiff.jsonReporter())
         .pipe(gulp.dest(diffFile + '.json'))
         .on('error', function(error) {
-          util.log(util.colors.red('Screenshot diff failed: ', file, error));
+          log(colors.red('Screenshot diff failed: ', file, error));
           cb({error});
         })
-        .on('end', function(res) {
-          var contents = fs.readFileSync(diffFile + '.json', 'utf8');
-          var json = JSON.parse(contents);
+        .on('end', function() {
+          const contents = fs.readFileSync(diffFile + '.json', 'utf8');
+          const json = JSON.parse(contents);
           cb(json[0]);
         });
   });
@@ -256,7 +259,6 @@ function reportPostambule(reportFile) {
  * @param {!Object} record screenshot diff results record
  */
 function reportRecord(reportFile, file, dir, record) {
-
   /**
    * Create html for a thumbnail link
    * @param {string} file file path to a thumbnail image
@@ -292,16 +294,18 @@ gulp.task('make-golden', 'Creates a "golden" screenshot', makeGolden, {
         ' Defaults to "screenshots/{path}.png"',
     'device': '  The name of the device which parameters to be used for' +
         ' screenshotting. Defaults to "iPhone6+".',
-    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
-  }
+    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"',
+  },
 });
 
 gulp.task('test-screenshots', 'Tests screenshots against "golden" images',
-    testScreenshots, {
-  options: {
-    'host': '  The host. Defaults to "http://localhost:8000".',
-    'name': '  The name of the run. Defaults to "screenshots".' +
-        ' The run files are placed in the "build/{name}" dir.',
-    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
-  }
-});
+    testScreenshots,
+    {
+      options: {
+        'host': '  The host. Defaults to "http://localhost:8000".',
+        'name': '  The name of the run. Defaults to "screenshots".' +
+      ' The run files are placed in the "build/{name}" dir.',
+        'verbose': '  Verbose logging. Default is false. Shorthand is "-v"',
+      },
+    }
+);

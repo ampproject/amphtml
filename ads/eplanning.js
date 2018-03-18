@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function eplanning(global, data) {
-  validateDataExists(data, [
+  validateData(data, [
     'epl_si', 'epl_isv', 'epl_sv', 'epl_sec', 'epl_kvs', 'epl_e',
   ]);
   // push the two object into the '_eplanning' global

@@ -19,27 +19,238 @@
 // implementation is located in the ads/google/a4a directory rather than here.
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
-
 import {
-  googleAdsIsA4AEnabled,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  forceExperimentBranch,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {
+  MANUAL_EXPERIMENT_ID,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {
+  isCdnProxy,
+} from '../../../ads/google/a4a/utils';
+import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
-const DOUBLECLICK_A4A_EXPERIMENT_ID = 'expDoubleclickA4A';
+export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
-/** @const {!Branches} */
-const DOUBLECLICK_A4A_EXPERIMENT_BRANCHES = {
-  control: '117152640',
-  experiment: '117152641',
+export const UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME =
+  'expUnconditionedCanonicalHoldback';
+
+/** @type {string} */
+const TAG = 'amp-ad-network-doubleclick-impl';
+
+/** @const @enum{string} */
+export const DOUBLECLICK_EXPERIMENT_FEATURE = {
+  DELAYED_REQUEST_CONTROL: '21060728',
+  DELAYED_REQUEST: '21060729',
+  SRA_CONTROL: '117152666',
+  SRA: '117152667',
+  CANONICAL_EXPERIMENT: '21060933',
+  CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
+  CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  REMOTE_HTML_CONTROL: '21061728',
+  REMOTE_HTML_EXPERIMENT: '21061729',
+  USDRUD_CONTROL: '21061759',
+  USDRUD_EXPERIMENT: '21061760',
+  DF_DEP_LAUNCH_CONTROL: '21061783',
+  DF_DEP_LAUNCH_EXPERIMENT: '21061784',
 };
+
+/** @const @enum{string} */
+export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
+  CANONICAL_HLDBK_CTL: '21061372',
+  CANONICAL_HLDBK_EXP: '21061373',
+};
+
+/** @const @type {!Object<string,?string>} */
+export const URL_EXPERIMENT_MAPPING = {
+  '-1': MANUAL_EXPERIMENT_ID,
+  '0': null,
+  // Delay Request
+  '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
+  '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  // SRA
+  '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
+  '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
+  '9': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+  '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+  '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+  '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+  '13': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+  '14': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT,
+};
+
+/**
+ * Class for checking whether a page/element is eligible for Fast Fetch.
+ * Singleton class.
+ * @visibleForTesting
+ */
+export class DoubleclickA4aEligibility {
+  /**
+   * Returns whether we are running on the AMP CDN.
+   * @param {!Window} win
+   * @return {boolean}
+   */
+  isCdnProxy(win) {
+    return isCdnProxy(win);
+  }
+
+  /**
+   * Attempts all unconditioned experiment selection.
+   * @param {!Window} win
+   * @param {!Element} element
+   */
+  unconditionedExperimentSelection(win, element) {
+    this.selectAndSetUnconditionedExp(
+        win, element,
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP],
+        UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
+  }
+
+  /**
+   * Attempts to select into experiment and forces branch if selected.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!Array<string>} branches
+   * @param {string} expName
+   */
+  selectAndSetUnconditionedExp(win, element, branches, expName) {
+    const experimentId = this.maybeSelectExperiment(
+        win, element, branches, expName);
+    if (!!experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, expName, experimentId);
+    }
+  }
+
+  /** Whether Fast Fetch is enabled
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {boolean} useRemoteHtml
+   * @return {boolean}
+   */
+  isA4aEnabled(win, element, useRemoteHtml) {
+    this.unconditionedExperimentSelection(win, element);
+    const warnDeprecation = feature => user().warn(
+        TAG, `${feature} will no longer ` +
+          'be supported starting on March 29, 2018. Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
+    const usdrd = 'useSameDomainRenderingUntilDeprecated';
+    const hasUSDRD = usdrd in element.dataset ||
+          (tryParseJson(element.getAttribute('json')) || {})[usdrd];
+    if (hasUSDRD) {
+      warnDeprecation(usdrd);
+    }
+    if (useRemoteHtml) {
+      warnDeprecation('remote.html');
+    }
+    let experimentId;
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
+    if (![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT].includes(
+        URL_EXPERIMENT_MAPPING[urlExperimentId])) {
+      if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
+        return false;
+      }
+    }
+    if (!this.isCdnProxy(win)) {
+      // Ensure that forcing FF via url is applied if test/localDev.
+      if (urlExperimentId == -1 &&
+          (getMode(win).localDev || getMode(win).test)) {
+        experimentId = MANUAL_EXPERIMENT_ID;
+      } else {
+        // For unconditioned canonical holdback, in the control branch
+        // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
+        if (getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP) {
+          addExperimentIdToElement(
+              DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT, element);
+          return true;
+        }
+        return false;
+      }
+    } else {
+      // See if in holdback control/experiment.
+      if (urlExperimentId != undefined) {
+        experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+      }
+    }
+    if (experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+    }
+    // If we are in the Remote.html or USDRUD controls, then we are supposed
+    // to use Delayed Fetch in accordance with the existing carveouts.
+    switch (experimentId) {
+      case DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT:
+        return true;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT:
+        return !hasUSDRD;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT:
+        return !useRemoteHtml;
+    }
+    return !hasUSDRD &&
+        (!useRemoteHtml || !!element.getAttribute('rtc-config'));
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!Array<string>} selectionBranches
+   * @param {string} experimentName}
+   * @return {?string} Experiment branch ID or null if not selected.
+   * @visibileForTesting
+   */
+  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches: selectionBranches,
+    };
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+    return getExperimentBranch(win, experimentName);
+  }
+}
+
+/** @const {!DoubleclickA4aEligibility} */
+const singleton = new DoubleclickA4aEligibility();
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function doubleclickIsA4AEnabled(win, element) {
-  return googleAdsIsA4AEnabled(
-      win, element, DOUBLECLICK_A4A_EXPERIMENT_ID,
-      DOUBLECLICK_A4A_EXPERIMENT_BRANCHES);
+export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
+  return singleton.isA4aEnabled(win, element, useRemoteHtml);
+}
+
+/**
+ * @param {!Window} win
+ * @param {!DOUBLECLICK_EXPERIMENT_FEATURE|
+ *         DOUBLECLICK_UNCONDITIONED_EXPERIMENTS} feature
+ * @param {string=} opt_experimentName
+ * @return {boolean} whether feature is enabled
+ */
+export function experimentFeatureEnabled(win, feature, opt_experimentName) {
+  const experimentName = opt_experimentName || DOUBLECLICK_A4A_EXPERIMENT_NAME;
+  return getExperimentBranch(win, experimentName) == feature;
 }

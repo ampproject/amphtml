@@ -7,24 +7,39 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
     <style amp-custom>
-        input:invalid {
+        input.user-invalid {
             background-color: #dc4e41;
+        }
+
+        input.user-valid {
+            background-color: #4CAF50;
+        }
+
+        fieldset.user-invalid {
+            border: 3px solid #dc4e41;
+        }
+
+        fieldset.user-valid {
+            border: 3px solid #4CAF50;
         }
 
         form .form-message {
             display: none;
         }
 
-        form:invalid .invalid-message {
+        form.user-invalid .invalid-message {
             display: block;
             color: #dc4e41;
         }
 
-        form:valid .valid-message {
+        form.user-valid .valid-message {
             display: block;
             color: #4CAF50;
         }
@@ -42,6 +57,34 @@
             color: #dc4e41;
         }
 
+        .verification-form label {
+          display: block;
+        }
+
+        .spinner,
+        .spinner:after {
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+        }
+
+        .spinner {
+          visibility: hidden;
+          margin: 5px;
+          border: 9px solid rgba(0, 0, 0, 0.3);
+          border-left-color: #fff;
+          animation: spin 1.1s infinite linear;
+        }
+
+        .amp-form-verifying .spinner {
+          visibility: visible;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
         .lightbox {
             background: rgba(0,0,0,.8);
         }
@@ -54,48 +97,234 @@
             align-items: center;
             color: white;
         }
+
+
+        #poll1 li {
+            position: relative;
+            padding: 1em;
+            list-style: none;
+            margin: 0;
+            display: block;
+            height: 20px;
+        }
+
+        #poll1.amp-form-submit-success fieldset {
+            display: none;
+        }
+
+        .percentage-container {
+            z-index: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .one-pc {
+            width: 1%;
+            height: 100%;
+            display: inline-block;
+        }
+        .Wekas .one-pc {
+            background: #dc4e41;
+        }
+        .Penguins .one-pc {
+            background: #3f51b5;
+        }
+        .Ostriches .one-pc {
+            background: #4CAF50;
+        }
+        .Kiwis .one-pc {
+            background: #00ffff;
+        }
+        .poll1-results .title {
+            z-index: 1;
+            color: black;
+            position: absolute;
+        }
+        amp-selector [option] {
+            box-sizing: border-box;
+            display: inline-block;
+            position: relative;
+        }
+        amp-selector[disabled],
+        amp-selector [disabled] {
+            opacity: .20;
+        }
     </style>
 </head>
 <body>
 
-<h2>Subscribe to our weekly Newsletter (non-xhr)</h2>
+<amp-analytics>
+    <script type="application/json">
+        {
+            "requests": {
+                "event": "https://www.ampproject.org/static/img/logo-blue.svg?eid=${eventId}"
+            },
+            "triggers": {
+                "formSubmitSuccess": {
+                    "on": "amp-form-submit-success",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-success"
+                    }
+                },
+                "formSubmitError": {
+                    "on": "amp-form-submit-error",
+                    "request": "event",
+                    "vars": {
+                        "eventId": "form-submit-error"
+                    }
+                }
+            }
+        }
+    </script>
+</amp-analytics>
 
-<form method="post" action="/form/html/post" target="_blank">
+<h4>Search (GET non-xhr same origin)</h4>
+<form method="get" action="/form/search-html/get" target="_blank">
     <fieldset>
         <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+</form>
+
+<h4>Search (GET non-xhr cross origin - current host > httpbin.org)</h4>
+<form method="get" action="https://httpbin.org/html" target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+</form>
+
+<h4>Search (GET xhr same origin)</h4>
+<form method="get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+</form>
+
+<h4>Search (GET xhr cross origin current host > httpbin.org)</h4>
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>You searched for: {{term}}</h1>
+        </template>
+    </div>
+</form>
+
+<h4>Subscribe to our weekly Newsletter (POST xhr same origin)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name1" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email1" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+    <div submitting>
+      <template type="amp-mustache">
+        Please wait, {{name}}.
+      </template>
+    </div>
+    <div submit-success>
+      Success! Thanks for subscribing! Please make sure to check your email
+      to confirm!
+    </div>
+    <div submit-error>
+      <amp-img width="32" height="32" src="/examples/x-icon.png"></amp-img>
+      Oops! We apologize, something went wrong. Please try again later.
+    </div>
+</form>
+
+
+<h4>Subscribe to our weekly Newsletter (xhr POST cross origin - current host > amp.localhost:8000)</h4>
+<form method="post"
+      action-xhr="http://amp.localhost:8000/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name2" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email2" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
 
-    <div class="invalid-message">
-        There are some input that needs fixing. Please fix them.
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
     </div>
-    <div class="valid-message">
-        Everything looks good, you can submit now!
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
     </div>
 </form>
 
-<h2>Subscribe to our weekly Newsletter (xhr)</h2>
-
+<h4>Subscribe to our weekly Newsletter (xhr + submit events)</h4>
+<div id="msg">This message will hide when the form is submitted</div>
 <form method="post"
-      action="/form/html/post"
       action-xhr="/form/echo-json/post"
       target="_blank"
-      on="submit-success:success-lightbox;submit-error:error-lightbox">
+      on="submit:msg.hide;submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name3" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email3" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -112,7 +341,7 @@
     <div submit-success>
         <template type="amp-mustache">
             Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
-        to confirm!
+            to confirm!
         </template>
     </div>
     <div submit-error>
@@ -134,7 +363,8 @@
         <h1>Oops! Kittens!</h1>
         <amp-anim
                 src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
-                width="400" height="300" on="tap:error-lightbox.close">
+                width="400" height="300" on="tap:error-lightbox.close"
+                tabindex="2" role="img">
             <amp-img placeholder
                      src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no-k"
                      width="400" height="300"></amp-img>
@@ -142,5 +372,410 @@
     </div>
 </amp-lightbox>
 
+<h4>NOT ALLOWED (POST non-xhr - submission prevented)</h4>
+<form method="post" action="/regardless" target="_blank">
+    <fieldset>
+        <label>
+            <span>Subscribe</span>
+            <input type="email" name="email" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h1>Custom Validations</h1>
+<h4>Show First Validation On Submit</h4>
+
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-first-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name4" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name4"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name4">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email4" required>
+            <span visible-when-invalid="valueMissing" validation-for="email4"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email4"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name5" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name5"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name5">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email5" required>
+            <span visible-when-invalid="valueMissing" validation-for="email5"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit (Summary)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <div>
+        <ol>
+            <li visible-when-invalid="valueMissing" validation-for="name51">
+                Name is a required field. Please fill it out.
+            </li>
+            <li visible-when-invalid="patternMismatch" validation-for="name51">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </li>
+            <li visible-when-invalid="valueMissing" validation-for="email51">
+                We need your email to send you coolness!
+            </li>
+            <li visible-when-invalid="typeMismatch" validation-for="email51">
+                That doesn't look like an email. Please fix it.
+            </li>
+        </ol>
+    </div>
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name51" required pattern="\w+\s\w+">
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email51" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show As You Go Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name6" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name6"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name6">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email6" required>
+            <span visible-when-invalid="valueMissing" validation-for="email6"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email6"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show As You Go Messages (with all messages on submit)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="interact-and-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name7" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name7"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name7">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email7" required>
+            <span visible-when-invalid="valueMissing" validation-for="email7"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email7"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4 id="header1">on=change and form.submit examples</h4>
+<button on="tap:header1.submit">Wrong Action - should throw an error</button>
+<form method="post"
+      id="poll1"
+      action-xhr="/form/json/poll1"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+    <fieldset>
+        <p>What is your favorite flightless bird?</p>
+        <ul>
+            <li>
+                <label>
+                    <input name="question1" value="Penguins" type="radio" on="change:poll1.submit">
+                    Penguins
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Ostriches" type="radio" on="change:poll1.submit">
+                    Ostriches
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Kiwis" type="radio" on="change:poll1.submit">
+                    Kiwis
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input name="question1" value="Wekas" type="radio" on="change:poll1.submit">
+                    Wekas
+                </label>
+            </li>
+        </ul>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Thanks for answering the poll! Here are the results!
+            <ul class="poll1-results">
+            {{#result}}
+                <li>
+                    <div class="percentage-container {{answer}}">
+                        {{#percentage}}<span class="one-pc"></span>{{/percentage}}
+                    </div>
+                    <span class="title">{{answer}}</span>
+                </li>
+            {{/result}}
+            </ul>
+        </template>
+    </div>
+</form>
+
+
+<h4 id="header2">Using button[type=submit]</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name8" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email8" required>
+        </label>
+        <input type="submit" value="Subscribe - Input">
+        <input type="submit" value="Subscribe 2 - Input">
+        <button type="submit">Subscribe with a Button</button>
+        <button type="submit">Subscribe with a Button 2</button>
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+
+<h4>amp-selector example</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
+    <amp-selector layout="container" name="multi_image_select" multiple keyboard-select-mode="focus">
+        <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=50 height=50 option="1" selected></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=50 height=50 option="2"></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="3" selected></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=50 height=50 option="4"></amp-img>
+    </amp-selector>
+    <input type="Submit">
+</form>
+
+
+
+<h4 id="header3">Redirect After POST (works only if running on localhost)</h4>
+<form method="post"
+      action-xhr="http://iframe.localhost:8000/form/redirect-to/post"
+      target="_top">
+    <fieldset>
+        <label>
+            <span>Send us a message</span>
+            <input type="text" name="message" id="message1" required>
+        </label>
+        <input type="submit" value="Send">
+    </fieldset>
+</form>
+
+<h4>Recursive Event-Action-Event-Action Test - Should only submit once</h4>
+<form method="post"
+      id="myform"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      on="submit:myform.submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name9" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email9" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div class="form-message invalid-message">
+        There are some input that needs fixing. Please fix them.
+    </div>
+    <div class="form-message valid-message">
+        Everything looks good, you can submit now!
+    </div>
+    <div class="form-message submitting-message">
+        Please hold on while we submit your answer!
+    </div>
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+            to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h4>Asynchronous verification example</h4>
+
+<form
+  method="post"
+  action-xhr="/form/verify-search-json/post"
+  verify-xhr="/form/verify-search-json/post"
+  target="_blank"
+  class="verification-form">
+    <fieldset>
+        <label>
+            <span>Name</span>
+            <input type="text" name="name" id="nameId" required>
+        </label>
+        <label>
+            <span>Phone</span>
+            <input type="tel" name="phone" required>
+        </label>
+        <label>
+            <span>Address line 2 (optional)</span>
+            <input type="text" name="addressLine2">
+        </label>
+        <label>
+            <span>Zip Code</span>
+            <input type="tel" name="zip" required pattern="[0-9]{5}">
+        </label>
+        <label>
+            <span>City</span>
+            <input type="text" name="city" required>
+        </label>
+        <p>Throw an error?</p>
+        <label>Yes: <input type="radio" name="error" value="true" required></label>
+        <label>No: <input type="radio" name="error" value="false" required checked></label>
+        <div class="spinner"></div>
+        <input type="submit" value="Search">
+    </fieldset>
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are your results:</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            {{#verifyErrors}}
+                <p>{{message}}</p>
+            {{/verifyErrors}}
+            {{^verifyErrors}}
+                <p>Something went wrong. Try again later?</p>
+            {{/verifyErrors}}
+        </template>
+    </div>
+</form>
+
+<h4>Debounced search</h4>
+<form
+  id="debounced-search"
+  method="get"
+  action="/form/search-html/get"
+  action-xhr="/form/search-json/get"
+  target="_blank">
+    <fieldset>
+        <label>
+            <span>Search for</span>
+            <input type="search" on="input-debounced:debounced-search.submit" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            <h1>Here are the results for the search: {{term}}</h1>
+            <ul>
+                {{#results}}<li>{{title}}</li>{{/results}}
+            </ul>
+        </template>
+    </div>
+</form>
+
 </body>
 </html>
+
+<h4>Using a submit-success template referenced by id</h4>
+
+<template type="amp-mustache" id="submit_success_template">
+    <h1>You searched for: {{term}}</h1>
+</template>
+
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success template="submit_success_template"></div>
+</form>

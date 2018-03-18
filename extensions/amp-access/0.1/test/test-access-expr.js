@@ -53,6 +53,14 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('num <= 1', {num: 1})).to.be.true;
   });
 
+  it('should evaluate negative numerics', () => {
+    expect(evaluateAccessExpr('num = -1', {num: -1})).to.be.true;
+    expect(evaluateAccessExpr('num = -1', {num: 0})).to.be.false;
+    expect(evaluateAccessExpr('num < -1', {num: -1})).to.be.false;
+    expect(evaluateAccessExpr('num < -1', {num: -2})).to.be.true;
+    expect(evaluateAccessExpr('num > -1', {num: 0})).to.be.true;
+  });
+
   it('should evaluate numeric expressions over mistamtching type', () => {
     expect(evaluateAccessExpr('num = 1', {})).to.be.false;
     expect(evaluateAccessExpr('num > 1', {})).to.be.false;
@@ -240,7 +248,7 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('obj2.child2.other.x = NULL', resp)).to.be.true;
   });
 
-  it('should NOT evaluate nested expressions with wrong type', () => {
+  it('should NOT evaluate nested expressions with wrong type', function() {
     expect(evaluateAccessExpr('obj.bool = true', {obj: true})).to.be.false;
     expect(evaluateAccessExpr('obj.num = 11', {obj: 11})).to.be.false;
     expect(evaluateAccessExpr('obj.str = "A"', {obj: 'A'})).to.be.false;
@@ -277,6 +285,9 @@ describe('evaluateAccessExpr', () => {
     }).to.throw();
     expect(() => {
       evaluateAccessExpr('num-a = 10', {'num-a': 10});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('num-1 = 10', {'num-1': 10});
     }).to.throw();
   });
 });

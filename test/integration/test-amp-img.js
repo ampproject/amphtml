@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
-  this.timeout(5000);
+describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
+  const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
   let fixture;
   beforeEach(() => {
@@ -30,27 +31,29 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   });
 
   it('should show the body in image test', () => {
-    return expectBodyToBecomeVisible(fixture.win);
+    return expectBodyToBecomeVisible(fixture.win, timeout);
   });
 
   it('should be present', () => {
-    expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
-    // 5 image visible in 500 pixel height.
-    return fixture.awaitEvent('amp:load:start', 3).then(function() {
+    expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(16);
+    // 5 image visible in 500 pixel height. Note that there will be no load
+    // event for the inabox image.
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]')).to
-          .have.length(3);
+          .have.length(4);
     });
   });
 
   it('should resize and load more elements', () => {
-    const p = fixture.awaitEvent('amp:load:start', 11).then(function() {
+    // Note that there will be no load event for the inabox image.
+    const p = fixture.awaitEvent(AmpEvents.LOAD_START, 11).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]'))
-          .to.have.length(11);
+          .to.have.length(12);
       fixture.iframe.height = 2000;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-      return fixture.awaitEvent('amp:load:start', 13).then(function() {
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 13).then(function() {
         expect(fixture.doc.querySelectorAll('amp-img img[src]'))
-            .to.have.length(13);
+            .to.have.length(14);
       });
     });
     fixture.iframe.height = 1500;
@@ -59,22 +62,32 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   });
 
   it('should respect media queries', () => {
-    return fixture.awaitEvent('amp:load:start', 3).then(function() {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
       const smallScreen = fixture.doc.getElementById('img3');
       const largeScreen = fixture.doc.getElementById('img3_1');
-      expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
-      expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
+      expect(smallScreen.className)
+          .to.not.match(/i-amphtml-hidden-by-media-query/);
+      expect(largeScreen.className).to.match(/i-amphtml-hidden-by-media-query/);
       expect(smallScreen.offsetHeight).to.not.equal(0);
       expect(largeScreen.offsetHeight).to.equal(0);
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-      return fixture.awaitEvent('amp:load:start', 4).then(function() {
-        expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
+      return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(function() {
+        expect(smallScreen.className)
+            .to.match(/i-amphtml-hidden-by-media-query/);
         expect(largeScreen.className)
-            .to.not.match(/-amp-hidden-by-media-query/);
+            .to.not.match(/i-amphtml-hidden-by-media-query/);
         expect(smallScreen.offsetHeight).to.equal(0);
         expect(largeScreen.offsetHeight).to.not.equal(0);
       });
+    });
+  });
+
+  it('should not load image if already present (inabox)', () => {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
+      const ampImage = fixture.doc.getElementById('img8');
+      expect(ampImage).is.ok;
+      expect(ampImage.querySelectorAll('img').length).to.equal(1);
     });
   });
 });

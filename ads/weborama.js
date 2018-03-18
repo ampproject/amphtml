@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function weboramaDisplay(global, data) {
-  const mandatoryWeboramaFields = [
+  const mandatoryFields = [
     'width',
     'height',
     'wbo_account_id',
@@ -29,7 +29,7 @@ export function weboramaDisplay(global, data) {
     'wbo_fullhost',
   ];
 
-  const allWeboramaFields = [
+  const optionalFields = [
     'wbo_bid_price',
     'wbo_price_paid',
     'wbo_random',
@@ -46,13 +46,9 @@ export function weboramaDisplay(global, data) {
     'wbo_is_mobile',
     'wbo_vars',
     'wbo_weak_encoding',
-  ].concat(mandatoryWeboramaFields);
+  ];
 
-  // Warn on extra fields
-  checkData(data, allWeboramaFields);
-
-  // Validate if mandatory fields exist
-  validateDataExists(data, mandatoryWeboramaFields);
+  validateData(data, mandatoryFields, optionalFields);
 
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.weborama_display_tag = {

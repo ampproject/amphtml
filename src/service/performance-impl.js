@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {documentInfoFor} from '../document-info';
-import {onDocumentReady} from '../document-ready';
-import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
-import {resourcesFor} from '../resources';
-import {timer} from '../timer';
-import {viewerFor} from '../viewer';
-
+import {Services} from '../services';
+import {dict, map} from '../utils/object';
+import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service';
+import {isCanary} from '../experiments';
+import {layoutRectLtwh} from '../layout-rect';
+import {throttle} from '../utils/rate-limit';
+import {whenDocumentComplete} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -31,17 +31,13 @@ import {viewerFor} from '../viewer';
 const QUEUE_LIMIT = 50;
 
 /**
- * Added to relative relative timings so that they are never 0 which the
- * underlying library considers a non-value.
- */
-export const ENSURE_NON_ZERO = new Date().getTime();
-
-/**
- * @typedef {{
+ * Fields:
+ * {{
  *   label: string,
- *   opt_from: (string|null|undefined),
- *   opt_value: (number|undefined)
+ *   delta: (number|null|undefined),
+ *   value: (number|null|undefined)
  * }}
+ * @typedef {!JsonObject}
  */
 let TickEventDef;
 
@@ -79,7 +75,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = timer.now();
+    this.initTime_ = this.win.Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -88,26 +84,35 @@ export class Performance {
     this.viewer_ = null;
 
     /** @private {?./resources-impl.Resources} */
-    this.resources = null;
+    this.resources_ = null;
 
     /** @private {boolean} */
     this.isMessagingReady_ = false;
 
-    /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      onDocumentReady(this.win.document, () => {
-        // We need to add a delay, since this can execute earlier
-        // than the onReady callback registered inside of `Resources`.
-        // Should definitely think of making `getResourcesInViewport` async.
-        timer.delay(resolve);
-      });
-    });
+    /** @private {boolean} */
+    this.isPerformanceTrackingOn_ = false;
+
+    /** @private {!Object<string,boolean>} */
+    this.enabledExperiments_ = map();
+    /** @private {string} */
+    this.ampexp_ = '';
+
+    /** @private {number|null} */
+    this.makeBodyVisible_ = null;
+    /** @private {number|null} */
+    this.firstContentfulPaint_ = null;
+    /** @private {number|null} */
+    this.firstViewportReady_ = null;
+
+    // Add RTV version as experiment ID, so we can slice the data by version.
+    this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
+    if (isCanary(this.win)) {
+      this.addEnabledExperiment('canary');
+    }
 
     // Tick window.onload event.
-    loadPromise(win).then(() => {
-      this.tick('ol');
-      this.flush();
-    });
+    whenDocumentComplete(win.document).then(() => this.onload_());
+    this.registerPaintTimingObserver_();
   }
 
   /**
@@ -115,8 +120,11 @@ export class Performance {
    * @return {!Promise}
    */
   coreServicesAvailable() {
-    this.viewer_ = viewerFor(this.win);
-    this.resources_ = resourcesFor(this.win);
+    this.viewer_ = Services.viewerForDoc(this.win.document);
+    this.resources_ = Services.resourcesForDoc(this.win.document);
+
+    this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
+        this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -129,6 +137,11 @@ export class Performance {
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
 
+    this.viewer_.whenFirstVisible().then(() => {
+      this.tick('ofv');
+      this.flush();
+    });
+
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
     // is off we only need to know if the AMP page has a messaging
@@ -140,14 +153,84 @@ export class Performance {
     return channelPromise.then(() => {
       this.isMessagingReady_ = true;
 
-      // This task is async
-      this.setDocumentInfoParams_();
-      // forward all queued ticks to the viewer since messaging
+      // Tick the "messaging ready" signal.
+      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+
+      // Forward all queued ticks to the viewer since messaging
       // is now ready.
       this.flushQueuedTicks_();
-      // send all csi ticks through.
+
+      // Send all csi ticks through.
       this.flush();
     });
+  }
+
+  onload_() {
+    this.tick('ol');
+    this.tickLegacyFirstPaintTime_();
+    this.flush();
+  }
+
+  /**
+   * Reports first pain and first contentful paint timings.
+   * See https://github.com/WICG/paint-timing
+   */
+  registerPaintTimingObserver_() {
+    if (!this.win.PerformancePaintTiming) {
+      return;
+    }
+    // Chrome doesn't implement the buffered flag for PerformanceObserver.
+    // That means we need to read existing entries and maintain state
+    // as to whether we have reported a value yet, since in the future it may
+    // be reported twice.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    let recordedFirstPaint = false;
+    let recordedFirstContentfulPaint = false;
+    const processEntry = entry => {
+      if (entry.name == 'first-paint' && !recordedFirstPaint) {
+        this.tickDelta('fp', entry.startTime + entry.duration);
+        recordedFirstPaint = true;
+      }
+      else if (entry.name == 'first-contentful-paint'
+          && !recordedFirstContentfulPaint) {
+        this.tickDelta('fcp', entry.startTime + entry.duration);
+        recordedFirstContentfulPaint = true;
+      }
+    };
+    const observer = new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(processEntry);
+      this.flush();
+    });
+    // Programmatically read once as currently PerformanceObserver does not
+    // report past entries as of Chrome 61.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    this.win.performance.getEntriesByType('paint').forEach(processEntry);
+
+    observer.observe({entryTypes: ['paint']});
+  }
+
+  /**
+   * Tick fp time based on Chrome's legacy paint timing API when
+   * appropriate.
+   * `registerPaintTimingObserver_` calls the standards based API and this
+   * method does nothing if it is available.
+   */
+  tickLegacyFirstPaintTime_() {
+    // Detect deprecated first pain time API
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
+    // We'll use this until something better is available.
+    if (!this.win.PerformancePaintTiming
+        && this.win.chrome
+        && typeof this.win.chrome.loadTimes == 'function') {
+      const fpTime = this.win.chrome.loadTimes().firstPaintTime
+          * 1000 - this.win.performance.timing.navigationStart;
+      if (fpTime <= 1) {
+        // Throw away bad data generated from an apparent Chrome bug
+        // that is fixed in later Chrome versions.
+        return;
+      }
+      this.tickDelta('fp', fpTime);
+    }
   }
 
   /**
@@ -163,18 +246,26 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = timer.now();
+        docVisibleTime = this.win.Date.now();
       });
     }
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (timer.now() - docVisibleTime)
-            : 1 /* MS (magic number for prerender was complete
-                   by the time the user opened the page) */;
-        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+          ? (this.win.Date.now() - docVisibleTime)
+          //  Prerender was complete before visibility.
+          : 0;
+        this.viewer_.whenFirstVisible().then(() => {
+          // We only tick this if the page eventually becomes visible,
+          // since otherwise we heavily skew the metric towards the
+          // 0 case, since pre-renders that are never used are highly
+          // likely to fully load before they are never used :)
+          this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
+        // Mark this instance in the browser timeline.
+        this.mark('pc');
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
@@ -182,7 +273,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(timer.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -195,55 +286,69 @@ export class Performance {
    * @private
    */
   whenViewportLayoutComplete_() {
-    return this.whenReadyToRetrieveResources_().then(() => {
-      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
-        // We're ok with the layout failing and still reporting.
-        return r.loaded().catch(function() {});
-      }));
-    });
-  }
-
-  /**
-   * Returns a promise that is resolved when the document is ready and
-   * after a microtask delay.
-   * @return {!Promise}
-   */
-  whenReadyToRetrieveResources_() {
-    return this.whenReadyToRetrieveResourcesPromise_;
-  }
-
-  /**
-   * Forward an object to be appended as search params to the external
-   * intstrumentation library.
-   * @param {!JSONType} params
-   * @private
-   */
-  setFlushParams_(params) {
-    this.viewer_.setFlushParams(params);
+    const size = Services.viewportForDoc(this.win.document).getSize();
+    const rect = layoutRectLtwh(0, 0, size.width, size.height);
+    return this.resources_.getResourcesInRect(
+        this.win, rect, /* isInPrerender */ true)
+        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
    * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time. You probably want to use
-   *    `tickDelta` instead.
+   *     See TICKEVENTS.md for available metrics, and edit this file
+   *     when adding a new metric.
+   * @param {number=} opt_delta The delta. Call tickDelta instead of setting
+   *     this directly.
    */
-  tick(label, opt_from, opt_value) {
-    opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? timer.now() : opt_value;
+  tick(label, opt_delta) {
+    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
 
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
-      this.viewer_.tick({
-        label,
-        from: opt_from,
-        value: opt_value,
-      });
+    const data = dict({
+      'label': label,
+      'value': value,
+      // Delta can negative, but will always be changed to 0.
+      'delta': opt_delta != null ? Math.max(opt_delta, 0) : undefined,
+    });
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      this.viewer_.sendMessage('tick', data);
     } else {
-      this.queueTick_(label, opt_from, opt_value);
+      this.queueTick_(data);
+    }
+    // Mark the event on the browser timeline, but only if there was
+    // no delta (in which case it would not make sense).
+    if (arguments.length == 1) {
+      this.mark(label);
+    }
+
+    // Store certain page visibility metrics to be exposed as analytics variables.
+    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
+				 : value - this.initTime_);
+    switch (label) {
+      case 'fcp':
+        this.firstContentfulPaint_ = storedVal;
+        break;
+      case 'pc':
+        this.firstViewportReady_ = storedVal;
+        break;
+      case 'mbv':
+        this.makeBodyVisible_ = storedVal;
+        break;
+    }
+  }
+
+  /**
+   * Add browser performance timeline entries for simple ticks.
+   * These are for example exposed in WPT.
+   * See https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
+   * @param {string} label
+   */
+  mark(label) {
+    if (this.win.performance
+        && this.win.performance.mark
+        && arguments.length == 1) {
+      this.win.performance.mark(label);
     }
   }
 
@@ -254,10 +359,7 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
-    // library doesn't like 0 values.
-    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
-    this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
+    this.tick(label, value);
   }
 
   /**
@@ -265,7 +367,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = timer.now();
+    const now = this.win.Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
@@ -273,39 +375,50 @@ export class Performance {
 
 
   /**
-   * Calls the "flushTicks" function on the viewer.
+   * Ask the viewer to flush the ticks
    */
   flush() {
-    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
-      this.viewer_.flushTicks();
+    if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
+      this.viewer_.sendMessage('sendCsi', dict({
+        'ampexp': this.ampexp_,
+      }), /* cancelUnsent */true);
     }
   }
 
+  /**
+   * Flush with a rate limit of 10 per second.
+   */
+  throttledFlush() {
+    if (!this.throttledFlush_) {
+      /** @private {function()} */
+      this.throttledFlush_ = throttle(this.win, this.flush.bind(this), 100);
+    }
+    this.throttledFlush_();
+  }
+
+  /**
+   * @param {string} experimentId
+   */
+  addEnabledExperiment(experimentId) {
+    this.enabledExperiments_[experimentId] = true;
+    this.ampexp_ = Object.keys(this.enabledExperiments_).join(',');
+  }
 
   /**
    * Queues the events to be flushed when tick function is set.
    *
-   * @param {string} label The variable name as it will be reported.
-   * @param {?string=} opt_from The label of a previous tick to use as a
-   *    relative start for this tick.
-   * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   * @param {TickEventDef} data Tick data to be queued.
    * @private
    */
-  queueTick_(label, opt_from, opt_value) {
+  queueTick_(data) {
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
     if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 
-    this.events_.push({
-      label,
-      from: opt_from,
-      value: opt_value,
-    });
+    this.events_.push(data);
   }
-
 
   /**
    * Forwards all queued ticks to the viewer tick method.
@@ -316,43 +429,16 @@ export class Performance {
       return;
     }
 
-    if (!this.viewer_.isPerformanceTrackingOn()) {
+    if (!this.isPerformanceTrackingOn_) {
       // drop all queued ticks to not leak
       this.events_.length = 0;
       return;
     }
 
     this.events_.forEach(tickEvent => {
-      this.viewer_.tick(tickEvent);
+      this.viewer_.sendMessage('tick', tickEvent);
     });
     this.events_.length = 0;
-  }
-
-
-  /**
-   * Calls "setFlushParams_" with relevant document information.
-   * @return {!Promise}
-   * @private
-   */
-  setDocumentInfoParams_() {
-    return this.whenViewportLayoutComplete_().then(() => {
-      const params = Object.create(null);
-      const sourceUrl = documentInfoFor(this.win).sourceUrl
-          .replace(/#.*/, '');
-      params['sourceUrl'] = sourceUrl;
-
-      this.resources_.get().forEach(r => {
-        const el = r.element;
-        const name = el.tagName.toLowerCase();
-        incOrDef(params, name);
-        if (name == 'amp-ad') {
-          incOrDef(params, `ad-${el.getAttribute('type')}`);
-        }
-      });
-
-      this.setFlushParams_(params);
-      this.flush();
-    });
   }
 
   /**
@@ -361,18 +447,46 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.prerenderComplete({
-        value,
-      });
+      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
+          /* cancelUnsent */true);
     }
+  }
+
+  /**
+   * Identifies if the viewer is able to track performance.
+   * If the document is not embedded, there is no messaging channel,
+   * so no performance tracking is needed since there is nobody to forward the events.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.isPerformanceTrackingOn_;
+  }
+
+  getFirstContentfulPaint() {
+    return this.firstContentfulPaint_;
+  }
+
+  getMakeBodyVisible() {
+    return this.makeBodyVisible_;
+  }
+
+  getFirstViewportReady() {
+    return this.firstViewportReady_;
   }
 }
 
 
 /**
  * @param {!Window} window
- * @return {!Performance}
  */
 export function installPerformanceService(window) {
-  return fromClass(window, 'performance', Performance);
-};
+  registerServiceBuilder(window, 'performance', Performance);
+}
+
+/**
+ * @param {!Window} window
+ * @return {!Performance}
+ */
+export function performanceFor(window) {
+  return getService(window, 'performance');
+}

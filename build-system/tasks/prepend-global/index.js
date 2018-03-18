@@ -13,23 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
+const colors = require('ansi-colors');
+const fs = BBPromise.promisifyAll(require('fs'));
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 
+const red = colors.red;
+const cyan = colors.cyan;
 
 /**
- * @param {string} filename
- * @param {string=} opt_branch
+ * Returns the number of AMP_CONFIG matches in the given config string.
+ *
+ * @param {string} str
+ * @return {number}
+ */
+function numConfigs(str) {
+  const re = /\/\*AMP_CONFIG\*\//g;
+  const matches = str.match(re);
+  return matches == null ? 0 : matches.length;
+}
+
+/**
+ * Checks that only 1 AMP_CONFIG should exist after append.
+ *
+ * @param {string} str
+ */
+function sanityCheck(str) {
+  const numMatches = numConfigs(str);
+  if (numMatches != 1) {
+    throw new Error(
+        'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+  }
+}
+
+/**
+ * @param {string} filename File containing the config
+ * @param {string=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
-function checkoutBranchConfigs(filename, opt_branch) {
-  var branch = opt_branch || 'origin/master';
+function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
+  if (opt_localBranch) {
+    return Promise.resolve();
+  }
+  const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
   return exec(`git checkout ${branch} ${filename}`)
       .catch(function(e) {
@@ -43,25 +76,25 @@ function checkoutBranchConfigs(filename, opt_branch) {
 }
 
 /**
- * @param {string} configString
- * @param {string} fileString
+ * @param {string} configString String containing the AMP config
+ * @param {string} fileString String containing the AMP runtime
  * @return {string}
  */
 function prependConfig(configString, fileString) {
-  return `window.AMP_CONFIG||(window.AMP_CONFIG=${configString});` +
+  return `self.AMP_CONFIG||(self.AMP_CONFIG=${configString});` +
     `/*AMP_CONFIG*/${fileString}`;
 }
 
 /**
- * @param {string} filename
- * @param {string} fileString
- * @param {boolean=} opt_dryrun
+ * @param {string} filename Destination filename
+ * @param {string} fileString String to write
+ * @param {boolean=} opt_dryrun If true, print the contents without writing them
  * @return {!Promise}
  */
 function writeTarget(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
-    util.log(util.colors.blue(`overwriting: ${filename}`));
-    util.log(fileString);
+    log(cyan(`overwriting: ${filename}`));
+    log(fileString);
     return Promise.resolve();
   }
   return fs.writeFileAsync(filename, fileString);
@@ -73,29 +106,135 @@ function writeTarget(filename, fileString, opt_dryrun) {
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return value;
   }
   return defaultValue;
 }
 
+/**
+ * @param {string} config Prod or canary
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} filename File containing the (prod or canary) config
+ * @param {boolean=} opt_localDev Whether to enable local development
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
+ * @return {!Promise}
+ */
+function applyConfig(
+  config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
+  return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
+      .then(() => {
+        return Promise.all([
+          fs.readFileAsync(filename),
+          fs.readFileAsync(target),
+        ]);
+      })
+      .then(files => {
+        let configJson;
+        try {
+          configJson = JSON.parse(files[0].toString());
+        } catch (e) {
+          log(red(`Error parsing config file: ${filename}`));
+          throw e;
+        }
+        if (opt_localDev) {
+          configJson = enableLocalDev(config, target, configJson);
+        }
+        const targetString = files[1].toString();
+        const configString = JSON.stringify(configJson);
+        return prependConfig(configString, targetString);
+      })
+      .then(fileString => {
+        sanityCheck(fileString);
+        return writeTarget(target, fileString, argv.dryrun);
+      })
+      .then(() => {
+        if (!process.env.TRAVIS) {
+          log('Wrote', cyan(config), 'AMP config to', cyan(target));
+        }
+      });
+}
+
+/**
+ * @param {string} config Prod or canary
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} configJson The json object in which to enable local dev
+ * @return {string}
+ */
+function enableLocalDev(config, target, configJson) {
+  let LOCAL_DEV_AMP_CONFIG = {localDev: true};
+  if (!process.env.TRAVIS) {
+    log('Enabled local development mode in', cyan(target));
+  }
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (typeof TESTING_HOST == 'string') {
+    const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//) ?
+      TESTING_HOST : 'http://' + TESTING_HOST;
+    const TESTING_HOST_NO_PROTOCOL =
+      TESTING_HOST.replace(/^https?:\/\//, '');
+
+    LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
+      thirdPartyUrl: TESTING_HOST_FULL_URL,
+      thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
+      thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
+    });
+    if (!process.env.TRAVIS) {
+      log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
+          'in', cyan(target));
+    }
+  }
+  return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
+}
+
+/**
+ * @param {string} target Target file from which to remove the AMP config
+ * @return {!Promise}
+ */
+function removeConfig(target) {
+  return fs.readFileAsync(target)
+      .then(file => {
+        let contents = file.toString();
+        if (numConfigs(contents) == 0) {
+          if (!process.env.TRAVIS) {
+            log('No configs found in', cyan(target));
+          }
+          return Promise.resolve();
+        }
+        sanityCheck(contents);
+        const config =
+        /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+        contents = contents.replace(config, '');
+        return writeTarget(target, contents, argv.dryrun).then(() => {
+          if (!process.env.TRAVIS) {
+            log('Removed existing config from', cyan(target));
+          }
+        });
+      });
+}
+
 function main() {
-  if (!argv.target) {
-    util.log(util.colors.red('Missing --target.'));
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const target = argv.target || TESTING_HOST;
+
+  if (!target) {
+    log(red('Missing --target.'));
     return;
+  }
+
+  if (argv.remove) {
+    return removeConfig(target);
   }
 
   if (!(argv.prod || argv.canary)) {
-    util.log(util.colors.red('One of --prod or --canary should be provided.'));
+    log(red('One of --prod or --canary should be provided.'));
     return;
   }
 
-  var globs = [].concat(argv.files).filter(x => typeof x == 'string');
-  var branch = argv.branch;
-  var target = argv.target;
-  var filename = '';
+  let filename = '';
 
   // Prod by default.
+  const config = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
     filename = valueOrDefault(argv.canary,
         'build-system/global-configs/canary-config.json');
@@ -103,27 +242,11 @@ function main() {
     filename = valueOrDefault(argv.prod,
         'build-system/global-configs/prod-config.json');
   }
-  return checkoutBranchConfigs(filename, branch)
-      .then(() => {
-       return Promise.all([
-         fs.readFileAsync(filename),
-         fs.readFileAsync(target),
-       ]);
-      })
-      .then(files => {
-        var configFile;
-        try {
-          configFile = JSON.stringify(JSON.parse(files[0].toString()));
-        } catch (e) {
-          util.log(util.colors.red(`Error parsing config file: ${filename}`));
-          throw e;
-        }
-        var targetFile = files[1].toString();
-        return prependConfig(configFile, targetFile);
-      })
-      .then(fileString => {
-        return writeTarget(target, fileString, argv.dryrun);
-      });
+  return removeConfig(target).then(() => {
+    return applyConfig(
+        config, target, filename,
+        argv.local_dev, argv.local_branch, argv.branch);
+  });
 }
 
 gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
@@ -133,12 +256,21 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
         'Takes in an optional value for a custom canary config source.',
     'prod': '  Prepend the default prod config. ' +
         'Takes in an optional value for a custom prod config source.',
+    'local_dev': '  Enables runtime to be used for local development.',
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
-  }
+    'local_branch': '  Don\'t switch branches and use the config from the ' +
+        'local branch.',
+    'remove': '  Removes previously prepended json config from the target ' +
+        'file (if present).',
+  },
 });
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;
 exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
+exports.sanityCheck = sanityCheck;
+exports.numConfigs = numConfigs;
+exports.removeConfig = removeConfig;
+exports.applyConfig = applyConfig;

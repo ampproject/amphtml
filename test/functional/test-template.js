@@ -19,15 +19,28 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
+import {Services} from '../../src/services';
+import {resetServiceForTesting} from '../../src/service';
 
+describes.fakeWin('Template', {}, env => {
+  let templates;
+  let doc;
+  let win;
 
-describe('Template', () => {
+  beforeEach(() => {
+    win = env.win;
+    installTemplatesService(win);
+    templates = Services.templatesFor(win);
+    doc = win.document;
+  });
 
-  const templates = installTemplatesService(window);
+  afterEach(() => {
+    resetServiceForTesting(win, 'templates');
+  });
 
   class TemplateImpl extends BaseTemplate {
     render(data) {
-      const elem = document.createElement('div');
+      const elem = doc.createElement('div');
       elem.textContent = 'abc' + data.value;
       return elem;
     }
@@ -38,17 +51,14 @@ describe('Template', () => {
   function createTemplateElement() {
     const id = ++count;
     const type = `amp-template-${id}`;
-    const element = document.createElement('template');
+    const element = doc.createElement('template');
     element.setAttribute('type', type);
     return element;
   }
 
-  beforeEach(() => {
-  });
-
   it('should render immediately', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
     return templates.renderTemplate(templateElement, {value: 1}).then(res => {
       expect(res.textContent).to.equal('abc1');
@@ -57,40 +67,33 @@ describe('Template', () => {
 
   it('should render array', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
     return templates.renderTemplateArray(templateElement,
         [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
+      expect(res).to.have.length.of(2);
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
+    });
   });
 
   it('should NOT allow registering template class twice', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
     expect(() => {
-      registerExtendedTemplate(window, templateElement.getAttribute('type'),
+      registerExtendedTemplate(win, templateElement.getAttribute('type'),
           TemplateImpl);
     }).to.throw(/Duplicate template type/);
-  });
-
-  it('should fail render if template is not declared', () => {
-    const templateElement = createTemplateElement();
-    expect(() => {
-      templates.renderTemplate(templateElement, {value: 0});
-    }).to.throw(/Template must be declared/);
   });
 
   it('should block render until template registered', () => {
     templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
-    const scriptElement = document.createElement('script');
+    const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
         templateElement.getAttribute('type'));
-    document.body.appendChild(scriptElement);
+    doc.body.appendChild(scriptElement);
     let result = undefined;
     templates.renderTemplate(templateElement, {value: 0}).then(res => {
       result = res;
@@ -105,12 +108,12 @@ describe('Template', () => {
   it('should unblock render when template registered', () => {
     templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
-    const scriptElement = document.createElement('script');
+    const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
         templateElement.getAttribute('type'));
-    document.body.appendChild(scriptElement);
+    doc.body.appendChild(scriptElement);
     const p = templates.renderTemplate(templateElement, {value: 1});
-    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
     return p.then(res => {
       expect(res.textContent).to.equal('abc1');
@@ -120,13 +123,13 @@ describe('Template', () => {
   it('should unblock render for parallel templates', () => {
     templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
-    const scriptElement = document.createElement('script');
+    const scriptElement = doc.createElement('script');
     scriptElement.setAttribute('custom-template',
         templateElement.getAttribute('type'));
-    document.body.appendChild(scriptElement);
+    doc.body.appendChild(scriptElement);
     const p1 = templates.renderTemplate(templateElement, {value: 1});
     const p2 = templates.renderTemplate(templateElement, {value: 2});
-    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+    registerExtendedTemplate(win, templateElement.getAttribute('type'),
         TemplateImpl);
     // This is just a complicated way to say Promise -> all.
     return p1.then(res1 => {
@@ -144,11 +147,12 @@ describe('Template', () => {
     const type = templateElement.getAttribute('type');
     const id = type + Math.random();
     templateElement.setAttribute('id', id);
-    document.body.appendChild(templateElement);
-    registerExtendedTemplate(window, type, TemplateImpl);
+    doc.body.appendChild(templateElement);
+    registerExtendedTemplate(win, type, TemplateImpl);
 
-    const parentElement = document.createElement('div');
+    const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
           expect(res.textContent).to.equal('abc1');
@@ -156,13 +160,14 @@ describe('Template', () => {
   });
 
   it('should require discovered template via ID to be "template"', () => {
-    const nonTemplateElement = document.createElement('div');
+    const nonTemplateElement = doc.createElement('div');
     const id = 'nontemplate' + Math.random();
     nonTemplateElement.setAttribute('id', id);
-    document.body.appendChild(nonTemplateElement);
+    doc.body.appendChild(nonTemplateElement);
 
-    const parentElement = document.createElement('div');
+    const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
     }).to.throw(/Template element must be a "template" tag/);
@@ -171,9 +176,9 @@ describe('Template', () => {
   it('should discover template via children', () => {
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
-    registerExtendedTemplate(window, type, TemplateImpl);
+    registerExtendedTemplate(win, type, TemplateImpl);
 
-    const parentElement = document.createElement('div');
+    const parentElement = doc.createElement('div');
     parentElement.appendChild(templateElement);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
@@ -182,7 +187,8 @@ describe('Template', () => {
   });
 
   it('should fail when template not found', () => {
-    const parentElement = document.createElement('div');
+    const parentElement = doc.createElement('div');
+    doc.body.appendChild(parentElement);
     expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
     }).to.throw(/Template not found/);
@@ -193,22 +199,25 @@ describe('Template', () => {
     }).to.throw(/Template not found/);
   });
 
-  it('should discover and render template for an array', () => {
+  it('should detect if a template is present in a container', () => {
+    const parentElement = doc.createElement('div');
+    doc.body.appendChild(parentElement);
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
+    parentElement.setAttribute('template', 'notemplate' + Math.random());
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
     const templateElement = createTemplateElement();
     const type = templateElement.getAttribute('type');
-    const id = type + Math.random();
-    templateElement.setAttribute('id', id);
-    document.body.appendChild(templateElement);
-    registerExtendedTemplate(window, type, TemplateImpl);
+    registerExtendedTemplate(env.win, type, TemplateImpl);
 
-    const parentElement = document.createElement('div');
-    parentElement.setAttribute('template', id);
-    return templates.findAndRenderTemplateArray(parentElement,
-        [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
+    // With template, but different ID
+    parentElement.appendChild(templateElement);
+    expect(templates.hasTemplate(parentElement)).to.be.false;
+
+    // With template and correct ID
+    parentElement.removeAttribute('template');
+    expect(templates.hasTemplate(parentElement)).to.be.true;
   });
 
   it('should discover and render template for an array', () => {
@@ -216,103 +225,67 @@ describe('Template', () => {
     const type = templateElement.getAttribute('type');
     const id = type + Math.random();
     templateElement.setAttribute('id', id);
-    document.body.appendChild(templateElement);
-    registerExtendedTemplate(window, type, TemplateImpl);
+    doc.body.appendChild(templateElement);
+    registerExtendedTemplate(win, type, TemplateImpl);
 
-    const parentElement = document.createElement('div');
+    const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     return templates.findAndRenderTemplateArray(parentElement,
         [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
-  });
-
-  it('should replace target attribute in anchors', () => {
-    const prerendered = document.createElement('div');
-
-    const anchorWithoutTarget = document.createElement('a');
-    anchorWithoutTarget.setAttribute('href', 'https://acme.com/');
-    prerendered.appendChild(anchorWithoutTarget);
-
-    const anchorWithoutHref = document.createElement('a');
-    anchorWithoutHref.setAttribute('on', 'tap:my-element');
-    prerendered.appendChild(anchorWithoutHref);
-
-    const anchorWithTargetSelf = document.createElement('a');
-    anchorWithTargetSelf.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetSelf.setAttribute('target', '_self');
-    prerendered.appendChild(anchorWithTargetSelf);
-
-    const anchorWithTargetTop = document.createElement('a');
-    anchorWithTargetTop.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetTop.setAttribute('target', '_top');
-    prerendered.appendChild(anchorWithTargetTop);
-
-    const anchorWithTargetBlank = document.createElement('a');
-    anchorWithTargetBlank.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetBlank.setAttribute('target', '_blank');
-    prerendered.appendChild(anchorWithTargetBlank);
-
-    const anchorWithTargetParent = document.createElement('a');
-    anchorWithTargetParent.setAttribute('href', 'https://acme.com/');
-    anchorWithTargetParent.setAttribute('target', '_parent');
-    prerendered.appendChild(anchorWithTargetParent);
-
-    templates.render_({render: () => prerendered});
-
-    // The unknown target is replaced with "_blank", at least until #1572
-    // is resolved.
-    expect(anchorWithoutTarget.getAttribute('target')).to.equal('_blank');
-
-    // No target substitution is done for anchors without href.
-    expect(anchorWithoutHref.getAttribute('target')).to.be.null;
-
-    // All others require _blank.
-    expect(anchorWithTargetSelf.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetTop.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetBlank.getAttribute('target')).to.equal('_blank');
-    expect(anchorWithTargetParent.getAttribute('target')).to.equal('_blank');
+      expect(res).to.have.length.of(2);
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
+    });
   });
 });
 
 
-describe('BaseTemplate', () => {
+describes.fakeWin('BaseTemplate', {}, env => {
+
+  let templateElement;
+  let win;
+  let doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    templateElement = doc.createElement('div');
+  });
 
   it('should require render override', () => {
     expect(() => {
-      new BaseTemplate().render();
+      new BaseTemplate(templateElement).render();
     }).to.throw(/Not implemented/);
   });
 
   it('should unwrap single element', () => {
-    const root = document.createElement('div');
-    const element1 = document.createElement('div');
+    const root = doc.createElement('div');
+    const element1 = doc.createElement('div');
     root.appendChild(element1);
-    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
   });
 
   it('should unwrap with empty/whitespace text', () => {
-    const root = document.createElement('div');
-    const element1 = document.createElement('div');
-    root.appendChild(document.createTextNode('   '));
+    const root = doc.createElement('div');
+    const element1 = doc.createElement('div');
+    root.appendChild(doc.createTextNode('   '));
     root.appendChild(element1);
-    root.appendChild(document.createTextNode(' \n\t  '));
-    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+    root.appendChild(doc.createTextNode(' \n\t  '));
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
   });
 
   it('should NOT unwrap multiple elements', () => {
-    const root = document.createElement('div');
-    root.appendChild(document.createElement('div'));
-    root.appendChild(document.createElement('div'));
-    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+    const root = doc.createElement('div');
+    root.appendChild(doc.createElement('div'));
+    root.appendChild(doc.createElement('div'));
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
   });
 
   it('should NOT unwrap with non-empty/whitespace text', () => {
-    const root = document.createElement('div');
-    root.appendChild(document.createTextNode('a'));
-    root.appendChild(document.createElement('div'));
-    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+    const root = doc.createElement('div');
+    root.appendChild(doc.createTextNode('a'));
+    root.appendChild(doc.createElement('div'));
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
   });
 });

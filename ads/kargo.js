@@ -15,14 +15,10 @@
  */
 
 import {
-  loadScript,
-  checkData,
-  validateDataExists,
   computeInMasterFrame,
+  loadScript,
+  validateData,
 } from '../3p/3p';
-
-const dataKeys = ['site', 'slot', 'options'];
-const requiredDataKeys = ['site', 'slot'];
 
 /**
  * @param {!Window} global
@@ -31,9 +27,7 @@ const requiredDataKeys = ['site', 'slot'];
 export function kargo(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
 
-  // validate incoming data
-  checkData(data, dataKeys);
-  validateDataExists(data, requiredDataKeys);
+  validateData(data, ['site', 'slot'], ['options']);
 
   // Kargo AdTag url
   const kargoScriptUrl = 'https://storage.cloud.kargo.com/ad/network/tag/v3/' + data.site + '.js';

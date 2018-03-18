@@ -1,0 +1,160 @@
+<!--
+  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!doctype html>
+<!--
+      This sample AMP HTML file aims to be a minimalist document that
+      follows best practices and guidances for publishers to mark up
+      content for inclusion in various platforms.
+-->
+<html AMP lang="en">
+  <!-- you can use "amp" or "AMP" or "⚡" -->
+  <head>
+    <meta charset="utf-8">
+    <title>Lorem Ipsum</title>
+    <link rel="canonical" href="http://example.ampproject.org/recipe-metadata.html">
+    <!--
+        The canonical document for this article should be linked, as above.
+
+        The canonical document should also have a corresponding <link> tag
+        within pointing at this AMP HTML file:
+
+          <link rel="amphtml" href="http://example.ampproject.org/recipe-json-ld.amp.html">
+
+        It is possible that this AMP HTML document is the canonical document
+        for this article, in which case, the canonical URL should point to this
+        document, and no "amphtml" link is required.
+
+        Also, please be aware that some platforms that use AMP HTML have
+        further restrictions with regards to some schema components.
+
+         For example:
+
+           * All marked-up URL's should be absolute.
+           * The "logo" dimensions must not exceed 600x60.
+    -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    </script>
+    <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+    <style amp-custom>
+      body {
+        background-color: white;
+      }
+      amp-img {
+        background-color: gray;
+      }
+    </style>
+    <script type="application/ld+json">
+        //
+        // The document referenced in mainEntityOfPage should be the same as the
+        // canonical link above.
+        //
+        // Also, please be aware that some platforms that use AMP HTML have
+        // further restrictions with regards to some schema components.
+        //
+        // For example:
+        //
+        //   * The leader "image" referenced in the markup below must appear
+        //   somewhere on the AMP HTML document itself.
+        //
+        //   * The URL for that "image" must precisely match the src of the
+        //   amp-img tag.
+        //
+        //   * All marked-up URLs should be absolute.
+        //
+        //   * The "logo" dimensions must not exceed 600x60.
+      {
+        "@context": "http://schema.org/",
+        "@type": "Recipe",
+        "mainEntityOfPage": "http://example.ampproject.org/recipe-metadata.html",
+        "name": "Grandma's Holiday Apple Pie",
+        "image": {
+          "@type": "ImageObject",
+          "url": "http://cdn.ampproject.org/leader.jpg",
+          "height": 200,
+          "width": 200
+        },
+        "author": {
+          "@type":"Person",
+          "name":"Carol Smith"
+        },
+        "datePublished": "2009-11-05",
+        "dateModified": "2009-11-05",
+        "description": "This is my grandmother's apple pie recipe. I like to add a dash of nutmeg.",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.0",
+          "reviewCount": "35"
+        },
+        "prepTime": "PT30M",
+        "cookTime": "PT1H",
+        "totalTime": "PT1H30M",
+        "recipeYield": "1 9\" pie (8 servings)",
+        "nutrition": {
+          "@type": "NutritionInformation",
+          "servingSize": "1 medium slice",
+          "calories": "250 cal",
+          "fatContent": "12 g"
+        },
+        "recipeIngredient": [
+          "apples",
+          "White sugar"
+        ],
+        "recipeInstructions": "1. Cut and peel apples\n 2. Mix sugar and cinnamon. Use additional sugar for tart apples.\n...",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Google",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "http://cdn.ampproject.org/logo.jpg",
+            "width": 600,
+            "height": 60
+          }
+        }
+      }
+    </script>
+    <!-- this style tag is required -->
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+      <h1>Grandma's Holiday Apple Pie</h1>
+      <amp-img src="http://cdn.ampproject.org/leader.jpg" height="200" width="200"/></amp-img><br>
+      By Carol Smith <br>
+      Published: November 5, 2009
+      <p>This is my grandmother's apple pie recipe. I like to add a
+        dash of nutmeg. </p>
+      <p>4.0 stars based on 35 reviews</p>
+      <p>Prep time: 30 min</p>
+      <p>Cook time: 1 hour</p>
+      <p>Total time: 1 hour 30 min</p>
+      <p>Yield: 1 9" pie (8 servings) <br>
+        Serving size: 1 medium slice <br>
+        Calories per serving: 250 cal <br>
+        Fat per serving: 12 <br>
+      </p>
+      <p>Ingredients: <br>
+          Thinly-sliced apples:  6 cups <br>
+          White sugar: 3/4 cup <br>
+      ... <br>
+      </p>
+      <p>
+      Directions: <br>
+          1. Cut and peel apples <br>
+          2. Mix sugar and cinnamon. Use additional sugar for tart apples. <br>
+          ... <br>
+        </p>
+  </body>
+</html>

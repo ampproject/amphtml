@@ -2,18 +2,56 @@
 <body style="background-color: red">
 iframe
 <script>
+
+parent./*OK*/postMessage('loaded-iframe', '*');
 parent.parent./*OK*/postMessage('loaded-iframe', '*');
 
+function getAmpWindow(sentinel) {
+  var match = sentinel.match(/^(\d+)-\d+$/);
+  // If we have a proper 3P sentinel then use it to find the AMP window.
+  if (match) {
+    // Depth is measured from window.top.
+    var depth = Number(match[1]);
+    var ancestors = [];
+    for (var win = window; win && win != win.parent; win = win.parent) {
+      // Add window keeping the top-most one at the front.
+      ancestors.unshift(win.parent);
+    }
+    return ancestors[depth];
+  } else {
+    // Assume our parent is AMP.
+    return parent;
+  }
+}
+
 window.addEventListener('message', function(event) {
-  if (event.data && event.data.sentinel == 'amp-test') {
+  if (event.data) {
     if (event.data.type == 'requestHeight') {
-      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
-      parent./*OK*/postMessage({
-        sentinel: sentinel,
-        type: 'embed-size',
-        height: event.data.height,
-        width: event.data.width,
-      }, '*');
+      var sentinel;
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
+      getAmpWindow(sentinel)./*OK*/postMessage(
+          {
+            sentinel: sentinel,
+            type: 'embed-size',
+            height: event.data.height,
+            width: event.data.width,
+          }, '*');
+    } else if (event.data.type == 'subscribeToEmbedState') {
+      var sentinel;
+      if (event.data.is3p) {
+        sentinel = event.data.sentinel;
+      } else {
+        sentinel = 'amp';
+      }
+      getAmpWindow(sentinel)./*OK*/postMessage(
+          {
+            sentinel: sentinel,
+            type: 'send-embed-state',
+          }, '*');
     }
   }
 });

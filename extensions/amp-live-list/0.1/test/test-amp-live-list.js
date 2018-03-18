@@ -15,24 +15,32 @@
  */
 
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
-import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
 
-adopt(window);
 
-describe('amp-live-list', () => {
+describes.realWin('amp-live-list', {
+  amp: {
+    extensions: ['amp-live-list'],
+  },
+}, function(env) {
+  let win;
   let sandbox;
+  let ampdoc;
   let liveList;
   let elem;
   let dftAttrs;
   let itemsSlot;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
+    win = env.win;
     sandbox = sinon.sandbox.create();
+    ampdoc = new AmpDocSingle(win);
     elem = document.createElement('amp-live-list');
+    elem.getAmpDoc = () => ampdoc;
     const updateSlot = document.createElement('button');
     itemsSlot = document.createElement('div');
     updateSlot.setAttribute('update', '');
@@ -48,7 +56,6 @@ describe('amp-live-list', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
     sandbox.restore();
   });
 
@@ -77,17 +84,15 @@ describe('amp-live-list', () => {
         cb();
       });
     };
-    liveList.deferMutate = cb => {
-      cb();
-    };
     return elem;
   }
 
   /**
    * @param {!Array<number>} childIds
+   * @param {!Element=} opt_pagination
    * @return {!Element<!Element>}
    */
-  function createFromServer(childAttrs = []) {
+  function createFromServer(childAttrs = [], opt_pagination) {
     const parent = document.createElement('div');
     const itemsCont = document.createElement('div');
     itemsCont.setAttribute('items', '');
@@ -105,6 +110,10 @@ describe('amp-live-list', () => {
         child.setAttribute('data-tombstone', '');
       }
       itemsCont.appendChild(child);
+    }
+    if (opt_pagination) {
+      opt_pagination.setAttribute('pagination', '');
+      parent.appendChild(opt_pagination);
     }
     return parent;
   }
@@ -126,9 +135,9 @@ describe('amp-live-list', () => {
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
     const stub = sandbox.stub(liveList, 'validateLiveListItems_');
-    expect(stub.callCount).to.equal(0);
+    expect(stub).to.have.not.been.called;
     liveList.buildCallback();
-    expect(stub.callCount).to.equal(1);
+    expect(stub).to.be.calledOnce;
   });
 
   it('validates correctly', () => {
@@ -249,11 +258,119 @@ describe('amp-live-list', () => {
     }).to.throw(/must have an "items" slot/);
   });
 
+  it('should have aria-live=polite by default', () => {
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('polite');
+  });
+
+  it('should use explicitly defined aria-live attribute value', () => {
+    buildElement(elem, {
+      'aria-live': 'assertive',
+      'id': 'my-list',
+      'data-poll-interval': 2000,
+      'data-max-items-per-page': 5,
+      'data-sort-time': Date.now(),
+    });
+    liveList.buildCallback();
+    expect(liveList.element.getAttribute('aria-live')).to.equal('assertive');
+  });
+
   describe('#update', () => {
 
     beforeEach(() => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
+    });
+
+    it('sends amp-dom-update event on new items', () => {
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
+      liveList.update(fromServer1);
+      return liveList.updateAction_().then(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
+    });
+
+    it('sends amp-dom-update event on replace items', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+
+      const fromServer1 = createFromServer([
+        {id: 'id1', updateTime: 125},
+      ]);
+      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      // We stub and restore to not trigger `update` calling `updateAction_`.
+      const stub = sinon./*OK*/stub(liveList, 'updateAction_');
+      liveList.update(fromServer1);
+      stub./*OK*/restore();
+      return liveList.updateAction_().then(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
+    });
+
+    it('sends amp-dom-update event on tombstone items', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+
+      const fromServer1 = createFromServer([
+        {id: 'id1', tombstone: null},
+      ]);
+      const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+      // We stub and restore to not trigger `update` calling `updateAction_`.
+      const stub = sinon./*OK*/stub(liveList, 'updateAction_');
+      liveList.update(fromServer1);
+      stub./*OK*/restore();
+      return liveList.updateAction_().then(() => {
+        expect(spy).to.not.have.been.called;
+      });
+    });
+
+    it('dispatches "amp:template-rendered" event after render', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+
+      const fromServer1 = createFromServer([
+        {id: 'id1', updateTime: 125},
+      ]);
+      const spy = sandbox.spy(liveList.itemsSlot_, 'dispatchEvent');
+      // We stub and restore to not trigger `update` calling `updateAction_`.
+      const stub = sinon./*OK*/stub(liveList, 'updateAction_');
+      liveList.update(fromServer1);
+      stub./*OK*/restore();
+      return liveList.updateAction_().then(() => {
+        expect(spy).to.have.been.calledOnce;
+        expect(spy).calledWithMatch({
+          type: AmpEvents.DOM_UPDATE,
+          bubbles: true,
+        });
+      });
     });
 
     it('validates children during update', () => {
@@ -263,28 +380,31 @@ describe('amp-live-list', () => {
       update.appendChild(updateLiveListItems);
       updateLiveListItems.appendChild(document.createElement('div'));
       const stub = sandbox.stub(liveList, 'validateLiveListItems_');
-      expect(stub.callCount).to.equal(0);
+      expect(stub).to.have.not.been.called;
       expect(() => {
         liveList.update(update);
       }).to.throw();
-      expect(stub.callCount).to.equal(1);
+      expect(stub).to.be.calledOnce;
     });
 
-    it('asserts that an items slot was provided on update', () => {
+    it('should call updateFixedLayer on update with inserts', () => {
+      buildElement(elem, dftAttrs);
+      liveList.buildCallback();
+      const spy = sandbox.spy(liveList.viewport_, 'updateFixedLayer');
+      expect(liveList.itemsSlot_.childElementCount).to.equal(0);
+      const fromServer1 = createFromServer([{id: 'id0'}]);
+      expect(spy).to.have.not.been.called;
+      liveList.update(fromServer1);
+      return Promise.resolve().then(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
+    });
+
+    it('no items slot on update should be a no op update', () => {
       const update = document.createElement('div');
-      const updateLiveListItems = document.createElement('div');
-      update.appendChild(updateLiveListItems);
-      updateLiveListItems.appendChild(document.createElement('div'));
-
       expect(() => {
         liveList.update(update);
-      }).to.throw(/amp-live-list must have an `items` slot/);
-
-      updateLiveListItems.setAttribute('items', '');
-
-      expect(() => {
-        liveList.update(update);
-      }).to.not.throw(/amp-live-list must have an `items` slot/);
+      }).to.not.throw();
     });
 
     it('discovers children to insert when they have newly discovered ' +
@@ -414,9 +534,11 @@ describe('amp-live-list', () => {
       const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       expect(liveList.pendingItemsInsert_).to.have.length(1);
-      expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
+      return Promise.resolve().then(() => {
+        expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
 
-      return liveList.updateAction_(fromServer1).then(() => {
+        return liveList.updateAction_(fromServer1);
+      }).then(() => {
         expect(liveList.updateSlot_).to.have.class('amp-hidden');
       });
     });
@@ -528,7 +650,7 @@ describe('amp-live-list', () => {
     liveList.update(fromServer1);
 
     expect(liveList.pendingItemsInsert_).to.have.length(1);
-    expect(spy.callCount).to.equal(0);
+    expect(spy).to.have.not.been.called;
 
     const fromServer2 = createFromServer([
       {id: 'id4'},
@@ -537,7 +659,7 @@ describe('amp-live-list', () => {
     ]);
     liveList.update(fromServer2);
     expect(liveList.pendingItemsInsert_).to.have.length(4);
-    expect(spy.callCount).to.equal(0);
+    expect(spy).to.have.not.been.called;
   });
 
   it('should have pending replace items', () => {
@@ -563,7 +685,7 @@ describe('amp-live-list', () => {
     expect(liveList.pendingItemsInsert_).to.have.length(1);
     expect(liveList.pendingItemsReplace_).to.have.length(1);
     // Should wait for user action until `updateAction_`
-    expect(spy.callCount).to.equal(0);
+    expect(spy).to.have.not.been.called;
   });
 
   it('should have pending replace items even w/o new inserts', () => {
@@ -589,7 +711,7 @@ describe('amp-live-list', () => {
     expect(liveList.pendingItemsReplace_).to.have.length(1);
     // If there is no pending items to insert, flush the replace items
     // right away.
-    expect(spy.callCount).to.equal(1);
+    expect(spy).to.be.calledOnce;
   });
 
   it('should always use latest update to replace when in pending state', () => {
@@ -617,7 +739,7 @@ describe('amp-live-list', () => {
     expect(liveList.pendingItemsReplace_[0].getAttribute('data-update-time'))
         .to.equal('125');
     // Should wait for user action until `updateAction_`
-    expect(spy.callCount).to.equal(0);
+    expect(spy).to.have.not.been.called;
 
     const fromServer2 = createFromServer([
       {id: 'id1', updateTime: 127},
@@ -629,7 +751,88 @@ describe('amp-live-list', () => {
     expect(liveList.pendingItemsReplace_[0].getAttribute('data-update-time'))
         .to.equal('127');
 
-    expect(spy.callCount).to.equal(0);
+    expect(spy).to.have.not.been.called;
+  });
+
+  it('should replace pagination section', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    const originalPagination = document.createElement('div');
+    originalPagination.setAttribute('pagination', '');
+    elem.appendChild(originalPagination);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+    expect(liveList.pendingPagination_).to.equal(null);
+
+    const newPagination = document.createElement('div');
+    const fromServer1 = createFromServer([
+      {id: 'id1', tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ], newPagination);
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingPagination_).to.equal(newPagination);
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+
+    return liveList.updateAction_().then(() => {
+      expect(liveList.pendingPagination_).to.equal(null);
+      expect(liveList.paginationSlot_).to.equal(newPagination);
+
+      const newPagination2 = document.createElement('div');
+      const fromServer2 = createFromServer([
+        {id: 'id6'},
+      ], newPagination2);
+      liveList.update(fromServer2);
+
+      expect(liveList.pendingPagination_).to.equal(newPagination2);
+      expect(liveList.paginationSlot_).to.equal(newPagination);
+      return liveList.updateAction_().then(() => {
+        expect(liveList.pendingPagination_).to.equal(null);
+        expect(liveList.paginationSlot_).to.equal(newPagination2);
+      });
+    });
+  });
+
+  it('should not replace pagination if only no insert or tombstone', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    const originalPagination = document.createElement('div');
+    originalPagination.setAttribute('pagination', '');
+    elem.appendChild(originalPagination);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+    expect(liveList.pendingPagination_).to.equal(null);
+
+    const newPagination = document.createElement('div');
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 999},
+    ], newPagination);
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingPagination_).to.equal(newPagination);
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+
+    return liveList.updateAction_().then(() => {
+      expect(liveList.pendingPagination_).to.equal(null);
+      expect(liveList.paginationSlot_).to.equal(originalPagination);
+    });
   });
 
   it('should find items to tombstone', () => {
@@ -813,13 +1016,13 @@ describe('amp-live-list', () => {
     itemsSlot.appendChild(child2);
     itemsSlot.appendChild(child1);
     buildElement(elem, Object.assign({}, dftAttrs,
-        {'data-max-items-per-page': 3}));
+        {'data-max-items-per-page': 2}));
     sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
     liveList.buildCallback();
     const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
 
     const fromServer1 = createFromServer([
-      {id: 'id3'},
+      {id: 'id3', sortTime: '122'},
     ]);
 
     // Insert 1 new item
@@ -829,55 +1032,19 @@ describe('amp-live-list', () => {
     liveList.update(fromServer1);
     expect(liveList.pendingItemsInsert_).to.have.length(1);
     expect(liveList.curNumOfLiveItems_).to.equal(2);
-    expect(removeChildSpy.callCount).to.equal(0);
+    expect(removeChildSpy).to.have.not.been.called;
 
     return liveList.updateAction_().then(() => {
-      expect(liveList.curNumOfLiveItems_).to.equal(3);
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
       expect(liveList.pendingItemsInsert_).to.have.length(0);
 
-      expect(removeChildSpy.callCount).to.equal(0);
-      // tombstone id3
-      const fromServer = createFromServer([
-        {id: 'id3', tombstone: null},
-        // id6 actually doesn't exist.
-        {id: 'id6', tombstone: null},
-      ]);
-      liveList.update(fromServer);
-      // Note that updateAction_ is actually called twice here, since
-      // `update` will call it right away w/o any insertion operation.
-      return liveList.updateAction_().then(() => {
-        expect(removeChildSpy.callCount).to.equal(0);
-        expect(liveList.curNumOfLiveItems_).to.equal(2);
-      });
-    }).then(() => {
-      // Insert 1 new item
-      const fromServer = createFromServer([
-        {id: 'id4'},
-      ]);
-      liveList.update(fromServer);
-      return liveList.updateAction_().then(() => {
-        // We have room for 1 more since we did a tombstone to id3
-        expect(removeChildSpy.callCount).to.equal(0);
-        expect(liveList.curNumOfLiveItems_).to.equal(3);
-        expect(liveList.itemsSlot_
-            .lastElementChild.getAttribute('id')).to.equal('id1');
-      });
-    }).then(() => {
-      // Insert 1 new item
-      const fromServer = createFromServer([
-        {id: 'id8'},
-      ]);
-      liveList.update(fromServer);
-      return liveList.updateAction_().then(() => {
-        // We finally call removeChild on parent as we've
-        // passed the max items limit.
-        expect(removeChildSpy.callCount).to.equal(1);
-        expect(liveList.curNumOfLiveItems_).to.equal(3);
-        // Last item is now id2, since id1 would have been removed from live
-        // DOM.
-        expect(liveList.itemsSlot_
-            .lastElementChild.getAttribute('id')).to.equal('id2');
-      });
+      expect(removeChildSpy).to.have.been.called;
+
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id2');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id1');
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
     });
   });
 
@@ -910,13 +1077,31 @@ describe('amp-live-list', () => {
       {id: 'id6'},
     ]);
 
+    expect(liveList.curNumOfLiveItems_).to.equal(2);
+    expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+    expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+        .to.equal('id2');
+    expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+        .to.equal('id1');
 
     liveList.update(fromServer1);
-    expect(removeChildSpy.callCount).to.equal(0);
+    expect(removeChildSpy).to.have.not.been.called;
 
     return liveList.updateAction_().then(() => {
       // Will only remove id1 and not id2
-      expect(removeChildSpy.callCount).to.equal(1);
+      expect(liveList.curNumOfLiveItems_).to.equal(5);
+      expect(liveList.itemsSlot_.childElementCount).to.equal(5);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id6');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id5');
+      expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+          .to.equal('id4');
+      expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+          .to.equal('id3');
+      expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+          .to.equal('id2');
+      expect(removeChildSpy).to.be.calledOnce;
     });
   });
 
@@ -928,8 +1113,8 @@ describe('amp-live-list', () => {
     child1.textContent = 'hello world';
     child1.appendChild(document.createElement('div'));
     child2.setAttribute('id', 'id2');
-    child1.setAttribute('data-sort-time', '123');
-    child2.setAttribute('data-sort-time', '124');
+    child1.setAttribute('data-sort-time', '1');
+    child2.setAttribute('data-sort-time', '2');
     // append child 2 first
     itemsSlot.appendChild(child2);
     itemsSlot.appendChild(child1);
@@ -965,11 +1150,11 @@ describe('amp-live-list', () => {
           .to.equal('id1');
       liveList.update(fromServer);
       // Nothing removed yet
-      expect(removeChildSpy.callCount).to.equal(0);
+      expect(removeChildSpy).to.have.not.been.called;
       return liveList.updateAction_();
     }).then(() => {
       expect(liveList.curNumOfLiveItems_).to.equal(5);
-      expect(removeChildSpy.callCount).to.equal(2);
+      expect(removeChildSpy).to.have.callCount(2);
       // Deleted id1 and id2
       expect(liveList.itemsSlot_.lastElementChild.getAttribute('id'))
           .to.equal('id1');
@@ -979,6 +1164,44 @@ describe('amp-live-list', () => {
       // as id2 has been deleted from the live DOM to make room for new items.
       expect(liveList.itemsSlot_.lastElementChild
           .previousElementSibling.getAttribute('id')).to.equal('id4');
+    });
+  });
+
+  it('should insert properly using sort-time', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id4');
+    child1.setAttribute('data-sort-time', '1');
+    child2.setAttribute('data-sort-time', '4');
+    itemsSlot.appendChild(child2);
+    itemsSlot.appendChild(child1);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer = createFromServer([
+      {id: 'id2', sortTime: 2},
+      {id: 'id3', sortTime: 3},
+    ]);
+
+    expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+        .to.equal('id4');
+    expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+        .to.equal('id1');
+
+    liveList.update(fromServer);
+    return liveList.updateAction_().then(() => {
+      expect(liveList.curNumOfLiveItems_).to.equal(4);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id4');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id3');
+      expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+          .to.equal('id2');
+      expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+          .to.equal('id1');
     });
   });
 
@@ -995,5 +1218,160 @@ describe('amp-live-list', () => {
       expect(getNumberMaxOrDefault('0', 10)).to.equal(10);
       expect(getNumberMaxOrDefault(0, 10)).to.equal(10);
     });
+  });
+
+  describe('sort=ascending', () => {
+
+    it('should have correct insertion by using data-sort-time', () => {
+      const oldDate = Date.now();
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'unique-id-num-1');
+      child2.setAttribute('id', 'unique-id-num-2');
+      child1.setAttribute('data-sort-time', oldDate - 2);
+      child2.setAttribute('data-sort-time', oldDate - 1);
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs, {'sort': 'ascending'}));
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
+
+
+      const fromServer1 = createFromServer([
+        {id: 'unique-id-num-4', sortTime: oldDate + 2},
+        {id: 'unique-id-num-3', sortTime: oldDate + 1},
+        {id: 'unique-id-num-5', sortTime: oldDate - 3},
+      ]);
+
+      liveList.update(fromServer1);
+
+      // Sort order should be 5, 3, 4
+      expect(liveList.pendingItemsInsert_[0].getAttribute('id'))
+          .to.equal('unique-id-num-5');
+      expect(liveList.pendingItemsInsert_[1].getAttribute('id'))
+          .to.equal('unique-id-num-3');
+      expect(liveList.pendingItemsInsert_[2].getAttribute('id'))
+          .to.equal('unique-id-num-4');
+      return liveList.updateAction_().then(() => {
+        // Insertion order should be 5, 3, 4
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('unique-id-num-5');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('unique-id-num-1');
+        expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+            .to.equal('unique-id-num-2');
+        expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+            .to.equal('unique-id-num-3');
+        expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+            .to.equal('unique-id-num-4');
+        expect(liveList.itemsSlot_.children.length).to.equal(5);
+      });
+    });
+
+    it('should delete old items to accomodate new items', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child1.textContent = 'hello world';
+      child1.appendChild(document.createElement('div'));
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      // append child 2 first
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs,
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
+      sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+
+      const fromServer1 = createFromServer([
+        {id: 'id3', sortTime: '125'},
+      ]);
+
+      // Insert 1 new item
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(liveList.pendingItemsInsert_).to.have.length(0);
+
+      liveList.update(fromServer1);
+      expect(liveList.pendingItemsInsert_).to.have.length(1);
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(removeChildSpy).to.have.not.been.called;
+
+      return liveList.updateAction_().then(() => {
+        expect(liveList.curNumOfLiveItems_).to.equal(2);
+        expect(liveList.pendingItemsInsert_).to.have.length(0);
+
+        expect(removeChildSpy).to.have.been.called;
+
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('id2');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('id3');
+        expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      });
+    });
+
+    it('should only delete items above the viewport', () => {
+      const child1 = document.createElement('div');
+      const child2 = document.createElement('div');
+      child1.setAttribute('id', 'id1');
+      child1.textContent = 'hello world';
+      child1.appendChild(document.createElement('div'));
+      child2.setAttribute('id', 'id2');
+      child1.setAttribute('data-sort-time', '123');
+      child2.setAttribute('data-sort-time', '124');
+      // append child 2 first
+      itemsSlot.appendChild(child1);
+      itemsSlot.appendChild(child2);
+      buildElement(elem, Object.assign({}, dftAttrs,
+          {'data-max-items-per-page': 2, 'sort': 'ascending'}));
+      const pred = sandbox.stub(liveList, 'isElementAboveViewport_');
+      // id1
+      pred.onCall(0).returns(true);
+      // Anything else
+      pred.returns(false);
+      toggleExperiment(liveList.win, 'amp-live-list-sorting', true);
+      liveList.buildCallback();
+      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+
+      const fromServer1 = createFromServer([
+        {id: 'id3'},
+        {id: 'id4'},
+        {id: 'id5'},
+        {id: 'id6'},
+      ]);
+
+      expect(liveList.curNumOfLiveItems_).to.equal(2);
+      expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+      expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+          .to.equal('id1');
+      expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+          .to.equal('id2');
+      liveList.update(fromServer1);
+      expect(removeChildSpy).to.have.not.been.called;
+
+      return liveList.updateAction_().then(() => {
+        // Will only remove id1 and not id2
+        expect(removeChildSpy).to.be.calledOnce;
+        expect(liveList.curNumOfLiveItems_).to.equal(5);
+        expect(liveList.itemsSlot_.childElementCount).to.equal(5);
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('id2');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('id3');
+        expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+            .to.equal('id4');
+        expect(liveList.itemsSlot_.children[3].getAttribute('id'))
+            .to.equal('id5');
+        expect(liveList.itemsSlot_.children[4].getAttribute('id'))
+            .to.equal('id6');
+      });
+    });
+
   });
 });

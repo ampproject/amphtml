@@ -15,26 +15,41 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import * as sinon from 'sinon';
+import {Resource} from '../../src/service/resource';
+import {Services} from '../../src/services';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {layoutRectLtwh} from '../../src/layout-rect';
+import {listenOncePromise} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 
-describe('BaseElement', () => {
 
-  let sandbox;
-  let div;
+describes.realWin('BaseElement', {amp: true}, env => {
+  let win, doc;
+  let customElement;
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    div = document.createElement('div');
-    element = new BaseElement(div);
+    win = env.win;
+    doc = win.document;
+    doc.registerElement('amp-test-element', {
+      prototype: createAmpElementProtoForTesting(win,
+          'amp-test-element', BaseElement),
+    });
+    customElement = doc.createElement('amp-test-element');
+    element = new BaseElement(customElement);
   });
 
-  afterEach(() => {
-    sandbox.restore();
+  it('should delegate update priority to resources', () => {
+    const resources = win.services.resources.obj;
+    customElement.getResources = () => resources;
+    const updateLayoutPriorityStub = sandbox.stub(
+        resources, 'updateLayoutPriority');
+    element.updateLayoutPriority(1);
+    expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 
   it('propagateAttributes - niente', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     element.propagateAttributes(['data-test1'], target);
@@ -45,14 +60,14 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
-    div.setAttribute('data-test1', 'abc');
-    div.setAttribute('data-test2', 'xyz');
-    div.setAttribute('data-test3', '123');
+    customElement.setAttribute('data-test1', 'abc');
+    customElement.setAttribute('data-test2', 'xyz');
+    customElement.setAttribute('data-test3', '123');
 
-    element.propagateAttributes(['data-test1'], target);
+    element.propagateAttributes('data-test1', target);
     expect(target.hasAttributes()).to.be.true;
 
     expect(target.getAttribute('data-test1')).to.equal('abc');
@@ -67,7 +82,7 @@ describe('BaseElement', () => {
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);
-    expect(element.actionMap_['method1']).to.equal(handler);
+    expect(element.actionMap_['method1']).to.not.be.null;
   });
 
   it('should fail execution of unregistered action', () => {
@@ -76,17 +91,135 @@ describe('BaseElement', () => {
     }).to.throw(/Method not found/);
   });
 
+  it('`this` context of handler should not be the holder', () => {
+    const handler = () => {
+      const holder = element.actionMap_['foo'];
+      expect(this).to.not.equal(holder);
+    };
+    element.registerAction('foo', handler);
+    const invocation = {method: 'foo', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+  });
+
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
-    element.executeAction({method: 'method1'}, false);
-    expect(handler.callCount).to.equal(1);
+    const invocation = {method: 'method1', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+    expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
-    element.executeAction({method: 'activate'}, false);
-    expect(handler.callCount).to.equal(1);
+    const invocation = {method: 'activate', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+    expect(handler).to.be.calledOnce;
   });
+
+  it('should check trust before invocation', () => {
+    const handler = sandbox.spy();
+    const minTrust = 123;
+    element.registerAction('foo', handler, minTrust);
+    const activate = sandbox.stub(element, 'activate');
+
+    // Registered action.
+    element.executeAction({method: 'foo', satisfiesTrust: () => false}, false);
+    expect(handler).to.not.be.called;
+    element.executeAction({
+      method: 'foo',
+      satisfiesTrust: t => (t == minTrust),
+    }, false);
+    expect(handler).to.be.calledOnce;
+
+    // Unregistered action (activate).
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: () => false,
+    }, false);
+    expect(activate).to.not.be.called;
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: t => (t <= element.activationTrust()),
+    }, false);
+    expect(activate).to.be.calledOnce;
+  });
+
+  it('should return correct layoutBox', () => {
+    const resources = win.services.resources.obj;
+    customElement.getResources = () => resources;
+    const resource = new Resource(1, customElement, resources);
+    sandbox.stub(resources, 'getResourceForElement')
+        .withArgs(customElement)
+        .returns(resource);
+    const layoutBox = layoutRectLtwh(0, 50, 100, 200);
+    const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
+    sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
+    sandbox.stub(resource, 'getPageLayoutBox').callsFake(() => pageLayoutBox);
+    expect(element.getLayoutBox()).to.eql(layoutBox);
+    expect(customElement.getLayoutBox()).to.eql(layoutBox);
+    expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);
+    expect(customElement.getPageLayoutBox()).to.eql(pageLayoutBox);
+  });
+
+  it('should return true for inabox experiment renderOutsideViewport', () => {
+    expect(element.renderOutsideViewport()).to.eql(3);
+    // Still 3 if inabox w/o experiment.
+    env.win.AMP_MODE.runtime = 'inabox';
+    expect(element.renderOutsideViewport()).to.eql(3);
+    // Enable experiment and now should be true.
+    toggleExperiment(env.win, 'inabox-rov', true);
+    expect(element.renderOutsideViewport()).to.be.true;
+  });
+
+  describe('forwardEvents', () => {
+    const TIMEOUT = 1000;
+    let target;
+    let event1;
+    let event2;
+    let event1Promise;
+    let event2Promise;
+
+    beforeEach(() => {
+      const timer = Services.timerFor(element.win);
+      target = doc.createElement('div');
+
+      event1 = doc.createEvent('Event');
+      event1.initEvent('event1', false, true);
+
+      event2 = doc.createEvent('Event');
+      event2.initEvent('event2', false, true);
+
+      event1Promise = listenOncePromise(element.element, 'event1');
+      event1Promise = timer.timeoutPromise(TIMEOUT, event1Promise);
+
+      event2Promise = listenOncePromise(element.element, 'event2');
+      event2Promise = timer.timeoutPromise(TIMEOUT, event2Promise);
+    });
+
+    it('forwards single event', () => {
+      element.forwardEvents('event1', target);
+      target.dispatchEvent(event1);
+      target.dispatchEvent(event2);
+
+      return Promise.all([
+        event1Promise,
+        event2Promise
+            .then(() => { assert.fail('Blur should not have been forwarded'); })
+            .catch(() => { /* timed-out, all good */ }),
+      ]);
+    });
+
+    it('forwards multiple events', () => {
+      element.forwardEvents(['event1', 'event2'], target);
+      target.dispatchEvent(event1);
+      target.dispatchEvent(event2);
+
+      return Promise.all([
+        event1Promise,
+        event2Promise,
+      ]);
+    });
+  });
+
 });

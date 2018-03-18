@@ -1,6 +1,11 @@
 package org.ampproject;
 
 
+import java.util.Set;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.javascript.rhino.IR;
+import com.google.javascript.rhino.Node;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
@@ -12,10 +17,18 @@ import com.google.javascript.jscomp.Es6CompilerTestCase;
  */
 public class AmpPassTestEnvTest extends Es6CompilerTestCase {
 
-  ImmutableSet<String> suffixTypes = ImmutableSet.of();
+  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
+  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_MINIFIED",
+      IR.trueNode());
+
+  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
+      "IS_DEV",
+      IR.falseNode());
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ false, suffixTypes);
+    return new AmpPass(compiler, /* isProd */ false, suffixTypes, assignmentReplacements,
+        prodAssignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
@@ -80,6 +93,22 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
              "  if ($mode.getMode().minified) {",
              "    console.log('hello world');",
              "  }",
+            "})()"));
+  }
+
+  public void testOptimizeGetModeFunction() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+             "(function() {",
+             "const IS_DEV = true;",
+             "const IS_MINIFIED = false;",
+             "const IS_SOMETHING = true;",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "const IS_DEV = true;",
+             "const IS_MINIFIED = true;",
+             "const IS_SOMETHING = true;",
             "})()"));
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix, validateExactlyOne} from '../3p/3p';
+import {validateData, validateSrcPrefix, writeScript} from '../3p/3p';
 
 // Valid adform ad source hosts
 const hosts = {
@@ -31,8 +31,7 @@ const hosts = {
  * @param {!Object} data
  */
 export function adform(global, data) {
-
-  validateExactlyOne(data, ['src', 'bn', 'mid']);
+  validateData(data, [['src', 'bn', 'mid']]);
   global.Adform = {ampData: data};
   const src = data.src;
   const bn = data.bn;

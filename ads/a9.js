@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function a9(global, data) {
-  checkData(data, ['aax_size', 'aax_pubname', 'aax_src']);
+  // TODO: check mandatory fields
+  validateData(data, [], ['aax_size', 'aax_pubname', 'aax_src']);
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.aax_size = data.aax_size;
   global.aax_pubname = data.aax_pubname;

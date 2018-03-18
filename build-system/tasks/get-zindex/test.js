@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
-var test = require('ava');
-var m = require('./');
+const m = require('./');
+const test = require('ava');
 
-var result = {
+const result = {
   'test.css': {
     '.selector-1': '1',
     '.selector-2': '0',
@@ -30,21 +31,22 @@ var result = {
 };
 
 test.cb('collects selectors', t => {
-  var data = Object.create(null);
-  m.getZindex('./*.css')
-    .on('data', chunk => {
-      data[chunk.name] = chunk.selectors;
-    })
-    .on('end', () => {
-      t.deepEqual(data, result);
-      t.end();
-    });
+  const data = Object.create(null);
+  const testFiles = `${__dirname}/*.css`;
+  m.getZindex(testFiles)
+      .on('data', chunk => {
+        data[chunk.name] = chunk.selectors;
+      })
+      .on('end', () => {
+        t.deepEqual(data, result);
+        t.end();
+      });
 });
 
 test('sync - create array of arrays with z index order', t => {
   t.plan(1);
-  var table = m.createTable(result);
-  var expected = [
+  const table = m.createTable(result);
+  const expected = [
     ['.selector-2', '0', 'test.css'],
     ['.selector-1', '1', 'test.css'],
     ['.selector-4', '80', 'test-2.css'],

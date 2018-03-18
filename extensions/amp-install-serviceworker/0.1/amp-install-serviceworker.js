@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
-import {documentInfoFor} from '../../../src/document-info';
+import {Services} from '../../../src/services';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  isSecureUrl,
+  parseUrl,
+  removeFragment,
+} from '../../../src/url';
+import {closestByTag, removeElement} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
-import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {listen} from '../../../src/event-helper';
+import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -29,93 +38,271 @@ const TAG = 'amp-install-serviceworker';
  * for installation of ServiceWorkers owned by the publisher
  * of the current page.
  */
-class AmpInstallServiceWorker extends AMP.BaseElement {
+export class AmpInstallServiceWorker extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string}  */
+    this.iframeSrc_ = null;
+
+    /** @private {?UrlRewriter_}  */
+    this.urlRewriter_ = null;
+
+    /** @private {boolean}  */
+    this.insertframeOnFirstLayout_ = false;
+  }
+
   /** @override */
   buildCallback() {
-    const win = this.getWin();
+    const win = this.win;
     if (!('serviceWorker' in win.navigator)) {
+      this.maybeInstallUrlRewrite_();
       return;
     }
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
 
-    /** @private {?string}  */
-    this.iframeSrc_ = null;
-
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
+      // Schedule loading the iframe in firstLayoutCompleted().
+      this.insertframeOnFirstLayout_ = true;
+    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+      this.loadPromise(this.win).then(() => {
+        return install(this.win, src);
+      });
+    } else {
+      this.user().error(TAG,
+          'Did not install ServiceWorker because it does not ' +
+          'match the current origin: ' + src);
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.insertframeOnFirstLayout_) {
+      this.insertframeOnFirstLayout_ = false;
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
         const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoFor(win);
+        const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
-        user.assert(
+        user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.scheduleIframeLoad_();
+        this.insertIframe_();
       }
-      return;
     }
-
-    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.getWin(), src);
-    } else {
-      user.error(TAG,
-          'Did not install ServiceWorker because it does not ' +
-          'match the current origin: ' + src);
-    }
+    return Promise.resolve();
   }
 
-  /** @private */
-  scheduleIframeLoad_() {
-    viewerFor(this.getWin()).whenFirstVisible().then(() => {
-      // If the user is longer than 20 seconds on this page, load
-      // the external iframe to install the ServiceWorker. The wait is
-      // introduced to avoid installing SWs for content that the user
-      // only engaged with superficially.
-      timer.delay(() => {
-        this.deferMutate(this.insertIframe_.bind(this));
-      }, 20000);
-    });
+  /** @override */
+  renderOutsideViewport() {
+    // We want the service worker to be installed wherever the element is
+    // located in the document.
+    return true;
+  }
+
+  /** @override  */
+  getLayoutPriority() {
+    return 3;
   }
 
   /** @private */
   insertIframe_() {
-    // If we are no longer visible, we will not do a SW registration on this
-    // page view.
-    if (!viewerFor(this.getWin()).isVisible()) {
-      return;
-    }
-    this.insertedIframe_ = true;
-    // The iframe will stil be loaded.
-    this.element.style.display = 'none';
-    const iframe = /*OK*/document.createElement('iframe');
+    // Should only be called from layoutCallback.
+    setStyle(this.element, 'display', 'none');
+    const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
     iframe.src = this.iframeSrc_;
     this.element.appendChild(iframe);
   }
+
+  /** @private */
+  maybeInstallUrlRewrite_() {
+    // Only run rewrite in single-doc environment.
+    if (!this.getAmpDoc().isSingleDoc()) {
+      return;
+    }
+
+    const ampdoc = this.getAmpDoc();
+    const win = this.win;
+    const winUrl = parseUrl(win.location.href);
+
+    // Read the url-rewrite config.
+    const urlMatch = this.element.getAttribute(
+        'data-no-service-worker-fallback-url-match');
+    let shellUrl = this.element.getAttribute(
+        'data-no-service-worker-fallback-shell-url');
+    if (!urlMatch && !shellUrl) {
+      return;
+    }
+
+    // Check the url-rewrite config is valid.
+    user().assert(urlMatch && shellUrl,
+        'Both, "%s" and "%s" must be specified for url-rewrite',
+        'data-no-service-worker-fallback-url-match',
+        'data-no-service-worker-fallback-shell-url');
+    shellUrl = removeFragment(shellUrl);
+    let urlMatchExpr;
+    try {
+      urlMatchExpr = new RegExp(urlMatch);
+    } catch (e) {
+      throw user().createError(
+          'Invalid "data-no-service-worker-fallback-url-match" expression', e);
+    }
+    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
+        'Shell source origin "%s" must be the same as source origin "%s"',
+        shellUrl, winUrl.href);
+
+    // Install URL rewriter.
+    this.urlRewriter_ = new UrlRewriter_(ampdoc, urlMatchExpr, shellUrl);
+
+    // Cache shell.
+    if (isSecureUrl(shellUrl)) {
+      this.waitToPreloadShell_(shellUrl);
+    }
+  }
+
+  /**
+   * @param {string} shellUrl
+   * @return {!Promise}
+   * @private
+   */
+  waitToPreloadShell_(shellUrl) {
+    // Ensure that document is loaded and visible first.
+    const whenReady = this.loadPromise(this.win);
+    const whenVisible =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+    return Promise.all([whenReady, whenVisible]).then(() => {
+      this.mutateElement(() => this.preloadShell_(shellUrl));
+    });
+  }
+
+  /**
+   * @param {string} shellUrl
+   * @private
+   */
+  preloadShell_(shellUrl) {
+    const win = this.win;
+
+    // Preload the shell by via an iframe with `#preload` fragment.
+    const iframe = win.document.createElement('iframe');
+    iframe.id = 'i-amphtml-shell-preload';
+    iframe.setAttribute('src', shellUrl + '#preload');
+
+    // Make the iframe hidden.
+    toggle(iframe, false);
+
+    // Restrict what this iframe can do: not much beyond precaching the
+    // resources. Unlike Chrome, Safari does not precan scripts w/o
+    // `allow-scripts` sandbox.
+    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+    // Remove iframe once loaded.
+    const loaded = this.loadPromise(iframe);
+    loaded.then(() => {
+      removeElement(iframe);
+    });
+
+    // Start the preload.
+    this.element.appendChild(iframe);
+  }
 }
+
+
+/**
+ * URL Rewriter intercepts all navigations and, if within the parameters,
+ * rewrites the URL to go via shell.
+ */
+class UrlRewriter_ {
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!RegExp} urlMatchExpr
+   * @param {string} shellUrl
+   */
+  constructor(ampdoc, urlMatchExpr, shellUrl) {
+    /** @const {!Window} */
+    this.win = ampdoc.win;
+    /** @const @private {!RegExp} */
+    this.urlMatchExpr_ = urlMatchExpr;
+    /** @const @private {string} */
+    this.shellUrl_ = shellUrl;
+
+    /** @const @private {!Location} */
+    this.shellLoc_ = parseUrl(shellUrl);
+
+    listen(ampdoc.getRootNode(), 'click', this.handle_.bind(this));
+  }
+
+  /**
+   * @param {?Event} event
+   * @private
+   */
+  handle_(event) {
+    // Check event and target.
+    if (event.defaultPrevented) {
+      return;
+    }
+    const target = closestByTag(dev().assertElement(event.target), 'A');
+    if (!target || !target.href) {
+      return;
+    }
+
+    // Check the URL matches the mask and doesn't match shell itself.
+    const tgtLoc = parseUrl(target.href);
+    if (tgtLoc.origin != this.shellLoc_.origin ||
+            tgtLoc.pathname == this.shellLoc_.pathname ||
+            !this.urlMatchExpr_.test(tgtLoc.href)) {
+      return;
+    }
+
+    // Check if this URL was already rewritten.
+    if (target.getAttribute('i-amphtml-orig-href')) {
+      return;
+    }
+
+    // Only rewrite URLs to a different location to avoid breaking fragment
+    // navigation.
+    const win = this.win;
+    if (removeFragment(tgtLoc.href) == removeFragment(win.location.href)) {
+      return;
+    }
+
+    // Rewrite URL.
+    target.setAttribute('i-amphtml-orig-href', target.href);
+    target.href = this.shellUrl_ + '#href=' + encodeURIComponent(
+        `${tgtLoc.pathname}${tgtLoc.search}${tgtLoc.hash}`);
+  }
+}
+
 
 /**
  * Installs the service worker at src via direct service worker installation.
  * @param {!Window} win
  * @param {string} src
+ * @return {!Promise<!ServiceWorkerRegistration|undefined>}
  */
 function install(win, src) {
-  win.navigator.serviceWorker.register(src).then(function(registration) {
+  return win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
-      user.info(TAG, 'ServiceWorker registration successful with scope: ',
+      user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
-  }).catch(function(e) {
-    user.error(TAG, 'ServiceWorker registration failed:', e);
+    return registration;
+  }, function(e) {
+    user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});

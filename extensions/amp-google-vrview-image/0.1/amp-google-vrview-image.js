@@ -16,14 +16,31 @@
 
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-import {loadPromise} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
 
+
 class AmpGoogleVrviewImage extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.isExperimentOn_ = false;
+
+    /** @private {string} */
+    this.imageSrc_ = '';
+
+    /** @private {string} */
+    this.src_ = '';
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -32,23 +49,12 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
+      dev().warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
 
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
-    /** @private @const {string} */
     this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
         this.element);
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
@@ -66,7 +72,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     if (this.element.hasAttribute('yaw-only')) {
       src = addParamToUrl(src, 'is_yaw_only', 'true');
     }
-    /** @private @const {string} */
     this.src_ = src;
   }
 
@@ -87,9 +92,9 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
+      dev().warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
 
@@ -101,16 +106,14 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     this.applyFillContent(iframe);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
-
-    /** @private {!Element} */
     this.iframe_ = iframe;
-
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 }
 
-AMP.registerElement('amp-google-vrview-image', AmpGoogleVrviewImage);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpGoogleVrviewImage);
+});

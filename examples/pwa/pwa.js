@@ -22,12 +22,17 @@ function log(args) {
   console/*OK*/.log.apply(console, var_args);
 }
 
+function startsWith(string, prefix) {
+  return string.lastIndexOf(prefix, 0) == 0;
+}
 
 class Shell {
-
-  constructor(win) {
+  constructor(win, useStreaming) {
     /** @private @const {!Window} */
     this.win = win;
+
+    /** @private @const {boolean} */
+    this.useStreaming_ = useStreaming;
 
     /** @private @const {!AmpViewer} */
     this.ampViewer_ = new AmpViewer(win,
@@ -36,14 +41,23 @@ class Shell {
     /** @private {string} */
     this.currentPage_ = win.location.pathname;
 
+    this.sidebarCloseButton_ = document.querySelector('#sidebarClose');
+
     win.addEventListener('popstate', this.handlePopState_.bind(this));
     win.document.documentElement.addEventListener('click',
         this.handleNavigate_.bind(this));
 
     log('Shell created');
 
-    if (this.currentPage_) {
+    if (this.currentPage_ && !isShellUrl(this.currentPage_)) {
       this.navigateTo(this.currentPage_);
+    } else if (this.win.location.hash) {
+      const hashParams = parseQueryString(this.win.location.hash);
+      const href = hashParams['href'];
+      if (href) {
+        this.currentPage_ = href;
+        this.navigateTo(href);
+      }
     }
 
     // Install service worker
@@ -73,15 +87,16 @@ class Shell {
   }
 
   /**
+   * @param {!Event} e
    */
   handleNavigate_(e) {
     if (e.defaultPrevented) {
       return false;
     }
-    if (event.button) {
+    if (e.button) {
       return false;
     }
-    let a = event.target;
+    let a = e.target;
     while (a) {
       if (a.tagName == 'A' && a.href) {
         break;
@@ -90,14 +105,15 @@ class Shell {
     }
     if (a) {
       const url = new URL(a.href);
-      if (url.origin == this.win.location.origin &&
-              url.pathname.indexOf('/pwa/') == 0 &&
-              url.pathname.indexOf('amp.max.html') != -1) {
+      const location = this.win.location;
+      if (url.origin == location.origin &&
+          startsWith(url.pathname, '/pwa/') &&
+          url.pathname.indexOf('amp.html') != -1) {
         e.preventDefault();
-        const newPage = url.pathname;
+        const newPage = url.pathname + location.search;
         log('Internal link to: ', newPage);
         if (newPage != this.currentPage_) {
-          this.navigateTo(newPage);
+          this.closeSidebar().then(() => this.navigateTo(newPage));
         }
       }
     }
@@ -141,9 +157,16 @@ class Shell {
     // Fetch.
     const url = this.resolveUrl_(path);
     log('Fetch and render doc:', path, url);
+    // TODO(dvoytenko, #9490): Make `streamDocument` the only used API once
+    // streaming is graduated out of experimental.
+    if (this.useStreaming_) {
+      log('Streaming started: ', url);
+      return this.ampViewer_.showAsStream(url).then(
+          shadowDoc => streamDocument(url, shadowDoc.writer));
+    }
     return fetchDocument(url).then(doc => {
       log('Fetch complete: ', doc);
-      this.ampViewer_.show(doc, url);
+      return this.ampViewer_.show(doc, url);
     });
   }
 
@@ -158,6 +181,19 @@ class Shell {
     this.a_.href = url;
     return this.a_.href;
   }
+
+  closeSidebar() {
+    if (this.sidebarCloseButton_) {
+      return new Promise(resolve => {
+        this.sidebarCloseButton_.click();
+        // TODO implement a better method to detect when
+        // closing sidebar has finished
+        setTimeout(() => resolve(), 100);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
 }
 
 
@@ -170,27 +206,40 @@ class AmpViewer {
     this.container = container;
 
     win.AMP_SHADOW = true;
-    this.ampReadyPromise_ = new Promise(resolve => {
+    const ampReadyPromise = new Promise(resolve => {
       (window.AMP = window.AMP || []).push(resolve);
     });
-    this.ampReadyPromise_.then(AMP => {
+    ampReadyPromise.then(AMP => {
       log('AMP LOADED:', AMP);
     });
+
+    const isShadowDomSupported = (
+      Element.prototype.attachShadow ||
+      Element.prototype.createShadowRoot
+    );
+    const shadowDomReadyPromise = new Promise((resolve, reject) => {
+      if (isShadowDomSupported) {
+        resolve();
+      } else if (this.win.document.querySelector('script[src*=webcomponents]')) {
+        this.win.addEventListener('WebComponentsReady', resolve);
+      } else {
+        // AMP polyfills small part of SD spec. It's functional, but some things
+        // (e.g. slots) are not available.
+        resolve();
+      }
+    });
+
+    this.readyPromise_ = Promise.all([
+      ampReadyPromise,
+      shadowDomReadyPromise,
+    ]).then(results => results[0]);
 
     /** @private @const {string} */
     this.baseUrl_ = null;
     /** @private @const {?Element} */
     this.host_ = null;
-    /** @private @const {?ShadowRoot} */
-    this.shadowRoot_ = null;
-    /** @private @const {!Array<string>} */
-    this.stylesheets_ = [];
-    /** @private @const {!Array<!Element>} */
-    this.scripts_ = [];
-    /** @private @const {!Array<string>} */
-    this.extensions_ = [];
     /** @private @const {...} */
-    this.viewer_ = null;
+    this.amp_ = null;
 
     // Immediately install amp-shadow.js.
     this.installScript_('/dist/amp-shadow.js');
@@ -199,6 +248,10 @@ class AmpViewer {
   /**
    */
   clear() {
+    if (this.amp_) {
+      this.amp_.close();
+      this.amp_ = null;
+    }
     this.container.textContent = '';
   }
 
@@ -208,7 +261,9 @@ class AmpViewer {
    */
   show(doc, url) {
     log('Show document:', doc, url);
-    this.container.textContent = '';
+
+    // Cleanup the existing document if any.
+    this.clear();
 
     this.baseUrl_ = url;
 
@@ -222,117 +277,42 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.shadowRoot_ = this.host_.createShadowRoot();
-    log('Shadow root:', this.shadowRoot_);
-
-    this.ampReadyPromise_.then(AMP => {
-      const amp = AMP.attachShadowRoot(this.shadowRoot_, this.extensions_);
-      this.viewer_ = amp.viewer;
-      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
-      this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
-          this.getOrigin_(this.win.location.href));
-      */
+    return this.readyPromise_.then(AMP => {
+      this.amp_ = AMP.attachShadowDoc(this.host_, doc, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
     });
-
-    // Head
-    log('head:', doc.head);
-    for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
-      const tagName = n.tagName;
-      const isMeta = tagName == 'META';
-      const isLink = tagName == 'LINK';
-      const name = n.getAttribute('name');
-      const rel = n.getAttribute('rel');
-      if (n.tagName == 'TITLE') {
-        this.title_ = n.textContent;
-        log('- title: ', this.title_);
-      } else if (isMeta && n.hasAttribute('charset')) {
-        // Ignore.
-      } else if (isMeta && name == 'viewport') {
-        // Ignore.
-      } else if (isLink && rel == 'canonical') {
-        this.canonicalUrl_ = n.getAttribute('href');
-        log('- canonical: ', this.canonicalUrl_);
-      } else if (isLink && rel == 'stylesheet') {
-        this.stylesheets_.push(n.getAttribute('href'));
-        log('- stylesheet: ', this.stylesheets_[this.stylesheets_.length - 1]);
-      } else if (n.tagName == 'STYLE') {
-        if (n.hasAttribute('amp-boilerplate')) {
-          // Ignore.
-          log('- ignored embedded style: ', n);
-        } else {
-          log('- embedded style: ', n);
-          this.shadowRoot_.appendChild(this.win.document.importNode(n, true));
-        }
-      } else if (n.tagName == 'SCRIPT') {
-        if (n.hasAttribute('src')) {
-          log('- src script: ', n);
-          this.scripts_.push(n);
-          const customElement = n.getAttribute('custom-element');
-          if (customElement) {
-            this.extensions_.push(customElement);
-          }
-        } else {
-          log('- non-src script: ', n);
-          this.shadowRoot_.appendChild(this.win.document.importNode(n, true));
-        }
-      } else if (n.tagName == 'NOSCRIPT') {
-        // Ignore.
-      } else {
-        log('- UNKNOWN head element:', n);
-      }
-    }
-
-    this.mergeHead_();
-
-    // Body
-    doc.body.setAttribute('style', 'position:relative;');
-    this.shadowRoot_.appendChild(this.win.document.importNode(doc.body, true));
   }
 
-  mergeHead_() {
-    const doc = this.win.document;
+  /**
+   * @param {string} url
+   * @return {!Promise<!ShadowDoc>}
+   */
+  showAsStream(url) {
+    log('Show stream document:', url);
 
-    // Title.
-    doc.title = this.title_ || '';
-    log('SET title: ', doc.title);
+    // Cleanup the existing document if any.
+    this.clear();
 
-    // Stylesheets.
-    this.stylesheets_.forEach(stylesheet => {
-      const href = this.resolveUrl_(stylesheet);
-      const exists = doc.querySelector('link[href="' + href + '"]');
-      if (exists) {
-        log('- stylesheet already exists: ', href);
-      } else {
-        const el = doc.createElement('link');
-        el.setAttribute('rel', 'stylesheet');
-        el.setAttribute('type', 'text/css');
-        el.setAttribute('href', href);
-        doc.head.appendChild(el);
-        log('- stylesheet added: ', href, el);
-      }
-    });
+    this.baseUrl_ = url;
 
-    // Scripts.
-    this.scripts_.forEach(script => {
-      // TODO(dvoytenko): extensions should be ideally registered via runtime
-      // to ensure correct stubbing, version management and other dependencies.
-      const customElement = script.getAttribute('custom-element');
-      const customTemplate = script.getAttribute('custom-template');
-      const src = this.resolveUrl_(script.getAttribute('src'));
-      log('script: ', customElement, customTemplate, script.getAttribute('src'), src);
-      const existsExpr =
-          customElement ? '[custom-element="' + customElement + '"]' :
-          customTemplate ? '[custom-template="' + customTemplate + '"]' :
-          '[src="' + src + '"]';
-      const exists = doc.querySelector('script' + existsExpr);
-      if (exists) {
-        log('- script already exists: ', customElement, customTemplate, src);
-      } else if (src.indexOf('/amp.js') != -1) {
-        // Do not install runtime again. Already installed via amp-shadow.js.
-        log('- runtime already installed: ', src);
-      } else {
-        this.installScript_(src, customElement, customTemplate);
-      }
+    this.host_ = this.win.document.createElement('div');
+    this.host_.classList.add('amp-doc-host');
+
+    const hostTemplate = this.win.document.getElementById('amp-slot-template');
+    if (hostTemplate) {
+      this.host_.appendChild(hostTemplate.content.cloneNode(true));
+    }
+
+    this.container.appendChild(this.host_);
+
+    return this.readyPromise_.then(AMP => {
+      this.amp_ = AMP.attachShadowDocAsStream(this.host_, url, {});
+      this.win.document.title = this.amp_.title || '';
+      this.amp_.onMessage(this.onMessage_.bind(this));
+      this.amp_.setVisibilityState('visible');
+      return this.amp_;
     });
   }
 
@@ -374,7 +354,6 @@ class AmpViewer {
   /**
    */
   onMessage_(type, data, rsvp) {
-    log('received message:', type, data, rsvp);
   }
 }
 
@@ -384,7 +363,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  return (url == '/pwa' || url == '/pwa/');
+  return (url == '/pwa' || url == '/pwa/' || url == '/pwa/ampdoc-shell');
 }
 
 
@@ -398,7 +377,6 @@ function fetchDocument(url) {
     xhr.open('GET', url, true);
     xhr.responseType = 'document';
     xhr.setRequestHeader('Accept', 'text/html');
-    xhr.setRequestHeader('AMP-Direct-Fetch', '1');
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;
@@ -427,5 +405,107 @@ function fetchDocument(url) {
 }
 
 
+/**
+ * @param {string} url
+ * @param {!WritableStreamDefaultWriter} writer
+ * @return {!Promise}
+ */
+function streamDocument(url, writer) {
+  // Try native first.
+  if (window.fetch && window.TextDecoder && window.ReadableStream) {
+    return fetch(url).then(response => {
+      // This should be a lot simpler with transforming streams and pipes,
+      // but, TMK, these are not supported anywhere yet.
+      const /** !ReadableStreamDefaultReader */ reader = response.body
+          .getReader();
+      const decoder = new TextDecoder();
+      function readChunk(chunk) {
+        const text = decoder.decode(
+            chunk.value || new Uint8Array(),
+            {stream: !chunk.done});
+        if (text) {
+          writer.write(text);
+        }
+        if (chunk.done) {
+          writer.close();
+        } else {
+          return reader.read().then(readChunk);
+        }
+      }
+      return reader.read().then(readChunk);
+    });
+  }
 
-var shell = new Shell(window);
+  // Polyfill via XHR.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Accept', 'text/html');
+    let pos = 0;
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
+        return;
+      }
+      if (xhr.status < 100 || xhr.status > 599) {
+        xhr.onreadystatechange = null;
+        reject(new Error(`Unknown HTTP status ${xhr.status}`));
+        return;
+      }
+      if (xhr.readyState == /* LOADING */ 3 ||
+          xhr.readyState == /* COMPLETE */ 4) {
+        const s = xhr.responseText;
+        const chunk = s.substring(pos);
+        pos = s.length;
+        writer.write(chunk);
+        if (xhr.readyState == /* COMPLETE */ 4) {
+          writer.close().then(resolve);
+        }
+      }
+    };
+    xhr.onerror = () => {
+      reject(new Error('Network failure'));
+    };
+    xhr.onabort = () => {
+      reject(new Error('Request aborted'));
+    };
+    xhr.send();
+  });
+}
+
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ * @param {string} queryString
+ * @return {!Object<string>}
+ */
+function parseQueryString(queryString) {
+  const params = Object.create(null);
+  if (!queryString) {
+    return params;
+  }
+  if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+    queryString = queryString.substr(1);
+  }
+  const pairs = queryString.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
+    let name;
+    let value;
+    if (eqIndex != -1) {
+      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+    } else {
+      name = decodeURIComponent(pair).trim();
+      value = '';
+    }
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
+}
+
+
+var shell = new Shell(window, /* useStreaming */ true);

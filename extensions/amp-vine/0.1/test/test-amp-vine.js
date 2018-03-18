@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-vine';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-vine', () => {
+describes.realWin('amp-vine', {
+  amp: {
+    extensions: ['amp-vine'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
   function getVine(vineId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const vine = iframe.doc.createElement('amp-vine');
-      vine.setAttribute('data-vineid', vineId);
-      vine.setAttribute('width', 400);
-      vine.setAttribute('height', 400);
-      if (opt_responsive) {
-        vine.setAttribute('layout', 'responsive');
-      }
-      iframe.doc.body.appendChild(vine);
-      vine.implementation_.layoutCallback();
-      return vine;
-    });
+    const vine = doc.createElement('amp-vine');
+    vine.setAttribute('data-vineid', vineId);
+    vine.setAttribute('width', 400);
+    vine.setAttribute('height', 400);
+    if (opt_responsive) {
+      vine.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(vine);
+    return vine.build().then(() => vine.layoutCallback()).then(() => vine);
   }
 
   it('renders', () => {
@@ -46,8 +47,6 @@ describe('amp-vine', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://vine.co/v/MdKjXez002d/embed/simple');
-      expect(iframe.getAttribute('width')).to.equal('400');
-      expect(iframe.getAttribute('height')).to.equal('400');
     });
   });
 
@@ -55,12 +54,12 @@ describe('amp-vine', () => {
     return getVine('MdKjXez002d', true).then(vine => {
       const iframe = vine.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
   it('requires data-vineid', () => {
     return getVine('').should.eventually.be.rejectedWith(
-      /The data-vineid attribute is required for/);
+        /The data-vineid attribute is required for/);
   });
 });

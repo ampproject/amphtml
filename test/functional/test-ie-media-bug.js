@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('ie-media-bug', () => {
@@ -34,7 +34,7 @@ describe('ie-media-bug', () => {
       isIe: () => false,
     };
     platformMock = sandbox.mock(platform);
-    devErrorStub = sandbox.stub(dev, 'error');
+    devErrorStub = sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,
@@ -57,19 +57,19 @@ describe('ie-media-bug', () => {
     windowMock.expects('setInterval').never();
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
   });
 
   it('should bypass polling when matchMedia is not broken', () => {
     platformMock.expects('isIe').returns(true);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: true})
         .once();
     windowMock.expects('setInterval').never();
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
   });
 
   it('should poll when matchMedia is wrong, but eventually succeeds', () => {
@@ -77,7 +77,7 @@ describe('ie-media-bug', () => {
 
     // Scheduling pass.
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .once();
     const intervalId = 111;
@@ -95,7 +95,7 @@ describe('ie-media-bug', () => {
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
     windowMock.verify();
     windowMock./*OK*/restore();
@@ -104,12 +104,12 @@ describe('ie-media-bug', () => {
     clock.tick(10);
     windowMock = sandbox.mock(windowApi);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .once();
     windowMock.expects('clearInterval').never();
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     windowMock.verify();
     windowMock./*OK*/restore();
 
@@ -117,7 +117,7 @@ describe('ie-media-bug', () => {
     clock.tick(10);
     windowMock = sandbox.mock(windowApi);
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: true})
         .once();
     windowMock.expects('clearInterval').withExactArgs(intervalId).once();
@@ -126,7 +126,7 @@ describe('ie-media-bug', () => {
     windowMock./*OK*/restore();
 
     return promise.then(() => {
-      expect(devErrorStub.callCount).to.equal(0);
+      expect(devErrorStub).to.have.not.been.called;
     });
   });
 
@@ -135,7 +135,7 @@ describe('ie-media-bug', () => {
 
     // Scheduling pass.
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .returns({matches: false})
         .atLeast(2);
     const intervalId = 111;
@@ -154,21 +154,21 @@ describe('ie-media-bug', () => {
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
 
     // Second pass.
     clock.tick(10);
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(0);
+    expect(devErrorStub).to.have.not.been.called;
 
     // Third pass - timeout.
     clock.tick(2000);
     intervalCallback();
-    expect(devErrorStub.callCount).to.equal(1);
+    expect(devErrorStub).to.be.calledOnce;
 
     return promise.then(() => {
-      expect(devErrorStub.callCount).to.equal(1);
+      expect(devErrorStub).to.be.calledOnce;
     });
   });
 
@@ -176,13 +176,13 @@ describe('ie-media-bug', () => {
     platformMock.expects('isIe').returns(true);
 
     windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
         .throws(new Error('intentional'))
         .once();
     windowMock.expects('setInterval').never();
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
-    expect(devErrorStub.callCount).to.equal(1);
+    expect(devErrorStub).to.be.calledOnce;
   });
 });

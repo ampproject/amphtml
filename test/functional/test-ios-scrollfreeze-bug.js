@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {checkAndFix} from '../../src/service/ios-scrollfreeze-bug';
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {checkAndFix} from '../../src/service/viewport/ios-scrollfreeze-bug';
 
 
 describe('ios-scrollfreeze-bug', () => {
   let sandbox;
   let windowApi;
+  let ampdoc;
   let platform;
   let platformMock;
   let vsyncApi;
@@ -40,15 +42,20 @@ describe('ios-scrollfreeze-bug', () => {
     platformMock = sandbox.mock(platform);
 
     windowApi = {
-      document: {body: {style: {}}},
+      document: {
+        nodeType: /* DOCUMENT */ 9,
+        body: {style: {}},
+      },
     };
+    windowApi.document.defaultView = windowApi;
+    ampdoc = new AmpDocSingle(windowApi);
     bodyBottom = '0px';
     bodySetSpy = sandbox.spy();
     Object.defineProperty(windowApi.document.body.style, 'bottom', {
-      get: function() {
+      get() {
         return bodyBottom;
       },
-      set: function(value) {
+      set(value) {
         bodySetSpy(value);
         bodyBottom = value;
       },
@@ -57,7 +64,7 @@ describe('ios-scrollfreeze-bug', () => {
     vsyncApi = {
       mutate: () => {},
     };
-    mutateStub = sandbox.stub(vsyncApi, 'mutate', callback => {
+    mutateStub = sandbox.stub(vsyncApi, 'mutate').callsFake(callback => {
       callback();
     });
 
@@ -79,12 +86,12 @@ describe('ios-scrollfreeze-bug', () => {
   });
 
   it('should execute body reset', () => {
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.exist;
     return promise.then(() => {
       expect(windowApi.document.body.style.bottom).to.equal('0px');
-      expect(mutateStub.callCount).to.equal(2);
-      expect(bodySetSpy.callCount).to.equal(2);
+      expect(mutateStub).to.have.callCount(2);
+      expect(bodySetSpy).to.have.callCount(2);
       expect(bodySetSpy.args[0][0]).to.equal('');
       expect(bodySetSpy.args[1][0]).to.equal('0px');
     });
@@ -92,30 +99,30 @@ describe('ios-scrollfreeze-bug', () => {
 
   it('should ignore for non-iOS', () => {
     platformMock.expects('isIos').returns(false).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 
   it('should ignore for non-Safari', () => {
     platformMock.expects('isSafari').returns(false).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 
   it('should ignore for version > 8', () => {
     platformMock.expects('getMajorVersion').returns(9).once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
 
     platformMock.expects('getMajorVersion').returns(10).once();
-    const promise2 = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise2 = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise2).to.not.exist;
   });
 
   it('should ignore when b29185497 is not specified', () => {
     viewerMock.expects('getParam').withExactArgs('b29185497').returns('')
         .once();
-    const promise = checkAndFix(windowApi, platform, viewerApi, vsyncApi);
+    const promise = checkAndFix(ampdoc, platform, viewerApi, vsyncApi);
     expect(promise).to.not.exist;
   });
 });

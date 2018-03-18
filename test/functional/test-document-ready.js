@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {isDocumentReady, onDocumentReady, whenDocumentReady,} from
-    '../../src/document-ready';
-import {timer} from '../../src/timer';
 import * as sinon from 'sinon';
+import {Services} from '../../src/services';
+import {isDocumentReady,
+  onDocumentReady,
+  whenDocumentComplete,
+  whenDocumentReady,
+} from '../../src/document-ready';
 
 
 describe('documentReady', () => {
@@ -25,6 +28,7 @@ describe('documentReady', () => {
   let sandbox;
   let testDoc;
   let eventListeners;
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -44,10 +48,12 @@ describe('documentReady', () => {
 
   afterEach(() => {
     sandbox.restore();
-
   });
 
-  it('should interprete readyState correctly', () => {
+  it('should interpret readyState correctly', () => {
+    expect(isDocumentReady(testDoc)).to.equal(false);
+
+    testDoc.readyState = 'uninitialized';
     expect(isDocumentReady(testDoc)).to.equal(false);
 
     testDoc.readyState = 'interactive';
@@ -61,20 +67,22 @@ describe('documentReady', () => {
     testDoc.readyState = 'complete';
     const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(1);
+    expect(callback).to.be.calledOnce;
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
   });
 
   it('should wait to call callback until ready', () => {
     testDoc.readyState = 'loading';
     const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(0);
+    expect(callback).to.have.not.been.called;
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
     // Complete
     testDoc.readyState = 'complete';
     eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(1);
+    expect(callback).to.be.calledOnce;
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
     expect(eventListeners['readystatechange']).to.equal(undefined);
   });
 
@@ -82,18 +90,19 @@ describe('documentReady', () => {
     testDoc.readyState = 'loading';
     const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(0);
+    expect(callback).to.have.not.been.called;
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
     // Still loading
     eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(0);
+    expect(callback).to.have.not.been.called;
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
     // Complete
     testDoc.readyState = 'complete';
     eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(1);
+    expect(callback).to.be.calledOnce;
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
     expect(eventListeners['readystatechange']).to.equal(undefined);
   });
 
@@ -109,23 +118,24 @@ describe('documentReady', () => {
 
       whenDocumentReady(testDoc).then(spy3);
 
-      expect(spy.callCount).to.equal(0);
-      expect(spy2.callCount).to.equal(0);
-      expect(spy3.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
+      expect(spy2).to.have.not.been.called;
+      expect(spy3).to.have.not.been.called;
 
       return timer.promise().then(() => {
-        expect(spy.callCount).to.equal(1);
-        expect(spy2.callCount).to.equal(1);
-        expect(spy3.callCount).to.equal(1);
+        expect(spy).to.be.calledOnce;
+        expect(spy.getCall(0).args).to.deep.equal([testDoc]);
+        expect(spy2).to.be.calledOnce;
+        expect(spy3).to.be.calledOnce;
       });
     });
 
     it('should not call callback', () => {
       const spy = sandbox.spy();
       whenDocumentReady(testDoc).then(spy);
-      expect(spy.callCount).to.equal(0);
+      expect(spy).to.have.not.been.called;
       return timer.promise().then(() => {
-        expect(spy.callCount).to.equal(0);
+        expect(spy).to.have.not.been.called;
       });
     });
 
@@ -135,7 +145,7 @@ describe('documentReady', () => {
       whenDocumentReady(testDoc).then(callback);
 
       return timer.promise().then(() => {
-        expect(callback.callCount).to.equal(0);
+        expect(callback).to.have.not.been.called;
         expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
         // Complete
@@ -143,8 +153,73 @@ describe('documentReady', () => {
         eventListeners['readystatechange']();
 
         return timer.promise().then(() => {
-          expect(callback.callCount).to.equal(1);
+          expect(callback).to.be.calledOnce;
+          expect(callback.getCall(0).args).to.deep.equal([testDoc]);
           expect(eventListeners['readystatechange']).to.equal(undefined);
+        });
+      });
+    });
+  });
+
+  describe('whenDocumentComplete', () => {
+
+    it('should call callback immediately when complete', () => {
+      testDoc.readyState = 'complete';
+      const spy = sandbox.spy();
+      const spy2 = sandbox.spy();
+      const spy3 = sandbox.spy();
+
+      whenDocumentComplete(testDoc).then(spy).then(spy2);
+
+      whenDocumentComplete(testDoc).then(spy3);
+
+      expect(spy).to.have.not.been.called;
+      expect(spy2).to.have.not.been.called;
+      expect(spy3).to.have.not.been.called;
+
+      return timer.promise().then(() => {
+        expect(spy).to.be.calledOnce;
+        expect(spy.getCall(0).args).to.deep.equal([testDoc]);
+        expect(spy2).to.be.calledOnce;
+        expect(spy3).to.be.calledOnce;
+      });
+    });
+
+    it('should not call callback', () => {
+      const spy = sandbox.spy();
+      whenDocumentComplete(testDoc).then(spy);
+      expect(spy).to.have.not.been.called;
+      return timer.promise().then(() => {
+        expect(spy).to.have.not.been.called;
+      });
+    });
+
+    it('should wait to call callback until ready', () => {
+      testDoc.readyState = 'loading';
+      const callback = sandbox.spy();
+      whenDocumentComplete(testDoc).then(callback);
+
+      return timer.promise().then(() => {
+        expect(callback).to.have.not.been.called;
+        expect(eventListeners['readystatechange']).to.not.equal(undefined);
+
+        // interactive
+        testDoc.readyState = 'interactive';
+        eventListeners['readystatechange']();
+
+        return timer.promise().then(() => {
+          expect(callback).to.have.not.been.called;
+          expect(eventListeners['readystatechange']).to.not.equal(undefined);
+
+          // Complete
+          testDoc.readyState = 'complete';
+          eventListeners['readystatechange']();
+
+          return timer.promise().then(() => {
+            expect(callback).to.be.calledOnce;
+            expect(callback.getCall(0).args).to.deep.equal([testDoc]);
+            expect(eventListeners['readystatechange']).to.equal(undefined);
+          });
         });
       });
     });

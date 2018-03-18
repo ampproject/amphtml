@@ -14,12 +14,39 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-accordion-0.1.css';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
+import {tryFocus} from '../../../src/dom';
+
+const TAG = 'amp-accordion';
+
 
 class AmpAccordion extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {!Array<!Node>} */
+    this.headers_ = [];
+
+    /** @private {?string} */
+    this.sessionId_ = null;
+
+    /** @private {?JsonObject} */
+    this.currentState_ = null;
+
+    /** @private {boolean} */
+    this.sessionOptOut_ = false;
+
+    /** @private {Element} */
+    this.sections_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -28,84 +55,136 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {!NodeList} */
-    this.sections_ = this.getRealChildren();
+    this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
-    /** @const @private {!Window} */
-    this.win_ = this.getWin();
-
-    /** @const @private {string} */
-    this.id_ = this.getSessionStorageKey_();
-
-    /** @const @private {!Object|undefined} */
-    this.currentState_ = null;
-    this.element.setAttribute('role', 'tablist');
-
-    // sessionStorage key: special created id for this element, this.id_.
+    // sessionStorage key: special created id for this element, this.sessionId_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
+    this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
-    if (!this.currentState_) {
-      this.currentState_ = Object.create(null);
-    }
-    const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
+
+    this.sections_ = this.getRealChildren();
     this.sections_.forEach((section, index) => {
-      user.assert(
+      user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-      const sectionComponents_ = section.children;
-      user.assert(
-          sectionComponents_.length == 2,
+      const sectionComponents = section.children;
+      user().assert(
+          sectionComponents.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
-      const header = sectionComponents_[0];
-      const content = sectionComponents_[1];
-      header.classList.add('-amp-accordion-header');
-      header.setAttribute('role', 'tab');
-      content.classList.add('-amp-accordion-content');
-      content.setAttribute('role', 'tabpanel');
+      const content = sectionComponents[1];
+      content.classList.add('i-amphtml-accordion-content');
       let contentId = content.getAttribute('id');
       if (!contentId) {
         contentId = this.element.id + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
+
+      this.registerAction('toggle', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.toggle_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.toggle_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('expand', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.expand_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.expand_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('collapse', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+              sectionEl,
+              'No element found with id:' + sectionId);
+          this.collapse_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.collapse_(this.sections_[i]);
+          }
+        }
+      });
+
       if (this.currentState_[contentId]) {
         section.setAttribute('expanded', '');
-      } else if (this.currentState_[contentId] == false) {
+      } else if (this.currentState_[contentId] === false) {
         section.removeAttribute('expanded');
       }
-      content.setAttribute(
-          'aria-expanded', section.hasAttribute('expanded').toString());
+      this.mutateElement(() => {
+        // Just mark this element as dirty since we changed the state
+        // based on runtime state. This triggers checking again
+        // whether children need layout.
+        // See https://github.com/ampproject/amphtml/issues/3586
+        // for details.
+      });
+
+      const header = sectionComponents[0];
+      header.classList.add('i-amphtml-accordion-header');
+      header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', boundOnHeaderClick_);
+      header.setAttribute('aria-expanded',
+          section.hasAttribute('expanded').toString());
+      if (!header.hasAttribute('tabindex')) {
+        header.setAttribute('tabindex', 0);
+      }
+      this.headers_.push(header);
+      header.addEventListener('click', this.clickHandler_.bind(this));
+      header.addEventListener('keydown', this.keyDownHandler_.bind(this));
     });
   }
 
   /**
    * Generate a sessionStorage Key based on amp-accordion element id.
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getSessionStorageKey_() {
-    const id_ = this.element.id;
-    const url = removeFragment(this.win_.location.href);
+    const id_ = this.element.id || this.element.getResourceId();
+    const url = removeFragment(this.win.location.href);
     return `amp-${id_}-${url}`;
   }
 
   /**
    * Get previous state from sessionStorage.
-   * @return {!Object|null}
+   * @return {!JsonObject}
    * @private
    */
   getSessionState_() {
+    if (this.sessionOptOut_) {
+      return dict();
+    }
     try {
-      const sessionStr = this.win_./*OK*/sessionStorage.getItem(this.id_);
-      return JSON.parse(sessionStr);
+      const sessionStr =
+          this.win./*OK*/sessionStorage.getItem(
+              dev().assertString(this.sessionId_));
+      return sessionStr
+        ? /** @type {!JsonObject} */ (
+          dev().assert(parseJson(dev().assertString(sessionStr))))
+        : dict();
     } catch (e) {
-      dev.error(e.message, e.stack);
-      return;
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
+      return dict();
     }
   }
 
@@ -114,38 +193,154 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   setSessionState_() {
+    if (this.sessionOptOut_) {
+      return;
+    }
     const sessionStr = JSON.stringify(this.currentState_);
     try {
-      this.win_./*OK*/sessionStorage.setItem(this.id_, sessionStr);
+      this.win./*OK*/sessionStorage.setItem(
+          dev().assertString(this.sessionId_), sessionStr);
     } catch (e) {
-      dev.error(e.message, e.stack);
+      dev().fine('AMP-ACCORDION', e.message, e.stack);
     }
   }
 
   /**
-   * Handles accordion headers clicks to expand/collapse its content.
-   * @param {!MouseEvent} event Click event.
+   * Toggles section between expanded or collapsed.
    * @private
    */
-  onHeaderClick_(event) {
-    event.preventDefault();
-    const section = event.currentTarget.parentNode;
-    const sectionComponents_ = section.children;
-    const content = sectionComponents_[1];
+  toggle_(section, opt_forceExpand = undefined) {
+    const sectionComponents = section.children;
+    const header = sectionComponents[0];
+    const content = sectionComponents[1];
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
-      if (section.hasAttribute('expanded')) {
-        section.removeAttribute('expanded');
-        content.setAttribute('aria-expanded', 'false');
+      let toExpand;
+      if (opt_forceExpand === true) {
+        toExpand = true;
+      } else if (opt_forceExpand === false) {
+        toExpand = false;
       } else {
-        section.setAttribute('expanded', '');
-        content.setAttribute('aria-expanded', 'true');
+        toExpand = !section.hasAttribute('expanded');
       }
-    }, content);
+
+      if (toExpand) {
+        section.setAttribute('expanded', '');
+        header.setAttribute('aria-expanded', 'true');
+        // if expand-single-section is set, only allow one <section> to be expanded at a time
+        if (this.element.hasAttribute('expand-single-section')) {
+          this.sections_.forEach(sectionIter => {
+            if (sectionIter != section) {
+              sectionIter.removeAttribute('expanded');
+              sectionIter.children[0].setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+      } else {
+        section.removeAttribute('expanded');
+        header.setAttribute('aria-expanded', 'false');
+      }
+    }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
   }
+
+  /**
+   * Force expands the accordion.
+   * @private
+   */
+  expand_(section) {
+    this.toggle_(section, true);
+  }
+
+  /**
+   * Force collapses the accordion.
+   * @private
+   */
+  collapse_(section) {
+    this.toggle_(section, false);
+  }
+
+  /**
+   * Handles accordion header activation, through clicks or enter/space presses.
+   * @param {!Event} event 'click' or 'keydown' event.
+   * @private
+   */
+  onHeaderPicked_(event) {
+    event.preventDefault();
+    const header = dev().assertElement(event.currentTarget);
+    const section = header.parentElement;
+    this.toggle_(section);
+  }
+
+  /**
+   * Handles clicks on an accordion header to expand/collapse its content.
+   */
+  clickHandler_(event) {
+    // Need to support clicks on any children of the header except
+    // for on links, which should not have their default behavior
+    // overidden.
+    const target = dev().assertElement(event.target);
+    const header = dev().assertElement(event.currentTarget);
+    const anchor = closest(target, e => e.tagName == 'A', header);
+    if (anchor === null) {
+      // Don't use clicks on links in header to expand/collapse.
+      this.onHeaderPicked_(event);
+    }
+  }
+
+  /**
+   * Handles key presses on an accordion header to expand/collapse its content
+   * or move focus to previous/next header.
+   * @param {!Event} event keydown event.
+   */
+  keyDownHandler_(event) {
+    if (event.defaultPrevented) {
+      return;
+    }
+    const keyCode = event.keyCode;
+    switch (keyCode) {
+      case KeyCodes.UP_ARROW: /* fallthrough */
+      case KeyCodes.DOWN_ARROW:
+        this.navigationKeyDownHandler_(event);
+        return;
+      case KeyCodes.ENTER: /* fallthrough */
+      case KeyCodes.SPACE:
+        if (event.target == event.currentTarget) {
+          // Only activate if header element was activated directly.
+          // Do not respond to key presses on its children.
+          this.onHeaderPicked_(event);
+        }
+        return;
+    }
+  }
+
+  /**
+   * Handles keyboard navigation events. Only respond to keyboard navigation
+   * if a section header already has focus.
+   * @param {!Event} event
+   * @private
+   */
+  navigationKeyDownHandler_(event) {
+    const header = dev().assertElement(event.currentTarget);
+    const index = this.headers_.indexOf(header);
+    if (index !== -1) {
+      event.preventDefault();
+      // Up and down are the same regardless of locale direction.
+      const diff = event.keyCode == KeyCodes.UP_ARROW ? -1 : 1;
+      // If user navigates one past the beginning or end, wrap around.
+      let newFocusIndex = (index + diff) % this.headers_.length;
+      if (newFocusIndex < 0) {
+        newFocusIndex = newFocusIndex + this.headers_.length;
+      }
+      const newFocusHeader = this.headers_[newFocusIndex];
+      tryFocus(newFocusHeader);
+    }
+  }
 }
 
-AMP.registerElement('amp-accordion', AmpAccordion, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAccordion);
+});

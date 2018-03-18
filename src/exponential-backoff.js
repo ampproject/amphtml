@@ -17,7 +17,7 @@
 
 /**
  * @param {number=} opt_base Exponential base. Defaults to 2.
- * @return {function(function(): number)} Function that when invoked will
+ * @return {function(function()): number} Function that when invoked will
  *     call the passed in function. On every invocation the next
  *     invocation of the passed in function will be exponentially
  *     later. Returned function returns timeout id.
@@ -35,9 +35,10 @@ export function exponentialBackoff(opt_base) {
  *    a number that exponentially grows per invocation.
  */
 export function exponentialBackoffClock(opt_base) {
+  const base = opt_base || 2;
   let count = 0;
   return () => {
-    let wait = Math.pow(opt_base || 2, count++);
+    let wait = Math.pow(base, count++);
     wait += getJitter(wait);
     return wait * 1000;
   };

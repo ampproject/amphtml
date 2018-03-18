@@ -17,7 +17,9 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
-import {timer} from './timer';
+import {findIndex} from './utils/array';
+import {toWin} from './types';
+
 
 const PROP_ = '__AMP_Gestures';
 
@@ -64,12 +66,13 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
+   * @param {boolean=} opt_shouldNotPreventDefault
    * @return {!Gestures}
    */
-  static get(element) {
+  static get(element, opt_shouldNotPreventDefault = false) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element);
+      res = new Gestures(element, opt_shouldNotPreventDefault);
       element[PROP_] = res;
     }
     return res;
@@ -78,7 +81,7 @@ export class Gestures {
   /**
    * @param {!Element} element
    */
-  constructor(element) {
+  constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -97,6 +100,9 @@ export class Gestures {
     /** @private {?GestureRecognizer} */
     this.eventing_ = null;
 
+    /** @private {boolean} */
+    this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+
     /**
      * This variable indicates that the eventing has stopped on this
      * event cycle.
@@ -105,7 +111,7 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(element.ownerDocument.defaultView,
+    this.pass_ = new Pass(toWin(element.ownerDocument.defaultView),
         this.doPass_.bind(this));
 
     /** @private {!Observable} */
@@ -130,16 +136,20 @@ export class Gestures {
     this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
+
+    /** @private {boolean} */
+    this.passAfterEvent_ = false;
   }
 
   /**
-   * Unsubscribes from all pointer events.
+   * Unsubscribes from all pointer events and removes the shared cache instance.
    */
   cleanup() {
     this.element_.removeEventListener('touchstart', this.boundOnTouchStart_);
     this.element_.removeEventListener('touchend', this.boundOnTouchEnd_);
     this.element_.removeEventListener('touchmove', this.boundOnTouchMove_);
     this.element_.removeEventListener('touchcancel', this.boundOnTouchCancel_);
+    delete this.element_[PROP_];
     this.pass_.cancel();
   }
 
@@ -148,8 +158,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>)} recognizerConstr
-   * @param {function(!Gesture<!DATA>)} handler
+   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(!Gesture<DATA>)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -163,6 +173,35 @@ export class Gestures {
       this.overservers_[type] = overserver;
     }
     return overserver.add(handler);
+  }
+
+  /**
+   * Unsubscribes all handlers from the given gesture recognizer. Returns
+   * true if anything was done. Returns false if there were no handlers
+   * registered on the given gesture recognizer in first place.
+   *
+   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @return {boolean}
+   */
+  removeGesture(recognizerConstr) {
+    const type = new recognizerConstr(this).getType();
+    const overserver = this.overservers_[type];
+    if (overserver) {
+      overserver.removeAll();
+      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      if (index < 0) {
+        return false;
+      }
+      // Remove the recognizer as well as all associated tracking state
+      this.recognizers_.splice(index, 1);
+      this.ready_.splice(index, 1);
+      this.pending_.splice(index, 1);
+      this.tracking_.splice(index, 1);
+      delete this.overservers_[type];
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -181,7 +220,7 @@ export class Gestures {
    * @private
    */
   onTouchStart_(event) {
-    const now = timer.now();
+    const now = Date.now();
     this.wasEventing_ = false;
 
     this.pointerDownObservable_.fire(event);
@@ -216,7 +255,7 @@ export class Gestures {
    * @private
    */
   onTouchMove_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -244,7 +283,7 @@ export class Gestures {
    * @private
    */
   onTouchEnd_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -295,7 +334,7 @@ export class Gestures {
 
     // Set the recognizer as ready and wait for the pass to
     // make the decision.
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.ready_[i] = now + offset;
@@ -311,7 +350,7 @@ export class Gestures {
    * this time expires the recognizer should either signal readiness or it
    * will be canceled.
    * @param {!GestureRecognizer} recognizer
-   * @param {number} offset
+   * @param {number} timeLeft
    * @private
    */
   signalPending_(recognizer, timeLeft) {
@@ -321,7 +360,7 @@ export class Gestures {
       return;
     }
 
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.pending_[i] = now + timeLeft;
@@ -351,11 +390,11 @@ export class Gestures {
    * @private
    */
   signalEmit_(recognizer, data, event) {
-    dev.assert(this.eventing_ == recognizer,
+    dev().assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, timer.now(),
+      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
           event));
     }
   }
@@ -368,7 +407,7 @@ export class Gestures {
     let cancelEvent = !!this.eventing_ || this.wasEventing_;
     this.wasEventing_ = false;
     if (!cancelEvent) {
-      const now = timer.now();
+      const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
                 this.pending_[i] && this.pending_[i] >= now) {
@@ -379,7 +418,9 @@ export class Gestures {
     }
     if (cancelEvent) {
       event.stopPropagation();
-      event.preventDefault();
+      if (!this.shouldNotPreventDefault_) {
+        event.preventDefault();
+      }
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;
@@ -390,11 +431,10 @@ export class Gestures {
   /**
    * The pass that decides which recognizers can start emitting and which
    * are canceled.
-   * @param {!Event} event
    * @private
    */
   doPass_() {
-    const now = timer.now();
+    const now = Date.now();
 
     // The "most ready" recognizer is the youngest in the "ready" set.
     // Otherwise we wouldn't wait for it at all.
@@ -574,7 +614,7 @@ export class GestureRecognizer {
    * The recognizer can call this method to emit the gestures while in the
    * "emitting" state. Recognizer can only call this method if it has
    * previously received the {@link acceptStart} call.
-   * @param {!DATA} data
+   * @param {DATA} data
    * @param {?Event} event
    */
   signalEmit(data, event) {

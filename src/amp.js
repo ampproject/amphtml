@@ -18,81 +18,105 @@
  * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
  */
 
-import './polyfills';
-import {installPerformanceService} from './service/performance-impl';
-import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installGlobalClickListener} from './document-click';
-import {installStyles, makeBodyVisible} from './styles';
-import {installErrorReporting} from './error';
-import {installDocService} from './service/ampdoc-impl';
-import {stubElements} from './custom-element';
-import {
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-  adopt,
-} from './runtime';
-import {cssText} from '../build/css';
-import {maybeValidate} from './validator-integration';
-import {maybeTrackImpression} from './impression';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
+import {Services} from './services';
+import {adopt, installAmpdocServices, installBuiltins, installRuntimeServices} from './runtime';
+import {cssText} from '../build/css';
+import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {installCacheServiceWorker} from './service-worker/install';
+import {installDocService} from './service/ampdoc-impl';
+import {installErrorReporting} from './error';
+import {installPerformanceService} from './service/performance-impl';
+import {installPlatformService} from './service/platform-impl';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStylesForDoc, makeBodyVisible} from './style-installer';
+import {maybeTrackImpression} from './impression';
+import {maybeValidate} from './validator-integration';
+import {startupChunk} from './chunk';
+import {stubElementsForDoc} from './service/custom-element-registry';
+
+// Store the originalHash as early as possible. Trying to debug:
+// https://github.com/ampproject/amphtml/issues/6070
+if (self.location) {
+  self.location.originalHash = self.location.hash;
+}
+
+/** @type {!./service/ampdoc-impl.AmpDocService} */
+let ampdocService;
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  const ampdocService = installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
-
-  const perf = installPerformanceService(window);
+  installDocService(self, /* isSingleDoc */ true);
+  ampdocService = Services.ampdocServiceFor(self);
+} catch (e) {
+  // In case of an error call this.
+  makeBodyVisible(self.document);
+  throw e;
+}
+startupChunk(self.document, function initial() {
+  /** @const {!./service/ampdoc-impl.AmpDoc} */
+  const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPerformanceService(self);
+  /** @const {!./service/performance-impl.Performance} */
+  const perf = Services.performanceFor(self);
+  if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
+    perf.addEnabledExperiment('no-boilerplate');
+  }
+  installPlatformService(self);
+  fontStylesheetTimeout(self);
   perf.tick('is');
-  installStyles(document, cssText, () => {
-    try {
+  installStylesForDoc(ampdoc, cssText, () => {
+    startupChunk(self.document, function services() {
       // Core services.
-      installRuntimeServices(window);
+      installRuntimeServices(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
-      maybeTrackImpression(window);
-
+      maybeTrackImpression(self);
+    });
+    startupChunk(self.document, function builtins() {
       // Builtins.
-      installBuiltins(window);
+      installBuiltins(self);
+    });
+    startupChunk(self.document, function adoptWindow() {
+      adopt(self);
+    });
+    startupChunk(self.document, function stub() {
+      // Pre-stub already known elements.
+      stubElementsForDoc(ampdoc);
+    });
+    startupChunk(self.document, function final() {
+      installPullToRefreshBlocker(self);
 
-      // Final configuration and stubbing.
-      adopt(window);
-      stubElements(window);
-
-      installPullToRefreshBlocker(window);
-      installGlobalClickListener(window);
-
-      maybeValidate(window);
-      makeBodyVisible(document, /* waitForExtensions */ true);
-    } catch (e) {
-      makeBodyVisible(document);
-      throw e;
-    } finally {
+      maybeValidate(self);
+      makeBodyVisible(self.document, /* waitForServices */ true);
+      installCacheServiceWorker(self);
+    });
+    startupChunk(self.document, function finalTick() {
       perf.tick('e_is');
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
-    }
+    });
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-} catch (e) {
-  // In case of an error call this.
-  makeBodyVisible(document);
-  throw e;
-}
+});
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
-if (window.console) {
+if (self.console) {
   (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
+      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
+      self.location.href);
 }
-window.document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+self.document.documentElement.setAttribute('amp-version',
+    '$internalRuntimeVersion$');

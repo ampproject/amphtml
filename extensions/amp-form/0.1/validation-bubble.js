@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from '../../../src/vsync';
-import {viewportFor} from '../../../src/viewport';
+import {Services} from '../../../src/services';
+import {removeChildren} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 /** @type {string} */
@@ -25,28 +25,55 @@ export class ValidationBubble {
 
   /**
    * Creates a bubble component to display messages in.
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} id
    */
-  constructor(win) {
+  constructor(ampdoc, id) {
+    /** @private @const {string} */
+    this.id_ = id;
 
-    /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(win);
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    /** @private @const {!HTMLDivElement} */
-    this.bubbleElement_ = win.document.createElement('div');
-    this.bubbleElement_.classList.add('-amp-validation-bubble');
+    /** @private {?Element} */
+    this.currentTargetElement_ = null;
+
+    /** @private {string} */
+    this.currentMessage_ = '';
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
+    /** @private @const {!Element} */
+    this.bubbleElement_ = ampdoc.win.document.createElement('div');
+
+    this.bubbleElement_.classList.add('i-amphtml-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
-    win.document.body.appendChild(this.bubbleElement_);
+    ampdoc.getBody().appendChild(this.bubbleElement_);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isActiveOn(element) {
+    return this.isVisible_ && element == this.currentTargetElement_;
   }
 
   /**
    * Hides the bubble off screen.
    */
   hide() {
-    // TODO(#3776): Use .mutate method when it supports passing state.
+    if (!this.isVisible_) {
+      return;
+    }
+
+    this.isVisible_ = false;
+    this.currentTargetElement_ = null;
+    this.currentMessage_ = '';
+
     this.vsync_.run({
       measure: undefined,
       mutate: hideBubble,
@@ -57,15 +84,23 @@ export class ValidationBubble {
 
   /**
    * Shows the bubble targeted to an element with the passed message.
-   * @param {!HTMLElement} targetElement
+   * @param {!Element} targetElement
    * @param {string} message
    */
   show(targetElement, message) {
+    if (this.isActiveOn(targetElement) && message == this.currentMessage_) {
+      return;
+    }
+
+    this.isVisible_ = true;
+    this.currentTargetElement_ = targetElement;
+    this.currentMessage_ = message;
     const state = {
       message,
       targetElement,
       bubbleElement: this.bubbleElement_,
       viewport: this.viewport_,
+      id: this.id_,
     };
     this.vsync_.run({
       measure: measureTargetElement,
@@ -81,6 +116,9 @@ export class ValidationBubble {
  * @private
  */
 function hideBubble(state) {
+  state.bubbleElement.removeAttribute('aria-alert');
+  state.bubbleElement.removeAttribute('role');
+  removeChildren(state.bubbleElement);
   setStyles(state.bubbleElement, {
     display: 'none',
   });
@@ -103,9 +141,16 @@ function measureTargetElement(state) {
  * @private
  */
 function showBubbleElement(state) {
-  state.bubbleElement.textContent = state.message;
+  removeChildren(state.bubbleElement);
+  const messageDiv = state.bubbleElement.ownerDocument.createElement('div');
+  messageDiv.id = `bubble-message-${state.id}`;
+  messageDiv.textContent = state.message;
+  state.bubbleElement.setAttribute('aria-labeledby', messageDiv.id);
+  state.bubbleElement.setAttribute('role', 'alert');
+  state.bubbleElement.setAttribute('aria-live', 'assertive');
+  state.bubbleElement.appendChild(messageDiv);
   setStyles(state.bubbleElement, {
-    display: '',
+    display: 'block',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

@@ -1,0 +1,125 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.amp-access-laterpay {
+  position: relative;
+}
+
+@media (min-width: 420px) {
+  .amp-access-laterpay {
+    width: 420px;
+  }
+}
+
+.amp-access-laterpay ul {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 40px;
+}
+
+.amp-access-laterpay li {
+  list-style: none;
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.amp-access-laterpay label {
+  display: flex;
+  padding-right: 10px;
+}
+
+.amp-access-laterpay input {
+  width: 20px;
+}
+
+.amp-access-laterpay-container {
+  padding: 16px;
+  padding-right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 12px;
+  box-shadow: 0 0 10px -1px rgba(0,0,0,.25);
+}
+
+.amp-access-laterpay-sandbox {
+  width: 112%;
+  padding: 15px 10px;
+  background-color: #f2902a;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+.amp-access-laterpay-badge {
+  text-align: center;
+  color: #999;
+}
+
+.amp-access-laterpay-badge a {
+  color: #8db444;
+}
+
+.amp-access-laterpay-header {
+  font-size: 1.2em;
+  margin-bottom: 40px;
+}
+
+.amp-access-laterpay-metadata {
+  width: 92%;
+}
+
+.amp-access-laterpay-title {
+  font-size: 1.1em;
+  margin: 0;
+  padding: 0;
+}
+
+.amp-access-laterpay-description {
+  font-size: 0.9em;
+  margin: 0;
+  padding: 0;
+}
+
+.amp-access-laterpay-price-container {
+  margin-top: 0;
+  margin-left: auto;
+}
+
+.amp-access-laterpay-price {
+  font-size: 1.5em;
+}
+
+.amp-access-laterpay-currency {
+  font-size: 0.7em;
+}
+
+.amp-access-laterpay-purchase-button {
+  font-size: 1.1em;
+  padding: 0.5em 0.8em;
+  width: 70%;
+  padding: 0.5em 0.8em;
+  background-color: #8db444;
+  border-radius: 4px;
+  border: 0;
+  color: #fff;
+  width: 70%;
+}
+
+.amp-access-laterpay-already-purchased-link-container {
+  font-size: 0.9em;
+}

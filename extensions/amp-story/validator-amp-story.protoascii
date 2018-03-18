@@ -1,0 +1,375 @@
+#
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-story
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story>
+  html_format: AMP
+  tag_name: "AMP-STORY"
+  requires_extension: "amp-story"
+  mandatory_parent: "BODY"
+  # Mandate that at least one of the children is an amp-story-page.
+  # TODO(gregable): This global requires/satisfies approach only works because
+  # there is only one <amp-story standalone> in a document. We really want this
+  # requirement to be expressed on the <amp-story> children, however.
+  requires: "amp-story-page"
+  attrs: {
+    name: "standalone"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "bookend-config-src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  siblings_disallowed: true
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-PAGE"
+  }
+}
+tags: {  # <amp-story-page>
+  html_format: AMP
+  tag_name: "AMP-STORY-PAGE"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY"
+  satisfies: "amp-story-page"
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  attrs: { name: "auto-advance-after" }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  child_tags: {
+    child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-CTA-LAYER"
+    child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
+    mandatory_min_num_child_tags: 1
+  }
+}
+tags: {  # <amp-story-grid-layer>
+  html_format: AMP
+  tag_name: "AMP-STORY-GRID-LAYER"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  attrs: {
+    name: "template"
+    value_regex: "(fill|horizontal|vertical|thirds)"
+    mandatory: true
+  }
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER default"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-GRID-LAYER default"
+  attrs: { name: "grid-area" }
+  attrs: {
+    name: "align-content"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch|"
+        "space-around|"
+        "space-between|"
+        "space-evenly)"
+  }
+  attrs: {
+    name: "align-items"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "align-self"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-content"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch|"
+        "space-around|"
+        "space-between|"
+        "space-evenly)"
+  }
+  attrs: {
+    name: "justify-items"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-self"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "animate-in"
+    value_regex: "(drop|"
+        "fade-in|"
+        "fly-in-bottom|"
+        "fly-in-left|"
+        "fly-in-right|"
+        "fly-in-top|"
+        "pulse|"
+        "rotate-in-left|"
+        "rotate-in-right|"
+        "twirl-in|"
+        "whoosh-in-left|"
+        "whoosh-in-right)"
+  }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-after" }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  # Attribute grid-area is not allowed in this tag. That's what makes this
+  # reference point different than the grid-area reference point.
+  attrs: {
+    name: "animate-in"
+    value_regex: "(drop|"
+        "fade-in|"
+        "fly-in-bottom|"
+        "fly-in-left|"
+        "fly-in-right|"
+        "fly-in-top|"
+        "pulse|"
+        "rotate-in-left|"
+        "rotate-in-right|"
+        "twirl-in|"
+        "whoosh-in-left|"
+        "whoosh-in-right)"
+  }
+  attrs: { name: "animate-in-delay" }
+  attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-after" }
+  reference_points: {
+    tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {  # <amp-story-cta-layer>
+  html_format: AMP
+  tag_name: "AMP-STORY-CTA-LAYER"
+  mandatory_ancestor: "AMP-STORY-PAGE"
+  descendant_tag_list: "amp-story-cta-layer-allowed-descendants"
+  mandatory_last_child: true
+}
+descendant_tag_list: {
+  name: "amp-story-cta-layer-allowed-descendants"
+  allowed_tags: "A"
+  allowed_tags: "ABBR"
+  allowed_tags: "ADDRESS"
+  allowed_tags: "AMP-CALL-TRACKING"
+  allowed_tags: "AMP-FIT-TEXT"
+  allowed_tags: "AMP-FONT"
+  allowed_tags: "AMP-IMG"
+  allowed_tags: "AMP-TIMEAGO"
+  allowed_tags: "B"
+  allowed_tags: "BDI"
+  allowed_tags: "BDO"
+  allowed_tags: "BLOCKQUOTE"
+  allowed_tags: "BR"
+  allowed_tags: "BUTTON"
+  allowed_tags: "CAPTION"
+  allowed_tags: "CITE"
+  allowed_tags: "CODE"
+  allowed_tags: "DATA"
+  allowed_tags: "DEL"
+  allowed_tags: "DFN"
+  allowed_tags: "DIV"
+  allowed_tags: "EM"
+  allowed_tags: "FIGCAPTION"
+  allowed_tags: "FIGURE"
+  allowed_tags: "FOOTER"
+  allowed_tags: "H1"
+  allowed_tags: "H2"
+  allowed_tags: "H3"
+  allowed_tags: "H4"
+  allowed_tags: "H5"
+  allowed_tags: "H6"
+  allowed_tags: "HEADER"
+  allowed_tags: "HGROUP"
+  allowed_tags: "HR"
+  allowed_tags: "I"
+  allowed_tags: "INS"
+  allowed_tags: "KBD"
+  allowed_tags: "LI"
+  allowed_tags: "MAIN"
+  allowed_tags: "MARK"
+  allowed_tags: "NAV"
+  allowed_tags: "NOSCRIPT"
+  allowed_tags: "OL"
+  allowed_tags: "P"
+  allowed_tags: "PRE"
+  allowed_tags: "Q"
+  allowed_tags: "RP"
+  allowed_tags: "RT"
+  allowed_tags: "RTC"
+  allowed_tags: "RUBY"
+  allowed_tags: "S"
+  allowed_tags: "SAMP"
+  allowed_tags: "SECTION"
+  allowed_tags: "SMALL"
+  allowed_tags: "SPAN"
+  allowed_tags: "STRONG"
+  allowed_tags: "SUB"
+  allowed_tags: "SUP"
+  allowed_tags: "TIME"
+  allowed_tags: "TR"
+  allowed_tags: "U"
+  allowed_tags: "UL"
+  allowed_tags: "VAR"
+  allowed_tags: "WBR"
+}
+descendant_tag_list: {
+  name: "amp-story-grid-layer-allowed-descendants"
+  allowed_tags: "ABBR"
+  allowed_tags: "ADDRESS"
+  allowed_tags: "AMP-ANALYTICS"
+  allowed_tags: "AMP-AUDIO"
+  allowed_tags: "AMP-EXPERIMENT"
+  allowed_tags: "AMP-FIT-TEXT"
+  allowed_tags: "AMP-FONT"
+  allowed_tags: "AMP-GFYCAT"
+  allowed_tags: "AMP-GIST"
+  allowed_tags: "AMP-GOOGLE-VRVIEW-IMAGE"
+  allowed_tags: "AMP-IMG"
+  allowed_tags: "AMP-INSTALL-SERVICEWORKER"
+  allowed_tags: "AMP-LIST"
+  allowed_tags: "AMP-LIVE-LIST"
+  allowed_tags: "AMP-PIXEL"
+  allowed_tags: "AMP-VIDEO"
+  allowed_tags: "ARTICLE"
+  allowed_tags: "ASIDE"
+  allowed_tags: "B"
+  allowed_tags: "BDI"
+  allowed_tags: "BDO"
+  allowed_tags: "BLOCKQUOTE"
+  allowed_tags: "BR"
+  allowed_tags: "CAPTION"
+  allowed_tags: "CITE"
+  allowed_tags: "CODE"
+  allowed_tags: "COL"
+  allowed_tags: "COLGROUP"
+  allowed_tags: "DATA"
+  allowed_tags: "DD"
+  allowed_tags: "DEL"
+  allowed_tags: "DFN"
+  allowed_tags: "DIV"
+  allowed_tags: "DL"
+  allowed_tags: "DT"
+  allowed_tags: "EM"
+  allowed_tags: "FIGCAPTION"
+  allowed_tags: "FIGURE"
+  allowed_tags: "FOOTER"
+  allowed_tags: "H1"
+  allowed_tags: "H2"
+  allowed_tags: "H3"
+  allowed_tags: "H4"
+  allowed_tags: "H5"
+  allowed_tags: "H6"
+  allowed_tags: "HEADER"
+  allowed_tags: "HGROUP"
+  allowed_tags: "HR"
+  allowed_tags: "I"
+  allowed_tags: "INS"
+  allowed_tags: "KBD"
+  allowed_tags: "LI"
+  allowed_tags: "MAIN"
+  allowed_tags: "MARK"
+  allowed_tags: "NAV"
+  allowed_tags: "NOSCRIPT"
+  allowed_tags: "OL"
+  allowed_tags: "P"
+  allowed_tags: "PRE"
+  allowed_tags: "Q"
+  allowed_tags: "RP"
+  allowed_tags: "RT"
+  allowed_tags: "RTC"
+  allowed_tags: "RUBY"
+  allowed_tags: "S"
+  allowed_tags: "SAMP"
+  allowed_tags: "SECTION"
+  allowed_tags: "SMALL"
+  allowed_tags: "SOURCE"
+  allowed_tags: "SPAN"
+  allowed_tags: "STRONG"
+  allowed_tags: "SUB"
+  allowed_tags: "SUP"
+  allowed_tags: "TABLE"
+  allowed_tags: "TBODY"
+  allowed_tags: "TD"
+  allowed_tags: "TFOOT"
+  allowed_tags: "TH"
+  allowed_tags: "THEAD"
+  allowed_tags: "TIME"
+  allowed_tags: "TR"
+  allowed_tags: "TRACK"
+  allowed_tags: "U"
+  allowed_tags: "UL"
+  allowed_tags: "VAR"
+  allowed_tags: "WBR"
+}

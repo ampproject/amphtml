@@ -62,23 +62,44 @@ export function isObject(value) {
 }
 
 /**
- * Determines if value is of FormData type.
+ * Determines if value is of number type and finite.
+ * NaN and Infinity are not considered a finite number.
+ * String numbers are not considered numbers.
  * @param {*} value
  * @return {boolean}
  */
-export function isFormData(value) {
-  return toString(value) === '[object FormData]';
+export function isFiniteNumber(value) {
+  return (typeof value === 'number' && isFinite(value));
 }
 
 /**
- * Determines if value is actually a `ShadowRoot` node.
- * @param {*} value
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
  * @return {boolean}
+ * @template T
  */
-export function isShadowRoot(value) {
-  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
-  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  return (!!value &&
-      value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
-      toString(value) === '[object ShadowRoot]');
+export function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
 }
+
+/**
+ * Externs declare that access `defaultView` from `document` or
+ * `ownerDocument` is of type `(Window|null)` but most of our parameter types
+ * assume that it is never null. This is OK in practice as we ever only get
+ * null on disconnected documents or old IE.
+ * This helper function casts it into just a simple Window return type.
+ *
+ * @param {!Window|null} winOrNull
+ * @return {!Window}
+ */
+export function toWin(winOrNull) {
+  return /** @type {!Window} */ (winOrNull);
+}
+

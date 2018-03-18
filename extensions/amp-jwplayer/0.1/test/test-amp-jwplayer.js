@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-jwplayer';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-jwplayer', () => {
+describes.realWin('amp-jwplayer', {
+  amp: {
+    extensions: ['amp-jwplayer'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getjwplayer(attributes) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const jw = iframe.doc.createElement('amp-jwplayer');
-      for (const key in attributes) {
-        jw.setAttribute(key, attributes[key]);
-      }
-      jw.setAttribute('width', '320');
-      jw.setAttribute('height', '180');
-      jw.setAttribute('layout', 'responsive');
-      iframe.doc.body.appendChild(jw);
-      jw.implementation_.layoutCallback();
-      return jw;
-    });
+    const jw = doc.createElement('amp-jwplayer');
+    for (const key in attributes) {
+      jw.setAttribute(key, attributes[key]);
+    }
+    jw.setAttribute('width', '320');
+    jw.setAttribute('height', '180');
+    jw.setAttribute('layout', 'responsive');
+    doc.body.appendChild(jw);
+    return jw.build().then(() => jw.layoutCallback()).then(() => jw);
   }
 
   it('renders', () => {
@@ -51,8 +51,7 @@ describe('amp-jwplayer', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.getAttribute('width')).to.equal('320');
-      expect(iframe.getAttribute('height')).to.equal('180');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
@@ -69,14 +68,11 @@ describe('amp-jwplayer', () => {
     });
   });
 
-  // These tests fail if the corresponding errors occur in buildCallback instead of
-  // layoutCallback.  Commenting them out for now.
-  /*
   it('fails if no media is specified', () => {
     return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be/
+        /Either the data-media-id or the data-playlist-id attributes must be/
     );
   });
 
@@ -84,10 +80,9 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-media-id': 'Wferorsv',
     }).should.eventually.be.rejectedWith(
-      /The data-player-id attribute is required for/
+        /The data-player-id attribute is required for/
     );
   });
-  */
 
   it('renders with a bad playlist', () => {
     return getjwplayer({
@@ -102,4 +97,30 @@ describe('amp-jwplayer', () => {
     });
   });
 
+  describe('createPlaceholderCallback', () => {
+    it('should create a placeholder image', () => {
+      return getjwplayer({
+        'data-media-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('src')).to.equal(
+            'https://content.jwplatform.com/thumbs/Wferorsv-720.jpg');
+        expect(img.getAttribute('layout')).to.equal('fill');
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      });
+    });
+
+    it('should not create a placeholder for playlists', () => {
+      return getjwplayer({
+        'data-playlist-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.be.null;
+      });
+    });
+  });
 });

@@ -18,13 +18,14 @@
       height: 10px;
     }
   </style>
-  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 </head>
 <body>
-
+<p>Scroll down to see content</p>
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -33,16 +34,18 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 {
   "transport": {"beacon": false, "xhrpost": false},
   "requests": {
-    "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
-    "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
-    "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}"
+    "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+    "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+    "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
+    "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${firstVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
+    "timer": "${base}&backgroundState=${backgroundState}&timerStart=${timerStart}&duration=${timerDuration}",
+    "video": "${base}&type=${type}&currentTime=${currentTime}&f=${fullscreen}&a=${autoplay}"
   },
   "vars": {
     "title": "Example Request"
   },
   "extraUrlParams": {
-    "param1": "Interesting value",
+    "param1": "${random}",
     "platform": "AMP"
   },
   "extraUrlParamsReplaceMap": {
@@ -51,24 +54,47 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "triggers": {
     "defaultPageview": {
       "on": "visible",
-      "request": "pageview",
+      "request": "base",
       "vars": {
-        "eventName": "page-loaded",
-        "eventId": "42"
+        "type": "pageLoad"
       },
       "extraUrlParams": {
         "param1": "Another value"
       }
     },
+    "pageview": {
+      "on": "visible",
+      "request": "base",
+      "vars": {
+        "type": "${random}${title}"
+      }
+    },
     "visibility": {
       "on": "visible",
+      "request": "visibility",
+      "selector": "#anim-id",
+      "visibilitySpec": {
+        "visiblePercentageMin": 20,
+        "visiblePercentageMax": 80,
+        "totalTimeMin": 5000,
+        "continuousTimeMin": 2000,
+        "waitFor": "ini-load"
+      },
+      "vars": {
+        "type": "visibility"
+      }
+    },
+    "hidden": {
+      "on": "hidden",
       "request": "visibility",
       "visibilitySpec": {
         "selector": "#anim-id",
         "visiblePercentageMin": 20,
-        "visiblePercentageMax": 80,
-        "totalTimeMin": 5000,
-        "continuousTimeMin": 2000
+        "visiblePercentageMin": 1000,
+        "continuousTimeMax": 5000
+      },
+      "vars": {
+        "type": "hidden"
       }
     },
     "scrollPings": {
@@ -79,547 +105,86 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "horizontalBoundaries": [100]
       },
       "vars": {
-        "eventName": "scroll"
-      }
-    }
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- AT Internet tracking -->
-<amp-analytics type="atinternet">
-<script type="application/json">
-  {
-    "vars": {
-      "site": "123456",
-      "log": "logs",
-      "domain": ".xiti.com",
-      "title": "pageChapter::pageTitle",
-      "level2": "10"
-    },
-    "triggers": {
-      "defaultPageview": {
-        "on": "visible",
-        "request": "pageview"
-      },
-      "links": {
-        "on": "click",
-        "selector": "#test1",
-        "request": "click",
-        "vars": {
-          "label": "clickChapter::clickLabel",
-          "level2Click": "12",
-          "type": "a"
-        }
-      }
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End AT Internet tracking -->
-
-<!-- Burt tracking -->
-<amp-analytics type="burt">
-  <script type="application/json">
-    {
-      "vars": {
-        "trackingKey": "B31VT4QH1BFR",
-        "category": "sports",
-        "subCategory": "golf"
-      }
-    }
-  </script>
-</amp-analytics>
-<!-- End Burt example -->
-
-<!-- Chartbeat tracking -->
-<amp-analytics type="chartbeat">
-<script type="application/json">
-{
-  "vars": {
-    "uid": "12345",
-    "domain": "my-site.com",
-    "sections": "section 1, section 2"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Chartbeat example -->
-
-<!-- Clicky tracking -->
-<amp-analytics type="clicky">
-<script type="application/json">
-{
-  "vars": {
-    "site_id": "12345"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Clicky example -->
-
-<!-- ColAnalytics pageview tracking -->
-<amp-analytics type="colanalytics">
-<script type="application/json">
-{
-  "vars": {
-    "id": "100000"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End ColAnalytics example -->
-
-<!-- comScore UDM pageview tracking -->
-<amp-analytics type="comscore">
-<script type="application/json">
-{
-  "vars": {
-    "c2": "1000001"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End comScore example -->
-
-<!-- Cxense tracking -->
-<amp-analytics type="cxense">
-<script type="application/json">
-{
-  "vars": {
-    "siteId": "1234567890"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Cxense example -->
-
-<amp-analytics type="googleanalytics" id="googleanalytics">
-<script type="application/json">
-{
-  "extraUrlParams" : {
-    "dimension5": "AMP",
-    "metric17": "10"
-  },
-  "vars": {
-    "account": "UA-YYYY-Y"
-  },
-  "triggers": {
-    "defaultPageview": {
-      "on": "visible",
-      "request": "pageview",
-      "vars": {
-        "title": "Example Pageview"
+        "type": "scroll"
       }
     },
-    "clickOnTest1Trigger": {
+    "clickPings": {
       "on": "click",
-      "selector": "#test1",
-      "request": "event",
+      "selector": "${img}",
+      "request": ["endpoint", "base"],
       "vars": {
-        "eventCategory": "examples",
-        "eventAction": "clicked-test1"
+        "type": "click",
+        "img": "#anim-id, #container"
       }
     },
-    "clickOnTopTrigger": {
-      "on": "click",
-      "selector": "#top",
-      "request": "event",
-      "vars": {
-        "eventCategory": "examples",
-        "eventAction": "clicked-header"
-      }
-    }
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
-<amp-analytics type="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
-<script type="application/json">
-{
-  "vars": {
-    "section": "amp",
-    "subsection": "examples"
-  },
-  "extraUrlParams": {
-    "user.status": "developer",
-    "page.keywords": "amp, mobile, examples"
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- Lotame tracking.
-  Please replace the value for "account" (12345)
-  with the correct Lotame Client ID.
-  The extraUrlParams are provided as an example,
-  the correct values are case-specific.
--->
-<amp-analytics type="lotame">
-<script type="application/json">
-{
-  "vars": {
-    "account": 12345
-  },
-  "extraUrlParams": {
-    "int": "sports",
-    "gen": "m"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Lotame example -->
-
-<!-- Mediametrie tracking
-  serial is the account id (required)
-  level1 to 4 are page levels (optional)
--->
-<amp-analytics type="mediametrie">
-<script type="application/json">
-  {
-    "vars": {
-      "serial": "241041208720",
-      "level1": "level1-test-amp",
-      "level2": "level2-test-amp",
-      "level3": "level3",
-      "level4": "level4"
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End Mediametrie example -->
-
-
-<!-- mParticle tracking
-  Ensure you replace AppKey with your Application key
--->
-<amp-analytics type="mparticle" id="mparticle">
-<script type="application/json">
-  {
-    "vars": {
-      "apiKey": "AppKey"
-    },
-    "triggers": {
-      "trackPageview": {
-        "on": "visible",
-        "request": "pageview"
-      },
-      "trackPageviewWithCustomTitleAndUrl": {
-        "on": "visible",
-        "request": "pageview",
-        "vars": {
-          "title": "Custom Title",
-          "ampdocUrl" : "http://www.example.com"
-        }
-      },
-      "trackAppEvent": {
-        "on": "click",
-        "selector": "#test1",
-        "request": "event",
-        "vars": {
-          "eventName": "AMP Test 1 button clicked",
-          "eventType": "Unknown",
-          "eventAttributes_Keys": ["test key1","test key2"],
-          "eventAttributes_Values": ["test value1","test value2"],
-          "userAttributes_Keys": ["test user attr key1","test user attr key2"],
-          "userAttributes_Values": ["test user attr value1","test user attr value2"],
-          "userIdentities_Types" : ["facebook", "twitter"],
-          "userIdentities_Values" : ["example@facebook.com", "@example"],
-          "debug": "true",
-          "location": [26.4619396, -80.0691996],
-          "customFlags_Keys": ["custom flag1", "custom flag2"],
-          "customFlags_Values": ["[100, 200]", "[test val1, test val2]"],
-          "appVersion": "1.0"
-        }
-      }
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End mParticle example -->
-
-<!-- OEWA example -->
-<amp-analytics type="oewa">
-<script type="application/json">
-{
-  "vars": {
-    "s": "offer",
-    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
-  },
-  "requests": {
-    "url": "https://subdomain.domain.example/amp-analytics-oewa.html"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End OEWA example -->
-
-<!-- OEWADIRECT example -->
-<amp-analytics type="oewadirect">
-<script type="application/json">
-{
-  "vars": {
-    "s": "offer",
-    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End OEWADIRECT example -->
-
-<!-- Parsely tracking -->
-<amp-analytics type="parsely">
-<script type="application/json">
-{
-  "vars": {
-    "apikey": "example.com"
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- Start Piano example -->
-<amp-analytics type="piano">
-<script type="application/json">
-{
-  "vars": {
-    "aid": "AIDAIDAID",
-    "contentCreated": "2015-02-16T05:00:00",
-    "contentSection": "Sports",
-    "contentAuthor": "John Higgins",
-    "tags": ["sports"]
-  },
-  "triggers": {
-    "defaultPageview": {
-      "on": "visible",
-      "request": "pageview"
-    }
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Piano example -->
-
-<!-- Quantcast tracking -->
-<amp-analytics type="quantcast">
-<script type="application/json">
-{
-  "vars": {
-    "pcode": "p-1234567890abc",
-    "labels": ["Example.label.1", "Example.label.2"]
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Quantcast example -->
-
-<amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
-
-<amp-analytics id="analytics4">
-<script type="application/json">
-{
-  "requests": {
-    "test-ping": "https://example.com/ping?title=${title}&acct=${account}"
-  },
-  "vars": {
-    "title": "A page that sends a ping",
-    "account": "12345"
-  },
-  "triggers": {
     "timer": {
       "on": "timer",
       "timerSpec": {
         "interval": 5,
-        "max-timer-length": 300
+        "maxTimerLength": 20
       },
-      "request": "test-ping"
-    }
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- comScore UDM pageview tracking -->
-<amp-analytics type="comscore">
-<script type="application/json">
-{
-  "vars": {
-    "c2": "1000001"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End comScore example -->
-
-<!--
-  INFOnline example
-
-  Important: url needs to point to a copy of
-  amp-analytics-infonline.html on a different subdomain
-  than your AMP files.
--->
-<amp-analytics type="infonline" id="infonline">
-<script type="application/json">
-{
-  "vars": {
-    "st":  "angebotskennung",
-    "co":  "comment",
-    "cp":  "code"
-  },
-  "requests": {
-    "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline.html"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End INFOnline example -->
-
-<!-- SimpleReach Tracking -->
-<amp-analytics type="simplereach">
-<script type="application/json">
-  {
-    "vars": {
-      "pid": "000000000000000000000000",
-      "title": "a title",
-      "authors": ["john smith", "jane doe", "last name, first name"],
-      "categories": ["sports", "football"],
-      "tags": ["big-game", "nfl"],
-      "published_at": "2015-01-01 00:00:00"
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End SimpleReach Example -->
-
-<!-- Segment analytics tracking -->
-<amp-analytics type="segment">
-<script type="application/json">
-{
-  "vars": {
-    "writeKey": "p74lml96co",
-    "name": "Page name"
-  },
-  "extraUrlParams": {
-    "properties.author.name": "John"
-  },
-  "triggers": {
-    "click": {
-      "on": "click",
-      "selector": "#test1",
-      "request": "track",
+      "request": "timer",
       "vars": {
-        "event": "click"
-      }
-    }
-  }
-}
-</script>
-</amp-analytics>
-
-<!-- Snowplow Analytics tracking -->
-<amp-analytics type="snowplow" id="snowplow">
-<script type="application/json">
-{
-  "vars": {
-    "collectorHost": "d3rkrsqld9gmqf.cloudfront.net",
-    "appId": "amp-examples"
-  },
-  "triggers": {
-    "defaultPageview": {
-      "on": "visible",
-      "request": "pageView"
-    },
-    "clickOnTest1Trigger": {
-      "on": "click",
-      "selector": "#test1",
-      "request": "structEvent",
-      "vars": {
-        "structEventCategory": "examples",
-        "structEventAction": "clicked-test1"
+        "type": "timer"
       }
     },
-    "clickOnTopTrigger": {
-      "on": "click",
-      "selector": "#top",
-      "request": "structEvent",
+    "videoPlays": {
+      "on": "video-play",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": true
+      },
+      "request": "video",
       "vars": {
-        "structEventCategory": "examples",
-        "structEventAction": "clicked-header"
+        "type": "video-play"
       }
-    }
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Snowplow Analytics example -->
-
-<!-- Webtrekk tracking -->
-<amp-analytics type="webtrekk">
-<script type="application/json">
-  {
-    "vars": {
-      "trackDomain": "q3.webtrekk.net",
-      "trackId": "111111111111111",
-      "contentId": "en.example"
     },
-    "triggers": {
-      "trackPageview": {
-        "on": "visible",
-        "request": "pageview"
-      }
-    }
-  }
-</script>
-</amp-analytics>
-<!-- End Webtrekk example -->
-
-<!-- SOASTA mPulse example -->
-<amp-analytics type="mpulse" config="https://c.go-mpulse.net/api/amp-config.json?d=SOURCE_HOST&key=XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
-<script type="application/json">
-{
-  "extraUrlParams": {
-    "ab_test": "a",
-    "page_group": "Home",
-    "custom_metric.Cache_Hits": 15,
-    "custom_metric.Cache_Misses": "0",
-    "custom_metric.SQL_Queries": 2,
-    "custom_dimension.Market_Vertical": "Sports",
-    "custom_dimension.Page_Language": "English"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End SOASTA mPulse example -->
-
-<!-- Adobe Analytics example -->
-<!--
-For complete documentation and additional examples please see: https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html
--->
-<amp-analytics type=adobeanalytics>
-+<!-- adobeanalytics type -->
-<script type="application/json">
-{
-  "requests": {
-    "myClick": "${click}&v1=${eVar1}"
-  },
-  "vars": {
-    "host": "metrics.example.com",
-    "reportSuites": "reportSuiteID"
-  },
-  "triggers": {
-    "pageLoad": {
-      "on": "visible",
-      "request": "pageview"
-    },
-    "click": {
-      "on": "click",
-      "selector": "#test1",
-      "request": "myClick",
+    "videoPauses": {
+      "on": "video-pause",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": false
+      },
+      "request": "video",
       "vars": {
-        "eVar1": "button clicked"
+        "type": "video-pause"
+      }
+    },
+    "videoSession": {
+      "on": "video-session",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-session"
+      }
+    },
+    "videoSecondsPlayed": {
+      "on": "video-seconds-played",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": false,
+        "exclude-autoplay": false,
+        "interval": 3
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-seconds-played"
+      }
+    },
+    "videoEnded": {
+      "on": "video-ended",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-ended"
       }
     }
   }
@@ -627,44 +192,11 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 
-<!-- adobeanalytics_nativeConfig type -->
-<amp-analytics type="adobeanalytics_nativeConfig">
-<script type="application/json">
-{
-  "requests": {
-    "base": "https://${host}",
-    "iframeMessage": "${base}/stats.html?campaign=${queryParam(campaign)}&pageURL=${ampdocUrl}"
-  },
-  "vars": {
-    "host": "example.publishersite.com"
-  },
-  "extraUrlParams": {
-    "pageName": "Adobe Analytics using amp-analytics adobeanalytics_nativeConfig",
-    "v1": "eVar1 test value"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Adobe Analytics example -->
-
-<!-- Linkpulse example - please replace id with your Linkpulse id -->
-<amp-analytics type="linkpulse">
-<script type="application/json">
-{
-  "vars": {
-    "id": "aabbcceedd00000000000000"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End Linkpulse example -->
-
-</div>
+<amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
-
-<span id="test1" class="box">
+<span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
 <p>
@@ -679,33 +211,50 @@ Nam posuere velit euismod risus pulvinar, in sollicitudin sapien consectetur. Ve
 <p>
 Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor mollis finibus, tortor elit elementum dolor, vel vulputate lorem dui id ante. Vivamus in velit at lectus blandit gravida vitae quis arcu. Nam et magna magna. Fusce condimentum diam lacus, ac ullamcorper purus malesuada eu. Mauris ullamcorper elit et venenatis faucibus. Nullam lobortis molestie purus quis pellentesque. Sed at libero id nisi rhoncus tincidunt. Praesent vestibulum vehicula tristique. Etiam rutrum, nunc id porta interdum, nulla nisi molestie leo, at fermentum justo dolor at lorem. Duis in egestas sapien.
 </p>
+<amp-video
+    id="myVideo"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    width="358"
+    height="204"
+    layout="responsive"
+    controls
+    autoplay
+  >
+  <div placeholder>
+    This is a placeholder
+  </div>
+  <div fallback>
+    This is a fallback
+  </div>
+</amp-video>
+<button on="tap:myVideo.pause">Pause</button>
 <p>
 Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctus tincidunt lacus, vitae lobortis nisi malesuada ac. Aliquam mattis leo vel elit rutrum, nec consequat massa vestibulum. Maecenas bibendum metus nec ante feugiat, eu faucibus orci mattis. Cras tristique sem non elit congue malesuada. Proin ornare, lacus et porttitor consequat, sapien urna rutrum diam, ac pellentesque ligula est eget nisi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec ultrices sollicitudin eros a placerat. Proin eget pulvinar est. Donec posuere ultrices odio at ultrices. Suspendisse potenti. Phasellus id orci id purus porttitor consectetur a at erat. Nullam volutpat ultricies nisl id maximus. Morbi porta ex ante, et egestas odio ultricies consequat.
 </p>
 <p>
-</p><ul>
+<ul>
 <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
 <li>Aliquam in ex porta, imperdiet elit sit amet, condimentum diam.</li>
 <li>Etiam fermentum nisi at porta pulvinar.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Proin mattis neque vel elit posuere molestie.</li>
 <li>Integer tincidunt sem sed nunc auctor elementum.</li>
 <li>Integer a felis in ipsum aliquet auctor sit amet a neque.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Sed suscipit dolor molestie, rhoncus quam ac, lacinia ex.</li>
 <li>Curabitur et tellus vel justo ultrices aliquet sed id turpis.</li>
 <li>Nam finibus risus at justo elementum bibendum.</li>
 <li>In non lacus non urna congue feugiat at vel diam.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Integer hendrerit augue interdum dui venenatis, sit amet tristique mauris cursus.</li>
 <li>Etiam quis eros viverra, tincidunt justo in, facilisis nunc.</li>
 <li>Aliquam at lacus faucibus, congue lorem interdum, semper mauris.</li>
@@ -713,15 +262,47 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Morbi id augue id orci sagittis tempus.</li>
 <li>Vestibulum varius libero ac dignissim sodales.</li>
 </ul>
-<p></p>
+</p>
 <p>
-</p><ul>
+<ul>
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
-<p></p>
-    <amp-anim src="https://goo.gl/FBCKQO" id="anim-id"
-        width="400" height="225" layout="responsive">
-      <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
-    </amp-anim>
+</p>
+<amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
+  <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
+  <amp-analytics id="nestedAnalytics">
+    <script type="application/json">
+    {
+      "transport": {"beacon": false, "xhrpost": false},
+      "requests": {
+        "visibility": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?${type}&RANDOM"
+      },
+      "triggers": {
+        "visibilityScope": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-img",
+            "selectionMethod": "scope",
+            "visiblePercentageMin": 10
+          },
+          "vars": { "type": "scope" }
+        },
+        "visibilityClosest": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-anim",
+            "selectionMethod": "closest",
+            "visiblePercentageMin": 20
+          },
+          "vars": { "type": "closest" }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+</amp-anim>
+</div>
 </body>
 </html>

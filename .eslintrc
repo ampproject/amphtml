@@ -1,16 +1,19 @@
 {
   "parser": "babel-eslint",
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": false,
-    "spread": false
-  },
+  "plugins": [
+    "chai-expect",
+    "eslint-plugin-amphtml-internal",
+    "eslint-plugin-google-camelcase",
+    "sort-imports-es6-autofix",
+    "sort-requires"
+  ],
   "env": {
     "es6": true,
     "browser": true
+  },
+ "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
   },
   "globals": {
     "it": false,
@@ -25,31 +28,50 @@
     "assert": false,
     "sinon": true,
     "sandbox": true,
-    "context": false
+    "context": false,
+    "global": false,
+    "describes": true
   },
   "rules": {
+    "amphtml-internal/closure-type-primitives": 2,
+    "amphtml-internal/dict-string-keys": 2,
+    "amphtml-internal/enforce-private-props": 2,
+    "amphtml-internal/no-array-destructuring": 2,
+    "amphtml-internal/no-es2015-number-props": 2,
+    "amphtml-internal/no-export-side-effect": 2,
+    "amphtml-internal/no-for-of-statement": 2,
+    "amphtml-internal/no-global": 0,
+    "amphtml-internal/no-spread": 2,
+    "amphtml-internal/query-selector": 2,
+    "amphtml-internal/todo-format": 0,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "chai-expect/missing-assertion": 2,
+    "chai-expect/no-inner-compare": 2,
+    "chai-expect/terminating-properties": 2,
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dot-location": [2, "property"],
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
-    "indent": [2, 2, { "SwitchCase": 1 }],
+    "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": ""
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$"
     }],
     "no-alert": 2,
+    "no-cond-assign": 2,
     "no-debugger": 2,
     "no-div-regex": 2,
+    "no-dupe-keys": 2,
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
+    "no-extra-semi": 2,
     "no-implicit-coercion": [2, { "boolean": false }],
     "no-implied-eval": 2,
     "no-iterator": 2,
@@ -77,19 +99,23 @@
       "objectsInObjects": false,
       "arraysInObjects": false
     }],
-    "object-shorthand": [2, "properties"],
+    "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "semi": 2,
-    "space-after-keywords": 2,
+    "keyword-spacing": [2, { "before": true, "after": true }],
+    "sort-imports-es6-autofix/sort-imports-es6": [2, {
+      "ignoreCase": false,
+      "ignoreMemberSort": false,
+      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    }],
+    "sort-requires/sort-requires": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
-    "space-before-keywords": 2,
     "space-in-parens": 2,
     "space-infix-ops": 2,
     "space-unary-ops": [1, { "words": true, "nonwords": false }],
-    "space-return-throw-case": 2,
     "wrap-iife": [2, "any"]
   }
 }

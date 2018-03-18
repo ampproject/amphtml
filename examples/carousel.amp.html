@@ -22,11 +22,12 @@
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-carousel width=400 height=300 layout=responsive type=slides controls>
+  <amp-carousel width=400 height=300 layout=responsive type=slides>
 
     <div>hello world</div>
 
@@ -58,7 +59,7 @@
         </amp-img>
     </amp-anim>
 
-    <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3">
+    <amp-audio src="/examples/av/audio.mp3">
     </amp-audio>
 
     <amp-brightcove
@@ -88,7 +89,7 @@
     </amp-vine>
 
     <amp-video
-        src="video/The-Audience-Is-Programming.mp4"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
         width="358"
         height="204"
         layout="responsive"
@@ -97,7 +98,7 @@
 
   </amp-carousel>
 
-  <amp-carousel width=auto height=300 controls>
+  <amp-carousel width=auto height=300 data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide" controls>
 
     <div>hello world</div>
 
@@ -129,7 +130,7 @@
         </amp-img>
     </amp-anim>
 
-    <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3">
+    <amp-audio src="/examples/av/audio.mp3">
     </amp-audio>
 
     <amp-brightcove
@@ -158,7 +159,7 @@
     </amp-vine>
 
     <amp-video
-        src="video/The-Audience-Is-Programming.mp4"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
         width="300"
         height="300"
         controls>

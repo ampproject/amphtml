@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, checkData} from '../3p/3p';
-import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getSourceUrl} from '../src/url';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /* global rubicontag: false */
 
@@ -25,7 +25,8 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function rubicon(global, data) {
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
@@ -65,7 +66,7 @@ function fastLane(global, data) {
         }
       }
     }
-  };
+  }
 
   let gptran = false;
   function gptrun() {
@@ -81,32 +82,31 @@ function fastLane(global, data) {
         ASTargeting = ASTargeting[i].values;
       }
     }
-    if (!data.targeting) { data.targeting = {}; };
+    if (!data.targeting) { data.targeting = {}; }
     data.targeting['rpfl_' + data.account] = ASTargeting;
     data.targeting['rpfl_elemid'] = 'c';
 
-    if (data['method']) { delete data['method']; };
-    if (data['account']) { delete data['account']; };
-    if (data['pos']) { delete data['pos']; };
-    if (data['kw']) { delete data['kw']; };
-    if (data['visitor']) { delete data['visitor']; };
-    if (data['inventory']) { delete data['inventory']; };
+    if (data['method']) { delete data['method']; }
+    if (data['account']) { delete data['account']; }
+    if (data['pos']) { delete data['pos']; }
+    if (data['kw']) { delete data['kw']; }
+    if (data['visitor']) { delete data['visitor']; }
+    if (data['inventory']) { delete data['inventory']; }
     doubleclick(global, data);
-  };
+  }
 
   loadScript(global, 'https://ads.rubiconproject.com/header/' + encodeURIComponent(data.account) + '.js', () => {
     global.rubicontag.cmd.push(() => {
       const rubicontag = global.rubicontag;
       const slot = rubicontag.defineSlot(data.slot, dimensions, 'c');
 
-      if (data.pos) { slot.setPosition(data.pos); };
-      if (data.kw) { rubicontag.addKW(data.kw); };
-      if (data.visitor) { setFPD('V', data.visitor); };
-      if (data.inventory) { setFPD('I', data.inventory); };
+      if (data.pos) { slot.setPosition(data.pos); }
+      if (data.kw) { rubicontag.addKW(data.kw); }
+      if (data.visitor) { setFPD('V', data.visitor); }
+      if (data.inventory) { setFPD('I', data.inventory); }
       rubicontag.setUrl(getSourceUrl(context.location.href));
       rubicontag.setIntegration('amp');
       rubicontag.run(gptrun, 1000);
-
     });
   });
 }
@@ -129,6 +129,6 @@ function smartTag(global, data) {
   global.rp_amp = 'st';
   global.rp_callback = data.callback;
   /* eslint-enable */
-  writeScript(global, 'https://ads.rubiconproject.com/ad/' + encodeURIComponent(data.account) + '.js');
+  writeScript(global, 'https://ads.rubiconproject.com/ad/'
+      + encodeURIComponent(data.account) + '.js');
 }
-

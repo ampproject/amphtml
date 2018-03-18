@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {createFixtureIframe} from '../../testing/iframe';
 
 // Checks if an amp element gets upgraded.
 function checkElementUpgrade(element) {
-  expect(element).to.have.class('-amp-element');
-  expect(element).to.have.class('-amp-layout-responsive');
-  expect(element).to.have.class('-amp-layout-size-defined');
-  expect(element).to.not.have.class('-amp-notbuilt');
+  expect(element).to.have.class('i-amphtml-element');
+  expect(element).to.have.class('i-amphtml-layout-responsive');
+  expect(element).to.have.class('i-amphtml-layout-size-defined');
   expect(element).to.not.have.class('amp-notbuilt');
+  expect(element).to.not.have.class('i-amphtml-notbuilt');
   expect(element).to.not.have.class('amp-unresolved');
-  expect(element).to.not.have.class('-amp-unresolved');
+  expect(element).to.not.have.class('i-amphtml-unresolved');
 }
 
 /**
@@ -40,21 +41,23 @@ function testLoadOrderFixture(fixtureName, testElements) {
       expect(fixture.doc.querySelectorAll(testElements[i]))
           .to.have.length(1);
     }
-    return fixture.awaitEvent('amp:load:start', 1);
+    return fixture.awaitEvent(AmpEvents.LOAD_START, testElements.length);
   }).then(() => {
     for (let i = 0; i < testElements.length; i++) {
       const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
       checkElementUpgrade(testElement);
       if (testElement.tagName == 'AMP-FIT-TEXT') {
-        expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-          .to.have.length(1);
+        expect(fixture.doc.getElementsByClassName('i-amphtml-fit-text-content'))
+            .to.have.length(1);
       }
     }
   });
 }
 
 const t = describe.configure().retryOnSaucelabs();
-t.run('test extensions loading in multiple orders', () => {
+t.run('test extensions loading in multiple orders', function() {
+  this.timeout(15000);
+
   it('one extension, extension loads first, all scripts in header', () => {
     return testLoadOrderFixture(
         'test/fixtures/script-load-extension-head-v0-head.html',
@@ -85,7 +88,9 @@ t.run('test extensions loading in multiple orders', () => {
         ['amp-fit-text']);
   });
 
-  it('two extensions, one of extension scripts and v0 in header', () => {
+  // TODO(choumx); This test times out when run with the prod AMP config.
+  // See #11588.
+  it.skip('two extensions, one of extension scripts and v0 in header', () => {
     return testLoadOrderFixture('test/fixtures/script-load-extensions.html',
         ['amp-fit-text', 'amp-iframe']);
   });

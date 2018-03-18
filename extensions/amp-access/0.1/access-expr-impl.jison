@@ -21,7 +21,7 @@
 "!="                      return 'NEQ'
 "=="                      return 'DEQ'
 "="                       return 'EQ'
-[0-9]+("."[0-9]+)?\b      return 'NUMERIC'
+\-?[0-9]+("."[0-9]+)?\b   return 'NUMERIC'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'

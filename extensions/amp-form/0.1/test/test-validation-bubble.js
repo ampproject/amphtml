@@ -14,60 +14,50 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {ValidationBubble} from '../validation-bubble';
-import {createIframePromise} from '../../../../testing/iframe';
 
-describe('validation-bubble', () => {
-
-  let sandbox;
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
+describes.realWin('validation-bubble', {amp: true}, env => {
   it('should append a dom element to the document', () => {
-    return createIframePromise().then(iframe => {
-      new ValidationBubble(iframe.win);
-      expect(iframe.doc.querySelector('.-amp-validation-bubble'))
-          .to.not.be.null;
-    });
+    const ampdoc = env.ampdoc;
+    const document = ampdoc.getRootNode();
+
+    new ValidationBubble(ampdoc);
+    expect(document.querySelector('.i-amphtml-validation-bubble'))
+        .to.not.be.null;
   });
 
   it('should show and hide bubble', () => {
-    return createIframePromise().then(iframe => {
-      const targetEl = iframe.doc.createElement('div');
-      targetEl.textContent = 'I am the target!';
-      targetEl.style.position = 'absolute';
-      targetEl.style.top = '300px';
-      targetEl.style.left = '400px';
-      targetEl.style.width = '200px';
-      iframe.doc.body.appendChild(targetEl);
+    const ampdoc = env.ampdoc;
+    const document = ampdoc.getRootNode();
 
-      const bubble = new ValidationBubble(iframe.win);
-      bubble.vsync_ = {
-        run: (task, state) => {
-          if (task.measure) {
-            task.measure(state);
-          }
-          if (task.mutate) {
-            task.mutate(state);
-          }
-        },
-      };
-      const bubbleEl = iframe.doc.querySelector('.-amp-validation-bubble');
-      bubble.show(targetEl, 'Hello World');
-      expect(bubbleEl).to.not.be.null;
-      expect(bubbleEl.textContent).to.equal('Hello World');
-      expect(bubbleEl.style.display).to.equal('');
-      expect(bubbleEl.style.top).to.equal('290px');
-      expect(bubbleEl.style.left).to.equal('500px');
+    const targetEl = document.createElement('div');
+    targetEl.textContent = 'I am the target!';
+    targetEl.style.position = 'absolute';
+    targetEl.style.top = '300px';
+    targetEl.style.left = '400px';
+    targetEl.style.width = '200px';
+    document.body.appendChild(targetEl);
 
-      bubble.hide();
-      expect(bubbleEl.style.display).to.equal('none');
-    });
+    const bubble = new ValidationBubble(ampdoc);
+    bubble.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
+    const bubbleEl = document.querySelector('.i-amphtml-validation-bubble');
+    bubble.show(targetEl, 'Hello World');
+    expect(bubbleEl).to.not.be.null;
+    expect(bubbleEl.textContent).to.equal('Hello World');
+    expect(bubbleEl.style.display).to.equal('block');
+    expect(bubbleEl.style.top).to.equal('290px');
+    expect(bubbleEl.style.left).to.equal('500px');
+
+    bubble.hide();
+    expect(bubbleEl.style.display).to.equal('none');
   });
 });

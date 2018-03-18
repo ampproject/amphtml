@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   computeInMasterFrame,
-  validateSrcPrefix,
-  validateSrcContains,
-  checkData,
+  loadScript,
   nextTick,
   validateData,
-  validateDataExists,
-  validateExactlyOne,
+  validateSrcContains,
+  validateSrcPrefix,
 } from '../../3p/3p';
-import * as sinon from 'sinon';
 
 describe('3p', () => {
 
@@ -75,99 +73,98 @@ describe('3p', () => {
     validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/');
   });
 
-  it('should accept good host supplied data', () => {
-    checkData({
-      width: '',
-      height: false,
-      type: true,
-      referrer: true,
-      canonicalUrl: true,
-      pageViewId: true,
-      location: true,
-      mode: true,
-    }, []);
-    clock.tick(1);
+  describe('validateData', () => {
 
-    checkData({
-      width: '',
-      foo: true,
-      bar: true,
-    }, ['foo', 'bar']);
-    clock.tick(1);
-  });
-
-  it('should accept supplied data', () => {
-    validateDataExists({
-      width: '',
-      height: false,
-      type: 'taboola',
-      referrer: true,
-      canonicalUrl: true,
-      pageViewId: true,
-      location: true,
-      mode: true,
-    }, []);
-    clock.tick(1);
-
-    validateDataExists({
-      width: '',
-      type: 'taboola',
-      foo: true,
-      bar: true,
-    }, ['foo', 'bar']);
-    clock.tick(1);
-  });
-
-  it('should accept supplied data', () => {
-    validateExactlyOne({
-      width: '',
-      type: 'taboola',
-      foo: true,
-      bar: true,
-    }, ['foo', 'day', 'night']);
-    clock.tick(1);
-  });
-
-  it('should complain about unexpected args', () => {
-    checkData({
-      type: 'TEST',
-      foo: true,
-      'not-whitelisted': true,
-    }, ['foo']);
-    expect(() => {
+    it('should check mandatory fields', () => {
+      validateData({
+        width: '',
+        height: false,
+        type: 'taboola',
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, []);
       clock.tick(1);
-    }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
 
-    expect(() => {
-      // Sync throw, not validateData vs. checkData
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, ['foo', 'bar']);
+      clock.tick(1);
+
+      expect(() => {
+        validateData({
+          width: '',
+          type: 'xxxxxx',
+          foo: true,
+          bar: true,
+        }, ['foo', 'bar', 'persika']);
+      }).to.throw(/Missing attribute for xxxxxx: persika./);
+
+      expect(() => {
+        validateData({
+          width: '',
+          type: 'xxxxxx',
+          foo: true,
+          bar: true,
+        }, [['red', 'green', 'blue']]);
+      }).to.throw(
+          /xxxxxx must contain exactly one of attributes: red, green, blue./);
+    });
+
+    it('should check mandatory fields with alternative options', () => {
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, [['foo', 'day', 'night']]);
+      clock.tick(1);
+    });
+
+    it('should check optional fields', () => {
+      validateData({
+        width: '',
+        height: false,
+        type: true,
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, /* mandatory */[], /* optional */[]);
+      clock.tick(1);
+
+      validateData({
+        width: '',
+        foo: true,
+        bar: true,
+      }, /* mandatory */[], ['foo', 'bar']);
+      clock.tick(1);
+
       validateData({
         type: 'TEST',
         foo: true,
-        'not-whitelisted2': true,
-      }, ['not-whitelisted', 'foo']);
-    }).to.throw(/Unknown attribute for TEST: not-whitelisted2./);
-  });
+        'not-whitelisted': true,
+      }, [], ['foo']);
 
-  it('should complain about missing args', () => {
+      expect(() => {
+        clock.tick(1);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+    });
 
-    expect(() => {
-      validateDataExists({
+    it('should check mandatory and optional fields', () => {
+      validateData({
         width: '',
-        type: 'xxxxxx',
         foo: true,
         bar: true,
-      }, ['foo', 'bar', 'persika']);
-    }).to.throw(/Missing attribute for xxxxxx: persika./);
-
-    expect(() => {
-      validateExactlyOne({
-        width: '',
-        type: 'xxxxxx',
-        foo: true,
-        bar: true,
-      }, ['red', 'green', 'blue']);
-    }).to.throw(
-        /xxxxxx must contain exactly one of attributes: red, green, blue./);
+        halo: 'world',
+      }, [['foo', 'fo'], 'bar'], ['halo']);
+    });
   });
 
   it('should run in next tick', () => {
@@ -242,4 +239,33 @@ describe('3p', () => {
     expect(progress).to.equal(';slave0;master;slave1;slave2');
     expect(workCalls).to.equal(1);
   });
+
+  describe('loadScript', () => {
+
+    it('should add <script /> with url to the body', () => {
+      const url = 'http://test.com/example.js';
+      let s = window.document.body.querySelector(`script[src="${url}"]`);
+      expect(s).to.equal(null);
+      loadScript(window, url);
+      s = window.document.body.querySelector(`script[src="${url}"]`);
+      expect(s.src).to.equal(url);
+    });
+
+    it('should handle onSuccess callback', done => {
+      loadScript(window, 'http://localhost:9876/test/functional/test-3p.js', () => {
+        done();
+      }, () => {
+        done('onError should not be called!');
+      });
+    });
+
+    it('should handle onFailure callback', done => {
+      loadScript(window, 'http://localhost:9876/404', () => {
+        done('onSuccess should not be called');
+      }, () => {
+        done();
+      });
+    });
+  });
+
 });

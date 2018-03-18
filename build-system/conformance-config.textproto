@@ -1,0 +1,258 @@
+# Custom Rules
+
+requirement: {
+  rule_id: 'closure:throwOfNonErrorTypes'
+  type: CUSTOM
+  java_class: 'com.google.javascript.jscomp.ConformanceRules$BanThrowOfNonErrorTypes'
+  error_message: 'Should not throw a non-Error object.'
+}
+
+# Strings
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.padStart is not allowed'
+  value: 'string.prototype.padStart'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.padEnd is not allowed'
+  value: 'string.prototype.padEnd'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.startsWith is not allowed'
+  value: 'string.prototype.startsWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.endsWith is not allowed'
+  value: 'string.prototype.endsWith'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.includes is not allowed'
+  value: 'string.prototype.includes'
+  # SW code is modern-browser-only.
+  whitelist: 'src/service-worker/core.js'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.repeat is not allowed'
+  value: 'string.prototype.repeat'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.normalize is not allowed'
+  value: 'string.prototype.normalize'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'string.prototype.codePointAt is not allowed'
+  value: 'string.prototype.codePointAt'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'String.fromCodePoint is not allowed'
+  value: 'String.fromCodePoint'
+}
+
+# Object
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.values is not allowed'
+  value: 'Object.values'
+  whitelist: 'extensions/amp-bind/0.1/bind-expression.js' # Polyfills IE case.
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.entries is not allowed'
+  value: 'Object.entries'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Object.getOwnPropertyDescriptors is not allowed'
+  value: 'Object.getOwnPropertyDescriptors'
+}
+
+# Array
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.from is not allowed'
+  value: 'Array.from'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Array.of is not allowed'
+  value: 'Array.of'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.find is not allowed'
+  value: 'Array.prototype.find'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.findIndex is not allowed'
+  value: 'Array.prototype.findIndex'
+}
+
+# Math
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Math.trunc is not allowed'
+  value: 'Math.trunc'
+}
+
+# Number
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isSafeInteger is not allowed'
+  value: 'Number.isSafeInteger'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isNaN is not allowed'
+  value: 'Number.isNaN'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.isFinite is not allowed'
+  value: 'Number.isFinite'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Number.EPSILON is not allowed'
+  value: 'Number.EPSILON'
+}
+
+# Structures
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Map is not allowed'
+  value: 'Map'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'WeakMap is not allowed'
+  value: 'WeakMap'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Set is not allowed'
+  value: 'Set'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'WeakSet is not allowed'
+  value: 'WeakSet'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Symbol is not allowed'
+  value: 'Symbol'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
+  value: 'JSON.parse'
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/imedia.js'
+  whitelist: 'ads/kargo.js'
+  whitelist: 'ads/mads.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'src/json.js' # Where jsonParse itself is implemented.
+}
+
+requirement: {
+  type: BANNED_PROPERTY_READ
+  error_message: 'Use eventHelper#getData to read the data property. OK to whitelist 3p ads for now.'
+  value: 'Event.prototype.data'
+  value: 'MessageEvent.prototype.data'
+  whitelist: 'src/event-helper.js' # getData is implemented here
+  whitelist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
+  whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
+
+  # 3p ads are OK
+  whitelist: 'ads/adfox.js'
+  whitelist: 'ads/google/imaVideo.js'
+  whitelist: 'ads/netletix.js'
+  whitelist: 'ads/yandex.js'
+}
+
+requirement: {
+  type: RESTRICTED_METHOD_CALL
+  error_message: 'postMessage must be called with a string or a JsonObject'
+  value: 'Window.prototype.postMessage:function((string|?JsonObject), string, (Array|Transferable)=)'
+  # Guaranteed same version call
+  whitelist: 'src/web-worker/web-worker.js'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/imaVideo.js'
+}
+
+requirement: {
+  type: RESTRICTED_NAME_CALL
+  error_message: 'JSON.stringify must be called with a JsonObject'
+  # Unfortunately the Array is untyped, because the compiler doesn't check
+  # for the template type.
+  value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
+  # Allowing violations in ads code for now.
+  # We would have to fix this to property obfuscated the 3p frame code.
+  whitelist: 'ads/google/doubleclick.js'
+}
+
+# Cookies
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'Document.prototype.cookie'
+  whitelist: 'src/cookies.js'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'module$src$cookies.getCookie'
+  value: 'module$src$cookies.setCookie'
+  whitelist: 'src/cookies.js'
+  whitelist: 'src/experiments.js'
+  whitelist: 'src/service/cid-api.js'
+  whitelist: 'src/service/cid-impl.js'
+}
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
+}

@@ -234,12 +234,21 @@
 
 .-amp-pinterest-embed-pin,
 .-amp-pinterest-embed-pin-medium {
+  box-sizing: border-box;
   padding: 5px;
   width: 237px;
 }
 
 .-amp-pinterest-embed-pin-medium {
   width: 345px;
+}
+
+.-amp-pinterest-embed-pin-responsive {
+  width: 100%;
+}
+
+.-amp-pinterest-embed-pin-responsive .-amp-pinterest-embed-pin-image {
+  max-width: 100%;
 }
 
 .-amp-pinterest-embed-pin-inner {

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 const adbladeFields = ['width', 'height', 'cid'];
 const adbladeHostname = 'web.adblade.com';
 const industrybrainsHostname = 'web.industrybrains.com';
 
 function addAdiantUnit(hostname, global, data) {
-  checkData(data, adbladeFields);
-  validateDataExists(data, adbladeFields);
+  validateData(data, adbladeFields, []);
 
   // create a data element so our script knows what to do
   const ins = global.document.createElement('ins');
@@ -34,6 +33,11 @@ function addAdiantUnit(hostname, global, data) {
   ins.setAttribute('data-protocol', 'https');
   ins.setAttribute('data-tag-type', 1);
   global.document.getElementById('c').appendChild(ins);
+
+  ins.parentNode.addEventListener(
+      'eventAdbladeRenderStart',
+      global.context.renderStart()
+  );
 
   // run our JavaScript code to display the ad unit
   writeScript(global, 'https://' + hostname + '/js/ads/async/show.js');

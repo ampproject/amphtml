@@ -19,64 +19,25 @@ limitations under the License.
 A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-If you just want to validate a page that you're looking at in your web browser,
-add `#development=1` to your URL and look for the validation messages in the
-Javascript console. See also
+If you just want to validate a page, please see
 [our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
 
-For the additional choices listed below, install Node.js version 4.X on your
-system (tested with v4.4.2). E.g.,
-[by downloading](https://nodejs.org/en/download/) or
-[by using a package manager](https://nodejs.org/en/download/package-manager/) or
-[by using NVM](https://github.com/creationix/nvm).
+## Chrome Extension
+Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
-## Using the command-line tool (Beta!)
+## Command Line Tool and Node.js API
 
-* Type `./index.js` in this directory to get started:
+Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
 
-```
-$ ./index.js testdata/feature_tests/minimum_valid_amp.html
-testdata/feature_tests/minimum_valid_amp.html: PASS
+## Web UI
 
-$ ./index.js testdata/feature_tests/several_errors.html
-testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
-testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
-testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)
-testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
-...
-```
-
-If you wish to install the Validator as a system command,
-install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
-run `npm install -g` in this directory. After that, you may type
-`amp-validator` in any directory to invoke the validator.
-
-## Using the NodeJS API (Beta!)
-
-This API is new and still experimental, feedback is especially welcome. We may
-try to port to earlier versions of NodeJS if sufficient interest exists.
-
-```js
-'use strict';
-const ampValidator = require('amp-validator');
-
-ampValidator.getInstance().then((validator) => {
-  const result = validator.validateString('<html>Hello, world.</html>');
-  ((result.status === 'PASS') ? console.log : console.error)(result.status);
-  for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
-    if (error.specUrl !== null) {
-      msg += ' (see ' + error.specUrl + ')';
-    }
-    ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-  }
-});
-```
+Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
 
 ## Building a Custom Validator
 
-This is only useful for development - e.g. when making changes to validator.js,
-and it's rough aroung the edges. Below are instructions for Linux Ubuntu 14.
+This is only useful for development - e.g. when making changes to
+`engine/validator.js` or when authoring an AMP extension, and it's rough around
+the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
 
@@ -86,20 +47,39 @@ Install these packages using apt-get:
 * python-protobuf
 * python2.7
 
-In addition, install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
+In addition, install Node.js v4.4.2. E.g.,
   [by downloading](https://nodejs.org/en/download/) or
   [by using a package manager](https://nodejs.org/en/download/package-manager/) or
   [by using NVM](https://github.com/creationix/nvm).
 
 Then, run `build.py`. This creates `dist/validator_minified.js`, which is
 equivalent to the validator deployed at cdn.ampproject.org. You may now
-use the `--validator_js` command line flag to `index.js` to use this validator.
+use the `--validator_js` command line flag to
+[amphtml-validator](https://www.ampproject.org/docs/guides/validate.html#command-line-tool) to use this validator.
 
 ```
-$ node index.js --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
+$ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
 testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
 testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
 testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)
 testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
 ...
 ```
+
+### Building on MacOS
+* Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+* Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
+* If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+
+To verify that you have the necessary prerequisites, run and verify:
+```
+$ protoc --version
+libprotoc 3.5.1
+```
+and
+```
+$ python
+>>> import google.protobuf
+>>>
+```
+Now `cd amphtml/validator` and run `python build.py`.

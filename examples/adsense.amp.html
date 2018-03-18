@@ -12,35 +12,84 @@
     .red {
       background-color: red;
     }
+    .talldiv {
+      height: 2000px;
+    }
+    amp-ad div[placeholder] {
+      background-color: lightgray;
+    }
+    amp-ad div[fallback] {
+      background-color: black;
+    }
+    amp-ad div[placeholder]::after {
+      content: "loading ...";
+    }
+    amp-ad div[fallback]::after {
+      content: "No ad";
+      color: white;
+    }
+    amp-ad div[placeholder]::after,
+    amp-ad div[fallback]::after {
+      font-size: 20px;
+      line-height: 30px;
+      text-align: center;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - 15px);
+    }
+    amp-user-notification {
+      background-color: lightgray;
+      padding: 5px;
+    }
   </style>
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 </head>
 <body>
 
+  <amp-user-notification
+      layout=nodisplay
+      id="amp-user-notification">
+    This site uses cookies to personalize content.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification.dismiss" role="button" tabindex="0">I accept</button>
+  </amp-user-notification>
+
   <h2>AdSense</h2>
-  <amp-ad width=300 height=200
+  <amp-ad width=300 height=250
       type="adsense"
-      data-ad-client="ca-pub-8125901705757971"
-      data-ad-slot="7783467241">
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
+    <div placeholder></div>
+    <div fallback></div>
   </amp-ad>
 
   <amp-ad width=300 height=250
-      type="adsense"
-      data-ad-client="ca-pub-8125901705757971"
-      data-ad-slot="7783467241">
+          type="adsense"
+          data-ad-client="ca-pub-2005682797531342"
+          data-ad-slot="7046626912"
+          data-consent-notification-id="amp-user-notification">
+    <div placeholder>should only show ad after notification get dismissed</div>
+    <div fallback></div>
   </amp-ad>
 
-  <div style="height:2000px">
+  <div class=talldiv>
     <!-- Make the second ad below the fold. -->
   </div>
 
   <h2>AdSense ad 2</h2>
+
   <amp-ad width=300 height=250
       type="adsense"
-      data-ad-client="ca-pub-8125901705757971"
-          data-ad-slot="7783467241"
-          data-adtest="on">
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912"
+      data-adtest="on">
+    <div placeholder></div>
+    <div fallback></div>
   </amp-ad>
 
 </body>

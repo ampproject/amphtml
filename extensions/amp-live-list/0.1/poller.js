@@ -15,9 +15,9 @@
  */
 
 
-import {exponentialBackoffClock, getJitter,}
-    from '../../../src/exponential-backoff';
-import {timer} from '../../../src/timer';
+import {Services} from '../../../src/services';
+import {exponentialBackoffClock, getJitter}
+  from '../../../src/exponential-backoff';
 
 
 /**
@@ -26,7 +26,7 @@ import {timer} from '../../../src/timer';
 export class Poller {
 
   constructor(win, wait, work) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private {number} */
@@ -35,7 +35,7 @@ export class Poller {
     /** @private {function(): !Promise} */
     this.work_ = work;
 
-    /** @private {?number} */
+    /** @private {number|string|null} */
     this.lastTimeoutId_ = null;
 
     /** @private {boolean} */
@@ -45,8 +45,8 @@ export class Poller {
     this.backoffClock_ = null;
 
     /**
-     * Mostly for testing purposes.
-     * @private {!Promise}
+     * For testing purposes.
+     * @private {?Promise}
      */
     this.lastWorkPromise_ = null;
   }
@@ -101,7 +101,7 @@ export class Poller {
    */
   clear_() {
     if (this.lastTimeoutId_) {
-      timer.cancel(this.lastTimeoutId_);
+      Services.timerFor(this.win).cancel(this.lastTimeoutId_);
       this.lastTimeoutId_ = null;
     }
   }
@@ -140,7 +140,8 @@ export class Poller {
     if (opt_immediate) {
       work();
     } else {
-      this.lastTimeoutId_ = timer.delay(work, this.getTimeout_());
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
     }
   }
 }

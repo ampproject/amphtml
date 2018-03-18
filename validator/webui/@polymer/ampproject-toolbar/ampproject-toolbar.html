@@ -29,13 +29,9 @@
     }
     .ampproject-left {
       @apply(--layout-flex);
-      color: #0379C4;
-      padding: 15px 10px 15px 50px;
-      margin: 10px 0;
       width: auto;
       text-transform: none;
       white-space: nowrap;
-      background-image: url('/logo-blue.svg');
       background-repeat: no-repeat;
       background-size: 40px 40px;
       background-position: center left;
@@ -64,14 +60,24 @@
     <paper-toolbar>
       <div class="ampproject-left ampproject-link">
         <a href="https://www.ampproject.org/"
-           target="_blank">Accelerated Mobile Pages Project</a>
+           target="_blank"><img style="height: 60px; width: 100px"
+                                src="/logo-blue.svg"></a>
       </div>
       <div class="ampproject-right ampproject-link">
+        <a href="https://www.ampproject.org/docs/guides/validate.html"
+           target="_blank">HOWTO</a>
+        &nbsp;&nbsp;&nbsp;
         <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
            target="_blank">GITHUB</a>
         &nbsp;&nbsp;&nbsp;
+        <a href="https://www.google.com/policies/privacy/"
+           target="_blank">PRIVACY</a>
+        &nbsp;&nbsp;&nbsp;
         <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
            id="install-extension" onclick="return false;" target="_blank">CHROME EXTENSION</a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="https://www.npmjs.com/package/amphtml-validator"
+           target="_blank">NPM</a>
       </div>
     </paper-toolbar>
   </template>

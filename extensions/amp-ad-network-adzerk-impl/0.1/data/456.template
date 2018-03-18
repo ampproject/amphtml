@@ -1,0 +1,32 @@
+<!doctype html>
+<html ⚡4ads>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <style amp-custom>amp-fit-text {border: solid 1px;font: 500 11px/13px "Raleway";}</style>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
+  </head>
+  <body>
+    <template type="amp-mustache">
+      <amp-fit-text width="200" height="40">hello {{USER_NAME}}! {{USER_NUM}}</amp-fit-text><br>
+      Expect encoding {{HTML_CONTENT}}<br>
+      <amp-img src={{IMG_SRC}} height=159 width=318></amp-img><br>
+      Missing {{UNKNOWN}} item
+    </template>
+    <script amp-ad-metadata type=application/json>
+    {
+      "ampRuntimeUtf16CharOffsets" : [ 0, 0 ],
+      "customElementExtensions": [
+        "amp-fit-text"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-fit-text",
+          "src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"
+        }
+      ]
+    }
+    </script>
+  </body>
+</html>

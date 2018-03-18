@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  loadScript, writeScript, validateDataExists,
-}
-from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
+import {setStyles} from '../src/style';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
@@ -29,12 +27,12 @@ export function appnexus(global, data) {
   const args = [];
   args.push('size=' + data.width + 'x' + data.height);
   if (data.tagid) {
-    validateDataExists(data, ['tagid']);
+    validateData(data, ['tagid']);
     args.push('id=' + encodeURIComponent(data.tagid));
     writeScript(global, constructTtj(args));
     return;
   } else if (data.member && data.code) {
-    validateDataExists(data, ['member', 'code']);
+    validateData(data, ['member', 'code']);
     args.push('member=' + encodeURIComponent(data.member));
     args.push('inv_code=' + encodeURIComponent(data.code));
     writeScript(global, constructTtj(args));
@@ -61,7 +59,7 @@ export function appnexus(global, data) {
 }
 
 function appnexusAst(global, data) {
-  validateDataExists(data, ['adUnits']);
+  validateData(data, ['adUnits']);
   let apntag;
   if (context.isMaster) { // in case we are in the master iframe, we load AST
     context.master.apntag = context.master.apntag || {};
@@ -85,7 +83,6 @@ function appnexusAst(global, data) {
     loadScript(global, APPNEXUS_AST_URL, () => {
       apntag.anq.push(() => {
         apntag.loadTags();
-        apntag.initialRequestMade = true;
       });
     });
   }
@@ -95,6 +92,13 @@ function appnexusAst(global, data) {
   const divContainer = global.document.getElementById('c');
   if (divContainer) {
     divContainer.appendChild(div);
+    setStyles(divContainer, {
+      top: '50%',
+      left: '50%',
+      bottom: '',
+      right: '',
+      transform: 'translate(-50%, -50%)',
+    });
   }
 
   if (!apntag) {
@@ -105,13 +109,10 @@ function appnexusAst(global, data) {
   }
 
   apntag.anq.push(() => {
-    if (!apntag.initialRequestMade) {
-      apntag.onEvent('adAvailable', data.target, () => {
-        apntag.showTag(data.target, global.window);
-      });
-    } else {
+    apntag.onEvent('adAvailable', data.target, adObj => {
+      global.context.renderStart({width: adObj.width, height: adObj.height});
       apntag.showTag(data.target, global.window);
-    }
+    });
 
     apntag.onEvent('adNoBid', data.target, () => {
       context.noContentAvailable();

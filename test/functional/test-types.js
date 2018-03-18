@@ -60,36 +60,49 @@ describe('Types', () => {
     });
   });
 
-  describe('isShadowRoot', () => {
+  describe('isFiniteNumber', () => {
 
-    it('should yield false for non-nodes', () => {
-      expect(types.isShadowRoot(null)).to.be.false;
-      expect(types.isShadowRoot(undefined)).to.be.false;
-      expect(types.isShadowRoot('')).to.be.false;
-      expect(types.isShadowRoot(11)).to.be.false;
+    it('should yield false for non-numbers', () => {
+      expect(types.isFiniteNumber(null)).to.be.false;
+      expect(types.isFiniteNumber(undefined)).to.be.false;
+      expect(types.isFiniteNumber('')).to.be.false;
+      expect(types.isFiniteNumber('2')).to.be.false;
+      expect(types.isFiniteNumber([])).to.be.false;
+      expect(types.isFiniteNumber([2])).to.be.false;
+      expect(types.isFiniteNumber({})).to.be.false;
+      expect(types.isFiniteNumber({'a': 2})).to.be.false;
+      expect(types.isFiniteNumber(true)).to.be.false;
+      expect(types.isFiniteNumber(NaN)).to.be.false;
     });
 
-    it('should yield false for other types of nodes', () => {
-      expect(types.isShadowRoot(document.createElement('div'))).to.be.false;
-      expect(types.isShadowRoot(document.createTextNode('abc'))).to.be.false;
+    it('should yield true for numbers', () => {
+      expect(types.isFiniteNumber(3)).to.be.true;
+      expect(types.isFiniteNumber(3.2)).to.be.true;
+      expect(types.isFiniteNumber(123e5)).to.be.true;
+    });
+  });
+
+  describe('isEnumValue', () => {
+    /** @enum {string} */
+    const enumObj = {
+      X: 'x',
+      Y: 'y',
+      Z: 'z',
+    };
+
+    it('should return true for valid enum values', () => {
+      ['x', 'y', 'z'].forEach(value => {
+        expect(types.isEnumValue(enumObj, value),
+            'enum value = ' + value).to.be.true;
+      });
     });
 
-    it('should yield true for natively-supported createShadowRoot API', () => {
-      const element = document.createElement('div');
-      if (element.createShadowRoot) {
-        const shadowRoot = element.createShadowRoot();
-        expect(types.isShadowRoot(shadowRoot)).to.be.true;
-      }
-    });
-
-    it('should yield false for non-document-fragment shadow root', () => {
-      const element = document.createElement('div');
-      expect(types.isShadowRoot(element)).to.be.false;
-    });
-
-    it('should yield false for document-fragment shadow root', () => {
-      const fragment = document.createDocumentFragment();
-      expect(types.isShadowRoot(fragment)).to.be.false;
+    it('should return false for non-enum values', () => {
+      ['a', 'X', 'Z', {'x': 'x'}, ['y'], null, undefined, [], /x/, /y/, 42]
+          .forEach(value => {
+            expect(types.isEnumValue(enumObj, value),
+                'enum value = ' + value).to.be.false;
+          });
     });
   });
 });

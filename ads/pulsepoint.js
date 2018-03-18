@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, checkData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function pulsepoint(global, data) {
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'pid', 'tagid', 'tagtype', 'slot', 'timeout',
   ]);
   if (data.tagtype === 'hb') {
@@ -37,7 +38,10 @@ export function pulsepoint(global, data) {
  * @param {!Object} data
  */
 function tag(global, data) {
-  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD&cwpid=' + encodeURIComponent(data.pid) + '&cwtagid=' + encodeURIComponent(data.tagid) + '&cwadformat=' + encodeURIComponent(data.width + 'X' + data.height));
+  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD' +
+      '&cwpid=' + encodeURIComponent(data.pid)
+      + '&cwtagid=' + encodeURIComponent(data.tagid)
+      + '&cwadformat=' + encodeURIComponent(data.width + 'X' + data.height));
 }
 
 /**
@@ -55,7 +59,7 @@ function headerBidding(global, data) {
         placement: data.slot,
         elementId: 'c',
       }],
-      done: function(targeting) {
+      done(targeting) {
         doubleclick(global, {
           width: data.width,
           height: data.height,

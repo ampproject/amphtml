@@ -14,179 +14,104 @@
  * limitations under the License.
  */
 
-import {clientIdScope} from '../../ads/_config';
-import {createAdPromise} from '../../testing/ad-iframe';
-import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import * as lolex from 'lolex';
+import {Services} from '../../src/services';
+import {adConfig} from '../../ads/_config';
 import {
-  installUserNotificationManager,
-} from '../../extensions/amp-user-notification/0.1/amp-user-notification';
-import {setCookie} from '../../src/cookies';
-import * as sinon from 'sinon';
+  cidServiceForDocForTesting,
+} from '../../src/service/cid-impl';
+import {getAdCid} from '../../src/ad-cid';
 
+describes.realWin('ad-cid', {amp: true}, env => {
+  const cidScope = 'cid-in-ads-test';
+  const config = adConfig['_ping_'];
+  let sandbox;
 
-// TODO: I'm not sure if this is fully kosher.  This test asks, 'does the
-// CID get written to the element properly?'  When amp-ad is actually a delegate
-// to either amp-a4a or amp-ad-3p-impl, the CID gets written only to the
-// 3p-impl child Element.  Changing the test in this way checks that the CID
-// appears on the 3p-impl child, rather than the (delegating) parent.  That
-// should (?) be enough to ensure that it's propagated forward to the ad in the
-// 3p iframe.
-// describe('ad-cid-embed', tests('amp-embed'));
-describe('ad-cid', tests('amp-ad'));
+  let cidService;
+  let clock;
+  let element;
+  let adElement;
+  let win;
 
-function tests(name) {
-  function getAd(attributes, canonical, opt_handleElement,
-                 opt_beforeLayoutCallback) {
-    return createAdPromise(name, attributes, canonical,
-                           opt_handleElement, opt_beforeLayoutCallback);
-  }
+  beforeEach(() => {
+    win = env.win;
+    sandbox = env.sandbox;
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    element = env.win.document.createElement('amp-ad');
+    element.setAttribute('type', '_ping_');
+    const ampdoc = env.ampdoc;
+    cidService = cidServiceForDocForTesting(ampdoc);
+    adElement = {
+      getAmpDoc: () => ampdoc,
+      element,
+      win,
+    };
+  });
 
-  return () => {
-    describe('cid-ad support', () => {
-      const cidScope = 'cid-in-ads-test';
-      let sandbox;
+  afterEach(() => {
+    clock.uninstall();
+  });
 
-      beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-      });
+  it('should get correct cid', () => {
+    config.clientIdScope = cidScope;
 
-      afterEach(() => {
-        sandbox.restore();
-        delete clientIdScope['with_cid'];
-        setCookie(window, cidScope, '', new Date().getTime() - 5000);
-      });
-
-      it('provides cid to ad', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          setCookie(window, cidScope, 'sentinel123',
-              new Date().getTime() + 5000);
-          installCidService(win);
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
-        });
-      });
-
-      it('proceeds on failed CID', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const service = installCidService(win);
-          sandbox.stub(service, 'get',
-              () => Promise.reject(new Error('nope')));
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
-        });
-      });
-
-      it('waits for consent', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-          'data-consent-notification-id': 'uid',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          sandbox.stub(uidService, 'get', id => {
-            expect(id).to.equal('uid');
-            return Promise.resolve('consent');
-          });
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent-cid');
-        });
-      });
-
-      it('waits for consent w/o cidScope', () => {
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-          'data-consent-notification-id': 'uid',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          sandbox.stub(uidService, 'get', id => {
-            expect(id).to.equal('uid');
-            return Promise.resolve('consent');
-          });
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent');
-        });
-      });
-
-      it('provide null if notification and cid is not provided', () => {
-        let uidSpy = null;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          uidSpy = sandbox.spy(uidService, 'get');
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(uidSpy.callCount).to.equal(0);
-          expect(ad.getAttribute('ampcid')).to.be.null;
-        });
-      });
-
-      it('provides null if cid service not available', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          setCookie(window, cidScope, 'XXX',
-              new Date().getTime() + 5000);
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
-        });
+    let getCidStruct;
+    sandbox.stub(cidService, 'get').callsFake(struct => {
+      getCidStruct = struct;
+      return Promise.resolve('test123');
+    });
+    return getAdCid(adElement).then(cid => {
+      expect(cid).to.equal('test123');
+      expect(getCidStruct).to.deep.equal({
+        scope: cidScope,
+        createCookieIfNotPresent: true,
+        cookieName: undefined,
       });
     });
-  };
-}
+  });
+
+  it('should respect clientIdCookieName field', () => {
+    config.clientIdScope = cidScope;
+    config.clientIdCookieName = 'different-cookie-name';
+
+    let getCidStruct;
+    sandbox.stub(cidService, 'get').callsFake(struct => {
+      getCidStruct = struct;
+      return Promise.resolve('test123');
+    });
+    return getAdCid(adElement).then(cid => {
+      expect(cid).to.equal('test123');
+      expect(getCidStruct).to.deep.equal({
+        scope: cidScope,
+        createCookieIfNotPresent: true,
+        cookieName: 'different-cookie-name',
+      });
+    });
+  });
+
+  it('should return on timeout', () => {
+    config.clientIdScope = cidScope;
+    sandbox.stub(cidService, 'get').callsFake(() => {
+      return Services.timerFor(win).promise(2000);
+    });
+    const p = getAdCid(adElement).then(cid => {
+      expect(cid).to.be.undefined;
+      expect(win.Date.now()).to.equal(1000);
+    });
+    clock.tick(999);
+    // Let promises resolve before ticking 1 more ms.
+    Promise.resolve().then(() => {
+      clock.tick(1);
+    });
+    return p;
+  });
+
+  it('should return undefined on failed CID', () => {
+    config.clientIdScope = cidScope;
+    sandbox.stub(cidService, 'get').callsFake(() => {
+      return Promise.reject(new Error('nope'));
+    });
+    return expect(getAdCid(adElement)).to.eventually.be.undefined;
+  });
+});

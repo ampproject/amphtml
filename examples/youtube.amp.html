@@ -19,13 +19,33 @@
             layout="responsive"
             data-param-controls=1
             width="480" height="270">
-        <amp-img placeholder width="480" height="270" layout="responsive" src="https://i.ytimg.com/vi/mGENRKrdoGY/hqdefault.jpg"></amp-img>
+    </amp-youtube>
+
+    <!-- YouTube video without cookies -->
+    <amp-youtube
+            data-videoid="mGENRKrdoGY"
+            credentials="omit"
+            data-param-controls=1
+            width="480" height="270">
     </amp-youtube>
 
     <!-- YouTube video that doesn't have sddefault.jpg -->
     <amp-youtube
             data-videoid="oofSnsGkops"
-            width="480" height="270"></amp-youtube>
+            width="480" height="270">
+    </amp-youtube>
+
+    <!-- YouTube with custom placeholder as cover -->
+    <amp-youtube
+            data-videoid="rddtw6uMNoo"
+            width="480" height="270">
+      <amp-img
+            placeholder
+            width="480" height="270"
+            layout="responsive"
+            src="https://placehold.it/480x270?text=Custom Placeholder">
+      </amp-img>
+    </amp-youtube>
 
     <a on="tap:watch-video-lightbox"
        role="button"

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {sendRequest, sendRequestUsingIframe, Transport} from '../transport';
+import * as sinon from 'sinon';
+import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 
 adopt(window);
 
@@ -39,7 +39,7 @@ describe('amp-analytics.transport', () => {
   }
 
   function assertCallCounts(
-      expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
+    expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
     expect(Transport.sendRequestUsingBeacon.callCount,
         'sendRequestUsingBeacon call count').to.equal(expectedBeaconCalls);
     expect(Transport.sendRequestUsingXhr.callCount,
@@ -108,9 +108,14 @@ describe('amp-analytics.transport', () => {
     }).to.throw(/https/);
   });
 
+  it('should NOT allow __amp_source_origin', () => {
+    expect(() => {
+      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/);
+  });
+
   describe('sendRequestUsingIframe', () => {
-    const url = 'http://iframe.localhost:9876/base/test/' +
-        'fixtures/served/iframe.html';
+    const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
     it('should create and delete an iframe', () => {
       const clock = sandbox.useFakeTimers();
       const iframe = sendRequestUsingIframe(window, url);
@@ -134,7 +139,7 @@ describe('amp-analytics.transport', () => {
 
     it('forbids same origin', () => {
       expect(() => {
-        sendRequestUsingIframe(window, 'http://localhost:9876/base/');
+        sendRequestUsingIframe(window, 'http://localhost:9876/');
       }).to.throw(
           /Origin of iframe request must not be equal to the document origin./
       );

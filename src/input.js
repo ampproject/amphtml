@@ -15,9 +15,10 @@
  */
 
 import {Observable} from './observable';
-import {fromClass} from './service';
+import {Services} from './services';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
+import {registerServiceBuilder} from './service';
 
 
 const TAG_ = 'Input';
@@ -44,21 +45,21 @@ export class Input {
     /** @private {!Function} */
     this.boundOnMouseDown_ = this.onMouseDown_.bind(this);
 
-    /** @private {!Function} */
-    this.boundOnMouseMove_ = this.onMouseMove_.bind(this);
+    /** @private {?function(!Event)} */
+    this.boundOnMouseMove_ = null;
 
-    /** @private {!Function} */
-    this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
+    /** @private {?Function} */
+    this.boundMouseCanceled_ = null;
 
-    /** @private {!Function} */
-    this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
+    /** @private {?Function} */
+    this.boundMouseConfirmed_ = null;
 
     /** @private {boolean} */
     this.hasTouch_ = ('ontouchstart' in win ||
         (win.navigator['maxTouchPoints'] !== undefined &&
             win.navigator['maxTouchPoints'] > 0) ||
         win['DocumentTouch'] !== undefined);
-    dev.fine(TAG_, 'touch detected:', this.hasTouch_);
+    dev().fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
     this.keyboardActive_ = false;
@@ -84,6 +85,8 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
+      this.boundOnMouseMove_ =
+        /** @private {function(!Event)} */ (this.onMouseMove_.bind(this));
       listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
@@ -182,7 +185,7 @@ export class Input {
 
     this.keyboardActive_ = true;
     this.keyboardStateObservable_.fire(true);
-    dev.fine(TAG_, 'keyboard activated');
+    dev().fine(TAG_, 'keyboard activated');
   }
 
   /** @private */
@@ -192,7 +195,7 @@ export class Input {
     }
     this.keyboardActive_ = false;
     this.keyboardStateObservable_.fire(false);
-    dev.fine(TAG_, 'keyboard deactivated');
+    dev().fine(TAG_, 'keyboard deactivated');
   }
 
   /**
@@ -206,18 +209,33 @@ export class Input {
       this.mouseCanceled_();
       return undefined;
     }
+    if (!this.boundMouseConfirmed_) {
+      this.boundMouseConfirmed_ = this.mouseConfirmed_.bind(this);
+      this.boundMouseCanceled_ = this.mouseCanceled_.bind(this);
+    }
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
-        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    let unlisten;
+    const listenPromise = listenOncePromise(this.win.document, 'click',
+        /* capture */ undefined, unlistener => {
+          unlisten = unlistener;
+        });
+    return Services.timerFor(this.win)
+        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+        .then(this.boundMouseCanceled_, () => {
+          if (unlisten) {
+            unlisten();
+          }
+          this.boundMouseConfirmed_();
+        });
   }
 
   /** @private */
   mouseConfirmed_() {
     this.hasMouse_ = true;
     this.mouseDetectedObservable_.fire(true);
-    dev.fine(TAG_, 'mouse detected');
+    dev().fine(TAG_, 'mouse detected');
   }
 
   /** @private */
@@ -225,18 +243,17 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
+      listenOnce(this.win.document, 'mousemove',
+          /** @type {function(!Event)} */ (this.boundOnMouseMove_));
     } else {
-      dev.fine(TAG_, 'mouse detection failed');
+      dev().fine(TAG_, 'mouse detection failed');
     }
   }
 }
 
-
 /**
- * @param {!Window} window
- * @return {!Input}
+ * @param {!Window} win
  */
-export function inputFor(window) {
-  return fromClass(window, 'input', Input);
-};
+export function installInputService(win) {
+  registerServiceBuilder(win, 'input', Input);
+}

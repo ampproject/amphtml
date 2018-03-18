@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /* global MicroAd: false */
 
@@ -23,8 +23,8 @@ import {loadScript, checkData} from '../3p/3p';
  * @param {!Object} data
  */
 export function microad(global, data) {
-  const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo'];
-  checkData(data, microadData);
+  // TODO: check mandatory fields
+  validateData(data, [], ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo']);
 
   global.document.getElementById('c').setAttribute('id', data.spot);
   loadScript(global, 'https://j.microad.net/js/camp.js', () => {

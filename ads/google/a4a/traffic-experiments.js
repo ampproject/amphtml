@@ -22,16 +22,31 @@
  * impacts on click-throughs.
  */
 
-import {isGoogleAdsA4AValidEnvironment} from './utils';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {
+  EXPERIMENT_ATTRIBUTE,
+  isGoogleAdsA4AValidEnvironment,
+  mergeExperimentIds,
+} from './utils';
+import {
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  forceExperimentBranch,
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
+import {parseQueryString} from '../../../src/url';
 
-/** @typedef {{string: {branches: !Branches}}} */
-export let Branches;
+/** @typedef {{
+ *    control: string,
+ *    experiment: string
+ *  }} */
+export let A4aExperimentBranches;
 
-/** @typedef {{control: string, experiment: string}} */
-export let ExperimentInfo;
+/** @type {string} @private */
+export const MANUAL_EXPERIMENT_ID = '117152632';
+
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
@@ -48,181 +63,166 @@ export let ExperimentInfo;
  *
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element Ad tag Element.
- * @param {string} experimentId ID for the experiment to use.
- * @param {!Branches} experiment and control branch IDs to use.
- * @return {boolean}  Whether Google Ads should attempt to render via the A4A
+ * @param {string} experimentName Overall name for the experiment.
+ * @param {!A4aExperimentBranches} externalBranches experiment and control
+ *   branch IDs to use when experiment is triggered externally (e.g., via Google
+ *   Search results page).
+ * @param {!A4aExperimentBranches} internalBranches experiment and control
+ *   branch IDs to use when experiment is triggered internally (i.e., via
+ *   client-side selection).
+ * @param {!A4aExperimentBranches} delayedExternalBranches
+ * @param {!A4aExperimentBranches=} opt_sfgInternalBranches
+ * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
-  if (isGoogleAdsA4AValidEnvironment(win)) {
-    // Page is served from a supported domain.
-    handleUrlParameters(win, experimentId, branches);
-    const experimentInfo = {};
-    experimentInfo[experimentId] = branches;
-    setupPageExperiments(win, experimentInfo);
-    if (isExperimentOn(win, experimentId)) {
-      // Page is selected into the overall traffic experiment.
-      if (getPageExperimentBranch(win, experimentId) === branches.experiment) {
-        // Page is on the "experiment" (i.e., use A4A rendering pathway)
-        // branch of the overall traffic experiment.
-        addExperimentIdToElement(branches.experiment, element);
-        return true;
-      } else {
-        // Page is on the "control" (i.e., use traditional, 3p iframe
-        // rendering pathway) branch of the overall traffic experiment.
-        addExperimentIdToElement(branches.control, element);
-        return false;
+export function googleAdsIsA4AEnabled(win, element, experimentName,
+  externalBranches, internalBranches, delayedExternalBranches,
+  opt_sfgInternalBranches) {
+  if (!isGoogleAdsA4AValidEnvironment(win)) {
+    // Serving location doesn't qualify for A4A treatment
+    return false;
+  }
+
+  const isSetFromUrl = maybeSetExperimentFromUrl(win, element,
+      experimentName, externalBranches.control,
+      externalBranches.experiment, delayedExternalBranches.control,
+      delayedExternalBranches.experiment,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
+      MANUAL_EXPERIMENT_ID);
+  if (!isSetFromUrl) {
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    const branches = [
+      internalBranches.control,
+      internalBranches.experiment,
+    ];
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches,
+    };
+    // Note: Because the same experimentName is being used everywhere here,
+    // randomlySelectUnsetExperiments won't add new IDs if
+    // maybeSetExperimentFromUrl has already set something for this
+    // experimentName.
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+  }
+  if (isExperimentOn(win, experimentName)) {
+    // Page is selected into the overall traffic experiment.
+    // In other words, if A4A has not yet launched serve A4A Fast Fetch,
+    // else serve Delayed Fetch.
+    const selectedBranch = getExperimentBranch(win, experimentName);
+    if (selectedBranch) {
+      addExperimentIdToElement(selectedBranch, element);
+      const perf = Services.performanceForOrNull(win);
+      if (perf) {
+        perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
       }
     }
+    // Detect whether page is on the "experiment" (i.e., use A4A rendering
+    // pathway) branch of the overall traffic experiment or it's on the
+    // "control" (i.e., use traditional, 3p iframe rendering pathway).
+    const selected = selectedBranch == internalBranches.experiment ||
+                     selectedBranch == externalBranches.experiment ||
+                     selectedBranch == delayedExternalBranches.experiment ||
+                     selectedBranch == MANUAL_EXPERIMENT_ID;
+    // Not launched, control branch -> Delayed Fetch
+    // Not launched, experimental branch -> Fast Fetch
+    // Launched, control branch -> Fast Fetch
+    // Launched, experimental branch -> Delayed Fetch (for holdback)
+    return (selected == !hasLaunched(win, element));
+  } else {
+    // Page is not selected into the overall traffic experiment.
+    // In other words, if A4A has launched serve A4A Fast Fetch, else serve
+    // Delayed Fetch.
+    return hasLaunched(win, element);
   }
-  // Serving location doesn't qualify for A4A treatment or page is not in the
-  // traffic experiment.
-  return false;
 }
 
 /**
- * Set experiment state from URL parameter, if present.
- *
  * @param {!Window} win
- * @param {string} experimentId
- * @param {!Branches} branches
- * @visibleForTesting
+ * @param {!Element} element Ad tag Element.
+ * @return {?string} experiment extracted from page url.
  */
-function handleUrlParameters(win, experimentId, branches) {
-  const a4aParam = /(?:\?|&)a4a=([0-9]+)/.exec(win.location.search);
-  if (a4aParam) {
-    // If a4aParam is non-null, it necessarily has at least 2 elements.
-    switch (a4aParam[1]) {
-      case '0':
-        // Not selected into experiment.  Disable the experiment altogether, so
-        // that setupPageExperiments doesn't accidentally enable it.
-        forceExperimentBranch(win, experimentId, false);
-        break;
-      case '1':
-        // Selected in; on control branch.
-        forceExperimentBranch(win, experimentId, branches.control);
-        break;
-      case '2':
-        // Selected in; on experiment branch.
-        forceExperimentBranch(win, experimentId, branches.experiment);
-        break;
-      default:
-        dev.warn('a4a-config', 'Unknown a4a URL parameter: ',
-                 a4aParam[1]);
-    }
+export function extractUrlExperimentId(win, element) {
+  const expParam = Services.viewerForDoc(element).getParam('exp') ||
+    parseQueryString(win.location.search)['exp'];
+  if (!expParam) {
+    return null;
   }
-}
-
-// TODO(tdrl): New test case: Invoke setupPageExperiments twice for different
-// experiment lists.
-
-/**
- * In some browser implementations of Math.random(), sequential calls of
- * Math.random() are correlated and can cause a bias.  In particular,
- * if the previous random() call was < 0.001 (as it will be if we select
- * into an experiment), the next value could be less than 0.5 more than
- * 50.7% of the time.  This provides an implementation that roots down into
- * the crypto API, when available, to produce less biased samples.
- *
- * @return {number} Pseudo-random floating-point value on the range [0, 1).
- */
-function slowButAccuratePrng() {
-  // TODO(tdrl): Implement.
-  return Math.random();
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
+  return arg || null;
 }
 
 /**
- * Container for alternate random number generator implementations.  This
- * allows us to set an "accurate" PRNG for branch selection, but to mock it
- * out easily in tests.
+ * Set experiment state from URL parameter, if present.  This looks for the
+ * presence of a URL parameter of the form
+ *   `exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN`
+ * and interprets the X as one of the following:
+ *   - `-1`: Manually-triggered experiment.  For testing only.  Sets
+ *     `adtest=on` on the ad request, so that it will not bill or record
+ *     user clicks as ad CTR.  Ad request will be accounted in a special
+ *     'testing only' experiment statistic pool so that we can track usage
+ *     of this feature.
+ *   - `0`: Ad is explicitly opted out of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will serve into a 3p iframe, as traditional, but ad
+ *     request and clicks will not be accounted in experiment statistics.
+ *   - `1`: Ad is on the control branch of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will serve into a 3p iframe, and ad requests and
+ *     clicks _will_ be accounted in experiment statistics.
+ *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will render via the A4A path, including early ad
+ *     request and (possibly) early rendering in shadow DOM or iframe.
+ * Allows for per network selection using exp=aa:# for AdSense and exp=da:# for
+ * Doubleclick.
  *
- * @visibleForTesting
- * @const {!{accuratePrng: function():number}}
+ * @param {!Window} win  Window.
+ * @param {!Element} element Ad tag Element.
+ * @param {string} experimentName  Name of the overall experiment.
+ * @param {string} controlBranchId  Experiment ID string for control branch of
+ *   the overall experiment.
+ * @param {string} treatmentBranchId  Experiment ID string for the 'treatment'
+ *   branch of the overall experiment.
+ * @param {string} delayedTreatmentBrandId Experiment ID string for the
+ *   'treatment' plus delayed request experiment.
+ * @param {string} manualId  ID of the manual experiment.
+ * @return {boolean}  Whether the experiment state was set from a command-line
+ *   parameter or not.
  */
-export const RANDOM_NUMBER_GENERATORS = {
-  accuratePrng: slowButAccuratePrng,
-};
-
-/**
- * Selects, uniformly at random, a single property name from all
- * properties set on a given object.
- *
- * @param {!Object} obj Object to select from.
- * @return {string} Single property name from obj.
- */
-function selectRandomProperty(obj) {
-  const allProperties = Object.keys(obj);
-  const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  return allProperties[Math.floor(rn * allProperties.length)];
-}
-
-/**
- * Selects which page-level experiments, if any, a given amp-ad will
- * participate in.  Check experiments using isExperimentOn(win,
- * experimentId) and, if a given experiment is on, look for which
- * branch is selected in win.pageExperimentBranches[experimentId].
- *
- * @param {!Window} win Window context on which to save experiment
- * selection state.
- * @param {ExperimentInfo} experiments  Set of experiments to
- * configure for this page load.
- * @visibleForTesting
- */
-export function setupPageExperiments(win, experiments) {
-  win.pageExperimentBranches = win.pageExperimentBranches || {};
-  if (getMode().localDev) {
-    // In local dev mode, it can be difficult to configure AMP_CONFIG
-    // externally.  Default it here if necessary.
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
+function maybeSetExperimentFromUrl(win, element, experimentName,
+  controlBranchId, treatmentBranchId, delayedControlId,
+  delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
+  const argMapping = {
+    '-1': manualId,
+    '0': null,
+    '1': controlBranchId,
+    '2': treatmentBranchId,
+    '3': delayedControlId,
+    '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
+  };
+  const arg = extractUrlExperimentId(win, element);
+  if (argMapping.hasOwnProperty(arg)) {
+    forceExperimentBranch(win, experimentName, argMapping[arg]);
+    return true;
+  } else {
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
+        ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
+        'branch), or 2 (a4a experiment branch)');
+    return false;
   }
-  for (const experimentId in experiments) {
-    // Skip experimentId if it is not a key of experiments object or if it
-    // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentId) ||
-        win.pageExperimentBranches.hasOwnProperty(experimentId)) {
-      continue;
-    }
-    if (getMode().localDev) {
-      win.AMP_CONFIG[experimentId] = win.AMP_CONFIG[experimentId] || 0.0;
-    }
-    // If we're in the experiment, but we haven't already forced a specific
-    // experiment branch (e.g., via a test setup), then randomize the branch
-    // choice.
-    if (!win.pageExperimentBranches[experimentId] &&
-        isExperimentOn(win, experimentId)) {
-      const branches = experiments[experimentId];
-      const branch = selectRandomProperty(branches);
-      win.pageExperimentBranches[experimentId] = branches[branch];
-    }
-  }
-}
-
-/**
- * Returns the experiment branch enabled for the given experiment ID.
- * For example, 'control' or 'experiment'.
- *
- * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentId ID of the experiment to check.
- * @return {string} Experiment branch ID for experimentId.
- */
-export function getPageExperimentBranch(win, experimentId) {
-  return win.pageExperimentBranches[experimentId];
-}
-
-/**
- * Force enable (or disable) a specific branch of a given experiment ID.
- * Disables the experiment ID altogether if branchId is falseish.
- *
- * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentId ID of the experiment to check.
- * @param {string} branchId ID of branch to force or null/false to disable
- *   altogether.
- * @visibleForTesting
- */
-export function forceExperimentBranch(win, experimentId, branchId) {
-  win.pageExperimentBranches = win.pageExperimentBranches || {};
-  toggleExperiment(win, experimentId, !!branchId, true);
-  win.pageExperimentBranches[experimentId] = branchId;
 }
 
 /**
@@ -234,7 +234,7 @@ export function forceExperimentBranch(win, experimentId, branchId) {
  * that, use validateExperimentIds.
  *
  * @param {?string} idString  String to parse.
- * @returns {!Array<!string>}  List of experiment IDs (possibly empty).
+ * @returns {!Array<string>}  List of experiment IDs (possibly empty).
  * @see validateExperimentIds
  */
 export function parseExperimentIds(idString) {
@@ -245,10 +245,61 @@ export function parseExperimentIds(idString) {
 }
 
 /**
+ * Checks whether the given element is a member of the given experiment branch.
+ * I.e., whether the element's data-experiment-id attribute contains the id
+ * value (possibly because the host page URL contains a 'exp=a4a:X' parameter
+ * and #maybeSetExperimentFromUrl has added the appropriate EID).
+ *
+ * @param element  {!Element}  Element to check for membership in a specific
+ *   experiment.
+ * @param id {?string} Experiment ID to check for on `element`.
+ * @return {boolean}
+ */
+export function isInExperiment(element, id) {
+  return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
+      x => { return x === id; });
+}
+
+/**
+ * Checks whether the given element is a member of the 'manually triggered
+ * "experiment" branch'.  I.e., whether the element's data-experiment-id
+ * attribute contains the MANUAL_EXPERIMENT_ID value (hopefully because the
+ * user has manually specified 'exp=a4a:-1' in the host page URL and
+ * #maybeSetExperimentFromUrl has added it).
+ *
+ * @param {!Element} element  Element to check for manual experiment membership.
+ * @returns {boolean}
+ */
+export function isInManualExperiment(element) {
+  return isInExperiment(element, MANUAL_EXPERIMENT_ID);
+}
+
+/**
+ * Predicate to check whether A4A has launched yet or not.
+ * If it has not yet launched, then the experimental branch serves A4A, and
+ * control/filler do not. If it has not, then the filler and control branch do
+ * serve A4A, and the experimental branch does not.
+ *
+ * @param {!Window} win  Host window for the ad.
+ * @param {!Element} element  Element to check for pre-launch membership.
+ * @returns {boolean}
+ */
+export function hasLaunched(win, element) {
+  switch (element.getAttribute('type')) {
+    case 'adsense':
+      return isExperimentOn(win, 'a4aFastFetchAdSenseLaunched');
+    case 'doubleclick':
+      return isExperimentOn(win, 'a4aFastFetchDoubleclickLaunched');
+    default:
+      return false;
+  }
+}
+
+/**
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *
- * @param {!Array<!string>} idList  List of experiment IDs.  Can be empty.
+ * @param {!Array<string>} idList  List of experiment IDs.  Can be empty.
  * @returns {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
@@ -256,49 +307,16 @@ export function validateExperimentIds(idList) {
 }
 
 /**
- * Add a new experiment ID to a (possibly empty) existing set of experiment IDs.
- * The {@code currentIdString} may be {@code null} or {@code ''}, but if it is
- * populated, it must contain a comma-separated list of integer experiment IDs
- * (per {@code parseExperimentIds()}).  Returns the new set of IDs, encoded
- * as a comma-separated list.  Does not de-duplicate ID entries.
- *
- * @param {!string} newId  ID to merge in.  Must be a stringified integer
- *   (base 10).
- * @param {?string} currentIdString  If present, a string containing a
- *   comma-separated list of integer experiment IDs.
- * @returns {string}  New experiment list string, including newId iff it is
- *   a valid (integer) experiment ID.
- * @see parseExperimentIds, validateExperimentIds
- */
-export function mergeExperimentIds(newId, currentIdString) {
-  if (newId && !isNaN(parseInt(newId, 10))) {
-    return currentIdString ? (currentIdString + ',' + newId) : newId;
-  }
-  return currentIdString || '';
-}
-
-/**
- * Element attribute that stores experiment IDs.
- *
- * Note: This attribute should be used only for tracking experimental
- * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
- * added by a publisher page.
- *
- * @const {!string}
- */
-export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
-
-/**
  * Adds a single experimentID to an element iff it's a valid experiment ID.
  *
- * @param {!string} experimentId  ID to add to the element.
- * @param element  Element to add the experiment ID to.
+ * @param {string} experimentId  ID to add to the element.
+ * @param element Element to add the experiment ID to.
  */
 export function addExperimentIdToElement(experimentId, element) {
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
     element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds(experimentId, currentEids));
+        mergeExperimentIds([experimentId], currentEids));
   } else {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }

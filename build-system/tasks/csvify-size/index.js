@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
-var BBPromise = require('bluebird');
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const BBPromise = require('bluebird');
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
+const colors = require('ansi-colors');
+const fs = BBPromise.promisifyAll(require('fs'));
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 
+
+const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
 /**
- * @typedef {!Array<Fields>}
+ * @typedef {!Array<FieldsDef>}
  */
-var Tables;
+let TablesDef;
 
 /**
  * @typedef {{
@@ -35,17 +39,15 @@ var Tables;
  *   size: string
  * }}
  */
-var Fields;
+let FieldsDef;
 
-var filePath = 'test/size.txt';
+const filePath = 'test/size.txt';
 
-var fileSizes = Object.create(null);
-
-var tableHeaders = [
-  ['"datetime"']
+const tableHeaders = [
+  ['"datetime"'],
 ];
 
-var dateTimes = [];
+const dateTimes = [];
 
 /**
  * @param {string} format
@@ -58,16 +60,15 @@ function getLog(format) {
 
 /**
  * @param {string} file
- * @return {!Tables}
+ * @return {!TablesDef}
  */
 function parseSizeFile(file) {
-  var lines = file.trim().split('\n');
-  var minSizePos = 0;
-  var headers = lines[0].trim().split('|').map(x => x.trim());
-  var minPos = -1;
+  const lines = file.trim().split('\n');
+  const headers = lines[0].trim().split('|').map(x => x.trim());
+  let minPos = -1;
   // Find the "min" column which is the closure compiled or the "size" column
   // which was previously babelify compiled file.
-  for (var i = 0; i < headers.length; i++) {
+  for (let i = 0; i < headers.length; i++) {
     if (headers[i] == 'min' || headers[i] == 'size') {
       minPos = i;
       break;
@@ -80,12 +81,13 @@ function parseSizeFile(file) {
   lines.shift();
 
   return lines.map(line => {
-    var columns = line.split('|').map(x => x.trim());
-    var name = columns[columns.length - 1];
+    const columns = line.split('|').map(x => x.trim());
+    let name = columns[columns.length - 1];
 
     // Older size.txt files contained duplicate entries of the same "entity",
     // for example a file had an entry for its .min and its .max file.
-    var shouldSkip = (name.endsWith('max.js') && !name.endsWith('alp.max.js'))
+    const shouldSkip = (name.endsWith('max.js') &&
+        !name.endsWith('alp.max.js') && !/\s\/\s/.test(name))
         || name == 'current/integration.js' || name == 'amp.js' ||
         name == 'cc.js' || name.endsWith('-latest.js');
 
@@ -105,37 +107,43 @@ function parseSizeFile(file) {
     } else if (name == 'alp.max.js' || name == 'alp.js / install-alp.js' ||
         name == 'alp.js / alp.max.js') {
       name = 'alp.js';
+    } else if (name == 'sw.js / sw.max.js') {
+      name = 'sw.js';
+    } else if (name == 'sw-kill.js / sw-kill.max.js') {
+      name = 'sw-kill.js';
+    } else if (name == 'a4a-host-v0.js / amp-inabox-host.js') {
+      name = 'amp4ads-host-v0.js / amp-inabox-host.js';
+    } else if (name == 'a4a-v0.js / amp-inabox.js') {
+      name = 'amp4ads-v0.js / amp-inabox.js';
     }
 
     return {
       name: `"${name}"`,
-      size: `"${columns[minPos]}"`,
+      size: `"${reversePrettyBytes(columns[minPos])}"`,
     };
   }).filter(x => !!x);
 }
 
 /**
  * @param {!Array<string>} dateTimes
- * @param {!Tables} tables
+ * @param {!TablesDef} tables
  * @return {!Array<!Array<string>>}
  */
 function mergeTables(dateTimes, tables) {
   // Where key is filename
   /** @typedef {!Object<string, !Array<{size: string, date: string}>>} */
-  var obj = Object.create(null);
-  var rows = [];
+  const obj = Object.create(null);
+  const rows = [];
 
   // Aggregate all fields with same file name into an array
   tables.forEach(table => {
     table.forEach(field => {
-      var name = field.name;
+      const name = field.name;
       if (!obj[name]) {
         obj[name] = [];
       }
-      // Match only numeric values
-      var size = (field.size.match(/\d+(?:\.\d+)?/) || [])[0] || '';
       obj[name].push({
-        size: `"${size}"`,
+        size: field.size,
         dateTime: field.dateTime,
       });
     });
@@ -154,14 +162,15 @@ function mergeTables(dateTimes, tables) {
   // populate all other columns with their respective file size if any.
   dateTimes.forEach(dateTime => {
     // Seed array with empty string values
-    var row = Array.apply(null, Array(tableHeaders[0].length)).map(x => '""');
+    const row =
+        Array.apply(null, Array(tableHeaders[0].length)).map(() => '""');
     rows.push(row);
     row[0] = dateTime;
     // Exclude the datetime column
     tableHeaders[0].slice(1).forEach((fileName, colIdx) => {
-      var colIdx = colIdx + 1;
-      var curField = null;
-      for (var i = 0; i < obj[fileName].length; i++) {
+      colIdx = colIdx + 1;
+      let curField = null;
+      for (let i = 0; i < obj[fileName].length; i++) {
         curField = obj[fileName][i];
         if (curField.dateTime == dateTime) {
           row[colIdx] = curField.size;
@@ -174,16 +183,36 @@ function mergeTables(dateTimes, tables) {
 }
 
 /**
+ * @param {string} prettyBytes
+ * @return {number}
+ */
+function reversePrettyBytes(prettyBytes) {
+  const triple = prettyBytes.match(
+      /(\d+(?:\.\d+)?)\s+(B|kB|MB|GB|TB|PB|EB|ZB|YB)/);
+  if (!triple) {
+    throw new Error('No matching bytes data found');
+  }
+  const value = triple[1];
+  const unit = triple[2];
+
+  if (!(value && unit)) {
+    return 0;
+  }
+  const exponent = prettyBytesUnits.indexOf(unit);
+  return (Number(value) * Math.pow(1000, exponent)).toFixed(3);
+}
+
+/**
  * Iterates through the commits and tries to checkout the file
  * @param {!Array<string>} logs
  * @return {!Promise}
  */
 function serializeCheckout(logs) {
-  var tables = [];
-  var promise = logs.reduce((acc, cur, i) => {
-    var parts = logs[i].split(' ');
-    var sha = parts.shift();
-    var dateTime = parts.join(' ');
+  const tables = [];
+  const promise = logs.reduce((acc, cur, i) => {
+    const parts = logs[i].split(' ');
+    const sha = parts.shift();
+    const dateTime = parts.join(' ');
 
     return acc.then(tables => {
       // We checkout all the known commits for the file and accumulate
@@ -191,10 +220,10 @@ function serializeCheckout(logs) {
       return exec(`git checkout ${sha} ${filePath}`).then(() => {
         return fs.readFileAsync(`${filePath}`);
       }).then(file => {
-        var quotedDateTime = `"${dateTime}"`;
+        const quotedDateTime = `"${dateTime}"`;
         dateTimes.push(quotedDateTime);
         // We convert the read file string into an Table objects
-        var fields = parseSizeFile(file.toString()).map(field => {
+        const fields = parseSizeFile(file.toString()).map(field => {
           field.dateTime = quotedDateTime;
           return field;
         });
@@ -207,7 +236,7 @@ function serializeCheckout(logs) {
           tables.push([]);
           return tables;
         }
-        util.log(util.colors.red(e.message));
+        log(colors.red(e.message));
       });
     });
   }, Promise.resolve(tables));
@@ -215,13 +244,13 @@ function serializeCheckout(logs) {
 }
 
 function csvify() {
-  var shaAndDate = "%H %ai";
+  const shaAndDate = '%H %ai';
   return getLog(shaAndDate)
       .then(logs => {
         // Reverse it from oldest to newest
         return serializeCheckout(logs.reverse()).then(rows => {
           rows.unshift.apply(rows, tableHeaders);
-          var tbl = rows.map(row => row.join(',')).join('\n');
+          const tbl = rows.map(row => row.join(',')).join('\n');
           return fs.writeFileAsync('test/size.csv', `${tbl}\n`);
         });
       });

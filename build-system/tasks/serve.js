@@ -13,34 +13,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
-var webserver = require('gulp-webserver');
-var app = require('../server').app;
+const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const nodemon = require('nodemon');
 
-var port = argv.port || process.env.PORT || 8000;
-var useHttps = argv.https != undefined;
+const host = argv.host || 'localhost';
+const port = argv.port || process.env.PORT || 8000;
+const useHttps = argv.https != undefined;
+const quiet = argv.quiet != undefined;
+const sendCachingHeaders = argv.cache != undefined;
 
 /**
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port,
-        host: '0.0.0.0',
-        directoryListing: true,
-        https: useHttps,
-        middleware: [app]
-      }));
+  // Get the serve mode
+  if (argv.compiled) {
+    process.env.SERVE_MODE = 'compiled';
+    log(colors.green('Serving minified js'));
+  } else if (argv.cdn) {
+    process.env.SERVE_MODE = 'cdn';
+    log(colors.green('Serving current prod js'));
+  } else {
+    process.env.SERVE_MODE = 'default';
+    log(colors.green('Serving unminified js'));
+  }
 
-  util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples.build/article.amp.max.html'
-  ));
-  return server;
+  nodemon({
+    script: require.resolve('../server.js'),
+    watch: [
+      require.resolve('../app.js'),
+      require.resolve('../server.js'),
+    ],
+    env: {
+      'NODE_ENV': 'development',
+      'SERVE_PORT': port,
+      'SERVE_HOST': host,
+      'SERVE_USEHTTPS': useHttps,
+      'SERVE_PROCESS_ID': process.pid,
+      'SERVE_QUIET': quiet,
+      'SERVE_CACHING_HEADERS': sendCachingHeaders,
+    },
+    stdout: !quiet,
+  }).once('quit', function() {
+    log(colors.green('Shutting down server'));
+  });
 }
+
+process.on('SIGINT', function() {
+  process.exit();
+});
 
 gulp.task(
     'serve',
@@ -48,12 +74,18 @@ gulp.task(
     serve,
     {
       options: {
+        'host': '  Hostname or IP address to bind to (default: localhost)',
         'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)'
-      }
+        'https': '  Use HTTPS server (default: false)',
+        'quiet': '  Do not log HTTP requests (default: false)',
+        'cache': '  Make local resources cacheable by the browser ' +
+            '(default: false)',
+      },
     }
 );
 
 function getHost() {
-  return (useHttps ? 'https' : 'http') + '://localhost:' + port;
+  return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
+
+exports.serve = serve;

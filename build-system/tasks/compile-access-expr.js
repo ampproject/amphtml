@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var jison = require('jison');
-var gulp = require('gulp');
-var fs = require('fs-extra');
+const fs = require('fs-extra');
+const gulp = require('gulp');
+const jison = require('jison');
 
 gulp.task('compile-access-expr', function() {
-  var path = 'extensions/amp-access/0.1/';
+  const path = 'extensions/amp-access/0.1/';
 
-  var bnf = fs.readFileSync(path + 'access-expr-impl.jison', 'utf8');
-  var settings = {type: 'lalr', debug: false, moduleType: 'js'};
-  var generator = new jison.Generator(bnf, settings);
-  var jsModule = generator.generate(settings);
+  const bnf = fs.readFileSync(path + 'access-expr-impl.jison', 'utf8');
+  const settings = {type: 'lalr', debug: false, moduleType: 'js'};
+  const generator = new jison.Generator(bnf, settings);
+  const jsModule = generator.generate(settings);
 
-  var license = fs.readFileSync(
+  const license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
-  var jsExports = 'exports.parser = parser;';
+  const jsExports = 'exports.parser = parser;';
 
-  var out = license + '\n\n' + jsModule + '\n\n' + jsExports + '\n';
+  const out = license + '\n\n' + jsModule + '\n\n' + jsExports + '\n';
   fs.writeFileSync(path + 'access-expr-impl.js', out);
 });

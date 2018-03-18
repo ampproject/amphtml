@@ -26,12 +26,12 @@ This method allow you to call one ad position with a specific configuration.
 
 ### a. Basic Example
 
-```
+```html
 <amp-ad width=300
         height=250
         type="webediads"
-        data-site="allocine"
-        data-page="fichefilm"
+        data-site="site_test"
+        data-page="amp"
         data-position="middle"
         data-query="">
 </amp-ad>
@@ -39,14 +39,28 @@ This method allow you to call one ad position with a specific configuration.
 
 ### b. Query Example
 
-```
+```html
 <amp-ad width=300
         height=250
         type="webediads"
-        data-sitename="allocine"
-        data-pagename="fichefilm"
+        data-site="site_test"
+        data-page="amp"
         data-position="middle"
-        data-query="movie=28765&genre=13008|13009">
+        data-query="amptest=1">
+</amp-ad>
+```
+
+### c. Placeholder and Fallback example
+```html
+<amp-ad width=300
+        height=250
+        type="webediads"
+        data-site="site_test"
+        data-page="amp"
+        data-position="middle"
+        data-query="amptest=1">
+    <div placeholder>Loading...</div>
+    <div fallback>No ad</div>
 </amp-ad>
 ```
 
@@ -60,11 +74,11 @@ All parameters are mandatory, only "query" can be empty.
 - ```data-page``` (String, non-empty)
 - ```data-position``` (String, non-empty)
 - ```data-query``` (String)
-  - ```key``` are separated with ```&```
-  - ```value``` are separted with ```|```
+    - ```key``` are separated with ```&```
+    - ```value``` are separted with ```|```
 
-__Example__
-  - ```key1=value1|value2|value3&key2=value4&key3=value5|value6```
+    __Example__
+    - ```key1=value1|value2|value3&key2=value4&key3=value5|value6```
 
 
 ## 5. Support

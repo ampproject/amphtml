@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpVimeo extends AMP.BaseElement {
 
-  /** @override */
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url('https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
@@ -36,10 +46,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    // The video-id is supported only for backward compatibility.
-    const videoid = user.assert(
+    const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);
@@ -51,12 +58,9 @@ class AmpVimeo extends AMP.BaseElement {
     iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(
         videoid);
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -64,12 +68,15 @@ class AmpVimeo extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // See
       // https://developer.vimeo.com/player/js-api
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
         'method': 'pause',
         'value': '',
-      }), '*');
+      })), '*');
     }
   }
-};
+}
 
-AMP.registerElement('amp-vimeo', AmpVimeo);
+
+AMP.extension('amp-vimeo', '0.1', AMP => {
+  AMP.registerElement('amp-vimeo', AmpVimeo);
+});

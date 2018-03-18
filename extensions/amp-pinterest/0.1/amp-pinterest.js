@@ -36,12 +36,12 @@
  */
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
-
 import {FollowButton} from './follow-button';
 import {PinItButton} from './pinit-button';
+
 import {PinWidget} from './pin-widget';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 
 /**
  * AMP Pinterest
@@ -51,7 +51,10 @@ import {PinWidget} from './pin-widget';
  */
 class AmpPinterest extends AMP.BaseElement {
 
-  /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // preconnect to widget APIpinMedia
     this.preconnect.url('https://widgets.pinterest.com', onLayout);
@@ -64,9 +67,9 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const selector = user.assert(this.element.getAttribute('data-do'),
-      'The data-do attribute is required for <amp-pinterest> %s',
-      this.element);
+    const selector = user().assert(this.element.getAttribute('data-do'),
+        'The data-do attribute is required for <amp-pinterest> %s',
+        this.element);
 
     return this.render(selector).then(node => {
       return this.element.appendChild(node);
@@ -82,9 +85,11 @@ class AmpPinterest extends AMP.BaseElement {
       case 'buttonFollow':
         return new FollowButton(this.element).render();
     }
-    return Promise.resolve('Invalid selector: ', selector);
+    return Promise.reject(user().createError('Invalid selector: ' + selector));
   }
+}
 
-};
 
-AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+AMP.extension('amp-pinterest', '0.1', AMP => {
+  AMP.registerElement('amp-pinterest', AmpPinterest, CSS);
+});

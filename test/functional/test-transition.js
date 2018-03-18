@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as tr from '../../src/transition';
 import * as sinon from 'sinon';
+import * as tr from '../../src/transition';
 
 describe('Transition', () => {
 
@@ -34,26 +34,75 @@ describe('Transition', () => {
     const func2 = sandbox.spy();
     const all = tr.all([func1, func2]);
 
-    expect(func1.callCount).to.equal(0);
-    expect(func2.callCount).to.equal(0);
+    expect(func1).to.have.not.been.called;
+    expect(func2).to.have.not.been.called;
 
     all(0, false);
-    expect(func1.callCount).to.equal(1);
-    expect(func1.calledWithExactly(0, false)).to.equal(true);
-    expect(func2.callCount).to.equal(1);
-    expect(func2.calledWithExactly(0, false)).to.equal(true);
+    expect(func1).to.be.calledOnce;
+    expect(func1).to.be.calledWithExactly(0, false);
+    expect(func2).to.be.calledOnce;
+    expect(func2).to.be.calledWithExactly(0, false);
 
     all(0.5, false);
-    expect(func1.callCount).to.equal(2);
-    expect(func1.calledWithExactly(0.5, false)).to.equal(true);
-    expect(func2.callCount).to.equal(2);
-    expect(func2.calledWithExactly(0.5, false)).to.equal(true);
+    expect(func1).to.have.callCount(2);
+    expect(func1).to.be.calledWithExactly(0.5, false);
+    expect(func2).to.have.callCount(2);
+    expect(func2).to.be.calledWithExactly(0.5, false);
 
     all(1, true);
-    expect(func1.callCount).to.equal(3);
-    expect(func1.calledWithExactly(1, true)).to.equal(true);
-    expect(func2.callCount).to.equal(3);
-    expect(func2.calledWithExactly(1, true)).to.equal(true);
+    expect(func1).to.have.callCount(3);
+    expect(func1).to.be.calledWithExactly(1, true);
+    expect(func2).to.have.callCount(3);
+    expect(func2).to.be.calledWithExactly(1, true);
+  });
+
+  describe('concat', () => {
+    it('should concat two string transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t2 = tr.scale(tr.numeric(0, 10));
+      const concat = tr.concat([t1, t2]);
+
+      expect(concat(0, false)).to.equal('translateX(0px) scale(0)');
+      expect(concat(0.5, false)).to.equal('translateX(5px) scale(5)');
+      expect(concat(1, true)).to.equal('translateX(10px) scale(10)');
+    });
+
+    it('should handle single transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const concat = tr.concat([t1]);
+
+      expect(concat(0, false)).to.equal('translateX(0px)');
+      expect(concat(0.5, false)).to.equal('translateX(5px)');
+      expect(concat(1, true)).to.equal('translateX(10px)');
+    });
+
+    it('should handle empty input', () => {
+      const concat = tr.concat([]);
+
+      expect(concat(0, false)).to.equal('');
+      expect(concat(0.5, false)).to.equal('');
+      expect(concat(1, true)).to.equal('');
+    });
+
+    it('should ignore non-string transitions', () => {
+      const t1 = tr.translateX(tr.numeric(0, 10));
+      const t2 = tr.spring(2, 10, 12, 0.8);
+      const concat = tr.concat([t1, t2]);
+
+      expect(concat(0, false)).to.equal('translateX(0px)');
+      expect(concat(0.5, false)).to.equal('translateX(5px)');
+      expect(concat(1, true)).to.equal('translateX(10px)');
+    });
+
+    it('should support other delimeters', () => {
+      const t1 = tr.px(tr.numeric(0, 10));
+      const t2 = tr.px(tr.numeric(0, 20));
+      const concat = tr.concat([t1, t2], ', ');
+
+      expect(concat(0, false)).to.equal('0px, 0px');
+      expect(concat(0.5, false)).to.equal('5px, 10px');
+      expect(concat(1, true)).to.equal('10px, 20px');
+    });
   });
 
   it('withCurve', () => {
@@ -112,7 +161,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(11, 1e-3);
     expect(func(1)).to.equal(10);
 
@@ -120,7 +169,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(-2);
     expect(func(0.3)).to.be.closeTo(-5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(-9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(-12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(-12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(-11, 1e-3);
     expect(func(1)).to.equal(-10);
   });

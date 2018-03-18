@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from './timer';
+import {Services} from './services';
 
 
 /**
@@ -32,12 +32,12 @@ export class Pass {
    *   is called without one.
    */
   constructor(win, handler, opt_defaultDelay) {
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {function()} */
     this.handler_ = handler;
 
-    /** @private @const {number|string} */
+    /** @private @const {number} */
     this.defaultDelay_ = opt_defaultDelay || 0;
 
     /** @private {number|string} */
@@ -49,7 +49,7 @@ export class Pass {
     /** @private {boolean} */
     this.running_ = false;
 
-    /** @private @const */
+    /** @private @const {!Function} */
     this.boundPass_ = () => this.pass_();
   }
 
@@ -82,7 +82,7 @@ export class Pass {
       delay = 10;
     }
 
-    const nextTime = this.timer_.now() + delay;
+    const nextTime = Date.now() + delay;
     // Schedule anew if nothing is scheduled currently or if the new time is
     // sooner then previously requested.
     if (!this.isPending() || nextTime - this.nextTime_ < -10) {

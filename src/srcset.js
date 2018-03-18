@@ -28,6 +28,14 @@ import {dev, user} from './log';
  */
 let SrcsetSourceDef;
 
+/**
+ * General grammar: (URL [NUM[w|x]],)*
+ * Example 1: "image1.png 100w, image2.png 50w"
+ * Example 2: "image1.png 2x, image2.png"
+ * Example 3: "image1,100w.png 100w, image2.png 50w"
+ */
+const srcsetRegex =
+    /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
 
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
@@ -42,57 +50,48 @@ export function srcsetFromElement(element) {
   // We can't push `src` via `parseSrcset` because URLs in `src` are not always
   // RFC compliant and can't be easily parsed as an `srcset`. For instance,
   // they sometimes contain space characters.
-  const srcAttr = user.assert(element.getAttribute('src'),
+  const srcAttr = user().assert(element.getAttribute('src'),
       'Either non-empty "srcset" or "src" attribute must be specified: %s',
       element);
-  return new Srcset([{url: srcAttr, width: undefined, dpr: 1}]);
+  return srcsetFromSrc(srcAttr);
 }
 
+/**
+ * Creates a Srcset from a `src` attribute value.
+ * @param {string} src
+ * @return {!Srcset}
+ */
+export function srcsetFromSrc(src) {
+  return new Srcset([{url: src, width: undefined, dpr: 1}]);
+}
 
 /**
  * Parses the text representation of srcset into Srcset object.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
- * @param {!Element=} opt_element
  * @return {!Srcset}
  */
-export function parseSrcset(s, opt_element) {
-  // General grammar: (URL [NUM[w|x]],)*
-  // Example 1: "image1.png 100w, image2.png 50w"
-  // Example 2: "image1.png 2x, image2.png"
-  // Example 3: "image1,100w.png 100w, image2.png 50w"
-  const sSources = s.match(
-      /\s*(?:[\S]*)(?:\s+(?:-?(?:\d+(?:\.(?:\d+)?)?|\.\d+)[a-zA-Z]))?(?:\s*,)?/g
-  );
-  user.assert(sSources.length > 0,
-      'srcset has to have at least one source: %s',
-      opt_element);
+export function parseSrcset(s) {
   const sources = [];
-  for (let i = 0; i < sSources.length; i++) {
-    let sSource = sSources[i].trim();
-    if (sSource.substr(-1) == ',') {
-      sSource = sSource.substr(0, sSource.length - 1).trim();
-    }
-    const parts = sSource.split(/\s+/, 2);
-    if (parts.length == 0 ||
-          parts.length == 1 && !parts[0] ||
-          parts.length == 2 && !parts[0] && !parts[1]) {
-      continue;
-    }
-    const url = parts[0];
-    if (parts.length == 1 || parts.length == 2 && !parts[1]) {
-      // If no "w" or "x" specified, we assume it's "1x".
-      sources.push({url, width: undefined, dpr: 1});
-    } else {
-      const spec = parts[1].toLowerCase();
-      const lastChar = spec.substring(spec.length - 1);
-      if (lastChar == 'w') {
-        sources.push({url, width: parseFloat(spec), dpr: undefined});
-      } else if (lastChar == 'x') {
-        sources.push({url, width: undefined, dpr: parseFloat(spec)});
+  let match;
+  while ((match = srcsetRegex.exec(s))) {
+    const url = match[1];
+    let width, dpr;
+    if (match[2]) {
+      const type = match[3].toLowerCase();
+      if (type == 'w') {
+        width = parseInt(match[2], 10);
+      } else if (type == 'x') {
+        dpr = parseFloat(match[2]);
+      } else {
+        continue;
       }
+    } else {
+      // If no "w" or "x" specified, we assume it's "1x".
+      dpr = 1;
     }
+    sources.push({url, width, dpr});
   }
   return new Srcset(sources);
 }
@@ -115,30 +114,23 @@ export class Srcset {
    * @param {!Array<!SrcsetSourceDef>} sources
    */
   constructor(sources) {
-    user.assert(sources.length > 0, 'Srcset must have at least one source');
+    user().assert(sources.length > 0, 'Srcset must have at least one source');
     /** @private @const {!Array<!SrcsetSourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
     let hasWidth = false;
     let hasDpr = false;
-    for (let i = 0; i < this.sources_.length; i++) {
-      const source = this.sources_[i];
-      user.assert(
-          (source.width || source.dpr) && (!source.width || !source.dpr),
-          'Either dpr or width must be specified');
+    for (let i = 0; i < sources.length; i++) {
+      const source = sources[i];
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
     }
-    user.assert(!hasWidth || !hasDpr,
-        'Srcset cannot have both width and dpr sources');
+    user().assert(!!(hasWidth ^ hasDpr),
+        'Srcset must have width or dpr sources, but not both');
 
     // Source and assert duplicates.
-    if (hasWidth) {
-      this.sources_.sort(sortByWidth);
-    } else {
-      this.sources_.sort(sortByDpr);
-    }
+    sources.sort(hasWidth ? sortByWidth : sortByDpr);
 
     /** @private @const {boolean} */
     this.widthBased_ = hasWidth;
@@ -173,119 +165,110 @@ export class Srcset {
    * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
    * @param {number} width
    * @param {number} dpr
-   * @return {!SrcsetSourceDef}
+   * @return {string}
    */
   select(width, dpr) {
-    dev.assert(width, 'width=%s', width);
-    dev.assert(dpr, 'dpr=%s', dpr);
-    let index = -1;
+    dev().assert(width, 'width=%s', width);
+    dev().assert(dpr, 'dpr=%s', dpr);
+    let index = 0;
     if (this.widthBased_) {
-      index = this.selectByWidth_(width, dpr);
-    } else if (this.dprBased_) {
-      index = this.selectByDpr_(width, dpr);
+      index = this.selectByWidth_(width * dpr);
+    } else {
+      index = this.selectByDpr_(dpr);
     }
-    if (index != -1) {
-      return this.sources_[index];
-    }
-    return this.getLast();
+    return this.sources_[index].url;
   }
 
   /**
    * @param {number} width
-   * @param {number} dpr
    * @return {number}
    * @private
    */
-  selectByWidth_(width, dpr) {
-    let minIndex = -1;
-    let minWidth = 1000000;
-    let minScore = 1000000;
-    for (let i = 0; i < this.sources_.length; i++) {
-      const source = this.sources_[i];
-      let sourceWidth;
-      if (source.width) {
-        sourceWidth = source.width / dpr;
+  selectByWidth_(width) {
+    const sources = this.sources_;
+    let minIndex = 0;
+    let minScore = Infinity;
+    let minWidth = Infinity;
+
+    for (let i = 0; i < sources.length; i++) {
+      const sWidth = sources[i].width;
+      const score = Math.abs(sWidth - width);
+
+      // Select the one that is closer with a slight preference toward larger
+      // widths. If smaller size is closer, enforce minimum ratio to ensure
+      // image isn't too distorted.
+      if (score <= minScore * 1.1 || width / minWidth > 1.2) {
+        minIndex = i;
+        minScore = score;
+        minWidth = sWidth;
       } else {
-        // Default source: no width: assume values are half of of the
-        // minimum values seen.
-        sourceWidth = minWidth / 2;
-      }
-      minWidth = Math.min(minWidth, sourceWidth);
-      // The calculation is slightly biased toward higher width by offsetting
-      // score by negative 0.2.
-      const score = Math.abs((sourceWidth - width) / width - 0.2);
-      if (score < minScore) {
-        minScore = score;
-        minIndex = i;
+        break;
       }
     }
     return minIndex;
   }
 
   /**
-   * @param {number} _width
    * @param {number} dpr
    * @return {number}
    * @private
    */
-  selectByDpr_(_width, dpr) {
-    let minIndex = -1;
-    let minScore = 1000000;
-    for (let i = 0; i < this.sources_.length; i++) {
-      const source = this.sources_[i];
-      // Default DPR = 1.
-      const sourceDpr = source.dpr || 1;
-      const score = Math.abs(sourceDpr - dpr);
-      if (score < minScore) {
-        minScore = score;
+  selectByDpr_(dpr) {
+    const sources = this.sources_;
+    let minIndex = 0;
+    let minScore = Infinity;
+
+    for (let i = 0; i < sources.length; i++) {
+      const score = Math.abs(sources[i].dpr - dpr);
+      if (score <= minScore) {
         minIndex = i;
+        minScore = score;
+      } else {
+        break;
       }
     }
     return minIndex;
   }
 
   /**
-   * Returns the last source in the srcset, which is the default source.
-   * @return {!SrcsetSourceDef}
+   * Returns all URLs in the srcset.
+   * @return {!Array<string>}
    */
-  getLast() {
-    return this.sources_[this.sources_.length - 1];
-  }
-
-  /**
-   * Returns all sources in the srcset.
-   * @return {!Array<!SrcsetSourceDef>}
-   */
-  getSources() {
-    return this.sources_;
+  getUrls() {
+    return this.sources_.map(s => s.url);
   }
 
   /**
    * Reconstructs the string expression for this srcset.
+   * @param {function(string):string=} opt_mapper
    * @return {string}
    */
-  stringify() {
+  stringify(opt_mapper) {
     const res = [];
-    for (let i = 0; i < this.sources_.length; i++) {
-      const source = this.sources_[i];
-      if (source.width) {
-        res.push(`${source.url} ${source.width}w`);
-      } else if (source.dpr) {
-        res.push(`${source.url} ${source.dpr}x`);
-      } else {
-        res.push(`${source.url}`);
+    const sources = this.sources_;
+    for (let i = 0; i < sources.length; i++) {
+      const source = sources[i];
+      let src = source.url;
+      if (opt_mapper) {
+        src = opt_mapper(src);
       }
+      if (this.widthBased_) {
+        src += ` ${source.width}w`;
+      } else {
+        src += ` ${source.dpr}x`;
+      }
+      res.push(src);
     }
     return res.join(', ');
   }
 }
 
 function sortByWidth(s1, s2) {
-  user.assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
-  return s2.width - s1.width;
+  user().assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
+  return s1.width - s2.width;
 }
 
 function sortByDpr(s1, s2) {
-  user.assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
-  return s2.dpr - s1.dpr;
+  user().assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
+  return s1.dpr - s2.dpr;
 }

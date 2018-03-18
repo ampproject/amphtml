@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
+
 /**
  * Get social share configurations by supported type.
- * @param  {!string} type
+ * @param  {string} type
  * @return {!Object}
  */
 export function getSocialConfig(type) {
@@ -24,46 +26,75 @@ export function getSocialConfig(type) {
 }
 
 /**
- * @type {Object<string, Object>}
+ * @type {!JsonObject}
  */
-const BUILTINS = {
-  twitter: {
-    shareEndpoint: 'https://twitter.com/intent/tweet',
-    defaultParams: {
-      text: 'TITLE',
-      url: 'CANONICAL_URL',
+const BUILTINS = dict({
+  'twitter': {
+    'shareEndpoint': 'https://twitter.com/intent/tweet',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
     },
   },
-  facebook: {
-    shareEndpoint: 'https://www.facebook.com/dialog/share',
-    defaultParams: {
-      href: 'CANONICAL_URL',
+  'facebook': {
+    'shareEndpoint': 'https://www.facebook.com/dialog/share',
+    'defaultParams': {
+      'href': 'CANONICAL_URL',
     },
   },
-  pinterest: {
-    shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
-    defaultParams: {
-      url: 'CANONICAL_URL',
+  'pinterest': {
+    'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
+      'description': 'TITLE',
     },
   },
-  linkedin: {
-    shareEndpoint: 'https://www.linkedin.com/shareArticle',
-    defaultParams: {
-      url: 'CANONICAL_URL',
-      mini: 'true',
+  'linkedin': {
+    'shareEndpoint': 'https://www.linkedin.com/shareArticle',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
+      'mini': 'true',
     },
   },
-  gplus: {
-    shareEndpoint: 'https://plus.google.com/share',
-    defaultParams: {
-      url: 'CANONICAL_URL',
+  'gplus': {
+    'shareEndpoint': 'https://plus.google.com/share',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
     },
   },
-  email: {
-    shareEndpoint: 'mailto:',
-    defaultParams: {
-      subject: 'TITLE',
-      body: 'CANONICAL_URL',
+  'email': {
+    'bindings': ['recipient'],
+    'shareEndpoint': 'mailto:RECIPIENT',
+    'defaultParams': {
+      'subject': 'TITLE',
+      'body': 'CANONICAL_URL',
+      'recipient': '',
     },
   },
-};
+  'tumblr': {
+    'shareEndpoint': 'https://www.tumblr.com/share/link',
+    'defaultParams': {
+      'name': 'TITLE',
+      'url': 'CANONICAL_URL',
+    },
+  },
+  'whatsapp': {
+    'shareEndpoint': 'https://api.whatsapp.com/send',
+    'defaultParams': {
+      'text': 'TITLE - CANONICAL_URL',
+    },
+  },
+  'sms': {
+    'shareEndpoint': 'sms:',
+    'defaultParams': {
+      'body': 'TITLE - CANONICAL_URL',
+    },
+  },
+  'system': {
+    'shareEndpoint': 'navigator-share:',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    },
+  },
+});

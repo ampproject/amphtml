@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 import * as sinon from 'sinon';
+import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 
 describe('LoginDoneDialog', () => {
@@ -195,7 +195,7 @@ describe('LoginDoneDialog', () => {
           .then(() => 'SUCCESS', error => 'ERROR ' + error)
           .then(res => {
             expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace).to.be.calledOnce;
             expect(windowApi.location.replace.firstCall.args[0]).to.equal(
                 'http://acme.com/doc1');
           });
@@ -209,7 +209,7 @@ describe('LoginDoneDialog', () => {
           .then(() => 'SUCCESS', error => 'ERROR ' + error)
           .then(res => {
             expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace).to.be.calledOnce;
             expect(windowApi.location.replace.firstCall.args[0]).to.equal(
                 'https://acme.com/doc1');
           });
@@ -222,7 +222,7 @@ describe('LoginDoneDialog', () => {
       expect(() => {
         dialog.postbackOrRedirect_();
       }).to.throw(/URL must start with/);
-      expect(windowApi.location.replace.callCount).to.equal(0);
+      expect(windowApi.location.replace).to.have.not.been.called;
     });
 
     it('should fail without opener and redirect URL', () => {
@@ -261,10 +261,10 @@ describe('LoginDoneDialog', () => {
       windowMock.expects('close').once();
       dialog.postbackError_ = sandbox.spy();
       dialog.postbackSuccess_();
-      expect(dialog.postbackError_.callCount).to.equal(0);
+      expect(dialog.postbackError_).to.have.not.been.called;
 
       clock.tick(10000);
-      expect(dialog.postbackError_.callCount).to.equal(1);
+      expect(dialog.postbackError_).to.be.calledOnce;
     });
 
     it('should configure error mode for "postback"', () => {

@@ -7,5 +7,6 @@ HTML Sanitizer.
 Run compile.sh to generate a new version.
 
 Local Modifications:
-Export to ES6.
-Change unicode literal to unicode escaped character. (see https://github.com/google/caja/issues/1978)
+* Export to ES6
+* Change html attribute regex to optionally accept bracketed attribute names for amp-bind
+* Add <template> to the list of allowed elements

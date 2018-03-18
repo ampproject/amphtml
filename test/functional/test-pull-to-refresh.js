@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 import * as sinon from 'sinon';
+import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
 
 describe('PullToRefreshBlocker', () => {
@@ -41,7 +41,7 @@ describe('PullToRefreshBlocker', () => {
     };
 
     const viewportApi = {
-      getTop: () => 0,
+      getScrollTop: () => 0,
     };
     viewportMock = sandbox.mock(viewportApi);
 
@@ -93,7 +93,7 @@ describe('PullToRefreshBlocker', () => {
   });
 
   it('should NOT start tracking when scrolled', () => {
-    viewportMock.expects('getTop').returns(11).once();
+    viewportMock.expects('getScrollTop').returns(11).once();
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(false);
   });
@@ -134,7 +134,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
-    expect(preventDefault.callCount).to.equal(1);
+    expect(preventDefault).to.be.calledOnce;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.equal(undefined);
@@ -150,7 +150,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
-    expect(preventDefault.callCount).to.equal(0);
+    expect(preventDefault).to.have.not.been.called;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.equal(undefined);
@@ -166,7 +166,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(true);
-    expect(preventDefault.callCount).to.equal(0);
+    expect(preventDefault).to.have.not.been.called;
 
     expect(eventListeners['touchstart']).to.not.equal(undefined);
     expect(eventListeners['touchmove']).to.not.equal(undefined);

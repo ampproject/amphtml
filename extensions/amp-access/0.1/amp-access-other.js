@@ -21,27 +21,27 @@ import {isProxyOrigin} from '../../../src/url';
 const TAG = 'amp-access-other';
 
 
-/** @implements {AccessTypeAdapterDef} */
+/** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
 
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authorizationResponse_ =
         configJson['authorizationFallbackResponse'] || null;
 
     /** @const @private {boolean} */
-    this.isProxyOrigin_ = isProxyOrigin(win.location);
+    this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location);
   }
 
   /** @override */
@@ -60,15 +60,20 @@ export class AccessOtherAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Use the authorization fallback for type=other');
-    // Only allowed for proxy origin (`cdn.ampproject.org`).
-    dev.assert(!this.isProxyOrigin_);
-    return Promise.resolve(dev.assert(this.authorizationResponse_));
+    dev().fine(TAG, 'Use the authorization fallback for type=other');
+    // Disallow authorization for proxy origin (`cdn.ampproject.org`).
+    dev().assert(!this.isProxyOrigin_, 'Cannot authorize for proxy origin');
+    return Promise.resolve(dev().assert(this.authorizationResponse_));
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    return false;
   }
 
   /** @override */
   pingback() {
-    dev.fine(TAG, 'Ignore pingback');
+    dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
   }
 }

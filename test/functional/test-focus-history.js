@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {FocusHistory} from '../../src/focus-history';
 import * as sinon from 'sinon';
+import {FocusHistory} from '../../src/focus-history';
+import {installTimerService} from '../../src/service/timer-impl';
 
 
 describe('FocusHistory', () => {
@@ -48,7 +49,10 @@ describe('FocusHistory', () => {
       addEventListener: (eventType, handler) => {
         windowEventListeners[eventType] = handler;
       },
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
     };
+    installTimerService(testWindow);
     focusHistory = new FocusHistory(testWindow, 10000);
   });
 
@@ -57,8 +61,8 @@ describe('FocusHistory', () => {
   });
 
   it('should subscribe to focus events', () => {
-    expect(eventListeners['focus']).to.not.be.undefined;
-    expect(windowEventListeners['blur']).to.not.be.undefined;
+    expect(eventListeners['focus']).to.exist;
+    expect(windowEventListeners['blur']).to.exist;
     expect(focusHistory.getLast()).to.be.null;
   });
 
@@ -118,9 +122,9 @@ describe('FocusHistory', () => {
     const el1 = document.createElement('div');
     const el2 = document.createElement('div');
     clock.tick(100);
-    eventListeners['focus']({target: el1});  // time=100
+    eventListeners['focus']({target: el1}); // time=100
     clock.tick(100);
-    eventListeners['focus']({target: el2});  // time=200
+    eventListeners['focus']({target: el2}); // time=200
 
     focusHistory.purgeBefore(50);
     expect(focusHistory.history_.length).to.equal(2);

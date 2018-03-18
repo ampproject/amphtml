@@ -1,6 +1,6 @@
 {
   "requests": {
-    "event": "https://example.com?remote-test&title=${title}&r=${random}"
+    "event": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?remote-test&title=${title}&r=${random}"
   },
   "vars": {
     "title": "Example Request"
@@ -10,6 +10,7 @@
       "on": "visible",
       "request": "event"
     }
-  }
+  },
+  "transport" : {"beacon": false, "xhrpost": false}
 }
 

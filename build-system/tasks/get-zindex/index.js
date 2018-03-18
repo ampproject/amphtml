@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 
-var fs = require('fs');
-var gulp = require('gulp-help')(require('gulp'));
-var postcss = require('postcss');
-var table = require('text-table');
-var through = require('through2');
-var util = require('gulp-util');
+const fs = require('fs');
+const gulp = require('gulp-help')(require('gulp'));
+const PluginError = require('plugin-error');
+const postcss = require('postcss');
+const table = require('text-table');
+const through = require('through2');
 
-var tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+const tableHeaders = [
+  ['selector', 'z-index', 'file'],
+  ['---', '---', '---'],
 ];
 
-var tableOptions = {
+const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
@@ -41,7 +42,7 @@ function zIndexCollector(acc, css) {
   css.walkRules(rule => {
     rule.walkDecls(decl => {
       // Split out multi selector rules
-      var selectorNames = rule.selector.replace('\n', '');
+      let selectorNames = rule.selector.replace('\n', '');
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
         selectorNames.forEach(selector => {
@@ -66,17 +67,17 @@ function onFileThrough(file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
-  var selectors = Object.create(null);
+  const selectors = Object.create(null);
 
   postcss([zIndexCollector.bind(null, selectors)])
       .process(file.contents.toString(), {
-        from: file.relative
-      }).then(res => {
-        cb(null, { name: file.relative, selectors: selectors });
+        from: file.relative,
+      }).then(() => {
+        cb(null, {name: file.relative, selectors});
       });
 }
 
@@ -86,19 +87,19 @@ function onFileThrough(file, enc, cb) {
  * @param {function()} cb callback to end the stream
  * @return {!Array<!Array<string>>}
  */
-function createTable(filesData, cb) {
-  var rows = [];
-  Object.keys(filesData).sort().forEach((fileName, fileIdx) => {
-    var selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach((selectorName, selectorIdx) => {
-      var zIndex = selectors[selectorName];
-      var row = [selectorName, zIndex, fileName];
+function createTable(filesData) {
+  const rows = [];
+  Object.keys(filesData).sort().forEach(fileName => {
+    const selectors = filesData[fileName];
+    Object.keys(selectors).sort().forEach(selectorName => {
+      const zIndex = selectors[selectorName];
+      const row = [selectorName, zIndex, fileName];
       rows.push(row);
     });
   });
   rows.sort((a, b) => {
-    var aZIndex = parseInt(a[1], 10);
-    var bZIndex = parseInt(b[1], 10);
+    const aZIndex = parseInt(a[1], 10);
+    const bZIndex = parseInt(b[1], 10);
     return aZIndex - bZIndex;
   });
   return rows;
@@ -116,16 +117,16 @@ function getZindex(glob) {
  * @param {function()} cb
  */
 function getZindexForAmp(cb) {
-  var filesData = Object.create(null);
+  const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
   getZindex('{css,src,extensions}/**/*.css')
-      .on('data', (chunk) => {
+      .on('data', chunk => {
         filesData[chunk.name] = chunk.selectors;
       })
       .on('end', () => {
-        var rows = createTable(filesData);
+        const rows = createTable(filesData);
         rows.unshift.apply(rows, tableHeaders);
-        var tbl = table(rows, tableOptions);
+        const tbl = table(rows, tableOptions);
         fs.writeFileSync('css/Z_INDEX.md', tbl);
         cb();
       });

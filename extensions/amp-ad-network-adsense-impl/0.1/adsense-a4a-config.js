@@ -21,24 +21,48 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  googleAdsIsA4AEnabled,
+  MANUAL_EXPERIMENT_ID,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {dev} from '../../../src/log';
+import {forceExperimentBranch} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
-/** @const {string} */
-const ADSENSE_A4A_EXPERIMENT_ID = 'expAdsenseA4A';
+/** @const {string} @visibleForTesting */
+export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/** @const {!Branches} */
-const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
-  control: '117152630',
-  experiment: '117152632',
+/** @type {string} */
+const TAG = 'amp-ad-network-adsense-impl';
+
+/** @const @type {!Object<string,?string>} */
+export const URL_EXPERIMENT_MAPPING = {
+  '-1': MANUAL_EXPERIMENT_ID,
+  '0': null,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
-  return googleAdsIsA4AEnabled(
-      win, element, ADSENSE_A4A_EXPERIMENT_ID, ADSENSE_A4A_EXPERIMENT_BRANCHES);
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
+      !element.getAttribute('data-ad-client')) {
+    return false;
+  }
+  // See if in holdback control/experiment.
+  let experimentId;
+  const urlExperimentId = extractUrlExperimentId(win, element);
+  if (urlExperimentId != undefined) {
+    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+    dev().info(
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+  }
+  if (experimentId) {
+    addExperimentIdToElement(experimentId, element);
+    forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
+  }
+  return true;
 }

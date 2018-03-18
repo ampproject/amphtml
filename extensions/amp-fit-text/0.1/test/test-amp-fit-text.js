@@ -14,106 +14,125 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
-import {createIframePromise} from '../../../../testing/iframe';
-import '../amp-fit-text';
 import {
   calculateFontSize_,
   updateOverflow_,
 } from '../amp-fit-text';
-import {adopt} from '../../../../src/runtime';
-
-adopt(window);
 
 
-describe('amp-fit-text component', () => {
+describes.realWin('amp-fit-text component', {
+  amp: {
+    extensions: ['amp-fit-text'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getFitText(text, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      const ft = iframe.doc.createElement('amp-fit-text');
-      ft.setAttribute('width', '111');
-      ft.setAttribute('height', '222');
-      ft.style.fontFamily = 'Arial';
-      ft.style.fontSize = '17px';
-      ft.style.lineHeight = '17px';
-      ft.style.overflow = 'hidden';
-      ft.style.width = '111px';
-      ft.style.height = '222px';
-      ft.style.position = 'relative';
-      if (opt_responsive) {
-        ft.setAttribute('layout', 'responsive');
-      }
-      ft.textContent = text;
-      iframe.doc.body.appendChild(ft);
-      return new Timer(window).promise(16).then(() => {
-        ft.implementation_.layoutCallback();
-        return ft;
-      });
-    });
+    const ft = doc.createElement('amp-fit-text');
+    ft.setAttribute('width', '111');
+    ft.setAttribute('height', '222');
+    ft.style.fontFamily = 'Arial';
+    ft.style.fontSize = '17px';
+    ft.style.lineHeight = '17px';
+    ft.style.overflow = 'hidden';
+    ft.style.width = '111px';
+    ft.style.height = '222px';
+    ft.style.position = 'relative';
+    if (opt_responsive) {
+      ft.setAttribute('layout', 'responsive');
+    }
+    ft.textContent = text;
+    doc.body.appendChild(ft);
+    return ft.build().then(() => ft.layoutCallback()).then(() => ft);
   }
 
   it('renders', () => {
     const text = 'Lorem ipsum';
     return getFitText(text).then(ft => {
-      const content = ft.querySelector('.-amp-fit-text-content');
+      const content = ft.querySelector('.i-amphtml-fit-text-content');
       expect(content).to.not.equal(null);
       expect(content.textContent).to.equal(text);
     });
   });
-
 });
 
 
-describe('amp-fit-text calculateFontSize', () => {
-
+describes.realWin('amp-fit-text calculateFontSize', {}, env => {
+  let win, doc;
   let element;
 
   beforeEach(() => {
-    element = document.createElement('div');
+    win = env.win;
+    doc = win.document;
+    element = doc.createElement('div');
     element.style.fontFamily = 'Arial';
     element.style.lineHeight = '1em';
-    element.style.position = 'relative';
-    element.style.width = '200px';
-    document.body.appendChild(element);
+    element.style.position = 'absolute';
+    element.style.left = 0;
+    element.style.top = 0;
+    element.style.visibility = 'hidden';
+    doc.body.appendChild(element);
   });
 
-  afterEach(() => {
-    document.body.removeChild(element);
-  });
-
-  it('should always fit on one line', () => {
+  it('should always fit on one line w/ enough width', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 20, 6, 72)).to.equal(20);
-    expect(calculateFontSize_(element, 10, 6, 72)).to.equal(10);
-    expect(calculateFontSize_(element, 40, 6, 72)).to.equal(40);
+    expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(20);
+    expect(calculateFontSize_(element, 10, 200, 6, 72)).to.equal(10);
+    expect(calculateFontSize_(element, 40, 200, 6, 72)).to.equal(40);
   });
 
-  it('should hit min', () => {
+  it('should always fit the width w/ enough height', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 6, 6, 72)).to.equal(6);
-    expect(calculateFontSize_(element, 3, 6, 72)).to.equal(6);
+    expect(calculateFontSize_(element, 200, 10, 6, 72)).to.equal(15);
+    expect(calculateFontSize_(element, 200, 20, 6, 72)).to.equal(30);
+    expect(calculateFontSize_(element, 200, 40, 6, 72)).to.equal(60);
   });
 
-  it('should hit max', () => {
+  it('should hit min w/ small height and enough width', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 72, 6, 72)).to.equal(72);
-    expect(calculateFontSize_(element, 80, 6, 72)).to.equal(72);
+    expect(calculateFontSize_(element, 6, 200, 6, 72)).to.equal(6);
+    expect(calculateFontSize_(element, 3, 200, 6, 72)).to.equal(6);
   });
 
-  it('should always fit on two lines', () => {
+  it('should hit min w/ small width and enough height', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 200, 2, 6, 72)).to.equal(6);
+    expect(calculateFontSize_(element, 200, 4, 6, 72)).to.equal(6);
+  });
+
+  it('should hit max w/ enough width', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 72, 200, 6, 72)).to.equal(72);
+    expect(calculateFontSize_(element, 80, 200, 6, 72)).to.equal(72);
+  });
+
+  it('should hit max w/ enough height', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 200, 48, 6,72)).to.equal(72);
+    expect(calculateFontSize_(element, 200, 60, 6, 72)).to.equal(72);
+  });
+
+  it('should always fit on two lines w/ enough width', () => {
     element./*OK*/innerHTML = 'A<br>B';
-    expect(calculateFontSize_(element, 20, 6, 72)).to.equal(10);
+    expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(10);
   });
 });
 
 
-describe('amp-fit-text updateOverflow', () => {
-
+describes.realWin('amp-fit-text updateOverflow', {}, env => {
+  let win, doc;
   let content;
   let classToggles;
   let measurer;
 
   beforeEach(() => {
+    win = env.win;
+    doc = win.document;
     classToggles = {};
     content = {
       style: {},
@@ -124,16 +143,12 @@ describe('amp-fit-text updateOverflow', () => {
       },
     };
 
-    measurer = document.createElement('div');
+    measurer = doc.createElement('div');
     measurer.style.fontFamily = 'Arial';
     measurer.style.lineHeight = '1.15em';
     measurer.style.position = 'absolute';
     measurer.style.width = '300px';
-    document.body.appendChild(measurer);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(measurer);
+    doc.body.appendChild(measurer);
   });
 
   function getLineClamp() {
@@ -148,7 +163,7 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on one line', () => {
     measurer./*OK*/innerHTML = 'A';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(false);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.be.false;
     expect(getLineClamp()).to.equal('');
     expect(content.style.maxHeight).to.equal('');
   });
@@ -156,8 +171,8 @@ describe('amp-fit-text updateOverflow', () => {
   it('should always fit on two lines', () => {
     measurer./*OK*/innerHTML = 'A<br>B';
     updateOverflow_(content, measurer, 24, 20);
-    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(true);
+    expect(classToggles['i-amphtml-fit-text-content-overflown']).to.equal(true);
     expect(getLineClamp()).to.equal(1);
-    expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
+    expect(content.style.maxHeight).to.equal(23 + 'px'); // 23 = 20 * 1.15
   });
 });
