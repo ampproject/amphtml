@@ -381,6 +381,9 @@ class AmpApesterMedia extends AMP.BaseElement {
                 }
               });
             });
+          }).catch(error => {
+            dev().error(TAG, 'Display', error);
+            return undefined;
           });
         },
         error => {
