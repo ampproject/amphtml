@@ -537,20 +537,20 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         ampAd.style.height = '600px';
         ampAd.style.width = '600px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
       sendExpandMessage(550,550);
 
       return Services.timerFor(env.win).promise(100).then(() => {
-           expect(resizeIframeSpy).to.be.calledOnce;
-           expect(resizeIframeSpy).to.be.calledWith(600, 600);
-           expect(safeframeMock.style.height).to.equal('600px');
-           expect(safeframeMock.style.width).to.equal('600px');
-           expect(sendResizeResponseSpy).to.be.calledWith(
-               true, SERVICE.EXPAND_RESPONSE);
-           expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-         });
+        expect(resizeIframeSpy).to.be.calledOnce;
+        expect(resizeIframeSpy).to.be.calledWith(600, 600);
+        expect(safeframeMock.style.height).to.equal('600px');
+        expect(safeframeMock.style.width).to.equal('600px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     /**
@@ -575,14 +575,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request should fail if expanding past amp-ad bounds and would ' +
        'create reflow', () => {
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // In our mock, we don't do anything to the iframe that would be seen as a
-      // success, thus we are failing the resizing.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
 
       sendExpandMessage(550, 550);
 
@@ -615,13 +608,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.style.width = '600px';
       safeframeMock.style.height = 600;
       safeframeMock.style.width = 600;
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // Resize the ampAd to simulate a success.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
       sendCollapseMessage();
 
       return Services.timerFor(env.win).promise(100).then(() => {
@@ -647,7 +634,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         ampAd.style.height = '250px';
         ampAd.style.width = '300px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();

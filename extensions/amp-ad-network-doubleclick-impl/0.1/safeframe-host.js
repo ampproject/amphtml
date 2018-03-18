@@ -571,27 +571,34 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse
    */
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
+    const resizeAndRespond = () => {
+      this.resizeIframe(height, width);
+      this.isCollapsed_ = !!optIsCollapse;
+      // We need to force a measure right now, as without remeasuring, we
+      // will have the wrong size information for the amp-ad and the
+      // safeframe when we send the response message into the safeframe.
+      // This would be an issue specifically for when expand is successful
+      // while amp-ad is out of the viewport, for example.
+      this.baseInstance_.measureElement(() => {
+        this.baseInstance_.getResource().measure();
+      });
+      this.sendResizeResponse(true, messageType);
+    };
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      const success = !!this.baseInstance_.element.style.height.match(height)
-            && !!this.baseInstance_.element.style.width.match(width);
-      if (success || optIsCollapse) {
-        this.resizeIframe(height, width);
-        this.isCollapsed_ = !!optIsCollapse;
-        // We need to force a measure right now, as without remeasuring, we
-        // will have the wrong size information for the amp-ad and the
-        // safeframe when we send the response message into the safeframe.
-        // This would be an issue specifically for when expand is successful
-        // while amp-ad is out of the viewport, for example.
-        this.baseInstance_.measureElement(() => {
-          this.baseInstance_.getResource().measure();
-        });
-        this.sendResizeResponse(true, messageType);
+      resizeAndRespond();
+    }).catch(() => {
+      // If the resize initially failed, it may have been queued
+      // as a pendingChangeSize, which will cause the size change
+      // to execute upon the next user interaction. We don't want
+      // that for safeframe, so we reset it here.
+      this.baseInstance_.getResource().resetPendingChangeSize();
+      if (optIsCollapse) {
+        // If this is a collapse request, then even if resizing
+        // the amp-ad failed, still resize the iframe.
+        resizeAndRespond();
       } else {
-        this.baseInstance_.getResource().resetPendingChangeSize();
         this.sendResizeResponse(false, messageType);
       }
-    }).catch(() => {
-      this.sendResizeResponse(false, messageType);
     });
   }
 
