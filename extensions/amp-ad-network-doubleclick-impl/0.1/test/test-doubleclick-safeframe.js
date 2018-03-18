@@ -447,7 +447,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('Resizing', () => {
     let safeframeMock;
-    let resizeIframeSpy;
+    let resizeSafeframeSpy;
     let sendResizeResponseSpy;
     let resizeAmpAdAndSafeframeSpy;
     let attemptChangeSizeStub;
@@ -465,8 +465,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeIframeSpy = sandbox.spy(
-          safeframeHost, 'resizeIframe');
+      resizeSafeframeSpy = sandbox.spy(
+          safeframeHost, 'resizeSafeframe');
       sendResizeResponseSpy = sandbox.spy(
           safeframeHost, 'sendResizeResponse');
       resizeAmpAdAndSafeframeSpy = sandbox.spy(
@@ -513,8 +513,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
       return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeIframeSpy).to.be.calledOnce;
-        expect(resizeIframeSpy).to.be.calledWith(100, 100);
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(100, 100);
         expect(safeframeMock.style.height).to.equal('100px');
         expect(safeframeMock.style.width).to.equal('100px');
         expect(sendResizeResponseSpy).to.be.calledWith(
@@ -543,8 +543,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(550,550);
 
       return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeIframeSpy).to.be.calledOnce;
-        expect(resizeIframeSpy).to.be.calledWith(600, 600);
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(600, 600);
         expect(safeframeMock.style.height).to.equal('600px');
         expect(safeframeMock.style.width).to.equal('600px');
         expect(sendResizeResponseSpy).to.be.calledWith(
@@ -580,7 +580,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(550, 550);
 
       return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeIframeSpy).to.not.be.called;
+        expect(resizeSafeframeSpy).to.not.be.called;
         expect(safeframeMock.height).to.equal('50');
         expect(safeframeMock.width).to.equal('50');
         expect(sendResizeResponseSpy).to.be.calledWith(
@@ -612,8 +612,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendCollapseMessage();
 
       return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeIframeSpy).to.be.calledOnce;
-        expect(resizeIframeSpy).to.be.calledWith(250, 300);
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
         expect(safeframeMock.style.height).to.equal('250px');
         expect(safeframeMock.style.width).to.equal('300px');
         expect(sendResizeResponseSpy).to.be.calledWith(
@@ -640,8 +640,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendCollapseMessage();
 
       return Services.timerFor(env.win).promise(100).then(() => {
-        expect(resizeIframeSpy).to.be.calledOnce;
-        expect(resizeIframeSpy).to.be.calledWith(250, 300);
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
         expect(safeframeMock.style.height).to.equal('250px');
         expect(safeframeMock.style.width).to.equal('300px');
         expect(sendResizeResponseSpy).to.be.calledWith(

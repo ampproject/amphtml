@@ -498,8 +498,11 @@ export class SafeframeHostApi {
   /**
    * @param {number} height
    * @param {number} width
+   * @param {boolean} isCollapsed
+   * @param {string} messageType
    */
-  resizeIframe(height, width) {
+  resizeSafeframe(height, width, isCollapsed, messageType) {
+    this.isCollapsed_ = isCollapsed;
     this.baseInstance_.mutateElement(() => {
       if (this.iframe_) {
         setStyles(this.iframe_, {
@@ -508,6 +511,15 @@ export class SafeframeHostApi {
         });
       }
     }, this.iframe_);
+    // We need to force a measure right now, as without remeasuring, we
+    // will have the wrong size information for the amp-ad and the
+    // safeframe when we send the response message into the safeframe.
+    // This would be an issue specifically for when expand is successful
+    // while amp-ad is out of the viewport, for example.
+    this.baseInstance_.measureElement(() => {
+      this.baseInstance_.getResource().measure();
+    });
+    this.sendResizeResponse(/** SUCCESS */ true, messageType);
   }
 
   /**
@@ -531,9 +543,7 @@ export class SafeframeHostApi {
     if (!optIsCollapse &&
         width <= this.initialSize_.width &&
         height <= this.initialSize_.height) {
-      this.resizeIframe(height, width);
-      this.isCollapsed_ = !!optIsCollapse;
-      this.sendResizeResponse(/** SUCCESS */ true, messageType);
+      this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
           height, width, messageType, optIsCollapse);
@@ -564,29 +574,21 @@ export class SafeframeHostApi {
   }
 
   /**
-   *
+   * Attempts to resize both the amp-ad and the Safeframe.
+   * If the amp-ad can not be resized, then if it was a collapse request,
+   * we will still collapse just the safeframe.
    * @param {number} height
    * @param {number} width
    * @param {string} messageType
    * @param {boolean=} optIsCollapse
    */
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
-    const resizeAndRespond = () => {
-      this.resizeIframe(height, width);
-      this.isCollapsed_ = !!optIsCollapse;
-      // We need to force a measure right now, as without remeasuring, we
-      // will have the wrong size information for the amp-ad and the
-      // safeframe when we send the response message into the safeframe.
-      // This would be an issue specifically for when expand is successful
-      // while amp-ad is out of the viewport, for example.
-      this.baseInstance_.measureElement(() => {
-        this.baseInstance_.getResource().measure();
-      });
-      this.sendResizeResponse(true, messageType);
-    };
+    // First, attempt to resize the Amp-Ad that is the parent of the
+    // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      resizeAndRespond();
-    }).catch(() => {
+      // If this resize succeeded, we always resize the safeframe.
+      this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
+    }, /** REJECT CALLBACK */ () => {
       // If the resize initially failed, it may have been queued
       // as a pendingChangeSize, which will cause the size change
       // to execute upon the next user interaction. We don't want
@@ -595,10 +597,17 @@ export class SafeframeHostApi {
       if (optIsCollapse) {
         // If this is a collapse request, then even if resizing
         // the amp-ad failed, still resize the iframe.
-        resizeAndRespond();
+        this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
       } else {
+        // If this is not a collapse request, then we were attempting to
+        // expand past the bounds of the amp-ad, and it failed. Thus,
+        // we need to send a failure message, and the safeframe is
+        // not resized.
         this.sendResizeResponse(false, messageType);
       }
+    }).catch(() => {
+      dev().error(TAG, 'Resizing failed.');
+      this.sendResizeResponse(false, messageType);
     });
   }
 
