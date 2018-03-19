@@ -1398,7 +1398,10 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Reacts to muted state updates.
    * @param  {boolean} isMuted Whether the story just got muted.
+<<<<<<< HEAD
    * @private
+=======
+>>>>>>> Adding the mutate state to the store.
    */
   onMutedStateUpdate_(isMuted) {
     isMuted ? this.mute_() : this.unmute_();
