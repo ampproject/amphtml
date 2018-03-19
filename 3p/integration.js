@@ -158,6 +158,7 @@ import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
+import {kuadio} from '../ads/kuadio';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -241,6 +242,7 @@ const AMP_EMBED_ALLOWED = {
   bringhub: true,
   dable: true,
   engageya: true,
+  kuadio: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -353,6 +355,7 @@ register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
+register('kuadio', kuadio);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
