@@ -155,7 +155,7 @@ The RTC Response to a GET request must meet the following requirements:
 
 
 *   Status Code = 200
-*   [Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses)
+*   [Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) here and Access-Control-Allow-Credentials: true
 *   Body of response is a JSON object of targeting information such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
