@@ -27,8 +27,7 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /**
- * Fetches and returns the template from the given ad response, wrapped as a
- * promise, or rejects if the template cannot be fetched.
+ * Validator for Template ads.
  */
 export class TemplateValidator extends Validator {
 
@@ -109,7 +108,7 @@ export class TemplateValidator extends Validator {
 }
 
 /**
- * Render a validated AMP template.
+ * Render for Template ads.
  */
 export class TemplateRenderer extends FriendlyFrameRenderer {
 
