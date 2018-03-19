@@ -321,3 +321,5 @@ https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26e
 ## Using RTC In DFP
 
 The results of the RTC Callouts will be added to the DoubleClick Ad Request, allowing you to use the key/value pairs in DFP as you would for any other non-AMP ad request. Please refer to generic key/value targeting documentation for DoubleClick.
+
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
