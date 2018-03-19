@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-87f482e */
+ /** Version: 0.1.22-1ba2fd9 */
 'use strict';
 
 
@@ -249,6 +249,8 @@ class PageConfigResolver {
     this.metaParser_ = new MetaParser(win);
     /** @private @const {!JsonLdParser} */
     this.ldParser_ = new JsonLdParser(win);
+    /** @private @const {!MicrodataParser} */
+    this.microdataParser_ = new MicrodataParser(win);
   }
 
   /**
@@ -273,6 +275,9 @@ class PageConfigResolver {
     let config = this.metaParser_.check();
     if (!config) {
       config = this.ldParser_.check();
+    }
+    if (!config) {
+      config = this.microdataParser_.check();
     }
 
     if (config) {
@@ -476,6 +481,51 @@ class JsonLdParser {
     }
     return (typeArray.includes(expectedType) ||
         typeArray.includes('http://schema.org/' + expectedType));
+  }
+}
+
+class MicrodataParser {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+  }
+
+  /**
+   * @return {?PageConfig}
+   */
+  check() {
+    if (!this.win_.document.body) {
+      // Wait until the whole `<head>` is parsed.
+      return null;
+    }
+
+    // TODO(sohanirao): create page config from DOM
+    /* Psuedo code
+      Initialize an empty list of items
+      Get all items (query elements that have itemscope)
+        For each element
+          get a list of properties
+            if a property is 'isAccessibleForFree', create an entry in the items list:
+            {'isAccessibleForFree': booleanvalue, 'element': elementWithTheProperty}
+            if a property is 'productID', create an entry in the items list as follows:
+            {'productID': value, 'element': elementWithTheProperty}
+      Initialize an empty list of results
+      Iterate through entries in the items list
+        Pop an entry,
+          if the element's type is "NewsArticle"
+            add it to the results list
+          else if this element is not the root
+            create an entry with either 'isAccessibleForFree' or 'productID' and corresponding value,
+            and the parent of the element as the entry for 'element' key, add this entry to items list
+      When the items list is processed, results list contains entries that meet the requirements:
+        type is NewsArticle, contains either isAccessibleForFree value or productID value.
+        When the results array contains entries for both and the corresponding elements are the same,
+          return PageConfig, otherwise return null
+    */
+    return null;
   }
 }
 
