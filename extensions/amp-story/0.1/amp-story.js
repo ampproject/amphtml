@@ -77,18 +77,13 @@ import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-import {once} from '../../../src/utils/function';
 import {registerServiceBuilder} from '../../../src/service';
-import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
-
-/** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 /** @private @const {string} */
 const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
@@ -267,7 +262,7 @@ export class AmpStory extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
     /** @private @const {!Bookend} */
-    this.bookend_ = new Bookend(this.win);
+    this.bookend_ = new Bookend(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -285,9 +280,6 @@ export class AmpStory extends AMP.BaseElement {
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
         this.win, 'story-variable', () => this.variableService_.get());
-
-    /** @private @const {!function():!Promise<?./bookend.BookendConfigDef>} */
-    this.loadBookendConfig_ = once(() => this.loadBookendConfigImpl_());
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
@@ -482,7 +474,7 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX} = gesture.data;
-      if (this.bookend_.isActive()) {
+      if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         return;
       }
       if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
@@ -586,7 +578,7 @@ export class AmpStory extends AMP.BaseElement {
 
     container.appendChild(this.shareWidget_.build(this.getAmpDoc()));
 
-    this.loadBookendConfig_().then(bookendConfig => {
+    this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
       if (bookendConfig !== null) {
         this.shareWidget_.setProviders(bookendConfig.shareProviders);
       }
@@ -950,7 +942,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    if (this.bookend_.isActive()) {
+    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       return;
     }
 
@@ -1099,7 +1091,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   showBookend_() {
-    this.buildBookend_().then(() => {
+    this.buildAndPreloadBookend_().then(() => {
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
     });
   }
@@ -1271,44 +1263,19 @@ export class AmpStory extends AMP.BaseElement {
     const pageIndex = this.getPageIndex(this.activePage_);
 
     if (pageIndex + 1 >= this.getPageCount()) {
-      this.buildBookend_();
+      this.buildAndPreloadBookend_();
     }
-  }
-
-
-  /** @private */
-  buildBookend_() {
-    if (this.bookend_.isBuilt()) {
-      return Promise.resolve();
-    }
-
-    this.element.appendChild(this.bookend_.build(this.getAmpDoc()));
-    this.setAsOwner(this.bookend_.getRoot());
-
-    return this.loadBookendConfig_().then(bookendConfig => {
-      if (bookendConfig !== null) {
-        this.bookend_.setConfig(dev().assert(bookendConfig));
-      }
-      this.scheduleLayout(this.bookend_.getRoot());
-    });
   }
 
 
   /**
+   * Builds, fetches and sets the bookend publisher configuration.
    * @return {!Promise<?./bookend.BookendConfigDef>}
    * @private
    */
-  loadBookendConfigImpl_() {
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
-        .then(response => response && {
-          shareProviders: response['share-providers'],
-          relatedArticles:
-              relatedArticlesFromJson(response['related-articles']),
-        })
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
-          return null;
-        });
+  buildAndPreloadBookend_() {
+    this.bookend_.build();
+    return this.bookend_.loadConfig();
   }
 
 
@@ -1327,32 +1294,8 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.isDesktop_()) {
       return Promise.resolve(true);
     }
-    return this.loadBookendConfig_().then(config =>
+    return this.bookend_.loadConfig(false /** applyConfig */).then(config =>
       !!(config && config.relatedArticles && config.relatedArticles.length));
-  }
-
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    if (!this.element.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
-    const rawUrl = this.element.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
-
-    return Services.urlReplacementsForDoc(this.getAmpDoc())
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win).fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
-          return response.json();
-        });
   }
 
 
@@ -1565,7 +1508,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    if (this.bookend_.isActive()) {
+    if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
