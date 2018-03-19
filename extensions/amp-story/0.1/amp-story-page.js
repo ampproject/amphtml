@@ -23,6 +23,7 @@
  * </amp-story>
  * </code>
  */
+import {Action} from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -33,6 +34,7 @@ import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
+import {Services} from '../../../src/services';
 import {
   closestBySelector,
   matches,
@@ -116,6 +118,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /** @private {?./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
 
@@ -137,6 +142,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const storePromise = Services.storyStoreServiceForOrNull(this.win)
+        .then(storeService => {
+          dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+          this.storeService_ = storeService;
+        });
+
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -148,6 +159,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+    return storePromise;
   }
 
 
@@ -582,7 +594,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(targetPageId);
+    this.storeService_.dispatch(Action.PAGE_CHANGE, targetPageId);
   }
 
 
@@ -598,7 +610,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.switchTo_(pageId);
+    this.storeService_.dispatch(Action.PAGE_CHANGE, pageId);
   }
 
   /**
@@ -609,18 +621,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     const payload = {direction};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
-        eventInit);
-  }
-
-
-  /**
-   * @param {string} targetPageId
-   * @private
-   */
-  switchTo_(targetPageId) {
-    const payload = {targetPageId};
-    const eventInit = {bubbles: true};
-    dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
   }
 
