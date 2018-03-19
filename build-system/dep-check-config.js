@@ -291,6 +291,14 @@ exports.rules = [
     ],
   },
 
+  {
+    mustNotDependOn: [
+      /** DO NOT WHITELIST ANY FILES */
+      'ads/google/deprecated_doubleclick.js',
+      /** DO NOT WHITELIST ANY FILES */
+    ]
+  },
+
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
   // Doubleclick.js will be deleted from the repository at that time.
   // Please see https://github.com/ampproject/amphtml/issues/11834
