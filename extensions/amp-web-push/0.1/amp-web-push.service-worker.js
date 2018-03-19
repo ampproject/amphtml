@@ -150,7 +150,8 @@ function onMessageReceivedSubscribe(opt_payload) {
   * @param {!Object=} opt_payload
  */
 function onMessageReceivedUnsubscribe(opt_payload) {
-  /** @type {!ServiceWorkerGlobalScope} */ (self).registration.pushManager.getSubscription()
+  /** @type {!ServiceWorkerGlobalScope} */ (
+    self).registration.pushManager.getSubscription()
       .then(subscription => subscription.unsubscribe())
       .then(() => {
         // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here

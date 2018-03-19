@@ -291,7 +291,6 @@ function compile(entryModuleFilenames, outputDir,
         rewrite_polyfills: false,
         externs,
         entry_point: entryModuleFilenames,
-        //process_common_js_modules: true,
         module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
         // required.

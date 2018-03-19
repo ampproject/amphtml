@@ -16,9 +16,9 @@
 
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
+import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {parseQueryString} from '../../../src/url.js';
-import {getData} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 /**
