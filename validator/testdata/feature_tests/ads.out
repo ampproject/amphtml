@@ -1,13 +1,13 @@
 PASS
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -204,7 +204,7 @@ PASS
 |        <input type="submit" value="Go">
 |      </form>
 |    </div>
-|  
+|
 |    <h2>A8</h2>
 |    <amp-ad width="300" height="250"
 |        type="a8"
@@ -215,7 +215,7 @@ PASS
 |        data-mat="2TCGYR-17GNXU-3L92-64Z8X"
 |        data-type="static">
 |    </amp-ad>
-|  
+|
 |    <h2>A9</h2>
 |    <amp-ad width="300" height="250"
 |        type="a9"
@@ -223,14 +223,14 @@ PASS
 |        data-aax_pubname="test123"
 |        data-aax_src="302">
 |    </amp-ad>
-|  
+|
 |    <h2>AccessTrade</h2>
 |    <amp-ad width="300" height="250"
 |        type="accesstrade"
 |        data-atops="r"
 |        data-atrotid="00000000000008c06y">
 |    </amp-ad>
-|  
+|
 |    <h2>Adblade</h2>
 |    <amp-ad width="300" height="250"
 |        type="adblade"
@@ -238,27 +238,27 @@ PASS
 |        data-height="250"
 |        data-cid="19626-3798936394">
 |    </amp-ad>
-|  
+|
 |    <h2>AdButler</h2>
 |    <amp-ad width="300" height="250"
 |        type="adbutler"
 |        data-account="167283"
 |        data-zone="212491">
 |    </amp-ad>
-|  
+|
 |    <h2>ADITION</h2>
 |    <amp-ad width="300" height="250"
 |        type="adition"
 |        data-version="1"
 |        data-wp_id="3470234">
 |    </amp-ad>
-|  
+|
 |    <h2>Ad Generation</h2>
 |    <amp-ad width="320" height="50"
 |        type="adgeneration"
 |        data-id="10722">
 |    </amp-ad>
-|  
+|
 |    <h2>Adhese</h2>
 |    <amp-ad width=300 height=250
 |        type="adhese"
@@ -270,7 +270,7 @@ PASS
 |      <div placeholder></div>
 |      <div fallback></div>
 |    </amp-ad>
-|  
+|
 |    <amp-ad width=300 height=250
 |        type="adhese"
 |        data-location="_sdk_amp_"
@@ -282,14 +282,14 @@ PASS
 |      <div placeholder></div>
 |      <div fallback></div>
 |    </amp-ad>
-|  
+|
 |    <h2 id="adfox">AdFox</h2>
 |    <amp-ad width="248" height="408"
 |        type="adfox"
 |        data-owner-id="208087"
 |        data-adfox-params='{"pt": "b","p1": "bsoji","p2": "feil","pct": "a","pfc": "bbhfo","pfb": "cwrtv"}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Adman</h2>
 |    <amp-ad width="300" height="250"
 |        type="adman"
@@ -297,20 +297,20 @@ PASS
 |        data-s="300x250"
 |        data-host="talos.adman.gr">
 |    </amp-ad>
-|  
+|
 |    <h2>AdmanMedia</h2>
 |    <amp-ad width="300" height="250"
 |        type="admanmedia"
 |        data-id="8e916419">
 |    </amp-ad>
-|  
+|
 |    <h2>AdPlugg</h2>
 |    <amp-ad width="300" height="250"
 |        type="adplugg"
 |        data-access-code="A48214096"
 |        data-zone="my_amp_zone_300x250">
 |    </amp-ad>
-|  
+|
 |    <h2>AdReactor</h2>
 |    <amp-ad width="728" height="90"
 |        type="adreactor"
@@ -318,14 +318,14 @@ PASS
 |        data-zid=9
 |        data-custom3="No Type">
 |    </amp-ad>
-|  
+|
 |    <h2>AdSense</h2>
 |    <amp-ad width="300" height="250"
 |        type="adsense"
 |        data-ad-client="ca-pub-2005682797531342"
 |        data-ad-slot="7046626912">
 |    </amp-ad>
-|  
+|
 |    <h2>AdsNative</h2>
 |    <amp-ad width="300" height="250"
 |        type="adsnative"
@@ -334,7 +334,7 @@ PASS
 |        data-antid="abc"
 |        data-ankv="key:val,key:val2">
 |    </amp-ad>
-|  
+|
 |    <h2>AdSpeed</h2>
 |    <amp-ad width="300" height="250"
 |        type="adspeed"
@@ -343,27 +343,27 @@ PASS
 |    <div placeholder></div>
 |    <div fallback></div>
 |    </amp-ad>
-|  
+|
 |    <h2>AdSpirit</h2>
 |    <amp-ad width="300" height="250"
 |        type="adspirit"
 |        data-asm-params="&amp;pid=4"
 |        data-asm-host="help.adspirit.de">
 |    </amp-ad>
-|  
+|
 |    <h2>AdStir 320x50 banner</h2>
 |    <amp-ad width="320" height="50"
 |        type="adstir"
 |        data-app-id="MEDIA-343ded3e"
 |        data-ad-spot="1">
 |    </amp-ad>
-|  
+|
 |    <h2>AdTech (1x1 fake image ad)</h2>
 |    <amp-ad width="300" height="250"
 |        type="adtech"
 |        src="https://adserver.adtechus.com/addyn/3.0/5280.1/2274008/0/-1/ADTECH;size=300x250;key=plumber;alias=careerbear-ros-middle1;loc=300;;target=_blank;grp=27980912;misc=3767074">
 |    </amp-ad>
-|  
+|
 |    <h2>AdThrive 320x50 banner</h2>
 |    <amp-ad width="320" height="50"
 |        type="adthrive"
@@ -371,7 +371,7 @@ PASS
 |        data-ad-unit="AdThrive_Content_1"
 |        data-sizes="320x50">
 |    </amp-ad>
-|  
+|
 |    <h2>AdThrive 300x250 banner</h2>
 |    <amp-ad width="300" height="250"
 |        type="adthrive"
@@ -379,7 +379,7 @@ PASS
 |        data-ad-unit="AdThrive_Content_2"
 |        data-sizes="300x250">
 |    </amp-ad>
-|  
+|
 |    <h2>Ad Up Technology</h2>
 |    <amp-ad width="500" height="250"
 |        type="aduptech"
@@ -388,21 +388,21 @@ PASS
 |        data-query="reisen;mallorca;spanien"
 |        data-adtest="1">
 |    </amp-ad>
-|  
+|
 |    <h2>Adverline</h2>
 |    <amp-ad width="300" height="250"
 |        type="adverline"
 |        data-id=13625
 |        data-plc=3>
 |    </amp-ad>
-|  
+|
 |    <h2>Adverticum</h2>
 |    <amp-ad width="285" height="350"
 |       type="adverticum"
 |       data-goa3zone="4316734"
 |       data-costumeTargetString="bWFsYWM=">
 |    </amp-ad>
-|  
+|
 |    <h2>AdvertServe</h2>
 |    <amp-ad width="300" height="250"
 |        type="advertserve"
@@ -410,7 +410,7 @@ PASS
 |        data-pid=0
 |        data-zid=68>
 |    </amp-ad>
-|  
+|
 |    <h2>Affiliate-B</h2>
 |    <amp-ad width="300" height="250"
 |        type="affiliateb"
@@ -418,40 +418,40 @@ PASS
 |        data-afb_p="g2m"
 |        data-afb_t="i">
 |    </amp-ad>
-|  
+|
 |    <h2>AMoAd banner</h2>
 |    <amp-ad width="300" height="250"
 |        type="amoad"
 |        data-ad-type="banner"
 |        data-sid="62056d310111552c951d19c06bfa71e16e615e39493eceff667912488bc576a6">
 |    </amp-ad>
-|  
+|
 |    <h2>AMoAd native</h2>
 |    <amp-ad width="320" height="100"
 |        type="amoad"
 |        data-ad-type="native"
 |        data-sid="62056d310111552c951d19c06bfa71e1bc19eea7e94d0a6e73e46a9402dbee47">
 |    </amp-ad>
-|  
+|
 |    <h2>AppNexus with JSON based configuration multi ad</h2>
 |    <amp-ad width="300" height="250"
 |        type="appnexus"
 |        data-target="apn_ad_1"
 |        json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
 |    </amp-ad>
-|  
+|
 |    <amp-ad width="728" height="90"
 |        type="appnexus"
 |        data-target="apn_ad_2"
 |        json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Atomx</h2>
 |    <amp-ad width="300" height="250"
 |        type="atomx"
 |        data-id="1234">
 |    </amp-ad>
-|  
+|
 |    <h2 id="bidtellect">Bidtellect</h2>
 |    <amp-ad width=320 height=200
 |        type="bidtellect"
@@ -459,40 +459,40 @@ PASS
 |        data-pid="925847381"
 |        data-sid="216072">
 |    </amp-ad>
-|  
+|
 |    <h2>brainy</h2>
 |    <amp-ad width="300" height="250"
 |        type="brainy"
 |        data-aid="10"
 |        data-slot-id="3347">
 |    </amp-ad>
-|  
+|
 |    <h2>Bringhub Mini-Storefront</h2>
 |    <amp-embed width="600" height="320"
 |        type="bringhub"
 |        layout="responsive"
 |        heights="(max-width: 270px) 1280px, (max-width:553px) 640px, 338px">
 |    </amp-embed>
-|  
+|
 |    <h2>CA A.J.A. Infeed</h2>
 |    <amp-ad width="320" height="120"
 |        type="caajainfeed"
 |        data-ad-spot="jqeto4eMJqk"
 |        data-test="true">
 |    </amp-ad>
-|  
+|
 |    <h2>CA ProFit-X</h2>
 |    <amp-ad width="320" height="50"
 |        type="caprofitx"
 |        data-tagid="17359">
 |    </amp-ad>
-|  
+|
 |    <h2>Chargeads</h2>
 |    <amp-ad width="320" height="50"
 |        type="chargeads"
 |        src="https://www.chargeplatform.com/ads/?id=1288491435">
 |    </amp-ad>
-|  
+|
 |    <h2>Content.ad Banner 320x50</h2>
 |    <amp-ad width="320" height="50"
 |        type="contentad"
@@ -501,7 +501,7 @@ PASS
 |        data-wid="218710"
 |        data-url="nonblocking.io">
 |    </amp-ad>
-|  
+|
 |    <h2>Content.ad Banner 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="contentad"
@@ -510,7 +510,7 @@ PASS
 |        data-wid="218706"
 |        data-url="nonblocking.io">
 |    </amp-ad>
-|  
+|
 |    <h2>Content.ad Banner 300x250 2x2</h2>
 |    <amp-ad width="300" height="250"
 |        type="contentad"
@@ -519,7 +519,7 @@ PASS
 |        data-wid="218705"
 |        data-url="nonblocking.io">
 |    </amp-ad>
-|  
+|
 |    <h2>Content.ad Banner 300x600</h2>
 |    <amp-ad width="300" height="600"
 |        type="contentad"
@@ -528,7 +528,7 @@ PASS
 |        data-wid="218708"
 |        data-url="nonblocking.io">
 |    </amp-ad>
-|  
+|
 |    <h2>Content.ad Banner 300x600 5x2</h2>
 |    <amp-ad width="300" height="600"
 |        type="contentad"
@@ -537,19 +537,19 @@ PASS
 |        data-wid="218709"
 |        data-url="nonblocking.io">
 |    </amp-ad>
-|  
+|
 |    <h2>Criteo Passback</h2>
 |    <p>Due to ad targeting, the slot might not load ad.</p>
-|  
+|
 |    <amp-ad width="300" height="250"
 |        type="criteo"
 |        data-tagtype="passback"
 |        data-zone="314159">
 |    </amp-ad>
-|  
+|
 |    <h2>Criteo RTA</h2>
 |    <p>Due to ad targeting, the slot might not load ad.</p>
-|  
+|
 |    <amp-ad width="300" height="250"
 |        type="criteo"
 |        data-tagtype="rta"
@@ -557,7 +557,7 @@ PASS
 |        data-adserver="DFP"
 |        data-networkid="1976">
 |    </amp-ad>
-|  
+|
 |    <h2>CSA</h2>
 |    <amp-ad width="auto" height="300"
 |        type="csa"
@@ -565,7 +565,7 @@ PASS
 |        data-afs-page-options='{"pubId": "partner-pub-9616389000213823", "query": "flowers"}'
 |        data-afs-adblock-options='{"width": "auto", "number": 1}'>
 |    </amp-ad>
-|  
+|
 |    <h2 id="custom">Custom leaderboard</h2>
 |    <amp-ad width="500" height="60"
 |        type="custom"
@@ -577,7 +577,7 @@ PASS
 |        </a>
 |      </template>
 |    </amp-ad>
-|  
+|
 |    <h2>Custom square</h2>
 |    <amp-ad width="200" height="200"
 |        type="custom"
@@ -589,7 +589,7 @@ PASS
 |        </a>
 |      </template>
 |    </amp-ad>
-|  
+|
 |    <h2>Custom leaderboard with no slot specified</h2>
 |    <amp-ad width="500" height="60"
 |        type="custom"
@@ -600,14 +600,14 @@ PASS
 |        </a>
 |      </template>
 |    </amp-ad>
-|  
+|
 |    <h2>Cxense Display</h2>
 |    <amp-ad width="240" height="65"
 |        type="eas"
 |        data-eas-domain="stage.emediate.eu"
 |        data-eas-cu="3255">
 |    </amp-ad>
-|  
+|
 |    <h2>DistroScale</h2>
 |    <amp-ad width="300" height="600"
 |        type="distroscale"
@@ -615,7 +615,7 @@ PASS
 |        data-zid="8710"
 |        layout="responsive">
 |    </amp-ad>
-|  
+|
 |    <h2>DotAndAds masthead</h2>
 |    <amp-ad width="980" height="250"
 |        type="dotandads"
@@ -624,7 +624,7 @@ PASS
 |        data-mpt="amp-amp-all-all"
 |        data-sp='sn-u'>
 |    </amp-ad>
-|  
+|
 |    <h2>DotAndAds 300x250 box</h2>
 |    <amp-ad width="300" height="250"
 |        type="dotandads"
@@ -633,33 +633,33 @@ PASS
 |        data-mpo="ampTest"
 |        data-mpt="amp-amp-all-all">
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick</h2>
 |    <amp-ad width="320" height="50"
 |        type="doubleclick"
 |        data-slot="/4119129/mobile_ad_banner">
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick with RTC config</h2>
 |    <amp-ad width="320" height="50"
 |        type="doubleclick"
 |        data-slot="/4119129/mobile_ad_banner"
 |        rtc-config="{foo: bar}">
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick with JSON based parameters</h2>
 |    <amp-ad width="320" height="50"
 |        type="doubleclick"
 |        data-slot="/4119129/mobile_ad_banner"
 |        json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick no ad</h2>
 |    <amp-ad width="300" height="200"
 |        type="doubleclick"
 |        data-slot="/4119129/doesnt-exist">
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick with overriden size</h2>
 |    <amp-ad width="420" height="100"
 |        data-override-width="320" data-override-height="50"
@@ -667,14 +667,14 @@ PASS
 |        data-slot="/4119129/mobile_ad_banner"
 |        class="red">
 |    </amp-ad>
-|  
+|
 |    <h2>Doubleclick challenging ad</h2>
 |    <amp-ad width="414" height="457"
 |        type="doubleclick"
 |        layout="fixed"
 |        data-slot="/35096353/amptesting/badvideoad">
 |    </amp-ad>
-|  
+|
 |    <h2>E-Planning 320x50</h2>
 |    <amp-ad width="320" height="50"
 |        type="eplanning"
@@ -686,28 +686,28 @@ PASS
 |        data-epl_kvs='{"target1":"food", "target2":"cars"}'
 |        data-epl_e="AMP_TEST">
 |    </amp-ad>
-|  
+|
 |    <h2>Ezoic</h2>
 |    <amp-ad width="300" height="250"
 |        type="ezoic"
 |        data-slot="/1254144/28607874"
 |        json='{"targeting": {"iid15":"1479509","t":"134","d":"1317","t1":"134","pvc":"0","ap":"1144","sap":"1144","a":"|0|","as":"revenue","plat":"1","bra":"mod1","ic":"1","at":"mbf","adr":"400","reft":"tf","ga":"2497208","rid":"99998","pt":"0","al":"2022","compid":"1","tap":"28607874-1479509","br1":"0","br2":"0"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>FlexOneELEPHANT</h2>
 |    <amp-ad width="300" height="250"
 |        type="f1e"
 |        data-url="https://demo.impact-ad.jp"
 |        data-target="/SITE=AMPSITE/AREA=AMPAREA/AAMSZ=300X250/OENCJP=UTF8" >
 |    </amp-ad>
-|  
+|
 |    <h2>FlexOneHARRIER</h2>
 |    <amp-ad width="300" height="250"
 |        type="f1h"
 |        data-section-id="2267"
 |        data-slot="2843">
 |    </amp-ad>
-|  
+|
 |    <h2>Felmat</h2>
 |    <amp-ad width="300" height="250"
 |        type="felmat"
@@ -716,21 +716,21 @@ PASS
 |        data-fmk="U12473_n2cJD"
 |        data-fmp="0">
 |    </amp-ad>
-|  
+|
 |    <h2>Flite</h2>
 |    <amp-ad width="320" height="568"
 |        type="flite"
 |        data-guid="aa7bf589-6d51-4194-91f4-d22eef8e3688"
 |        data-mixins="">
 |    </amp-ad>
-|  
+|
 |    <h2>fluct</h2>
 |    <amp-ad width="300" height="250"
 |        type="fluct"
 |        data-g="1000067784"
 |        data-u="1000101409">
 |    </amp-ad>
-|  
+|
 |    <h2>Fusion</h2>
 |    <amp-ad width="600" height="100"
 |        type="fusion"
@@ -740,39 +740,39 @@ PASS
 |        data-space="apicaAd"
 |        data-parameters="age=99&isMobile&gender=male">
 |    </amp-ad>
-|  
+|
 |    <h2>Geniee SSP</h2>
 |    <amp-ad width="300" height="250"
 |        type="genieessp"
 |        data-vid="3"
 |        data-zid="1077330">
 |    </amp-ad>
-|  
+|
 |    <h2 class="broken">GMOSSP 320x50 banner</h2>
 |    <amp-ad width="320" height="50"
 |        type="gmossp"
 |        data-id="10014">
 |    </amp-ad>
-|  
+|
 |    <h2>GumGum 300x100 banner</h2>
 |    <amp-ad width=300 height=100
 |        type="gumgum"
 |        data-zone="ggumtest"
 |        data-slot="3883">
 |    </amp-ad>
-|  
+|
 |    <h2>Holder 300x250 banner</h2>
 |    <amp-ad width="300" height="250"
 |        type="holder"
 |        data-block="7163">
 |    </amp-ad>
-|  
+|
 |    <h2>iBillboard 300x250 banner</h2>
 |    <amp-ad width="300" height="250"
 |        type="ibillboard"
 |        src="https://go.eu.bbelements.com/please/code?j-21414.1.5.6.0.0._blank">
 |    </amp-ad>
-|  
+|
 |    <h2>I-Mobile 320x50 banner</h2>
 |    <amp-ad width="320" height="50"
 |        type="imobile"
@@ -780,20 +780,20 @@ PASS
 |        data-adtype="banner"
 |        data-asid="813689">
 |    </amp-ad>
-|  
+|
 |    <h2>Imedia</h2>
 |    <amp-ad width="300" height="250"
 |        type="imedia"
 |        data-id="p1"
 |        data-positions='[{"id":"p1", "zoneId":"seznam.novinky.ikona2"}, {"id":"p2", "zoneId":"seznam.novinky.ikona"}]'>
 |    </amp-ad>
-|  
+|
 |    <amp-ad width="300" height="100"
 |        type="imedia"
 |        data-id="p2"
 |        data-positions='[{"id":"p1", "zoneId":"seznam.novinky.ikona2"}, {"id":"p2", "zoneId":"seznam.novinky.ikona"}]'>
 |    </amp-ad>
-|  
+|
 |    <h2>Industrybrains</h2>
 |    <amp-ad width="300" height="250"
 |        type="industrybrains"
@@ -801,22 +801,22 @@ PASS
 |        data-height="250"
 |        data-cid="19626-3798936394">
 |    </amp-ad>
-|  
+|
 |    <h2>InMobi</h2>
 |    <amp-ad width="320" height="50"
 |        type="inmobi"
 |        data-siteid="a0078c4ae5a54199a8689d49f3b46d4b"
 |        data-slotid="15">
 |    </amp-ad>
-|  
+|
 |    <h2>Index Exchange Header Tag</h2>
 |    <amp-ad width="300" height="250"
 |        type="ix"
 |        data-ix-id="1"
 |        data-slot="/62650033/AMP_Example_Ad_Unit">
 |    </amp-ad>
-|  
-|  
+|
+|
 |    <h2>Kargo</h2>
 |    <amp-ad width="300" height="250"
 |        type="kargo"
@@ -824,51 +824,51 @@ PASS
 |        data-slot="_vypM8bkVCf"
 |        data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Kiosked</h2>
 |    <amp-ad width="300" height="250"
 |        type="kiosked"
 |        data-scriptid="91">
 |    </amp-ad>
-|  
+|
 |    <h2>Kixer</h2>
 |    <amp-ad width="300" height="250"
 |        type="kixer"
 |        data-adslot="6812">
 |    </amp-ad>
-|  
+|
 |    <h2>Ligatus</h2>
 |    <amp-ad width="300" height="250"
 |        type="ligatus"
 |        src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
 |    </amp-ad>
-|  
+|
 |    <h2>LOKA</h2>
 |    <amp-ad width="300" height="250"
 |        type="loka"
 |        data-unit-params='{"unit":"mvbanner","id":"YdzhBxTvKwZlLeeQ"}'>
 |    </amp-ad>
-|  
+|
 |    <h2>MADS</h2>
 |    <amp-ad width="320" height="50"
 |        type="mads"
 |        data-adrequest='{"pid":"6252122059"}'>
 |    </amp-ad>
-|  
+|
 |    <h2>MANTIS</h2>
 |    <amp-ad width="300" height="250"
 |        type="mantis-display"
 |        data-property = "demo"
 |        data-zone="medium-rectangle">
 |    </amp-ad>
-|  
+|
 |    <amp-embed width="100" height="283"
 |        type="mantis-recommend"
 |        layout=responsive
 |        heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
 |        data-property="demo">
 |    </amp-embed>
-|  
+|
 |    <h2>Media Impact</h2>
 |    <amp-ad width="320" height="250"
 |        type="mediaimpact"
@@ -878,7 +878,7 @@ PASS
 |        data-target=""
 |        data-slot="4459">
 |    </amp-ad>
-|  
+|
 |    <h2>Media.Net Header Bidder Tag</h2>
 |    <amp-ad width="300" height="250"
 |        type="medianet"
@@ -887,7 +887,7 @@ PASS
 |        data-slot="/45361917/AMP_Header_Bidder"
 |        json='{"targeting":{"mnetAmpTest":"1","pos":"mnetSlot1"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Media.Net Contextual Monetization Tag</h2>
 |    <amp-ad width="300" height="250"
 |        type="medianet"
@@ -895,7 +895,7 @@ PASS
 |        data-cid="8CUS8O7EX"
 |        data-crid="112682482">
 |    </amp-ad>
-|  
+|
 |    <h2>Mediavine</h2>
 |    <amp-ad width="300" height="250"
 |        type="mediavine"
@@ -904,13 +904,13 @@ PASS
 |        <div placeholder></div>
 |        <div fallback></div>
 |    </amp-ad>
-|  
+|
 |    <h2>Meg</h2>
 |    <amp-ad width="320" height="250"
 |        type="meg"
 |        data-code="6rc0ERhN75">
 |    </amp-ad>
-|  
+|
 |    <h2>MicroAd 320x50 banner</h2>
 |    <amp-ad width="320" height="50"
 |        type="microad"
@@ -921,20 +921,20 @@ PASS
 |        data-appid="${COMPASS_EXT_APPID}"
 |        data-geo="${COMPASS_EXT_GEO}">
 |    </amp-ad>
-|  
+|
 |    <h2>Mixpo</h2>
 |    <amp-ad width="300" height="250"
 |        type = "mixpo"
 |        data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
 |        data-subdomain = "www">
 |    </amp-ad>
-|  
+|
 |    <h2>myWidget</h2>
 |    <amp-embed width="300" height="250"
 |        type="mywidget"
 |        data-cid="ed1538fc077cfeae6ea558f6e7404541">
 |    </amp-embed>
-|  
+|
 |    <h2>Nativo</h2>
 |    <amp-ad width="350" height="150"
 |        type="nativo"
@@ -942,7 +942,7 @@ PASS
 |        data-premium
 |        data-request-url="http://localhost:9876">
 |    </amp-ad>
-|  
+|
 |    <h2>Navegg</h2>
 |    <div>It is common to see a no-fill ad in this example.</div>
 |    <amp-ad width=320 height=50
@@ -951,13 +951,13 @@ PASS
 |        data-slot="/4119129/mobile_ad_banner"
 |        json='{"targeting":{"sport":["rugby","cricket"]}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Nend</h2>
 |    <amp-ad width="320" height="50"
 |        type="nend"
 |        data-nend_params='{"media":82,"site":58536,"spot":127513,"type":1,"oriented":1}'>
 |    </amp-ad>
-|  
+|
 |    <h2>NETLETIX</h2>
 |    <amp-ad width='300' height='250'
 |        type='netletix'
@@ -966,7 +966,7 @@ PASS
 |        data-nxwidth='300'
 |        data-nxheight='250'>
 |    </amp-ad>
-|  
+|
 |    <h2>Nokta</h2>
 |    <amp-ad width="300" height="250"
 |        type="nokta"
@@ -974,7 +974,7 @@ PASS
 |        data-site="izlesene:anasayfa"
 |        data-zone="152541">
 |    </amp-ad>
-|  
+|
 |    <h2>Open AdStream single ad</h2>
 |    <amp-ad width="300" height="250"
 |        type="openadstream"
@@ -983,7 +983,7 @@ PASS
 |        data-pos="x04"
 |        data-query="keyword=keyvalue&key2=value2" >
 |    </amp-ad>
-|  
+|
 |    <h2>OpenX</h2>
 |    <amp-ad width="728" height="90"
 |        type="openx"
@@ -994,7 +994,7 @@ PASS
 |    <div>
 |      <a href="openx.amp.html">See all OpenX examples</a>
 |    </div>
-|  
+|
 |    <h2>Outbrain widget</h2>
 |    <amp-embed width="100" height="100"
 |        type="outbrain"
@@ -1006,7 +1006,7 @@ PASS
 |        data-styleFile="http://localhost/style.css"
 |        data-testMode="true">
 |    </amp-embed>
-|  
+|
 |    <h2>Plista responsive widget</h2>
 |    <amp-embed width="300" height="300"
 |        type="plista"
@@ -1018,14 +1018,14 @@ PASS
 |        data-urlprefix=""
 |        data-categories="politik">
 |    </amp-embed>
-|  
+|
 |    <h2>polymorphicAds</h2>
 |    <amp-ad width=320 height=50
 |        type="polymorphicads"
 |        data-adunit="7c0b3ae742beccf94f7726ea832277a2"
 |        data-params='{"testMode": "true"}'>
 |    </amp-ad>
-|  
+|
 |    <h2>popIn native ad</h2>
 |    <amp-ad width="300" height="568"
 |        type="popin"
@@ -1033,7 +1033,7 @@ PASS
 |        heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
 |        data-mediaid="popin_amp">
 |    </amp-ad>
-|  
+|
 |    <h2>Pubmine 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="pubmine"
@@ -1042,31 +1042,21 @@ PASS
 |        data-siteid="37790885"
 |        data-wordads="1">
 |    </amp-ad>
-|  
-|    <h2 class="broken">PulsePoint Header Bidding 300x250</h2>
-|    <amp-ad width="300" height="250"
-|        type="pulsepoint"
-|        data-pid="521732"
-|        data-tagid="76835"
-|        data-tagtype="hb"
-|        data-timeout="1000"
-|        data-slot="/1066621/ExchangeTech_Prebid_AdUnit">
-|    </amp-ad>
-|  
+|
 |    <h2>PulsePoint 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="pulsepoint"
 |        data-pid="512379"
 |        data-tagid="472988">
 |    </amp-ad>
-|  
+|
 |    <h2>Purch 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="purch"
 |        data-pid="2882"
 |        data-divid="rightcol_top">
 |    </amp-ad>
-|  
+|
 |    <h2>Rambler&Co</h2>
 |    <amp-ad width="500" height="250"
 |        type="capirs"
@@ -1076,7 +1066,7 @@ PASS
 |        data-custom-css="div[id^=begun_block] iframe{margin:0 auto;}"
 |        json='{"params":{"p1":"bvpkq","p2":"y","pct":"a"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Relap</h2>
 |    <amp-ad width="auto" height="750"
 |        type="relap"
@@ -1085,7 +1075,7 @@ PASS
 |        data-url="http://bigpicture.ru"
 |        data-anchorid="i0xMMY1MoliiZWVl">
 |    </amp-ad>
-|  
+|
 |    <h2>Revcontent Responsive Tag</h2>
 |    <amp-ad width="320" height="240"
 |        type="revcontent"
@@ -1106,7 +1096,7 @@ PASS
 |        data-wrapper="rcjsload_2ff711"
 |        data-id="203">
 |    </amp-ad>
-|  
+|
 |    <h2>Rubicon Project Smart Tag</h2>
 |    <amp-ad width="320" height="50"
 |        type="rubicon"
@@ -1118,7 +1108,7 @@ PASS
 |        data-kw="amp-test, test"
 |        json='{"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Rubicon Project FastLane Single Slot</h2>
 |    <amp-ad width="320" height="50"
 |        type="rubicon"
@@ -1129,27 +1119,27 @@ PASS
 |        data-kw="amp-test"
 |        json='{"targeting":{"kw":"amp-test","age":"18-24","gender":"male","section":"amp"},"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
 |    </amp-ad>
-|  
+|
 |    <h2>Sharethrough</h2>
 |    <amp-ad width="300" height="150"
 |        type="sharethrough"
 |        layout="responsive"
 |        data-pkey="c0fa8367">
 |    </amp-ad>
-|  
+|
 |    <h2>Sklik</h2>
 |    <amp-ad width="970" height="310"
 |        type="sklik"
 |        json='{"zoneId":0, "w": 970, "h": 310}'>
 |    </amp-ad>
-|  
+|
 |    <h2>SlimCut Media</h2>
 |    <amp-ad width="400" height="225"
 |        type="slimcutmedia"
 |        data-pid="amp-3"
 |        data-ffc="SCMPROMO">
 |    </amp-ad>
-|  
+|
 |    <h2>SmartAdServer ad</h2>
 |    <amp-ad width="320" height="50"
 |        type="smartadserver"
@@ -1158,21 +1148,21 @@ PASS
 |        data-format="38952"
 |        data-target="foo=bar">
 |    </amp-ad>
-|  
+|
 |    <h2>smartclip</h2>
 |    <amp-ad width="400" height="225"
 |        type="smartclip"
 |        data-plc="84555"
 |        data-sz="400x320">
 |    </amp-ad>
-|  
+|
 |    <h2>Sortable ad</h2>
 |    <amp-ad width="300" height="250"
 |        type="sortable"
 |        data-name="medrec"
 |        data-site="ampproject.org">
 |    </amp-ad>
-|  
+|
 |    <h2>SOVRN</h2>
 |    <amp-ad width="300" height="250"
 |        type="sovrn"
@@ -1184,14 +1174,14 @@ PASS
 |        data-testFlag="true"
 |        data-z="393900"><!-- this ID is only whitelisted for localhost:8000 and http://amphtml-nightly.herokuapp.com-->
 |    </amp-ad>
-|  
+|
 |    <h2>SpotX</h2>
 |    <amp-ad width="300" height="250"
 |        type="spotx"
 |        data-spotx_channel_id="85394"
 |        data-spotx_autoplay="1">
 |    </amp-ad>
-|  
+|
 |    <h2>SunMedia</h2>
 |    <amp-ad width="300" height="1"
 |        type="sunmedia"
@@ -1200,7 +1190,7 @@ PASS
 |        data-cid="sunmedia_test"
 |        data-crst="1">
 |    </amp-ad>
-|  
+|
 |    <h2>Swoop</h2>
 |    <amp-ad width=250 height=35
 |        type="swoop"
@@ -1209,7 +1199,7 @@ PASS
 |        data-placement="page/inline"
 |        data-slot="amp/test">
 |    </amp-ad>
-|  
+|
 |    <h2>Taboola responsive widget</h2>
 |    <amp-embed width="100" height="283"
 |        type="taboola"
@@ -1220,21 +1210,21 @@ PASS
 |        data-placement="Ads Example"
 |        data-article="auto">
 |    </amp-embed>
-|  
+|
 |    <h2>Teads</h2>
 |    <amp-ad width="300" height="220"
 |        type="teads"
 |        data-pid="42266"
 |        layout="responsive">
 |    </amp-ad>
-|  
+|
 |    <h2>TripleLift</h2>
 |    <amp-ad width="297" height="410"
 |        type="triplelift"
 |        layout="responsive"
 |        src="https://ib.3lift.com/dtj/amptest_main_feed/335430">
 |    </amp-ad>
-|  
+|
 |    <h2>Weborama</h2>
 |    <amp-ad width="300" height="250"
 |        type="weborama-display"
@@ -1244,27 +1234,27 @@ PASS
 |        data-wbo_random="[RANDOM]"
 |        data-wbo_publisherclick="[PUBLISHER_TRACKING_URL]">
 |    </amp-ad>
-|  
+|
 |    <h2>Widespace Panorama Ad</h2>
 |    <amp-ad width="300" height="50"
 |        type="widespace"
 |        data-sid="93f1a996-52f5-46b4-8dc8-ccd8886a8fbf"
 |        layout="responsive">
 |    </amp-ad>
-|  
+|
 |    <h2>Widespace Takeover Ad</h2>
 |    <amp-ad width="300" height="300"
 |        type="widespace"
 |        data-sid="fc5a6f59-d45e-4cf1-acac-67bf5ab4862a"
 |        layout="responsive">
 |    </amp-ad>
-|  
+|
 |    <h2>Xlift native ad</h2>
 |    <amp-ad width="300" height="300"
 |        type="xlift"
 |        data-mediaid="mamastar">
 |    </amp-ad>
-|  
+|
 |    <h2>Yahoo Display</h2>
 |    <amp-ad width="316" height="264"
 |        type="yahoo"
@@ -1272,19 +1262,19 @@ PASS
 |        data-site="news"
 |        data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
 |    </amp-ad>
-|  
+|
 |    <h2>YahooJP YDN</h2>
 |    <amp-ad width="300" height="250"
 |        type="yahoojp"
 |        data-yadsid="79712_113431">
 |    </amp-ad>
-|  
+|
 |    <h2 id="yandex">Yandex</h2>
 |    <amp-ad width="240" height="400"
 |        type="yandex"
 |        data-block-id="R-I-106712-3">
 |    </amp-ad>
-|  
+|
 |    <h2>Yieldbot 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="yieldbot"
@@ -1293,27 +1283,27 @@ PASS
 |        data-slot="/2476204/medium-rectangle"
 |        json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
 |    </amp-ad>
-|  
+|
 |    <h2>YIELD ONE</h2>
 |    <amp-ad width="320" height="50"
 |        type="yieldone"
 |        data-pubid="0001"
 |        data-pid="032478_4">
 |    </amp-ad>
-|  
+|
 |    <h2>Yieldmo</h2>
 |    <amp-ad width="300" height="168"
 |        type="yieldmo"
 |        data-ymid="1349317029731662884">
 |    </amp-ad>
-|  
+|
 |    <h2>ValueCommerce</h2>
 |    <amp-ad width="300" height="250"
 |        type="valuecommerce"
 |        data-sid="3008"
 |        data-pid="884466614">
 |    </amp-ad>
-|  
+|
 |    <h2>Webediads</h2>
 |    <div>It's a private ad network with strict ad targeting, hence very common to see a no-fill.</div>
 |    <amp-ad width="300" height="250"
@@ -1323,7 +1313,7 @@ PASS
 |        data-position="middle"
 |        data-query="amptest=1">
 |    </amp-ad>
-|  
+|
 |    <h2>ZEDO</h2>
 |    <amp-ad width="300" height="250"
 |        type="zedo"
@@ -1334,7 +1324,7 @@ PASS
 |        data-publisher="0"
 |        data-dim="9">
 |    </amp-ad>
-|  
+|
 |    <h2>ZergNet</h2>
 |    <amp-embed width="780" height="100"
 |        type="zergnet"
@@ -1342,7 +1332,7 @@ PASS
 |        layout="responsive"
 |        data-zergid="42658">
 |    </amp-embed>
-|  
+|
 |    <h2>Zucks</h2>
 |    <amp-ad width="320" height="50"
 |        type="zucks"

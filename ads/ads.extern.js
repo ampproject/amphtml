@@ -447,9 +447,6 @@ data.adsafe;
 data.wordads;
 data.section;
 
-// pulsepoint.js
-window.PulsePointHeaderTag;
-
 // rubicon.js
 var rubicontag;
 rubicontag.setFPV;
