@@ -18,8 +18,8 @@ import {dev} from '../../src/log';
 
 const TAG = 'DOUBLECLICK - DEPRECATED';
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * @param {!Window} unusedGlobal
+ * @param {!Object} unusedData
  */
 export function doubleclick(unusedGlobal, unusedData) {
   dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please' +
