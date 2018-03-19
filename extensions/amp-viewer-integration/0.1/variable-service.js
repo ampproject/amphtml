@@ -1,0 +1,82 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {parseQueryString} from '../../../src/url';
+import {user} from '../../../src/log';
+
+/**
+ * @typedef {{
+ *   ancestorOrigin: function():string,
+ *   fragmentParam: function(string, string):string),
+ * }}
+ */
+export let ViewerIntegrationVariableDef;
+
+/**
+ * Variable service for amp-viewer-integration.
+ * Used for URL replacement service. See usage in src/url-replacements-impl.
+ */
+export class AmpViewerIntegrationVariableService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+    this.ampdoc = ampdoc;
+    /** @private {!ViewerIntegrationVariableDef} */
+    this.variables_ = {
+      ancestorOrigin: (param, defaultValue) => { return this.getAncestorOrigin_();},
+      fragmentParam: (param, defaultValue) => { return this.getFragmentParamData_(param, defaultValue);},
+    };
+  }
+
+
+  /**
+   * Return the FRAGMENT_PARAM from the original location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   * @private
+   */
+  getFragmentParamData_(param, defaultValue) {
+    user().assert(param,
+        'The first argument to FRAGMENT_PARAM, the fragment string ' +
+        'param is required');
+    user().assert(typeof param == 'string', 'param should be a string');
+    const hash = this.ampdoc.win.location.originalHash;
+    const params = parseQueryString(hash);
+    return (typeof params[param] !== 'undefined')
+      ? params[param] : defaultValue;
+  }
+
+  /**
+   * Return the FRAGMENT_PARAM from the original location href
+   * @return {string}
+   * @private
+   */
+  getAncestorOrigin_() {
+    return this.ampdoc.win.location.ancestorOrigins[0];
+  }
+  /**
+   * @return {!StoryVariableDef}
+   */
+  get() {
+    // TODO(newmius): You should probably Object.freeze this in development.
+    return this.variables_;
+  }
+}

@@ -250,13 +250,9 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
-    this.set('FRAGMENT_PARAM', (param, defaultValue = '') => {
-      return this.getFragmentParamData_(param, defaultValue);
-    });
+    this.set('FRAGMENT_PARAM', this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
 
-    this.set('ANCESTOR_ORIGIN', () => {
-      return this.ampdoc.win.location.ancestorOrigins[0];
-    });
+    this.set('ANCESTOR_ORIGIN', this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
     /**
      * Stores client ids that were generated during this page view
@@ -606,24 +602,6 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Return the FRAGMENT_PARAM from the original location href
-   * @param {*} param
-   * @param {string} defaultValue
-   * @return {string}
-   * @private
-   */
-  getFragmentParamData_(param, defaultValue) {
-    user().assert(param,
-        'The first argument to FRAGMENT_PARAM, the fragment string ' +
-        'param is required');
-    user().assert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location.originalHash;
-    const params = parseQueryString(hash);
-    return (typeof params[param] !== 'undefined')
-      ? params[param] : defaultValue;
-  }
-
-  /**
    * Resolves the value via amp-experiment's variants service.
    * @param {function(!Object<string, string>):(?string)} getter
    * @param {string} expr
@@ -682,6 +660,24 @@ export class GlobalVariableSource extends VariableSource {
               /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
               (storyVariables));
         });
+  }
+
+  /**
+   * Resolves the value via amp-viewer-integration's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getViewerIntegrationValue_(property, name) {
+    return (param, defaultValue = '') => {
+      const service = Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+      return service.then(viewerIntegrationVariables => {
+        user().assert(viewerIntegrationVariables,
+            'To use variable %s amp-viewer-integration should be configured', name);
+        return storyVariables[property](param, defaultValue);
+      });
+    };
   }
 }
 

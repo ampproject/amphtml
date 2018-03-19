@@ -19,11 +19,15 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
+import {AmpViewerIntegrationVariableService} from './variable-service';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../src/service';
 import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
@@ -58,6 +62,11 @@ export class AmpViewerIntegration {
 
     /** @private {boolean} */
     this.isHandShakePoll_ = false;
+
+    /** @const @private {!AmpViewerIntegrationVariableService} */
+    this.variableService_ = new AmpViewerIntegrationVariableService(getAmpdoc(this.win.document));
+    registerServiceBuilder(
+        this.win, 'viewer-integration-variable', () => this.variableService_.get());
   }
 
   /**
