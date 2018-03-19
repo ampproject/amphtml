@@ -548,10 +548,12 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
-app.use('/get-consent/', (req, res) => {
+app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
-  const body = {};
-  res.send(body);
+  const body = {
+    'consentRequired': true,
+  };
+  res.json(body);
 });
 
 // Proxy with local JS.
