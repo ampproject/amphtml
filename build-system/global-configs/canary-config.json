@@ -32,5 +32,5 @@
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "rollback-delayed-fetch-deprecation": 1,
+  "rollback-delayed-fetch-deprecation": 1
 }
