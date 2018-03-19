@@ -1043,16 +1043,6 @@ PASS
 |        data-wordads="1">
 |    </amp-ad>
 |  
-|    <h2 class="broken">PulsePoint Header Bidding 300x250</h2>
-|    <amp-ad width="300" height="250"
-|        type="pulsepoint"
-|        data-pid="521732"
-|        data-tagid="76835"
-|        data-tagtype="hb"
-|        data-timeout="1000"
-|        data-slot="/1066621/ExchangeTech_Prebid_AdUnit">
-|    </amp-ad>
-|  
 |    <h2>PulsePoint 300x250</h2>
 |    <amp-ad width="300" height="250"
 |        type="pulsepoint"
