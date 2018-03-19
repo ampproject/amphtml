@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# DoubleClick
+
 ### <a name="amp-ad-network-doubleclick-impl"></a> `amp-ad-network-doubleclick-impl`
 
 <table>
@@ -116,24 +118,30 @@ Supported via `json` attribute:
     <td><strong>Feature</strong></td>
     <td><strong>Description</strong></td>
     <td><strong>Status</strong></td>
+  </tr>
   <tr>
-    <td>Render on Idle</td>
+    <td><a href="multi-size.md">Multi-size</a></td>
+    <td>Allows slots to specify multiple sizes.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
+    <td><a href="fluid.md">Fluid</a></td>
+    <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
+    <td>Beta</td>
+  </tr>
+  <tr>
+    <td><a href="render-on-idle.md">Render on Idle</a></td>
     <td>Allows slots 3-12 viewports down to render while the AMP scheduler is idle.</td>
     <td>Launched</td>
   </tr>
   <tr>
-    <td>Refresh</td>
+    <td><a href="refresh.md">Refresh</a></td>
     <td>Enabled slots will periodically refetch new creatives.</td>
     <td>Launched</td>
   </tr>
   <tr>
-    <td>SRA: Single Request Architecture</td>
+    <td><a href="sra.md">SRA: Single Request Architecture</a></td>
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
-    <td>Beta</td>
-  </tr>
-  <tr>
-    <td>Fluid</td>
-    <td>Fluid slots do not require a pre-specified size, but will instead fill up the width of their parent container and adjust their height accordingly.</td>
     <td>Beta</td>
   </tr>
 </table>
