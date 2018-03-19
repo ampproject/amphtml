@@ -157,7 +157,7 @@ const renderer = new TemplateRenderer();
 /**
  * @abstract
  */
-export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
+export class AmpAdTemplateBase extends AmpAdNetworkBase {
   /**
    * @param {!Element} element
    */
@@ -176,7 +176,6 @@ export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
   /** @override */
   buildCallback() {
     this.getContext().size = {
-      // TODO(levitzky) handle non-numeric values.
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
       layout: this.element.getAttribute('layout'),

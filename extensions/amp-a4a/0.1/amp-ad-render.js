@@ -42,17 +42,6 @@ const SHARED_IFRAME_PROPERTIES = dict({
 /** @const {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
-/** @typedef {{
-      baseInstance: !./amp-ad-network-base.AmpAdNetworkBase,
-    }} */
-export let FriendlyFrameContextDef;
-
-/** @typedef {{
-      baseInstance: !./amp-ad-network-base.AmpAdNetworkBase,
-      crossDomainData: !./amp-ad-type-defs.CrossDomainDataDef,
-    }} */
-export let CrossDomainFrameContextDef;
-
 /**
  * Render a validated AMP creative directly in the parent page.
  */
@@ -66,11 +55,8 @@ export class FriendlyFrameRenderer extends Renderer {
 
   /** @override */
   render(context, element, creativeData) {
-
-    context = /** @type {FriendlyFrameContextDef} */ (context);
     const size = context.size;
     const adUrl = context.requestUrl;
-
     const creativeMetaData = creativeData.creativeMetaData;
 
     dev().assert(size, 'missing creative size');
@@ -131,9 +117,9 @@ export class FriendlyFrameRenderer extends Renderer {
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, unusedCreativeData) {
-    context = /** @type {CrossDomainFrameContextDef} */ (context);
+    dev().assert(context.crossDomainData, 'CrossDomain data undefined!');
+
     const crossDomainData = context.crossDomainData;
-    dev().assert(crossDomainData, 'CrossDomain data undefined!');
     const rawCreativeBytes = crossDomainData.rawCreativeBytes;
     const creative = utf8Decode(rawCreativeBytes);
     const srcPath =
@@ -147,34 +133,21 @@ export class NameFrameRenderer extends Renderer {
         sentinel,
         additionalContextMetadata);
     contextMetadata['creative'] = creative;
-    const name = JSON.stringify(contextMetadata);
-    iframeRenderHelper(context, element, dict({'src': srcPath, 'name': name}));
+    const mergedAttributes = dict({
+      'src': srcPath,
+      'name': JSON.stringify(contextMetadata),
+      'height': context.size.height,
+      'width': context.size.width,
+    });
+    if (sentinel) {
+      mergedAttributes['data-amp-3p-sentinel'] = sentinel;
+    }
+    const iframe = createElementWithAttributes(
+        /** @type {!Document} */ (element.ownerDocument), 'iframe',
+        /** @type {!JsonObject} */ (
+          Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)));
+    context.applyFillContent(iframe);
+    element.appendChild(iframe);
     return Promise.resolve();
   }
 }
-
-/**
- * Shared functionality for cross-domain iframe-based rendering methods.
- * @param {!CrossDomainFrameContextDef} context
- * @param {!Element} containerElement
- * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
- */
-function iframeRenderHelper(context, containerElement, attributes) {
-  const size = context.size;
-  const crossDomainData = context.crossDomainData;
-  const sentinel = crossDomainData && crossDomainData.sentinel;
-  const mergedAttributes = Object.assign(attributes, dict({
-    'height': size.height,
-    'width': size.width,
-  }));
-  if (sentinel) {
-    mergedAttributes['data-amp-3p-sentinel'] = sentinel;
-  }
-  const iframe = createElementWithAttributes(
-      /** @type {!Document} */ (containerElement.ownerDocument), 'iframe',
-      /** @type {!JsonObject} */ (Object.assign(mergedAttributes,
-          SHARED_IFRAME_PROPERTIES)));
-  context.applyFillContent(iframe);
-  containerElement.appendChild(iframe);
-}
-
