@@ -153,7 +153,7 @@ export class SafeframeHostApi {
     this.isFluid_ = isFluid;
 
     /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.ampAdSize_ = initialSize;
+    this.slotSize_ = initialSize;
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
@@ -539,8 +539,8 @@ export class SafeframeHostApi {
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
     if (!optIsCollapse &&
-        width <= this.ampAdSize_.width &&
-        height <= this.ampAdSize_.height) {
+        width <= this.slotSize_.width &&
+        height <= this.slotSize_.height) {
       this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
@@ -590,8 +590,8 @@ export class SafeframeHostApi {
       // Update our stored record of what the amp-ad's size is. This
       // is just for caching. Setting it here doesn't actually change
       // the size of the amp-ad, the attempt change size above did that.
-      this.ampAdSize_.height = height;
-      this.ampAdSize_.width = width;
+      this.slotSize_.height = height;
+      this.slotSize_.width = width;
     }, /** REJECT CALLBACK */ () => {
       // If the resize initially failed, it may have been queued
       // as a pendingChangeSize, which will cause the size change
