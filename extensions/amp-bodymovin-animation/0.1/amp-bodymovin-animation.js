@@ -22,10 +22,11 @@ import {clamp} from '../../../src/utils/math';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isFiniteNumber} from '../../../src/types';
+import {isObject, isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
+import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
@@ -120,8 +121,9 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        return this.loadPromise(this.iframe_)
-            .then(() => this.playerReadyPromise_);
+        const loaded = this.loadPromise(this.iframe_);
+        this.playerReadyResolver_(loaded);
+        return loaded;
       });
     });
   }
@@ -139,11 +141,23 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 
   handleBodymovinMessages_(event) {
-    if (event.source === this.iframe_.contentWindow) {
-      const eventData = parseJson(getData(event));
-      if (eventData['action'] == 'ready') {
-        this.playerReadyResolver_(this.iframe_);
-      }
+    if (event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+      return; // Doesn't look like JSON.
+    }
+
+    /** @const {?JsonObject} */
+    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
+      ? getData(event)
+      : parseJson(getData(event)));
+    if (eventData === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (eventData['action'] == 'ready') {
+      this.playerReadyResolver_(this.iframe_);
     }
   }
 
