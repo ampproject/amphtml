@@ -42,6 +42,8 @@ FAIL
 |    </amp-list>
 |    <!-- Valid: amp-list with both src and [src] attributes -->
 |    <amp-list width=10 height=10
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'amp-list' is deprecated - use '[src]' instead. [DEPRECATION]
 |              src="https://data.com/articles.json?ref=CANONICAL_URL"
 |              [src]="foo.bar" [state]="baz.qux">
 |      <div></div>
