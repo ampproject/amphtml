@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 586
+spec_file_revision: 588
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -602,6 +602,8 @@ tags: {
   # itemprop / property is non-standard, but commonly seen.
   attrs: { name: "itemprop" }
   attrs: { name: "property" }
+  # scheme is used by Dublin Core, see issue #13993
+  attrs: { name: "scheme" }
 }
 # This is redundant with meta charset, but also harmless as long as it's
 # set to utf-8.
