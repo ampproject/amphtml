@@ -22,7 +22,7 @@ import {clamp} from '../../../src/utils/math';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isObject, isFiniteNumber} from '../../../src/types';
+import {isFiniteNumber, isObject} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
@@ -40,7 +40,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private @const */
     this.ampdoc_ = Services.ampdoc(this.element);
 
-    /** @private {?HTMLIFrameElement} */
+    /** @private {?Element} */
     this.iframe_ = null;
 
     /** @private {?string} */
