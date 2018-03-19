@@ -356,7 +356,7 @@ AMP.BaseElement = class {
  */
 AMP.AmpAdXOriginIframeHandler = class {
   /**
-   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a|!AmpAdNetworkBase$$module$extensions$amp_a4a$0_1$amp_ad_network_base} baseInstance
+   * @param {!AmpAd3PImpl$$module$extensions$amp_ad$0_1$amp_ad_3p_impl|!AmpA4A$$module$extensions$amp_a4a$0_1$amp_a4a} baseInstance
    */
   constructor(baseInstance) {}
 };

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkTemplateBase} from '../../amp-a4a/0.1/amp-ad-network-template-base';
+import {AmpAdNetworkTemplateBase} from '../../amp-a4a/0.1/amp-ad-template-base';
 import {NetworkRegistry} from './config';
 import {dev} from '../../../src/log';
 

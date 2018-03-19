@@ -15,7 +15,7 @@
  */
 
 import {AmpAdNetworkBase} from './amp-ad-network-base';
-import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
+import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {FriendlyFrameRenderer} from './amp-ad-render';
 import {Services} from '../../../src/services';
 import {Validator, ValidatorResult} from './amp-ad-type-defs';
@@ -25,13 +25,6 @@ import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
-
-/** @typedef {{
-      templateUrl: string,
-      data: (JsonObject|undefined),
-      analytics: (JsonObject|undefined),
-    }} */
-export let AmpTemplateCreativeDef;
 
 /**
  * Fetches and returns the template from the given ad response, wrapped as a
@@ -48,8 +41,8 @@ export class TemplateValidator extends Validator {
 
   /**
    * @param {string} templateString
-   * @param {!AmpTemplateCreativeDef} parsedResponseBody
-   * @return {!./amp-ad-render.CreativeMetaDataDef}
+   * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
+   * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
    * @private
    */
   getAmpAdMetadata_(templateString, parsedResponseBody) {
@@ -58,7 +51,7 @@ export class TemplateValidator extends Validator {
     // by more sophisticated logic.
     const minifiedCreative = templateString.replace(
         /<script async.+?<\/script>/g, '');
-    const metadata = /** @type {!./amp-ad-render.CreativeMetaDataDef} */ ({
+    const metadata = /** @type {!./amp-ad-type-defs.CreativeMetaDataDef} */ ({
       minifiedCreative,
       customElementExtensions: [],
       extensions: [],
@@ -71,7 +64,7 @@ export class TemplateValidator extends Validator {
   }
 
   /**
-   * @param {!./amp-ad-render.CreativeMetaDataDef} metadata
+   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
    * @param {!Window} win
    * @private
    */
@@ -98,7 +91,7 @@ export class TemplateValidator extends Validator {
     }
 
     const parsedResponseBody =
-        /** @type {!AmpTemplateCreativeDef} */ (
+        /** @type {!./amp-ad-type-defs.AmpTemplateCreativeDef} */ (
         tryParseJson(body) || {});
     this.ampAdTemplates_ = this.ampAdTemplates_ ||
         new AmpAdTemplates(context.win);
@@ -130,10 +123,12 @@ export class TemplateRenderer extends FriendlyFrameRenderer {
   /** @override */
   render(context, containerElement, creativeData) {
     return super.render(
-        context, containerElement, creativeData.creativeMetadata)
+        context, containerElement, creativeData)
         .then(() => {
+          dev().assert(creativeData.templateData,
+              'Template renderer invoked before template data available!');
           const templateData = creativeData.templateData;
-          const templateMacroValues = templateData && templateData.data;
+          const templateMacroValues = templateData.data;
           if (this.iframe && templateMacroValues) {
             this.ampAdTemplates_ = this.ampAdTemplates_ ||
                 new AmpAdTemplates(context.win);

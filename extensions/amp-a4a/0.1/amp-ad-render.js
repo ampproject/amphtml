@@ -43,28 +43,13 @@ const SHARED_IFRAME_PROPERTIES = dict({
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>,
-      images: (Array<string>|undefined),
-    }} */
-export let CreativeMetaDataDef;
-
-/** @typedef {{
-      rawCreativeBytes: !ArrayBuffer,
-      additionalContextMetadata: !JsonObject,
-      sentinel: string,
-    }} */
-export let CrossDomainDataDef;
-
-/** @typedef {{
       baseInstance: !./amp-ad-network-base.AmpAdNetworkBase,
     }} */
 export let FriendlyFrameContextDef;
 
 /** @typedef {{
       baseInstance: !./amp-ad-network-base.AmpAdNetworkBase,
-      crossDomainData: !CrossDomainDataDef,
+      crossDomainData: !./amp-ad-type-defs.CrossDomainDataDef,
     }} */
 export let CrossDomainFrameContextDef;
 
@@ -80,11 +65,13 @@ export class FriendlyFrameRenderer extends Renderer {
   }
 
   /** @override */
-  render(context, element, creativeMetaData) {
+  render(context, element, creativeData) {
 
     context = /** @type {FriendlyFrameContextDef} */ (context);
     const size = context.size;
     const adUrl = context.requestUrl;
+
+    const creativeMetaData = creativeData.creativeMetaData;
 
     dev().assert(size, 'missing creative size');
     dev().assert(adUrl, 'missing ad request url');
@@ -162,6 +149,7 @@ export class NameFrameRenderer extends Renderer {
     contextMetadata['creative'] = creative;
     const name = JSON.stringify(contextMetadata);
     iframeRenderHelper(context, element, dict({'src': srcPath, 'name': name}));
+    return Promise.resolve();
   }
 }
 
@@ -186,8 +174,7 @@ function iframeRenderHelper(context, containerElement, attributes) {
       /** @type {!Document} */ (containerElement.ownerDocument), 'iframe',
       /** @type {!JsonObject} */ (Object.assign(mergedAttributes,
           SHARED_IFRAME_PROPERTIES)));
-  const crossOriginIframeHandler =
-      new AMP.AmpAdXOriginIframeHandler(context.baseInstance);
-  crossOriginIframeHandler.init(iframe, /* opt_isA4A */ true);
+  context.applyFillContent(iframe);
+  containerElement.appendChild(iframe);
 }
 
