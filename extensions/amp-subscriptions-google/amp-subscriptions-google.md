@@ -19,9 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically injects ads into an AMP page by
-      using a remotely-served configuration file.
-    </td>
+    <td>Implements subscription-style access protocol for Subscribe with Google.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>

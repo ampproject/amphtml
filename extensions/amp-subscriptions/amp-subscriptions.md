@@ -19,9 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically injects ads into an AMP page by
-      using a remotely-served configuration file.
-    </td>
+    <td>Implements subscription-style access protocol.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -151,7 +149,7 @@ The "local" service is configured as following:
 The properties in the "local" service are:
  - "authorizationUrl" - the authorization endpoint URL.
  - "pingbackUrl" - the pingback endpoint URL.
- - "actions" - a named map of actions. At a minimum there must be two actions specified: "login" and "subscribe".
+ - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
 
 ### The vendor service configuration
 
