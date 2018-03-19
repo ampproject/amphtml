@@ -296,7 +296,10 @@ exports.rules = [
       /** DO NOT WHITELIST ANY FILES */
       'ads/google/deprecated_doubleclick.js',
       /** DO NOT WHITELIST ANY FILES */
-    ]
+    ],
+    whitelist: [
+      '3p/integration.js->ads/google/deprecated_doubleclick.js',
+    ],
   },
 
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
@@ -322,7 +325,6 @@ exports.rules = [
       'ads/yieldbot.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
       'ads/criteo.js->ads/google/doubleclick.js',
-      '3p/integration.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
     ],
   },
