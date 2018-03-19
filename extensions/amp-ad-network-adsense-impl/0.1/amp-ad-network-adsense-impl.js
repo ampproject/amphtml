@@ -228,7 +228,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               viewportSize),
-          viewportSize.width);
+          viewportSize.width).catch(() => {});
     }
   }
 

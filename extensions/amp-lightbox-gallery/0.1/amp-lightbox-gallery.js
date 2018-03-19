@@ -93,13 +93,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     super(element);
 
     /** @private {boolean} */
-    this.active_ = false;
+    this.isActive_ = false;
 
     /** @private {number} */
     this.currentElemId_ = -1;
 
     /** @private {function(!Event)} */
-    this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
+    this.boundOnKeyDown_ = this.onKeyDown_.bind(this);
 
     /**
      * @private {?./service/lightbox-manager-impl.LightboxManager}
@@ -404,6 +404,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.descriptionBox_.classList.remove('standard');
         this.descriptionBox_.classList.add('overflow');
       } else {
+        this.descriptionBox_./*OK*/scrollTop = 0;
         this.descriptionBox_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
       }
@@ -614,13 +615,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       });
     }).then(() => {
       this.getViewport().enterLightboxMode();
-      this.active_ = true;
+      this.isActive_ = true;
 
       this.updateInViewport(dev().assertElement(this.container_), true);
       this.scheduleLayout(dev().assertElement(this.container_));
 
       this.win.document.documentElement.addEventListener(
-          'keydown', this.boundHandleKeyboardEvents_);
+          'keydown', this.boundOnKeyDown_);
 
       this.carousel_.addEventListener(
           'slideChange', event => this.slideChangeHandler_(event)
@@ -642,10 +643,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
-    // Hack to access private property. Better than not getting
-    // type checking to work.
-    /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-        this.currentElemId_);
+    dev().assert(this.carousel_).getImpl()
+        .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
     const tagName = this.getCurrentElement_().tagName;
     if (ELIGIBLE_TAP_TAGS[tagName]) {
       this.getCurrentElement_().imageViewer.signals()
@@ -984,8 +983,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }
       });
 
-      /**@type {?}*/ (lightboxCarouselMetadata.sourceCarousel).implementation_
-          .showSlideWhenReady(returnSlideIndex);
+      dev().assert(lightboxCarouselMetadata.sourceCarousel).getImpl()
+          .then(carousel => carousel.showSlideWhenReady(returnSlideIndex));
     }
   }
 
@@ -995,11 +994,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   close_() {
-    if (!this.active_) {
+    if (!this.isActive_) {
       return Promise.resolve();
     }
 
-    this.active_ = false;
+    this.isActive_ = false;
 
     this.cleanupEventListeners_();
 
@@ -1016,7 +1015,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
 
     this.win.document.documentElement.removeEventListener(
-        'keydown', this.boundHandleKeyboardEvents_);
+        'keydown', this.boundOnKeyDown_);
 
     this.carousel_.removeEventListener(
         'slideChange', event => {this.slideChangeHandler_(event);});
@@ -1038,11 +1037,39 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    *  -Esc will close the lightbox.
    * @private
    */
-  handleKeyboardEvents_(event) {
-    const code = event.keyCode;
-    if (code == KeyCodes.ESCAPE) {
-      this.close_();
+  onKeyDown_(event) {
+    if (!this.isActive_) {
+      return;
     }
+    const {keyCode} = event;
+    switch (keyCode) {
+      case KeyCodes.ESCAPE:
+        this.close_();
+        break;
+      case KeyCodes.LEFT_ARROW:
+        this.maybeSlideCarousel_(/*direction*/ -1);
+        break;
+      case KeyCodes.RIGHT_ARROW:
+        this.maybeSlideCarousel_(/*direction*/ 1);
+        break;
+      default:
+        // Keycode not registered. Do nothing.
+    }
+
+  }
+
+  /**
+   * @param {number} direction 1 for forward or -1 for backwards.
+   * @private
+   */
+  maybeSlideCarousel_(direction) {
+    const isGalleryView = this.container_.hasAttribute('gallery-view');
+    if (isGalleryView) {
+      return;
+    }
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.goCallback(direction, /* animate */ true, /* autoplay */ false);
+    });
   }
 
   /**
@@ -1147,10 +1174,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
-      // Hack to access private property. Better than not getting
-      // type checking to work.
-      /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-          this.currentElemId_);
+      dev().assert(this.carousel_).getImpl()
+          .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
       this.updateDescriptionBox_();
       event.stopPropagation();
     };
