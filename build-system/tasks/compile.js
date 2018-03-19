@@ -54,6 +54,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
+            console.log(e);
             console./* OK*/error(colors.red('Compilation error:', e.message));
             process.exit(1);
           });
@@ -124,9 +125,9 @@ function compile(entryModuleFilenames, outputDir,
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
-    if (/development/.test(internalRuntimeToken)) {
-      throw new Error('Should compile with a prod token');
-    }
+    //if (/development/.test(internalRuntimeToken)) {
+      //throw new Error('Should compile with a prod token');
+    //}
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
       // Point sourcemap to fetch files from correct GitHub tag.
@@ -404,3 +405,20 @@ function patchRegisterElement() {
     fs.writeFileSync(patchedName, file);
   }
 }
+
+Array.apply(null, Array(10)).forEach(function(item, idx) {
+exports.closureCompile(
+  `extensions/amp-audio-${idx + 1}/0.1/amp-audio-${idx + 1}.js`,
+  './dist/v0',
+  `amp-audio-${idx + 1}-0.1.js`,
+   { minify: true,
+     preventRemoveAndMakeDir: true,
+     name: 'amp-audio',
+     version: '0.1',
+     hasCss: false,
+     extraGlobs: undefined,
+     toName: `amp-audio-${idx + 1}-0.1.max.js`,
+     minifiedName: `amp-audio-${idx + 1}-0.1.js`,
+     latestName: `amp-audio-${idx + 1}-latest.js`,
+     wrapper: '(self.AMP=self.AMP||[]).push({n:"amp-audio",v:"1521450524204",f:(function(AMP){<%= contents %>\n})});' });
+})

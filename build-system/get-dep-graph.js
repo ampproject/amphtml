@@ -409,12 +409,9 @@ exports.getBundleFlags = function(g) {
       'third_party/react-externs/externs.js',
     ];
 exports.getFlags({
-  modules: [
-    //'./src/amp.js',
-    './extensions/amp-audio/0.1/amp-audio.js',
-    './extensions/amp-audio-2/0.1/amp-audio.js',
-    './extensions/amp-soundcloud/0.1/amp-soundcloud.js',
-  ],
+  modules: Array.apply(null, Array(10)).map((x, i) => {
+      return `./extensions/amp-audio-${i + 1}/0.1/amp-audio-${i + 1}.js`;
+    }),
   writeTo: './sample/out/',
   externs: externs,
 }).then(function(flagsArray) {

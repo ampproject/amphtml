@@ -1,8 +1,0 @@
-{
-"version":3,
-"file":"/out/extensions-amp-soundcloud-0.1-amp-soundcloud.js",
-"lineCount":1,
-"mappings":"A,uCAsCEA,QAHIC,EAGO,CAACC,CAAD,CAAU,CACnB,GAAA,YAAA,KAAA,CAAA,IAAA,CAAMA,CAAN,CADmB,CAHvBC,CAAA,CAAA,CAAA,CAAA,GAAA,YAAA,CA8EAC,IAAAC,EAAA,CAAc,gBAAd,CAAgC,KAAhC,CAAuC,QAAA,CAAAD,CAAA,CAAO,CAC5CA,CAAAE,gBAAA,CAAoB,gBAApB,CAAsCL,CAAtC,CAD4C,CAA9C,C,CChHA,CAACM,IAAA,GAAD,CAAYA,IAAA,GAAZ,EAAwB,EAAxB,EAA4B,mDAA5B,CAAA,CD6BCC;",
-"sources":["/extensions/amp-soundcloud/0.1/amp-soundcloud.js","/splittable-build/tmp-8xtSwU.js"],
-"names":["constructor","AmpSoundcloud$$module$extensions$amp_soundcloud$0_1$amp_soundcloud","element","$jscomp.inherits","AMP","extension","registerElement","self","module$extensions$amp_soundcloud$0_1$amp_soundcloud"]
-}
