@@ -36,12 +36,13 @@ function spawnProcess(cmd, options) {
 }
 
 /**
- * Executes the provided command.
+ * Executes the provided command, returning the process object.
  *
  * @param {string} cmd Command line to execute.
+ * @return {<Object>} Process info.
  */
 exports.exec = function(cmd) {
-  spawnProcess(cmd, {'stdio': 'inherit'});
+  return spawnProcess(cmd, {'stdio': 'inherit'});
 };
 
 /**
