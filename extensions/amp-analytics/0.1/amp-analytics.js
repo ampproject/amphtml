@@ -627,7 +627,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           requests[k] = new RequestHandler(
               this.element, request, this.preconnect,
               this.sendRequest_.bind(this),
-              this.isSandbox_);
+              this.isSandbox_, this.element);
         }
       }
       this.requests_ = requests;

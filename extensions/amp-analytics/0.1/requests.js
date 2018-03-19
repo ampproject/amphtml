@@ -41,6 +41,7 @@ export class RequestHandler {
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
+   * @param {!AmpElement} ampAnalyticsElement
    */
   constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
 
