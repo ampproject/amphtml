@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
@@ -151,7 +153,7 @@ export class SafeframeHostApi {
     this.isFluid_ = isFluid;
 
     /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.initialSize_ = initialSize;
+    this.slotSize_ = initialSize;
 
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
@@ -171,16 +173,17 @@ export class SafeframeHostApi {
     /** @private {boolean} */
     this.isRegistered_ = false;
 
+    // TODO: Make this page-level.
     const sfConfig = Object(tryParseJson(
         this.baseInstance_.element.getAttribute(
             'data-safeframe-config')) || {});
     /** @private {boolean} */
-    this.expandByOverlay_ = (sfConfig.hasOwnProperty('expandByOverlay') &&
-                             !!sfConfig['expandByOverlay']) || true;
+    this.expandByOverlay_ = sfConfig.hasOwnProperty('expandByOverlay') ?
+      sfConfig['expandByOverlay'] : true;
 
     /** @private {boolean} */
-    this.expandByPush_ = (sfConfig.hasOwnProperty('expandByPush') &&
-                          !!sfConfig['expandByPush']) || true;
+    this.expandByPush_ = sfConfig.hasOwnProperty('expandByPush') ?
+      sfConfig['expandByPush'] : true;
 
     /** @private {?Function} */
     this.unlisten_ = null;
@@ -211,12 +214,41 @@ export class SafeframeHostApi {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
+            'canonical_url': this.maybeGetCanonicalUrl(),
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
     return attributes;
+  }
+
+  /**
+   * Returns the canonical URL of the page, if the publisher allows
+   * it to be passed.
+   * @return {string|undefined}
+   * @visibleForTesting
+   */
+  maybeGetCanonicalUrl() {
+    // Don't allow for referrer policy same-origin,
+    // as Safeframe will always be a different origin.
+    // Don't allow for no-referrer.
+    const canonicalUrl = Services.documentInfoForDoc(
+        this.baseInstance_.getAmpDoc()).canonicalUrl;
+    const metaReferrer = this.win_.document.querySelector(
+        "meta[name='referrer']");
+    if (!metaReferrer) {
+      return canonicalUrl;
+    }
+    switch (metaReferrer.getAttribute('content')) {
+      case 'same-origin':
+        return;
+      case 'no-referrer':
+        return;
+      case 'origin':
+        return parseUrl(canonicalUrl).origin;
+    }
+    return canonicalUrl;
   }
 
   /**
@@ -457,8 +489,8 @@ export class SafeframeHostApi {
     if (this.isCollapsed_ || !this.isRegistered_) {
       return;
     }
-    this.handleSizeChange(this.initialSize_.height,
-        this.initialSize_.width,
+    this.handleSizeChange(this.creativeSize_.height,
+        this.creativeSize_.width,
         SERVICE.COLLAPSE_RESPONSE,
         /** isCollapse */ true);
   }
@@ -466,14 +498,26 @@ export class SafeframeHostApi {
   /**
    * @param {number} height
    * @param {number} width
+   * @param {boolean} isCollapsed
+   * @param {string} messageType
    */
-  resizeIframe(height, width) {
-    if (this.iframe_) {
-      setStyles(this.iframe_, {
-        'height': height + 'px',
-        'width': width + 'px',
-      });
-    }
+  resizeSafeframe(height, width, isCollapsed, messageType) {
+    this.isCollapsed_ = isCollapsed;
+    this.baseInstance_.measureMutateElement(
+        /** MEASURER */ () => {
+          this.baseInstance_.getResource().measure();
+        },
+        /** MUTATOR */ () => {
+          if (this.iframe_) {
+            setStyles(this.iframe_, {
+              'height': height + 'px',
+              'width': width + 'px',
+            });
+          }
+          this.sendResizeResponse(/** SUCCESS */ true, messageType);
+        },
+        this.iframe_
+    );
   }
 
   /**
@@ -495,11 +539,9 @@ export class SafeframeHostApi {
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
     if (!optIsCollapse &&
-        width <= this.initialSize_.width &&
-        height <= this.initialSize_.height) {
-      this.resizeIframe(height, width);
-      this.isCollapsed_ = !!optIsCollapse;
-      this.sendResizeResponse(/** SUCCESS */ true, messageType);
+        width <= this.slotSize_.width &&
+        height <= this.slotSize_.height) {
+      this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
           height, width, messageType, optIsCollapse);
@@ -530,45 +572,48 @@ export class SafeframeHostApi {
   }
 
   /**
-   *
+   * Attempts to resize both the amp-ad and the Safeframe.
+   * If the amp-ad can not be resized, then if it was a collapse request,
+   * we will still collapse just the safeframe.
    * @param {number} height
    * @param {number} width
    * @param {string} messageType
    * @param {boolean=} optIsCollapse
    */
   resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
+    // First, attempt to resize the Amp-Ad that is the parent of the
+    // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      const success = !!this.baseInstance_.element.style.height.match(height)
-              && !!this.baseInstance_.element.style.width.match(width);
-      // If the amp-ad element was successfully resized, always update
-      // the size of the safeframe as well. If the amp-ad element could not
-      // be resized, but this is a collapse request, then only collapse
-      // the safeframe.
-      if (success || optIsCollapse) {
-        this.resizeIframe(height, width);
-        this.isCollapsed_ = !!optIsCollapse;
-        this.baseInstance_.element.getResources().resources_.forEach(
-            resource => {
-              if (resource.element == this.baseInstance_.element) {
-                // Need to force a measure event, as measure won't happen immediately
-                // if the element was above the viewport when resize occured, and
-                // without a measure, we'll send the wrong size for the creative
-                // on the geometry update message.
-                resource.measure();
-              }
-            });
+      // If this resize succeeded, we always resize the safeframe.
+      // resizeSafeframe also sends the resize response.
+      this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
+      // Update our stored record of what the amp-ad's size is. This
+      // is just for caching. Setting it here doesn't actually change
+      // the size of the amp-ad, the attempt change size above did that.
+      this.slotSize_.height = height;
+      this.slotSize_.width = width;
+    }, /** REJECT CALLBACK */ () => {
+      // If the resize initially failed, it may have been queued
+      // as a pendingChangeSize, which will cause the size change
+      // to execute upon the next user interaction. We don't want
+      // that for safeframe, so we reset it here.
+      this.baseInstance_.getResource().resetPendingChangeSize();
+      if (optIsCollapse) {
+        // If this is a collapse request, then even if resizing
+        // the amp-ad failed, still resize the iframe.
+        // resizeSafeframe also sends the resize response.
+        this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
       } else {
-        // attemptChangeSize automatically registers a pendingChangeSize if
-        // the initial attempt failed. We do not want to do that, so clear it.
-        this.baseInstance_.element.getResources().resources_.forEach(
-            resource => {
-              if (resource.element == this.baseInstance_.element) {
-                resource.pendingChangeSize_ = undefined;
-              }
-            });
+        // If this is not a collapse request, then we were attempting to
+        // expand past the bounds of the amp-ad, and it failed. Thus,
+        // we need to send a failure message, and the safeframe is
+        // not resized.
+        this.sendResizeResponse(false, messageType);
       }
-      this.sendResizeResponse(success || !!optIsCollapse, messageType);
-    }).catch(() => {});
+    }).catch(err => {
+      dev().error(TAG, `Resizing failed: ${err}`);
+      this.sendResizeResponse(false, messageType);
+    });
   }
 
   /**

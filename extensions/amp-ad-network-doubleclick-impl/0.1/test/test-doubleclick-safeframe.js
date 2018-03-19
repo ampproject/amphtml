@@ -168,6 +168,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getSafeframeNameAttr', () => {
     it('should return name attributes', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({
+        canonicalUrl: 'http://example.org/canonical',
+      });
       const attrs = safeframeHost.getSafeframeNameAttr();
       expect(Object.keys(attrs)).to.deep.equal(
           ['uid', 'hostPeerName', 'initialGeometry', 'permissions',
@@ -204,6 +207,64 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
+          'canonical_url': 'http://example.org/canonical',
+        },
+      });
+    });
+    it('should not pass canonicalUrl if referrer policy same-origin', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({
+        canonicalUrl: 'http://example.org/canonical',
+      });
+      const meta = env.win.document.createElement('meta');
+      meta.setAttribute('name', 'referrer');
+      meta.setAttribute('content', 'same-origin');
+      env.win.document.head.appendChild(meta);
+      const attrs = safeframeHost.getSafeframeNameAttr();
+      // Check the metadata
+      expect(JSON.parse(attrs['metadata'])).to.deep.equal({
+        'shared': {
+          'sf_ver': doubleclickImpl.safeframeVersion,
+          'ck_on': 1,
+          'flash_ver': '26.0.0',
+        },
+      });
+    });
+
+    it('should not pass canonicalUrl if referrer policy no-referrer', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({
+        canonicalUrl: 'http://example.org/canonical',
+      });
+      const meta = env.win.document.createElement('meta');
+      meta.setAttribute('name', 'referrer');
+      meta.setAttribute('content', 'no-referrer');
+      env.win.document.head.appendChild(meta);
+      const attrs = safeframeHost.getSafeframeNameAttr();
+      // Check the metadata
+      expect(JSON.parse(attrs['metadata'])).to.deep.equal({
+        'shared': {
+          'sf_ver': doubleclickImpl.safeframeVersion,
+          'ck_on': 1,
+          'flash_ver': '26.0.0',
+        },
+      });
+    });
+
+    it('should pass canonicalUrl domain if referrer policy origin', () => {
+      sandbox.stub(Services, 'documentInfoForDoc').returns({
+        canonicalUrl: 'http://example.org/canonical/foo?bleh',
+      });
+      const meta = env.win.document.createElement('meta');
+      meta.setAttribute('name', 'referrer');
+      meta.setAttribute('content', 'origin');
+      env.win.document.head.appendChild(meta);
+      const attrs = safeframeHost.getSafeframeNameAttr();
+      // Check the metadata
+      expect(JSON.parse(attrs['metadata'])).to.deep.equal({
+        'shared': {
+          'sf_ver': doubleclickImpl.safeframeVersion,
+          'ck_on': 1,
+          'flash_ver': '26.0.0',
+          'canonical_url': 'http://example.org',
         },
       });
     });
@@ -386,7 +447,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('Resizing', () => {
     let safeframeMock;
-    let resizeIframeSpy;
+    let resizeSafeframeSpy;
     let sendResizeResponseSpy;
     let resizeAmpAdAndSafeframeSpy;
     let attemptChangeSizeStub;
@@ -404,8 +465,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeIframeSpy = sandbox.spy(
-          safeframeHost, 'resizeIframe');
+      resizeSafeframeSpy = sandbox.spy(
+          safeframeHost, 'resizeSafeframe');
       sendResizeResponseSpy = sandbox.spy(
           safeframeHost, 'sendResizeResponse');
       resizeAmpAdAndSafeframeSpy = sandbox.spy(
@@ -451,17 +512,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(100, 100);
-      expect(safeframeMock.style.height).to.equal('100px');
-      expect(safeframeMock.style.width).to.equal('100px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(100, 100);
+        expect(safeframeMock.style.height).to.equal('100px');
+        expect(safeframeMock.style.width).to.equal('100px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      });
     });
 
     /**
-     * If the safeframed creative asks to resize within the bounds of
+     * If the safeframed creative asks to resize outside the bounds of
      * the amp-ad element, first we try to resize the amp-ad element by
      * using element.attemptChangeSize. If that succeeds, then we also
      * resize the safeframe.
@@ -474,18 +537,35 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         ampAd.style.height = '600px';
         ampAd.style.width = '600px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
       sendExpandMessage(550,550);
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(600, 600);
-      expect(safeframeMock.style.height).to.equal('600px');
-      expect(safeframeMock.style.width).to.equal('600px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(600, 600);
+        expect(safeframeMock.style.height).to.equal('600px');
+        expect(safeframeMock.style.width).to.equal('600px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
+    });
+
+    /**
+     * If the safeframed creative asks to resize outside the bounds of
+     * the amp-ad element, first we try to resize the amp-ad element by
+     * using element.attemptChangeSize. If that rejects, we should send
+     * a failure message.
+     */
+    it('resizeAmpAdAndSafeframe should send error on rejection', () => {
+      attemptChangeSizeStub.rejects();
+      safeframeHost.resizeAmpAdAndSafeframe(550, 550, SERVICE.EXPAND_RESPONSE);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
     });
 
     /**
@@ -495,23 +575,18 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request should fail if expanding past amp-ad bounds and would ' +
        'create reflow', () => {
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // In our mock, we don't do anything to the iframe that would be seen as a
-      // success, thus we are failing the resizing.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
 
       sendExpandMessage(550, 550);
 
-      expect(resizeIframeSpy).to.not.be.called;
-      expect(safeframeMock.height).to.equal('50');
-      expect(safeframeMock.width).to.equal('50');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          false, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.not.be.called;
+        expect(safeframeMock.height).to.equal('50');
+        expect(safeframeMock.width).to.equal('50');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     function sendCollapseMessage() {
@@ -533,22 +608,18 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.style.width = '600px';
       safeframeMock.style.height = 600;
       safeframeMock.style.width = 600;
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // Resize the ampAd to simulate a success.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     it('should collapse safeframe on amp-ad resize success', () => {
@@ -563,18 +634,20 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         ampAd.style.height = '250px';
         ampAd.style.width = '300px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
   });
 });

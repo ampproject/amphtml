@@ -328,13 +328,12 @@ function proxyToAmpProxy(req, res, mode) {
 }
 
 
-const liveListUpdateFile = '/examples/live-list-update.amp.html';
-let liveListCtr = 0;
 let itemCtr = 2;
-let liveListDoc = null;
 const doctype = '<!doctype html>\n';
-app.use('/examples/live-list-update.amp.html', (req, res, next) => {
+const liveListDocs = Object.create(null);
+app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   const mode = pc.env.SERVE_MODE;
+  let liveListDoc = liveListDocs[req.baseUrl];
   if (mode != 'compiled' && mode != 'default') {
     // Only handle compile(prev min)/default (prev max) mode
     next();
@@ -349,16 +348,19 @@ app.use('/examples/live-list-update.amp.html', (req, res, next) => {
     return;
   }
   if (!liveListDoc) {
-    const liveListUpdateFullPath = `${pc.cwd()}${liveListUpdateFile}`;
+    const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
+    console.log('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
-    liveListDoc = jsdom.jsdom(liveListFile);
+    liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(liveListFile)
+        .window.document;
+    liveListDoc.ctr = 0;
   }
   const liveList = liveListDoc.querySelector('#my-live-list');
   const perPage = Number(liveList.getAttribute('data-max-items-per-page'));
   const items = liveList.querySelector('[items]');
   const pagination = liveListDoc.querySelector('#my-live-list [pagination]');
   const item1 = liveList.querySelector('#list-item-1');
-  if (liveListCtr != 0) {
+  if (liveListDoc.ctr != 0) {
     if (Math.random() < .8) {
       // Always run a replace on the first item
       liveListReplace(item1);
@@ -389,7 +391,7 @@ app.use('/examples/live-list-update.amp.html', (req, res, next) => {
   }
   let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
   outerHTML = replaceUrls(mode, outerHTML);
-  liveListCtr++;
+  liveListDoc.ctr++;
   res.send(`${doctype}${outerHTML}`);
 });
 
@@ -546,10 +548,12 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
-app.use('/get-consent/', (req, res) => {
+app.post('/get-consent-v1/', (req, res) => {
   assertCors(req, res, ['POST']);
-  const body = {};
-  res.send(body);
+  const body = {
+    'consentRequired': true,
+  };
+  res.json(body);
 });
 
 // Proxy with local JS.

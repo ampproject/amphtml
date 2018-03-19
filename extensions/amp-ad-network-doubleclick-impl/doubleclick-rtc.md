@@ -44,15 +44,13 @@ The requirements for an RTC endpoint to be used with DoubleClick are the same as
 
 The RTC Response to a GET must meet the following requirements:
 
-
-
 *   Status Code = 200
-*   Headers (in addition to automatically added headers):
-    *   CORS
-    *   AMP-Access-Control-Allow-Source-Origin
-    *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
-*   Must respond within default 1 second timeout on the response imposed by real-time-config-manager.js. Publishers may optionally shorten this timeout.
+*   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
+*   Body of response is a JSON object of targeting information such as:
+    *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+
+
 
 The body of the response must meet the following specification:
 

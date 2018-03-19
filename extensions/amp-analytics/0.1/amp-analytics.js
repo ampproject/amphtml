@@ -125,7 +125,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
     return this.isInabox_ ? 0 : 1;
   }

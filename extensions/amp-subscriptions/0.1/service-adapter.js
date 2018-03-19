@@ -36,9 +36,10 @@ export class ServiceAdapter {
   /**
    * Delegates actions to local platform
    * @param {string} action
+   * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    this.subscriptionService_.delegateActionToLocal(action);
+    return this.subscriptionService_.delegateActionToLocal(action);
   }
 
   /**
