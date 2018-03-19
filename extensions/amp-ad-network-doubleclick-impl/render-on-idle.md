@@ -20,3 +20,5 @@ is idle.  The result is an increase in impressions with a much smaller increase 
 viewable impressions and clicks.  Publishers sensitive to viewability rate should
 set data-loading-strategy=3 to keep the current viewport offset and disable idle render.  Publishers using data-loading-strategy=prefer-viewability-over-views will
 use current 1.25 viewport offset with idle render disabled.
+
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
