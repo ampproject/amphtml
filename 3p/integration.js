@@ -130,7 +130,7 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
-import {doubleclick} from '../ads/google/doubleclick';
+import {doubleclick} from '../ads/google/deprecated_doubleclick';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
