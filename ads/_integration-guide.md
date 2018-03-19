@@ -26,7 +26,7 @@ Note that each of the attributes that follow `type` are dependent on the paramet
 
 For details on how to integrate your ad network with AMP, see [Integrating ad networks into AMP](https://github.com/ampproject/amphtml/blob/master/ads/README.md).
 
-##### Server Side Platform (SSP) or an Ad Exchange
+## Server Side Platform (SSP) or an Ad Exchange
 
 *Examples : Rubicon, Criteo OR Appnexus, Ad-Exchange*
 
