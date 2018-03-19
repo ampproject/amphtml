@@ -108,7 +108,7 @@ The support for microdata format is coming soon.
 The `amp-subscriptions` extension must be configured using JSON configuration:
 
 ```
-<script type="json" id="amp-subscriptions">
+<script type="application/json" id="amp-subscriptions">
 {
   "services": [
     {
@@ -129,7 +129,7 @@ The key is the `services` property that contains an array of service configurati
 The "local" service is configured as following:
 
 ```
-<script type="json" id="amp-subscriptions">
+<script type="application/json" id="amp-subscriptions">
 {
   "services": [
     {
@@ -156,7 +156,7 @@ The properties in the "local" service are:
 The vendor service configuration must reference the service ID and can contain any additional properties allowed by the vendor service.
 
 ```
-<script type="json" id="amp-subscriptions">
+<script type="application/json" id="amp-subscriptions">
 {
   "services": [
     ...,

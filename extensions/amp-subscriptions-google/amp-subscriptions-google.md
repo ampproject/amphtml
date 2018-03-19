@@ -66,7 +66,7 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
   src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
   <script async custom-element="amp-subscriptions-google"
   src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"></script>
-  <script type="json" id="amp-subscriptions">
+  <script type="application/json" id="amp-subscriptions">
   {
     "services": [
       {
