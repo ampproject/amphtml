@@ -19,6 +19,7 @@ import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {FriendlyFrameRenderer} from './amp-ad-render';
 import {Services} from '../../../src/services';
 import {Validator, ValidatorResult} from './amp-ad-type-defs';
+import {dev} from '../../../src/log';
 import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
