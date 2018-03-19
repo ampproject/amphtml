@@ -64,13 +64,12 @@ export const RTC_ERROR_ENUM = {
  * @param {string} error
  * @param {string} callout
  * @param {number=} opt_rtcTime
- * @param {boolean=} opt_log
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
+function buildErrorResponse_(error, callout, opt_rtcTime) {
   if (opt_log) {
-    dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
+    dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
   }
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
@@ -124,7 +123,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     if (!url) {
       return promiseArray.push(
           buildErrorResponse_(
-              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, undefined, true));
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor));
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -171,15 +170,15 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-          callout, undefined, true);
+          callout);
     }
     if (!isSecureUrl(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-          callout, undefined, true);
+          callout);
     }
     if (seenUrls[url]) {
       return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-          callout, undefined, true);
+          callout);
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
@@ -200,7 +199,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return send(url);
   }).catch(unused => {
     return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        callout, undefined, true);
+        callout);
   }));
 }
 
