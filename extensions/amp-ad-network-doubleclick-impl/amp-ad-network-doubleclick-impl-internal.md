@@ -130,6 +130,11 @@ Supported via `json` attribute:
     <td>Beta</td>
   </tr>
   <tr>
+    <td><a href="doubleclick-rtc.md">Real Time Config</a></td>
+    <td>Allows Publishers to augment ad requests with targeting information that is retrieved at runtime.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
     <td><a href="render-on-idle.md">Render on Idle</a></td>
     <td>Allows slots 3-12 viewports down to render while the AMP scheduler is idle.</td>
     <td>Launched</td>
@@ -137,6 +142,11 @@ Supported via `json` attribute:
   <tr>
     <td><a href="refresh.md">Refresh</a></td>
     <td>Enabled slots will periodically refetch new creatives.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
+    <td><a href="safeframe.md">Safeframe API</a></td>
+    <td>An API-enabled Iframe for facilitating communication between publisher page and creative content.</td>
     <td>Launched</td>
   </tr>
   <tr>
