@@ -37,79 +37,9 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>TBD</td>
+    <td><a href="#examples">See Example Section</a></td>
   </tr>
 </table>
-
-#### Examples
-Example - DoubleClick Ad
-```html
-<amp-ad width=728 height=90
-    type="doubleclick"
-    data-slot="/6355419/Travel">
-</amp-ad>
-```
-Example - With additional targeting
-```html
-<amp-ad width=320 height=50
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner"
-    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'>
-</amp-ad>
-```
-Example - DoubleClick Ad with Multi-size Request
-```html
-<amp-ad width=728 height=90
-    type="doubleclick"
-    data-slot="/6355419/Travel"
-    data-multi-size="700x90,700x60,500x60">
-</amp-ad>
-```
-### Configuration
-
-For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
-
-
-#### Ad size
-
-By default the ad size is based on the `width` and `height` attributes of the `amp-ad` tag. In order to explicitly request different ad dimensions from those values, pass the attributes `data-override-width` and `data-override-height` to the ad.
-
-Example:
-
-```html
-<amp-ad width=320 height=50
-    data-override-width=111
-    data-override-height=222
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner">
-</amp-ad>
-```
-
-#### Attributes
-Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
-- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
-- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
-
-### Supported parameters
-
-- `data-slot`
-- `data-multi-size`
-- `data-multi-size-validation`
-
-Supported via `json` attribute:
-
-- `categoryExclusions`
-- `cookieOptions`
-- `tagForChildDirectedTreatment`
-- `targeting`
-- `useSameDomainRenderingUntilDeprecated`
-
-### Unsupported DFP Formats
-- Interstitials
-- Expandables. Although expandables on interaction/click is a format that is work in progress.
-- Flash
-- Anchor Ads / Adhesion Units
-- Creatives served over HTTP.
 
 ### Supported Features
 
@@ -156,15 +86,55 @@ Supported via `json` attribute:
   </tr>
 </table>
 
-### Temporary use of useSameDomainRenderingUntilDeprecated until March 29, 2018
-Support for this attribute will be dropped on March 29, 2018. 
-An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated on March 29, 2018. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe. For more information, please refer to https://github.com/ampproject/amphtml/issues/11834;
-
-Example:
+#### Examples
+Example - DoubleClick Ad
 ```html
-<amp-ad width=320 height=50
+<amp-ad width=728 height=90
     type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner"
-    json='{"useSameDomainRenderingUntilDeprecated":1}'>
+    data-slot="/6355419/Travel">
 </amp-ad>
 ```
+### Configuration
+
+For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
+
+
+#### Ad size
+
+By default the ad size is based on the `width` and `height` attributes of the `amp-ad` tag. In order to explicitly request different ad dimensions from those values, pass the attributes `data-override-width` and `data-override-height` to the ad.
+
+Example:
+
+```html
+<amp-ad width=320 height=50
+    data-override-width=111
+    data-override-height=222
+    type="doubleclick"
+    data-slot="/4119129/mobile_ad_banner">
+</amp-ad>
+```
+
+#### Attributes
+Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
+- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
+- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
+
+### Supported parameters
+
+- `data-slot`
+- `data-multi-size`
+- `data-multi-size-validation`
+
+Supported via `json` attribute:
+
+- `categoryExclusions`
+- `cookieOptions`
+- `tagForChildDirectedTreatment`
+- `targeting`
+
+### Unsupported DFP Formats
+- Interstitials
+- Expandables. Although expandables on interaction/click is a format that is work in progress.
+- Flash
+- Anchor Ads / Adhesion Units
+- Creatives served over HTTP.
