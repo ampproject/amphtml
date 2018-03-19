@@ -22,7 +22,7 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  * @param {!Object} unusedData
  */
 export function doubleclick(unusedGlobal, unusedData) {
-  dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please' +
+  dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please ' +
               'switch to Fast Fetch. See documentation here: ' +
               'https://github.com/ampproject/amphtml/issues/11834');
 }
