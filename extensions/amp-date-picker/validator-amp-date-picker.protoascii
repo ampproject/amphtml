@@ -153,6 +153,7 @@ tags: {
   attrs: { name: "week-day-format" }
   amp_layout: {
     supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
   }
 }
 
@@ -288,5 +289,6 @@ tags: {
   attrs: { name: "week-day-format" }
   amp_layout: {
     supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
   }
 }
