@@ -503,23 +503,21 @@ export class SafeframeHostApi {
    */
   resizeSafeframe(height, width, isCollapsed, messageType) {
     this.isCollapsed_ = isCollapsed;
-    this.baseInstance_.mutateElement(() => {
-      if (this.iframe_) {
-        setStyles(this.iframe_, {
-          'height': height + 'px',
-          'width': width + 'px',
-        });
-      }
-      this.sendResizeResponse(/** SUCCESS */ true, messageType);
-    }, this.iframe_);
-    // We need to force a measure right now, as without remeasuring, we
-    // will have the wrong size information for the amp-ad and the
-    // safeframe when we send the response message into the safeframe.
-    // This would be an issue specifically for when expand is successful
-    // while amp-ad is out of the viewport, for example.
-    this.baseInstance_.measureElement(() => {
-      this.baseInstance_.getResource().measure();
-    });
+    this.baseInstance_.measureMutateElement(
+        /** MEASURER */ () => {
+          this.baseInstance_.getResource().measure();
+        },
+        /** MUTATOR */ () => {
+          if (this.iframe_) {
+            setStyles(this.iframe_, {
+              'height': height + 'px',
+              'width': width + 'px',
+            });
+          }
+          this.sendResizeResponse(/** SUCCESS */ true, messageType);
+        },
+        this.iframe_
+    );
   }
 
   /**
