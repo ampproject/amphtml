@@ -323,12 +323,12 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
 #### Attributes
 
 
-###### template [required]
+##### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 
 
-###### grid-area [optional]
+##### grid-area [optional]
 
 This attribute is specified on children of `<amp-story-grid-layer>`.  `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
 
@@ -583,7 +583,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 ### `amp-story-cta-layer`
 
-The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` tags inside an `<amp-story-page>`.
+The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` elements inside an `<amp-story-page>`.
 
 #### Constraints
 
@@ -613,9 +613,9 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` t
   </amp-img>
 </div>
 
-### Children
+#### Children
 
-`amp-story-cta-layer` supports a similar set of children to the one found in  `amp-story-cta-layer`. The main difference is the addition of the `<a>` and `<button>` tags.
+The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
 
 For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii#L221) field in the validation rules.
 
