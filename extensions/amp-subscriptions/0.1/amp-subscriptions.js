@@ -27,9 +27,13 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
+import { Services } from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
+/** @const */
+const SERVICE_TIMEOUT = 3000;
 
 /** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
 export let RenderState;
@@ -76,6 +80,9 @@ export class SubscriptionService {
 
     /** @private {?Promise} */
     this.viewTrackerPromise_ = null;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
@@ -188,14 +195,24 @@ export class SubscriptionService {
    * @return {!Promise<!./entitlement.Entitlement>}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    return subscriptionPlatform.getEntitlements().then(entitlement => {
+    const defaultEntitlement =
+        Entitlement.empty(subscriptionPlatform.getServiceId);
+    const timedPromise = this.timer_.timeoutPromise(
+        SERVICE_TIMEOUT,
+        subscriptionPlatform.getEntitlements()
+    );
+    return timedPromise.then(entitlement => {
       if (!entitlement) {
         entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
       }
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
-      return entitlement;
+      defaultEntitlement = entitlement;
+    }).catch(() => {
+      this.platformStore_.reportPlatformFailure_(
+          subscriptionPlatform.getServiceId());
     });
+    return defaultEntitlement;
   }
 
   /**

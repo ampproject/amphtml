@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
@@ -46,6 +46,9 @@ export class PlatformStore {
 
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
+
+    /** @private {!Array<string>} */
+    this.failedPlatforms_ = [];
 
   }
 
@@ -112,8 +115,11 @@ export class PlatformStore {
     if (entitlement) {
       entitlement.service = serviceId;
     }
-
     this.entitlements_[serviceId] = entitlement;
+    // Remove this serviceId as a failed platform now
+    if (this.failedPlatforms_.indexOf(serviceId) !== -1) {
+      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    }
     // Call all onChange callbacks.
     this.onChangeCallbacks_.fire({serviceId, entitlement});
   }
@@ -296,5 +302,15 @@ export class PlatformStore {
     }
 
     return localPlatform;
+  }
+
+  reportPlatformFailure_(serviceId) {
+    if (this.failedPlatforms_.indexOf(serviceId) === -1) {
+      this.failedPlatforms_.push(serviceId);
+    }
+
+    if (this.failedPlatforms_.length === this.serviceIds_) {
+      user().error('amp-subscriptions', 'All platforms have failed to resolve');
+    }
   }
 }
