@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-87f482e */
+ /** Version: 0.1.22-1ba2fd9 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -2065,7 +2065,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://subscribe.sandbox.google.com').origin;
+  return parseUrl('https://news.google.com').origin;
 }
 
 
@@ -2074,7 +2074,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://subscribe.sandbox.google.com/swg/_/api/v1' + url;
+  return 'https://news.google.com/swg/_/api/v1' + url;
 }
 
 
@@ -2085,7 +2085,7 @@ function serviceUrl(url) {
  */
 function feUrl(url, prefix = '') {
   return addQueryParam(
-      'https://subscribe.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
+      'https://news.google.com' + prefix + '/swg/_/ui/v1' + url,
       '_', cacheParam('hr1'));
 }
 
@@ -2096,7 +2096,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-87f482e',
+    '_client': 'SwG 0.1.22-1ba2fd9',
   });
 }
 
