@@ -31,18 +31,19 @@ FAIL
 |    <link rel="manifest foo" href="foo">
 >>   ^~~~~~~~~
 feature_tests/link_meta_values.html:30:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest foo'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+|    <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
 |    <link rel="shortcut icon" type="a" href="b" sizes="c">
 |    <link rel="author" href="me">
 |    <link rel="DCTERMS.any" href="foo">
 |  
 |    <meta name="content-disposition" content="any">
 >>   ^~~~~~~~~
-feature_tests/link_meta_values.html:35:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:36:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
 |    <meta name=viewport content=invalid>
 >>   ^~~~~~~~~
-feature_tests/link_meta_values.html:36:2 The property 'minimum-scale' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/link_meta_values.html:37:2 The property 'minimum-scale' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>   ^~~~~~~~~
-feature_tests/link_meta_values.html:36:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/link_meta_values.html:37:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <link rel="unknown" href="foo">
 |  
 |    <link rel="comment cite map" href="foo">
@@ -55,7 +56,7 @@ feature_tests/link_meta_values.html:36:2 The property 'width' is missing from at
 |    <!-- Invalid as we need some additional attributes e.g. "rel=canonical" -->
 |    <link href="foo">
 >>   ^~~~~~~~~
-feature_tests/link_meta_values.html:47:2 The mandatory attribute 'rel' is missing in tag 'link rel='. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:48:2 The mandatory attribute 'rel' is missing in tag 'link rel='. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
 |  </head>
 |  <body>
 |  Hello, world.

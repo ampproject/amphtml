@@ -461,7 +461,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setDistance(distance) {
     // TODO(ccordry) refactor this when pages are managed
     if (this.isAd()) {
-      distance = Math.min(distance, 1);
+      distance = Math.min(distance, 2);
     }
 
     this.element.setAttribute('distance', distance);
@@ -594,8 +594,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   next(opt_isAutomaticAdvance) {
     const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
-    if (pageId === null) {
-      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
+    if (!pageId) {
       return;
     }
 

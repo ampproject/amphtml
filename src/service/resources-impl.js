@@ -188,9 +188,6 @@ export class Resources {
     */
     this.requestsChangeSize_ = [];
 
-    /** @private {!Array<!Function>} */
-    this.deferredMutates_ = [];
-
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
 
@@ -814,18 +811,18 @@ export class Resources {
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
-   * @param {number} newPriority
+   * @param {number} newLayoutPriority
    * @restricted
    */
-  updatePriority(element, newPriority) {
+  updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
-    resource.updatePriority(newPriority);
+    resource.updateLayoutPriority(newLayoutPriority);
 
     // Update affected tasks
     this.queue_.forEach(task => {
       if (task.resource == resource) {
-        task.priority = newPriority;
+        task.priority = newLayoutPriority;
       }
     });
 
@@ -894,18 +891,19 @@ export class Resources {
   }
 
   /**
-   * Requests mutate callback to executed at the earliest possibility.
-   * @param {!Element} element
-   * @param {!Function} callback
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
    */
-  deferMutate(element, callback) {
-    this.scheduleDeferredMutate_(Resource.forElement(element), callback);
-    this.schedulePassVsync();
+  measureElement(measurer) {
+    return this.vsync_.measurePromise(measurer);
   }
 
   /**
-   * Runs the specified mutation on the element and ensures that measures
-   * and layouts performed for the affected elements.
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -918,6 +916,41 @@ export class Resources {
    * @return {!Promise}
    */
   mutateElement(element, mutator) {
+    return this.measureMutateElement(element, null, mutator);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElement(element, measurer, mutator) {
+    if (this.useLayers_) {
+      return this.measureMutateElementLayers_(element, measurer, mutator);
+    } else {
+      return this.measureMutateElementResources_(element, measurer, mutator);
+    }
+  }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Resources system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -926,15 +959,17 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
+        if (measurer) {
+          measurer();
+        }
         relayoutTop = calcRelayoutTop();
       },
       mutate: () => {
         mutator();
 
-        // TODO(jridgewell): Mark parent layer as dirty, skip the rest of this.
-        // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
@@ -962,6 +997,32 @@ export class Resources {
       },
     });
   }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Layers system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementLayers_(element, measurer, mutator) {
+    return this.vsync_.runPromise({
+      measure: measurer || undefined,
+      mutate: () => {
+        mutator();
+
+        // TODO(jridgewell): This API needs to be audited. Common practice is
+        // to pass the amp-element in as the root even though we are only
+        // mutating children. If the amp-element is passed, we invalidate
+        // everything in the parent layer above it, where only invalidating the
+        // amp-element was necessary (only children were mutated, only
+        // amp-element's scroll box is affected).
+        this.layers_.dirty(element);
+      },
+    });
+  }
+
 
   /**
    * Return a promise that requests runtime to collapse this element.
@@ -1119,8 +1180,7 @@ export class Resources {
    * @private
    */
   hasMutateWork_() {
-    return (this.deferredMutates_.length > 0 ||
-        this.requestsChangeSize_.length > 0);
+    return (this.requestsChangeSize_.length > 0);
   }
 
   /**
@@ -1159,16 +1219,6 @@ export class Resources {
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-
-    if (this.deferredMutates_.length > 0) {
-      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      const deferredMutates = this.deferredMutates_;
-      this.deferredMutates_ = [];
-      for (let i = 0; i < deferredMutates.length; i++) {
-        deferredMutates[i]();
-      }
-      this.maybeChangeHeight_ = true;
-    }
 
     // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
@@ -1876,16 +1926,6 @@ export class Resources {
   }
 
   /**
-   * Schedules deferred mutate.
-   * @param {!Resource} resource
-   * @param {!Function} callback
-   * @private
-   */
-  scheduleDeferredMutate_(resource, callback) {
-    this.deferredMutates_.push(callback);
-  }
-
-  /**
    * Returns whether the resource should be preloaded at this time.
    * The element must be measured by this time.
    * @param {!Resource} resource
@@ -1967,11 +2007,11 @@ export class Resources {
       if (resource.getState() == ResourceState.NOT_BUILT) {
         resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
-              parentResource.getPriority());
+              parentResource.getLayoutPriority());
         });
       } else {
         this.measureAndScheduleIfAllowed_(resource, layout,
-            parentResource.getPriority());
+            parentResource.getLayoutPriority());
       }
     });
   }
@@ -2012,7 +2052,7 @@ export class Resources {
     const task = {
       id: taskId,
       resource,
-      priority: Math.max(resource.getPriority(), parentPriority) +
+      priority: Math.max(resource.getLayoutPriority(), parentPriority) +
           priorityOffset,
       forceOutsideViewport,
       callback,

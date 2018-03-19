@@ -57,6 +57,10 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   REMOTE_HTML_CONTROL: '21061728',
   REMOTE_HTML_EXPERIMENT: '21061729',
+  USDRUD_CONTROL: '21061759',
+  USDRUD_EXPERIMENT: '21061760',
+  DF_DEP_LAUNCH_CONTROL: '21061783',
+  DF_DEP_LAUNCH_EXPERIMENT: '21061784',
 };
 
 /** @const @enum{string} */
@@ -77,6 +81,10 @@ export const URL_EXPERIMENT_MAPPING = {
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
   '9': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+  '11': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+  '12': DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+  '13': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+  '14': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT,
 };
 
 /**
@@ -146,13 +154,17 @@ export class DoubleclickA4aEligibility {
       warnDeprecation('remote.html');
     }
     let experimentId;
-    const urlExperimentId = extractUrlExperimentId(win, element);
-    if (hasUSDRD || (useRemoteHtml &&
-                     !element.getAttribute('rtc-config') &&
-                     (!urlExperimentId ||
-                     URL_EXPERIMENT_MAPPING[urlExperimentId] !=
-                      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT))) {
-      return false;
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
+    if (![DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT,
+      DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_CONTROL,
+      DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT].includes(
+        URL_EXPERIMENT_MAPPING[urlExperimentId])) {
+      if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
+        return false;
+      }
     }
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
@@ -184,7 +196,18 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return experimentId != DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_CONTROL;
+    // If we are in the Remote.html or USDRUD controls, then we are supposed
+    // to use Delayed Fetch in accordance with the existing carveouts.
+    switch (experimentId) {
+      case DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_LAUNCH_EXPERIMENT:
+        return true;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.REMOTE_HTML_EXPERIMENT:
+        return !hasUSDRD;
+      case DOUBLECLICK_EXPERIMENT_FEATURE.USDRUD_EXPERIMENT:
+        return !useRemoteHtml;
+    }
+    return !hasUSDRD &&
+        (!useRemoteHtml || !!element.getAttribute('rtc-config'));
   }
 
   /**

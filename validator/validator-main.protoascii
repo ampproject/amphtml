@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 581
+spec_file_revision: 586
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -182,13 +182,12 @@ tags: {
         "components|"
         "import|"
         "manifest|"  # Handled separately below, has specific requirements.
+        "preload|"  # Handled separately below, has specific requirements.
         "serviceworker|"
         "stylesheet|"  # Handled separately below, has specific requirements.
         "subresource|"
         ")(\\s|$)"
   }
-  attrs: { name: "sizes" }
-  attrs: { name: "type" }
   attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
@@ -240,6 +239,24 @@ tags: {
     name: "rel"
     value_casei: "manifest"
     mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
+}
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "LINK"
+  spec_name: "link rel=preload"
+  disallowed_ancestor: "TEMPLATE"
+  attrs: { name: "as" }
+  attrs: { name: "href" }
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value_casei: "preload"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
@@ -4487,6 +4504,35 @@ attr_lists: {
     name: "amp-fx"
     value_casei: "parallax"
     requires_extension: "amp-fx-collection"
+  }
+  # amp-subscriptions specific attributes, see
+  # https://www.ampproject.org/docs/reference/components/amp-subscriptions
+  attrs: {
+    name: "subscriptions-action"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-actions"
+    value: ""
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-dialog"
+    value: ""
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-display"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-section"
+    value_regex_casei: "(actions|content|content-not-granted)"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
+    name: "subscriptions-service"
+    requires_extension: "amp-subscriptions"
   }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }

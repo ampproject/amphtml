@@ -26,6 +26,10 @@ describe('LRUCache', () => {
     }
   });
 
+  it('should create a protype-less object for caching', () => {
+    expect(cache.cache_.constructor).to.be.undefined;
+  });
+
   it('should never be over cap', () => {
     for (let i = 5; i < 10; i++) {
       cache.put(i, i);

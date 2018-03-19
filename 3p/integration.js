@@ -66,10 +66,12 @@ import {urls} from '../src/config';
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
+import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -89,6 +91,7 @@ import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
+import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
@@ -280,6 +283,7 @@ register('adhese', adhese);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
+register('admixer', admixer);
 register('adocean', adocean);
 register('adpicker', adpicker);
 register('adplugg', adplugg);
@@ -301,7 +305,9 @@ register('amoad', amoad);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);

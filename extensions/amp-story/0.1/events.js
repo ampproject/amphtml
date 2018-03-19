@@ -19,12 +19,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the bookend should be opened
-  SHOW_BOOKEND: 'ampstory:showbookend',
-
-  // Triggered when the user clicks the close bookend button
-  CLOSE_BOOKEND: 'ampstory:closebookend',
-
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',
 
