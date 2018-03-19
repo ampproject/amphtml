@@ -41,8 +41,10 @@ export class RequestHandler {
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
+   * @param {!AmpElement} ampAnalyticsElement
    */
-  constructor(ampdoc, request, preconnect, handler, isSandbox) {
+  constructor(ampdoc, request, preconnect, handler, isSandbox,
+    ampAnalyticsElement) {
 
     /** @const {!Window} */
     this.win = ampdoc.win;
@@ -75,7 +77,8 @@ export class RequestHandler {
     this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacementService_ = Services.urlReplacementsForDoc(ampdoc);
+    this.urlReplacementService_ =
+        Services.urlReplacementsForDoc(ampAnalyticsElement);
 
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
