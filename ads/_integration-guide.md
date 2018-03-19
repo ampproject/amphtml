@@ -32,7 +32,7 @@ If you are a sell-side platform that wants to get called directly from a publish
 
 More commonly, SSPs work with the publisher to traffick the SSP’s ad tags in their ad server. In this case, ensure that all assets being loaded by your script in the ad server’s creative are being made over HTTPS. There are some restrictions around some ad formats like expandables, so we recommend that you test out the most commonly delivered creative formats with your publishers.
 
-#### Ad Agency
+## Ad Agency
 *Examples : Essence, Omnicom*
 
 Work with your publisher to ensure that the creatives you develop are AMP-compliant. Since all creatives are served into iframes whose size is determined when the ad is called, ensure that your creative doesn't try to modify the size of the iframe.
@@ -40,7 +40,7 @@ Work with your publisher to ensure that the creatives you develop are AMP-compli
 Ensure that all assets that are part of the creative are requested using HTTPS.
 Some ad formats are not fully supported at the moment and we recommend testing the creatives in an AMP environment. Some examples are : Rich Media Expandables, Interstitials, Page Level Ads.
 
-#### Video Player
+## Video Player
 
 *Examples : Brightcove, Ooyala*
 
@@ -59,7 +59,7 @@ A Brightcove player can be invoked by the following:
 ```
 For instructions on how to develop an amp tag like Brightcove, see  [this pull request](https://github.com/ampproject/amphtml/pull/1052).
 
-#### Video Ad Network
+## Video Ad Network
 
 *Examples : Tremor, Brightroll*
 
@@ -68,14 +68,14 @@ If you are a video ad network, please work with your publisher to ensure that:
 - All video assets are served over HTTPS
 - The publisher’s video player has AMP support
 
-#### Data Management Platform (DMP)
+## Data Management Platform (DMP)
 *Examples : KRUX, Bluekai*
 
 See [how to enhance custom ad configuration](https://www.ampproject.org/docs/reference/components/amp-ad#enhance-incoming-ad-configuration).
 
 You can use a similar approach to enrich the ad call by passing in audience segments that you get from the user cookie into the ad call.
 
-#### Viewability Provider
+## Viewability Provider
 
 *Examples : MOAT, Integral Ad Science*
 
@@ -85,7 +85,7 @@ For e.g. for MOAT, make sure http://js.moatads.com is switched to  https://z.moa
 
 Also, see the approach to using the [intersection observer pattern](https://github.com/ampproject/amphtml/blob/master/ads/README.md#ad-viewability).
 
-#### Content-Recommendation Platform
+## Content-Recommendation Platform
 
 *Examples : Taboola, Outbrain*
 
