@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {createServedIframe} from '../../../testing/iframe';
-import {writeAdScript} from '../doubleclick';
+import {writeAdScript} from '../deprecated_doubleclick';
 
 function verifyScript(win, name) {
   const scripts = ['gpt.js', 'glade.js'];
