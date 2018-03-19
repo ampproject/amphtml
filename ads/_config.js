@@ -732,6 +732,10 @@ export const adConfig = {
 
   rubicon: {},
 
+  sekindo: {
+    renderStartImplemented: true,
+  },
+
   sharethrough: {
     renderStartImplemented: true,
   },
