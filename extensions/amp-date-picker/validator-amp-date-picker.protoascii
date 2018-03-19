@@ -15,6 +15,7 @@
 #
 
 tags: {
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-date-picker"
@@ -25,63 +26,22 @@ tags: {
 }
 
 tags: {
+  html_format: AMP
   spec_name: "amp-date-picker[type=single][mode=static]"
   tag_name: "AMP-DATE-PICKER"
   requires_extension: "amp-date-picker"
-  attrs: {
-    name: "allow-blocked-ranges"
-    value: ""
-  }
-  attrs: { name: "blocked" }
-  attrs: {
-    name: "day-size"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "first-day-of-week"
-    value_regex: "[0-9]"
-  }
-  attrs: { name: "format" }
-  attrs: {
-    name: "fullscreen"
-    value: ""
-  }
-  attrs: { name: "highlighted" }
-  attrs: { name: "input-selector" }
-  attrs: { name: "locale" }
-  attrs: { name: "max" }
-  attrs: { name: "min" }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
   attrs: {
     name: "mode"
     value_regex_casei: "static|"
-  }
-  attrs: { name: "month-format" }
-  attrs: {
-    name: "number-of-months"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "open-after-clear"
-    value: ""
-  }
-  attrs: {
-    name: "open-after-select"
-    value: ""
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
     value_regex_casei: "single|"
   }
-  attrs: { name: "week-day-format" }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -94,63 +54,21 @@ tags: {
 }
 
 tags: {
+  html_format: AMP
   spec_name: "amp-date-picker[type=single][mode=overlay]"
   tag_name: "AMP-DATE-PICKER"
   requires_extension: "amp-date-picker"
-  attrs: {
-    name: "allow-blocked-ranges"
-    value: ""
-  }
-  attrs: { name: "blocked" }
-  attrs: {
-    name: "day-size"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "first-day-of-week"
-    value_regex: "[0-9]"
-  }
-  attrs: { name: "format" }
-  attrs: {
-    name: "fullscreen"
-    value: ""
-  }
-  attrs: { name: "highlighted" }
-  attrs: { name: "input-selector" }
-  attrs: { name: "locale" }
-  attrs: { name: "max" }
-  attrs: { name: "min" }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "extended-amp-global"
   attrs: {
     name: "mode"
     value_casei: "overlay"
-  }
-  attrs: { name: "month-format" }
-  attrs: {
-    name: "number-of-months"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "open-after-clear"
-    value: ""
-  }
-  attrs: {
-    name: "open-after-select"
-    value: ""
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
     value_regex_casei: "single|"
   }
-  attrs: { name: "week-day-format" }
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: NODISPLAY
@@ -158,64 +76,22 @@ tags: {
 }
 
 tags: {
+  html_format: AMP
   spec_name: "amp-date-picker[type=range][mode=static]"
   tag_name: "AMP-DATE-PICKER"
   requires_extension: "amp-date-picker"
-  attrs: {
-    name: "allow-blocked-ranges"
-    value: ""
-  }
-  attrs: { name: "blocked" }
-  attrs: {
-    name: "day-size"
-    value_regex: "[0-9]+"
-  }
-  attrs: { name: "end-input-selector" }
-  attrs: {
-    name: "first-day-of-week"
-    value_regex: "[0-9]"
-  }
-  attrs: { name: "format" }
-  attrs: {
-    name: "fullscreen"
-    value: ""
-  }
-  attrs: { name: "highlighted" }
-  attrs: { name: "locale" }
-  attrs: { name: "max" }
-  attrs: { name: "min" }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
   attrs: {
     name: "mode"
     value_regex_casei: "static|"
   }
-  attrs: { name: "month-format" }
-  attrs: {
-    name: "number-of-months"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "open-after-clear"
-    value: ""
-  }
-  attrs: {
-    name: "open-after-select"
-    value: ""
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    blacklisted_value_regex: "__amp_source_origin"
-  }
-  attrs: { name: "start-input-selector" }
   attrs: {
     name: "type"
     value_casei: "range"
   }
-  attrs: { name: "week-day-format" }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -227,11 +103,30 @@ tags: {
   }
 }
 
-
 tags: {
+  html_format: AMP
   spec_name: "amp-date-picker[type=range][mode=overlay]"
   tag_name: "AMP-DATE-PICKER"
   requires_extension: "amp-date-picker"
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "mode"
+    value_casei: "overlay"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "range"
+  }
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+
+attr_lists: {
+  name: "amp-date-picker-common-attributes"
   attrs: {
     name: "allow-blocked-ranges"
     value: ""
@@ -241,24 +136,15 @@ tags: {
     name: "day-size"
     value_regex: "[0-9]+"
   }
-  attrs: { name: "end-input-selector" }
   attrs: {
     name: "first-day-of-week"
     value_regex: "[0-9]"
   }
   attrs: { name: "format" }
-  attrs: {
-    name: "fullscreen"
-    value: ""
-  }
   attrs: { name: "highlighted" }
   attrs: { name: "locale" }
   attrs: { name: "max" }
   attrs: { name: "min" }
-  attrs: {
-    name: "mode"
-    value_casei: "overlay"
-  }
   attrs: { name: "month-format" }
   attrs: {
     name: "number-of-months"
@@ -281,14 +167,24 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "start-input-selector" }
-  attrs: {
-    name: "type"
-    value_casei: "range"
-  }
   attrs: { name: "week-day-format" }
-  amp_layout: {
-    supported_layouts: CONTAINER
-    supported_layouts: NODISPLAY
+}
+
+attr_lists: {
+  name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-input-selector" }
+  attrs: { name: "start-input-selector" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "input-selector" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-static-mode-attributes"
+  attrs: {
+    name: "fullscreen"
+    value: ""
   }
 }
