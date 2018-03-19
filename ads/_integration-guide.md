@@ -81,7 +81,7 @@ You can use a similar approach to enrich the ad call by passing in audience segm
 
 Viewability providers typically integrate with publishers via the ad server’s creative wrappers. If that is the case, ensure that the creative wrapper loads all assets over HTTPS.
 
-For e.g. for MOAT, make sure http://js.moatads.com is switched to  https://z.moatads.com
+For e.g. for MOAT, make sure `http://js.moatads.com` is switched to  `https://z.moatads.com`
 
 Also, see the approach to using the [intersection observer pattern](https://github.com/ampproject/amphtml/blob/master/ads/README.md#ad-viewability).
 
