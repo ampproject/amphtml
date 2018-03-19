@@ -312,20 +312,21 @@ export class Services {
   }
 
   /**
-   * @return {?Promise<?../extensions/amp-story/0.1/messages.MessageService>}
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
    */
-  static messageServiceForOrNull(win) {
+  static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/messages.MessageService>} */
-      (getElementServiceIfAvailable(win, 'message', 'amp-story', true)));
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/messages.MessageService}
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
    */
-  static messageService(win) {
-    return getService(win, 'message');
+  static localizationService(win) {
+    return getService(win, 'localization');
   }
 
   /**

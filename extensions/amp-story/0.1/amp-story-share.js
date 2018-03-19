@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {MessageId} from './messages';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {Toast} from './toast';
 import {
@@ -33,19 +33,19 @@ import {throttle} from '../../../src/utils/rate-limit';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!Object<string, !MessageId>}
+ * @const {!Object<string, !LocalizedStringId>}
  */
 const SHARE_PROVIDER_MESSAGE_ID = map({
-  'system': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
-  'email': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
-  'facebook': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
-  'linkedin': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
-  'pinterest': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
-  'gplus': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
-  'tumblr': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
-  'twitter': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
-  'whatsapp': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
-  'sms': MessageId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
+  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 
@@ -93,7 +93,7 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  messageId: MessageId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
+  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
 };
 
 
@@ -125,7 +125,7 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
-  const shareProviderMessageId = dev().assert(
+  const shareProviderLocalizedStringId = dev().assert(
       SHARE_PROVIDER_MESSAGE_ID[shareType],
       `No message to display name for share type ${shareType}.`);
 
@@ -141,7 +141,7 @@ function buildProvider(doc, shareType, opt_params) {
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          messageId: shareProviderMessageId,
+          localizedStringId: shareProviderLocalizedStringId,
         },
       ]));
 }
@@ -159,12 +159,13 @@ function buildCopySuccessfulToast(doc, url) {
     children: [
       {
         tag: 'div',
-        messageId: MessageId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-        untranslatedText: url,
+        unlocalizedString: url,
       },
     ],
   }));
@@ -186,8 +187,8 @@ export class ShareWidget {
     /** @private {?Element} */
     this.root_ = null;
 
-    /** @private {?./messages/MessageService} */
-    this.messageServicePromise_ = null;
+    /** @private {?Promise<?./localization.LocalizationService>} */
+    this.localizationServicePromise_ = null;
   }
 
   /** @param {!Window} win */
@@ -203,7 +204,8 @@ export class ShareWidget {
     dev().assert(!this.root_, 'Already built.');
 
     this.ampdoc_ = ampdoc;
-    this.messageServicePromise_ = Services.messageServiceForOrNull(this.win_);
+    this.localizationServicePromise_ =
+        Services.localizationServiceForOrNull(this.win_);
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
@@ -239,10 +241,11 @@ export class ShareWidget {
           dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_, url)) {
-      this.messageServicePromise_.then(messageService => {
-        dev().assert(messageService, 'Could not retrieve MessageService.');
-        const failureMessage = messageService
-            .getMessage(MessageId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
+      this.localizationServicePromise_.then(localizationService => {
+        dev().assert(localizationService,
+            'Could not retrieve LocalizationService.');
+        const failureMessage = localizationService.getMessage(
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
         Toast.show(this.win_, failureMessage);
       });
       return;

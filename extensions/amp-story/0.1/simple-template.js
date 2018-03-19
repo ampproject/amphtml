@@ -23,8 +23,8 @@ import {isArray, toWin} from '../../../src/types';
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   messageId: (number|undefined),
- *   untranslatedText: (string|undefined),
+ *   localizedStringId: (number|undefined),
+ *   unlocalizedString: (string|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -77,11 +77,13 @@ function renderSingle(doc, elementDef) {
     createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
     doc.createElement(elementDef.tag);
 
-  if (elementDef.messageId) {
+  if (elementDef.localizedStringId) {
     const win = toWin(doc.defaultView);
-    Services.messageServiceForOrNull(win).then(messageService => {
-      dev().assert(messageService, 'Could not retrieve MessageService.');
-      el.textContent = messageService.getMessage(elementDef.messageId);
+    Services.localizationServiceForOrNull(win).then(localizationService => {
+      dev().assert(localizationService,
+          'Could not retrieve LocalizationService.');
+      el.textContent = localizationService
+          .getMessage(elementDef.localizedStringId);
     });
   }
 
