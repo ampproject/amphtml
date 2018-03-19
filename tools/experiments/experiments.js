@@ -257,12 +257,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
   {
-    id: 'a4a-doubleclick-disable-sf',
-    name: 'Disables Doubleclick Safeframe Host API for soft-rollback.',
-    spec: 'https://github.com/ampproject/amphtml/issues/13594',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13591',
-  },
-  {
     id: 'amp-document-recommendations',
     name: 'Docment level recommendations and infinte scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
