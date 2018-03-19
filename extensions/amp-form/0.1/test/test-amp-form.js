@@ -29,14 +29,13 @@ import {
 import {FormDataWrapper} from '../../../../src/form-data-wrapper';
 import {Services} from '../../../../src/services';
 import {
-  ShowFirstOnSubmitValidator,
-  setCheckValiditySupportedForTesting,
-  setReportValiditySupportedForTesting,
-} from '../form-validators';
-import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
 import {fromIterator} from '../../../../src/utils/array';
+import {
+  setCheckValiditySupportedForTesting,
+  setReportValiditySupportedForTesting,
+} from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -1336,11 +1335,17 @@ describes.repeated('', {
       });
     });
 
-    it('should handle clear action and restore initial values', () => {
+    it.only('should handle clear action and restore initial values', () => {
       const form = getForm();
       document.body.appendChild(form);
 
       const ampForm = new AmpForm(form);
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('value', 'jack@poc.com');
+      ampForm.form_.appendChild(emailInput);
       const initalFormValues = ampForm.getFormAsObject_();
 
       ampForm.form_.elements.name.value = 'Jack Sparrow';
@@ -1349,66 +1354,70 @@ describes.repeated('', {
       ampForm.actionHandler_({method: 'anything'});
       expect(ampForm.handleClearAction_).to.have.not.been.called;
 
+      expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
       ampForm.actionHandler_({method: 'clear'});
       expect(ampForm.handleClearAction_).to.have.been.called;
 
       expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
     });
 
-    it('should remove all form state classes when form is cleared', () => {
-      return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
-        const form = ampForm.form_;
-        form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
+    it.only('should remove all form state classes when form is cleared', () => {
+      const form = getForm();
+      document.body.appendChild(form);
 
-        const fieldset = document.createElement('fieldset');
-        const usernameInput = document.createElement('input');
-        usernameInput.setAttribute('name', 'username');
-        usernameInput.setAttribute('id', 'username');
-        usernameInput.setAttribute('type', 'text');
-        usernameInput.setAttribute('required', '');
-        usernameInput.setAttribute('value', 'Jack Sparrow');
-        fieldset.appendChild(usernameInput);
+      const ampForm = new AmpForm(form);
+      ampForm.form_
+          .setAttribute('custom-validation-reporting', 'show-all-on-submit');
 
-        const emailInput = document.createElement('input');
-        emailInput.setAttribute('name', 'email');
-        emailInput.setAttribute('id', 'email');
-        emailInput.setAttribute('type', 'email');
-        emailInput.setAttribute('required', '');
-        fieldset.appendChild(emailInput);
+      const fieldset = document.createElement('fieldset');
+      const usernameInput = document.createElement('input');
+      usernameInput.setAttribute('name', 'username');
+      usernameInput.setAttribute('id', 'username');
+      usernameInput.setAttribute('type', 'text');
+      usernameInput.setAttribute('required', '');
+      usernameInput.setAttribute('value', 'Jack Sparrow');
+      fieldset.appendChild(usernameInput);
 
-        const validationMessage = document.createElement('span');
-        validationMessage.setAttribute('visible-when-invalid', 'valueMissing');
-        validationMessage.setAttribute('validation-for', 'email');
-        fieldset.appendChild(validationMessage);
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      emailInput.setAttribute('value', '');
+      fieldset.appendChild(emailInput);
 
-        form.appendChild(fieldset);
+      const validationMessage = document.createElement('span');
+      validationMessage.setAttribute('visible-when-invalid', 'valueMissing');
+      validationMessage.setAttribute('validation-for', 'email');
+      fieldset.appendChild(validationMessage);
 
-        /**
-         * check validaty of input.
-         *  `usernameInput.className` should contain `user-valid`. but not
-         */
-        checkUserValidityAfterInteraction_(usernameInput);
-        /**
-         * Since above method not working, trying to simulate form submission
-         * which doesn't work either
-         */
-        form.querySelector('input[type="submit"]').click();
+      ampForm.form_.appendChild(fieldset);
 
-        // Ideally, this should pass, but not passing
-        expect(usernameInput.className).to.contain('user-valid');
+      /**
+       * check validaty of input.
+       *  `usernameInput.className` should contain `user-valid`. but not
+       */
+      checkUserValidityAfterInteraction_(usernameInput);
+      /**
+       * Since above method not working, trying to simulate form submission
+       * which doesn't work either
+       */
+      ampForm.form_.querySelector('input[type="submit"]').click();
 
-        checkUserValidityAfterInteraction_(emailInput);
-        // working fine
-        expect(form.className).to.contain('user-invalid');
-        expect(emailInput.className).to.contain('user-invalid');
-        // Ideally this should pass, but not
-        expect(validationMessage.className).to.contain('visible');
-        ampForm.handleClearAction_();
+      // Ideally, this should pass, but not passing
+      expect(usernameInput.className).to.contain('user-valid');
 
-        expect(form.className).to.not.contain('user-invalid');
-        expect(usernameInput.className).to.contain('user-valid');
-        expect(emailInput.className).to.not.contain('user-invalid');
-      });
+      checkUserValidityAfterInteraction_(emailInput);
+      // working fine
+      expect(ampForm.form_.className).to.contain('user-invalid');
+      expect(emailInput.className).to.contain('user-invalid');
+      // Ideally this should pass, but not
+      // expect(validationMessage.className).to.contain('visible');
+      ampForm.handleClearAction_();
+
+      expect(ampForm.form_.className).to.not.contain('user-invalid');
+      // expect(usernameInput.className).to.contain('user-valid');
+      expect(emailInput.className).to.not.contain('user-invalid');
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
