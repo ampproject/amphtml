@@ -237,6 +237,8 @@ describe('sanitizeHtml', () => {
         .to.equal('<div subscriptions-actions="">link</div>');
     expect(sanitizeHtml('<div subscriptions-display="">link</div>'))
         .to.equal('<div subscriptions-display="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
+        .to.equal('<div subscriptions-dialog="">link</div>');
   });
 });
 
