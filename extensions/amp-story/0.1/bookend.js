@@ -21,10 +21,12 @@ import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
+import {relatedArticlesFromJson} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -36,6 +38,10 @@ import {throttle} from '../../../src/utils/rate-limit';
  * }}
  */
 export let BookendConfigDef;
+
+
+/** @private @const {string} */
+const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 
 /**
@@ -82,6 +88,10 @@ const REPLAY_ICON_TEMPLATE = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
 };
+
+
+/** @type {string} */
+const TAG = 'amp-story';
 
 
 /**
@@ -190,74 +200,89 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 
 /**
  * Bookend component for <amp-story>.
+ * This component has to be built and preloaded before it can be displayed,
+ * through the 'build' and 'loadConfig' method. It can then be toggled by
+ * dispatching the store TOGGLE_BOOKEND action.
  */
 export class Bookend {
   /**
    * @param {!Window} win
+   * @param {!Element} storyElement Element where to append the bookend
    */
-  constructor(win) {
+  constructor(win, storyElement) {
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private {?./bookend.BookendConfigDef|undefined} */
+    this.config_;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
 
     /** @private {?Element} */
+    this.replayButton_ = null;
+
+    /** @private {?Element} */
     this.root_ = null;
-
-    /** @private {?Element} */
-    this.replayBtn_ = null;
-
-    /** @private {?Element} */
-    this.closeBtn_ = null;
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
+
+    /** @private @const {!Element} */
+    this.storyElement_ = storyElement;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @return {!Element}
+   * Builds the bookend components and appends it to the provided story.
    */
-  build(ampdoc) {
+  build() {
     if (this.isBuilt_) {
-      return this.getRoot();
+      return;
     }
 
     this.isBuilt_ = true;
 
     this.root_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
 
-    this.replayBtn_ = this.buildReplayButton_(ampdoc);
+    this.replayButton_ = this.buildReplayButton_();
 
-    this.getInnerContainer_().appendChild(this.replayBtn_);
-    this.getInnerContainer_().appendChild(this.shareWidget_.build(ampdoc));
+    const ampdoc = getAmpdoc(this.storyElement_);
 
-    this.attachEvents_();
+    const innerContainer = this.getInnerContainer_();
+    innerContainer.appendChild(this.replayButton_);
+    innerContainer.appendChild(this.shareWidget_.build(ampdoc));
+    this.initializeListeners_();
 
-    return this.getRoot();
+    this.vsync_.mutate(() => {
+      this.storyElement_.appendChild(this.getRoot());
+    });
   }
 
-  /** @private */
-  attachEvents_() {
-    // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.root_.addEventListener('click', e => this.maybeClose_(e));
-    this.replayBtn_.addEventListener('click', e => this.onReplayBtnClick_(e));
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.root_.addEventListener('click', event => this.maybeClose_(event));
+    this.replayButton_.addEventListener(
+        'click', event => this.onReplayButtonClick_(event));
 
     this.getOverflowContainer_().addEventListener('scroll',
         // minInterval is high since this is a step function that does not
         // require smoothness
         throttle(this.win_, () => this.onScroll_(), 100));
 
-    this.win_.addEventListener('keyup', e => {
-      if (!this.isActive()) {
+    this.win_.addEventListener('keyup', event => {
+      if (!this.isActive_()) {
         return;
       }
-      if (e.keyCode == KeyCodes.ESCAPE) {
-        e.preventDefault();
+      if (event.keyCode == KeyCodes.ESCAPE) {
+        event.preventDefault();
         this.close_();
       }
     });
@@ -266,29 +291,98 @@ export class Bookend {
         StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
   }
 
-  /** @return {boolean} */
-  isActive() {
-    return this.isBuilt() &&
-        !this.getRoot().classList.contains(HIDDEN_CLASSNAME);
+  /**
+   * Whether the bookend is displayed.
+   * @return {boolean}
+   * @private
+   */
+  isActive_() {
+    return !!this.storeService_.get(StateProperty.BOOKEND_STATE);
   }
 
   /**
-   * @param {!Event} e
+   * @param {!Event} event
    * @private
    */
-  onReplayBtnClick_(e) {
-    e.stopPropagation();
+  onReplayButtonClick_(event) {
+    event.stopPropagation();
     dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
   }
 
   /**
-   * Closes bookend if tapping outside usable area.
-   * @param {!Event} e
+   * Retrieves the publisher bookend configuration. Applying the configuration
+   * will prerender the bookend DOM, but there are cases where we need it before
+   * the component is built. Eg: the desktop share button needs the providers.
+   * @param {boolean=} applyConfig  Whether the config should be set.
+   * @return {!Promise<?./bookend.BookendConfigDef>}
+   */
+  loadConfig(applyConfig = true) {
+    if (this.config_ !== undefined) {
+      if (applyConfig && this.config_) {
+        this.setConfig(this.config_);
+      }
+      return Promise.resolve(this.config_);
+    }
+
+    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
+        .then(response => {
+          if (!response) {
+            return null;
+          }
+
+          this.config_ = {
+            shareProviders: response['share-providers'],
+            relatedArticles:
+                relatedArticlesFromJson(response['related-articles']),
+          };
+
+          // Allows the config to be fetched before the component is built, for
+          // cases like getting the share providers on desktop.
+          if (applyConfig) {
+            this.setConfig(this.config_);
+          }
+
+          return this.config_;
+        })
+        .catch(e => {
+          user().error(TAG, 'Error fetching bookend configuration', e.message);
+          return null;
+        });
+  }
+
+  /**
+   * @param {string} attributeName
+   * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
-  maybeClose_(e) {
-    if (this.elementOutsideUsableArea_(dev().assertElement(e.target))) {
-      e.stopPropagation();
+  loadJsonFromAttribute_(attributeName) {
+    if (!this.storyElement_.hasAttribute(attributeName)) {
+      return Promise.resolve(null);
+    }
+
+    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const opts = {};
+    opts.requireAmpResponseSourceOrigin = false;
+
+    const ampdoc = getAmpdoc(this.storyElement_);
+
+    return Services.urlReplacementsForDoc(ampdoc)
+        .expandUrlAsync(user().assertString(rawUrl))
+        .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
+        .then(response => {
+          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
+          return response.json();
+        });
+  }
+
+  /**
+   * Closes bookend if tapping outside usable area.
+   * @param {!Event} event
+   * @private
+   */
+  maybeClose_(event) {
+    if (this.elementOutsideUsableArea_(dev().assertElement(event.target))) {
+      event.stopPropagation();
       this.close_();
     }
   }
@@ -313,10 +407,10 @@ export class Bookend {
    * @private
    */
   onScroll_() {
-    if (!this.isActive()) {
+    if (!this.isActive_()) {
       return;
     }
-    Services.vsyncFor(this.win_).run({
+    this.vsync_.run({
       measure: state => {
         state.shouldBeFullBleed =
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
@@ -333,7 +427,7 @@ export class Bookend {
    * @private
    */
   toggle_(show) {
-    Services.vsyncFor(this.win_).mutate(() => {
+    this.vsync_.mutate(() => {
       this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
     });
   }
@@ -369,9 +463,11 @@ export class Bookend {
    * @private
    */
   setRelatedArticles_(articleSets) {
-    this.getInnerContainer_().appendChild(
-        renderSimpleTemplate(this.win_.document,
-            buildArticlesContainerTemplate(articleSets)));
+    this.vsync_.mutate(() => {
+      this.getInnerContainer_().appendChild(
+          renderSimpleTemplate(this.win_.document,
+              buildArticlesContainerTemplate(articleSets)));
+    });
   }
 
   /** @return {!Element} */
@@ -399,7 +495,6 @@ export class Bookend {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {{
    *   title: string,
    *   domainName: string,
@@ -407,7 +502,8 @@ export class Bookend {
    * }}
    * @private
    */
-  getStoryMetadata_(ampdoc) {
+  getStoryMetadata_() {
+    const ampdoc = getAmpdoc(this.storyElement_);
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
@@ -417,8 +513,8 @@ export class Bookend {
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
 
-      domainName:
-          parseUrl(Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
+      domainName: parseUrl(
+          Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
@@ -431,12 +527,11 @@ export class Bookend {
   }
 
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {!Element}
    * @private
    */
-  buildReplayButton_(ampdoc) {
-    const metadata = this.getStoryMetadata_(ampdoc);
+  buildReplayButton_() {
+    const metadata = this.getStoryMetadata_();
     return renderAsElement(this.win_.document, buildReplayButtonTemplate(
         this.win_.document,
         metadata.title,
