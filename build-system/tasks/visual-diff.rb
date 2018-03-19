@@ -258,9 +258,13 @@ def configure_browser
     }
   )
   Capybara.register_driver :chrome do |app|
+    http_client = Selenium::WebDriver::Remote::Http::Default.new
+    http_client.read_timeout = 120
+
     Capybara::Selenium::Driver.new(
       app,
       browser: :chrome,
+      http_client: http_client,
       options: options
     )
   end
