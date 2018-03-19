@@ -177,9 +177,9 @@ export class MessageService {
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
    */
-  getMessage(messageId, opt_elementToUse) {
-    const languageCodes = opt_elementToUse ?
-      this.getLanguageCodesForElement_(opt_elementToUse) :
+  getMessage(messageId, elementToUse = undefined) {
+    const languageCodes = elementToUse ?
+      this.getLanguageCodesForElement_(elementToUse) :
       this.rootLanguageCodes_;
 
     return findMessage(this.messageBundles_, languageCodes, messageId);
