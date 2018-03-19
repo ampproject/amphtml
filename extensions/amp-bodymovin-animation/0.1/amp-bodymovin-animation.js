@@ -18,22 +18,17 @@ import {ActionTrust} from '../../../src/action-trust';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {batchFetchJsonFor} from '../../../src/batched-json';
+import {clamp} from '../../../src/utils/math';
 import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-bodymovin-animation';
-
-/** @enum {number} */
-export const PLAYING_STATE = {
-  NOT_LOADED: 0,
-  LOADED_NOT_PLAYING: 1,
-  PLAYING: 2,
-  PAUSED: 3,
-  STOPPED: 4,
-};
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
 
@@ -56,8 +51,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     /** @private {?string} */
     this.src_ = null;
 
-    /** @private {!PLAYING_STATE} */
-    this.playingState_ = PLAYING_STATE.NOT_LOADED;
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /** @override */
@@ -78,12 +79,13 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   buildCallback() {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('noautoplay');
-    this.playingState_ = this.autoplay_ ?
-      PLAYING_STATE.PLAYING : PLAYING_STATE.LOADED_NOT_PLAYING;
     user().assert(this.element.hasAttribute('src'),
         'The src attribute must be specified for <amp-bodymovin-animation>');
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     this.src_ = this.element.getAttribute('src');
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
 
     // Register relevant actions
     this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
@@ -91,8 +93,8 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
     this.registerAction('seekTo', invocation => {
       const args = invocation.args;
-      if (args && args['time'] !== undefined) {
-        this.seekTo_(args['time']);
+      if (args) {
+        this.seekTo_(args);
       }
     }, ActionTrust.LOW);
   }
@@ -110,10 +112,16 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
           this.win, this.element, 'bodymovinanimation', opt_context);
       return Services.vsyncFor(this.win).mutatePromise(() => {
         this.applyFillContent(iframe);
+        this.unlistenMessage_ = listen(
+            this.win,
+            'message',
+            this.handleBodymovinMessages_.bind(this)
+        );
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        return this.loadPromise(this.iframe_);
+        return this.loadPromise(this.iframe_)
+            .then(() => this.playerReadyPromise_);
       });
     });
   }
@@ -124,53 +132,65 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
     return true;
   }
 
-  play_() {
-    if (this.playingState_ == PLAYING_STATE.PLAYING) {
-      return;
+  handleBodymovinMessages_(event) {
+    if (event.source === this.iframe_.contentWindow) {
+      const eventData = parseJson(getData(event));
+      if (eventData['action'] == 'ready') {
+        this.playerReadyResolver_(this.iframe_);
+      }
     }
+  }
 
-    const message = JSON.stringify(dict({
-      'action': 'play',
-    }));
-    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-    this.playingState_ = PLAYING_STATE.PLAYING;
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} action
+   * @param {string=} opt_valueType
+   * @param {number=} opt_value
+   * @private
+   * */
+  sendCommand_(action, opt_valueType, opt_value) {
+    this.playerReadyPromise_.then(function(iframe) {
+      this.iframe_ = iframe;
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify(dict({
+          'action': action,
+          'valueType': opt_valueType || '',
+          'value': opt_value || '',
+        }));
+        this.iframe_.contentWindow. /*OK*/postMessage(message, '*');
+      }
+    });
+  }
+
+  play_() {
+    this.sendCommand_('play');
   }
 
   pause_() {
-    if (this.playingState_ == PLAYING_STATE.PAUSED) {
-      return;
-    }
-
-    const message = JSON.stringify(dict({
-      'action': 'pause',
-    }));
-    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-    this.playingState_ = PLAYING_STATE.PAUSED;
+    this.sendCommand_('pause');
   }
 
   stop_() {
-    if (this.playingState_ == PLAYING_STATE.STOPPED) {
-      return;
-    }
-
-    const message = JSON.stringify(dict({
-      'action': 'stop',
-    }));
-    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-    this.playingState_ = PLAYING_STATE.STOPPED;
+    this.sendCommand_('stop');
   }
 
-  seekTo_(timeVal) {
-    const message = JSON.stringify(dict({
-      'action': 'goToAndStop',
-      'value': timeVal,
-    }));
-    this.iframe_.contentWindow./*OK*/postMessage(message, '*');
-    this.pause_();
-    this.playingState_ = PLAYING_STATE.PAUSED;
+  seekTo_(args) {
+    const time = parseFloat(args && args['time']);
+    // time based seek
+    if (isFiniteNumber(time)) {
+      this.sendCommand_('seekTo', 'time', time);
+    }
+    // percent based seek
+    const percent = parseFloat(args && args['percent']);
+    if (isFiniteNumber(percent)) {
+      this.sendCommand_('seekTo', 'percent', clamp(percent, 0, 1));
+    }
   }
 }
 

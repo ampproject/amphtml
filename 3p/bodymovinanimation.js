@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
@@ -35,19 +36,18 @@ function getBodymovinAnimationSdk(global, cb) {
 function parseMessage(event) {
   const eventMessage = parseJson(getData(event));
   const action = eventMessage['action'];
-  if (animationHandler) {
-    if (action == 'play') {
-      animationHandler.play();
-    } else if (action == 'pause') {
-      animationHandler.pause();
-    } else if (action == 'stop') {
-      animationHandler.stop();
-    } else if (action == 'goToAndStop') {
-      animationHandler.goToAndPlay(eventMessage['value']);
-    }
+  if (action == 'play') {
+    animationHandler.play();
+  } else if (action == 'pause') {
+    animationHandler.pause();
+  } else if (action == 'stop') {
+    animationHandler.stop();
+  } else if (action == 'seekTo') {
+    animationHandler.goToAndStop(eventMessage['value'],
+        eventMessage['valueType'] !== 'time');
   }
-
 }
+
 export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
@@ -64,7 +64,11 @@ export function bodymovinanimation(global) {
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
+    const message = JSON.stringify(dict({
+      'action': 'ready',
+    }));
+    global.parent.postMessage(message, '*');
   });
+  global.addEventListener('message', parseMessage, false);
 }
 
-window.addEventListener('message', parseMessage, false);
