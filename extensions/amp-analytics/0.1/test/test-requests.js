@@ -24,7 +24,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Requests', {amp: 1}, env => {
   let ampdoc;
-  let analytics;
+  let analyticsMock;
   let clock;
   let preconnect;
   let preconnectSpy;
@@ -32,7 +32,12 @@ describes.realWin('Requests', {amp: 1}, env => {
   beforeEach(() => {
     installVariableService(env.win);
     ampdoc = env.ampdoc;
-    analytics = {getAmpDoc: function() { return ampdoc; }};
+    ampdoc.defaultView = env.win;
+    analyticsMock = {
+      nodeType: 1,
+      ownerDocument: ampdoc,
+      getAmpDoc: function() { return ampdoc; }
+    };
     clock = lolex.install({target: ampdoc.win});
     preconnectSpy = sandbox.spy();
     preconnect = {
@@ -50,7 +55,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r2', 'batchInterval': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         handler.send({}, {}, expansionOptions, {});
@@ -65,7 +70,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1'};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         handler.send({}, {}, expansionOptions, {});
@@ -77,7 +82,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should preconnect', function* () {
         const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
         const handler = new RequestHandler(
-            analytics, r, preconnect, sandbox.spy(), false);
+            analyticsMock, r, preconnect, sandbox.spy(), false);
         const expansionOptions = new ExpansionOptions({'test': 'expanded'});
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -95,7 +100,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should support number', () => {
         const r = {'baseUrl': 'r1', 'batchInterval': 5};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         expect(handler.batchIntervalPointer_).to.not.be.null;
         expect(handler.batchInterval_).to.deep.equal([5000]);
       });
@@ -103,7 +108,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should support array', () => {
         const r = {'baseUrl': 'r1', 'batchInterval': [1, 2, 3]};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         expect(handler.batchIntervalPointer_).to.not.be.null;
         expect(handler.batchInterval_).to.deep.equal([1000, 2000, 3000]);
       });
@@ -113,13 +118,13 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r1 = {'baseUrl': 'r', 'batchInterval': 'invalid'};
         const r2 = {'baseUrl': 'r', 'batchInterval': ['invalid']};
         try {
-          new RequestHandler(analytics, r1, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r1, preconnect, spy, false);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analytics, r2, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r2, preconnect, spy, false);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
@@ -130,19 +135,19 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r4 = {'baseUrl': 'r', 'batchInterval': [-1, 5]};
         const r5 = {'baseUrl': 'r', 'batchInterval': [1, 0.01]};
         try {
-          new RequestHandler(analytics, r3, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r3, preconnect, spy, false);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analytics, r4, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r4, preconnect, spy, false);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
         }
         try {
-          new RequestHandler(analytics, r5, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r5, preconnect, spy, false);
           throw new Error('should never happen');
         } catch (e) {
           expect(e).to.match(/Invalid batchInterval value/);
@@ -152,7 +157,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should schedule send request with interval array', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         clock.tick(998);
         handler.send({}, {}, expansionOptions, {});
@@ -180,7 +185,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should not schedule send request w/o trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1]};
-        new RequestHandler(analytics, r, preconnect, spy, false);
+        new RequestHandler(analyticsMock, r, preconnect, spy, false);
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.not.be.called;
@@ -189,7 +194,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should schedule send independent of trigger immediate', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(999);
@@ -213,13 +218,13 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should accept reportWindow with number', () => {
         const r = {'baseUrl': 'r', 'reportWindow': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const r2 = {'baseUrl': 'r', 'reportWindow': '2'};
         const handler2 = new RequestHandler(
-            analytics, r2, preconnect, spy, false);
+            analyticsMock, r2, preconnect, spy, false);
         const r3 = {'baseUrl': 'r', 'reportWindow': 'invalid'};
         const handler3 = new RequestHandler(
-            analytics, r3, preconnect, spy, false);
+            analyticsMock, r3, preconnect, spy, false);
         expect(handler.reportWindow_).to.equal(1);
         expect(handler2.reportWindow_).to.equal(2);
         expect(handler3.reportWindow_).to.be.null;
@@ -228,7 +233,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should stop bathInterval outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.5, 'reportWindow': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(500);
@@ -246,7 +251,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should stop send request outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'reportWindow': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -261,7 +266,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should flush batch queue after batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 5, 'reportWindow': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions, {});
         clock.tick(1000);
@@ -272,7 +277,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should respect immediate trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.2, 'reportWindow': 0.5};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         clock.tick(500);
         yield macroTask();
@@ -288,7 +293,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({'e1': 'e1'}, {}, expansionOptions, {});
         handler.send({'e1': 'e1'}, {}, expansionOptions, {});
@@ -302,7 +307,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({'v2': '中'});
         handler.send({}, {
           'extraUrlParams': {
@@ -322,7 +327,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send(
             {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
@@ -340,7 +345,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchPlugin': '_ping_'};
         try {
-          new RequestHandler(analytics, r, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r, preconnect, spy, false);
         } catch (e) {
           expect(e).to.match(
               /batchPlugin cannot be set on non-batched request/);
@@ -352,7 +357,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r =
             {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': 'invalid'};
         try {
-          new RequestHandler(analytics, r, preconnect, spy, false);
+          new RequestHandler(analyticsMock, r, preconnect, spy, false);
         } catch (e) {
           expect(e).to.match(/unsupported batch plugin/);
         }
@@ -362,7 +367,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
         handler.batchingPlugin_ = () => {throw new Error('test');};
         const expansionOptions = new ExpansionOptions({});
@@ -377,7 +382,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r', 'batchInterval': 1, 'batchPlugin': '_ping_'};
         const handler = new RequestHandler(
-            analytics, r, preconnect, spy, false);
+            analyticsMock, r, preconnect, spy, false);
         // Overwrite batchPlugin function
         const batchPluginSpy = sandbox.spy(handler, 'batchingPlugin_');
         const expansionOptions = new ExpansionOptions({});
@@ -448,7 +453,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     const spy = sandbox.spy();
     const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
     const handler = new RequestHandler(
-        analytics, r, preconnect, spy, false);
+        analyticsMock, r, preconnect, spy, false);
     const expansionOptions = new ExpansionOptions({
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
@@ -482,7 +487,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE&foo=${foo}',
     };
     const handler = new RequestHandler(
-        analytics, r, preconnect, spy, false);
+        analyticsMock, r, preconnect, spy, false);
     const expansionOptions = new ExpansionOptions({
       'param1': 'PARAM_1',
       'param2': 'PARAM_2',
