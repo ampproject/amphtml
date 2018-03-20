@@ -613,8 +613,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.identityToken = results[1];
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                  this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), this.getPageParameters_()));
+                  this.getBlockParameters_(), this.buildIdentityParams_(),
+                  this.getPageParameters_(), rtcParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
