@@ -60,9 +60,17 @@ The path to the exported Bodymovin animation object. Must be `https` protocol.
 
 Indicates whether the animation should be looping or not.  By default, this attribute is set to `true`. Values for this attribute can be: `true`, `false`, or a number value. If a number is specified, the animation loops that number of times.
 
+##### noautoplay (optional)
+
+By default, an animation autoplays. If this attribute is added the video waits for an action to start playing.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Actions
+
+Please see [AMP Action Documentation](https://www.ampproject.org/docs/reference/amp-actions-and-events#amp-bodymovin-animation) for the actions available on `amp-bodymovin-animation` component.
 
 ## Validation
 

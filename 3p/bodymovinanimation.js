@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict} from '../src/utils/object';
+import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 
@@ -23,28 +25,50 @@ import {parseJson} from '../src/json';
  * @param {function(!Object)} cb
  */
 
+let animationHandler;
+
 function getBodymovinAnimationSdk(global, cb) {
   loadScript(global, 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js', function() {
     cb(global.bodymovin);
   });
 }
 
+function parseMessage(event) {
+  const eventMessage = parseJson(getData(event));
+  const action = eventMessage['action'];
+  if (action == 'play') {
+    animationHandler.play();
+  } else if (action == 'pause') {
+    animationHandler.pause();
+  } else if (action == 'stop') {
+    animationHandler.stop();
+  } else if (action == 'seekTo') {
+    animationHandler.goToAndStop(eventMessage['value'],
+        eventMessage['valueType'] !== 'time');
+  }
+}
+
 export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
-  const animationData = dataReceived['animationData'];
   const animatingContainer = global.document.createElement('div');
 
   global.document.getElementById('c').appendChild(animatingContainer);
   const shouldLoop = dataLoop != 'false';
   const loop = !isNaN(dataLoop) ? dataLoop : shouldLoop;
   getBodymovinAnimationSdk(global, function(bodymovin) {
-    bodymovin.loadAnimation({
+    animationHandler = bodymovin.loadAnimation({
       container: animatingContainer,
       renderer: 'svg',
       loop,
-      autoplay: true,
-      animationData,
+      autoplay: dataReceived['autoplay'],
+      animationData: dataReceived['animationData'],
     });
+    const message = JSON.stringify(dict({
+      'action': 'ready',
+    }));
+    global.addEventListener('message', parseMessage, false);
+    global.parent. /*OK*/postMessage(message, '*');
   });
 }
+
