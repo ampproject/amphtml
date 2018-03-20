@@ -48,24 +48,30 @@ amp-list/0.1/test/validator-amp-list.html:43:2 The attribute '[state]' in tag 'a
 |              [src]="foo.bar" [state]="baz.qux">
 |      <div></div>
 |    </amp-list>
+|    <!-- Valid amp-list with reset-on-refresh attribute -->
+|    <amp-list width=10 height=10
+|              src="https://data.com/articles.json?ref=CANONICAL_URL"
+|              reset-on-refresh>
+|      <div></div>
+|    </amp-list>
 |    <!-- Invalid: width is mistyped. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:49:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:55:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |              wdith=10 height=10>
 |      <div></div>
 |    </amp-list>
 |    <!-- Invalid: src is missing. -->
 |    <amp-list width=10 height=10>
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:54:2 The mandatory attribute 'src' is missing in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:60:2 The mandatory attribute 'src' is missing in tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |      <div></div>
 |    </amp-list>
 |    <!-- Invalid: width/height missing, so it's container layout
 |         which isn't supported. -->
 |    <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>   ^~~~~~~~~
-amp-list/0.1/test/validator-amp-list.html:59:2 The implied layout 'CONTAINER' is not supported by tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_LAYOUT_PROBLEM]
+amp-list/0.1/test/validator-amp-list.html:65:2 The implied layout 'CONTAINER' is not supported by tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_LAYOUT_PROBLEM]
 |      <div></div>
 |    </amp-list>
 |  </body>
