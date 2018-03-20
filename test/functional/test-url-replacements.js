@@ -45,7 +45,7 @@ import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 
 
-describes.sandboxed.only('UrlReplacements', {}, () => {
+describes.sandboxed('UrlReplacements', {}, () => {
 
   let canonical;
   let loadObservable;
