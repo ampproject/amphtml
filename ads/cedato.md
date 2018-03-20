@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width=640 height=360
     type="cedato"
     data-id="303084288"
     data-subid="subid">
