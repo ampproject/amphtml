@@ -242,8 +242,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig.writeInBody).to.be.false;
+      const {instantLoad, writeInBody} = impl.getNameFrameExperimentConfig();
+      expect(instantLoad).to.be.true;
+      expect(writeInBody).to.be.false;
     });
 
     it('should specify nameframe loading behavior; two args', () => {
@@ -256,8 +257,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           return !!this.get(name);
         },
       });
-      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig.writeInBody).to.be.true;
+      const {instantLoad, writeInBody} = impl.getNameFrameExperimentConfig();
+      expect(instantLoad).to.be.true;
+      expect(writeInBody).to.be.true;
     });
   });
 

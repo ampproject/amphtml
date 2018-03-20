@@ -15,12 +15,12 @@
  */
 
 import {Entitlement} from '../entitlement';
-import {EntitlementStore} from '../entitlement-store';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
 } from '../../../../third_party/subscriptions-project/config';
+import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionService} from '../amp-subscriptions';
 
@@ -84,9 +84,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     return subscriptionService.initialize_().then(() => {
       // Should show loading on the page
       expect(renderLoadingStub).to.be.calledWith(true);
-      // Should setup entitlement store
-      expect(subscriptionService.entitlementStore_).to.be
-          .instanceOf(EntitlementStore);
+      // Should setup platform store
+      expect(subscriptionService.platformStore_).to.be
+          .instanceOf(PlatformStore);
     });
   });
 
@@ -126,12 +126,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.serviceAdapter_ =
         new ServiceAdapter(subscriptionService);
       subscriptionService.pageConfig_ = pageConfig;
-      subscriptionService.subscriptionPlatforms_ = {};
+      subscriptionService.platformStore_ = new PlatformStore('local');
       subscriptionService.initializeLocalPlatforms_(service);
-      expect(subscriptionService.subscriptionPlatforms_['local'])
+      expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
           .to.be.not.null;
-      expect(subscriptionService.subscriptionPlatforms_['local']).to.be
-          .instanceOf(LocalSubscriptionPlatform);
+      expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
+          .to.be.instanceOf(LocalSubscriptionPlatform);
     });
   });
 
@@ -140,15 +140,17 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
-        sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
-            .callsFake(() => Promise.resolve());
-        sandbox.stub(subscriptionService.entitlementStore_, 'selectPlatform')
-            .callsFake(() => Promise.resolve(
-                new Entitlement('local', 'raw', 'local',
-                    products, 'token', false)
-            ));
+        const entitlement = new Entitlement({source: 'local', raw: 'raw',
+          service: 'local', products, subscriptionToken: 'token'});
+        entitlement.setCurrentProduct('product1');
         const localPlatform =
-          subscriptionService.subscriptionPlatforms_['local'];
+          subscriptionService.platformStore_.getLocalPlatform();
+        subscriptionService.platformStore_.resolveEntitlement('local',
+            entitlement);
+        sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
+            .callsFake(() => Promise.resolve());
+        sandbox.stub(subscriptionService.platformStore_, 'selectPlatform')
+            .callsFake(() => Promise.resolve(localPlatform));
         expect(localPlatform).to.be.not.null;
         const activateStub = sandbox.stub(localPlatform, 'activate');
         subscriptionService.selectAndActivatePlatform_().then(() => {
@@ -161,9 +163,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('startAuthorizationFlow_', () => {
     it('should start grantStatus and platform selection', () => {
-      subscriptionService.entitlementStore_ = new EntitlementStore(products);
+      subscriptionService.platformStore_ = new PlatformStore(products);
       const getGrantStatusStub =
-          sandbox.stub(subscriptionService.entitlementStore_, 'getGrantStatus')
+          sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
               .callsFake(() => Promise.resolve());
       const selectAndActivateStub =
           sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');

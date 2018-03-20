@@ -29,12 +29,17 @@
     src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
 </head>
 <body>
-  <!-- Example of a valid amp-list -->
+  <!-- Valid: amp-list with only src attribute -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
-  <!-- Valid amp-list with amp-bind attributes -->
+  <!-- Valid: amp-list with only [src] attribute -->
+  <amp-list width=10 height=10
+            [src]="foo.bar">
+    <div></div>
+  </amp-list>
+  <!-- Valid: amp-list with both src and [src] attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
             [src]="foo.bar" [state]="baz.qux">
@@ -55,7 +60,7 @@
   <amp-list width=10 height=10>
     <div></div>
   </amp-list>
-  <!-- also invalid: width/height missing, so it's container layout
+  <!-- Invalid: width/height missing, so it's container layout
        which isn't supported. -->
   <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>

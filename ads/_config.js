@@ -127,7 +127,19 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  admixer: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://inv-nets.admixer.net',
+      'https://cdn.admixer.net',
+    ],
+  },
+
   adocean: {},
+
+  adpicker: {
+    renderStartImplemented: true,
+  },
 
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
@@ -463,7 +475,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},
@@ -724,6 +735,10 @@ export const adConfig = {
   },
 
   rubicon: {},
+
+  sekindo: {
+    renderStartImplemented: true,
+  },
 
   sharethrough: {
     renderStartImplemented: true,

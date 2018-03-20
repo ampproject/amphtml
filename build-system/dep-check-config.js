@@ -291,25 +291,41 @@ exports.rules = [
     ],
   },
 
+  {
+    mustNotDependOn: [
+      /** DO NOT WHITELIST ANY FILES */
+      'ads/google/deprecated_doubleclick.js',
+      /** DO NOT WHITELIST ANY FILES */
+    ],
+    whitelist: [
+      '3p/integration.js->ads/google/deprecated_doubleclick.js',
+    ],
+  },
+
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
   // Doubleclick.js will be deleted from the repository at that time.
   // Please see https://github.com/ampproject/amphtml/issues/11834
   // for more information.
+  // Do not add any additional files to this whitelist without express
+  // permission from @bradfrizzell, @keithwrightbos, or @robhazan.
   {
     mustNotDependOn: [
       'ads/google/doubleclick.js',
     ],
     whitelist: [
+      /** DO NOT ADD TO WHITELIST **/
       'ads/ix.js->ads/google/doubleclick.js',
       'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
       'ads/openx.js->ads/google/doubleclick.js',
       'ads/pulsepoint.js->ads/google/doubleclick.js',
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
       'ads/criteo.js->ads/google/doubleclick.js',
-      '3p/integration.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
     ],
   },
 ];

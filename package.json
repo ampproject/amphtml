@@ -5,8 +5,8 @@
   "description": "Fastish HTML",
   "main": "index.js",
   "engines": {
-    "node": ">=6",
-    "yarn": ">=1.0.2"
+    "node": ">=8.10.0",
+    "yarn": ">=1.2.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
@@ -147,7 +147,7 @@
     "request": "2.84.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
-    "sinon": "4.4.5",
+    "sinon": "4.4.6",
     "sinon-chai": "3.0.0",
     "text-table": "0.2.0",
     "through2": "2.0.3",
