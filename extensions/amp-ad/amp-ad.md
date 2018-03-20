@@ -203,6 +203,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdmanMedia](../../ads/admanmedia.md)
 - [Admixer](../../ads/admixer.md)
 - [AdOcean](../../ads/adocean.md)
+- [AdPicker](../../ads/adpicker.md)
 - [AdPlugg](../../ads/adplugg.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
