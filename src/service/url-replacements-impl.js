@@ -247,9 +247,9 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
-    this.set('FRAGMENT_PARAM', this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+    this.setAsync('FRAGMENT_PARAM', this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
 
-    this.set('ANCESTOR_ORIGIN', this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
+    this.setAsync('ANCESTOR_ORIGIN', this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
     /**
      * Stores client ids that were generated during this page view
@@ -671,7 +671,7 @@ export class GlobalVariableSource extends VariableSource {
       return service.then(viewerIntegrationVariables => {
         user().assert(viewerIntegrationVariables,
             'To use variable %s amp-viewer-integration should be configured', name);
-        return storyVariables[property](param, defaultValue);
+        return viewerIntegrationVariables[property](param, defaultValue);
       });
     };
   }
@@ -1012,7 +1012,7 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          replacement = replacement.replace(match, encodeValue(v));
+          replacement = replacement.replace(match, NOENCODE_WHITELIST[match] ? v : encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }

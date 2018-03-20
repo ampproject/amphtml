@@ -34,14 +34,16 @@ export class AmpViewerIntegrationVariableService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
     /** @private {!ViewerIntegrationVariableDef} */
     this.variables_ = {
-      ancestorOrigin: (param, defaultValue) => { return this.getAncestorOrigin_();},
-      fragmentParam: (param, defaultValue) => { return this.getFragmentParamData_(param, defaultValue);},
+      ancestorOrigin: (param, defaultValue) => {
+	return this.getAncestorOrigin_();
+      },
+      fragmentParam: (param, defaultValue) => {
+	return this.getFragmentParamData_(param, defaultValue);
+      },
     };
   }
 
@@ -60,8 +62,7 @@ export class AmpViewerIntegrationVariableService {
     user().assert(typeof param == 'string', 'param should be a string');
     const hash = this.ampdoc.win.location.originalHash;
     const params = parseQueryString(hash);
-    return (typeof params[param] !== 'undefined')
-      ? params[param] : defaultValue;
+    return (params[param] === 'undefined') ? defaultValue: params[param];
   }
 
   /**
@@ -70,13 +71,16 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getAncestorOrigin_() {
+    if (this.ampdoc.win.location.ancestorOrigins === 'undefined') {
+      return '';
+    }
     return this.ampdoc.win.location.ancestorOrigins[0];
   }
+
   /**
-   * @return {!StoryVariableDef}
+   * @return {!ViewerIntegrationVariableDef}
    */
   get() {
-    // TODO(newmius): You should probably Object.freeze this in development.
     return this.variables_;
   }
 }
