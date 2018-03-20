@@ -409,13 +409,13 @@ export class AmpStory extends AMP.BaseElement {
       this.audioStopped_();
     });
 
-    this.element.addEventListener(EventType.SWITCH_PAGE, e => {
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE, pageId => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
         return;
       }
 
-      this.switchTo_(e.detail.targetPageId);
+      this.switchTo_(pageId);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
@@ -612,9 +612,9 @@ export class AmpStory extends AMP.BaseElement {
             page.setActive(false);
           });
         })
-        .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.storeService_.dispatch(Action.PAGE_CHANGE,
+            firstPageEl.id))
         .then(() => this.preloadPagesByDistance_());
-
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
@@ -1511,7 +1511,8 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+    const pageId = dev().assertElement(this.pages_[0].element).id;
+    this.storeService_.dispatch(Action.PAGE_CHANGE, pageId);
   }
 
   /** @return {!NavigationState} */
