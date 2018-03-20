@@ -54,6 +54,8 @@ The `amp-subscriptions-google` is the extension that enables Subscribe with Goog
 
 See [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md) for more details on AMP Subscriptions.
 
+See [Subscribe with Google GitHub repo](https://github.com/subscriptions-project/swg-js) for details on the project itself.
+
 
 ## Configuration
 
