@@ -78,7 +78,8 @@ let manager_;
  *   descriptionText: string,
  *   tagName: string,
  *   imageViewer: ?Element,
- *   sourceElement: !Element
+ *   sourceElement: !Element,
+ *   element: !Element
  * }}
  */
 let LightboxElementMetadataDef_;
@@ -242,6 +243,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         descriptionText: descText,
         tagName: clonedNode.tagName,
         sourceElement: element,
+        element: clonedNode,
       };
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
@@ -587,6 +589,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.onMoveRelease_(e.data.deltaY);
       }
     });
+  }
+
+  pauseLightboxChildren_() {
+    const lbgId = this.currentLightboxGroupId_;
+    const slides = this.elementsMetadata_[lbgId]
+        .map(elemMetadata => elemMetadata.element);
+    this.schedulePause(slides);
   }
 
   /**
@@ -1081,6 +1090,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         .then(() => {
           this.getViewport().leaveLightboxMode();
           this.schedulePause(dev().assertElement(this.container_));
+          this.pauseLightboxChildren_();
           this.carousel_ = null;
         });
   }
@@ -1108,7 +1118,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       default:
         // Keycode not registered. Do nothing.
     }
-
   }
 
   /**
