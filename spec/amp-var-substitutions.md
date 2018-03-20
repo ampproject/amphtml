@@ -1023,7 +1023,7 @@ Provides the user's time-zone offset from UTC, in minutes.
 
 #### Timezone Code
 
-Provides the user's IANA time-zone code.
+Provides the user's IANA time-zone code (if available).
 
 * **platform variable**: `TIMEZONE_CODE`
   *  Example: <br>
