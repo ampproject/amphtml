@@ -16,5 +16,4 @@ limitations under the License.
 
 # <a name="amp-slides"></a> `amp-slides`
 
-WARNING: amp-slides is no longer supported. Please see [`amp-carousel`](../amp-carousel/amp-carousel.md)
-with `type=slides` attributes instead.
+WARNING: `amp-slides` is no longer available. Please see [`amp-carousel`](../amp-carousel/amp-carousel.md) with the `type="slides"` attribute for an alternative.
