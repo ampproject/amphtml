@@ -465,6 +465,11 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
+    if (isNaN(payload['expand_b']) || isNaN(payload['expand_t']) ||
+        isNaN(payload['expand_r']) || isNaN(payload['expand_l'])) {
+      dev().error(TAG, 'Invalid expand values.');
+      return;
+    }
     const expandHeight = Number(this.iframe_.height) +
           payload['expand_b'] + payload['expand_t'];
     const expandWidth = Number(this.iframe_.width) +
@@ -478,6 +483,7 @@ export class SafeframeHostApi {
           expandHeight > this.creativeSize_.height)) ||
         expandWidth <= this.creativeSize_.width ||
         expandHeight <= this.creativeSize_.height) {
+      dev().error(TAG, 'Invalid expand values.');
       return;
     }
     // Can't expand to greater than the viewport size
@@ -553,7 +559,7 @@ export class SafeframeHostApi {
       this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
-          height, width, messageType, optIsCollapse);
+          height, width, messageType);
     }
   }
 
@@ -565,6 +571,11 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
+    if (isNaN(payload['shrink_b']) || isNaN(payload['shrink_t']) ||
+        isNaN(payload['shrink_r']) || isNaN(payload['shrink_l'])) {
+      dev().error(TAG, 'Invalid shrink values.');
+      return;
+    }
     const shrinkHeight = Number(this.iframe_.height) -
           payload['shrink_b'] + payload['shrink_t'];
     const shrinkWidth = Number(this.iframe_.width) -
@@ -572,11 +583,12 @@ export class SafeframeHostApi {
     // Make sure we are actually shrinking here.
     if (shrinkWidth > this.creativeSize_.width ||
         shrinkHeight > this.creativeSize_.height) {
+      dev().error(TAG, 'Invalid shrink values.');
       return;
     }
 
     this.resizeAmpAdAndSafeframe(shrinkHeight, shrinkWidth,
-        SERVICE.SHRINK_RESPONSE, true);
+        SERVICE.SHRINK_RESPONSE);
   }
 
   /**
@@ -609,10 +621,11 @@ export class SafeframeHostApi {
    * @param {number} height
    * @param {number} width
    * @param {string} messageType
-   * @param {boolean=} optIsReducing True for collapse & shrink requests.
    */
-  resizeAmpAdAndSafeframe(height, width, messageType, optIsReducing) {
+  resizeAmpAdAndSafeframe(height, width, messageType) {
     const isCollapsed = messageType == SERVICE.COLLAPSE_RESPONSE;
+    const isReducing = messageType == SERVICE.COLLAPSE_RESPONSE ||
+          messageType == SERVICE.SHRINK_RESPONSE;
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
@@ -630,7 +643,7 @@ export class SafeframeHostApi {
       // to execute upon the next user interaction. We don't want
       // that for safeframe, so we reset it here.
       this.baseInstance_.getResource().resetPendingChangeSize();
-      if (optIsReducing) {
+      if (isReducing) {
         // If this is a collapse or shrink request, then even if resizing
         // the amp-ad failed, still resize the iframe.
         // resizeSafeframe also sends the resize response.
