@@ -297,9 +297,13 @@ For example:
 
 The `<amp-story-page>` component contains one or more [layers](#layers).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
 
-## Layers: `amp-story-grid-layer`
+## Layers
 
-Layers are stacked on top of one another to create the desired visual effect. The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
+Layers are stacked on top of one another to create the desired visual effect.
+
+### `amp-story-grid-layer`
+
+The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
@@ -316,7 +320,7 @@ Layers are stacked on top of one another to create the desired visual effect. Th
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img></amp-im</amp-img>
 </div>
 
-### Attributes
+#### Attributes
 
 
 ##### template [required]
@@ -338,7 +342,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-### Templates
+#### Templates
 
 The following are available templates to specify for the layout of the grid layer.
 
@@ -348,7 +352,7 @@ To see the layout templates in use, check out the [layouts demo on AMP By Exampl
 
 
 
-#### fill
+##### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
 
@@ -368,7 +372,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### vertical
+##### vertical
 
 The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
@@ -389,7 +393,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### horizontal
+##### horizontal
 
 The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
@@ -409,7 +413,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### thirds
+##### thirds
 
 The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
 
@@ -433,7 +437,7 @@ Named Areas:
 </amp-story-grid-layer>
 ```
 
-### Children (of amp-story-grid-layer)
+#### Children
 
 An `amp-story-grid-layer` can contain any of the following elements:
 
@@ -481,6 +485,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;hgroup></code></li>
         <li><code>&lt;nav></code></li>
         <li><code>&lt;section></code></li>
+        <li><code>&lt;amp-cta-layer></code></li>
       </ul>
     </td>
   </tr>
@@ -575,6 +580,44 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
 </table>
+
+### `amp-story-cta-layer`
+
+The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` elements inside an `<amp-story-page>`.
+
+#### Constraints
+
+* If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
+* Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
+
+#### Example
+
+```html
+<amp-story-page id="vertical-template-thirds">
+  <amp-story-grid-layer template="thirds">
+    <div class="content" grid-area="upper-third">Paragraph 1</div>
+    <div class="content" grid-area="middle-third">Paragraph 2</div>
+    <div class="content" grid-area="lower-third">Paragraph 3</div>
+  </amp-story-grid-layer>
+  <amp-story-cta-layer>
+    <a href="http://www.google.com" class="button"> Call to action! </a>
+  </amp-story-cta-layer>
+</amp-story-page>
+```
+
+[Complete example found at the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+
+<div class="flex-images">
+  <amp-img alt="CTA Layer" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" width="404" height="678">
+  <noscript><img width="404" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /></noscript>
+  </amp-img>
+</div>
+
+#### Children
+
+The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
+
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii#L221) field in the validation rules.
 
 ## Animations
 
