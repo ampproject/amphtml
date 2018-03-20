@@ -68,9 +68,7 @@ export const RTC_ERROR_ENUM = {
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime) {
-  if (opt_log) {
-    dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
-  }
+  dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
 }
