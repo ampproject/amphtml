@@ -121,9 +121,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         this.element.appendChild(iframe);
         this.iframe_ = iframe;
       }).then(() => {
-        const loaded = this.loadPromise(this.iframe_);
-        this.playerReadyResolver_(loaded);
-        return loaded;
+        return this.loadPromise(this.iframe_);
       });
     });
   }
