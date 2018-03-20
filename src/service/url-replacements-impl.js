@@ -349,6 +349,18 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
+    // Returns the IANA timezone code
+    this.set('TIMEZONE_CODE', () => {
+      let tzCode;
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+
+      return tzCode || '';
+    });
+
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
 
