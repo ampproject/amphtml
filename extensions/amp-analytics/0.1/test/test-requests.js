@@ -36,7 +36,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     analyticsMock = {
       nodeType: 1,
       ownerDocument: ampdoc,
-      getAmpDoc: function() { return ampdoc; }
+      getAmpDoc: function() { return ampdoc; },
     };
     clock = lolex.install({target: ampdoc.win});
     preconnectSpy = sandbox.spy();
