@@ -177,6 +177,9 @@ data.ws;
 data.host;
 data.s;
 
+// adpicker.js
+data.ph;
+
 // adreactor.js
 data.zid;
 data.pid;
