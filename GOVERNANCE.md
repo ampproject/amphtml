@@ -14,20 +14,21 @@ Our governance model is as follows:
 ### List of Core Committers:
 
 * **Tech Lead: Malte Ubl (@cramforce)**
+* Alan Orozco (@alanorozco)
 * Ali Ghassemi (@aghassemi)
 * Avi Mehta (@avimehta). Specialty: Analytics
 * Barb Paduch (@bpaduch). Specialty: Docs
-* Sriram Krishnan (@camelburrito)
 * Chen Shay (@chenshay)
-* William Chou (@choumx)
+* David Sedano (@honeybadgerdontcare). Specialty: Validator
 * Dima Voytenko (@dvoytenko)
 * Erwin Mombay (@erwinmombay)
 * Greg Grothaus (@Gregable). Specialty: Validator
-* David Sedano (@honeybadgerdontcare). Specialty: Validator
-* Justin Ridgewell (@jridgewell)
 * Hongfei Ding (@lannka)
-* Yuxi Chen (@muxin)
 * Johannes Henkel (@powdercloud). Specialty: Validator
+* Justin Ridgewell (@jridgewell)
+* Sriram Krishnan (@camelburrito)
 * Wassim Gharbi (@wassgha)
+* William Chou (@choumx)
+* Yuxi Chen (@muxin)
 * Yuxuan Zhou (@zhouyx)
-* Alan Orozco (@alanorozco)
+
