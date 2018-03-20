@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
+ *    mutedstate: boolean,
  * }}
  */
 export let State;
@@ -47,12 +48,14 @@ export const StateProperty = {
 
   // App States.
   BOOKEND_STATE: 'bookendstate',
+  MUTED_STATE: 'mutedstate',
 };
 
 
 /** @private @const @enum {string} */
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
+  TOGGLE_MUTED: 'togglemuted',
 };
 
 
@@ -71,6 +74,9 @@ const actions = (state, action, data) => {
       }
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
+    case Action.TOGGLE_MUTED:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.MUTED_STATE]: !!data}));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -155,6 +161,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
+      [StateProperty.MUTED_STATE]: true,
     });
   }
 

@@ -87,4 +87,12 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
   });
+
+  it('should toggle the muted state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(false);
+  });
 });

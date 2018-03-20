@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action, StateProperty} from './amp-story-store-service';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
-import {EventType, dispatch} from './events';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -102,12 +101,6 @@ export class SystemLayer {
     this.root_ = null;
 
     /** @private {?Element} */
-    this.muteAudioBtn_ = null;
-
-    /** @private {?Element} */
-    this.unmuteAudioBtn_ = null;
-
-    /** @private {?Element} */
     this.leftButtonTray_ = null;
 
     /** @private @const {!ProgressBar} */
@@ -144,7 +137,7 @@ export class SystemLayer {
 
     this.buildForDevelopmentMode_();
 
-    this.addEventHandlers_();
+    this.initializeListeners_();
 
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
@@ -170,19 +163,18 @@ export class SystemLayer {
   /**
    * @private
    */
-  addEventHandlers_() {
+  initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.root_.addEventListener('click', e => {
-      const target = dev().assertElement(e.target);
+    this.root_.addEventListener('click', event => {
+      const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
-        this.onMuteAudioClick_(e);
+        this.onMuteAudioClick_();
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
-        this.onUnmuteAudioClick_(e);
+        this.onUnmuteAudioClick_();
       }
     });
   }
-
 
   /**
    * @return {!Element}
@@ -192,32 +184,19 @@ export class SystemLayer {
   }
 
   /**
-   * @param {!Event} e
+   * Handles click events on the mute button.
    * @private
    */
-  onMuteAudioClick_(e) {
-    this.dispatch_(EventType.MUTE, e);
+  onMuteAudioClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_MUTED, true);
   }
 
   /**
-   * @param {!Event} e
+   * Handles click events on the unmute button.
    * @private
    */
-  onUnmuteAudioClick_(e) {
-    this.dispatch_(EventType.UNMUTE, e);
-  }
-
-  /**
-   * @param {string} eventType
-   * @param {!Event=} opt_event
-   * @private
-   */
-  dispatch_(eventType, opt_event) {
-    if (opt_event) {
-      dev().assert(opt_event).stopPropagation();
-    }
-
-    dispatch(this.getRoot(), eventType, /* opt_bubbles */ true);
+  onUnmuteAudioClick_() {
+    this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
   }
 
   /**
