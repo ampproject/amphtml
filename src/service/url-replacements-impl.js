@@ -667,15 +667,16 @@ export class GlobalVariableSource extends VariableSource {
    * @private
    */
   getViewerIntegrationValue_(property, name) {
-    return (param, defaultValue = '') => {
-      const service =
-          Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
-      return service.then(viewerIntegrationVariables => {
-        user().assert(viewerIntegrationVariables, 'To use variable %s ' +
-            'amp-viewer-integration must be installed', name);
-        return viewerIntegrationVariables[property](param, defaultValue);
+    return /** @type {!AsyncResolverDef} */ (
+      (param, defaultValue = '') => {
+        const service =
+            Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+        return service.then(viewerIntegrationVariables => {
+          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
+          return viewerIntegrationVariables[property](param, defaultValue);
+        });
       });
-    };
   }
 }
 

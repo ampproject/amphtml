@@ -110,9 +110,11 @@ describes.sandboxed.only('UrlReplacements', {}, () => {
         }
         if (opt_options.withViewerIntegrationVariableService) {
           markElementScheduledForTesting(iframe.win, 'amp-viewer-integration');
-          registerServiceBuilder(iframe.win, 'viewer-integration-variable', function() {
-            return Promise.resolve(opt_options.withViewerIntegrationVariableService);
-          });
+          registerServiceBuilder(iframe.win, 'viewer-integration-variable',
+              function() {
+                return Promise.resolve(
+                    opt_options.withViewerIntegrationVariableService);
+              });
         }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
