@@ -49,6 +49,19 @@ export const ValidatorResult = {
     }} */
 export let ValidatorOutput;
 
+/** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
+
+/** @typedef {{
+      creativeMetaData: CreativeMetaDataDef,
+    }} */
+export let CreativeData;
+
 /**
  * @abstract
  */
@@ -70,7 +83,7 @@ export class Renderer {
   /**
    * @param {!Object} unusedContext
    * @param {!Element} unusedContainerElement
-   * @param {!Object} unusedCreativeData
+   * @param {!CreativeData} unusedCreativeData
    * @return {!Promise}
    * @abstract
    */
