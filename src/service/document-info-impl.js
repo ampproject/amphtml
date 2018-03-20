@@ -169,7 +169,7 @@ function getMetaTags(doc) {
 
       let value = metaTags[name];
       if (value) {
-        // Change to array if more than one href for the same rel
+        // Change to array if more than one content for the same name
         if (!isArray(value)) {
           value = metaTags[name] = [value];
         }
