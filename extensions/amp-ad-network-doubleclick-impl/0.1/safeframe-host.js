@@ -475,7 +475,9 @@ export class SafeframeHostApi {
     if ((payload['push'] && !this.expandByPush_) ||
         (!payload['push'] && !this.expandByOverlay_ &&
          (expandWidth > this.creativeSize_.width ||
-          expandHeight > this.creativeSize_.height))) {
+          expandHeight > this.creativeSize_.height)) ||
+        expandWidth <= this.creativeSize_.width ||
+        expandHeight <= this.creativeSize_.height) {
       return;
     }
     // Can't expand to greater than the viewport size
@@ -567,6 +569,12 @@ export class SafeframeHostApi {
           payload['shrink_b'] + payload['shrink_t'];
     const shrinkWidth = Number(this.iframe_.width) -
           payload['shrink_r'] + payload['shrink_l'];
+    // Make sure we are actually shrinking here.
+    if (shrinkWidth > this.creativeSize_.width ||
+        shrinkHeight > this.creativeSize_.height) {
+      return;
+    }
+
     this.resizeAmpAdAndSafeframe(shrinkHeight, shrinkWidth,
         SERVICE.SHRINK_RESPONSE, true);
   }

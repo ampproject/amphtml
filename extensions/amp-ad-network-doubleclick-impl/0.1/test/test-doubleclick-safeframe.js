@@ -660,6 +660,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
     /**
      * Send a message requesting a shrink.
+     * @param {number} height Pixels to shrink height by.
+     * @param {number} width Pixels to shrink width by.
      */
     function sendShrinkMessage(height, width) {
       const shrinkMessage = {};
