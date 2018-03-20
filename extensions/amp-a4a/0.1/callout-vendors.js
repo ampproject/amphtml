@@ -61,6 +61,11 @@ export const RTC_VENDORS = {
     url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
     macros: ['CLIENT_ID', 'AD_NETWORK'],
   },
+  salesforcedmp: {
+    url: 'https://cdn.krxd.net/userdata/v2/amp/ORGANIZATION_ID?segments_key=SEGMENTS_KEY&kuid_key=USER_KEY',
+    macros: ['ORGANIZATION_ID', 'SEGMENTS_KEY', 'USER_KEY'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
