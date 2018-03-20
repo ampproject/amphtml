@@ -299,6 +299,7 @@ exports.rules = [
       /** DO NOT WHITELIST ANY FILES */
     ],
     whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
       '3p/integration.js->ads/google/deprecated_doubleclick.js',
     ],
   },
