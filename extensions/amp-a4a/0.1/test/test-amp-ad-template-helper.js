@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpAdTemplates} from '../amp-ad-templates';
+import {AmpAdTemplates} from '../amp-ad-template-helper';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
 
-describes.fakeWin('amp-ad-templates', {amp: true}, env => {
+describes.fakeWin('amp-ad-template-helper', {amp: true}, env => {
 
   const cdnUrl = 'https://adserver-com.cdn.ampproject.org/ad/s/' +
       'adserver.com/amp_template_1';
