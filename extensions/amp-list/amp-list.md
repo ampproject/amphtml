@@ -235,6 +235,10 @@ The `items` array will be trucated to `max-items` entries if the returned value 
 Causes `amp-list` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
+#### reset-on-refresh
+
+If set, loading indicator and placeholder will be displayed again when list's source is refreshed via `amp-bind` or `refresh()` action.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
