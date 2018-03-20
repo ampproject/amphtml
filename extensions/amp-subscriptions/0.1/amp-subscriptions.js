@@ -22,12 +22,12 @@ import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
+import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
-import { Services } from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -195,24 +195,23 @@ export class SubscriptionService {
    * @return {!Promise<!./entitlement.Entitlement>}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    const defaultEntitlement =
-        Entitlement.empty(subscriptionPlatform.getServiceId);
-    const timedPromise = this.timer_.timeoutPromise(
+    return this.timer_.timeoutPromise(
         SERVICE_TIMEOUT,
         subscriptionPlatform.getEntitlements()
-    );
-    return timedPromise.then(entitlement => {
+    ).then(entitlement => {
       if (!entitlement) {
-        entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
+        entitlement = Entitlement.empty(
+            subscriptionPlatform.getServiceId());
       }
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
-      defaultEntitlement = entitlement;
+      return entitlement;
     }).catch(() => {
       this.platformStore_.reportPlatformFailure_(
           subscriptionPlatform.getServiceId());
+      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
+          Entitlement.empty(subscriptionPlatform.getServiceId()));
     });
-    return defaultEntitlement;
   }
 
   /**

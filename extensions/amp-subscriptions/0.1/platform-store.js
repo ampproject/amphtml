@@ -21,6 +21,8 @@ import {dict} from '../../../src/utils/object';
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
+/** @const */
+const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
@@ -309,8 +311,8 @@ export class PlatformStore {
       this.failedPlatforms_.push(serviceId);
     }
 
-    if (this.failedPlatforms_.length === this.serviceIds_) {
-      user().error('amp-subscriptions', 'All platforms have failed to resolve');
+    if (this.failedPlatforms_.length === this.serviceIds_.length) {
+      user().error(TAG, 'All platforms have failed to resolve');
     }
   }
 }

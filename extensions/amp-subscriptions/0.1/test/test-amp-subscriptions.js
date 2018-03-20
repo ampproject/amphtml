@@ -23,6 +23,7 @@ import {
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionService} from '../amp-subscriptions';
+import {setTimeout} from 'timers';
 
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
@@ -172,6 +173,51 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
+    });
+  });
+
+  describe('fetchEntitlements_', () => {
+    let platform;
+    let serviceAdapter;
+    beforeEach(() => {
+      serviceAdapter = new ServiceAdapter(subscriptionService);
+      subscriptionService.pageConfig_ = pageConfig;
+      platform = new LocalSubscriptionPlatform(ampdoc,
+          serviceConfig.services[0],
+          serviceAdapter);
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+    });
+    it('should report failure if platform timeouts', () => {
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => new Promise(resolve => setTimeout(resolve, 5000)));
+      const failureStub = sandbox.stub(subscriptionService.platformStore_,
+          'reportPlatformFailure_');
+      return subscriptionService.fetchEntitlements_(platform).then(() => {
+        expect(failureStub).to.be.calledOnce;
+      });
+    }).timeout(4000);
+
+    it('should report failure if platform reject promise', () => {
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => Promise.reject());
+      const failureStub = sandbox.stub(subscriptionService.platformStore_,
+          'reportPlatformFailure_');
+      return subscriptionService.fetchEntitlements_(platform).then(() => {
+        expect(failureStub).to.be.calledOnce;
+      });
+    });
+
+    it('should resolve entitlement if platform resolves', () => {
+      const entitlement = new Entitlement({source: 'local', raw: 'raw',
+        service: 'local', products, subscriptionToken: 'token'});
+      sandbox.stub(platform, 'getEntitlements')
+          .callsFake(() => Promise.resolve(entitlement));
+      const resolveStub = sandbox.stub(subscriptionService.platformStore_,
+          'resolveEntitlement');
+      return subscriptionService.fetchEntitlements_(platform).then(() => {
+        expect(resolveStub).to.be.calledOnce;
+        expect(resolveStub.getCall(0).args[1]).to.deep.equal(entitlement);
+      });
     });
   });
 });
