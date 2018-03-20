@@ -131,8 +131,8 @@ export class A4AVariableSource extends VariableSource {
    * @param {string} cssSelector Elements matching this selector will be
    *     included, provided they have at least one of the attributeNames
    *     set, up to a max of 10. May be URI encoded.
-   * Note: Additional params will be the names of the attributes whose values
-   * will be returned. There should be at least 1.
+   * Note: Additional params will be the names of the attributes whose
+   *     values will be returned. There should be at least 1.
    * @returns {string} A stringified JSON array containing one member for each
    *     matching element. Each member will contain the names and values of the
    *     specified attributes, if the corresponding element has that attribute.
@@ -141,7 +141,8 @@ export class A4AVariableSource extends VariableSource {
    *     for that element.
    */
   htmlAttrBinding_(cssSelector) {
-    const HTML_ATTR_MAX_RETURN_SIZE = 10;
+    const HTML_ATTR_MAX_ELEMENTS = 10;
+    const HTML_ATTR_MAX_ATTRS = 10;
     const attributeNames = Array.prototype.slice.call(arguments, 1);
     if (!cssSelector || !attributeNames.length) {
       return '[]';
@@ -152,15 +153,16 @@ export class A4AVariableSource extends VariableSource {
       elements = this.win_.document.querySelectorAll(cssSelector);
     } catch (e) {
       const TAG = 'A4AVariableSource';
-      user().warn(TAG, `Invalid selector: ${cssSelector}`);
+      user().error(TAG, `Invalid selector: ${cssSelector}`);
       return '[]';
     }
     const result = [];
     for (let i = 0; i < elements.length &&
-        result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+        result.length < HTML_ATTR_MAX_ELEMENTS; ++i) {
       const currentResult = {};
       let foundAtLeastOneAttr = false;
-      for (let j = 0; j < attributeNames.length; ++j) {
+      for (let j = 0; j < attributeNames.length &&
+          j < HTML_ATTR_MAX_ATTRS; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
           currentResult[attributeName] =

@@ -36,15 +36,16 @@ const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} ampAnalyticsElement
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
-   * @param {!Element} ampAnalyticsElement
    */
-  constructor(ampdoc, request, preconnect, handler, isSandbox,
-    ampAnalyticsElement) {
+  constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
+
+    /** @type {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+    const ampdoc = ampAnalyticsElement.getAmpDoc();
 
     /** @const {!Window} */
     this.win = ampdoc.win;
