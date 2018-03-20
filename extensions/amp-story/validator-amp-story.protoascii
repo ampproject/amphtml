@@ -171,7 +171,13 @@ tags: {
         "rotate-in-right|"
         "twirl-in|"
         "whoosh-in-left|"
-        "whoosh-in-right)"
+        "whoosh-in-right|"
+        "pan-up|"
+        "pan-down|"
+        "pan-left|"
+        "pan-right|"
+        "zoom-in|"
+        "zoom-out)"
   }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
@@ -200,7 +206,13 @@ tags: {
         "rotate-in-right|"
         "twirl-in|"
         "whoosh-in-left|"
-        "whoosh-in-right)"
+        "whoosh-in-right|"
+        "pan-up|"
+        "pan-down|"
+        "pan-left|"
+        "pan-right|"
+        "zoom-in|"
+        "zoom-out)"
   }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
