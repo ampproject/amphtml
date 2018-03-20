@@ -463,11 +463,6 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    if (isNaN(payload['expand_b']) || isNaN(payload['expand_t']) ||
-        isNaN(payload['expand_r']) || isNaN(payload['expand_l'])) {
-      dev().error(TAG, 'Invalid expand values.');
-      return;
-    }
     const expandHeight = Number(this.iframe_.height) +
           payload['expand_b'] + payload['expand_t'];
     const expandWidth = Number(this.iframe_.width) +
@@ -475,7 +470,8 @@ export class SafeframeHostApi {
     // Verify that if expanding by push, that expandByPush is allowed.
     // If expanding by overlay, verify that expandByOverlay is allowed,
     // and that we are only expanding within the bounds of the amp-ad.
-    if ((payload['push'] && !this.expandByPush_) ||
+    if (isNaN(expandHeight) || isNaN(expandWidth) ||
+        (payload['push'] && !this.expandByPush_) ||
         (!payload['push'] && !this.expandByOverlay_ &&
          (expandWidth > this.creativeSize_.width ||
           expandHeight > this.creativeSize_.height))) {
@@ -509,11 +505,10 @@ export class SafeframeHostApi {
   /**
    * @param {number} height
    * @param {number} width
-   * @param {boolean} isCollapsed
    * @param {string} messageType
    */
-  resizeSafeframe(height, width, isCollapsed, messageType) {
-    this.isCollapsed_ = isCollapsed;
+  resizeSafeframe(height, width, messageType) {
+    this.isCollapsed_ = messageType == SERVICE.COLLAPSE_RESPONSE;
     this.baseInstance_.measureMutateElement(
         /** MEASURER */ () => {
           this.baseInstance_.getResource().measure();
@@ -552,10 +547,9 @@ export class SafeframeHostApi {
     if (!optIsCollapse &&
         width <= this.slotSize_.width &&
         height <= this.slotSize_.height) {
-      this.resizeSafeframe(height, width, !!optIsCollapse, messageType);
+      this.resizeSafeframe(height, width, messageType);
     } else {
-      this.resizeAmpAdAndSafeframe(
-          height, width, messageType);
+      this.resizeAmpAdAndSafeframe(height, width, messageType);
     }
   }
 
@@ -567,17 +561,13 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    if (isNaN(payload['shrink_b']) || isNaN(payload['shrink_t']) ||
-        isNaN(payload['shrink_r']) || isNaN(payload['shrink_l'])) {
-      dev().error(TAG, 'Invalid shrink values.');
-      return;
-    }
     const shrinkHeight = Number(this.iframe_.height) -
           payload['shrink_b'] + payload['shrink_t'];
     const shrinkWidth = Number(this.iframe_.width) -
           payload['shrink_r'] + payload['shrink_l'];
     // Make sure we are actually shrinking here.
-    if (shrinkWidth > this.creativeSize_.width ||
+    if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||
+        shrinkWidth > this.creativeSize_.width ||
         shrinkHeight > this.creativeSize_.height) {
       dev().error(TAG, 'Invalid shrink values.');
       return;
@@ -619,15 +609,12 @@ export class SafeframeHostApi {
    * @param {string} messageType
    */
   resizeAmpAdAndSafeframe(height, width, messageType) {
-    const isCollapsed = messageType == SERVICE.COLLAPSE_RESPONSE;
-    const isReducing = messageType == SERVICE.COLLAPSE_RESPONSE ||
-          messageType == SERVICE.SHRINK_RESPONSE;
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
       // If this resize succeeded, we always resize the safeframe.
       // resizeSafeframe also sends the resize response.
-      this.resizeSafeframe(height, width, isCollapsed, messageType);
+      this.resizeSafeframe(height, width, messageType);
       // Update our stored record of what the amp-ad's size is. This
       // is just for caching. Setting it here doesn't actually change
       // the size of the amp-ad, the attempt change size above did that.
@@ -639,12 +626,13 @@ export class SafeframeHostApi {
       // to execute upon the next user interaction. We don't want
       // that for safeframe, so we reset it here.
       this.baseInstance_.getResource().resetPendingChangeSize();
-      if (isReducing) {
+      if (messageType == SERVICE.COLLAPSE_RESPONSE ||
+          messageType == SERVICE.SHRINK_RESPONSE) {
         // If this is a collapse or shrink request, then even if resizing
         // the amp-ad failed, still resize the iframe.
         // resizeSafeframe also sends the resize response.
         // Only register as collapsed if explicitly a collapse request.
-        this.resizeSafeframe(height, width, isCollapsed, messageType);
+        this.resizeSafeframe(height, width, messageType);
       } else {
         // We were attempting to
         // expand past the bounds of the amp-ad, and it failed. Thus,
