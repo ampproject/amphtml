@@ -16,23 +16,22 @@
 
 tags: {  # amp-consent
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-consent"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-consent (json)
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-consent extension .json script"
   requires_extension: "amp-consent"
   mandatory_parent: "AMP-CONSENT"
+  unique: true
+  satisfies: "amp-consent extension .json script"
   attrs: { name: "nonce" }
   attrs: {
     name: "type"
@@ -49,10 +48,10 @@ tags: {  # amp-consent (json)
 }
 tags: {  # <amp-consent>
   html_format: AMP
-  html_format: EXPERIMENTAL
   tag_name: "AMP-CONSENT"
   requires_extension: "amp-consent"
   attr_lists: "extended-amp-global"
+  requires: "amp-consent extension .json script"
   unique: true
   amp_layout: {
     supported_layouts: NODISPLAY
