@@ -20,19 +20,20 @@ describes.fakeWin('amp-viewer-integration variable service', {}, () => {
   let variableService;
 
   beforeEach(() => {
-    let ampdoc = {
+    const ampdoc = {
       win: {
-	location: {
-	  originalHash: '#margarine=1&ice=2&cream=3',
-	  ancestorOrigins: ['http://margarine-paradise.com'],
-	}
-      }
+        location: {
+          originalHash: '#margarine=1&ice=2&cream=3',
+          ancestorOrigins: ['http://margarine-paradise.com'],
+        },
+      },
     };
     variableService = new AmpViewerIntegrationVariableService(ampdoc);
   });
 
   it('should return the first ancestorOrigin', () => {
-    expect(variableService.get()['ancestorOrigin']()).to.equal('http://margarine-paradise.com');
+    expect(variableService.get()['ancestorOrigin']()).to.equal(
+        'http://margarine-paradise.com');
   });
 
   it('should return the fragment param', () => {
