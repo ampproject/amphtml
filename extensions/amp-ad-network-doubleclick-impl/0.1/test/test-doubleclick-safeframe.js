@@ -208,6 +208,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org/canonical',
+          'initial_slot_width': ampAdWidth,
+          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -226,6 +228,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
+          'initial_slot_width': ampAdWidth,
+          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -245,6 +249,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
+          'initial_slot_width': ampAdWidth,
+          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -265,6 +271,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org',
+          'initial_slot_width': ampAdWidth,
+          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -646,6 +654,49 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(safeframeMock.style.width).to.equal('300px');
         expect(sendResizeResponseSpy).to.be.calledWith(
             true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
+    });
+
+    /**
+     * Send a message requesting a shrink.
+     */
+    function sendShrinkMessage(height, width) {
+      const shrinkMessage = {};
+      shrinkMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+      shrinkMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+      shrinkMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.SHRINK_REQUEST;
+      shrinkMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        'uid': 0.623462509818004,
+        'shrink_t': 0,
+        'shrink_r': width,
+        'shrink_b': height,
+        'shrink_l': 0,
+        'sentinel': safeframeHost.sentinel_,
+      });
+      receiveMessage(shrinkMessage);
+    }
+
+    it('should shrink safeframe on amp-ad resize success', () => {
+      safeframeHost.isCollapsed_ = false;
+      // Sneaky hack to do a synchronous mock of attemptChangeSize
+      // Resize the ampAd to simulate a success.
+      const then = f => {
+        ampAd.style.height = '40px';
+        ampAd.style.width = '40px';
+        f();
+        return {'catch': () => {}};
+      };
+      attemptChangeSizeStub.returns({then});
+      sendShrinkMessage(10, 10);
+
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(40, 40);
+        expect(safeframeMock.style.height).to.equal('40px');
+        expect(safeframeMock.style.width).to.equal('40px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.SHRINK_RESPONSE);
         expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
       });
     });
