@@ -29,6 +29,10 @@
 </head>
 <body>
 
+  <div on="tap:list1.refresh,list2.refresh,list3.refresh,list4.refresh,list5.refresh">
+    Refresh All Lists
+  </div>
+
   <!-- ## Using a nested template -->
   <!--
   The `amp-list` content is provided by a JSON CORS endpoint, which is defined by the `src`
@@ -47,7 +51,7 @@
   ```
   The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
   -->
-  <amp-list width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1">
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
@@ -59,7 +63,7 @@
     `template` element. This example references the template from the
     previous sample.
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json"
+  <amp-list id="list2" width="auto" height="100" layout="fixed-height"  src="list.example.json"
       template="amp-template-id" class="m1">
   </amp-list>
 
@@ -67,15 +71,15 @@
   <!--
  Use the `max-items` attribute to limit the number of list elements displayed
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
-      template="amp-template-id" class="m1">
+  <amp-list id="list3" width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
+      template="amp-template-id" class="m1" reset-on-refresh>
   </amp-list>
 
    <!-- ## Single Entry list -->
   <!--
  If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
   -->
-  <amp-list width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
+  <amp-list id="list4" width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
   template="amp-template-id" class="m1">
 </amp-list>
 
@@ -83,7 +87,7 @@
   <!--
  If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
   -->
-  <amp-list width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1">
+  <amp-list id="list5" width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1" reset-on-refresh>
     <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
       Show more
     </div>
