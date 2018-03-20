@@ -30,5 +30,6 @@
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
-  "expUnconditionedCanonicalHoldback": 0.01
+  "expUnconditionedCanonicalHoldback": 0.01,
+  "rollback-delayed-fetch-deprecation": 1
 }
