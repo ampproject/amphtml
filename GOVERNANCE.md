@@ -17,6 +17,7 @@ Our governance model is as follows:
 * Alan Orozco (@alanorozco)
 * Ali Ghassemi (@aghassemi)
 * Barb Paduch (@bpaduch). Specialty: Docs
+* Cathy Zhu (@cathyxz)
 * Chen Shay (@chenshay)
 * David Sedano (@honeybadgerdontcare). Specialty: Validator
 * Dima Voytenko (@dvoytenko)
@@ -28,5 +29,4 @@ Our governance model is as follows:
 * Sriram Krishnan (@camelburrito)
 * Wassim Gharbi (@wassgha)
 * William Chou (@choumx)
-* Yuxi Chen (@muxin)
 * Yuxuan Zhou (@zhouyx)
