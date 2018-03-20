@@ -13,3 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {FriendlyFrameRenderer} from '../amp-ad-render';
+
+const realWinConfig = {
+  amp: {},
+  ampAdCss: true,
+  allowExternalResources: true,
+};
+
+describes.realWin('amp-ad-render', realWinConfig, env => {
+
+  const minifiedCreative = '<p>Hello, World!</p>';
+
+  let context;
+  let creativeData;
+
+  beforeEach(() => {
+    context = {
+      size: {width: '320', height: '50'},
+      requestUrl: 'http://www.google.com',
+      ampDoc: env.ampdoc,
+      applyFillContent: () => {},
+      isInViewport: () => true,
+    };
+    creativeData = {
+      creativeMetaData: {
+        minifiedCreative,
+        customElementExtensions: [],
+        extensions: [],
+      },
+    };
+  });
+
+  describe('FriendlyFrameRenderer', () => {
+
+    let renderer;
+    let containerElement;
+
+    beforeEach(() => {
+      renderer = new FriendlyFrameRenderer();
+      containerElement = document.createElement('div');
+      containerElement.signals = () => ({
+        whenSignal: () => Promise.resolve(),
+      });
+      containerElement.renderStarted = () => {};
+      containerElement.getLayoutBox = () => ({
+        left: 0, top: 0, width: 0, height: 0,
+      });
+      document.body.appendChild(containerElement);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(containerElement);
+    });
+
+    it('should append iframe child', () => {
+      return renderer.render(context, containerElement, creativeData).then(
+          () => {
+            const iframe = containerElement.querySelector('iframe');
+            expect(iframe).to.be.ok;
+            expect(iframe.contentWindow.document.body.innerHTML)
+                .to.equal(minifiedCreative);
+          });
+    });
+  });
+});
