@@ -381,6 +381,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         // text area is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
 
+        // Avoid flickering out if transitioning from a slide with no text
+        this.descriptionBox_.classList.remove('fade-out');
         toggle(dev().assertElement(this.descriptionBox_), true);
 
         // If the description is in overflow mode, we set it to the correct
