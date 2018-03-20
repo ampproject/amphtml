@@ -247,8 +247,14 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
+    // Returns the value of the given field name in the fragment query string.
+    // Second parameter is an optional default value.
+    // For example, if location is 'pub.com/amp.html?x=1#y=2' then
+    // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
     this.setAsync('FRAGMENT_PARAM',
         this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+
+    // Returns the first item in the ancestorOrigins array, if available.
     this.setAsync('ANCESTOR_ORIGIN',
         this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
