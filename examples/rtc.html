@@ -1,0 +1,49 @@
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Doubleclick RTC Example</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h2> AMP prebid server integration with RTC 2 </h2>
+  <h2>Doubleclick with RTC</h2>
+    <amp-ad width="300" height="250"
+            type="doubleclick"
+            data-slot="/19968336/universal_creative"
+            rtc-config='{"vendors": {"PrebidAppNexus": {"PLACEMENT_ID": "ef8299d0-cc32-46cf-abcd-41cebe8b4b85"}}, "timeoutMillis": 500}'>
+    </amp-ad>
+<!--
+ 
+	
+     json='{"targeting":{"hb_pb":"5.00", "hb_base": "prebid.adnxs.com/pbc/v1/cache", "hb_adid": "668697f5-fc85-406e-b82a-b3c56df422f9"}}'
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://broken.zzzzzz"], "timeoutMillis": 100}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://a.com","https://b.com","https://c.com","https://d.com","https://e.com","https://f.com", "https://g.com"], "timeoutMillis": 100}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}, "fakeVendor3": {}, "fakeVendor4": {},"fakeVendor5": {},"fakeVendor6": {},"fakeVendor7": {}}, "timeoutMillis": 100}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+  </amp-ad> -->
+</body>
+</html>
