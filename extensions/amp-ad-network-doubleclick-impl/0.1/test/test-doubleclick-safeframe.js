@@ -208,8 +208,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org/canonical',
-          'initial_slot_width': ampAdWidth,
-          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -228,8 +226,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
-          'initial_slot_width': ampAdWidth,
-          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -249,8 +245,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
-          'initial_slot_width': ampAdWidth,
-          'initial_slot_height': ampAdHeight,
         },
       });
     });
@@ -271,8 +265,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org',
-          'initial_slot_width': ampAdWidth,
-          'initial_slot_height': ampAdHeight,
         },
       });
     });

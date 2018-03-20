@@ -217,8 +217,6 @@ export class SafeframeHostApi {
             'ck_on': 1,
             'flash_ver': '26.0.0',
             'canonical_url': this.maybeGetCanonicalUrl(),
-            'initial_slot_width': this.slotSize_.width,
-            'initial_slot_height': this.slotSize_.height,
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
