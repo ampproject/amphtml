@@ -807,20 +807,20 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace ANCESTOR_ORIGIN', () => {
     const win = getFakeWindow();
-    win.location = {ancestorOrigins: ['http://margarine-paradise.com'],};
+    win.location = {ancestorOrigins: ['http://margarine-paradise.com']};
     return Services.urlReplacementsForDoc(win.ampdoc)
-	.expandUrlAsync('ANCESTOR_ORIGIN/recipes').then(res => {
-      expect(res).to.equal('http://margarine-paradise.com/recipes');
-    });
+        .expandUrlAsync('ANCESTOR_ORIGIN/recipes').then(res => {
+          expect(res).to.equal('http://margarine-paradise.com/recipes');
+        });
   });
 
   it('should replace FRAGMENT_PARAM with 2', () => {
     const win = getFakeWindow();
-    win.location = {originalHash: '#margarine=1&ice=2&cream=3',};
+    win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
     return Services.urlReplacementsForDoc(win.ampdoc)
-	.expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s').then(res => {
-      expect(res).to.equal('?sh=2&s');
-    });
+        .expandUrlAsync('?sh=FRAGMENT_PARAM(ice)&s').then(res => {
+          expect(res).to.equal('?sh=2&s');
+        });
   });
 
   it('should accept $expressions', () => {
