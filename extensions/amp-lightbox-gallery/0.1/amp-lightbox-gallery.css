@@ -109,10 +109,12 @@
 
 .i-amphtml-lbg-controls.show {
   opacity: 1;
+  visibility: visible;
 }
 
 .i-amphtml-lbg-controls.hidden {
   opacity: 0;
+  visibility: hidden;
 }
 
 .i-amphtml-lbg-controls.fade-in {
