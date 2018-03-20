@@ -266,13 +266,13 @@
   <button class="lightbox-close" on="tap:lb.close" tabindex="0"></button>
   <div class="date-picker-wrapper">
     <amp-date-picker
+      layout="fill"
       class="date-picker"
       id="dp"
       type="range"
       number-of-months="12"
-      orientation="verticalScrollable"
-      with-full-screen-portal
-      keep-open-on-date-select
+      fullscreen
+      open-after-select
       src="travel.json"
       format="MM/DD/YYYY"
       week-day-format="dd"

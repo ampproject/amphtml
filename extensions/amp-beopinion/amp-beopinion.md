@@ -14,40 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# BeOpinion
-[BeOpinion](https://beopinion.com/) is a tool for content creators to add interactive blocks such as polls and quizzes in their pages. We mostly work with journalists of major media groups in Europe.
-We created an AMP extension usable with the `amp-beopinion` tag.
-We also added type `beopinion` for the `amp-ad` element.
-
-# Integration examples
-
-## As a 3rd party
-```html
-<amp-beopinion width=375 height=472
-      layout="responsive"
-      data-account="589446dd42ee0d6fdd9c3dfd"
-      data-content="5a703a2f46e0fb00016d51b3"
-      data-name="content-slot">
-</amp-beopinion>
-```
-
-## As an ad provider
-```html
-<amp-ad width="300" height="220"
-      type="beopinion"
-      layout="responsive"
-      data-account="589446dd42ee0d6fdd9c3dfd"
-      data-name="slot_0"
-      data-my-content="0">
-</amp-ad>
-```
-
 # <a name="amp-beopinion"></a> `amp-beopinion`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a BeOpinion content.</td>
+        <td>Embeds <a href="https://beopinion.com/">BeOpinion</a> content.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -63,8 +35,31 @@ We also added type `beopinion` for the `amp-ad` element.
 
 ## Behavior
 
-The `amp-beopinion` component allows you to embed a BeOpinion content given a BeOpinion account.  
+The `amp-beopinion` component allows you to embed [BeOpinion](https://beopinion.com/) content in your AMP page for a given BeOpinion account. BeOpinion is a tool for content creators to add interactive blocks such as polls and quizzes to their pages. BeOpinion mostly works with journalists of major media groups in Europe.
 
+### Integration examples
+
+### As a 3rd party
+```html
+<amp-beopinion width=375 height=472
+      layout="responsive"
+      data-account="589446dd42ee0d6fdd9c3dfd"
+      data-content="5a703a2f46e0fb00016d51b3"
+      data-name="content-slot">
+</amp-beopinion>
+```
+
+### As an ad provider
+
+```html
+<amp-ad width="300" height="220"
+      type="beopinion"
+      layout="responsive"
+      data-account="589446dd42ee0d6fdd9c3dfd"
+      data-name="slot_0"
+      data-my-content="0">
+</amp-ad>
+```
 
 ## Appearance
 
