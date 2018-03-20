@@ -704,6 +704,25 @@ export class BaseElement {
   }
 
   /**
+   * Hides or shows the loading indicator. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} state
+   * @public @final
+   */
+  toggleLoading(state) {
+    this.element.toggleLoading(state, {force: true});
+  }
+
+  /**
+   * Returns whether the loading indicator is reused again after the first render.
+   * @return {boolean}
+   * @public
+   */
+  isLoadingReused() {
+    return false;
+  }
+
+  /**
    * Returns an optional overflow element for this custom element.
    * @return {?Element}
    * @public @final
