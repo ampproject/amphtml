@@ -31,6 +31,7 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
+ *    mutedstate: boolean,
  * }}
  */
 export let State;
