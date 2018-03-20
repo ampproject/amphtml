@@ -346,6 +346,7 @@ export class AmpStory extends AMP.BaseElement {
       this.variableService_.onStateChange(stateChangeEvent));
 
     // Mute `amp-story` in beginning.
+    // TODO(gmajoulet): Support unmuted embed mode option.
     this.mute_();
   }
 
@@ -393,20 +394,8 @@ export class AmpStory extends AMP.BaseElement {
       this.previous_();
     });
 
-    this.element.addEventListener(EventType.MUTE, () => {
-      this.mute_();
-    });
-
-    this.element.addEventListener(EventType.UNMUTE, () => {
-      this.unmute_();
-    });
-
-    this.element.addEventListener(EventType.AUDIO_PLAYING, () => {
-      this.audioPlaying_();
-    });
-
-    this.element.addEventListener(EventType.AUDIO_STOPPED, () => {
-      this.audioStopped_();
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      this.onMutedStateUpdate_(isMuted);
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -1407,6 +1396,15 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Reacts to muted state updates.
+   * @param  {boolean} isMuted Whether the story just got muted.
+   * @private
+   */
+  onMutedStateUpdate_(isMuted) {
+    isMuted ? this.mute_() : this.unmute_();
+  }
+
+  /**
    * Mutes the audio for the story.
    * @private
    */
@@ -1486,24 +1484,8 @@ export class AmpStory extends AMP.BaseElement {
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
     if (containsMediaElement || hasStoryAudio) {
-      this.audioPlaying_();
+      this.element.classList.add('audio-playing');
     }
-  }
-
-  /**
-   * Marks the story as having audio playing on the active page.
-   * @private
-   */
-  audioPlaying_() {
-    this.element.classList.add('audio-playing');
-  }
-
-  /**
-   * Marks the story as not having audio playing on the active page.
-   * @private
-   */
-  audioStopped_() {
-    this.element.classList.remove('audio-playing');
   }
 
   /** @private */
