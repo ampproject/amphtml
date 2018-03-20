@@ -133,6 +133,7 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -299,6 +300,7 @@ exports.rules = [
       /** DO NOT WHITELIST ANY FILES */
     ],
     whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
       '3p/integration.js->ads/google/deprecated_doubleclick.js',
     ],
   },
