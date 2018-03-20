@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {deprecatedDoubleclick} from './deprecated_doubleclick';
+import {parseJson} from '../../src/json';
 import {dev} from '../../src/log';
 
 const TAG = 'DOUBLECLICK - DEPRECATED';
@@ -23,7 +24,7 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  */
 export function doubleclick(global, data) {
   try {
-    const context = JSON.parse(global['context']['cachedFrameName_']
+    const context = parseJson(global['context']['cachedFrameName_']
     )['attributes']['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
