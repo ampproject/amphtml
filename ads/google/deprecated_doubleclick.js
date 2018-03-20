@@ -23,7 +23,7 @@ import {setStyles} from '../../src/style';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function doubleclick(global, data) {
+export function deprecatedDoubleclick(global, data) {
   // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
