@@ -62,7 +62,7 @@ export class AmpViewerIntegrationVariableService {
     user().assert(typeof param == 'string', 'param should be a string');
     const hash = this.ampdoc.win.location.originalHash;
     const params = parseQueryString(hash);
-    return (params[param] === 'undefined') ? defaultValue: params[param];
+    return (params[param] === undefined) ? defaultValue: params[param];
   }
 
   /**
@@ -71,7 +71,7 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getAncestorOrigin_() {
-    if (this.ampdoc.win.location.ancestorOrigins === 'undefined') {
+    if (this.ampdoc.win.location.ancestorOrigins === undefined) {
       return '';
     }
     return this.ampdoc.win.location.ancestorOrigins[0];
