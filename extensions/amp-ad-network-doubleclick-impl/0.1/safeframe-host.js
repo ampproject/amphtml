@@ -478,9 +478,7 @@ export class SafeframeHostApi {
     if ((payload['push'] && !this.expandByPush_) ||
         (!payload['push'] && !this.expandByOverlay_ &&
          (expandWidth > this.creativeSize_.width ||
-          expandHeight > this.creativeSize_.height)) ||
-        expandWidth <= this.creativeSize_.width ||
-        expandHeight <= this.creativeSize_.height) {
+          expandHeight > this.creativeSize_.height))) {
       dev().error(TAG, 'Invalid expand values.');
       return;
     }
