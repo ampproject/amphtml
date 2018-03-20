@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov"],
+  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov", "amp-date-picker"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 0,
