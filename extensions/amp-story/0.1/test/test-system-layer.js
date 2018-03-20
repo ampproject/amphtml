@@ -51,14 +51,14 @@ describes.fakeWin('amp-story system layer', {}, env => {
   });
 
   it('should build UI', () => {
-    const addEventHandlers =
-        sandbox.stub(systemLayer, 'addEventHandlers_').callsFake(NOOP);
+    const initializeListeners =
+        sandbox.stub(systemLayer, 'initializeListeners_').callsFake(NOOP);
 
     const root = systemLayer.build();
 
     expect(root).to.not.be.null;
 
-    expect(addEventHandlers).to.have.been.called;
+    expect(initializeListeners).to.have.been.called;
   });
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
@@ -68,7 +68,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
     sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
     sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
-    systemLayer.addEventHandlers_();
+    systemLayer.initializeListeners_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
