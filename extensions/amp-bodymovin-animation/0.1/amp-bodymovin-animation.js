@@ -134,14 +134,18 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
     return true;
   }
 
+  /** @private */
   handleBodymovinMessages_(event) {
-    if (event.source != this.iframe_.contentWindow) {
+    if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
     }
     if (!getData(event) || !(isObject(getData(event))
@@ -157,7 +161,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     if (eventData['action'] == 'ready') {
-      this.playerReadyResolver_(this.iframe_);
+      this.playerReadyResolver_();
     }
   }
 
@@ -169,8 +173,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(action, opt_valueType, opt_value) {
-    this.playerReadyPromise_.then(function(iframe) {
-      this.iframe_ = iframe;
+    this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         const message = JSON.stringify(dict({
           'action': action,
@@ -182,18 +185,22 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     });
   }
 
+  /** @private */
   play_() {
     this.sendCommand_('play');
   }
 
+  /** @private */
   pause_() {
     this.sendCommand_('pause');
   }
 
+  /** @private */
   stop_() {
     this.sendCommand_('stop');
   }
 
+  /** @private */
   seekTo_(args) {
     const time = parseFloat(args && args['time']);
     // time based seek

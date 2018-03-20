@@ -66,6 +66,10 @@ By default, an animation autoplays. If this attribute is added the video waits f
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+## Actions
+
+Please see [AMP Action Documentation](https://www.ampproject.org/docs/reference/amp-actions-and-events#amp-bodymovin-animation) for the actions available on `amp-bodymovin-animation` component.
+
 ## Validation
 
 See [amp-bodymovin-animation rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-bodymovin-animation/validator-amp-bodymovin-animation.protoascii) in the AMP validator specification.

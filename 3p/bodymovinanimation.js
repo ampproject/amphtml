@@ -67,8 +67,8 @@ export function bodymovinanimation(global) {
     const message = JSON.stringify(dict({
       'action': 'ready',
     }));
+    global.addEventListener('message', parseMessage, false);
     global.parent. /*OK*/postMessage(message, '*');
   });
-  global.addEventListener('message', parseMessage, false);
 }
 
