@@ -68,11 +68,12 @@ The value of rtc-config must conform to the following specification:
             "MACRO_1": "MACRO_VALUE_1",
             "MACRO_2": "MACRO_VALUE_2"
         }
-	},
+    },
     "urls": [
         "https://www.exampleA.com/endpoint",
-        "https://www.exampleb.com/endpoint"],
-	"timeoutMillis": 500
+        "https://www.exampleb.com/endpoint"
+    ],
+    "timeoutMillis": 500
 }
 ```
 
