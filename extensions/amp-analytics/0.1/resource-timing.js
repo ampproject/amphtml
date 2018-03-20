@@ -53,6 +53,13 @@ let IndividualResourceSpecDef;
 let ResourceSpecForHostDef;
 
 /**
+ * The default maximum buffer size for resource timing entries. After the limit
+ * has been reached, the browser will stop recording resource timing entries.
+ * @const {string}
+ */
+const RESOURCE_TIMING_BUFFER_SIZE = 150;
+
+/**
  * Yields the thread before running the function to avoid causing jank. (i.e. a
  * task that takes over 16ms.)
  * @param {function(): OUT} fn
@@ -256,8 +263,14 @@ export function serializeResourceTiming(
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
     return Promise.resolve('');
   }
-  const entries = getResourceTimingEntries(win)
-      .filter(e => e.startTime + e.duration >= responseAfter);
+  let entries = getResourceTimingEntries(win);
+  if (entries.length >= RESOURCE_TIMING_BUFFER_SIZE) {
+    // We've exceeded the maximum buffer size so no additional metrics need to
+    // be reported.
+    resourceTimingSpec['done'] = true;
+  }
+
+  entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
   }

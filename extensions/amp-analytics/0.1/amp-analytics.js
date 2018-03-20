@@ -713,6 +713,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
+      if (resourceTimingSpec['done']) {
+        return;
+      }
+
       const binding = 'RESOURCE_TIMING';
       const analyticsVar = 'resourceTiming';
       const after = this.getAndUpdateLastReportedTime_(resourceTimingSpec);
