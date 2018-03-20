@@ -16,7 +16,6 @@ Our governance model is as follows:
 * **Tech Lead: Malte Ubl (@cramforce)**
 * Alan Orozco (@alanorozco)
 * Ali Ghassemi (@aghassemi)
-* Avi Mehta (@avimehta). Specialty: Analytics
 * Barb Paduch (@bpaduch). Specialty: Docs
 * Chen Shay (@chenshay)
 * David Sedano (@honeybadgerdontcare). Specialty: Validator
@@ -31,4 +30,3 @@ Our governance model is as follows:
 * William Chou (@choumx)
 * Yuxi Chen (@muxin)
 * Yuxuan Zhou (@zhouyx)
-
