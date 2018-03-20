@@ -199,18 +199,17 @@ export class SubscriptionService {
         SERVICE_TIMEOUT,
         subscriptionPlatform.getEntitlements()
     ).then(entitlement => {
-      if (!entitlement) {
-        entitlement = Entitlement.empty(
-            subscriptionPlatform.getServiceId());
-      }
+      entitlement = entitlement || Entitlement.empty(
+          subscriptionPlatform.getServiceId());
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
       return entitlement;
-    }).catch(() => {
+    }).catch(err => {
       this.platformStore_.reportPlatformFailure_(
           subscriptionPlatform.getServiceId());
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           Entitlement.empty(subscriptionPlatform.getServiceId()));
+      return Promise.reject(err);
     });
   }
 
