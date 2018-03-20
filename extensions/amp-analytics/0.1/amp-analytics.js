@@ -64,7 +64,7 @@ const WHITELIST_EVENT_IN_SANDBOX = [
  *     with sub-millisecond precision (so the value is not necessarily an
  *     integer).
  */
-function now(win) {
+function performanceTimestamp(win) {
   return win.performance && win.performance.now ? win.performance.now() : 0;
 }
 
@@ -692,6 +692,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * updates the time for future calls.
    * Note that the timestamp is stored on the resourceTimingSpec.
    * @param {!JsonObject} resourceTimingSpec
+   * @return {number}
    * @private
    */
   getAndUpdateLastReportedTime_(resourceTimingSpec) {
@@ -699,7 +700,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
     // Take the max time in case the user specified "responseAfter.
     resourceTimingSpec[lastReportedVariable] =
-        Math.max(now(this.win), lastTime);
+        Math.max(performanceTimestamp(this.win), lastTime);
     return lastTime;
   }
 
@@ -721,7 +722,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const analyticsVar = 'resourceTiming';
       const after = this.getAndUpdateLastReportedTime_(resourceTimingSpec);
       dynamicBindings[binding] =
-          serializeResourceTiming(resourceTimingSpec, this.win, after);
+          serializeResourceTiming(this.win, resourceTimingSpec, after);
       expansionOptions.vars[analyticsVar] = binding;
     }
     return dynamicBindings;

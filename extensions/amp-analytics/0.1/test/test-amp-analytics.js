@@ -2043,11 +2043,31 @@ describes.realWin('amp-analytics', {
       config['triggers'][0]['timerSpec'] = {'interval': 1};
       return runResourceTimingTest(
           [entry], config, 'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200', 3500 /* timeout */)
+              'foo_bar-script-100-500-7200', 2000 /* timeout */)
           .then(() => {
             expect(sendRequestSpy.args[1][0]).to.equal(
                 'https://ping.example.com/endpoint?rt=');
           });
-    }).timeout(4000);
+    }).timeout(3000);
+
+    it('should stop reporting after reaching the buffer limit', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://does_not_match.com/lib.js', 'script', 100, 500, 10 * 1000,
+          false);
+      const entries = new Array(150).fill(entry);
+      // Stub performance.now so that it returns a timestamp after the resource
+      // timing entry.
+      sandbox.stub(win.performance, 'now').returns(700);
+      const config = newConfig();
+      config['triggers'][0]['on'] = 'timer';
+      config['triggers'][0]['timerSpec'] = {'interval': 1};
+      return runResourceTimingTest(
+          entries, config, 'https://ping.example.com/endpoint?rt=',
+          2000 /* timeout */)
+          .then(() => {
+            expect(sendRequestSpy.args[1][0]).to.equal(
+                'https://ping.example.com/endpoint?rt=');
+          });
+    }).timeout(3000);
   });
 });

@@ -92,7 +92,7 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
   const runSerializeTest = function(
     fakeEntries, resourceTimingSpec, expectedResult, responseAfter = 0) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return serializeResourceTiming(resourceTimingSpec, win, responseAfter)
+    return serializeResourceTiming(win, resourceTimingSpec, responseAfter)
         .then(result => {
           expect(result).to.equal(expectedResult);
         });
@@ -106,16 +106,16 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if the performance API is not supported', () => {
     const fakeWin = {};
-    return serializeResourceTiming(newResourceTimingSpec(), fakeWin)
+    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
         .then(result => {
           expect(result).to.equal('');
         });
   });
 
   it('should return empty when resource timing is not supported', () => {
-    // Performance API (fakeWin.performance)  oesn't support resource timing.
+    // Performance API (fakeWin.performance) doesn't support resource timing.
     const fakeWin = {performance: {}};
-    return serializeResourceTiming(newResourceTimingSpec(), fakeWin)
+    return serializeResourceTiming(fakeWin, newResourceTimingSpec(), 0)
         .then(result => {
           expect(result).to.equal('');
         });
