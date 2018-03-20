@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {AmpViewerIntegrationVariableService} from './variable-service';
 import {
   Messaging,
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
-import {AmpViewerIntegrationVariableService} from './variable-service';
 import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
@@ -64,9 +64,10 @@ export class AmpViewerIntegration {
     this.isHandShakePoll_ = false;
 
     /** @const @private {!AmpViewerIntegrationVariableService} */
-    this.variableService_ = new AmpViewerIntegrationVariableService(getAmpdoc(this.win.document));
-    registerServiceBuilder(
-        this.win, 'viewer-integration-variable', () => this.variableService_.get());
+    this.variableService_ = new AmpViewerIntegrationVariableService(
+        getAmpdoc(this.win.document));
+    registerServiceBuilder(this.win, 'viewer-integration-variable',
+        () => this.variableService_.get());
   }
 
   /**

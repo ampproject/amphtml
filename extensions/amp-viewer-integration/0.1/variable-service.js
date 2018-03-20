@@ -18,10 +18,7 @@ import {parseQueryString} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
- * @typedef {{
- *   ancestorOrigin: function():string,
- *   fragmentParam: function(string, string):string),
- * }}
+ * @typedef {{ancestorOrigin: function(string, string):string, fragmentParam: function(string, string):string}}
  */
 export let ViewerIntegrationVariableDef;
 
@@ -30,19 +27,21 @@ export let ViewerIntegrationVariableDef;
  * Used for URL replacement service. See usage in src/url-replacements-impl.
  */
 export class AmpViewerIntegrationVariableService {
+
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
-    /** @private {!ViewerIntegrationVariableDef} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!ViewerIntegrationVariableDef} */
     this.variables_ = {
-      ancestorOrigin: (param, defaultValue) => {
-	return this.getAncestorOrigin_();
+      ancestorOrigin: (unusedParam, unusedDefaultValue) => {
+	      return this.getAncestorOrigin_();
       },
       fragmentParam: (param, defaultValue) => {
-	return this.getFragmentParamData_(param, defaultValue);
+	      return this.getFragmentParamData_(param, defaultValue);
       },
     };
   }
@@ -60,9 +59,9 @@ export class AmpViewerIntegrationVariableService {
         'The first argument to FRAGMENT_PARAM, the fragment string ' +
         'param is required');
     user().assert(typeof param == 'string', 'param should be a string');
-    const hash = this.ampdoc.win.location.originalHash;
+    const hash = this.ampdoc_.win.location.originalHash;
     const params = parseQueryString(hash);
-    return (params[param] === undefined) ? defaultValue: params[param];
+    return (params[param] === undefined) ? defaultValue : params[param];
   }
 
   /**
@@ -71,10 +70,11 @@ export class AmpViewerIntegrationVariableService {
    * @private
    */
   getAncestorOrigin_() {
-    if (this.ampdoc.win.location.ancestorOrigins === undefined) {
+    const ancestorOrigins = this.ampdoc_.win.location.ancestorOrigins;
+    if (!ancestorOrigins) {
       return '';
     }
-    return this.ampdoc.win.location.ancestorOrigins[0];
+    return ancestorOrigins[0];
   }
 
   /**

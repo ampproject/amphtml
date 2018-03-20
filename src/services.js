@@ -316,9 +316,10 @@ export class Services {
    * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
    */
   static viewerIntegrationVariableServiceForOrNull(win) {
-    return (/** @type {
-        !Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
-	(getElementServiceIfAvailable(win, 'viewer-integration-variable', 'amp-viewer-integration', true)));
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
+      (getElementServiceIfAvailable(win, 'viewer-integration-variable',
+          'amp-viewer-integration', true)));
   }
 
   /**
