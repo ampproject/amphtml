@@ -15,7 +15,6 @@
  */
 import {deprecatedDoubleclick} from './deprecated_doubleclick';
 import {dev} from '../../src/log';
-import {isExperimentOn} from '../../src/experiments';
 
 const TAG = 'DOUBLECLICK - DEPRECATED';
 /**
@@ -23,9 +22,14 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  if (isExperimentOn(global, `rollback-dfd-${data.type}`)) {
-    return deprecatedDoubleclick(window, data);
-  }
+  try {
+    const context = JSON.parse(global['context']['cachedFrameName_']
+    )['attributes']['_context'];
+    // Make this easy to rollback in case of emergency.
+    if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
+      return deprecatedDoubleclick(window, data);
+    }
+  } catch (unused) {}
   dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please ' +
               'switch to Fast Fetch. See documentation here: ' +
               'https://github.com/ampproject/amphtml/issues/11834');
