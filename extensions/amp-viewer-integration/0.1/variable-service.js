@@ -66,7 +66,7 @@ export class AmpViewerIntegrationVariableService {
   }
 
   /**
-   * Return the FRAGMENT_PARAM from the original location href
+   * Return the ANCESTOR_ORIGIN from the location
    * @return {string}
    * @private
    */
