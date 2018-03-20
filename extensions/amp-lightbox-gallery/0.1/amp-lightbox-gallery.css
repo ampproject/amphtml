@@ -107,14 +107,20 @@
   }
 }
 
-.i-amphtml-lbg-controls {
+.i-amphtml-lbg-controls.show {
+  opacity: 1;
+}
+
+.i-amphtml-lbg-controls.hidden {
   opacity: 0;
+}
+
+.i-amphtml-lbg-controls.fade-in {
   animation: fadeIn ease-in 0.4s 1 forwards;
 }
 
 .i-amphtml-lbg-controls.fade-out
  {
-  opacity: 1;
   animation: fadeOut linear 0.4s 1 forwards;
 }
 
@@ -126,8 +132,6 @@
   overflow: hidden !important;
   color: #ffffff;
   z-index: 2 !important;
-  opacity: 0;
-  animation: fadeIn ease-in 0.4s 1 forwards;
 }
 
 .i-amphtml-lbg-desc-box.standard {
