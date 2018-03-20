@@ -42,6 +42,11 @@ export const ValidatorResult = {
   NON_AMP: 'NON_AMP',
 };
 
+/** @enum {string} */
+export const AdResponseType = {
+  CRYPTO: 'crypto',
+};
+
 /** @typedef {{
       type: !ValidatorResult,
       adResponseType: string,

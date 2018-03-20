@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from '../amp-ad-render';
+import {
+  CryptographicValidator,
+  FriendlyFrameRenderer,
+  SIGNATURE_VERIFIER_PROPERTY_NAME,
+} from '../amp-ad-render';
+import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 
 const realWinConfig = {
   amp: {},
@@ -44,6 +49,22 @@ describes.realWin('amp-ad-render', realWinConfig, env => {
         extensions: [],
       },
     };
+  });
+
+  describe('CryptographicValidator', () => {
+
+    const headers = {'Content-Type': 'application/jwk-set+json'};
+
+    beforeEach(() => {
+      env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] =
+          new SignatureVerifier(env.win, {
+          'service-1': 'https://signingservice1.net/keyset.json',
+        });
+    });
+
+    it('should pass validation', () => {
+
+    });
   });
 
   describe('FriendlyFrameRenderer', () => {

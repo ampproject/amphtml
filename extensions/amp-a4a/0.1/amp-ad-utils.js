@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {isArray, isObject} from '../../../src/types';
+import {isSecureUrl} from '../../../src/url';
+import {parseJson} from '../../../src/json';
+
+const TAG = 'amp-ad-util';
 
 /**
  * Sends a CORS XHR request to the given URL.
@@ -27,4 +33,101 @@ export function sendXhrRequest(win, url) {
     method: 'GET',
     credentials: 'include',
   });
+}
+
+/** @type {Array<string>} */
+const METADATA_STRINGS = [
+  '<script amp-ad-metadata type=application/json>',
+  '<script type="application/json" amp-ad-metadata>',
+  '<script type=application/json amp-ad-metadata>'];
+
+/**
+ *
+ * Throws {@code SyntaxError} if the metadata block delimiters are missing
+ * or corrupted or if the metadata content doesn't parse as JSON.
+ * @param {string} creative from which CSS is extracted
+ * @return {?CreativeMetaDataDef} Object result of parsing JSON data blob inside
+ *     the metadata markers on the ad text, or null if no metadata markers are
+ *     found.
+ * TODO(keithwrightbos@): report error cases
+ */
+export function getAmpAdMetadata(creative) {
+  let metadataStart = -1;
+  let metadataString;
+  for (let i = 0; i < METADATA_STRINGS.length; i++) {
+    metadataString = METADATA_STRINGS[i];
+    metadataStart = creative.lastIndexOf(metadataString);
+    if (metadataStart >= 0) {
+      break;
+    }
+  }
+  if (metadataStart < 0) {
+    // Couldn't find a metadata blob.
+    dev().warn(
+        TAG, `Could not locate start index for amp meta data in: ${creative}`);
+    return null;
+  }
+  const metadataEnd = creative.lastIndexOf('</script>');
+  if (metadataEnd < 0) {
+    // Couldn't find a metadata blob.
+    dev().warn(TAG,
+        'Could not locate closing script tag for amp meta data in: %s',
+        creative);
+    return null;
+  }
+  try {
+    const metaDataObj = parseJson(
+        creative.slice(metadataStart + metadataString.length, metadataEnd));
+    const ampRuntimeUtf16CharOffsets =
+      metaDataObj['ampRuntimeUtf16CharOffsets'];
+    if (!isArray(ampRuntimeUtf16CharOffsets) ||
+        ampRuntimeUtf16CharOffsets.length != 2 ||
+        typeof ampRuntimeUtf16CharOffsets[0] !== 'number' ||
+        typeof ampRuntimeUtf16CharOffsets[1] !== 'number') {
+      throw new Error('Invalid runtime offsets');
+    }
+    const metaData = {};
+    if (metaDataObj['customElementExtensions']) {
+      metaData.customElementExtensions =
+        metaDataObj['customElementExtensions'];
+      if (!isArray(metaData.customElementExtensions)) {
+        throw new Error(
+            'Invalid extensions', metaData.customElementExtensions);
+      }
+    } else {
+      metaData.customElementExtensions = [];
+    }
+    if (metaDataObj['customStylesheets']) {
+      // Expect array of objects with at least one key being 'href' whose
+      // value is URL.
+      metaData.customStylesheets = metaDataObj['customStylesheets'];
+      const errorMsg = 'Invalid custom stylesheets';
+      if (!isArray(metaData.customStylesheets)) {
+        throw new Error(errorMsg);
+      }
+      metaData.customStylesheets.forEach(stylesheet => {
+        if (!isObject(stylesheet) || !stylesheet['href'] ||
+            typeof stylesheet['href'] !== 'string' ||
+            !isSecureUrl(stylesheet['href'])) {
+          throw new Error(errorMsg);
+        }
+      });
+    }
+    if (isArray(metaDataObj['images'])) {
+      // Load maximum of 5 images.
+      metaData.images = metaDataObj['images'].splice(0, 5);
+    }
+    // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
+    // metadata as its in the head?
+    metaData.minifiedCreative =
+      creative.slice(0, ampRuntimeUtf16CharOffsets[0]) +
+      creative.slice(ampRuntimeUtf16CharOffsets[1], metadataStart) +
+      creative.slice(metadataEnd + '</script>'.length);
+    return metaData;
+  } catch (err) {
+    dev().warn(
+        TAG, 'Invalid amp metadata: %s',
+        creative.slice(metadataStart + metadataString.length, metadataEnd));
+    return null;
+  }
 }

@@ -15,10 +15,17 @@
  */
 
 import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
-import {Renderer} from './amp-ad-type-defs';
+import {
+  AdResponseType,
+  Renderer,
+  Validator,
+  ValidatorResult,
+} from './amp-ad-type-defs';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpAdMetadata} from './amp-ad-utils';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   installFriendlyIframeEmbed,
@@ -26,6 +33,61 @@ import {
 } from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
+import {signingServerURLs} from '../../../ads/_a4a-config';
+import {utf8Decode} from '../../../src/utils/bytes';
+
+export const SIGNATURE_VERIFIER_PROPERTY_NAME =
+    'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
+
+const TAG = 'amp-ad-render';
+
+export class CryptographicValidator extends Validator {
+  /** @param {!Window} win */
+  getSignatureVerifier_(win) {
+    return win[SIGNATURE_VERIFIER_PROPERTY_NAME] ||
+        (win[SIGNATURE_VERIFIER_PROPERTY_NAME] =
+         new SignatureVerifier(win, signingServerURLs));
+  }
+
+  /**
+   * @param {boolean} verificationSucceeded
+   * @param {!ArrayBuffer} bytes
+   * @return {!./amp-ad-type-defs.ValidatorOutput}
+   */
+  createOutput_(verificationSucceeded, bytes) {
+    const creativeData = {
+      creativeMetadata: getAmpAdMetadata(utf8decode(bytes)),
+    };
+    return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
+      type: verificationSucceeded ?
+        ValidatorResult.AMP : ValidatorResult.NON_AMP,
+      adResponseType: AdResponseType.CRYPTO,
+      creativeData,
+    });
+  }
+
+  /** @override */
+  validate(context, unvalidatedBytes, headers) {
+    return this.getSignatureVerifier_(context.win)
+        .verify(unvalidatedBytes, headers, /* lifecycleCallback */
+            (unusedEventName, unusedExtraVariables) => {})
+        .then(status => {
+          switch (status) {
+            case VerificationStatus.OK:
+              return this.createOutput_(true, unvalidatedBytes);
+            case VerificationStatus.UNVERIFIED:
+            // TODO(levitzky) Preferential render without crypto in some
+            // instances.
+            case VerificationStatus.CRYPTO_UNAVAILABLE:
+            // TODO(@taymonbeal, #9274): differentiate between these
+            case VerificationStatus.ERROR_KEY_NOT_FOUND:
+            case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
+              user().error(TAG, 'Signature verification failed');
+              return this.createOutput_(false, unvalidatedBytes);
+          }
+        });
+  }
+}
 
 /**
  * Render a validated AMP creative directly in the parent page.
