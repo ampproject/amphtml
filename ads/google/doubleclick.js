@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {deprecatedDoubleclick} from './deprecated_doubleclick';
-import {parseJson} from '../../src/json';
 import {dev} from '../../src/log';
+import {parseJson} from '../../src/json';
 
 const TAG = 'DOUBLECLICK - DEPRECATED';
 /**
