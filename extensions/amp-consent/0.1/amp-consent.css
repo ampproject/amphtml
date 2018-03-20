@@ -19,5 +19,5 @@
   position: fixed;
   bottom: 0;
   overflow: hidden !important;
-  visibility: hidden;
+  visibility: visible;
  }
