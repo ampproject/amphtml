@@ -814,10 +814,10 @@ describes.sandboxed.only('UrlReplacements', {}, () => {
   it('should replace ANCESTOR_ORIGIN', () => {
     return expect(
         expandUrlAsync('ANCESTOR_ORIGIN/recipes',
-            /*opt_bindings*/ undefined, { withViewerIntegrationVariableService: {
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
               ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
               fragmentParam: (param, defaultValue) => {
-                return param == 'ice_cream' ? '2': defaultValue;
+                return param == 'ice_cream' ? '2' : defaultValue;
               },
             }}))
         .to.eventually.equal('http://margarine-paradise.com/recipes');
@@ -826,10 +826,10 @@ describes.sandboxed.only('UrlReplacements', {}, () => {
   it('should replace FRAGMENT_PARAM with 2', () => {
     return expect(
         expandUrlAsync('?sh=FRAGMENT_PARAM(ice_cream)&s',
-            /*opt_bindings*/ undefined, { withViewerIntegrationVariableService: {
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
               ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
               fragmentParam: (param, defaultValue) => {
-                return param == 'ice_cream' ? '2': defaultValue;
+                return param == 'ice_cream' ? '2' : defaultValue;
               },
             }}))
         .to.eventually.equal('?sh=2&s');
