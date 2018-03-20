@@ -30,3 +30,4 @@ Our governance model is as follows:
 * Johannes Henkel (@powdercloud). Specialty: Validator
 * Wassim Gharbi (@wassgha)
 * Yuxuan Zhou (@zhouyx)
+* Alan Orozco (@alanorozco)
