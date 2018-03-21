@@ -136,7 +136,7 @@
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
     "shuffle-seed": "1.1.6",
-    "sinon": "4.4.2",
+    "sinon": "4.4.7",
     "sinon-chai": "3.0.0",
     "text-table": "0.2.0",
     "through2": "2.0.3",
