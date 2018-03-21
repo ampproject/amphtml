@@ -53,6 +53,10 @@ tags: {  # <amp-story>
       allowed_protocol: "https"
     }
   }
+  attrs: {
+    name: "scaling"
+    value: "relative"
+  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
