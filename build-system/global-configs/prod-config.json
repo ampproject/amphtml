@@ -26,6 +26,7 @@
   "a4a-measure-get-ad-urls": 0,
   "3p-use-ampcontext": 1,
   "amp-animation": 1,
+  "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
