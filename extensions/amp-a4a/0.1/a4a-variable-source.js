@@ -18,8 +18,8 @@ import {Services} from '../../../src/services';
 import {
   VariableSource,
   getNavigationData,
-  getTimingDataSync,
   getTimingDataAsync,
+  getTimingDataSync,
 } from '../../../src/service/variable-source';
 import {user} from '../../../src/log';
 
@@ -48,6 +48,7 @@ const WHITELISTED_VARIABLES = [
   'SHARE_TRACKING_OUTGOING',
   'TIMESTAMP',
   'TIMEZONE',
+  'TIMEZONE_CODE',
   'SCROLL_TOP',
   'SCROLL_LEFT',
   'SCROLL_HEIGHT',
@@ -65,6 +66,9 @@ const WHITELISTED_VARIABLES = [
   'TOTAL_ENGAGED_TIME',
   'AMP_VERSION',
   'USER_AGENT',
+  'FIRST_CONTENTFUL_PAINT',
+  'FIRST_VIEWPORT_READY',
+  'MAKE_BODY_VISIBLE',
 ];
 
 
@@ -75,7 +79,7 @@ export class A4AVariableSource extends VariableSource {
    * @param  {!Window} embedWin
    */
   constructor(ampdoc, embedWin) {
-    super();
+    super(ampdoc);
     /** @private {VariableSource} global variable source for fallback. */
     this.globalVariableSource_ = Services.urlReplacementsForDoc(ampdoc)
         .getVariableSource();

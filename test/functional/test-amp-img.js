@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
-import {BaseElement} from '../../src/base-element';
-import {installImg, AmpImg} from '../../builtins/amp-img';
-import {Services} from '../../src/services';
 import * as sinon from 'sinon';
+import {AmpImg, installImg} from '../../builtins/amp-img';
+import {BaseElement} from '../../src/base-element';
+import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
 
 describe('amp-img', () => {
   let sandbox;
@@ -75,7 +75,7 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(ampImg.implementation_.getPriority()).to.equal(0);
+      expect(ampImg.implementation_.getLayoutPriority()).to.equal(0);
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
@@ -92,7 +92,7 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-      expect(ampImg.implementation_.getPriority()).to.equal(0);
+      expect(ampImg.implementation_.getLayoutPriority()).to.equal(0);
     });
   });
 

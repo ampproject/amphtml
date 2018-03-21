@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 
@@ -82,7 +82,7 @@ export class AmpCallTracking extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return Services.urlReplacementsForDoc(this.getAmpDoc())
-        .expandAsync(user().assertString(this.configUrl_))
+        .expandUrlAsync(user().assertString(this.configUrl_))
         .then(url => fetch_(this.win, url))
         .then(data => {
           user().assert('phoneNumber' in data,

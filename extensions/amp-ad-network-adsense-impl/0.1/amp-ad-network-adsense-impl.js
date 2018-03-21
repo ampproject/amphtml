@@ -20,50 +20,52 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {isExperimentOn} from '../../../src/experiments';
-import {
-  additionalDimensions,
-  googleAdUrl,
-  isReportingEnabled,
-  extractAmpAnalyticsConfig,
+  QQID_HEADER,
+  ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
+  additionalDimensions,
+  extractAmpAnalyticsConfig,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
-  QQID_HEADER,
-  maybeAppendErrorParameter,
   getEnclosingContainerTypes,
-  ValidAdContainerTypes,
   getIdentityToken,
+  googleAdUrl,
+  isReportingEnabled,
+  maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
 } from '../../../ads/google/a4a/utils';
-import {
-  googleLifecycleReporterFactory,
-  setGoogleLifecycleVarsFromHeaders,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {removeElement} from '../../../src/dom';
-import {getMode} from '../../../src/mode';
-import {stringHash32} from '../../../src/string';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
   setStyle,
   setStyles,
 } from '../../../src/style';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
-import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
+import {getMode} from '../../../src/mode';
+import {
+  googleLifecycleReporterFactory,
+  setGoogleLifecycleVarsFromHeaders,
+} from '../../../ads/google/a4a/google-data-reporter';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
+import {isExperimentOn} from '../../../src/experiments';
+import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {removeElement} from '../../../src/dom';
+import {stringHash32} from '../../../src/string';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -150,6 +152,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
+
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
+    this.nameframeExperimentConfig_ = {
+      instantLoad: false,
+      writeInBody: false,
+    };
   }
 
   /**
@@ -171,6 +179,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * that it has been verified.
      */
     if (this.isResponsive_()) {
+      if (!this.element.hasAttribute('data-full-width')) {
+        user().error(TAG,
+            'Responsive AdSense ad units require the attribute ' +
+            'data-full-width.');
+        return false;
+      }
+
       const height = this.element.getAttribute('height');
       const width = this.element.getAttribute('width');
       if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
@@ -213,7 +228,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
               viewportSize),
-          viewportSize.width);
+          viewportSize.width).catch(() => {});
     }
   }
 
@@ -327,7 +342,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
     return this.size_;
+  }
+
+  /** @override */
+  getAdditionalContextMetadata() {
+    const attributes = dict({});
+    Object.assign(attributes, this.nameframeExperimentConfig_);
+    return attributes;
   }
 
   /**

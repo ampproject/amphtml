@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from './dom';
+import {isExperimentOn} from './experiments';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
-import {isExperimentOn} from './experiments';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,
@@ -63,7 +64,9 @@ function maybeTimeoutFonts(win) {
     // Find all stylesheets that aren't loaded from the AMP CDN (those are
     // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-        'link[rel~="stylesheet"]:not([href^="' + urls.cdn + '"])');
+        `link[rel~="stylesheet"]:not([href^="${
+          escapeCssSelectorIdent(urls.cdn)
+        }"])`);
     // Compare external sheets against elements of document.styleSheets.
     // They do not appear in this list until they have been loaded.
     const timedoutStyleSheets = [];

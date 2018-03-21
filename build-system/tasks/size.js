@@ -19,10 +19,10 @@ const del = require('del');
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const gzipSize = require('gzip-size');
+const PluginError = require('plugin-error');
 const prettyBytes = require('pretty-bytes');
 const table = require('text-table');
 const through = require('through2');
-const PluginError = require('plugin-error');
 
 
 const tempFolderName = '__size-temp';

@@ -14,29 +14,31 @@
   * limitations under the License.
   */
 
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {VisibilityState} from '../../../src/visibility-state';
+import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {
-  elementByTag,
-  childElementsByTag,
   childElementByTag,
+  childElementsByTag,
   closestByTag,
+  elementByTag,
   fullscreenEnter,
   fullscreenExit,
-  isFullscreenElement,
   insertAfterOrAtStart,
+  isFullscreenElement,
 } from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {VisibilityState} from '../../../src/visibility-state';
+import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
+
 
 const TAG = 'amp-video';
 
@@ -88,6 +90,12 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unlisteners_ = [];
+
+    /** @private @const {boolean} */
+    this.isStoryVideo_ = !!closestByTag(this.element, 'amp-story');
+
+    /** @private @const {boolean} */
+    this.storySupportsHls_ = !isExperimentOn(this.win, 'disable-amp-story-hls');
   }
 
   /**
@@ -205,7 +213,7 @@ class AmpVideo extends AMP.BaseElement {
     // visibility.
     // TODO(alanorozco, #12712): amp-story should coordinate resumeCallback.
     Services.videoManagerForDoc(this.element).register(this,
-        /* manageAutoplay */ !closestByTag(this.element, 'amp-story'));
+        /* manageAutoplay */ !this.isStoryVideo_);
   }
 
   /** @override */
@@ -314,7 +322,7 @@ class AmpVideo extends AMP.BaseElement {
     // Only cached sources are added during prerender.
     // Origin sources will only be added when document becomes visible.
     sources.forEach(source => {
-      if (this.isCachedByCDN_(source)) {
+      if (this.isCachedByCDN_(source) && this.isValidSource_(source)) {
         this.video_.appendChild(source);
       }
     });
@@ -337,10 +345,14 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     sources.forEach(source => {
-      // Cached sources should have been moved from <amp-video> to <video>.
-      dev().assert(!this.isCachedByCDN_(source));
-      assertHttpsUrl(source.getAttribute('src'), source);
-      this.video_.appendChild(source);
+      if (this.isValidSource_(source)) {
+        // Cached sources should have been moved from <amp-video> to <video>.
+        dev().assert(!this.isCachedByCDN_(source));
+        assertHttpsUrl(source.getAttribute('src'), source);
+        this.video_.appendChild(source);
+      } else {
+        this.element.removeChild(source);
+      }
     });
 
     // To handle cases where cached source may 404 if not primed yet,
@@ -402,6 +414,22 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Element} source The <source> element to check for validity.
+   * @return {boolean} true if the source is allowed to be propagated to the
+   *     created video.
+   * @private
+   */
+  isValidSource_(source) {
+    if (!this.isStoryVideo_ || this.storySupportsHls_) {
+      return true;
+    }
+
+    const type = (source.getAttribute('type') || '').toLowerCase();
+    return type !== 'application/x-mpegurl' &&
+        type !== 'application/vnd.apple.mpegurl';
+  }
+
+  /**
    * @private
    */
   installEventHandlers_() {
@@ -416,10 +444,6 @@ class AmpVideo extends AMP.BaseElement {
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
-    }));
-
-    this.unlisteners_.push(listen(video, 'ended', () => {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     }));
   }
 

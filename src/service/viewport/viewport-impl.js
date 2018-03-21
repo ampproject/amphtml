@@ -17,31 +17,31 @@
 import {Animation} from '../../animation';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
+import {Services} from '../../services';
+import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingIosEmbedWrapper_,
+} from './viewport-binding-ios-embed-wrapper';
+import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {dev} from '../../log';
+import {dict} from '../../utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
+import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
+import {installLayersServiceForDoc} from '../layers-impl';
+import {isExperimentOn} from '../../experiments';
+import {isIframed} from '../../dom';
 import {
+  layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-  layoutRectFromDomRect,
 } from '../../layout-rect';
-import {dev} from '../../log';
-import {dict} from '../../utils/object';
-import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
-import {isExperimentOn} from '../../experiments';
 import {numeric} from '../../transition';
-import {Services} from '../../services';
 import {setStyle} from '../../style';
-import {isIframed} from '../../dom';
-import {getMode} from '../../mode';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingNatural_} from './viewport-binding-natural';
-import {
-  ViewportBindingIosEmbedWrapper_,
-} from './viewport-binding-ios-embed-wrapper';
-import {installLayersServiceForDoc} from '../layers-impl';
 
 
 const TAG_ = 'Viewport';
@@ -458,6 +458,14 @@ export class Viewport {
       }
       return moveLayoutRect(l, r.left, r.top);
     });
+  }
+
+  /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {
+    return this.binding_.supportsPositionFixed();
   }
 
   /**

@@ -22,14 +22,15 @@
  * https://3p.ampproject.net/$version/f.js
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
   masterSelection,
 } from './ampcontext-integration';
-import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {MessageType} from '../src/3p-frame-messaging';
 import {
   computeInMasterFrame,
   nextTick,
@@ -37,6 +38,8 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
+import {dict} from '../src/utils/object.js';
+import {endsWith} from '../src/string';
 import {
   getAmpConfig,
   getAttributeData,
@@ -44,26 +47,31 @@ import {
   getEmbedType,
   getLocation,
 } from './frame-metadata';
-import {urls} from '../src/config';
-import {endsWith} from '../src/string';
-import {parseJson} from '../src/json';
-import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
+import {getMode} from '../src/mode';
+import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
 import {
   initLogConstructor,
+  isUserErrorMessage,
   setReportError,
   user,
-  isUserErrorMessage,
 } from '../src/log';
-import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
+import {installEmbedStateListener, manageWin} from './environment';
+import {isExperimentOn} from './3p';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
+import {parseJson} from '../src/json';
 import {startsWith} from '../src/string.js';
-import {AmpEvents} from '../src/amp-events';
-import {MessageType} from '../src/3p-frame-messaging';
+import {urls} from '../src/config';
+
+// Disable auto-sorting of imports from here on.
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
+import {mathml} from './mathml';
 import {reddit} from './reddit';
+import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -83,7 +91,10 @@ import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
+import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
+import {adpicker} from '../ads/adpicker';
+import {adplugg} from '../ads/adplugg';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adsnative} from '../ads/adsnative';
@@ -100,13 +111,16 @@ import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
+import {broadstreetads} from '../ads/broadstreetads';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
+import {cedato} from '../ads/cedato';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {connatix} from '../ads/connatix';
@@ -117,7 +131,8 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
-import {doubleclick} from '../ads/google/doubleclick';
+import {deprecatedDoubleclick} from '../ads/google/deprecated_doubleclick';
+import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
@@ -137,6 +152,7 @@ import {ibillboard} from '../ads/ibillboard';
 import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
+import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
@@ -152,9 +168,11 @@ import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {mediaimpact} from '../ads/mediaimpact';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
+import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
 import {microad} from '../ads/microad';
 import {mixpo} from '../ads/mixpo';
+import {monetizer101} from '../ads/monetizer101';
 import {mywidget} from '../ads/mywidget';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
@@ -168,14 +186,17 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {pubexchange} from '../ads/pubexchange';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
+import {quoraad} from '../ads/quoraad';
 import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
+import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
@@ -191,7 +212,9 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
+import {trugaze} from '../ads/trugaze';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
@@ -226,6 +249,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  pubexchange: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -260,7 +284,10 @@ register('adhese', adhese);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
+register('admixer', admixer);
 register('adocean', adocean);
+register('adpicker', adpicker);
+register('adplugg', adplugg);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adsnative', adsnative);
@@ -277,13 +304,18 @@ register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('appvador', appvador);
 register('atomx', atomx);
+register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
+register('broadstreetads', broadstreetads);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
+register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
 register('connatix',connatix);
@@ -294,7 +326,8 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
-register('doubleclick', doubleclick);
+register('doubleclick', deprecatedDoubleclick);
+register('eadv', eadv);
 register('eas', eas);
 register('engageya', engageya);
 register('eplanning', eplanning);
@@ -316,6 +349,7 @@ register('ibillboard', ibillboard);
 register('ima-video', imaVideo);
 register('imedia', imedia);
 register('imobile', imobile);
+register('imonomy', imonomy);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
@@ -330,12 +364,15 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('mathml', mathml);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
+register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);
+register('monetizer101', monetizer101);
 register('mywidget', mywidget);
 register('nativo', nativo);
 register('navegg', navegg);
@@ -349,15 +386,18 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('pubexchange', pubexchange);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
+register('quoraad', quoraad);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rubicon', rubicon);
+register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
@@ -373,8 +413,10 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('teads', teads);
 register('triplelift', triplelift);
+register('trugaze', trugaze);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('videonow', videonow);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
@@ -450,7 +492,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

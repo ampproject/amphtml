@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -34,12 +35,11 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
-import * as dom from './dom';
 import {toWin} from './types';
-import {isExperimentOn} from './experiments';
 
 const TAG = 'CustomElement';
 
@@ -151,6 +151,15 @@ function createBaseCustomElementClass(win) {
       // considered to be built. See "setBuilt" method.
       /** @private {boolean} */
       this.built_ = false;
+
+      /**
+       * Several APIs require the element to be connected to the DOM tree, but
+       * the CustomElement lifecycle APIs are async. This lead to subtle bugs
+       * that require state tracking. See #12849, https://crbug.com/821195, and
+       * https://bugs.webkit.org/show_bug.cgi?id=180940.
+       * @private {boolean}
+       */
+      this.isConnected_ = false;
 
       /** @private {?Promise} */
       this.buildingPromise_ = null;
@@ -443,10 +452,10 @@ function createBaseCustomElementClass(win) {
      * Get the priority to load the element.
      * @return {number} @this {!Element}
      */
-    getPriority() {
+    getLayoutPriority() {
       dev().assert(
           this.isUpgraded(), 'Cannot get priority of unupgraded element');
-      return this.implementation_.getPriority();
+      return this.implementation_.getLayoutPriority();
     }
 
     /**
@@ -545,7 +554,7 @@ function createBaseCustomElementClass(win) {
       if (this.isLoadingEnabled_()) {
         if (this.isInViewport_) {
           // Already in viewport - start showing loading.
-          this.toggleLoading_(true);
+          this.toggleLoading(true);
         } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD &&
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
@@ -645,7 +654,7 @@ function createBaseCustomElementClass(win) {
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
         if (this.resources_) {
-          this.resources_.deferMutate(this, () => {
+          this.resources_.mutateElement(this, () => {
             dom.removeElement(sizer);
           });
         }
@@ -681,6 +690,16 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     connectedCallback() {
+      // Chrome and Safari can trigger connectedCallback even when the node is
+      // disconnected. See #12849, https://crbug.com/821195, and
+      // https://bugs.webkit.org/show_bug.cgi?id=180940. Thankfully,
+      // connectedCallback will later be called when the disconnected root is
+      // connected to the document tree.
+      if (this.isConnected_ || !dom.isConnectedNode(this)) {
+        return;
+      }
+      this.isConnected_ = true;
+
       if (!this.everAttached) {
         this.classList.add('i-amphtml-element');
         this.classList.add('i-amphtml-notbuilt');
@@ -816,6 +835,10 @@ function createBaseCustomElementClass(win) {
       if (this.isInTemplate_) {
         return;
       }
+      if (!this.isConnected_ || dom.isConnectedNode(this)) {
+        return;
+      }
+      this.isConnected_ = false;
       this.getResources().remove(this);
       this.implementation_.detachedCallback();
     }
@@ -1014,7 +1037,7 @@ function createBaseCustomElementClass(win) {
         }
         this.readyState = 'complete';
         this.layoutCount_++;
-        this.toggleLoading_(false, /* cleanup */ true);
+        this.toggleLoading(false, {cleanup: true});
         // Check if this is the first success layout that needs
         // to call firstLayoutCompleted.
         if (!this.isFirstLayoutCompleted_) {
@@ -1031,7 +1054,7 @@ function createBaseCustomElementClass(win) {
               CommonSignals.LOAD_END, /** @type {!Error} */ (reason));
         }
         this.layoutCount_++;
-        this.toggleLoading_(false, /* cleanup */ true);
+        this.toggleLoading(false, {cleanup: true});
         throw reason;
       });
     }
@@ -1068,7 +1091,7 @@ function createBaseCustomElementClass(win) {
       this.isInViewport_ = inViewport;
       if (this.layoutCount_ == 0) {
         if (!inViewport) {
-          this.toggleLoading_(false);
+          this.toggleLoading(false);
         } else {
           // Set a minimum delay in case the element loads very fast or if it
           // leaves the viewport.
@@ -1079,7 +1102,7 @@ function createBaseCustomElementClass(win) {
             if (this.isInViewport_ &&
                 this.ownerDocument &&
                 this.ownerDocument.defaultView) {
-              this.toggleLoading_(true);
+              this.toggleLoading(true);
             }
           }, 100);
         }
@@ -1345,7 +1368,7 @@ function createBaseCustomElementClass(win) {
           // Blacklist elements that has a native placeholder property
           // like input and textarea. These are not allowed to be AMP
           // placeholders.
-          !('placeholder' in el);
+          !isInputPlaceholder(el);
       });
     }
 
@@ -1364,6 +1387,11 @@ function createBaseCustomElementClass(win) {
       } else {
         const placeholders = dom.childElementsByAttr(this, 'placeholder');
         for (let i = 0; i < placeholders.length; i++) {
+          // Don't toggle elements with a native placeholder property
+          // e.g. input, textarea
+          if (isInputPlaceholder(placeholders[i])) {
+            continue;
+          }
           placeholders[i].classList.add('amp-hidden');
         }
       }
@@ -1414,7 +1442,7 @@ function createBaseCustomElementClass(win) {
     renderStarted() {
       this.signals_.signal(CommonSignals.RENDER_START);
       this.togglePlaceholder(false);
-      this.toggleLoading_(false);
+      this.toggleLoading(false);
     }
 
     /**
@@ -1487,12 +1515,14 @@ function createBaseCustomElementClass(win) {
     /**
      * Turns the loading indicator on or off.
      * @param {boolean} state
-     * @param {boolean=} opt_cleanup
-     * @private @final @this {!Element}
+     * @param {{cleanup:boolean,force:boolean}=} opt_options
+     * @public @final @this {!Element}
      */
-    toggleLoading_(state, opt_cleanup) {
+    toggleLoading(state, opt_options) {
+      const cleanup = opt_options && opt_options.cleanup;
+      const force = opt_options && opt_options.force;
       assertNotTemplate(this);
-      if (state &&
+      if (state && !this.implementation_.isLoadingReused() &&
           (this.layoutCount_ > 0 ||
               this.signals_.get(CommonSignals.RENDER_START))) {
         // Loading has already been canceled. Ignore.
@@ -1504,7 +1534,7 @@ function createBaseCustomElementClass(win) {
       }
 
       // Check if loading should be shown.
-      if (state && !this.isLoadingEnabled_()) {
+      if (state && !force && !this.isLoadingEnabled_()) {
         this.loadingState_ = false;
         return;
       }
@@ -1513,7 +1543,7 @@ function createBaseCustomElementClass(win) {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
-        if (state && !this.isLoadingEnabled_()) {
+        if (state && !force && !this.isLoadingEnabled_()) {
           state = false;
         }
         if (state) {
@@ -1526,11 +1556,12 @@ function createBaseCustomElementClass(win) {
         this.loadingContainer_.classList.toggle('amp-hidden', !state);
         this.loadingElement_.classList.toggle('amp-active', state);
 
-        if (!state && opt_cleanup) {
+        if (!state && cleanup &&
+            !this.implementation_.isLoadingReused()) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().deferMutate(this, () => {
+          this.getResources().mutateElement(this, () => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1544,7 +1575,7 @@ function createBaseCustomElementClass(win) {
     getLayoutDelayMeter_() {
       if (!this.layoutDelayMeter_) {
         this.layoutDelayMeter_ = new LayoutDelayMeter(
-            toWin(this.ownerDocument.defaultView), this.getPriority());
+            toWin(this.ownerDocument.defaultView), this.getLayoutPriority());
       }
       return this.layoutDelayMeter_;
     }
@@ -1601,9 +1632,14 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
-  };
+  }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
+}
+
+/** @param {!Element} element */
+function isInputPlaceholder(element) {
+  return 'placeholder' in element;
 }
 
 

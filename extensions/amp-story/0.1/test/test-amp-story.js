@@ -18,7 +18,6 @@ import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {PaginationButtons} from '../pagination-buttons';
-import {Services} from '../../../../src/services';
 
 
 const NOOP = () => {};
@@ -70,6 +69,7 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
@@ -129,70 +129,33 @@ describes.realWin('amp-story', {
 
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
-    const bookendUrl = 'foo.com';
-    story.element.setAttribute('bookend-config-src', bookendUrl);
 
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.have.been.calledOnce;
-          expect(fetchJsonStub.getCall(0).args[0]).to.equal(bookendUrl);
-        });
-  });
-
-  // The empty bookend is built even if no bookend-config-src attribute was set.
-  it('should prerender the bookend if navigating to the last page', () => {
-    createPages(story.element, 1, ['cover']);
-    const fakeBookendElement = win.document.createElement('div');
-    const buildBookendStub =
-        sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const appendChildSpy = sandbox.spy(story.element, 'appendChild');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildBookendStub).to.have.been.calledWith(story.getAmpDoc());
-          expect(appendChildSpy).to.have.been.calledWith(fakeBookendElement);
-        });
-  });
-
-  it('should not preload the bookend if no attribute was set', () => {
-    createPages(story.element, 1, ['cover']);
-
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.have.been.calledOnce;
+          expect(loadBookendStub).to.have.been.calledOnce;
         });
   });
 
   it('should not preload the bookend if not on the last page', () => {
     createPages(story.element, 2, ['cover']);
-    story.element.setAttribute('bookend-config-src', 'foo.com');
 
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.not.have.been.called;
+          expect(loadBookendStub).to.not.have.been.called;
         });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(
         element.implementation_, 'hideBookend_', NOOP);
@@ -206,7 +169,7 @@ describes.realWin('amp-story', {
     expect(hideBookendStub).to.have.been.calledOnce;
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should return a valid page index', () => {
     const count = 5;
 
@@ -217,7 +180,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should update progress bar when switching pages', () => {
     const impl = element.implementation_;
     const count = 10;
@@ -239,7 +202,7 @@ describes.realWin('amp-story', {
     expect(updateProgressBarStub).to.have.been.calledWith(index, count - 1);
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should pause/resume pages when switching pages', () => {
     const impl = element.implementation_;
     const pages = createPages(element, 5);
@@ -257,7 +220,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 

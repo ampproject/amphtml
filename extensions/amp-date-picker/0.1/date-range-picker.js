@@ -14,192 +14,80 @@
  * limitations under the License.
  */
 
+import {DayPickerPhrases} from './defaultPhrases';
+import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
-
 
 /**
  * Create a DateRangePicker React component
  * @return {function(new:React.Component, !Object)} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const React = requireExternal('react');
-  const PropTypes = requireExternal('prop-types');
-  const moment = requireExternal('moment');
   const {
-    ANCHOR_LEFT,
+    DAY_SIZE,
     HORIZONTAL_ORIENTATION,
   } = requireExternal('react-dates/constants');
-  const {
-    DateRangePicker: DatePicker,
-    DateRangePickerShape,
-  } = requireExternal('react-dates');
+  const {DayPickerRangeController} = requireExternal('react-dates');
 
-  React.options.syncComponentUpdates = false;
 
-  const propTypes = {
-    // example props for the demo
-    autoFocus: PropTypes.bool,
-    autoFocusEndDate: PropTypes.bool,
-    initialStartDate: PropTypes.object,
-    initialEndDate: PropTypes.object,
-    registerAction: PropTypes.func,
-    templates: PropTypes.object,
-  };
+  const defaultProps = map({
+    startDate: null, // TODO: use null
+    endDate: null, // TODO: use null
+    onDatesChange() {},
 
-  Object.assign(propTypes, omit(DateRangePickerShape, [
-    'startDate',
-    'endDate',
-    'onDatesChange',
-    'focusedInput',
-    'onFocusChange',
-  ]));
+    focusedInput: null,
+    onFocusChange() {},
+    onClose() {},
 
-  const defaultProps = {
-    // example props for the demo
-    autoFocus: false,
-    autoFocusEndDate: false,
-    initialStartDate: null,
-    initialEndDate: null,
-
-    // input related props
-    startDateId: 'start-date',
-    startDatePlaceholderText: 'Start Date',
-    endDateId: 'end-date',
-    endDatePlaceholderText: 'End Date',
-    disabled: false,
-    required: false,
-    screenReaderInputMessage: '',
-    showClearDates: false,
-    showDefaultInputIcon: false,
-    customInputIcon: null,
-    customArrowIcon: null,
-    customCloseIcon: null,
-
-    // calendar presentation and interaction related props
-    renderMonth: null,
-    orientation: HORIZONTAL_ORIENTATION,
-    anchorDirection: ANCHOR_LEFT,
-    horizontalMargin: 0,
-    withPortal: false,
-    withFullScreenPortal: false,
-    initialVisibleMonth: null,
-    numberOfMonths: 2,
     keepOpenOnDateSelect: false,
-    reopenPickerOnClearDates: false,
-    isRTL: false,
+    minimumNights: 1,
+    isOutsideRange() {},
+    isDayBlocked() {},
+    isDayHighlighted() {},
 
-    // navigation related props
+    // DayPicker props
+    renderMonth: null,
+    enableOutsideDays: false,
+    numberOfMonths: 1,
+    orientation: HORIZONTAL_ORIENTATION,
+    withPortal: false,
+    hideKeyboardShortcutsPanel: false,
+    initialVisibleMonth: null,
+    daySize: DAY_SIZE,
+
     navPrev: null,
     navNext: null,
+
     onPrevMonthClick() {},
     onNextMonthClick() {},
+    onOutsideClick() {},
 
-    // day presentation and interaction related props
     renderDay: null,
-    minimumNights: 1,
-    enableOutsideDays: false,
-    isDayBlocked: () => false,
-    isOutsideRange: () => false,
-    isDayHighlighted: () => false,
+    renderCalendarInfo: null,
+    firstDayOfWeek: null,
+    verticalHeight: null,
+    noBorder: false,
+    transitionDuration: undefined,
 
-    // internationalization
-    displayFormat: () => moment.localeData().longDateFormat('L'),
+    // accessibility
+    onBlur() {},
+    isFocused: false,
+    showKeyboardShortcuts: false,
+
+    // i18n
     monthFormat: 'MMMM YYYY',
+    weekDayFormat: 'd',
+    phrases: DayPickerPhrases,
 
-    registerAction: null,
-  };
+    isRTL: false,
+  });
 
-  class DateRangePickerBase extends React.Component {
-    /**
-     * @param {!Object} props
-     */
-    constructor(props) {
-      super(props);
+  const WrappedDayPickerRangeController =
+      withDatePickerCommon(DayPickerRangeController);
+  WrappedDayPickerRangeController.defaultProps = defaultProps;
 
-      let focusedInput = null;
-      if (props.autoFocus) {
-        focusedInput = 'startDate';//this.props.startDateId;
-      } else if (props.autoFocusEndDate) {
-        focusedInput = 'endDate';//this.props.endDateId;
-      }
-
-      this.state = {
-        focusedInput,
-        startDate: props.initialStartDate && moment(props.initialStartDate),
-        endDate: props.initialEndDate && moment(props.initialEndDate),
-      };
-
-      this.onDatesChange = this.onDatesChange.bind(this);
-      this.onFocusChange = this.onFocusChange.bind(this);
-
-      if (this.props.registerAction) {
-        this.props.registerAction('setDates', invocation => {
-          const {startDate, endDate} = invocation.args;
-          const state = {};
-          if (startDate) {
-            state.startDate = moment(startDate);
-          }
-          if (endDate) {
-            state.endDate = moment(endDate);
-          }
-
-          // TODO(cvializ): check if valid date, blocked, outside range, etc
-          this.setState(state);
-        });
-        this.props.registerAction('clear', () => {
-          this.setState({startDate: null, endDate: null});
-        });
-      }
-    }
-
-    /**
-     * @param {!Object} details
-     */
-    onDatesChange({startDate, endDate}) {
-      const {onDatesChange} = this.props;
-
-      this.setState({startDate, endDate});
-
-      if (onDatesChange) {
-        onDatesChange({startDate, endDate});
-      }
-    }
-
-    /**
-     * @param {?string} focusedInput
-     */
-    onFocusChange(focusedInput) {
-      this.setState({focusedInput});
-    }
-
-    /** @override */
-    render() {
-      const {focusedInput, startDate, endDate} = this.state;
-
-      const props = omit(this.props, [
-        'autoFocus',
-        'autoFocusEndDate',
-        'initialStartDate',
-        'initialEndDate',
-        'onDatesChange',
-      ]);
-
-      return React.createElement(DatePicker, Object.assign({}, props, {
-        onDatesChange: this.onDatesChange,
-        onFocusChange: this.onFocusChange,
-        focusedInput,
-        startDate,
-        endDate,
-      }));
-    }
-  }
-
-  DateRangePickerBase.propTypes = propTypes;
-  DateRangePickerBase.defaultProps = defaultProps;
-
-  return withDatePickerCommon(DateRangePickerBase);
+  return WrappedDayPickerRangeController;
 }
 
 /** @private {?function(new:React.Component, !Object)} */

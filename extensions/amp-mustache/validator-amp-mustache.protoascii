@@ -32,13 +32,30 @@ tags: {  # amp-mustache
   }
   attr_lists: "common-extension-attrs"
 }
-
+tags: {  # amp-mustache
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-mustache"
+    is_custom_template: true
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 # HTML5, 4.11.3 The template element
 tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
+  # <templates> tags inside <amp-story-auto-ads> have additional requirements
+  # as specified in the <amp-story-auto-ads rule> file.
+  disallowed_ancestor: "AMP-STORY-AUTO-ADS"
   disallowed_ancestor: "FORM > DIV [submit-success][template]"
+  disallowed_ancestor: "FORM > DIV [submit-error][template]"
   requires_extension: "amp-mustache"
   attrs: {
     name: "type"

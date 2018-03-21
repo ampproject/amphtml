@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {SystemLayer} from '../system-layer';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
+import {SystemLayer} from '../system-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -30,12 +31,13 @@ describes.fakeWin('amp-story system layer', {}, env => {
   beforeEach(() => {
     win = env.win;
 
+    registerServiceBuilder(win, 'story-store', () => ({get: NOOP}));
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
       build: sandbox.stub().returns(progressBarRoot),
       getRoot: sandbox.stub().returns(progressBarRoot),
-      setActivePageIndex: sandbox.spy(),
+      setActiveSegmentId: sandbox.spy(),
       updateProgress: sandbox.spy(),
     };
 
@@ -49,14 +51,14 @@ describes.fakeWin('amp-story system layer', {}, env => {
   });
 
   it('should build UI', () => {
-    const addEventHandlers =
-        sandbox.stub(systemLayer, 'addEventHandlers_').callsFake(NOOP);
+    const initializeListeners =
+        sandbox.stub(systemLayer, 'initializeListeners_').callsFake(NOOP);
 
     const root = systemLayer.build();
 
     expect(root).to.not.be.null;
 
-    expect(addEventHandlers).to.have.been.called;
+    expect(initializeListeners).to.have.been.called;
   });
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
@@ -66,15 +68,15 @@ describes.fakeWin('amp-story system layer', {}, env => {
     sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
     sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
-    systemLayer.addEventHandlers_();
+    systemLayer.initializeListeners_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
 
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach(index => {
-      systemLayer.setActivePageIndex(index);
-      progressBarStub.setActivePageIndex.should.have.been.calledWith(index);
+      systemLayer.setActivePageId(index);
+      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });
   });
 });

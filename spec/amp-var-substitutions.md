@@ -36,7 +36,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <th width="25%"><strong>AMP Feature</strong></th>
     <th width="25%"><strong>URL limitations</strong></th>
-    <th width="25%"><strong>Requires per-use opt-in?</strong></th>
+    <th width="25%"><strong>Requires <a href="#per-use-opt-in">per-use opt-in</a>?</strong></th>
     <th width="25%"><strong>Restrictions</strong></th>
   </tr>
   <tr>
@@ -48,7 +48,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-list</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md#substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">No</td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
@@ -60,7 +60,7 @@ The following table lists the features that enable variable substitutions, as we
   <tr>
     <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
-    <td width="25%">No</td>
+    <td width="25%">Yes, if fetching cross-origin resources via <code>[src]</code> <a href="https://www.ampproject.org/docs/reference/components/amp-bind#element-specific-attributes">attribute binding</a>. Otherwise, no. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
     <td width="25%">None</td>
   </tr>
   <tr>
@@ -74,13 +74,13 @@ The following table lists the features that enable variable substitutions, as we
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
-    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
   <tr>
     <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
     <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
-    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes.</td>
+    <td width="25%">See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
 </table>
 
@@ -193,6 +193,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
 | [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
 | [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
+| [Timezone Code](#timezone-code)     | `TIMEZONE_CODE`   | `${timezoneCode}`   |
 | [User Agent](#user-agent)           | `USER_AGENT`      | `${userAgent}`      |
 | [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
 | [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
@@ -582,7 +583,7 @@ Provides the name of the error that triggered an user error event. This variable
 #### External Referrer
 
 Provides the referrer where the user came from. Similar to [Document Referrer](#document_referrer), but the value is empty if user is navigated from same domain or the corresponding CDN proxy domain.
-Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation. 
+Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation.
 
 * **platform variable**: `EXTERNAL_REFERRER`
   *  Example: <br>
@@ -624,7 +625,7 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 #### Intersection Ratio
 
 Provides the fraction of the selected element that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
- 
+
 * **platform variable**: N/A
 * **amp-analytics variable**: `${intersectionRatio}`
 
@@ -1020,6 +1021,18 @@ Provides the user's time-zone offset from UTC, in minutes.
 * **amp-analytics variable**: `${timezone}`
   * Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
 
+#### Timezone Code
+
+Provides the user's IANA time-zone code (if available).
+
+* **platform variable**: `TIMEZONE_CODE`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?tz_code=TIMEZONE_CODE"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${timezoneCode}`
+  * Example value: `Europe/Rome`.
+ 
 #### Total Engaged Time
 
 Provides the total time (in seconds) the user has been engaged with the page since the page first became visible in the viewport. Total engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.

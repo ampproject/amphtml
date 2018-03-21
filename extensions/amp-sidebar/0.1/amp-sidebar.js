@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {ActionTrust} from '../../../src/action-trust';
+import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
-import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {setStyles, toggle} from '../../../src/style';
+import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
-import {removeFragment, parseUrl} from '../../../src/url';
+import {dev} from '../../../src/log';
+import {parseUrl, removeFragment} from '../../../src/url';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 /** @const */
 const TAG = 'amp-sidebar toolbar';
@@ -112,8 +112,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(this.element);
-
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
@@ -259,6 +257,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
+      this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+
       if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
@@ -275,7 +275,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.historyId_ = historyId;
     });
     if (opt_invocation) {
-      this.openerElement_ = opt_invocation.source;
+      this.openerElement_ = opt_invocation.caller;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }

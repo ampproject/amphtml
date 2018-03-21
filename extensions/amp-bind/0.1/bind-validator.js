@@ -124,8 +124,7 @@ export class BindValidator {
           user().error(TAG, 'Failed to parse srcset: ', e);
           return false;
         }
-        const sources = srcset.getSources();
-        urls = sources.map(source => source.url);
+        urls = srcset.getUrls();
       } else {
         urls = [value];
       }
@@ -246,6 +245,7 @@ function createElementRules_() {
       'state': null,
     },
     'AMP-SELECTOR': {
+      'disabled': null,
       'selected': null,
     },
     'AMP-STATE': {

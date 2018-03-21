@@ -33,6 +33,7 @@ export const SANDBOX_AVAILABLE_VARS = {
   'SOURCE_PATH': true,
   'TIMESTAMP': true,
   'TIMEZONE': true,
+  'TIMEZONE_CODE': true,
   'VIEWPORT_HEIGHT': true,
   'VIEWPORT_WIDTH': true,
   'SCREEN_WIDTH': true,
@@ -45,4 +46,7 @@ export const SANDBOX_AVAILABLE_VARS = {
   'AMP_VERSION': true,
   'BACKGROUND_STATE': true,
   'USER_AGENT': true,
+  'FIRST_CONTENTFUL_PAINT': true,
+  'FIRST_VIEWPORT_READY': true,
+  'MAKE_BODY_VISIBLE': true,
 };

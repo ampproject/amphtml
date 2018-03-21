@@ -15,12 +15,12 @@
  */
 
 import {Observable} from '../../observable';
-import {layoutRectLtwh} from '../../layout-rect';
-import {dev} from '../../log';
 import {Services} from '../../services';
-import {px, setStyle} from '../../style';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
+import {px, setStyle} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -102,6 +102,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   requiresFixedLayerTransfer() {
     return false;
+  }
+
+  /** @override */
+  supportsPositionFixed() {
+    return true;
   }
 
   /** @override */

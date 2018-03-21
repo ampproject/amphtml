@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
-import {makeCorrelator} from '../correlator';
-import {getBinaryType} from '../../../src/experiments';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
-import {parseUrl} from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {getBinaryType} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {makeCorrelator} from '../correlator';
+import {parseJson} from '../../../src/json';
+import {parseUrl} from '../../../src/url';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -79,6 +79,11 @@ export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 /** @typedef {{urls: !Array<string>}}
  */
 export let AmpAnalyticsConfigDef;
+
+/**
+ * @typedef {{instantLoad: boolean, writeInBody: boolean}}
+ */
+export let NameframeExperimentConfig;
 
 /**
  * @const {!./url-builder.QueryParameterDef}
@@ -230,6 +235,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, clientId, nodeOrDoc),
+          'ga_cid': win.gaGlobal.cid || null,
+          'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
           'biw': viewportRect.width,
           'bih': viewportRect.height,
@@ -426,7 +433,7 @@ export function additionalDimensions(win, viewportSize) {
     outerHeight,
     innerWidth,
     innerHeight].join();
-};
+}
 
 /**
  * Returns amp-analytics config for a new CSI trigger.
@@ -727,7 +734,7 @@ export function getIdentityToken(win, nodeOrDoc) {
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
       executeIdentityTokenFetch(win, nodeOrDoc);
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
-};
+}
 
 /**
  * @param {!Window} win
@@ -794,7 +801,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   const canonical =
     parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
-};
+}
 
 /**
  * Returns whether we are running on the AMP CDN.
@@ -805,4 +812,20 @@ export function isCdnProxy(win) {
   const googleCdnProxyRegex =
     /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return googleCdnProxyRegex.test(win.location.origin);
+}
+
+/**
+ * Populates the fields of the given Nameframe experiment config object.
+ * @param {!../../../src/service/xhr-impl.FetchResponseHeaders} headers
+ * @param {!NameframeExperimentConfig} nameframeConfig
+ */
+export function setNameframeExperimentConfigs(headers, nameframeConfig) {
+  const nameframeExperimentHeader = headers.get('amp-nameframe-exp');
+  if (nameframeExperimentHeader) {
+    nameframeExperimentHeader.split(';').forEach(config => {
+      if (config == 'instantLoad' || config == 'writeInBody') {
+        nameframeConfig[config] = true;
+      }
+    });
+  }
 }

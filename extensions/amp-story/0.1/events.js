@@ -19,23 +19,11 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the bookend should be opened
-  SHOW_BOOKEND: 'ampstory:showbookend',
-
-  // Triggered when the user clicks the close bookend button
-  CLOSE_BOOKEND: 'ampstory:closebookend',
-
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',
 
   // Triggered when the user unmutes the story
   UNMUTE: 'ampstory:unmute',
-
-  // Triggered when there are audio sources playing on the active page
-  AUDIO_PLAYING: 'ampstory:audioplaying',
-
-  // Triggered when there are no audio sources playing on the active page
-  AUDIO_STOPPED: 'ampstory:audiostopped',
 
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
@@ -61,6 +49,12 @@ export const EventType = {
 
   // Triggered when user clicks on left 25% of the first page
   SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
+
+  // Triggered when a story has loaded at least its initial set of pages.
+  STORY_LOADED: 'ampstory:load',
+
+  // Triggered when a page has loaded at least one frame of all of its media.
+  PAGE_LOADED: 'ampstory:pageload',
 };
 
 

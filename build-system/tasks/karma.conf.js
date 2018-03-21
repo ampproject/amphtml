@@ -121,6 +121,10 @@ module.exports = {
       // Dramatically speeds up iframe creation time.
       flags: ['--disable-extensions'],
     },
+    Chrome_no_extensions_headless: {
+      base: 'ChromeHeadless',
+      flags: ['--disable-extensions'],
+    },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
@@ -149,10 +153,10 @@ module.exports = {
       browserName: 'iphone',
       version: '10.0',
     },
-    SL_iOS_9_1: {
+    SL_iOS_9_3: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '9.1',
+      version: '9.3',
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',

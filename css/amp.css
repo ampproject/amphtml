@@ -165,6 +165,17 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   position: relative;
 }
 
+.i-amphtml-layout-intrinsic
+{
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+}
+
+.i-amphtml-intrinsic-sizer {
+  max-width: 100%;
+}
+
 .i-amphtml-layout-fixed-height,
 [layout=fixed-height][height]
 {
@@ -233,6 +244,10 @@ i-amphtml-sizer {
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+.i-amphtml-layout-intrinsic .i-amphtml-sizer {
+  max-width: 100%;
 }
 
 .i-amphtml-replaced-content {
@@ -568,9 +583,9 @@ amp-instagram {
 
 
 /**
- * Analytics tags should never be visible. keep them hidden.
+ * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics {
+amp-analytics, amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -596,6 +611,17 @@ amp-iframe iframe {
   display: none;
 }
 
+/**
+ * Minimal Subscriptions CSS. This part initially disables all of the UI
+ * until the complete rules are loaded as part of amp-subscriptions extension.
+ * Notice that, the `[subscription-dialog]` elements are always hidden.
+ */
+html:not(.i-amphtml-subs-ready) [subscriptions-section],
+html:not(.i-amphtml-subs-ready) [subscriptions-action],
+[subscriptions-dialog] {
+  display: none !important;
+}
+
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -603,6 +629,13 @@ amp-iframe iframe {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
   display: none;
 }
 
@@ -794,59 +827,24 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
-  display: block;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 100%;
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
 }
 
 amp-story-page {
   background-color: #757575;
 }
 
-amp-date-picker {
-  display: block;
-}
-
-amp-date-picker:not([i-amphtml-date-picker-attached])  {
-  display: flex;
-  width: 200px;
-  height: 50px;
-  border: 1px solid #dbdbdb;
-}
-
-amp-date-picker[type="range"]:not([i-amphtml-date-picker-attached]) {
-  width: 400px;
-}
-
-amp-date-picker[i-amphtml-date-picker-attached] [amp-date-placeholder],
-amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-start],
-amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-end] {
-  display: none;
-}
-
-amp-date-picker [amp-date-placeholder],
-amp-date-picker[type="range"] [amp-date-placeholder-start],
-amp-date-picker[type="range"] [amp-date-placeholder-end] {
-  border: 0;
-  font-weight: 200;
-  font-size: 18px;
-  line-height: 24px;
-  color: #333;
-  font-family: serif;
-  padding: 4px 8px;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-amp-date [amp-date-placeholder]::placeholder,
-amp-date-picker[type="range"] [amp-date-placeholder-start]::placeholder,
-amp-date-picker[type="range"] [amp-date-placeholder-end]::placeholder {
-  color: #757575;
+amp-story .i-amphtml-loader {
+  display: none !important;
 }

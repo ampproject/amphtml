@@ -15,42 +15,47 @@
  * limitations under the License.
  */
 
+import * as st from '../style';
+import * as tr from '../transition';
 import {ActionTrust} from '../action-trust';
-import {VideoSessionManager} from './video-session-manager';
-import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {getData, listen, listenOncePromise} from '../event-helper';
-import {dev} from '../log';
-import {getMode} from '../mode';
-import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
-import {setStyles} from '../style';
-import {isFiniteNumber} from '../types';
-import {mapRange} from '../utils/math';
-import {startsWith} from '../string.js';
+import {Animation} from '../animation';
+import {
+  EMPTY_METADATA,
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
+} from '../mediasession-helper';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
-import {Services} from '../services';
-import {
-  installPositionObserverServiceForDoc,
-} from './position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from './position-observer/position-observer-worker';
-import {map} from '../utils/object';
-import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {RelativePositions, layoutRectLtwh} from '../layout-rect';
+import {Services} from '../services';
+import {VideoSessionManager} from './video-session-manager';
 import {
-  EMPTY_METADATA,
-  parseSchemaImage,
-  parseOgImage,
-  parseFavicon,
-  setMediaSession,
-} from '../mediasession-helper';
-import {Animation} from '../animation';
-import * as st from '../style';
-import * as tr from '../transition';
+  createCustomEvent,
+  getData,
+  listen,
+  listenOncePromise,
+} from '../event-helper';
+import {dev} from '../log';
+import {getMode} from '../mode';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {
+  installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {isFiniteNumber} from '../types';
+import {isRTL, removeElement} from '../dom';
+import {map} from '../utils/object';
+import {mapRange} from '../utils/math';
+import {setStyles} from '../style';
+import {startsWith} from '../string.js';
 
 const TAG = 'video-manager';
 
@@ -160,6 +165,9 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
+
+    /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
@@ -178,9 +186,30 @@ export class VideoManager {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
         analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        this.timeUpdateActionEvent_(entry);
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /**
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
+   * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
+   * every 1 second for now.
+   * @private
+   */
+  timeUpdateActionEvent_(entry) {
+    const name = 'timeUpdate';
+    const currentTime = entry.video.getCurrentTime();
+    const duration = entry.video.getDuration();
+    if (isFiniteNumber(currentTime) &&
+        isFiniteNumber(duration) &&
+        duration > 0) {
+      const perc = currentTime / duration;
+      const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
+          {time: currentTime, percent: perc});
+      this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
+    }
   }
 
   /**
@@ -604,6 +633,7 @@ class VideoEntry {
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -658,11 +688,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    if (this.video.getCurrentTime() === this.video.getDuration()) {
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-    } else {
-      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
-    }
+    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -676,16 +702,21 @@ class VideoEntry {
   }
 
   /**
+   * Callback for when the video has ended
+   * @private
+   */
+  videoEnded_() {
+    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+  }
+
+  /**
    * Called when the video is loaded and can play.
    */
   videoLoaded() {
     this.loaded_ = true;
 
     // Get the internal element (the actual video/iframe)
-    this.internalElement_ = scopedQuerySelector(
-        this.video.element,
-        'video, iframe'
-    );
+    this.internalElement_ = this.video.element.querySelector('video, iframe');
 
     // Just in case the video's size changed during layout
     this.vsync_.measure(() => {
@@ -1057,7 +1088,7 @@ class VideoEntry {
       const internalElement = this.internalElement_;
       function cloneStyle(prop) {
         return st.getStyle(dev().assertElement(internalElement), prop);
-      };
+      }
 
       st.setStyles(dev().assertElement(this.draggingMask_), {
         'top': cloneStyle('top'),
@@ -1956,4 +1987,4 @@ export function clearSupportsAutoplayCacheForTesting() {
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
-};
+}

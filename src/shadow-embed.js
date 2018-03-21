@@ -16,21 +16,21 @@
 
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {dev} from './log';
 import {
+  ShadowDomVersion,
+  getShadowDomSupportedVersion,
+  isShadowCssSupported,
+  isShadowDomSupported,
+} from './web-components';
+import {
+  childElementsByTag,
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
-  childElementsByTag,
 } from './dom';
+import {dev} from './log';
 import {installCssTransformer} from './style-installer';
-import {
-  isShadowCssSupported,
-  isShadowDomSupported,
-  getShadowDomSupportedVersion,
-  ShadowDomVersion,
-} from './web-components';
 import {setStyle} from './style';
 import {toArray, toWin} from './types';
 
@@ -112,7 +112,6 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
-  const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
   hostElement.classList.add('i-amphtml-shadow-host-polyfill');
@@ -136,7 +135,7 @@ function createShadowRootPolyfill(hostElement) {
 
   // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function(id) {
-    const escapedId = escapeCssSelectorIdent(win, id);
+    const escapedId = escapeCssSelectorIdent(id);
     return /** @type {HTMLElement|null} */ (
       shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };

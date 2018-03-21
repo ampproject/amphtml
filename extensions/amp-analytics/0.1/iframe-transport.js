@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
+import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
-import {hasOwn} from '../../../src/utils/object';
-import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.IframeTransport';
@@ -185,11 +185,7 @@ export class IframeTransport {
             entry.attribution.forEach(attrib => {
               if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                user().error(TAG_,
-                    'Long Task: ' +
-                      `Vendor: "${this.type_}" ` +
-                      `Duration: ${entry.duration}ms ` +
-                      `Occurrences: ${this.numLongTasks_}`);
+                user().error(TAG_, `Long Task: Vendor: "${this.type_}"`);
               }
             });
           }

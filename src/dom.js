@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -136,7 +136,7 @@ export function removeChildren(parent) {
  * are deeply cloned. Notice, that this method should be used with care and
  * preferably on smaller subtrees.
  * @param {!Element} from
- * @param {!Element} to
+ * @param {!Element|!DocumentFragment} to
  */
 export function copyChildren(from, to) {
   const frag = to.ownerDocument.createDocumentFragment();
@@ -198,6 +198,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * @see https://dom.spec.whatwg.org/#connected
  */
 export function isConnectedNode(node) {
+  const connected = node.isConnected;
+  if (connected !== undefined) {
+    return connected;
+  }
+
   // "An element is connected if its shadow-including root is a document."
   let n = node;
   do {
@@ -433,7 +438,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  return scopedQuerySelector(parent, `> [${attr}]`);
+  return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -457,7 +462,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  return scopedQuerySelectorAll(parent, `> [${attr}]`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -468,7 +473,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  return scopedQuerySelector(parent, `> ${tagName}`);
+  return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -479,7 +484,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
-  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -609,6 +614,25 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
+ * Returns a clone of the content of a template element.
+ *
+ * Polyfill to replace .content access for browsers that do not support
+ * HTMLTemplateElements natively.
+ *
+ * @param {!HTMLTemplateElement|!Element} template
+ * @return {!DocumentFragment}
+ */
+export function templateContentClone(template) {
+  if ('content' in template) {
+    return template.content.cloneNode(true);
+  } else {
+    const content = template.ownerDocument.createDocumentFragment();
+    copyChildren(template, content);
+    return content;
+  }
+}
+
+/**
  * Iterate over an array-like. Some collections like NodeList are
  * lazily evaluated in some browsers, and accessing `length` forces full
  * evaluation. We can improve performance by iterating until an element is
@@ -693,18 +717,27 @@ export function isRTL(doc) {
  *
  * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
  *
- * @param {!Window} win
  * @param {string} ident
  * @return {string}
  */
-export function escapeCssSelectorIdent(win, ident) {
-  if (win.CSS && win.CSS.escape) {
-    return win.CSS.escape(ident);
-  }
-  // Polyfill.
+export function escapeCssSelectorIdent(ident) {
   return cssEscape(ident);
 }
 
+/**
+ * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
+ *
+ * See https://github.com/w3c/csswg-drafts/issues/2306.
+ *
+ * @param {string|number} ident
+ * @return {string}
+ */
+export function escapeCssSelectorNth(ident) {
+  const escaped = String(ident);
+  // Ensure it doesn't close the nth-child psuedo class.
+  dev().assert(escaped.indexOf(')') === -1);
+  return escaped;
+}
 
 /**
  * Escapes `<`, `>` and other HTML charcaters with their escaped forms.

@@ -35,18 +35,30 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`gulp`**<sup>[[1]](#footnote-1)</sup>                                 | Runs "watch" and "serve". Use this for standard local dev.            |
+| `gulp --extensions=<amp-foo,amp-bar>`                                   | Runs "watch" and "serve", after building only the listed extensions.
+| `gulp --extensions=minimal_set`                                         | Runs "watch" and "serve", after building the extensions needed to load `article.amp.html`.
+| `gulp --noextensions`                                                   | Runs "watch" and "serve" without building any extensions.
 | `gulp dist`<sup>[[1]](#footnote-1)</sup>                                | Builds production binaries.                                           |
+| `gulp dist --extensions=<amp-foo,amp-bar>`                              | Builds production binaries, with only the listed extensions.
+| `gulp dist --extensions=minimal_set`                                    | Builds production binaries, with only the extensions needed to load `article.amp.html`.
+| `gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
 | `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.) |
 | `gulp dist --fortesting --config=<config>`<sup>[[1]](#footnote-1)</sup> | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.) |
 | `gulp lint`                                                             | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
+| `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided.                                         |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
+| `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
+| `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 | `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
-| `gulp extensions`                                                       | Build AMP Extensions.                                                 |
-| `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-builds.                               |
+| `gulp watch --extensions=<amp-foo,amp-bar>`                             | Watches for changes in files, re-builds only the listed extensions.
+| `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
+| `gulp watch --noextensions`                                             | Watches for changes in files, re-builds with no extensions.
 | `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
 | `gulp pr-check --nobuild`<sup>[[1]](#footnote-1)</sup>                  | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
 | `gulp pr-check --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup>   | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
@@ -71,8 +83,9 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.                     |
 | `gulp ava`<sup>[[1]](#footnote-1)</sup>                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
-| `gulp visual-diff`                                                      | Runs all visual diff tests locally. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
-| `gulp visual-diff --percy_debug --phantomjs_debug --webserver_debug`    | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
+| `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
+| `gulp visual-diff --percy_debug --chrome_debug --webserver_debug`       | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
@@ -187,8 +200,6 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
-* If you see "Cannot find module '../build/safe-execute'", this is caused by a caching issue - try uninstalling and reinstalling the 'wd' module as described in [karma-sauce-launcher issue #117](https://github.com/karma-runner/karma-sauce-launcher/issues/117).
-
 ## Visual Diff Tests
 
 **NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
@@ -200,7 +211,7 @@ The technology stack used is:
 - [Percy](https://percy.io/), a visual regression testing service for webpages
 - [Capybara](https://percy.io/docs/clients/ruby/capybara-rails), a framework that integrates tests with Percy
 - [Poltergeist](https://github.com/teampoltergeist/poltergeist), a driver capable of loading webpages for diffing
-- [PhantomJS](http://phantomjs.org/), a headless webkit based browser
+- [(Headless) Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome browser, optionally in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
@@ -214,20 +225,25 @@ You can also run the visual tests locally during development. You must first cre
 
 First, make sure you have [Ruby](https://www.ruby-lang.org/en/documentation/installation/) installed on your machine if you don't already have it, and download the gems required for local Percy builds:
 ```
-gem install percy-capybara poltergeist phantomjs
+gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
 ```
 Next, build the AMP runtime and run the gulp task that invokes the visual diff script:
 ```
 gulp build
 gulp visual-diff
 ```
-The build will use the Percy credentials set via environment variables in the previous step, and you can see the results at `https://percy.io/<org>/<project>`.
+The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome. You can see the results at `https://percy.io/<org>/<project>`.
+
+To run Chrome in headless mode, use:
+```
+ gulp visual-diff --headless
+```
 
 To see debugging info during Percy runs, you can run:
 ```
- gulp visual-diff --percy_debug --phantomjs_debug --webserver_debug
+ gulp visual-diff --percy_debug --chrome_debug --webserver_debug
 ```
-The debug flags `--percy_debug`, `--phantomjs_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
+The debug flags `--percy_debug`, `--chrome_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
 ```
  gulp visual-diff --debug
 ```

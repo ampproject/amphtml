@@ -176,11 +176,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">form</td>
-    <td>Allowed. Require including <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">amp-form extension</a>.</td>
+    <td>Allowed. Require including <a href="https://www.ampproject.org/docs/reference/components/amp-form">amp-form</a> extension.</td>
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly allowed with <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#inputs">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://www.ampproject.org/docs/reference/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -331,6 +331,7 @@ Font providers can be whitelisted if they support CSS-only integrations and serv
 - Fonts.com: `https://fast.fonts.net`
 - Google Fonts: `https://fonts.googleapis.com`
 - Font Awesome: `https://maxcdn.bootstrapcdn.com`
+- [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
 
 IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.
 

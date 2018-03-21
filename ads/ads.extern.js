@@ -34,6 +34,13 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Under 3p folder
 
+// beopinion.js
+data.account;
+data.content;
+data.name;
+//data['my-content'];
+window.BeOpinionSDK;
+
 // facebook.js
 data.embedAs;
 data.href;
@@ -48,6 +55,13 @@ data.src;
 
 //twitter.js
 data.tweetid
+
+//mathml.js
+data.formula
+var mathjax
+mathjax.Hub
+mathjax.Hub.Queue
+window.MathJax
 
 // Under ads/google folder
 
@@ -162,6 +176,9 @@ data.targetid;
 data.ws;
 data.host;
 data.s;
+
+// adpicker.js
+data.ph;
 
 // adreactor.js
 data.zid;
@@ -301,6 +318,10 @@ data.queue;
 
 // imedia.js
 data.positions
+
+// imonomy.js
+data.pid;
+data.subId;
 
 // improvedigital.js
 data.placement;

@@ -33,10 +33,17 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>none</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><ul>
+      <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
+      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+    </ul></td>
+  </tr>
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
 {% endcall %}
 
 [TOC]
@@ -205,17 +212,17 @@ Each of these providers has a different set of available parameters ([see `data-
   "related-articles": {
     "More to Read": [
       {
-        title: "My friends, this is India [...]",
-        url: "http://a-publisher.com/india"
-        image: "./media/b1.jpg"
+        "title": "My friends, this is India [...]",
+        "url": "http://a-publisher.com/india",
+        "image": "./media/b1.jpg"
       },
       {
-        title: "A wonderful weekend with Tenturi",
-        url: "http://a-publisher.com/tenturi"
-        image: "./media/b2.jpg"
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "./media/b2.jpg"
       },
       ...
-    ],
+    ]
   }
 }
 ```
@@ -244,16 +251,15 @@ The `<amp-story-page>` component represents the content to display on a single p
 ```html
 <amp-story-page id="cover">
   <amp-story-grid-layer template="fill">
-    <amp-video src="background.mp4"></amp-video>
+    <amp-video layout="fill" src="background.mp4" poster="background.png" muted autoplay></amp-video>
   </amp-story-grid-layer>
   <amp-story-grid-layer template="vertical">
     <h1>These are the Top 5 World's Most...</h1>
     <p>Jon Bersch</p>
     <p>May 18</p>
   </amp-story-grid-layer>
-  <amp-story-grid-layer template="vertical"
-      align-content="end" justify-content="end">
-    <amp-img src="a-logo.svg"></amp-img>
+  <amp-story-grid-layer template="thirds">
+    <amp-img grid-area="bottom-third" src="a-logo.svg" width="64" height="64"></amp-img>
   </amp-story-grid-layer>
 </amp-story-page>
 ```
@@ -291,9 +297,13 @@ For example:
 
 The `<amp-story-page>` component contains one or more [layers](#layers).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
 
-## Layers: `amp-story-grid-layer`
+## Layers
 
-Layers are stacked on top of one another to create the desired visual effect. The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
+Layers are stacked on top of one another to create the desired visual effect.
+
+### `amp-story-grid-layer`
+
+The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
@@ -310,7 +320,7 @@ Layers are stacked on top of one another to create the desired visual effect. Th
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img></amp-im</amp-img>
 </div>
 
-### Attributes
+#### Attributes
 
 
 ##### template [required]
@@ -332,11 +342,17 @@ Example:
 </amp-story-grid-layer>
 ```
 
-### Templates
+#### Templates
 
 The following are available templates to specify for the layout of the grid layer.
 
-#### fill
+{% call callout('Tip', type='success') %}
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://ampbyexample.com/stories/features/layouts/).
+{% endcall %}
+
+
+
+##### fill
 
 The `fill` template shows its first child full bleed. All other children are not shown.
 
@@ -356,7 +372,7 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### vertical
+##### vertical
 
 The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
@@ -377,7 +393,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### horizontal
+##### horizontal
 
 The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
@@ -397,7 +413,7 @@ Names Areas: (none)
 </amp-story-grid-layer>
 ```
 
-#### thirds
+##### thirds
 
 The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
 
@@ -421,7 +437,7 @@ Named Areas:
 </amp-story-grid-layer>
 ```
 
-### Children (of amp-story-grid-layer)
+#### Children
 
 An `amp-story-grid-layer` can contain any of the following elements:
 
@@ -469,6 +485,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;hgroup></code></li>
         <li><code>&lt;nav></code></li>
         <li><code>&lt;section></code></li>
+        <li><code>&lt;amp-cta-layer></code></li>
       </ul>
     </td>
   </tr>
@@ -564,6 +581,44 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+### `amp-story-cta-layer`
+
+The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` elements inside an `<amp-story-page>`.
+
+#### Constraints
+
+* If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
+* Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
+
+#### Example
+
+```html
+<amp-story-page id="vertical-template-thirds">
+  <amp-story-grid-layer template="thirds">
+    <div class="content" grid-area="upper-third">Paragraph 1</div>
+    <div class="content" grid-area="middle-third">Paragraph 2</div>
+    <div class="content" grid-area="lower-third">Paragraph 3</div>
+  </amp-story-grid-layer>
+  <amp-story-cta-layer>
+    <a href="http://www.google.com" class="button"> Call to action! </a>
+  </amp-story-cta-layer>
+</amp-story-page>
+```
+
+[Complete example found at the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)
+
+<div class="flex-images">
+  <amp-img alt="CTA Layer" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" width="404" height="678">
+  <noscript><img width="404" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" /></noscript>
+  </amp-img>
+</div>
+
+#### Children
+
+The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
+
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii#L221) field in the validation rules.
+
 ## Animations
 
 Every element inside an `<amp-story-page>` can have an entrance animation.
@@ -589,6 +644,12 @@ The following animation effects are available as presets for AMP stories:
 | `twirl-in`        | 1000                  | 0 |
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
+
+
+{% call callout('Tip', type='success') %}
+See a [live demo of all the AMP story animations](https://ampbyexample.com/stories/features/animations/) on AMP By Example.
+{% endcall %}
+
 
 ### Animation attributes
 
@@ -630,7 +691,9 @@ Fly from left!
 </h2>
 ```
 
-**Note**: The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% call callout('Note', type='note') %}
+The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
+{% endcall %}
 
 ##### animate-in-after (optional)
 
@@ -700,9 +763,16 @@ You can apply multiple entrance animations on one element (for example, an eleme
 </div>
 ```
 
-**Note**: If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
-
+{% call callout('Note', type='note') %}
+If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
+{% endcall %}
 
 ## Validation
 
 See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) in the AMP validator specification.
+
+## Related resources
+
+* [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+* [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
+* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)
