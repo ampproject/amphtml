@@ -32,7 +32,7 @@ describe('document-info', () => {
     sandbox.restore();
   });
 
-  function getWin(links) {
+  function getWin(links, metas) {
     return createIframePromise().then(iframe => {
       if (links) {
         for (const rel in links) {
@@ -42,6 +42,17 @@ describe('document-info', () => {
             link.setAttribute('rel', rel);
             link.setAttribute('href', hrefs[i]);
             iframe.doc.head.appendChild(link);
+          }
+        }
+      }
+      if (metas) {
+        for (const name in metas) {
+          const contents = metas[name];
+          for (let i = 0; i < contents.length; i++) {
+            const meta = iframe.doc.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', contents[i]);
+            iframe.doc.head.appendChild(meta);
           }
         }
       }
@@ -203,6 +214,21 @@ describe('document-info', () => {
           .to.be.undefined;
       expect(Services.documentInfoForDoc(win.document).linkRels['preconnect'])
           .to.be.undefined;
+    });
+  });
+
+  it('should provide the metaTags', () => {
+    return getWin({}, {
+      'theme-color': ['#123456'],
+    }).then(win => {
+      expect(Services.documentInfoForDoc(win.document).metaTags['theme-color'])
+          .to.equal('#123456');
+    });
+  });
+
+  it('should provide empty metaTags if there are no meta tags', () => {
+    return getWin().then(win => {
+      expect(Services.documentInfoForDoc(win.document).metaTags).to.be.empty;
     });
   });
 
