@@ -259,7 +259,6 @@ export class AmpList extends AMP.BaseElement {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
         this.renderPass_.schedule(1); // Allow paint frame before next render.
-        user().error(TAG, 'New renderItems_, continuing render pass...');
       } else {
         this.renderItems_ = null;
       }
