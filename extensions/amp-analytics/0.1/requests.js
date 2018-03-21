@@ -44,11 +44,8 @@ export class RequestHandler {
    */
   constructor(ampAnalyticsElement, request, preconnect, handler, isSandbox) {
 
-    /** @type {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-    const ampdoc = ampAnalyticsElement.getAmpDoc();
-
     /** @const {!Window} */
-    this.win = ampdoc.win;
+    this.win = ampAnalyticsElement.getAmpDoc().win;
 
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);

@@ -131,8 +131,8 @@ export class A4AVariableSource extends VariableSource {
    * @param {string} cssSelector Elements matching this selector will be
    *     included, provided they have at least one of the attributeNames
    *     set, up to a max of 10. May be URI encoded.
-   * Note: Additional params will be the names of the attributes whose
-   *     values will be returned. There should be at least 1.
+   * @param {...string} attributeNames Additional params will be the names of
+   *     attributes whose values will be returned. There should be at least 1.
    * @returns {string} A stringified JSON array containing one member for each
    *     matching element. Each member will contain the names and values of the
    *     specified attributes, if the corresponding element has that attribute.
@@ -140,11 +140,23 @@ export class A4AVariableSource extends VariableSource {
    *     requested attributes, then nothing will be included in the array
    *     for that element.
    */
-  htmlAttrBinding_(cssSelector) {
-    const HTML_ATTR_MAX_ELEMENTS = 10;
+  htmlAttrBinding_(cssSelector, ...attributeNames) {
+    // Generate an error if cssSelector matches more than this many elements
+    const HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE = 50;
+
+    // Of the elements matched by cssSelector, see which contain one or more
+    // of the specified attributes, and return an array of at most this many.
+    const HTML_ATTR_MAX_ELEMENTS_TO_RETURN = 10;
+
+    // Only allow at most this many attributeNames to be specified.
     const HTML_ATTR_MAX_ATTRS = 10;
-    const attributeNames = Array.prototype.slice.call(arguments, 1);
+
+    const TAG = 'A4AVariableSource';
     if (!cssSelector || !attributeNames.length) {
+      return '[]';
+    }
+    if (attributeNames.length > HTML_ATTR_MAX_ATTRS) {
+      user().error(TAG, `At most ${HTML_ATTR_MAX_ATTRS} may be requested.`);
       return '[]';
     }
     cssSelector = decodeURI(cssSelector);
@@ -152,17 +164,20 @@ export class A4AVariableSource extends VariableSource {
     try {
       elements = this.win_.document.querySelectorAll(cssSelector);
     } catch (e) {
-      const TAG = 'A4AVariableSource';
       user().error(TAG, `Invalid selector: ${cssSelector}`);
+      return '[]';
+    }
+    if (elements.length > HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE) {
+      user().error(TAG, 'CSS selector may match at most ' +
+          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`);
       return '[]';
     }
     const result = [];
     for (let i = 0; i < elements.length &&
-        result.length < HTML_ATTR_MAX_ELEMENTS; ++i) {
+        result.length < HTML_ATTR_MAX_ELEMENTS_TO_RETURN; ++i) {
       const currentResult = {};
       let foundAtLeastOneAttr = false;
-      for (let j = 0; j < attributeNames.length &&
-          j < HTML_ATTR_MAX_ATTRS; ++j) {
+      for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
           currentResult[attributeName] =
