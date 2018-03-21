@@ -34,7 +34,11 @@ export class FriendlyFrameRenderer extends Renderer {
 
   constructor() {
     super();
-    /** @type {?Element} */
+
+    /**
+     * @type {?Element}
+     * @private
+     */
     this.iframe_ = null;
   }
 
