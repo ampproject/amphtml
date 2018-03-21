@@ -245,6 +245,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
   {
+    id: 'inline-styles',
+    name: 'Enables the usage of inline styles for non fixed elements',
+    spec: 'https://github.com/ampproject/amphtml/issues/11881',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+  },
+  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
