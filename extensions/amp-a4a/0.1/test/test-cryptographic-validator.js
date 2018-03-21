@@ -15,13 +15,13 @@
  */
 
 import * as sinon from 'sinon';
+import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
   SIGNATURE_VERIFIER_PROPERTY_NAME,
 } from '../cryptographic-validator';
-import {ValidatorResult} from '../amp-ad-type-defs';
-import {SignatureVerifier} from '../signature-verifier';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {VerificationStatus} from '../signature-verifier';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
   amp: {},
@@ -31,36 +31,41 @@ const realWinConfig = {
 
 describes.realWin('CryptographicValidator', realWinConfig, env => {
 
-  const minifiedCreative = '<p>Hello, World!</p>';
   const headers = {'Content-Type': 'application/jwk-set+json'};
-  const encodedCreative = utf8Encode(minifiedCreative);
+  const minifiedCreative = '<p>Hello, World!</p>';
 
   let sandbox;
   let validator;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] =
-        new SignatureVerifier(env.win, {
-        'service-1': 'https://signingservice1.net/keyset.json',
-      });
+    // We are mocking out the actual verifier for simplicity, but that's okay
+    // since its logic is well tested in test-signature-verifier.js.
+    env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
+      verify: () => Promise.resolve(VerificationStatus.OK),
+    };
     validator = new CryptographicValidator();
   });
 
-  it('should pass validation', () => {
-    sandbox.stub(CryptographicValidator.prototype, 'createOutput_').
-        withArgs(true, encodedCreative).returns({
-          result: ValidatorResult.AMP,
-          adResponseType: 'cryptographic',
-          creativeData: {
-            creativeMetadata: {
-              // 
-            },
-          },
+  it('should have AMP validator result', () => {
+    sandbox.stub(CryptographicValidator.prototype, 'getAmpAdMetadata_')
+        .withArgs(minifiedCreative).returns({
+          minifiedCreative,
+          customElementExtensions: [],
+          customStyleSheets: [],
         });
-    validator.validate({win: env.win}, utf8Encode(minifiedCreative), headers)
+    return validator.validate(
+        {win: env.win}, utf8Encode(minifiedCreative), headers)
         .then(validatorOutput => {
-          // TODO
+          expect(validatorOutput).to.be.ok;
+          expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+          expect(validatorOutput.adResponseType).to.equal(
+              AdResponseType.CRYPTO);
+          expect(validatorOutput.creativeData).to.be.ok;
+
+          const creativeMetadata =
+              validatorOutput.creativeData.creativeMetadata;
+          expect(creativeMetadata.minifiedCreative).to.equal(minifiedCreative);
         });
   });
 });

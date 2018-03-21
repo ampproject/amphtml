@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-import {A4AVariableSource} from '../../amp-a4a/0.1/a4a-variable-source';
 import {
   AdResponseType,
-  Renderer,
   Validator,
   ValidatorResult,
 } from './amp-ad-type-defs';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getAmpAdMetadata} from './amp-ad-utils';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {user} from '../../../src/log';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 export const SIGNATURE_VERIFIER_PROPERTY_NAME =
@@ -56,7 +46,7 @@ export class CryptographicValidator extends Validator {
    */
   createOutput_(verificationSucceeded, bytes) {
     const creativeData = {
-      creativeMetadata: getAmpAdMetadata(utf8Decode(bytes)),
+      creativeMetadata: this.getAmpAdMetadata_(utf8Decode(bytes)),
     };
     return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
       type: verificationSucceeded ?
@@ -86,5 +76,14 @@ export class CryptographicValidator extends Validator {
               return this.createOutput_(false, unvalidatedBytes);
           }
         });
+  }
+
+  /**
+   * @param {string} creative
+   * @return {?./amp-ad-type-defs.CreativeMetaDataDef}
+   * @visibleForTesting
+   */
+  getAmpAdMetadata_(creative) {
+    return getAmpAdMetadata(creative);
   }
 }

@@ -46,9 +46,9 @@ const METADATA_STRINGS = [
  * Throws {@code SyntaxError} if the metadata block delimiters are missing
  * or corrupted or if the metadata content doesn't parse as JSON.
  * @param {string} creative from which CSS is extracted
- * @return {?CreativeMetaDataDef} Object result of parsing JSON data blob inside
- *     the metadata markers on the ad text, or null if no metadata markers are
- *     found.
+ * @return {?./amp-ad-type-defs.CreativeMetaDataDef} Object result of parsing
+ *     JSON data blob inside the metadata markers on the ad text, or null if
+ *     no metadata markers are found.
  * TODO(keithwrightbos@): report error cases
  */
 export function getAmpAdMetadata(creative) {
