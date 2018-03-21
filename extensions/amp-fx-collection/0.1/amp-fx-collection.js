@@ -15,6 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {FadeInProvider} from './providers/fade-in';
 import {ParallaxProvider} from './providers/parallax';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -30,6 +31,7 @@ const TAG = 'amp-fx-collection';
  */
 const FxType = {
   PARALLAX: 'parallax',
+  FADE_IN: 'fade-in',
 };
 
 /**
@@ -38,6 +40,8 @@ const FxType = {
  */
 const fxProviders = map({
   [FxType.PARALLAX]: ParallaxProvider,
+  [FxType.FADE_IN]: FadeInProvider,
+
 });
 
 /**

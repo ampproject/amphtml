@@ -80,6 +80,15 @@ In this example, as the user scrolls the page, the h1 element scrolls faster rel
 ```
 
 
+### fade-in
+
+The `fade-in` effect allows an element to fade in as the user scrolls the page.
+
+##### Attribute 1
+
+#### Example: Example 1
+
+
 ## Validation
 
 See [amp-fx-collection rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-collection/validator-amp-fx-collection.protoascii) in the AMP validator specification.
