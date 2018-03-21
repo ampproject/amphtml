@@ -89,8 +89,8 @@ function renderSingle(doc, elementDef) {
     });
   }
 
-  if (elementDef.untranslatedText) {
-    el.textContent = elementDef.untranslatedText;
+  if (elementDef.unlocalizedString) {
+    el.textContent = elementDef.unlocalizedString;
   }
 
   if (elementDef.children) {
