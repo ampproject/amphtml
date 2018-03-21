@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ * Extension gets loaded dynamically and manages video components.
+ * It's invalid to include this extension in a document as a `<script>` tag, as
+ * it gets automatically inserted by the runtime when required.
+ */
+
 import {dev} from '../../../src/log';
 
 
@@ -51,6 +58,6 @@ export class VideoService {
   }
 }
 
-AMP.extension('amp-video-manager', 0.1, function(AMP) {
+AMP.extension('amp-video-service', 0.1, function(AMP) {
   AMP.registerServiceForDoc('video-service', VideoService);
 });
