@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FriendlyFrameRenderer} from '../amp-ad-render';
+import {FriendlyFrameRenderer} from '../friendly-frame-renderer';
 
 const realWinConfig = {
   amp: {},
