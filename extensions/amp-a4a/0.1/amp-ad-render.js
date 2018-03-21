@@ -56,7 +56,7 @@ export class CryptographicValidator extends Validator {
    */
   createOutput_(verificationSucceeded, bytes) {
     const creativeData = {
-      creativeMetadata: getAmpAdMetadata(utf8decode(bytes)),
+      creativeMetadata: getAmpAdMetadata(utf8Decode(bytes)),
     };
     return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
       type: verificationSucceeded ?
