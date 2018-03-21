@@ -20,7 +20,7 @@ import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setStyles, setImportantStyles} from '../../style';
+import {px, setImportantStyles} from '../../style';
 
 
 const TAG_ = 'Viewport';
