@@ -84,7 +84,7 @@ function renderSingle(doc, elementDef) {
       dev().assert(localizationService,
           'Could not retrieve LocalizationService.');
       el.textContent = localizationService
-          .getMessage(/** @type {!LocalizedStringId} */ (
+          .getLocalizedString(/** @type {!LocalizedStringId} */ (
             elementDef.localizedStringId));
     });
   }

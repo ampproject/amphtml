@@ -35,7 +35,7 @@ import {throttle} from '../../../src/utils/rate-limit';
  * does not need to be included here.
  * @const {!Object<string, !LocalizedStringId>}
  */
-const SHARE_PROVIDER_MESSAGE_ID = map({
+const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
   'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
   'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
   'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
@@ -126,8 +126,8 @@ function buildProviderParams(opt_params) {
  */
 function buildProvider(doc, shareType, opt_params) {
   const shareProviderLocalizedStringId = dev().assert(
-      SHARE_PROVIDER_MESSAGE_ID[shareType],
-      `No message to display name for share type ${shareType}.`);
+      SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
+      `No localized string to display name for share type ${shareType}.`);
 
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([
@@ -244,9 +244,9 @@ export class ShareWidget {
       this.localizationServicePromise_.then(localizationService => {
         dev().assert(localizationService,
             'Could not retrieve LocalizationService.');
-        const failureMessage = localizationService.getMessage(
+        const failureString = localizationService.getLocalizedString(
             LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
-        Toast.show(this.win_, failureMessage);
+        Toast.show(this.win_, failureString);
       });
       return;
     }

@@ -761,18 +761,19 @@ export class AmpStory extends AMP.BaseElement {
     errorIconEl.classList.add('i-amphtml-story-experiment-icon-error');
 
     const errorMsgEl = this.win.document.createElement('span');
-    errorMsgEl.textContent = this.localizationService_.getMessage(
+    errorMsgEl.textContent = this.localizationService_.getLocalizedString(
         LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT);
 
     const experimentsLinkEl = this.win.document.createElement('button');
     experimentsLinkEl.textContent = this.localizationService_
-        .getMessage(LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
+        .getLocalizedString(
+            LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
       toggleExperiment(this.win, 'amp-story', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
-      errorMsgEl.textContent = this.localizationService_
-          .getMessage(LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
+      errorMsgEl.textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
       removeElement(experimentsLinkEl);
     });
 

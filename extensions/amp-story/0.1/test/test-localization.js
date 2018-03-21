@@ -21,10 +21,10 @@ import {
   getLanguageCodesFromString,
 } from '../localization';
 
-describes.fakeWin('amp-story messages', {}, env => {
-  describe('message IDs', () => {
+describes.fakeWin('localization', {}, env => {
+  describe('localized string IDs', () => {
     it('should have unique values', () => {
-      // Transform message IDs from a map of keys to values to a multimap of
+      // Transform string IDs from a map of keys to values to a multimap of
       // values to a list of keys that have that value.
       const localizedStringIdKeys = Object.keys(LocalizedStringId);
       const valuesToKeys = localizedStringIdKeys
@@ -44,29 +44,26 @@ describes.fakeWin('amp-story messages', {}, env => {
       const localizedStringIdValues = Object.keys(valuesToKeys);
       localizedStringIdValues.forEach(value => {
         const keys = valuesToKeys[value];
-        expect(keys, `${value} is never used in a message ID`)
+        expect(keys, `${value} is never used in a localized string ID`)
             .to.not.be.empty;
         expect(keys).to.have
             .lengthOf(1, `${value} is used as a value for more than one ` +
-                `message ID: ${keys}`);
+                `localized string ID: ${keys}`);
       });
     });
   });
 
-  describe('message service', () => {
-    const TEST_MESSAGE_ID = 'test_message_id';
-    const TEST_MESSAGE_CONTENT = 'test message content';
-
-    it('should get message text', () => {
+  describe('localization service', () => {
+    it('should get string text', () => {
       const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('default', {
-        [TEST_MESSAGE_ID]: {
-          message: TEST_MESSAGE_CONTENT,
+        'test_string_id': {
+          string: 'test string content',
         },
       });
 
-      expect(localizationService.getMessage(TEST_MESSAGE_ID))
-          .to.equal(TEST_MESSAGE_CONTENT);
+      expect(localizationService.getLocalizedString('test_string_id'))
+          .to.equal('test string content');
     });
 
     it('should have language fallbacks', () => {
@@ -76,27 +73,23 @@ describes.fakeWin('amp-story messages', {}, env => {
   });
 
   describe('en-XA pseudolocale', () => {
-    const TEST_MESSAGE_ID = 'test_message_id';
-
     it('should transform strings', () => {
       const originalStringBundle = {
-        [TEST_MESSAGE_ID]: {
-          message: 'foo',
-        },
+        'test_string_id': {string: 'foo'},
       };
       const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
           s => `${s} ${s}`);
 
-      expect(pseudoLocaleBundle[TEST_MESSAGE_ID].message).to.equal('foo foo');
+      expect(pseudoLocaleBundle['test_string_id'].string).to.equal('foo foo');
     });
 
     it('should contain all string IDs from original locale', () => {
       const originalStringBundle = {
-        'msg_id_1': {message: 'msg1'},
-        'msg_id_2': {message: 'msg2'},
-        'msg_id_3': {message: 'msg3'},
-        'msg_id_4': {message: 'msg4'},
-        'msg_id_5': {message: 'msg5'},
+        'msg_id_1': {string: 'msg1'},
+        'msg_id_2': {string: 'msg2'},
+        'msg_id_3': {string: 'msg3'},
+        'msg_id_4': {string: 'msg4'},
+        'msg_id_5': {string: 'msg5'},
       };
       const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
           s => `${s} ${s}`);

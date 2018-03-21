@@ -18,10 +18,10 @@ import {parseJson} from '../../../src/json';
 
 
 /**
- * A unique identifier for each message.  Message IDs should:
+ * A unique identifier for each localized string.  Localized string IDs should:
  *
  *   - Maintain alphabetical order
- *   - Be prefixed with the name of the extension that uses the message
+ *   - Be prefixed with the name of the extension that uses the string
  *     (e.g. "AMP_STORY_"), or with "AMP_" if they are general
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
@@ -59,7 +59,7 @@ export const LocalizedStringId = {
 
 /**
  * @typedef {{
- *   message: string,
+ *   string: string,
  *   description: string,
  * }}
  */
@@ -102,26 +102,28 @@ export function getLanguageCodesFromString(languageCode) {
 
 
 /**
- * Gets the message matching the specified message ID in the language specified.
- * @param {!Object<string, LocalizedStringBundleDef>} messageBundles
+ * Gets the string matching the specified localized string ID in the language
+ * specified.
+ * @param {!Object<string, LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
- * @param {!LocalizedStringId} LocalizedStringId
+ * @param {!LocalizedStringId} localizedStringId
  */
-function findMessage(messageBundles, languageCodes, LocalizedStringId) {
-  let message = null;
+function findLocalizedString(localizedStringBundles, languageCodes,
+  localizedStringId) {
+  let localizedString = null;
 
   languageCodes.some(languageCode => {
-    const messageBundle = messageBundles[languageCode];
-    if (messageBundle && messageBundle[LocalizedStringId] &&
-        messageBundle[LocalizedStringId].message) {
-      message = messageBundle[LocalizedStringId].message;
+    const localizedStringBundle = localizedStringBundles[languageCode];
+    if (localizedStringBundle && localizedStringBundle[localizedStringId] &&
+        localizedStringBundle[localizedStringId].string) {
+      localizedString = localizedStringBundle[localizedStringId].string;
       return true;
     }
 
     return false;
   });
 
-  return message;
+  return localizedString;
 }
 
 
@@ -153,8 +155,8 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
     const localizedStringId =
         /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
-    pseudoLocaleStringBundle[localizedStringId].message =
-        localizationFn(localizedStringBundle[localizedStringId].message);
+    pseudoLocaleStringBundle[localizedStringId].string =
+        localizationFn(localizedStringBundle[localizedStringId].string);
   });
 
   return pseudoLocaleStringBundle;
@@ -174,10 +176,10 @@ export class LocalizationService {
     this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
 
     /**
-     * A mapping of language code to message bundle.
+     * A mapping of language code to localized string bundle.
      * @private @const {!Object<string, !LocalizedStringBundleDef>}
      */
-    this.messageBundles_ = {};
+    this.localizedStringBundles_ = {};
   }
 
 
@@ -195,33 +197,35 @@ export class LocalizationService {
 
   /**
    * @param {string} languageCode The language code to associate with the
-   *     specified message bundle.
-   * @param {!LocalizedStringBundleDef} messageBundle The message bundle to
-   *     register.
+   *     specified localized string bundle.
+   * @param {!LocalizedStringBundleDef} localizedStringBundle The localized
+   *     string bundle to register.
    * @return {!LocalizationService} For chaining.
    */
-  registerLocalizedStringBundle(languageCode, messageBundle) {
-    if (!this.messageBundles_[languageCode]) {
-      this.messageBundles_[languageCode] = {};
+  registerLocalizedStringBundle(languageCode, localizedStringBundle) {
+    if (!this.localizedStringBundles_[languageCode]) {
+      this.localizedStringBundles_[languageCode] = {};
     }
 
-    Object.assign(this.messageBundles_[languageCode], messageBundle);
+    Object.assign(this.localizedStringBundles_[languageCode],
+        localizedStringBundle);
     return this;
   }
 
 
   /**
    * @param {!LocalizedStringId} LocalizedStringId
-   * @param {!Element=} elementToUse The element where the message will be
+   * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
    */
-  getMessage(LocalizedStringId, elementToUse = undefined) {
+  getLocalizedString(LocalizedStringId, elementToUse = undefined) {
     const languageCodes = elementToUse ?
       this.getLanguageCodesForElement_(elementToUse) :
       this.rootLanguageCodes_;
 
-    return findMessage(this.messageBundles_, languageCodes, LocalizedStringId);
+    return findLocalizedString(this.localizedStringBundles_, languageCodes,
+        LocalizedStringId);
   }
 }
