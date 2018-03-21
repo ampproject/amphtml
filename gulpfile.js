@@ -175,10 +175,52 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1');
+declareExtension('amp-video-service', '0.1', {
+  // `amp-video-service` provides analytics and autoplay for all videos. We need
+  // those to be available asap. This service replaces a runtime-level provider,
+  // so loadPriority is set to high in lieu of delivering it as part of the core
+  // binary.
+  loadPriority: 'high',
+});
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+
+
+/**
+ * Extensions to build when `--extensions=minimal_set`.
+ * @private @const {!Set<string>}
+ */
+const MINIMAL_EXTENSION_SET = [
+  'amp-ad',
+  'amp-ad-network-adsense-impl',
+  'amp-analytics',
+  'amp-audio',
+  'amp-image-lightbox',
+  'amp-lightbox',
+  'amp-sidebar',
+  'amp-video',
+];
+
+
+/**
+ * Extensions that require `amp-video-service` to be built alongside them.
+ * @private @const {!Set<string>}
+ */
+// TODO(alanorozco): Determine dynamically?
+const VIDEO_EXTENSIONS = new Set([
+  'amp-3q-player',
+  'amp-brid-player',
+  'amp-dailymotion',
+  'amp-gfycat',
+  'amp-ima-video',
+  'amp-nexxtv-player',
+  'amp-ooyala-player',
+  'amp-video',
+  'amp-wistia-player',
+  'amp-youtube',
+]);
 
 
 /**
@@ -665,14 +707,17 @@ function parseExtensionFlags() {
         process.exit(1);
       }
       argv.extensions = argv.extensions.replace(/\s/g, '');
+
       if (argv.extensions === 'minimal_set') {
-        argv.extensions =
-            'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
-            'amp-image-lightbox,amp-lightbox,amp-sidebar,' +
-            'amp-analytics,amp-app-banner';
+        argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
-      log(green('Building extension(s):'),
-          cyan(argv.extensions.split(',').join(', ')));
+
+      log(green('Building extension(s):'), cyan(extensions.join(', ')));
+
+      if (maybeAddVideoService()) {
+        log(green('⤷ Video component(s) being built, added'),
+          cyan('amp-video-service'), green('to extension set.'));
+      }
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
     } else {
@@ -682,6 +727,18 @@ function parseExtensionFlags() {
     log(extensionsMessage);
     log(minimalSetMessage);
   }
+}
+
+/**
+ * Adds `amp-video-service` to the extension set if a component requires it.
+ * @return {boolean}
+ */
+function maybeAddVideoService() {
+  if (!argv.extensions.split(',').find(ext => VIDEO_EXTENSIONS.has(ext))) {
+    return false;
+  }
+  argv.extensions += ',amp-video-service';
+  return true;
 }
 
 /**
