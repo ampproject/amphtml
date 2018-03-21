@@ -78,6 +78,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
+      'timezoneCode': 'TIMEZONE_CODE',
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'userAgent': 'USER_AGENT',
