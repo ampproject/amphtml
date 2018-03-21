@@ -152,18 +152,28 @@
     </div>
   </header>
   <main role="main">
-    <amp-consent id='ABC' layout='nodisplay'>
+    <amp-consent layout='nodisplay'>
       <script type="application/json">{
         "consents": {
           "DEF": {
             "checkConsentHref": "http://localhost:8000/get-consent-v1",
             "promptUI": "ui1"
+          },
+          "ABC": {
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui2"
           }
         }
       }</script>
       <div id="ui1">
         Learn more.
         <button on="tap:amp-consent.accept" role="button">Accept</button>
+        <button on="tap:amp-consent.reject" role="button">Reject</button>
+      </div>
+       <div id="ui2">
+        Learn more V2.
+        <button on="tap:amp-consent.accept" role="button">Accept</button>
+        <button on="tap:amp-consent.reject" role="button">Reject</button>
       </div>
     </amp-consent>
     <article>

@@ -16,8 +16,9 @@
 
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentPolicyManager} from './consent-policy-manager';
-import {ConsentStateManager} from './consent-state-manager';
+import {ConsentStateManager, CONSENT_ITEM_STATE} from './consent-state-manager';
 import {Layout} from '../../../src/layout';
+import {setStyle, toggle} from '../../../src/style';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {
@@ -28,12 +29,21 @@ import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANGER = 'consentPolicyManager';
 const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 const TAG = 'amp-consent';
+
+/**
+ * @enum {boolean}
+ */
+const ACTION_TYPE = {
+  // We can support DISMISS if requested
+  ACCEPT: true,
+  REJECT: false,
+};
 
 
 export class AmpConsent extends AMP.BaseElement {
@@ -46,6 +56,8 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?./consent-policy-manager.ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
 
+    this.consentUI_ = {};
+
     /** @private {!JsonObject} */
     this.consentConfig_ = dict();
 
@@ -54,12 +66,25 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object} */
     this.consentUIRequired_ = {};
+
+    this.uiInit_ = false;
+
+    this.displayQueue_ = Promise.resolve();
+
+    this.dialogResolver_ = {};
   }
 
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
     }
+
+    if (!this.element.getAttribute('id')) {
+      this.element.setAttribute('id', 'amp-consent');
+    }
+
+    this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
+    this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
 
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
@@ -81,6 +106,69 @@ export class AmpConsent extends AMP.BaseElement {
           this.init_();
         });
 
+  }
+
+  /**
+   * @param {string} instanceId
+   * @return {!Promise}
+   */
+  show_(instanceId) {
+    if (!this.consentUIRequired_[instanceId] || !this.consentUI_[instanceId]) {
+      return Promise.resolve();
+    }
+
+    dev().assert(!this.currentDisplayInstance_,
+        'Other consent instance on display');
+
+
+    if (!this.uiInit_) {
+      this.uiInit_ = true;
+      toggle(this.element, true);
+      this.getViewport().addToFixedLayer(this.element);
+    }
+
+    this.element.classList.remove('amp-hidden');
+    this.element.classList.add('amp-active');
+
+    // Display the current instance
+    this.currentDisplayInstance_ = instanceId;
+    setStyle(this.consentUI_[this.currentDisplayInstance_], 'display', 'block');
+    return new Promise(resolve => {
+      this.dialogResolver_[instanceId] = resolve;
+    });
+  }
+
+  hide_() {
+    this.element.classList.add('amp-hidden');
+    this.element.classList.remove('amp-active');
+    // Do not remove from fixed layer because of invoke button
+    // this.getViewport().removeFromFixedLayer(this.element);
+    dev().assert(this.currentDisplayInstance_
+        && this.consentUI_[this.currentDisplayInstance_],
+    'no consent UI to hide');
+
+    toggle(this.consentUI_[this.currentDisplayInstance_], false);
+    if (this.dialogResolver_[this.currentDisplayInstance_]) {
+      this.dialogResolver_[this.currentDisplayInstance_]();
+      this.dialogResolver_[this.currentDisplayInstance_] = null;
+    }
+    this.currentDisplayInstance_ = null;
+  }
+
+  handleAction_(action) {
+    dev().assert(this.currentDisplayInstance_, 'No consent is displaying');
+    dev().assert(this.consentStateManager_, 'No consent state manager');
+    if (action == ACTION_TYPE.ACCEPT) {
+      //accept
+      this.consentStateManager_.updateConsentInstanceState(
+          this.currentDisplayInstance_, CONSENT_ITEM_STATE.GRANTED);
+    } else if (action == ACTION_TYPE.REJECT) {
+      // reject
+      this.consentStateManager_.updateConsentInstanceState(
+          this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED);
+    }
+    // Hide current dialog
+    this.hide_();
   }
 
   /** @override */
@@ -210,6 +298,21 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentUIRequired_[instanceId]) {
       return;
     }
+
+    const promptUI = this.consentConfig_[instanceId]['promptUI'];
+    const element = this.getAmpDoc().getElementById(promptUI);
+    this.consentUI_[instanceId] = element;
+
+    // Get current consent state
+    this.consentStateManager_.getConsentInstanceState(instanceId)
+        .then(state => {
+          if (state == CONSENT_ITEM_STATE.UNKNOWN) {
+            // Need to display prompt UI for unknown state consent
+            this.displayQueue_ = this.displayQueue_.then(() => {
+              return this.show_(instanceId);
+            });
+          }
+        });
   }
 }
 
