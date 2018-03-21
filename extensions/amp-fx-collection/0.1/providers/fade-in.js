@@ -58,7 +58,10 @@ export class FadeInProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    setStyle(element, 'will-change', 'opacity');
+    setStyles(element, {
+      'will-change': 'opacity',
+      'opacity': 0,
+    });
     const fadeInElement = new FadeInElement(
         element, this.positionObserver_, this.viewport_, this.resources_);
     fadeInElement.initialize();
@@ -93,12 +96,24 @@ class FadeInElement {
     this.element_ = element;
 
     /** @private {number} */
+    this.margin_ = element.hasAttribute('data-fade-in-margin') ?
+      parseInt(element.getAttribute('data-fade-in-margin'), 10) : 0.25;
+
+    /** @private {string} */
+    this.easing_ = element.hasAttribute('data-fade-in-easing') ?
+      element.getAttribute('data-fade-in-easing') : 'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
+
+    /** @private {string} */
+    this.duration_ = element.hasAttribute('data-fade-in-duration') ?
+      element.getAttribute('data-fade-in-duration') : '1.5s';
+
+    /** @private {number} */
     this.opacityOffset_ = 0;
 
     /** @private {boolean} */
-    this.mutateScheduled_ = false;
+    this.animationScheduled_ = false;
 
-    this.boundOpacity_ = this.opacity_.bind(this);
+    this.opacityAnimation_ = this.opacityAnimation_.bind(this);
   }
 
   /**
@@ -127,31 +142,27 @@ class FadeInElement {
       return;
     }
 
-    // Stop from fading out based on scroll
-    if (this.opacityOffset_ > 1) {
-      return;
-    }
-
-    const top = entry.positionRect.top;
-    // Offset is how much extra to move the element which is position within
-    // viewport.
-    const offset = (this.adjustedViewportHeight_ - top);
-    this.opacityOffset_ = offset / this.viewport_.getHeight();
-
-    if (!this.mutateScheduled_) {
-      this.mutateScheduled_ = true;
-      this.resources_.mutateElement(this.element_, this.boundOpacity_);
+    // If above the threshold of trigger-position
+    if (entry.positionRect.top + (this.margin_ * entry.positionRect.width) < this.adjustedViewportHeight_) {
+      if (!this.animationScheduled_) {
+        this.animationScheduled_ = true;
+        this.resources_.mutateElement(this.element_, this.opacityAnimation_);
+      }      
     }
   }
 
   /**
    * This must be called inside a mutate phase.
    */
-  opacity_() {
+  opacityAnimation_() {
+    // What about timing?
     this.mutateScheduled_ = false;
-    // Change the opacity to the given value
-    // TODO: This needs to be scaled to a value between 0 and 1
-    setStyles(this.element_, {opacity: clamp(this.opacityOffset_, 0, 1)});
+    // Translate the element offset pixels.
+    setStyles(this.element_, {
+      'transition-duration': this.duration_,
+      'transition-timing-function': this.easing_,
+      'opacity': 1,
+    });
   }
 
   /**

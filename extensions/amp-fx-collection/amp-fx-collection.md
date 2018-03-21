@@ -82,9 +82,25 @@ In this example, as the user scrolls the page, the h1 element scrolls faster rel
 
 ### fade-in
 
-The `fade-in` effect allows an element to fade in as the user scrolls the page.
+The `fade-in` effect allows an element to fade in once the element being targetted is visible in the viewport.
 
-##### Attribute 1
+##### data-fade-in-duration
+
+This is the duration over which the animation takes places. The default value is `1500ms`.
+
+##### data-fade-in-easing
+
+This parameter lets you vary the animation's speed over the course of its duration. The default is `linear` which is `cubic-bezier(0.00, 0.00, 1.00, 1.00)`. You can also choose from one of the presets available:
+* “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
+* “s-curve” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
+* “slow-out/fast-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
+* “fast-out/slow-in” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+
+or specify a `custom-bezier()` input
+
+##### data-fade-in-trigger-position
+
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `25%`
 
 #### Example: Example 1
 
