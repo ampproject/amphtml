@@ -166,12 +166,18 @@ tags: {
         "fly-in-left|"
         "fly-in-right|"
         "fly-in-top|"
+        "pan-down|"
+        "pan-left|"
+        "pan-right|"
+        "pan-up|"
         "pulse|"
         "rotate-in-left|"
         "rotate-in-right|"
         "twirl-in|"
         "whoosh-in-left|"
-        "whoosh-in-right)"
+        "whoosh-in-right|"
+        "zoom-in|"
+        "zoom-out)"
   }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
@@ -195,12 +201,18 @@ tags: {
         "fly-in-left|"
         "fly-in-right|"
         "fly-in-top|"
+        "pan-down|"
+        "pan-left|"
+        "pan-right|"
+        "pan-up|"
         "pulse|"
         "rotate-in-left|"
         "rotate-in-right|"
         "twirl-in|"
         "whoosh-in-left|"
-        "whoosh-in-right)"
+        "whoosh-in-right|"
+        "zoom-in|"
+        "zoom-out)"
   }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
