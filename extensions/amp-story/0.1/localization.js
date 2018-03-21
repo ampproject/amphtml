@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {closest} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 
 
 /**
@@ -25,34 +26,34 @@ import {closest} from '../../../src/dom';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 21
+ * Next ID: 22
  *
- * @const @enum {number}
+ * @const @enum {string}
  */
 export const LocalizedStringId = {
   // amp-story
-  AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: 0,
-  AMP_STORY_EXPERIMENT_ENABLED_TEXT: 1,
-  AMP_STORY_HINT_UI_NEXT_LABEL: 2,
-  AMP_STORY_HINT_UI_PREVIOUS_LABEL: 3,
-  AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: 4,
-  AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: 5,
-  AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: 6,
-  AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: 7,
-  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: 8,
-  AMP_STORY_SHARING_PROVIDER_NAME_LINK: 9,
-  AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: 10,
-  AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: 11,
-  AMP_STORY_SHARING_PROVIDER_NAME_SMS: 12,
-  AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM: 13,
-  AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: 14,
-  AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: 15,
-  AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: 16,
-  AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: 17,
-  AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: 18,
-  AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: 19,
-  AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: 20,
-  AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: 21,
+  AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
+  AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
+  AMP_STORY_HINT_UI_NEXT_LABEL: '2',
+  AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
+  AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
+  AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
+  AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: '6',
+  AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: '7',
+  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
+  AMP_STORY_SHARING_PROVIDER_NAME_LINK: '9',
+  AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: '10',
+  AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: '11',
+  AMP_STORY_SHARING_PROVIDER_NAME_SMS: '12',
+  AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM: '13',
+  AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: '14',
+  AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: '15',
+  AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: '16',
+  AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
+  AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: '18',
+  AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: '19',
+  AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: '20',
+  AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: '21',
 };
 
 
@@ -62,7 +63,7 @@ export const LocalizedStringId = {
  *   description: string,
  * }}
  */
-let LocalizedStringDef;
+export let LocalizedStringDef;
 
 
 /**
@@ -121,6 +122,42 @@ function findMessage(messageBundles, languageCodes, LocalizedStringId) {
   });
 
   return message;
+}
+
+
+/**
+ * Creates a deep copy of the specified LocalizedStringBundle.
+ * @param {!LocalizedStringBundleDef} localizedStringBundle
+ * @return {!LocalizedStringBundleDef}
+ */
+function cloneLocalizedStringBundle(localizedStringBundle) {
+  return /** @type {!LocalizedStringBundleDef} */ (parseJson(
+      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))));
+}
+
+
+/**
+ * Creates a pseudo locale by applying string transformations (specified by the
+ * localizationFn) to an existing string bundle, without modifying the original.
+ * @param {!LocalizedStringBundleDef} localizedStringBundle The localized
+ *     string bundle to be transformed.
+ * @param {function(string): string} localizationFn The transformation to be
+ *     applied to each string in the bundle.
+ * @return {!LocalizedStringBundleDef} The new strings.
+ */
+export function createPseudoLocale(localizedStringBundle, localizationFn) {
+  /** @type {!LocalizedStringBundleDef} */
+  const pseudoLocaleStringBundle =
+      cloneLocalizedStringBundle(localizedStringBundle);
+
+  Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
+    const localizedStringId =
+        /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    pseudoLocaleStringBundle[localizedStringId].message =
+        localizationFn(localizedStringBundle[localizedStringId].message);
+  });
+
+  return pseudoLocaleStringBundle;
 }
 
 

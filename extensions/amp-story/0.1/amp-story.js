@@ -48,7 +48,11 @@ import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {LocalizationService, LocalizedStringId} from './localization';
+import {
+  LocalizationService,
+  LocalizedStringId,
+  createPseudoLocale,
+} from './localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
@@ -339,6 +343,14 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
         .registerLocalizedStringBundle('en', LocalizedStringsEn);
+
+    if (getMode().localDev) {
+      const enXaPseudoLocaleBundle =
+          createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+      this.localizationService_
+          .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
+    }
+
     registerServiceBuilder(this.win, 'localization',
         () => this.localizationService_);
   }

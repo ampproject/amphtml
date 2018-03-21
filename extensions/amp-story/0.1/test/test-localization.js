@@ -17,6 +17,7 @@
 import {
   LocalizationService,
   LocalizedStringId,
+  createPseudoLocale,
   getLanguageCodesFromString,
 } from '../localization';
 
@@ -71,6 +72,37 @@ describes.fakeWin('amp-story messages', {}, env => {
     it('should have language fallbacks', () => {
       expect(getLanguageCodesFromString('en-US-123')).to
           .deep.equal(['en-us-123', 'en-us', 'en', 'default']);
+    });
+  });
+
+  describe('en-XA pseudolocale', () => {
+    const TEST_MESSAGE_ID = 'test_message_id';
+
+    it('should transform strings', () => {
+      const originalStringBundle = {
+        [TEST_MESSAGE_ID]: {
+          message: 'foo',
+        },
+      };
+      const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
+          s => `${s} ${s}`);
+
+      expect(pseudoLocaleBundle[TEST_MESSAGE_ID].message).to.equal('foo foo');
+    });
+
+    it('should contain all string IDs from original locale', () => {
+      const originalStringBundle = {
+        'msg_id_1': {message: 'msg1'},
+        'msg_id_2': {message: 'msg2'},
+        'msg_id_3': {message: 'msg3'},
+        'msg_id_4': {message: 'msg4'},
+        'msg_id_5': {message: 'msg5'},
+      };
+      const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
+          s => `${s} ${s}`);
+
+      expect(Object.keys(originalStringBundle)).to
+          .deep.equal(Object.keys(pseudoLocaleBundle));
     });
   });
 });
