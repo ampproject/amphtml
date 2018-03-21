@@ -192,7 +192,7 @@ export class SubscriptionService {
 
   /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise<!./entitlement.Entitlement>}
+   * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
     return this.timer_.timeoutPromise(
@@ -204,12 +204,14 @@ export class SubscriptionService {
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
       return entitlement;
-    }).catch(err => {
-      this.platformStore_.reportPlatformFailure_(
-          subscriptionPlatform.getServiceId());
-      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
-          Entitlement.empty(subscriptionPlatform.getServiceId()));
-      return Promise.reject(err);
+    }).catch(reason => {
+      const serviceId = subscriptionPlatform.getServiceId();
+      this.platformStore_.reportPlatformFailure(serviceId);
+      this.resolveEntitlementsToStore_(serviceId,
+          Entitlement.empty(serviceId));
+      user().createError(
+          `fetch entitlements failed for ${serviceId}`, reason
+      );
     });
   }
 

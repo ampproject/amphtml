@@ -119,7 +119,7 @@ export class PlatformStore {
     }
     this.entitlements_[serviceId] = entitlement;
     // Remove this serviceId as a failed platform now
-    if (this.failedPlatforms_.indexOf(serviceId) !== -1) {
+    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
@@ -306,12 +306,16 @@ export class PlatformStore {
     return localPlatform;
   }
 
-  reportPlatformFailure_(serviceId) {
-    if (this.failedPlatforms_.indexOf(serviceId) === -1) {
+  /**
+   * Records a platform failure and logs error if all platforms have failed.
+   * @param {string} serviceId
+   */
+  reportPlatformFailure(serviceId) {
+    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       this.failedPlatforms_.push(serviceId);
     }
 
-    if (this.failedPlatforms_.length === this.serviceIds_.length) {
+    if (this.failedPlatforms_.length == this.serviceIds_.length) {
       user().error(TAG, 'All platforms have failed to resolve');
     }
   }
