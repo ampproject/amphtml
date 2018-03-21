@@ -1047,7 +1047,8 @@ describe('FixedLayer', () => {
       const userError = sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
-      expect(userError).calledWithMatch('FixedLayer', /Inline styles are not supported/);
+      expect(userError).calledWithMatch('FixedLayer',
+          /Inline styles are not supported/);
       expect(element1.hasAttribute('style')).to.be.false;
     });
   });
@@ -1321,7 +1322,8 @@ describe('FixedLayer', () => {
       const userError = sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
-      expect(userError).calledWithMatch('FixedLayer', /Inline styles are not supported/);
+      expect(userError).calledWithMatch('FixedLayer',
+          /Inline styles are not supported/);
       expect(element1.hasAttribute('style')).to.be.false;
     });
   });
