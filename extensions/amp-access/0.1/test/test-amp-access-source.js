@@ -15,6 +15,7 @@
  */
 
 import {AccessClientAdapter} from '../amp-access-client';
+import {AccessIframeAdapter} from '../amp-access-iframe';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
@@ -52,6 +53,7 @@ describes.fakeWin('AccessSource', {
 
   afterEach(() => {
     toggleExperiment(win, 'amp-access-server', false);
+    toggleExperiment(win, 'amp-access-iframe', false);
   });
 
   function expectSourceType(ampdoc, config, type, adapter) {
@@ -87,6 +89,11 @@ describes.fakeWin('AccessSource', {
 
     config['type'] = 'client';
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
+
+    config['type'] = 'iframe';
+    expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
+    toggleExperiment(win, 'amp-access-iframe', true);
+    expectSourceType(ampdoc, config, 'iframe', AccessIframeAdapter);
 
     config['type'] = 'server';
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);

@@ -15,6 +15,7 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {AccessIframeAdapter} from './amp-access-iframe';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
@@ -41,6 +42,7 @@ const TAG = 'amp-access';
  */
 export const AccessType = {
   CLIENT: 'client',
+  IFRAME: 'iframe',
   SERVER: 'server',
   VENDOR: 'vendor',
   OTHER: 'other',
@@ -180,6 +182,8 @@ export class AccessSource {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
         }
         return new AccessClientAdapter(this.ampdoc, configJson, context);
+      case AccessType.IFRAME:
+        return new AccessIframeAdapter(this.ampdoc, configJson, context);
       case AccessType.SERVER:
         if (isJwt) {
           return new AccessServerJwtAdapter(this.ampdoc, configJson, context);
@@ -230,6 +234,11 @@ export class AccessSource {
     if (type == AccessType.CLIENT && this.isServerEnabled_) {
       user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
+    }
+    if (type == AccessType.IFRAME &&
+        !isExperimentOn(this.ampdoc.win, 'amp-access-iframe')) {
+      user().error(TAG, 'Experiment "amp-access-iframe" is not enabled.');
+      type = AccessType.CLIENT;
     }
     return type;
   }
