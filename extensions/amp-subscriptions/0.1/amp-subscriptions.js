@@ -26,6 +26,7 @@ import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -195,8 +196,12 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
+    let timeout = SERVICE_TIMEOUT;
+    if (getMode().development || getMode().localDev || getMode().log) {
+      timeout = SERVICE_TIMEOUT * 2;
+    }
     return this.timer_.timeoutPromise(
-        SERVICE_TIMEOUT,
+        timeout,
         subscriptionPlatform.getEntitlements()
     ).then(entitlement => {
       entitlement = entitlement || Entitlement.empty(
