@@ -344,12 +344,10 @@ export class AmpStory extends AMP.BaseElement {
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
         .registerLocalizedStringBundle('en', LocalizedStringsEn);
 
-    if (getMode().localDev) {
-      const enXaPseudoLocaleBundle =
-          createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
-      this.localizationService_
-          .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
-    }
+    const enXaPseudoLocaleBundle =
+        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+    this.localizationService_
+        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
     registerServiceBuilder(this.win, 'localization',
         () => this.localizationService_);
