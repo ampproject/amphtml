@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
+import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentPolicyManager} from './consent-policy-manager';
-import {ConsentStateManager, CONSENT_ITEM_STATE} from './consent-state-manager';
 import {Layout} from '../../../src/layout';
-import {setStyle, toggle} from '../../../src/style';
+import {
+  NOTIFICATION_UI_MANAGER,
+  NotificationUIManager,
+} from './notification-ui-manager';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   isJsonScriptTag,
 } from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
+import {setStyle, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANGER = 'consentPolicyManager';
@@ -55,6 +59,8 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?./consent-policy-manager.ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
+
+    this.notificationUiManager_ = null;
 
     this.consentUI_ = {};
 
@@ -100,12 +106,21 @@ export class AmpConsent extends AMP.BaseElement {
           }
         });
 
-    getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
-        .then(manager => {
-          this.consentStateManager_ = manager;
+    const consentStateManagerPromise =
+        getServicePromiseForDoc(this.getAmpDoc(), CONSENT_STATE_MANAGER)
+            .then(manager => {
+              this.consentStateManager_ = manager;
+            });
+    const notificationUiManagerPromise =
+        getServicePromiseForDoc(this.getAmpDoc(), NOTIFICATION_UI_MANAGER)
+            .then(manager => {
+              this.notificationUiManager_ = manager;
+            });
+
+    Promise.all([consentStateManagerPromise, notificationUiManagerPromise])
+        .then(() => {
           this.init_();
         });
-
   }
 
   /**
@@ -191,6 +206,23 @@ export class AmpConsent extends AMP.BaseElement {
         // TODO: Handle errors
       });
     }
+    this.notificationUiManager_.onQueueEmpty(() => {
+      if (!this.revokeUI_) {
+        return;
+      }
+      this.element.classList.add('amp-active');
+      this.element.classList.remove('amp-hidden');
+      setStyle(this.revokeUI_, 'display', 'block');
+    });
+
+    this.notificationUiManager_.onQueueNotEmpty(() => {
+      if (!this.revokeUI_) {
+        return;
+      }
+      this.element.classList.add('amp-hidden');
+      this.element.classList.remove('amp-active');
+      toggle(this.revokeUI_, false);
+    });
   }
 
   /**
@@ -303,14 +335,19 @@ export class AmpConsent extends AMP.BaseElement {
     const element = this.getAmpDoc().getElementById(promptUI);
     this.consentUI_[instanceId] = element;
 
+    if (!this.revokeUI && this.consentConfig_[instanceId]['revokeUI']) {
+      const element =
+          this.getAmpDoc().getElementById(this.consentConfig_[instanceId]['revokeUI']);
+      this.revokeUI_ = element;
+    }
+
     // Get current consent state
     this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-            // Need to display prompt UI for unknown state consent
-            this.displayQueue_ = this.displayQueue_.then(() => {
-              return this.show_(instanceId);
-            });
+
+            this.notificationUiManager_.registerUI(
+                this.show_.bind(this, instanceId));
           }
         });
   }
@@ -318,6 +355,7 @@ export class AmpConsent extends AMP.BaseElement {
 
 AMP.extension('amp-consent', '0.1', AMP => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
+  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUIManager);
   AMP.registerServiceForDoc(CONSENT_STATE_MANAGER, ConsentStateManager);
   AMP.registerServiceForDoc(CONSENT_POLICY_MANGER, ConsentPolicyManager);
 });
