@@ -53,10 +53,6 @@ tags: {  # <amp-story>
       allowed_protocol: "https"
     }
   }
-  attrs: {
-    name: "scaling"
-    value: "relative"
-  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
@@ -72,10 +68,6 @@ tags: {  # <amp-story-page>
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
   satisfies: "amp-story-page"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   attrs: { name: "auto-advance-after" }
   attrs: {
     name: "background-audio"
@@ -83,6 +75,14 @@ tags: {  # <amp-story-page>
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  attrs: {
+    name: "scaling"
+    value: "relative"
   }
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
