@@ -24,6 +24,10 @@
 import {dev} from '../../../src/log';
 
 
+/** @private @const {string} */
+const TAG = 'amp-video-service';
+
+
 /**
  * Manages all AMP video players that implement the common Video API
  * {@see ../src/video-interface.VideoInterface}.
@@ -52,12 +56,12 @@ import {dev} from '../../../src/log';
  * @visibleForTesting
  */
 export class VideoService {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
-  constructor(ampdoc) {
-    dev().error('Unimplemented');
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc */
+  constructor(unusedAmpdoc) {
+    dev().error(TAG, 'Unimplemented');
   }
 }
 
-AMP.extension('amp-video-service', 0.1, function(AMP) {
+AMP.extension(TAG, 0.1, function(AMP) {
   AMP.registerServiceForDoc('video-service', VideoService);
 });

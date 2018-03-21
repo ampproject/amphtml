@@ -716,7 +716,7 @@ function parseExtensionFlags() {
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
-          cyan('amp-video-service'), green('to extension set.'));
+            cyan('amp-video-service'), green('to extension set.'));
       }
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
