@@ -35,7 +35,7 @@ export class FriendlyFrameRenderer extends Renderer {
   constructor() {
     super();
     /** @type {?Element} */
-    this.iframe = null;
+    this.iframe_ = null;
   }
 
   /** @override */
@@ -48,7 +48,7 @@ export class FriendlyFrameRenderer extends Renderer {
     dev().assert(adUrl, 'missing ad request url');
 
     // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */(
+    this.iframe_ = /** @type {!HTMLIFrameElement} */(
       createElementWithAttributes(
           /** @type {!Document} */(element.ownerDocument),
           'iframe',
@@ -62,7 +62,7 @@ export class FriendlyFrameRenderer extends Renderer {
             'allowtransparency': '',
             'scrolling': 'no',
           })));
-    context.applyFillContent(this.iframe);
+    context.applyFillContent(this.iframe_);
 
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
@@ -75,7 +75,7 @@ export class FriendlyFrameRenderer extends Renderer {
     }
 
     return installFriendlyIframeEmbed(
-        this.iframe, element, {
+        this.iframe_, element, {
           host: element,
           url: /** @type {string} */ (adUrl),
           html: creativeMetaData.minifiedCreative,
@@ -93,5 +93,10 @@ export class FriendlyFrameRenderer extends Renderer {
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
         });
+  }
+
+  /** @return {!Element} */
+  getIframe() {
+    return this.iframe_;
   }
 }
