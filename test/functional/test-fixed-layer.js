@@ -19,6 +19,8 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggleExperiment} from '../../src/experiments';
+import {user} from '../../src/log';
 
 
 describe('FixedLayer', () => {
@@ -48,7 +50,7 @@ describe('FixedLayer', () => {
     element2 = createElement('element2');
     element3 = createElement('element3');
     element4 = createElement('element4');
-    element5 = createElement('element4');
+    element5 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
@@ -274,8 +276,8 @@ describe('FixedLayer', () => {
         }
         return 0;
       },
-      getAttribute: name => {
-        return attrs[name];
+      hasAttribute: name => {
+        return !!attrs[name];
       },
       setAttribute: (name, value) => {
         attrs[name] = value;
@@ -370,7 +372,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -1037,6 +1039,17 @@ describe('FixedLayer', () => {
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.equal('');
     });
+
+    it('should remove inline style and throw user error', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+      element1.setAttribute('style', 'color:blue;');
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer', /Inline styles are not supported/);
+      expect(element1.hasAttribute('style')).to.be.false;
+    });
   });
 
   describe('with-transfer', () => {
@@ -1048,7 +1061,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
     });
@@ -1299,6 +1312,17 @@ describe('FixedLayer', () => {
 
       expect(state['F0'].fixed).to.equal(true);
       expect(state['F0'].transferrable).to.equal(true);
+    });
+
+    it('should remove inline style and throw user error', () => {
+      toggleExperiment(ampdoc.win, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+      element1.setAttribute('style', 'color:blue;');
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer', /Inline styles are not supported/);
+      expect(element1.hasAttribute('style')).to.be.false;
     });
   });
 });
