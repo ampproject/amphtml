@@ -212,7 +212,7 @@ export class SubscriptionService {
     }).catch(reason => {
       const serviceId = subscriptionPlatform.getServiceId();
       this.platformStore_.reportPlatformFailure(serviceId);
-      user().createError(
+      throw user().createError(
           `fetch entitlements failed for ${serviceId}`, reason
       );
     });

@@ -192,9 +192,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 5000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
           'reportPlatformFailure');
-      return subscriptionService.fetchEntitlements_(platform).then(() => {
-        expect(failureStub).to.be.calledOnce;
-      });
+      expect(subscriptionService.fetchEntitlements_(platform)).to.throw;
+      expect(failureStub).to.be.calledOnce;
     }).timeout(4000);
 
     it('should report failure if platform reject promise', () => {

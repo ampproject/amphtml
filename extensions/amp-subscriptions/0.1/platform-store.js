@@ -315,7 +315,7 @@ export class PlatformStore {
   reportPlatformFailure(serviceId) {
     if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       this.failedPlatforms_.push(serviceId);
-      this.resolveEntitlementsToStore_(serviceId, Entitlement.empty(serviceId));
+      this.resolveEntitlement(serviceId, Entitlement.empty(serviceId));
     }
 
     if (this.failedPlatforms_.length == this.serviceIds_.length) {
