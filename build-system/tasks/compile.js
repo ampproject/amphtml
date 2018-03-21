@@ -168,6 +168,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-subscriptions/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
+      // Needed for AmpViewerIntegrationVariableService
+      'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
