@@ -219,6 +219,9 @@ export class Bookend {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
+    /** @private {boolean} */
+    this.isConfigRendered_ = false;
+
     /** @private {?Element} */
     this.replayButton_ = null;
 
@@ -319,7 +322,7 @@ export class Bookend {
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
       if (applyConfig && this.config_) {
-        this.setConfig(this.config_);
+        this.setConfig_(this.config_);
       }
       return Promise.resolve(this.config_);
     }
@@ -339,7 +342,7 @@ export class Bookend {
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
           if (applyConfig) {
-            this.setConfig(this.config_);
+            this.setConfig_(this.config_);
           }
 
           return this.config_;
@@ -446,9 +449,15 @@ export class Bookend {
 
   /**
    * @param {!BookendConfigDef} bookendConfig
+   * @private
    */
-  setConfig(bookendConfig) {
+  setConfig_(bookendConfig) {
+    if (this.isConfigRendered_) {
+      return;
+    }
+
     this.assertBuilt_();
+    this.isConfigRendered_ = true;
 
     if (bookendConfig.shareProviders) {
       this.shareWidget_.setProviders(
