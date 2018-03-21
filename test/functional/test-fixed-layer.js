@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {endsWith} from '../../src/string';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {toggleExperiment} from '../../src/experiments';
+import {user} from '../../src/log';
 
 
 describe('FixedLayer', () => {
@@ -48,7 +50,7 @@ describe('FixedLayer', () => {
     element2 = createElement('element2');
     element3 = createElement('element3');
     element4 = createElement('element4');
-    element5 = createElement('element4');
+    element5 = createElement('element5');
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
@@ -273,7 +275,7 @@ describe('FixedLayer', () => {
         }
         return 0;
       },
-      getAttribute: name => {
+      hasAttribute: name => {
         return attrs[name];
       },
       setAttribute: (name, value) => {
@@ -360,7 +362,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -431,6 +433,19 @@ describe('FixedLayer', () => {
       expect(fixedLayer.isDeclaredSticky(element3)).to.be.false;
       expect(fixedLayer.isDeclaredSticky(element4)).to.be.true;
       expect(fixedLayer.isDeclaredSticky(element5)).to.be.true;
+    });
+
+    it('should throw user error for inline style', () => {
+      element1.setAttribute('style', 'color:blue;');
+      toggleExperiment(
+          ampdoc.win,
+          'inline-styles',
+          true /* opt_on */,
+          true /* opt_transientExperiment */);
+      const userError = sandbox.stub(user(), 'error');
+      fixedLayer.setup();
+      // Expect error regarding inline styles.
+      expect(userError).calledWithMatch('FixedLayer');
     });
 
     it('should add and remove element directly', () => {
@@ -1038,7 +1053,7 @@ describe('FixedLayer', () => {
       fixedLayer.setup();
     });
 
-    it('should initiale fixed layer to null', () => {
+    it('should initialize fixed layer to null', () => {
       expect(fixedLayer.transfer_).to.be.true;
       expect(fixedLayer.transferLayer_).to.be.null;
     });
