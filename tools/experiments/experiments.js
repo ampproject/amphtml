@@ -276,6 +276,12 @@ const EXPERIMENTS = [
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
+  {
+    id: 'video-service',
+    name: 'Enables new implementation of unified Video Interface services.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13674',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
+  },
 ];
 
 if (getMode().localDev) {
