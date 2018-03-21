@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -225,8 +227,17 @@ export class Bookend {
     /** @private {?Element} */
     this.replayButton_ = null;
 
-    /** @private {?Element} */
+    /**
+     * Root element containing a shadow DOM root.
+     * @private {?Element}
+     */
     this.root_ = null;
+
+    /**
+     * Actual bookend.
+     * @private {?Element}
+     */
+    this.bookendEl_ = null;
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
@@ -251,7 +262,16 @@ export class Bookend {
 
     this.isBuilt_ = true;
 
-    this.root_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+    this.root_ = this.win_.document.createElement('div');
+    const shadowRoot = createShadowRoot(this.root_);
+
+    this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+
+    const style = this.win_.document.createElement('style');
+    style./*OK*/textContent = CSS;
+
+    shadowRoot.appendChild(style);
+    shadowRoot.appendChild(this.bookendEl_);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -271,7 +291,7 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.root_.addEventListener('click', event => this.maybeClose_(event));
+    this.getRoot().addEventListener('click', event => this.maybeClose_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
@@ -431,7 +451,7 @@ export class Bookend {
    */
   toggle_(show) {
     this.vsync_.mutate(() => {
-      this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+      this.bookendEl_.classList.toggle(HIDDEN_CLASSNAME, !show);
     });
   }
 
@@ -500,7 +520,7 @@ export class Bookend {
    * @private
    */
   getOverflowContainer_() {
-    return dev().assertElement(this.getRoot().firstElementChild);
+    return dev().assertElement(this.bookendEl_.firstElementChild);
   }
 
   /**
