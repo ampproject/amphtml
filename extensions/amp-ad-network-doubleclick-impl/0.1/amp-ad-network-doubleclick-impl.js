@@ -383,16 +383,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    /**
-     * isValidElement used to also check that we are in a valid A4A environment,
-     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
-     * which is always called as part of the upgrade path from an amp-ad element
-     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
-     * that it has been verified.
-     */
-    return this.isAmpAdElement() &&
-      // Ensure not within remote.html iframe.
-      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    return this.isAmpAdElement();
   }
 
   /** @override */

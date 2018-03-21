@@ -149,13 +149,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.isValidElement()).to.be.true;
     });
-    it('should not be valid if remote.html present', () => {
-      const meta = doc.createElement('meta');
-      meta.setAttribute('name', 'amp-3p-iframe-src');
-      doc.head.appendChild(meta);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(impl.isValidElement()).to.be.false;
-    });
   });
 
 
