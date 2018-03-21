@@ -31,12 +31,15 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
+ *     - metaTags: A map object of meta tag's name (key) and corresponding
+ *       contents (value).
  *
  * @typedef {{
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
  *   linkRels: !Object<string, string|!Array<string>>,
+ *   metaTags: !Object<string, string|!Array<string>>,
  * }}
  */
 export let DocumentInfoDef;
@@ -80,6 +83,7 @@ export class DocInfo {
     }
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
+    const metaTags = getMetaTags(ampdoc.win.document);
 
     return this.info_ = {
       /** @return {string} */
@@ -89,6 +93,7 @@ export class DocInfo {
       canonicalUrl,
       pageViewId,
       linkRels,
+      metaTags,
     };
   }
 }
@@ -142,4 +147,37 @@ function getLinkRels(doc) {
     }
   }
   return linkRels;
+}
+
+/**
+ * Returns a map object of meta tags in document head.
+ * Key is the meta name, value is a list of corresponding content values.
+ * @param {!Document} doc
+ * @return {!JsonObject<string, string|!Array<string>>}
+ */
+function getMetaTags(doc) {
+  const metaTags = map();
+  if (doc.head) {
+    const metas = doc.head.querySelectorAll('meta[name]');
+    for (let i = 0; i < metas.length; i++) {
+      const meta = metas[i];
+      const content = meta.getAttribute('content');
+      const name = meta.getAttribute('name');
+      if (!name || !content) {
+        continue;
+      }
+
+      let value = metaTags[name];
+      if (value) {
+        // Change to array if more than one content for the same name
+        if (!isArray(value)) {
+          value = metaTags[name] = [value];
+        }
+        value.push(content);
+      } else {
+        metaTags[name] = content;
+      }
+    }
+  }
+  return metaTags;
 }
