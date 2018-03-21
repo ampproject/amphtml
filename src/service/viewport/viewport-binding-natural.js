@@ -20,7 +20,7 @@ import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setStyle} from '../../style';
+import {px, setStyles, setImportantStyles} from '../../style';
 
 
 const TAG_ = 'Viewport';
@@ -121,7 +121,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    setStyle(this.win.document.documentElement, 'paddingTop', px(paddingTop));
+    setImportantStyles(this.win.document.documentElement, {
+      'padding-top': px(paddingTop),
+    });
   }
 
   /** @override */
