@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
@@ -313,6 +315,7 @@ export class PlatformStore {
   reportPlatformFailure(serviceId) {
     if (this.failedPlatforms_.indexOf(serviceId) == -1) {
       this.failedPlatforms_.push(serviceId);
+      this.resolveEntitlementsToStore_(serviceId, Entitlement.empty(serviceId));
     }
 
     if (this.failedPlatforms_.length == this.serviceIds_.length) {

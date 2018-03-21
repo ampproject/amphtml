@@ -197,7 +197,7 @@ export class SubscriptionService {
    */
   fetchEntitlements_(subscriptionPlatform) {
     let timeout = SERVICE_TIMEOUT;
-    if (getMode().development || getMode().localDev || getMode().log) {
+    if (getMode().development || getMode().localDev) {
       timeout = SERVICE_TIMEOUT * 2;
     }
     return this.timer_.timeoutPromise(
@@ -212,8 +212,6 @@ export class SubscriptionService {
     }).catch(reason => {
       const serviceId = subscriptionPlatform.getServiceId();
       this.platformStore_.reportPlatformFailure(serviceId);
-      this.resolveEntitlementsToStore_(serviceId,
-          Entitlement.empty(serviceId));
       user().createError(
           `fetch entitlements failed for ${serviceId}`, reason
       );
