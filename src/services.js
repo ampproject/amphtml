@@ -312,6 +312,17 @@ export class Services {
   }
 
   /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
+   */
+  static viewerIntegrationVariableServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
+      (getElementServiceIfAvailable(win, 'viewer-integration-variable',
+          'amp-viewer-integration', true)));
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */

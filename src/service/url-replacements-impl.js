@@ -49,6 +49,10 @@ const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @private @const {Object<string, boolean>} */
+const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
+
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
 
@@ -242,6 +246,17 @@ export class GlobalVariableSource extends VariableSource {
         return this.getQueryParamData_(param, defaultValue);
       });
     });
+
+    // Returns the value of the given field name in the fragment query string.
+    // Second parameter is an optional default value.
+    // For example, if location is 'pub.com/amp.html?x=1#y=2' then
+    // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
+    this.setAsync('FRAGMENT_PARAM',
+        this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+
+    // Returns the first item in the ancestorOrigins array, if available.
+    this.setAsync('ANCESTOR_ORIGIN',
+        this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
     /**
      * Stores client ids that were generated during this page view
@@ -649,6 +664,26 @@ export class GlobalVariableSource extends VariableSource {
       });
     };
   }
+
+  /**
+   * Resolves the value via amp-viewer-integration's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getViewerIntegrationValue_(property, name) {
+    return /** @type {!AsyncResolverDef} */ (
+      (param, defaultValue = '') => {
+        const service =
+            Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+        return service.then(viewerIntegrationVariables => {
+          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
+          return viewerIntegrationVariables[property](param, defaultValue);
+        });
+      });
+  }
 }
 
 /**
@@ -890,7 +925,7 @@ export class UrlReplacements {
     // additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended.
     // #2: If the expansion function is not whitelisted:
-    // addionalUrlParamters will not be expanded,
+    // additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
@@ -986,7 +1021,8 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          replacement = replacement.replace(match, encodeValue(v));
+          replacement = replacement.replace(match,
+              NOENCODE_WHITELIST[match] ? v : encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -1001,7 +1037,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return NOENCODE_WHITELIST[match] ? val : encodeValue(val);
     });
 
     if (replacementPromise) {
