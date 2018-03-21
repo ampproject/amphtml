@@ -29,8 +29,8 @@
 </head>
 <body>
 Hello, world.
-
-<amp-consent id='ABC'>
+<!-- Invalid: no script json -->
+<amp-consent id='ABC' layout='nodisplay'>
   <div id='ui1'>UI1
     <button>Accept</button>
   </div>
@@ -38,19 +38,8 @@ Hello, world.
     <button>Accept</button>
   </div>
 </amp-consent>
-
+<!-- Invalid: multiple amp-consent -->
 <amp-consent id='ABC' layout='nodisplay'>
-  <script type="application/json">{
-    "consents": {
-      "DEF": {
-        "checkConsentHref": "http://localhost:8000/get-consent-v1",
-        "promptUI": "ui1"
-      },
-      "ABC": {
-        "checkConsentHref": "http://localhost:8000/get-consent-v1"
-      }
-    }
-  }</script>
   <div id='ui1'>UI1
     <button>Accept</button>
   </div>

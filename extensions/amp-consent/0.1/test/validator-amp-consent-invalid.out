@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
+|  
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|
+|  
 |        http://www.apache.org/licenses/LICENSE-2.0
-|
+|  
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,10 +30,8 @@ FAIL
 |  </head>
 |  <body>
 |  Hello, world.
-|
-|  <amp-consent id='ABC'>
->> ^~~~~~~~~
-amp-consent/0.1/test/validator-amp-consent-invalid.html:33:0 The implied layout 'CONTAINER' is not supported by tag 'amp-consent'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_LAYOUT_PROBLEM]
+|  <!-- Invalid: no script json -->
+|  <amp-consent id='ABC' layout='nodisplay'>
 |    <div id='ui1'>UI1
 |      <button>Accept</button>
 |    </div>
@@ -41,21 +39,10 @@ amp-consent/0.1/test/validator-amp-consent-invalid.html:33:0 The implied layout 
 |      <button>Accept</button>
 |    </div>
 |  </amp-consent>
-|
+|  <!-- Invalid: multiple amp-consent -->
 |  <amp-consent id='ABC' layout='nodisplay'>
 >> ^~~~~~~~~
 amp-consent/0.1/test/validator-amp-consent-invalid.html:42:0 The tag 'amp-consent' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-consent) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-|    <script type="application/json">{
-|      "consents": {
-|        "DEF": {
-|          "checkConsentHref": "http://localhost:8000/get-consent-v1",
-|          "promptUI": "ui1"
-|        },
-|        "ABC": {
-|          "checkConsentHref": "http://localhost:8000/get-consent-v1"
-|        }
-|      }
-|    }</script>
 |    <div id='ui1'>UI1
 |      <button>Accept</button>
 |    </div>
@@ -65,3 +52,5 @@ amp-consent/0.1/test/validator-amp-consent-invalid.html:42:0 The tag 'amp-consen
 |  </amp-consent>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-consent/0.1/test/validator-amp-consent-invalid.html:51:6 The tag 'amp-consent extension .json script' is missing or incorrect, but required by 'amp-consent'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_TAG_PROBLEM]
