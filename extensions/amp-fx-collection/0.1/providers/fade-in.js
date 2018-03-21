@@ -137,7 +137,6 @@ class FadeInElement {
     // viewport.
     const offset = (this.adjustedViewportHeight_ - top);
     this.opacityOffset_ = offset / this.viewport_.getHeight();
-    console.log(this.opacityOffset_);
 
     if (!this.mutateScheduled_) {
       this.mutateScheduled_ = true;
