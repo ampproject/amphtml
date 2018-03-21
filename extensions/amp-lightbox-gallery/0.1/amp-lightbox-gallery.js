@@ -57,8 +57,10 @@ const LightboxControlsModes = {
 
 const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
-const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
-const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
+// Use S Curves for entry and exit animations
+const ENTER_CURVE_ = bezierCurve(0.8, 0, 0.2, 1);
+const EXIT_CURVE_ = bezierCurve(0.8, 0, 0.2, 1);
+
 const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
@@ -812,7 +814,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const dx = imageBox.left - rect.left;
         const dy = imageBox.top - rect.top;
         const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
-        duration = this.getTransitionDuration_(dy);
+        const viewportHeight = this.getViewport().getSize().height;
+        duration = this.getTransitionDuration_(Math.abs(dy), viewportHeight);
 
         // Animate the position and scale of the transition image to its
         // final lightbox destination in the middle of the page
@@ -941,7 +944,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         const dx = rect.left - imageBox.left;
         const dy = rect.top - imageBox.top;
         const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
-        duration = this.getTransitionDuration_(dy);
+        const viewportHeight = this.getViewport().getSize().height;
+        duration = this.getTransitionDuration_(Math.abs(dy), viewportHeight);
 
         // Animate the position and scale of the transition image to its
         // final lightbox destination in the middle of the page
