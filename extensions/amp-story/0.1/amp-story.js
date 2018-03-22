@@ -331,13 +331,14 @@ export class AmpStory extends AMP.BaseElement {
       this.initializeStandaloneStory_();
     }
 
-    if (this.isDesktop_()) {
-      this.element.setAttribute('desktop','');
-    }
     this.element.querySelector('amp-story-page').setAttribute('active', '');
 
     this.initializeListeners_();
     this.initializeListenersForDev_();
+
+    if (this.isDesktop_()) {
+      this.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+    }
 
     this.navigationState_.observe(stateChangeEvent =>
       (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
@@ -439,6 +440,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
+    });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
     });
 
     this.win.document.addEventListener('keydown', e => {
@@ -626,7 +631,7 @@ export class AmpStory extends AMP.BaseElement {
       [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-        pagesToWaitFor.map(page => page.whenLoaded()));
+        pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded()));
 
     return this.timer_.timeoutPromise(timeoutMs, storyLoadPromise)
         .catch(() => {});
@@ -952,9 +957,38 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    if (this.isDesktop_()) {
-      this.element.setAttribute('desktop','');
-      this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
+    const isDesktop = this.isDesktop_();
+    this.storeService_.dispatch(Action.TOGGLE_DESKTOP, isDesktop);
+
+    if (isDesktop) {
+      return;
+    }
+
+    // On mobile, maybe display the landscape overlay warning.
+    // TODO(gmajoulet): This code seems to fail if the story is not standalone.
+    this.vsync_.run({
+      measure: state => {
+        const {offsetWidth, offsetHeight} = this.element;
+        state.isLandscape = offsetWidth > offsetHeight;
+      },
+      mutate: state => {
+        this.element.classList.toggle(LANDSCAPE_OVERLAY_CLASS,
+            state.isLandscape);
+      },
+    }, {});
+  }
+
+  /**
+   * Reacts to desktop state updates.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    if (isDesktop) {
+      this.vsync_.mutate(() => {
+        this.element.setAttribute('desktop', '');
+        this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
+      });
       if (!this.topBar_) {
         this.buildTopBar_();
       }
@@ -966,17 +1000,9 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element, /* initial */ true);
       }
     } else {
-      this.vsync_.run({
-        measure: state => {
-          const {offsetWidth, offsetHeight} = this.element;
-          state.isLandscape = offsetWidth > offsetHeight;
-        },
-        mutate: state => {
-          this.element.classList.toggle(LANDSCAPE_OVERLAY_CLASS,
-              state.isLandscape);
-          this.element.removeAttribute('desktop');
-        },
-      }, {});
+      this.vsync_.mutate(() => {
+        this.element.removeAttribute('desktop');
+      });
     }
   }
 

@@ -95,4 +95,12 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
+
+  it('should toggle the desktop state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_DESKTOP, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(true);
+  });
 });
