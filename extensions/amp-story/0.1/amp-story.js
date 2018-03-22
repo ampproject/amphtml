@@ -348,7 +348,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Set muted state for `amp-story` in beginning.
     const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
-    this.onMutedStateUpdate_(isMuted);
+    this.onMutedStateUpdate_(!!isMuted);
   }
 
 
