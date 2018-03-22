@@ -57,7 +57,7 @@ export class AccessIframeAdapter {
 
     /** @private @const {!Element} */
     this.iframe_ = ampdoc.win.document.createElement('iframe');
-    toggle(this.iframe_, false)
+    toggle(this.iframe_, false);
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
