@@ -36,7 +36,6 @@ import {
   googleAdUrl,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  setNameframeExperimentConfigs,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
 import {clamp} from '../../../src/utils/math';
@@ -46,7 +45,6 @@ import {
   setStyles,
 } from '../../../src/style';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
@@ -152,12 +150,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
-
-    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
-    this.nameframeExperimentConfig_ = {
-      instantLoad: false,
-      writeInBody: false,
-    };
   }
 
   /**
@@ -342,16 +334,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    setNameframeExperimentConfigs(responseHeaders,
-        this.nameframeExperimentConfig_);
     return this.size_;
-  }
-
-  /** @override */
-  getAdditionalContextMetadata() {
-    const attributes = dict({});
-    Object.assign(attributes, this.nameframeExperimentConfig_);
-    return attributes;
   }
 
   /**
