@@ -215,7 +215,7 @@ export class Bookend {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {?./bookend.BookendConfigDef|undefined} */
+    /** @private {?./amp-story-bookend.BookendConfigDef|undefined} */
     this.config_;
 
     /** @private {boolean} */
@@ -365,7 +365,7 @@ export class Bookend {
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<?./bookend.BookendConfigDef>}
+   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {

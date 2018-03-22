@@ -1285,7 +1285,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./bookend.BookendConfigDef>}
+   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
    * @private
    */
   buildAndPreloadBookend_() {
