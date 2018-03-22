@@ -109,10 +109,12 @@
 
 .i-amphtml-lbg-controls.show {
   opacity: 1;
+  visibility: visible;
 }
 
 .i-amphtml-lbg-controls.hidden {
   opacity: 0;
+  visibility: hidden;
 }
 
 .i-amphtml-lbg-controls.fade-in {
@@ -144,7 +146,7 @@
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   max-height: 100% !important;
-  transition: max-height ease-in 0.3s !important;
+  transition: max-height ease-out 0.7s !important;
 }
 
 .i-amphtml-lbg-desc-mask {
@@ -166,7 +168,7 @@
   z-index: 1 !important;
   height: 4rem !important;
   background: linear-gradient(transparent, transparent 50%, rgba(0,0,0,0.9));
-  transition: background-color ease-out 0.4s !important;
+  transition: background-color ease-out 0.5s !important;
 }
 .i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-mask {
   background-color: rgba(0,0,0,0.4) !important;
