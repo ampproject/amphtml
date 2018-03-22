@@ -346,8 +346,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.observe(stateChangeEvent =>
       this.variableService_.onStateChange(stateChangeEvent));
 
-    // Mute `amp-story` in beginning.
-    this.mute_();
+    // Set muted state for `amp-story` in beginning.
+    const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
+    this.onMutedStateUpdate_(isMuted);
   }
 
 
@@ -606,7 +607,6 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(firstPageEl.id))
-        .then(() => this.intializeMutedState_())
         .then(() => this.preloadPagesByDistance_());
 
     // Do not block the layout callback on the completion of these promises, as
@@ -758,14 +758,6 @@ export class AmpStory extends AMP.BaseElement {
         });
 
     return Promise.all(pageImplPromises);
-  }
-
-
-  /** @private */
-  intializeMutedState_() {
-    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-      this.onMutedStateUpdate_(false /* isMuted */);
-    }
   }
 
 
@@ -1462,7 +1454,9 @@ export class AmpStory extends AMP.BaseElement {
         this.mediaPool_.unmute(this.backgroundAudioEl_);
         this.mediaPool_.play(this.backgroundAudioEl_);
       }
-      this.activePage_.unmuteAllMedia();
+      if (this.activePage_) {
+        this.activePage_.unmuteAllMedia();
+      }
     };
 
     this.mediaPool_.blessAll()
