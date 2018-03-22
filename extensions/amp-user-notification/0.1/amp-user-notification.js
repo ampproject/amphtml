@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from '../../../extensions/amp-consent/0.1/notification-ui-manager';
+} from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';

@@ -21,7 +21,7 @@ import {Layout} from '../../../src/layout';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
-} from './notification-ui-manager';
+} from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {
@@ -54,14 +54,16 @@ export class AmpConsent extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?./consent-state-manager.ConsentStateManager} */
+    /** @private {?ConsentStateManager} */
     this.consentStateManager_ = null;
 
-    /** @private {?./consent-policy-manager.ConsentPolicyManager} */
+    /** @private {?ConsentPolicyManager} */
     this.consentPolicyManager_ = null;
 
+    /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
+    /** @private {!Object<string, Element>} */
     this.consentUI_ = {};
 
     /** @private {!JsonObject} */
@@ -73,10 +75,16 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {!Object} */
     this.consentUIRequired_ = {};
 
+    /** @private {boolean} */
     this.uiInit_ = false;
 
-    this.displayQueue_ = Promise.resolve();
+    /** @private {?string} */
+    this.currentDisplayInstance_ = null;
 
+    /** @private {?Element} */
+    this.revokeUI_ = null;
+
+    /** @private {!Object<string, function()>} */
     this.dialogResolver_ = {};
   }
 
@@ -124,6 +132,7 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * To show prompt UI for instanceId
    * @param {string} instanceId
    * @return {!Promise}
    */
@@ -153,6 +162,9 @@ export class AmpConsent extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Hide current prompt UI
+   */
   hide_() {
     this.element.classList.add('amp-hidden');
     this.element.classList.remove('amp-active');
@@ -170,6 +182,10 @@ export class AmpConsent extends AMP.BaseElement {
     this.currentDisplayInstance_ = null;
   }
 
+  /**
+   * Handler User action
+   * @param {ACTION_TYPE} action
+   */
   handleAction_(action) {
     dev().assert(this.currentDisplayInstance_, 'No consent is displaying');
     dev().assert(this.consentStateManager_, 'No consent state manager');
@@ -335,10 +351,9 @@ export class AmpConsent extends AMP.BaseElement {
     const element = this.getAmpDoc().getElementById(promptUI);
     this.consentUI_[instanceId] = element;
 
-    if (!this.revokeUI && this.consentConfig_[instanceId]['revokeUI']) {
-      const element =
-          this.getAmpDoc().getElementById(this.consentConfig_[instanceId]['revokeUI']);
-      this.revokeUI_ = element;
+    if (!this.revokeUI_ && this.consentConfig_[instanceId]['revokeUI']) {
+      this.revokeUI_ = this.getAmpDoc().getElementById(
+          this.consentConfig_[instanceId]['revokeUI']);
     }
 
     // Get current consent state

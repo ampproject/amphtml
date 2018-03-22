@@ -15,8 +15,8 @@
  */
 import {
   NotificationUiManager,
-} from '../notification-ui-manager';
-import {macroTask} from '../../../../testing/yield';
+} from '../../src/service/notification-ui-manager';
+import {macroTask} from '../../testing/yield';
 
 
 describes.realWin('NotificationUiManager', {amp: 1}, () => {

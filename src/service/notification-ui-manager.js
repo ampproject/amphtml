@@ -17,21 +17,32 @@
 export const NOTIFICATION_UI_MANAGER = 'notificationUIManager';
 
 export class NotificationUiManager {
-
   constructor() {
+    /** @private {number} */
     this.queueSize_ = 0;
 
+    /** @private {!Promise} */
     this.queuePromise_ = Promise.resolve();
 
+    /** @private {function()} */
     this.queueEmptyHandler_ = () => {}; // Make this an observable if requested
 
+    /** @private {function()} */
     this.queueNotEmptyHandler_ = () => {};
   }
 
+  /**
+   * Register handler to be called when UI queue becomes empty
+   * @param {function()} handler
+   */
   onQueueEmpty(handler) {
     this.queueEmptyHandler_ = handler;
   }
 
+  /**
+   * Register handler to be called when UI queue becomes not empty
+   * @param {function()} handler
+   */
   onQueueNotEmpty(handler) {
     this.queueNotEmptyHandler_ = handler;
   }
@@ -40,6 +51,7 @@ export class NotificationUiManager {
    * Register to display UI. Notification will be blocked until previous one has
    * been dismissed.
    * @param {function():!Promise} show
+   * @return {!Promise}
    */
   registerUI(show) {
     if (this.queueSize_ == 0) {
