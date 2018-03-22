@@ -53,6 +53,81 @@ tags: {  # <amp-story>
       allowed_protocol: "https"
     }
   }
+  attrs: {
+    name: "title"
+    mandatory: true
+  }
+  attrs: {
+    name: "publisher"
+    mandatory: true
+  }
+  attrs: {
+    name: "publisher-logo-src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-portrait-src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-square-src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "poster-landscape-src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  siblings_disallowed: true
+  child_tags: {
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "AMP-ANALYTICS"
+    child_tag_name_oneof: "AMP-PIXEL"
+    child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-PAGE"
+  }
+}
+tags: {  # <amp-story> without metadata (deprecated)
+  html_format: AMP
+  tag_name: "AMP-STORY"
+  spec_name: "AMP-STORY NO-METADATA"
+  deprecation: "AMP-STORY"
+  deprecation_url: "TODO(choumx)"
+  requires_extension: "amp-story"
+  mandatory_parent: "BODY"
+  requires: "amp-story-page"
+  attrs: {
+    name: "standalone"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "bookend-config-src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
+  attrs: {
+    name: "background-audio"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
   siblings_disallowed: true
   child_tags: {
     mandatory_min_num_child_tags: 1
