@@ -26,7 +26,7 @@ min_validator_revision_required: 319
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 590
+spec_file_revision: 591
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -771,6 +771,26 @@ tags: {
   attrs: {
     name: "content"
     mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
+}
+# http-equiv x-dns-prefetch-control
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta http-equiv=x-dns-prefetch-control"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value_casei: "x-dns-prefetch-control"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value_regex_casei: "(off|on)"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
