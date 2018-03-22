@@ -249,8 +249,7 @@ describes.realWin('Platform store', {}, () => {
     it('should report fatal error if all platforms fail', () => {
       platformStore.reportPlatformFailure('service1');
       platformStore.reportPlatformFailure('service2');
-      expect(errorSpy).to.be.calledWith('amp-subscriptions',
-          'All platforms have failed to resolve');
+      expect(errorSpy).to.be.calledOnce;
     });
   });
 
