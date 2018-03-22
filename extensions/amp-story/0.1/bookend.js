@@ -439,7 +439,7 @@ export class Bookend {
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
       },
       mutate: state => {
-        this.getRoot().classList.toggle(
+        this.bookendEl_.classList.toggle(
             FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
       },
     }, {});
