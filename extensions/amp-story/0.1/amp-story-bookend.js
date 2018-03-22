@@ -295,7 +295,8 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.getRoot().addEventListener('click', event => this.maybeClose_(event));
+    this.getShadowRoot()
+        .addEventListener('click', event => this.maybeClose_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
