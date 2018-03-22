@@ -15,6 +15,7 @@
  */
 
 import {isArray} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 /**
@@ -23,7 +24,6 @@ import {user} from '../../../src/log';
  * }}
  */
 export let AmpDocumentRecommendationsConfig;
-
 
 /**
  * @typedef {{
@@ -34,32 +34,34 @@ export let AmpDocumentRecommendationsConfig;
  */
 export let AmpDocumentRecommendationsReco;
 
-
 /**
- * Checks whether the object conforms to the AmpDocumentRecommendationsConfig spec.
+ * Checks whether the object conforms to the AmpDocumentRecommendationsConfig
+ * spec.
  *
  * @param {*} config The config to validate.
+ * @param {string} host The host of the current document
+ *     (document.location.host). All recommendations must be for the same domain
+ *     as the current document so the URL can be updated safely.
  * @return {!./config.AmpDocumentRecommendationsConfig}
  */
-export function assertConfig(config) {
-  user().assert(config);
-  user().assert(isArray(config.recommendations));
-  assertRecos(config.recommendations);
+export function assertConfig(config, host) {
+  user().assert(
+      config, 'amp-document-recommendations config must be specified');
+  user().assert(
+      isArray(config.recommendations), 'recommendations must be an array');
+  assertRecos(config.recommendations, host);
   return /** @type {!AmpDocumentRecommendationsConfig} */ (config);
 }
 
-function assertRecos(recos) {
-  recos.forEach(reco => assertReco(reco));
+function assertRecos(recos, host) {
+  recos.forEach(reco => assertReco(reco, host));
 }
 
-function assertReco(reco) {
-  user().assert(
-      typeof reco.ampUrl == 'string',
-      'ampUrl must be a string');
-  user().assert(
-      typeof reco.image == 'string',
-      'image must be a string');
-  user().assert(
-      typeof reco.title == 'string',
-      'title must be a string');
+function assertReco(reco, host) {
+  const url = parseUrl(reco.ampUrl);
+  user().assert(typeof reco.ampUrl == 'string', 'ampUrl must be a string');
+  user().assert(url.host == host,
+      'recommendations must be from the same host as the current document');
+  user().assert(typeof reco.image == 'string', 'image must be a string');
+  user().assert(typeof reco.title == 'string', 'title must be a string');
 }

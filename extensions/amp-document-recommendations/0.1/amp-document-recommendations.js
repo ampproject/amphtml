@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {assertConfig} from './config';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
+import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -203,7 +204,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
               'failed to parse content discovery script', error);
         });
 
-    this.config_ = assertConfig(configJson);
+    const docInfo = Services.documentInfoForDoc(this.element);
+    const host = parseUrl(docInfo.sourceUrl).host;
+    this.config_ = assertConfig(configJson, host);
 
     this.mutateElement(() => {
       this.appendDivision_();
