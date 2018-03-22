@@ -37,7 +37,7 @@ import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './bookend';
+import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -53,7 +53,7 @@ import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
-import {ShareWidget} from './share';
+import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {

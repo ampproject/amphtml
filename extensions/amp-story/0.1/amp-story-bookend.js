@@ -17,7 +17,7 @@ import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ScrollableShareWidget} from './share';
+import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
@@ -490,8 +490,8 @@ export class Bookend {
   toggleDesktopAttribute_(isDesktop) {
     this.vsync_.mutate(() => {
       isDesktop ?
-          this.getShadowRoot().setAttribute('desktop', '') :
-          this.getShadowRoot().removeAttribute('desktop');
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
