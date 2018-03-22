@@ -145,8 +145,9 @@ declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {
-    hasCss: true,
-    cssBinaries: ['amp-story-bookend', 'amp-story-share']});
+  hasCss: true,
+  cssBinaries: ['amp-story-bookend', 'amp-story-share'],
+});
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
