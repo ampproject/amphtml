@@ -27,6 +27,7 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
+import { Services } from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -73,6 +74,9 @@ export class SubscriptionService {
 
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
+
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {?Promise} */
     this.viewTrackerPromise_ = null;
@@ -212,6 +216,12 @@ export class SubscriptionService {
       user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
 
+      if (this.viewer_.hasCapability('auth')) {
+        const serviceIds = ['local'];
+        this.platformStore_ = new PlatformStore(serviceIds);
+
+        return this;
+      }
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
