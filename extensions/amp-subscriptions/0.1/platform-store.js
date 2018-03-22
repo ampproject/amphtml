@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
+/** @const */
+const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
@@ -46,6 +50,9 @@ export class PlatformStore {
 
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
+
+    /** @private {!Array<string>} */
+    this.failedPlatforms_ = [];
 
   }
 
@@ -112,8 +119,11 @@ export class PlatformStore {
     if (entitlement) {
       entitlement.service = serviceId;
     }
-
     this.entitlements_[serviceId] = entitlement;
+    // Remove this serviceId as a failed platform now
+    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
+      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    }
     // Call all onChange callbacks.
     this.onChangeCallbacks_.fire({serviceId, entitlement});
   }
@@ -296,5 +306,20 @@ export class PlatformStore {
     }
 
     return localPlatform;
+  }
+
+  /**
+   * Records a platform failure and logs error if all platforms have failed.
+   * @param {string} serviceId
+   */
+  reportPlatformFailure(serviceId) {
+    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+      this.resolveEntitlement(serviceId, Entitlement.empty(serviceId));
+      this.failedPlatforms_.push(serviceId);
+    }
+
+    if (this.failedPlatforms_.length == this.serviceIds_.length) {
+      user().error(TAG, 'All platforms have failed to resolve');
+    }
   }
 }

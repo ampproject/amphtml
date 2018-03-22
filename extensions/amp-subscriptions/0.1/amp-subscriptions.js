@@ -22,14 +22,19 @@ import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
+import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
+/** @const */
+const SERVICE_TIMEOUT = 3000;
 
 /** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
 export let RenderState;
@@ -76,6 +81,9 @@ export class SubscriptionService {
 
     /** @private {?Promise} */
     this.viewTrackerPromise_ = null;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /**
@@ -185,16 +193,28 @@ export class SubscriptionService {
 
   /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise<!./entitlement.Entitlement>}
+   * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    return subscriptionPlatform.getEntitlements().then(entitlement => {
-      if (!entitlement) {
-        entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
-      }
+    let timeout = SERVICE_TIMEOUT;
+    if (getMode().development || getMode().localDev) {
+      timeout = SERVICE_TIMEOUT * 2;
+    }
+    return this.timer_.timeoutPromise(
+        timeout,
+        subscriptionPlatform.getEntitlements()
+    ).then(entitlement => {
+      entitlement = entitlement || Entitlement.empty(
+          subscriptionPlatform.getServiceId());
       this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
           entitlement);
       return entitlement;
+    }).catch(reason => {
+      const serviceId = subscriptionPlatform.getServiceId();
+      this.platformStore_.reportPlatformFailure(serviceId);
+      throw user().createError(
+          `fetch entitlements failed for ${serviceId}`, reason
+      );
     });
   }
 
