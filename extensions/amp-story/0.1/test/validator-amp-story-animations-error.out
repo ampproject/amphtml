@@ -46,6 +46,8 @@ FAIL
 |  </head>
 |  <body>
 |    <amp-story standalone>
+>>   ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-animations-error.html:47:2 The tag 'AMP-STORY NO-METADATA' is deprecated - use 'AMP-STORY' instead. (see TODO(choumx)) [DEPRECATION]
 |      <amp-story-page id="combining-animations">
 |          <amp-story-grid-layer template="thirds">
 |            <h1>invalid animation value + empty animation value</h1>
