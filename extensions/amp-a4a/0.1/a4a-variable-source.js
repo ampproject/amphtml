@@ -113,7 +113,7 @@ export class A4AVariableSource extends VariableSource {
     });
 
     this.set('HTML_ATTR',
-        /** @type {function(...*)} */(this.htmlAttrBinding_.bind(this)));
+        /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
 
     for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
       const varName = WHITELISTED_VARIABLES[v];
@@ -140,7 +140,7 @@ export class A4AVariableSource extends VariableSource {
    *     requested attributes, then nothing will be included in the array
    *     for that element.
    */
-  htmlAttrBinding_(cssSelector, ...attributeNames) {
+  htmlAttributeBinding_(cssSelector, ...attributeNames) {
     // Generate an error if cssSelector matches more than this many elements
     const HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE = 20;
 
