@@ -712,7 +712,8 @@ function parseExtensionFlags() {
         argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
 
-      log(green('Building extension(s):'), cyan(extensions.join(', ')));
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.replace(/,/g, ', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
