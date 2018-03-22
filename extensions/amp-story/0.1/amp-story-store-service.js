@@ -191,6 +191,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+          [StateProperty.MUTED_STATE]: false,
         };
       default:
         return {};
