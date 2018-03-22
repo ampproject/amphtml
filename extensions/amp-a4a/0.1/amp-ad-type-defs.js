@@ -71,7 +71,7 @@ export class Renderer {
   /**
    * @param {!Object} unusedContext
    * @param {!Element} unusedContainerElement
-   * @param {!CreativeData} unusedCreativeData
+   * @param {!Object} unusedCreativeData
    * @return {!Promise}
    * @abstract
    */
