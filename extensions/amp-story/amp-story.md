@@ -48,6 +48,39 @@ This component is experimental and under active development. For any issues, ple
 
 [TOC]
 
+## Announcements
+
+### (3/22/2018) **New metadata requirements**
+
+We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
+
+```html
+<!-- `title`, `publisher`, `publisher-logo-src` and `poster-portrait-src` will soon be required. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
+
+<!-- `poster-square-src` and `poster-landscape-src` are optional, but strongly recommended. -->
+<amp-story standalone title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
+```
+
+These metadata attributes will be used for displaying a preview of this story across the AMP Stories ecosystem, for example in the bookend of a related story as an engaging preview link. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP Stories surfaces to come.
+
+| ATTRIBUTE | DESCRIPTION |
+| -- | -- |
+| `title` (required) | The title of the story. |
+| `publisher` (required) | The name of the story's publisher. |
+| `publisher-logo-src` (required) | The publisher's logo in square format (1x1 aspect ratio). |
+| `poster-portrait-src` (required) | The story poster in portrait format (3x4 aspect ratio). |
+| `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
+| `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
+
 ## Overview
 
 The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
