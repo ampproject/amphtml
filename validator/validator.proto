@@ -381,7 +381,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 32
+// NEXT AVAILABLE TAG: 33
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -454,6 +454,10 @@ message TagSpec {
   // Expresses a generic condition which must be satisfied if this tag is found.
   // Used in combination with the `satisfies` attributes on a different tag.
   repeated string requires = 24;
+  // The excludes field is a generic condition, which must not be satisfied if
+  // this tag is found. Otherwise a TAG_EXCLUDED_BY_TAG error will be generated.
+  // Used in combination with the `satisfies` attributes on a different tag.
+  repeated string excludes = 32;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -591,12 +595,13 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 101
+  // NEXT AVAILABLE TAG: 102
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;
+    TAG_EXCLUDED_BY_TAG = 101;
     WARNING_EXTENSION_UNUSED = 79;
     EXTENSION_UNUSED = 84;
     WARNING_EXTENSION_DEPRECATED_VERSION = 80;
