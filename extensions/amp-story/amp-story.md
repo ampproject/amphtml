@@ -70,14 +70,18 @@ We're adding four new required attributes and two optional attributes to the `<a
     poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
 ```
 
-These metadata attributes will be used for displaying a preview of this story across the AMP Stories ecosystem, for example in the bookend of a related story as an engaging preview link. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP Stories surfaces to come.
+These metadata attributes will be used for displaying a preview of this story across the AMP Stories ecosystem. For example, these attributes can be used to render an engagin preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP Stories surfaces to come.
+
+Note that these metadata attributes supplement and does not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP Stories.
+
+The new attributes:
 
 | ATTRIBUTE | DESCRIPTION |
 | -- | -- |
-| `title` (required) | The title of the story. |
-| `publisher` (required) | The name of the story's publisher. |
-| `publisher-logo-src` (required) | The publisher's logo in square format (1x1 aspect ratio). |
-| `poster-portrait-src` (required) | The story poster in portrait format (3x4 aspect ratio). |
+| `title` [required] | The title of the story. |
+| `publisher` [required] | The name of the story's publisher. |
+| `publisher-logo-src` [required] | The publisher's logo in square format (1x1 aspect ratio). |
+| `poster-portrait-src` [required] | The story poster in portrait format (3x4 aspect ratio). |
 | `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
 | `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
 
@@ -189,6 +193,22 @@ The `amp-story` component represents an entire story.  The component itself  imp
 
 Identifies that the AMP document is a story.
 
+##### title [required]
+
+The title of the story.
+
+##### publisher [required]
+
+The name of the story's publisher.
+
+##### publisher-logo-src [required]
+
+A publisher's logo in square format (1x1 aspect ratio).
+
+##### poster-portrait-src [required]
+
+The story poster in portrait format (3x4 aspect ratio).
+
 ##### bookend-config-src [optional]
 
 A URL endpoint that accepts GET requests and returns a JSON response with links to related and trending stories, to be shown on a screen at the end of the story.  If omitted, the amp-story component renders a default UI for the end screen.  See the [bookend endpoint](#bookend-json-endpoint) section below for the JSON response format.
@@ -196,6 +216,14 @@ A URL endpoint that accepts GET requests and returns a JSON response with links 
 ##### background-audio [optional]
 
 A URI to an audio file that plays throughout the story.
+
+##### poster-square-src [optional]
+
+The story poster in square format (1x1 aspect ratio).
+
+##### poster-landscape-src [optional]
+
+The story poster in landscape format (4x3 aspect ratio).
 
 ### Children (of amp-story)
 
@@ -221,7 +249,7 @@ These are configured in the `related-articles` field of the response object.
 
 #### Social sharing
 
-The configuration for social sharing is defined in the `share-providers` field of the response object (optional).
+The configuration for social sharing is defined in the `share-providers` field of the response object [optional].
 
 This field should contain an object with key-value pairs. Each key represents a share provider's name (e.g. `facebook`). The value should be set to a non-empty configuration object for the provider or `true` (when no parameters are required).
 
@@ -686,7 +714,7 @@ See a [live demo of all the AMP story animations](https://ampbyexample.com/stori
 
 ### Animation attributes
 
-#####  animate-in (required)
+#####  animate-in [required]
 
 Use this attribute to specify the name of the entrance [animation preset](#animation-presets).
 
@@ -698,7 +726,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-duration (optional)
+##### animate-in-duration [optional]
 
 Use this attribute to specify the duration of the entrance animation, in seconds or milliseconds (e.g., 0.2s or 200ms). The default duration depends on the animation preset you specified.
 
@@ -710,7 +738,7 @@ Fly from left!
 </h2>
 ```
 
-##### animate-in-delay (optional)
+##### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
 
@@ -728,7 +756,7 @@ Fly from left!
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as *delay this animation for at least N milliseconds*. This applies to all elements including those with a delay of 0 seconds.
 {% endcall %}
 
-##### animate-in-after (optional)
+##### animate-in-after [optional]
 
 Use this attribute to chain or sequence animations (for example, animation2 starts after animation1 is complete). Specify the ID of the animated element that this element's animation will follow. The element must be present on the same `<amp-story-page>`. The delay is applied after the previous element's animation has finished. For further details, see the [Sequencing animations](#sequencing-animations) section below.
 
