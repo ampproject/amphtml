@@ -1389,6 +1389,34 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
+ * Build "Iframe API".
+ *
+ * @param {!Object} options
+ */
+function buildAccessIframeApi(options) {
+  const version = '0.1';
+  options = options || {};
+  const path = `extensions/amp-access/${version}/iframe-api`;
+  let watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+  const minify = options.minify || argv.minify;
+  mkdirSync('dist.3p');
+  mkdirSync('dist.3p/current');
+  return compileJs(path + '/', 'amp-iframe-api-export.js',
+      './dist.3p/current', {
+        minifiedName: 'amp-iframe-api-v0.js',
+        checkTypes: options.checkTypes || argv.checkTypes,
+        watch,
+        minify,
+        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+        include3pDirectories: false,
+        includePolyfills: true,
+      });
+}
+
+/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -1541,3 +1569,5 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-access-iframe-api', 'Builds iframe-api.js',
+    buildAccessIframeApi);
