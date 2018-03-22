@@ -661,7 +661,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG) || getMode().test) {
+    if (isExperimentOn(this.win, TAG) || getMode().test ||
+        this.win.location.origin.indexOf('file://') === 0) {
       return true;
     }
 
