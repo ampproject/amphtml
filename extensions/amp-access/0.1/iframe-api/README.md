@@ -15,3 +15,30 @@ limitations under the License.
 -->
 
 # amp-access-iframe-api
+
+The access iframe is an experimental implementation of access protocol. It requires "amp-access-iframe" experiment turned on in the AMP document for it to work.
+
+The `AmpAccessIframeApi` is the entry point for access iframe implementation. As its main parameter it requires an instance of `AccessController`, which simply implements all methods of access protocol such as `authorize` and `pingback`.
+
+The instrumentation would normally look like this:
+
+```
+/** Implements AccessController interface */
+class Controler {
+  connect(origin, protocol, config) {
+    // Initialize the controller.
+    // Important! Ensure that the "origin" is an acceptable value.
+  }
+
+  authorize() {
+    // Return a promise that will yield the authorization response.
+  }
+
+  pingback() {
+    // Handle the "impression" event.
+  }
+}
+
+var iframeApi = new AmpAccessIframeApi(new Controller());
+iframeApi.connect();
+```

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <!-- Currently a sync script. -->
+  <script src="/dist.3p/current/amp-iframe-api-export.js"></script>
+  <script>
+    function log() {
+      if (!console || !console.log) {
+        return;
+      }
+      var var_args = Array.prototype.slice.call(arguments, 0);
+      var_args.unshift('[amp-access-iframe]');
+      console.log.apply(console, var_args);
+    }
+
+    /** Implementation of AccessController */
+    var Controller = function() {
+    };
+    Controller.prototype.connect = function(origin, protocol, config) {
+      log('connect: ', origin, protocol, config);
+    };
+    Controller.prototype.authorize = function() {
+      log('authorize');
+      return {granted: true};
+    };
+    Controller.prototype.pingback = function() {
+      log('pingback');
+    };
+
+    var iframeApi = new AmpAccessIframeApi(new Controller());
+    iframeApi.connect();
+  </script>
+</head>
+<body>
+  Hidden iframe.
+</body>
+</html>
