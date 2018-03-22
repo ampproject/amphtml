@@ -21,6 +21,7 @@ import {
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describe('sanitizeHtml', () => {
@@ -416,8 +417,40 @@ describe('sanitizeFormattingHtml', () => {
         .to.be.equal('<b>abc</b>');
   });
 
-  it('should compentsate for broken markup', () => {
+  it('should compensate for broken markup', () => {
     expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
+  });
+
+  describe('should sanitize `style` attribute', () => {
+    before(() => {
+      toggleExperiment(self, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+    });
+
+    after(() => {
+      toggleExperiment(self, 'inline-styles', false,
+          /* opt_transientExperiment */ true);
+    });
+
+    it('should allow valid styles',() => {
+      expect(sanitizeHtml('<div style="color:blue">Test</div>'))
+          .to.equal('<div style="color:blue">Test</div>');
+    });
+
+    it('should ignore styles containing `!important`',() => {
+      expect(sanitizeHtml('<div style="color:blue!important">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:fixed`', () => {
+      expect(sanitizeHtml('<div style="position:fixed">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:sticky`', () => {
+      expect(sanitizeHtml('<div style="position:sticky">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
   });
 });
