@@ -29,7 +29,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
-import { Services } from '../../../src/services';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -204,21 +203,23 @@ export class SubscriptionService {
     if (getMode().development || getMode().localDev) {
       timeout = SERVICE_TIMEOUT * 2;
     }
-    return this.timer_.timeoutPromise(
-        timeout,
-        subscriptionPlatform.getEntitlements()
-    ).then(entitlement => {
-      entitlement = entitlement || Entitlement.empty(
-          subscriptionPlatform.getServiceId());
-      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
-          entitlement);
-      return entitlement;
-    }).catch(reason => {
-      const serviceId = subscriptionPlatform.getServiceId();
-      this.platformStore_.reportPlatformFailure(serviceId);
-      throw user().createError(
-          `fetch entitlements failed for ${serviceId}`, reason
-      );
+    return this.viewer_.whenFirstVisible().then(() => {
+      return this.timer_.timeoutPromise(
+          timeout,
+          subscriptionPlatform.getEntitlements()
+      ).then(entitlement => {
+        entitlement = entitlement || Entitlement.empty(
+            subscriptionPlatform.getServiceId());
+        this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
+            entitlement);
+        return entitlement;
+      }).catch(reason => {
+        const serviceId = subscriptionPlatform.getServiceId();
+        this.platformStore_.reportPlatformFailure(serviceId);
+        throw user().createError(
+            `fetch entitlements failed for ${serviceId}`, reason
+        );
+      });
     });
   }
 
@@ -236,17 +237,6 @@ export class SubscriptionService {
       user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
 
-      if (this.viewer_.hasCapability('auth')) {
-        const serviceIds = ['local'];
-        this.platformStore_ = new PlatformStore(serviceIds);
-        this.viewer_.sendMessageAwaitResponse('auth', {
-        }).then(function(response) {
-          // use this response
-        }, function(reason) {
-          // do error code here
-        });
-        return;
-      }
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
@@ -256,14 +246,12 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.viewer_.whenFirstVisible().then(() => {
-        this.platformStore_.getAllRegisteredPlatforms().forEach(
-            subscriptionPlatform => {
-              this.fetchEntitlements_(subscriptionPlatform);
-            }
-        );
-        this.startAuthorizationFlow_();
-      });
+      this.platformStore_.getAllRegisteredPlatforms().forEach(
+          subscriptionPlatform => {
+            this.fetchEntitlements_(subscriptionPlatform);
+          }
+      );
+      this.startAuthorizationFlow_();
 
     });
     return this;
