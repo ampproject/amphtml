@@ -37,7 +37,7 @@ import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './bookend';
+import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -53,7 +53,7 @@ import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
-import {ShareWidget} from './share';
+import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -346,9 +346,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.observe(stateChangeEvent =>
       this.variableService_.onStateChange(stateChangeEvent));
 
-    // Mute `amp-story` in beginning.
-    // TODO(gmajoulet): Support unmuted embed mode option.
-    this.mute_();
+    // Set muted state for `amp-story` in beginning.
+    const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
+    this.onMutedStateUpdate_(!!isMuted);
   }
 
 
@@ -631,7 +631,7 @@ export class AmpStory extends AMP.BaseElement {
       [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-        pagesToWaitFor.map(page => page.whenLoaded()));
+        pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded()));
 
     return this.timer_.timeoutPromise(timeoutMs, storyLoadPromise)
         .catch(() => {});
@@ -661,7 +661,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isAmpStoryEnabled_() {
-    if (isExperimentOn(this.win, TAG) || getMode().test) {
+    if (isExperimentOn(this.win, TAG) || getMode().test ||
+        this.win.location.protocol === 'file:') {
       return true;
     }
 
@@ -1285,7 +1286,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./bookend.BookendConfigDef>}
+   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
    * @private
    */
   buildAndPreloadBookend_() {
@@ -1454,7 +1455,9 @@ export class AmpStory extends AMP.BaseElement {
         this.mediaPool_.unmute(this.backgroundAudioEl_);
         this.mediaPool_.play(this.backgroundAudioEl_);
       }
-      this.activePage_.unmuteAllMedia();
+      if (this.activePage_) {
+        this.activePage_.unmuteAllMedia();
+      }
     };
 
     this.mediaPool_.blessAll()

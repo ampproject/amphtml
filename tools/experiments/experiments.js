@@ -63,6 +63,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
+  },
+  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',

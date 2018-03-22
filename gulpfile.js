@@ -144,7 +144,10 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {hasCss: true});
+declareExtension('amp-story', '0.1', {
+  hasCss: true,
+  cssBinaries: ['amp-story-bookend', 'amp-story-share'],
+});
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
@@ -712,7 +715,8 @@ function parseExtensionFlags() {
         argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
 
-      log(green('Building extension(s):'), cyan(extensions.join(', ')));
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.replace(/,/g, ', ')));
 
       if (maybeAddVideoService()) {
         log(green('⤷ Video component(s) being built, added'),
@@ -1388,6 +1392,34 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
+ * Build "Iframe API".
+ *
+ * @param {!Object} options
+ */
+function buildAccessIframeApi(options) {
+  const version = '0.1';
+  options = options || {};
+  const path = `extensions/amp-access/${version}/iframe-api`;
+  let watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+  const minify = options.minify || argv.minify;
+  mkdirSync('dist.3p');
+  mkdirSync('dist.3p/current');
+  return compileJs(path + '/', 'amp-iframe-api-export.js',
+      './dist.3p/current', {
+        minifiedName: 'amp-iframe-api-v0.js',
+        checkTypes: options.checkTypes || argv.checkTypes,
+        watch,
+        minify,
+        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+        include3pDirectories: false,
+        includePolyfills: true,
+      });
+}
+
+/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -1540,3 +1572,5 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-access-iframe-api', 'Builds iframe-api.js',
+    buildAccessIframeApi);
