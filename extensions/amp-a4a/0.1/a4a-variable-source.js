@@ -142,7 +142,7 @@ export class A4AVariableSource extends VariableSource {
    */
   htmlAttrBinding_(cssSelector, ...attributeNames) {
     // Generate an error if cssSelector matches more than this many elements
-    const HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE = 50;
+    const HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE = 20;
 
     // Of the elements matched by cssSelector, see which contain one or more
     // of the specified attributes, and return an array of at most this many.
