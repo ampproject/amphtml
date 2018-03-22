@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ScrollableShareWidget} from './share';
+import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -213,7 +215,7 @@ export class Bookend {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {?./bookend.BookendConfigDef|undefined} */
+    /** @private {?./amp-story-bookend.BookendConfigDef|undefined} */
     this.config_;
 
     /** @private {boolean} */
@@ -225,8 +227,17 @@ export class Bookend {
     /** @private {?Element} */
     this.replayButton_ = null;
 
-    /** @private {?Element} */
+    /**
+     * Root element containing a shadow DOM root.
+     * @private {?Element}
+     */
     this.root_ = null;
+
+    /**
+     * Actual bookend.
+     * @private {?Element}
+     */
+    this.bookendEl_ = null;
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
@@ -251,7 +262,16 @@ export class Bookend {
 
     this.isBuilt_ = true;
 
-    this.root_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+    this.root_ = this.win_.document.createElement('div');
+    const shadowRoot = createShadowRoot(this.root_);
+
+    this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+
+    const style = this.win_.document.createElement('style');
+    style./*OK*/textContent = CSS;
+
+    shadowRoot.appendChild(style);
+    shadowRoot.appendChild(this.bookendEl_);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -262,6 +282,10 @@ export class Bookend {
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
 
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+      this.toggleDesktopAttribute_(true);
+    }
+
     this.vsync_.mutate(() => {
       this.storyElement_.appendChild(this.getRoot());
     });
@@ -271,7 +295,8 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.root_.addEventListener('click', event => this.maybeClose_(event));
+    this.getShadowRoot()
+        .addEventListener('click', event => this.maybeClose_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
@@ -290,8 +315,13 @@ export class Bookend {
       }
     });
 
-    this.storeService_.subscribe(
-        StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    });
   }
 
   /**
@@ -313,11 +343,29 @@ export class Bookend {
   }
 
   /**
+   * Reacts to bookend state updates.
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to desktop state updates.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    this.toggleDesktopAttribute_(isDesktop);
+  }
+
+  /**
    * Retrieves the publisher bookend configuration. Applying the configuration
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<?./bookend.BookendConfigDef>}
+   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
@@ -419,7 +467,7 @@ export class Bookend {
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
       },
       mutate: state => {
-        this.getRoot().classList.toggle(
+        this.getShadowRoot().classList.toggle(
             FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
       },
     }, {});
@@ -431,7 +479,20 @@ export class Bookend {
    */
   toggle_(show) {
     this.vsync_.mutate(() => {
-      this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+      this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+    });
+  }
+
+  /**
+   * Toggles the bookend desktop UI.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  toggleDesktopAttribute_(isDesktop) {
+    this.vsync_.mutate(() => {
+      isDesktop ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -485,6 +546,12 @@ export class Bookend {
     return dev().assertElement(this.root_);
   }
 
+  /** @return {!Element} */
+  getShadowRoot() {
+    this.assertBuilt_();
+    return dev().assertElement(this.bookendEl_);
+  }
+
   /**
    * Gets container for bookend content.
    * @return {!Element}
@@ -500,7 +567,7 @@ export class Bookend {
    * @private
    */
   getOverflowContainer_() {
-    return dev().assertElement(this.getRoot().firstElementChild);
+    return dev().assertElement(this.getShadowRoot().firstElementChild);
   }
 
   /**
