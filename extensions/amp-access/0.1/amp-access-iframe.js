@@ -17,6 +17,7 @@
 import {Messenger} from './iframe-api/messenger';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
+import {toggle} from '../../../src/style';
 import {user} from '../../../src/log';
 
 
@@ -56,7 +57,7 @@ export class AccessIframeAdapter {
 
     /** @private @const {!Element} */
     this.iframe_ = ampdoc.win.document.createElement('iframe');
-    this.iframe_.style.display = 'none';
+    toggle(this.iframe_, false)
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(

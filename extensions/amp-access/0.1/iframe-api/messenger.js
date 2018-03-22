@@ -175,7 +175,7 @@ export class Messenger {
         cmd == 'connect' ?
           (this.targetOrigin_ != null ? this.targetOrigin_ : '*') :
           this.getTargetOrigin();
-    target.postMessage(/** @type {!JsonObject} */ ({
+    target./*OK*/postMessage(/** @type {!JsonObject} */ ({
       'sentinel': SENTINEL,
       '_rsvp': rsvpId,
       'cmd': cmd,
