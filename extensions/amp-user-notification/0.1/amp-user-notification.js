@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {
   NOTIFICATION_UI_MANAGER,
-  NotificationUIManager,
+  NotificationUiManager,
 } from '../../../extensions/amp-consent/0.1/notification-ui-manager';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
@@ -514,6 +514,6 @@ export function installUserNotificationManagerForTesting(ampdoc) {
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(SERVICE_ID, UserNotificationManager);
-  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUIManager);
+  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerElement(TAG, AmpUserNotification, CSS);
 });

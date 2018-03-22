@@ -16,7 +16,7 @@
 
 export const NOTIFICATION_UI_MANAGER = 'notificationUIManager';
 
-export class NotificationUIManager {
+export class NotificationUiManager {
 
   constructor() {
     this.queueSize_ = 0;

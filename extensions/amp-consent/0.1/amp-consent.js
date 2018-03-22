@@ -20,7 +20,7 @@ import {ConsentPolicyManager} from './consent-policy-manager';
 import {Layout} from '../../../src/layout';
 import {
   NOTIFICATION_UI_MANAGER,
-  NotificationUIManager,
+  NotificationUiManager,
 } from './notification-ui-manager';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -355,7 +355,7 @@ export class AmpConsent extends AMP.BaseElement {
 
 AMP.extension('amp-consent', '0.1', AMP => {
   AMP.registerElement('amp-consent', AmpConsent, CSS);
-  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUIManager);
+  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerServiceForDoc(CONSENT_STATE_MANAGER, ConsentStateManager);
   AMP.registerServiceForDoc(CONSENT_POLICY_MANGER, ConsentPolicyManager);
 });
