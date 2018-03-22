@@ -337,7 +337,6 @@ export class VisibilityManager {
 
       // Optionally, element-level state.
       let layoutBox;
-
       if (opt_element) {
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
@@ -704,7 +703,7 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
 
   /** @override */
   getRootLayoutBox() {
-    const rootElement = dev().assertElement(this.embed.host);
+    const rootElement = dev().assertElement(this.embed.iframe);
     return Services.viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
   }
 
