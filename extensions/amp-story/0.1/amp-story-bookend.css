@@ -233,3 +233,41 @@
   padding-left: 16px !important;
   padding-right: 16px !important;
 }
+
+[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
+  /* TODO(alanorozco): Don't render at all when on desktop */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner {
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding: 104px 156px 64px !important;
+  margin: 0 !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-replay {
+  /* This is replaced with the forward button on desktop. */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-overflow {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 952px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 1272px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
+}

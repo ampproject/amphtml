@@ -282,6 +282,10 @@ export class Bookend {
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
 
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+      this.toggleDesktopAttribute_(true);
+    }
+
     this.vsync_.mutate(() => {
       this.storyElement_.appendChild(this.getRoot());
     });
@@ -310,8 +314,13 @@ export class Bookend {
       }
     });
 
-    this.storeService_.subscribe(
-        StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    });
   }
 
   /**
@@ -330,6 +339,24 @@ export class Bookend {
   onReplayButtonClick_(event) {
     event.stopPropagation();
     dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
+  }
+
+  /**
+   * Reacts to bookend state updates.
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to desktop state updates.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    this.toggleDesktopAttribute_(isDesktop);
   }
 
   /**
@@ -452,6 +479,19 @@ export class Bookend {
   toggle_(show) {
     this.vsync_.mutate(() => {
       this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+    });
+  }
+
+  /**
+   * Toggles the bookend desktop UI.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  toggleDesktopAttribute_(isDesktop) {
+    this.vsync_.mutate(() => {
+      isDesktop ?
+          this.getShadowRoot().setAttribute('desktop', '') :
+          this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
