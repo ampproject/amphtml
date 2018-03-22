@@ -70,9 +70,9 @@ We're adding four new required attributes and two optional attributes to the `<a
     poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
 ```
 
-These metadata attributes will be used for displaying a preview of this story across the AMP Stories ecosystem. For example, these attributes can be used to render an engagin preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP Stories surfaces to come.
+These metadata attributes will be used for displaying a preview of this story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
 
-Note that these metadata attributes supplement and does not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP Stories.
+Note that these metadata attributes supplement and does not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
 
 The new attributes:
 
@@ -87,7 +87,7 @@ The new attributes:
 
 ## Overview
 
-The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -97,13 +97,13 @@ The `amp-story` extension provides a new format for displaying visual content th
   </amp-anim>
 </figure>
 
-## AMP Story format
+## AMP story format
 
-An [AMP Story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
+An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP Story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
-    <img alt="AMP Story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
+    <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
 </amp-img>
 
@@ -157,12 +157,12 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP Story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
 | ---- | --- |
-| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
+| The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP story. |
 | Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 
 ## Story: `amp-story`
