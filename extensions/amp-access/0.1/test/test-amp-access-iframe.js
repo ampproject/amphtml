@@ -32,8 +32,7 @@ describes.realWin('AccessIframeAdapter', {
     clock = lolex.install({target: ampdoc.win});
 
     validConfig = {
-      'authorization': 'https://acme.com/a?rid=READER_ID',
-      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'iframeSrc': 'https://acme.com/iframe',
     };
 
     context = {
@@ -52,40 +51,72 @@ describes.realWin('AccessIframeAdapter', {
     it('should load valid config', () => {
       const adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
       expect(adapter.getConfig()).to.deep.equal({
+        'iframeSrc': 'https://acme.com/iframe',
       });
       expect(adapter.isAuthorizationEnabled()).to.be.true;
       expect(adapter.isPingbackEnabled()).to.be.true;
+    });
+
+    it('should require "iframeSrc"', () => {
+      delete validConfig['iframeSrc'];
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/iframeSrc/);
+    });
+
+    it('should require "iframeSrc" to be secure', () => {
+      validConfig['iframeSrc'] = 'http://acme.com/iframe';
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/https/);
     });
   });
 
 
   describe('runtime', () => {
     let adapter;
+    let messengerMock;
 
     beforeEach(() => {
       adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
+      messengerMock = sandbox.mock(adapter.messenger_);
+      messengerMock.expects('sendCommandRsvp')
+          .withExactArgs('start', {
+            'protocol': 'amp-access',
+            'config': validConfig,
+          })
+          .returns(Promise.resolve())
+          .once();
+      adapter.handleCommand_('connect');
     });
 
     afterEach(() => {
+      messengerMock.verify();
+    });
+
+    it('should connect', () => {
+      return adapter.connectedPromise_;
     });
 
     describe('authorize', () => {
       it('should issue authorization', () => {
-        return adapter.authorize().then(() => {
-          throw new Error('must have failed');
-        }, reason => {
-          expect(() => {throw reason;}).to.throw(/not implemented/);
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(Promise.resolve({granted: true}))
+            .once();
+        return adapter.authorize().then(result => {
+          expect(result).to.deep.equal({granted: true});
         });
       });
     });
 
     describe('pingback', () => {
       it('should send pingback', () => {
-        return adapter.pingback().then(() => {
-          throw new Error('must have failed');
-        }, reason => {
-          expect(() => {throw reason;}).to.throw(/not implemented/);
-        });
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('pingback', {})
+            .returns(Promise.resolve())
+            .once();
+        return adapter.pingback();
       });
     });
   });

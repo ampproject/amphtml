@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-/** @const {string} */
-const TAG = 'amp-access-iframe';
+import {Messenger} from './iframe-api/messenger';
+import {assertHttpsUrl} from '../../../src/url';
+import {parseUrl} from '../../../src/url';
+import {user} from '../../../src/log';
 
 
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
@@ -32,11 +34,54 @@ export class AccessIframeAdapter {
 
     /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
+
+    /** @const @private {!JsonObject} */
+    this.configJson_ = configJson;
+
+    /** @const @private {string} */
+    this.iframeSrc_ = user().assert(configJson['iframeSrc'],
+        '"iframeSrc" URL must be specified');
+    assertHttpsUrl(this.iframeSrc_, '"iframeSrc"');
+
+    /** @private @const {string} */
+    this.targetOrigin_ = parseUrl(this.iframeSrc_).origin;
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.connectedPromise_ = new Promise(resolve => {
+      this.connectedResolver_ = resolve;
+    });
+
+    /** @private @const {!Element} */
+    this.iframe_ = ampdoc.win.document.createElement('iframe');
+    this.iframe_.style.display = 'none';
+
+    /** @private @const {!Messenger} */
+    this.messenger_ = new Messenger(
+        this.ampdoc.win,
+        () => this.iframe_.contentWindow,
+        this.targetOrigin_);
+
+    // Connect.
+    this.messenger_.connect(this.handleCommand_.bind(this));
+    this.ampdoc.getBody().appendChild(this.iframe_);
+    this.iframe_.src = this.iframeSrc_;
+  }
+
+  /**
+   * Disconnect the client.
+   */
+  disconnect() {
+    this.messenger_.disconnect();
+    this.ampdoc.getBody().removeChild(this.iframe_);
   }
 
   /** @override */
   getConfig() {
     return {
+      'iframeSrc': this.iframeSrc_,
     };
   }
 
@@ -47,8 +92,12 @@ export class AccessIframeAdapter {
 
   /** @override */
   authorize() {
-    // TODO(dvoytenko): Implement.
-    return Promise.reject(new Error(TAG + ': not implemented'));
+    return this.connectedPromise_.then(() => {
+      return this.messenger_.sendCommandRsvp('authorize', {});
+    }).then(response => {
+      // TODO(dvoytenko): reformat the response.
+      return response;
+    });
   }
 
   /** @override */
@@ -58,7 +107,31 @@ export class AccessIframeAdapter {
 
   /** @override */
   pingback() {
-    // TODO(dvoytenko): Implement.
-    return Promise.reject(new Error(TAG + ': not implemented'));
+    return this.connectedPromise_.then(() => {
+      return this.messenger_.sendCommandRsvp('pingback', {});
+    });
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} unusedPayload
+   * @return {*}
+   * @private
+   */
+  handleCommand_(cmd, unusedPayload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.messenger_.sendCommandRsvp('start', {
+        'protocol': 'amp-access',
+        'config': this.configJson_,
+      }).then(() => {
+        // Confirmation that connection has been successful.
+        if (this.connectedResolver_) {
+          this.connectedResolver_();
+          this.connectedResolver_ = null;
+        }
+      });
+      return;
+    }
   }
 }
