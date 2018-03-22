@@ -98,9 +98,4 @@ export class FriendlyFrameRenderer extends Renderer {
           setStyle(frameDoc.body, 'visibility', 'visible');
         });
   }
-
-  /** @return {!Element} */
-  getIframe() {
-    return this.iframe_;
-  }
 }

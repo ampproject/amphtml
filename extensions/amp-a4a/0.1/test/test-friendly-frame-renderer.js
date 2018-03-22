@@ -72,12 +72,4 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
               .to.equal(minifiedCreative);
         });
   });
-  it('should contain the appended iframe child', () => {
-    return renderer.render(context, containerElement, creativeData).then(
-        () => {
-          expect(renderer.getIframe()).to.be.ok;
-          expect(renderer.getIframe()).to.equal(
-              containerElement.querySelector('iframe'));
-        });
-  });
 });
