@@ -28,7 +28,7 @@ const MIN_LAYER_WIDTH_PX = 380;
 
 
 /** @private @const {number} */
-const MAX_LAYER_WIDTH_PX = 520;
+const MAX_LAYER_WIDTH_PX = 460;
 
 
 /** @private @const {string} */
