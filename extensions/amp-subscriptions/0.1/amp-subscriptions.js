@@ -219,8 +219,13 @@ export class SubscriptionService {
       if (this.viewer_.hasCapability('auth')) {
         const serviceIds = ['local'];
         this.platformStore_ = new PlatformStore(serviceIds);
-
-        return this;
+        this.viewer_.sendMessageAwaitResponse('auth', {
+        }).then(function(response) {
+          // use this response
+        }, function(reason) {
+          // do error code here
+        });
+        return;
       }
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
@@ -231,13 +236,15 @@ export class SubscriptionService {
         this.initializeLocalPlatforms_(service);
       });
 
-      this.platformStore_.getAllRegisteredPlatforms().forEach(
-          subscriptionPlatform => {
-            this.fetchEntitlements_(subscriptionPlatform);
-          }
-      );
+      this.viewer_.whenFirstVisible().then(() => {
+        this.platformStore_.getAllRegisteredPlatforms().forEach(
+            subscriptionPlatform => {
+              this.fetchEntitlements_(subscriptionPlatform);
+            }
+        );
+        this.startAuthorizationFlow_();
+      });
 
-      this.startAuthorizationFlow_();
     });
     return this;
   }
