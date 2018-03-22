@@ -347,7 +347,6 @@ export class AmpStory extends AMP.BaseElement {
       this.variableService_.onStateChange(stateChangeEvent));
 
     // Mute `amp-story` in beginning.
-    // TODO(gmajoulet): Support unmuted embed mode option.
     this.mute_();
   }
 
@@ -607,6 +606,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.intializeMutedState_())
         .then(() => this.preloadPagesByDistance_());
 
     // Do not block the layout callback on the completion of these promises, as
@@ -758,6 +758,14 @@ export class AmpStory extends AMP.BaseElement {
         });
 
     return Promise.all(pageImplPromises);
+  }
+
+
+  /** @private */
+  intializeMutedState_() {
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.onMutedStateUpdate_(false /* isMuted */);
+    }
   }
 
 
