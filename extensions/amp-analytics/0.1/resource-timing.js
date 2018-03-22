@@ -55,6 +55,7 @@ let ResourceSpecForHostDef;
 /**
  * The default maximum buffer size for resource timing entries. After the limit
  * has been reached, the browser will stop recording resource timing entries.
+ * This number is chosen by the spec: https://w3c.github.io/resource-timing.
  * @const {number}
  */
 const RESOURCE_TIMING_BUFFER_SIZE = 150;

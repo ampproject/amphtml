@@ -1995,11 +1995,18 @@ describes.realWin('amp-analytics', {
           false);
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      const config = new Config();
+      // Check precondition of responseAfter.
+      expect(config['resourceTimingSpec']['responseAFter']).to.be.undefined;
+
       return runResourceTimingTest(
-          [entry1, entry2], newConfig(),
+          [entry1, entry2], config,
           'https://ping.example.com/endpoint?rt=' +
               'foo_bar-script-100-500-7200~' +
               'foo_bar-script-700-100-0');
+
+      // 'responseAfter' should be set to a positive number.
+      expect(config['resourceTimingSpec']['responseAFter']).to.be.above(0);
     });
 
     it('should url encode variables', () => {
@@ -2018,7 +2025,6 @@ describes.realWin('amp-analytics', {
               'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
     });
 
-
     it('should ignore resourceTimingSpec outside of triggers', () => {
       const entry = newPerformanceResourceTiming(
           'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
@@ -2031,7 +2037,7 @@ describes.realWin('amp-analytics', {
           [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
 
-    it('should only report timings only once', () => {
+    it('should report timings only once', () => {
       const entry = newPerformanceResourceTiming(
           'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
           false);

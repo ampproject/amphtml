@@ -58,14 +58,28 @@ const WHITELIST_EVENT_IN_SANDBOX = [
 ];
 
 /**
+ * How long to stop reporting resource timing after (for the sake of
+ * throttling).
+ * @const {number}
+ */
+const RESOURCE_TIMING_MAX_REPORT_TIME_MSEC = 30 * 1000;
+
+/**
+ * The time at which this script executed.
+ * @const {number}
+ */
+const scriptExecutionTime = Date.now();
+
+/**
  * @param {!Window} win
- * @return {number} A timestamp relative to navigationStart or 0 if the
- *     Navigation Timing API is not supported. The timestamp is in milliseconds
- *     with sub-millisecond precision (so the value is not necessarily an
- *     integer).
+ * @return {number} A timestamp relative to navigationStart with sub-millisecond
+ *     precision if the navigation timing API is supported (so the value is no
+ *     necessarily an integer). If the nav timing API is not supported, this
+ *     timing will be approximated.
  */
 function performanceTimestamp(win) {
-  return win.performance && win.performance.now ? win.performance.now() : 0;
+  return win.performance && win.performance.now
+    ? win.performance.now() : Date.now() - scriptExecutionTime;
 }
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -688,23 +702,6 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Returns the last time resource timing was reported for the spec and
-   * updates the time for future calls.
-   * Note that the timestamp is stored on the resourceTimingSpec.
-   * @param {!JsonObject} resourceTimingSpec
-   * @return {number}
-   * @private
-   */
-  getAndUpdateLastReportedTime_(resourceTimingSpec) {
-    const lastReportedVariable = 'responseAfter';
-    const lastTime = resourceTimingSpec[lastReportedVariable] || 0;
-    // Take the max time in case the user specified "responseAfter.
-    resourceTimingSpec[lastReportedVariable] =
-        Math.max(performanceTimestamp(this.win), lastTime);
-    return lastTime;
-  }
-
-  /**
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
    * @return {!Object<string, (string|!Promise<string>|function(): string)>}
@@ -713,13 +710,20 @@ export class AmpAnalytics extends AMP.BaseElement {
   getDynamicVariableBindings_(trigger, expansionOptions) {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
-    if (resourceTimingSpec && !resourceTimingSpec['done']) {
-      const binding = 'RESOURCE_TIMING';
-      const analyticsVar = 'resourceTiming';
-      const after = this.getAndUpdateLastReportedTime_(resourceTimingSpec);
-      dynamicBindings[binding] =
-          serializeResourceTiming(this.win, resourceTimingSpec, after);
-      expansionOptions.vars[analyticsVar] = binding;
+    if (resourceTimingSpec) {
+      const lastTime = resourceTimingSpec['responseAfter'] || 0;
+      if (!resourceTimingSpec['done'] ||
+          lastTime < RESOURCE_TIMING_MAX_REPORT_TIME_MSEC) {
+        resourceTimingSpec['responseAfter'] =
+            Math.max(performanceTimestamp(this.win), lastTime);
+
+        const binding = 'RESOURCE_TIMING';
+        const analyticsVar = 'resourceTiming';
+        const after = this.getAndUpdateLastReportedTime_(resourceTimingSpec);
+        dynamicBindings[binding] =
+            serializeResourceTiming(this.win, resourceTimingSpec, after);
+        expansionOptions.vars[analyticsVar] = binding;
+      }
     }
     return dynamicBindings;
   }
