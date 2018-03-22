@@ -45,11 +45,12 @@ export const ValidatorResult = {
 /** @enum {string} */
 export const AdResponseType = {
   CRYPTO: 'crypto',
+  TEMPLATE: 'template',
 };
 
 /** @typedef {{
       type: !ValidatorResult,
-      adResponseType: string,
+      adResponseType: AdResponseType,
       creativeData: !Object,
     }} */
 export let ValidatorOutput;
