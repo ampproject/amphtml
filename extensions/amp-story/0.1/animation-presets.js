@@ -184,7 +184,7 @@ export const PRESETS = {
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
-      const offsetY = dimensions.pageHeight - dimensions.targetHeight / 2;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
       return translate2d(offsetX, offsetY, 0, offsetY);
     },
   },
@@ -193,7 +193,7 @@ export const PRESETS = {
     easing: 'linear',
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
-      const offsetY = dimensions.pageHeight - dimensions.targetHeight / 2;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
       return translate2d(0, offsetY, offsetX, offsetY);
     },
   },
