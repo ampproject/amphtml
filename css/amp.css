@@ -829,7 +829,7 @@ amp-accordion > section[expanded] > :last-child {
  */
 amp-story[standalone], amp-story-page {
   display: block !important;
-  height: 100vh !important;
+  height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
