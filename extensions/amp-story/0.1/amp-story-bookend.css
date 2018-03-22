@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './amp-story-share.css';
+
 .i-amphtml-story-bookend {
   text-align: left !important;
   color: #fff !important;

@@ -439,7 +439,7 @@ export class Bookend {
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
       },
       mutate: state => {
-        this.bookendEl_.classList.toggle(
+        this.getShadowRoot().classList.toggle(
             FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
       },
     }, {});
@@ -451,7 +451,7 @@ export class Bookend {
    */
   toggle_(show) {
     this.vsync_.mutate(() => {
-      this.bookendEl_.classList.toggle(HIDDEN_CLASSNAME, !show);
+      this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
     });
   }
 
@@ -505,6 +505,12 @@ export class Bookend {
     return dev().assertElement(this.root_);
   }
 
+  /** @return {!Element} */
+  getShadowRoot() {
+    this.assertBuilt_();
+    return dev().assertElement(this.bookendEl_);
+  }
+
   /**
    * Gets container for bookend content.
    * @return {!Element}
@@ -520,7 +526,7 @@ export class Bookend {
    * @private
    */
   getOverflowContainer_() {
-    return dev().assertElement(this.bookendEl_.firstElementChild);
+    return dev().assertElement(this.getShadowRoot().firstElementChild);
   }
 
   /**
