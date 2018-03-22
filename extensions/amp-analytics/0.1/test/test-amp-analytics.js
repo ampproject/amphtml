@@ -1995,7 +1995,7 @@ describes.realWin('amp-analytics', {
           false);
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const config = new Config();
+      const config = newConfig();
       // Check precondition of responseAfter.
       expect(config['resourceTimingSpec']['responseAFter']).to.be.undefined;
 
