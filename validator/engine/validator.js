@@ -730,6 +730,15 @@ class ParsedTagSpec {
   }
 
   /**
+   * A TagSpec may specify that another tag is excluded. This accessor returns
+   * the list of those tags.
+   * @return {!Array<number>}
+   */
+  excludes() {
+    return this.spec_.excludes;
+  }
+
+  /**
    * Whether or not the tag should be recorded via
    * Context.recordTagspecValidated_ if it was validated
    * successfullly. For performance, this is only done for tags that are
@@ -4874,6 +4883,24 @@ class ParsedValidatorRules {
               getTagSpecUrl(spec), validationResult);
         }
       }
+      for (const condition of spec.excludes()) {
+       if (context.satisfiesCondition(condition)) {
+          if (amp.validator.LIGHT) {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
+          context.addError(
+              amp.validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG,
+              context.getLineCol(),
+              /* params */
+              [
+                getTagSpecName(spec.getSpec()),
+                context.getRules().getInternedString(condition)
+              ],
+              getTagSpecUrl(spec), validationResult);
+        }
+      }
       if (!amp.validator.LIGHT) {
         for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
           if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
@@ -5886,6 +5913,12 @@ amp.validator.categorizeError = function(error) {
           amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING &&
       (goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
        error.params[1] === 'template')) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The tag 'amp-access extension .json script' is present, but
+  // is excluded by the presence of 'amp-subscriptions extension .json script'."
+  if (error.code ===
+          amp.validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The attribute 'role' in tag 'amp-img' is missing or incorrect,
