@@ -18,6 +18,7 @@ import {Entitlement} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
+import {user} from '../../../../src/log';
 
 describes.realWin('Platform store', {}, () => {
   let platformStore;
@@ -236,6 +237,19 @@ describes.realWin('Platform store', {}, () => {
         subscriptionToken: null}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
+    });
+  });
+
+  describe('reportPlatformFailure_', () => {
+    let errorSpy;
+    beforeEach(() => {
+      errorSpy = sandbox.spy(user(), 'error');
+    });
+
+    it('should report fatal error if all platforms fail', () => {
+      platformStore.reportPlatformFailure('service1');
+      platformStore.reportPlatformFailure('service2');
+      expect(errorSpy).to.be.calledOnce;
     });
   });
 
