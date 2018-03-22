@@ -49,18 +49,6 @@ export const ValidatorResult = {
     }} */
 export let ValidatorOutput;
 
-/** @typedef {{
-      minifiedCreative: string,
-      customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>,
-      images: (Array<string>|undefined),
-    }} */
-export let CreativeMetaDataDef;
-
-/** @typedef {{
-      creativeMetaData: CreativeMetaDataDef,
-    }} */
-export let CreativeData;
 
 /**
  * @abstract

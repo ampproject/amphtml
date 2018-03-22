@@ -27,6 +27,19 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
+/** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
+
+/** @typedef {{
+      creativeMetaData: CreativeMetaDataDef,
+    }} */
+export let CreativeData;
+
 /**
  * Render a validated AMP creative directly in the parent page.
  */
@@ -44,6 +57,9 @@ export class FriendlyFrameRenderer extends Renderer {
 
   /** @override */
   render(context, element, creativeData) {
+
+    creativeData = /** @type {CreativeData} */ (creativeData);
+
     const size = context.size;
     const adUrl = context.requestUrl;
     const creativeMetaData = creativeData.creativeMetaData;
