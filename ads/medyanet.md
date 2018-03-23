@@ -21,6 +21,7 @@ limitations under the License.
 ```html
  <amp-ad width=300 height=250
     type="medyanet"
+    domain="publisherdomain.com.tr"
     data-slot="medyanet/2729856/Medyanet_AMP_AdUnit">
  </amp-ad>
 ```
