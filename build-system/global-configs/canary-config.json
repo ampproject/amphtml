@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov"],
+  "allow-doc-opt-in": ["amp-animation", "ampdoc-shell", "amp-ima-video", "url-replacement-v2", "inabox-rov", "amp-date-picker"],
   "allow-url-opt-in": ["pump-early-frame"],
 
   "canary": 1,
@@ -27,9 +27,11 @@
   "a4a-new-signature-verifier": 1,
   "3p-use-ampcontext": 1,
   "amp-animation": 1,
+  "amp-live-list-sorting": 1,
   "amp-sidebar toolbar": 1,
   "a4a-safeframe-preloading-off": 0.01,
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
-  "expUnconditionedCanonicalHoldback": 0.01
+  "expUnconditionedCanonicalHoldback": 0.01,
+  "rollback-delayed-fetch-deprecation": 1
 }

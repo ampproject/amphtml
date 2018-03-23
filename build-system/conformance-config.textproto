@@ -204,6 +204,7 @@ requirement: {
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/netletix.js'
   whitelist: 'ads/yandex.js'
+  whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
 }
 
 requirement: {
@@ -214,7 +215,7 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
   whitelist: 'ads/google/imaVideo.js'
 }
 
@@ -226,7 +227,7 @@ requirement: {
   value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
 }
 
 # Cookies

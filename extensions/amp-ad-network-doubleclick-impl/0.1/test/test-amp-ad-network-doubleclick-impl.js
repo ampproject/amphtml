@@ -149,13 +149,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.isValidElement()).to.be.true;
     });
-    it('should not be valid if remote.html present', () => {
-      const meta = doc.createElement('meta');
-      meta.setAttribute('name', 'amp-3p-iframe-src');
-      doc.head.appendChild(meta);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
-      expect(impl.isValidElement()).to.be.false;
-    });
   });
 
 
@@ -231,33 +224,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
-    });
-
-    it('should specify nameframe loading behavior; single arg', () => {
-      impl.extractSize({
-        get(name) {
-          return name == 'amp-nameframe-exp' ? 'instantLoad' : undefined;
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      });
-      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig.writeInBody).to.be.false;
-    });
-
-    it('should specify nameframe loading behavior; two args', () => {
-      impl.extractSize({
-        get(name) {
-          return name == 'amp-nameframe-exp' ?
-            'instantLoad;writeInBody' : undefined;
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      });
-      expect(impl.nameframeExperimentConfig.instantLoad).to.be.true;
-      expect(impl.nameframeExperimentConfig.writeInBody).to.be.true;
     });
   });
 
