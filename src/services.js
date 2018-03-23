@@ -313,6 +313,24 @@ export class Services {
 
   /**
    * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationService(win) {
+    return getService(win, 'localization');
+  }
+
+  /**
+   * @param {!Window} win
    * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
    */
   static viewerIntegrationVariableServiceForOrNull(win) {

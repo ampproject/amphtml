@@ -112,12 +112,12 @@ function buildArticleTemplate(articleData) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: articleData.title,
+        unlocalizedString: articleData.title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: articleData.domainName,
+        unlocalizedString: articleData.domainName,
       },
     ],
   });
@@ -150,7 +150,7 @@ function buildArticlesContainerTemplate(articleSets) {
       template.push({
         tag: 'h3',
         attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
-        text: articleSet.heading,
+        unlocalizedString: articleSet.heading,
       });
     }
     template.push({
@@ -188,12 +188,12 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: title,
+        unlocalizedString: title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: domainName,
+        unlocalizedString: domainName,
       },
     ],
   });
