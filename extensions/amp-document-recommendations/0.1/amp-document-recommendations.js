@@ -141,32 +141,37 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   /**
    * Attach a ShadowDoc using the given document.
    * @param {!Document} doc
+   * @return {!Promise<?Object>} Promise resolved with the return value of
+   *     {@link MultiDocManager#attachShadowDoc}
    */
   attachShadowDoc_(doc) {
-    this.getVsync().mutate(() => {
-      const shadowRoot = this.win.document.createElement('div');
+    let amp = null;
+    return this.getVsync()
+        .mutatePromise(() => {
+          const shadowRoot = this.win.document.createElement('div');
 
-      try {
-        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+          try {
+            amp =
+                this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-        // TODO(peterjosling): Update document title.
-        // TODO(emarchiori): Trigger analtyics event when active
-        // document changes.
-        // TODO(emarchiori): Hide position fixed elements of inactive
-        // documents and update approriately.
+            // TODO(peterjosling): Update document title.
+            // TODO(emarchiori): Trigger analtyics event when active
+            // document changes.
+            // TODO(emarchiori): Hide position fixed elements of inactive
+            // documents and update approriately.
 
-        this.element.appendChild(shadowRoot);
-        this.appendDivision_();
-        this.appendArticleLinks_(this.nextArticle_ + 1);
+            this.element.appendChild(shadowRoot);
+            this.appendDivision_();
+            this.appendArticleLinks_(this.nextArticle_ + 1);
 
-        if (this.nextArticle_ < this.config_.recommendations.length) {
-          this.appendNextArticle_();
-        }
-
-      } catch (e) {
-        // TODO(emarchiori): Handle loading errors.
-      }
-    });
+            if (this.nextArticle_ < this.config_.recommendations.length) {
+              this.appendNextArticle_();
+            }
+          } catch (e) {
+            // TODO(emarchiori): Handle loading errors.
+          }
+        })
+        .then(() => amp);
   }
 
   /** @override */
