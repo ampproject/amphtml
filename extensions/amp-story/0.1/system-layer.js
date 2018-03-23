@@ -121,6 +121,9 @@ export class SystemLayer {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
   }
 
   /**
@@ -189,7 +192,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.systemLayerEl_.addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', event => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -220,14 +223,23 @@ export class SystemLayer {
   }
 
   /**
+   * @return {!Element}
+   */
+  getShadowRoot() {
+    return dev().assertElement(this.systemLayerEl_);
+  }
+
+  /**
    * Reacts to desktop state updates and triggers the desktop UI.
    * @param {boolean} isDesktop
    * @private
    */
   onDesktopStateUpdate_(isDesktop) {
-    isDesktop ?
-      this.systemLayerEl_.setAttribute('desktop', '') :
-      this.systemLayerEl_.removeAttribute('desktop');
+    this.vsync_.mutate(() => {
+      isDesktop ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
+    });
   }
 
   /**
@@ -236,7 +248,9 @@ export class SystemLayer {
    * @private
    */
   onHasAudioStateUpdate_(hasAudio) {
-    this.systemLayerEl_.classList.toggle('audio-playing', hasAudio);
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
+    });
   }
 
   /**
@@ -245,9 +259,11 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
-    isMuted ?
-      this.systemLayerEl_.setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
-      this.systemLayerEl_.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    this.vsync_.mutate(() => {
+      isMuted ?
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    });
   }
 
   /**
@@ -305,7 +321,7 @@ export class SystemLayer {
       return;
     }
 
-    Services.vsyncFor(this.win_).mutate(() => {
+    this.vsync_.mutate(() => {
       logEntries.forEach(logEntry => this.logInternal_(logEntry));
     });
   }
