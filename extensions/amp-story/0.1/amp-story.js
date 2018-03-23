@@ -862,6 +862,8 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
+    this.storeService_.dispatch(Action.CHANGE_PAGE, targetPageId);
+
     const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
