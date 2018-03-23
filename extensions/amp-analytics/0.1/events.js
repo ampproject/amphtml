@@ -21,7 +21,7 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {dev, user} from '../../../src/log';
+import { user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue} from '../../../src/types';
