@@ -181,10 +181,10 @@ export class AnalyticsEvent {
     this.type = type;
     /** @const */
     this.vars = opt_vars || Object.create(null);
-    if (typeof this.vars.elementHeight === undefined) {
+    if (typeof this.vars.elementHeight === 'undefined') {
       this.vars.elementHeight = target./*REVIEW*/clientHeight;
     }
-    if (typeof this.vars.elementWidth === undefined) {
+    if (typeof this.vars.elementWidth === 'undefined') {
       this.vars.elementWidth = target./*REVIEW*/clientWidth;
     }
   }
