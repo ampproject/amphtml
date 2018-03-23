@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -54,7 +55,8 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  text: 'Back',
+                  localizedStringId:
+                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
                 },
               ],
             },
@@ -84,7 +86,8 @@ const TEMPLATE = {
                   tag: 'div',
                   attrs: dict({'class':
                       'i-amphtml-story-hint-tap-button-text'}),
-                  text: 'Next',
+                  localizedStringId:
+                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL,
                 },
               ],
             },

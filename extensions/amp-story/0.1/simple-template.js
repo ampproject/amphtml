@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {LocalizedStringId} from './localization'; // eslint-disable-line no-unused-vars
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {isArray} from '../../../src/types';
+import {dev} from '../../../src/log';
+import {isArray, toWin} from '../../../src/types';
 
 
 /**
  * @typedef {{
  *   tag: string,
  *   attrs: (!JsonObject|undefined),
- *   text: (string|undefined),
+ *   localizedStringId: (!LocalizedStringId|undefined),
+ *   unlocalizedString: (string|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -74,8 +78,19 @@ function renderSingle(doc, elementDef) {
     createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
     doc.createElement(elementDef.tag);
 
-  if (elementDef.text) {
-    el.textContent = elementDef.text;
+  if (elementDef.localizedStringId) {
+    const win = toWin(doc.defaultView);
+    Services.localizationServiceForOrNull(win).then(localizationService => {
+      dev().assert(localizationService,
+          'Could not retrieve LocalizationService.');
+      el.textContent = localizationService
+          .getLocalizedString(/** @type {!LocalizedStringId} */ (
+            elementDef.localizedStringId));
+    });
+  }
+
+  if (elementDef.unlocalizedString) {
+    el.textContent = elementDef.unlocalizedString;
   }
 
   if (elementDef.children) {

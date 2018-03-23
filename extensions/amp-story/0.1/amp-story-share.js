@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {Toast} from './toast';
 import {
@@ -20,7 +21,7 @@ import {
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
+import {dict, map} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -32,13 +33,19 @@ import {throttle} from '../../../src/utils/rate-limit';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!JsonObject}
+ * @const {!Object<string, !LocalizedStringId>}
  */
-const SHARE_PROVIDER_NAME = dict({
-  'gplus': 'Google+',
-  'linkedin': 'LinkedIn',
-  'system': 'More',
-  'whatsapp': 'WhatsApp',
+const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
+  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 
@@ -86,7 +93,7 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  text: 'Get Link', // TODO(alanorozco): i18n
+  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
 };
 
 
@@ -118,6 +125,10 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
+  const shareProviderLocalizedStringId = dev().assert(
+      SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
+      `No localized string to display name for share type ${shareType}.`);
+
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([
         {
@@ -130,7 +141,7 @@ function buildProvider(doc, shareType, opt_params) {
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          text: SHARE_PROVIDER_NAME[shareType] || shareType,
+          localizedStringId: shareProviderLocalizedStringId,
         },
       ]));
 }
@@ -148,12 +159,13 @@ function buildCopySuccessfulToast(doc, url) {
     children: [
       {
         tag: 'div',
-        text: 'Link copied!', // TODO(alanorozco): i18n
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-        text: url,
+        unlocalizedString: url,
       },
     ],
   }));
@@ -174,6 +186,9 @@ export class ShareWidget {
 
     /** @private {?Element} */
     this.root_ = null;
+
+    /** @private {?Promise<?./localization.LocalizationService>} */
+    this.localizationServicePromise_ = null;
   }
 
   /** @param {!Window} win */
@@ -189,6 +204,8 @@ export class ShareWidget {
     dev().assert(!this.root_, 'Already built.');
 
     this.ampdoc_ = ampdoc;
+    this.localizationServicePromise_ =
+        Services.localizationServiceForOrNull(this.win_);
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
@@ -224,7 +241,13 @@ export class ShareWidget {
           dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_, url)) {
-      Toast.show(this.win_, 'Could not copy link to clipboard :(');
+      this.localizationServicePromise_.then(localizationService => {
+        dev().assert(localizationService,
+            'Could not retrieve LocalizationService.');
+        const failureString = localizationService.getLocalizedString(
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
+        Toast.show(this.win_, failureString);
+      });
       return;
     }
 
