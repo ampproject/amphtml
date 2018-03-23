@@ -36,6 +36,7 @@ const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
 
+let startTime;
 
 /**
  * @typedef {{
@@ -189,8 +190,19 @@ function getGraph(entryModule) {
       .pipe(source(entryModule))
       // Unfortunately we need to write the files out.
       .pipe(gulp.dest('./.amp-build'))
-      .on('end', resolve.bind(null, module));
+      .on('end', function() {
+        resolve(module);
+        printTimestamp('getGraph ' + entryModule);
+      });
   return promise;
+}
+
+function printTimestamp(msg) {
+  const endTime = Date.now();
+  const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
+  const secs = executionTime.getSeconds();
+  console.log(msg, '(' + mins + 'm ' + secs + 's)');
 }
 
 /**
@@ -241,6 +253,7 @@ function flattenGraph(entryPoints) {
 function runRules(modules) {
   let errorsFound = false;
   Object.keys(modules).forEach(moduleName => {
+    printTimestamp('runRules ' + moduleName);
     const deps = modules[moduleName];
     // Run Rules against the modules and flatten for reporting.
     const errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
@@ -255,6 +268,8 @@ function runRules(modules) {
 }
 
 function depCheck() {
+  startTime = Date.now();
+  printTimestamp('start');
   const handlerProcess = createCtrlcHandler('dep-check');
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have

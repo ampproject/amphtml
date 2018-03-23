@@ -19,7 +19,7 @@ before_script:
   - chromedriver-update 2.35
   - chromedriver -v
   - ./node_modules/.bin/greenkeeper-lockfile-update
-script: node build-system/pr-check.js
+script: gulp dep-check
 after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
 branches:
   only:
@@ -51,8 +51,7 @@ addons:
     - python-protobuf
 matrix:
   include:
-    - env: BUILD_SHARD="unit_tests"
-    - env: BUILD_SHARD="integration_tests"
+    - env: BUILD_SHARD="dep_check"
 cache:
   yarn: true
   directories:
