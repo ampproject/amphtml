@@ -48,6 +48,19 @@ describes.fakeWin('amp-story-store-service', {}, env => {
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
   });
+
+  it('should not trigger a listener on subscribe by default', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    expect(listenerSpy).to.have.callCount(0);
+  });
+
+  it('should trigger a listener on subscribe if option is set to true', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(false);
+  });
 });
 
 describes.fakeWin('amp-story-store-service embed mode', {}, env => {
