@@ -27,8 +27,13 @@ import {renderAsElement} from './simple-template';
 
 
 
+/** @private @const {string} */
+const AUDIO_MUTED_ATTRIBUTE = 'muted';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
+/** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -141,7 +146,7 @@ export class SystemLayer {
     shadowRoot.appendChild(this.systemLayerEl_);
 
     this.systemLayerEl_.insertBefore(
-        this.progressBar_.build(pageIds), this.root_.lastChild);
+        this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
 
     this.leftButtonTray_ =
         this.systemLayerEl_.querySelector('.i-amphtml-story-ui-left');
@@ -149,6 +154,14 @@ export class SystemLayer {
     this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
+
+    // Initializes the component state.
+    // TODO(gmajoulet): come up with a way to do this from the subscribe method.
+    this.onDesktopStateUpdate_(
+        this.storeService_.get(StateProperty.DESKTOP_STATE));
+    this.onHasAudioStateUpdate_(
+        this.storeService_.get(StateProperty.HAS_AUDIO_STATE));
+    this.onMutedStateUpdate_(this.storeService_.get(StateProperty.MUTED_STATE));
 
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
@@ -176,7 +189,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.root_.addEventListener('click', event => {
+    this.systemLayerEl_.addEventListener('click', event => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -185,6 +198,18 @@ export class SystemLayer {
         this.onUnmuteAudioClick_();
       }
     });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    });
+
+    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
+      this.onHasAudioStateUpdate_(hasAudio);
+    });
+
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      this.onMutedStateUpdate_(isMuted);
+    });
   }
 
   /**
@@ -192,6 +217,37 @@ export class SystemLayer {
    */
   getRoot() {
     return dev().assertElement(this.root_);
+  }
+
+  /**
+   * Reacts to desktop state updates and triggers the desktop UI.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    isDesktop ?
+      this.systemLayerEl_.setAttribute('desktop', '') :
+      this.systemLayerEl_.removeAttribute('desktop');
+  }
+
+  /**
+   * Reacts to has audio state updates, displays the audio controls if needed.
+   * @param {boolean} isActive
+   * @private
+   */
+  onHasAudioStateUpdate_(hasAudio) {
+    this.systemLayerEl_.classList.toggle('audio-playing', hasAudio);
+  }
+
+  /**
+   * Reacts to muted state updates.
+   * @param {boolean} isMuted
+   * @private
+   */
+  onMutedStateUpdate_(isMuted) {
+    isMuted ?
+      this.systemLayerEl_.setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
+      this.systemLayerEl_.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
   }
 
   /**

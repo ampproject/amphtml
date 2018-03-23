@@ -138,12 +138,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.VIDEO]: 8,
 };
 
-
-/**
- * @private @const {string}
- */
-const AUDIO_MUTED_ATTRIBUTE = 'muted';
-
 /** @type {string} */
 const TAG = 'amp-story';
 
@@ -1483,7 +1477,6 @@ export class AmpStory extends AMP.BaseElement {
     this.pages_.forEach(page => {
       page.muteAllMedia();
     });
-    this.toggleMutedAttribute_(true);
   }
 
   /**
@@ -1503,7 +1496,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mediaPool_.blessAll()
         .then(unmuteAllMedia, unmuteAllMedia);
-    this.toggleMutedAttribute_(false);
   }
 
 
@@ -1524,21 +1516,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   isMuted_() {
-    return this.element.hasAttribute(AUDIO_MUTED_ATTRIBUTE);
-  }
-
-
-  /**
-   * Toggles mute or unmute attribute on element.
-   * @param {boolean} isMuted
-   * @private
-   */
-  toggleMutedAttribute_(isMuted) {
-    if (isMuted) {
-      this.element.setAttribute(AUDIO_MUTED_ATTRIBUTE, '');
-    } else {
-      this.element.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
-    }
+    return this.storeService_.get(StateProperty.MUTED_STATE);
   }
 
   /**
@@ -1553,9 +1531,8 @@ export class AmpStory extends AMP.BaseElement {
         'amp-audio, amp-video, [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    if (containsMediaElement || hasStoryAudio) {
-      this.element.classList.add('audio-playing');
-    }
+    this.storeService_.dispatch(
+        Action.TOGGLE_HAS_AUDIO, containsMediaElement || hasStoryAudio)
   }
 
   /** @private */
