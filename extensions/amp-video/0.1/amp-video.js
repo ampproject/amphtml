@@ -34,7 +34,6 @@ import {getMode} from '../../../src/mode';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
@@ -93,9 +92,6 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {boolean} */
     this.isStoryVideo_ = !!closestByTag(this.element, 'amp-story');
-
-    /** @private @const {boolean} */
-    this.storySupportsHls_ = !isExperimentOn(this.win, 'disable-amp-story-hls');
   }
 
   /**
@@ -322,7 +318,7 @@ class AmpVideo extends AMP.BaseElement {
     // Only cached sources are added during prerender.
     // Origin sources will only be added when document becomes visible.
     sources.forEach(source => {
-      if (this.isCachedByCDN_(source) && this.isValidSource_(source)) {
+      if (this.isCachedByCDN_(source)) {
         this.video_.appendChild(source);
       }
     });
@@ -345,14 +341,10 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     sources.forEach(source => {
-      if (this.isValidSource_(source)) {
-        // Cached sources should have been moved from <amp-video> to <video>.
-        dev().assert(!this.isCachedByCDN_(source));
-        assertHttpsUrl(source.getAttribute('src'), source);
-        this.video_.appendChild(source);
-      } else {
-        this.element.removeChild(source);
-      }
+      // Cached sources should have been moved from <amp-video> to <video>.
+      dev().assert(!this.isCachedByCDN_(source));
+      assertHttpsUrl(source.getAttribute('src'), source);
+      this.video_.appendChild(source);
     });
 
     // To handle cases where cached source may 404 if not primed yet,
@@ -413,21 +405,6 @@ class AmpVideo extends AMP.BaseElement {
     return false;
   }
 
-  /**
-   * @param {!Element} source The <source> element to check for validity.
-   * @return {boolean} true if the source is allowed to be propagated to the
-   *     created video.
-   * @private
-   */
-  isValidSource_(source) {
-    if (!this.isStoryVideo_ || this.storySupportsHls_) {
-      return true;
-    }
-
-    const type = (source.getAttribute('type') || '').toLowerCase();
-    return type !== 'application/x-mpegurl' &&
-        type !== 'application/vnd.apple.mpegurl';
-  }
 
   /**
    * @private
