@@ -241,6 +241,7 @@ export class Viewer {
     this.isWebviewEmbedded_ = !this.isIframed_ &&
         this.params_['webview'] == '1';
 
+
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe, or
      * a web view, or a shadow doc in PWA.
@@ -262,6 +263,12 @@ export class Viewer {
             || (this.win.location.search.indexOf('amp_js_v') != -1))
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
+
+    /**
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private @const {boolean}
+     */
+    this.isCustomTab_ = this.win.location.search.indexOf('amp_agsa=1') != -1;
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -416,6 +423,11 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
+  
+    // This fragment may get cleared by impression tracking. If so, it will be
+    // reset afterward.
+    // TODO: how? Use original hash? Is hash currently used to flag dev mode?
+    this.maybeUpdateFragmentForCustomTab();
   }
 
   /**
@@ -497,6 +509,34 @@ export class Viewer {
    */
   isWebviewEmbedded() {
     return this.isWebviewEmbedded_;
+  }
+
+  /**
+   * Whether the document is using Chrome Custom Tabs.
+   * @return {boolean}
+   */
+  isCustomTab() {
+    return this.isCustomTab_;
+  }
+
+  /**
+   * Update the URL fragment with data needed to support custom tabs.
+   */
+  maybeUpdateFragmentForCustomTab() {
+    if (!this.isCustomTab()) {
+      return;
+    }
+    if (!this.win.history.replaceState) {
+      return;
+    }
+    // Ensure that canonical URL origin matches document URL.
+    const url = parseUrl(this.win.location.href);
+    const canonicalUrl = parseUrl(Services.documentInfoForDoc(this.ampdoc).canonicalUrl);
+    if (url.origin == canonicalUrl.origin &&
+        getSourceOrigin(url) == getSourceOrigin(canonicalUrl)) {
+      this.win.history.replaceState({}, '', '#ampshare=' +
+        encodeURIComponent(canonicalUrl.href));
+    }
   }
 
   /**
