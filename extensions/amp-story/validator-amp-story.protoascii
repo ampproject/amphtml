@@ -90,6 +90,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-ANALYTICS"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
+    child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
   }
 }
@@ -160,7 +161,7 @@ tags: {  # <amp-story-page>
 tags: { # <amp-story-bookend>
   html_format: AMP
   tag_name: "AMP-STORY-BOOKEND"
-  mandatory_ancestor: "AMP-STORY"
+  mandatory_parent: "AMP-STORY"
   attrs: {
     name: "src"
     value_url: {

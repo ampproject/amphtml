@@ -28,7 +28,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-story> <!-- error because the 'standalone' attribute isn't set -->
+  <amp-story> <!-- error because the 'standalone' and metadata attributes aren't set -->
     <amp-story-page> <!-- error because the 'id' attribute isn't set -->
       <amp-story-grid-layer> <!-- error because one of 'fill', 'horizontal', 'vertical', 'thirds' should be set. -->
         <h5>
@@ -37,6 +37,7 @@
           </h1>
         </h5>
       </amp-story-grid-layer>
+      <amp-story-bookend></amp-story-bookend><!-- error because 'amp-story-bookend' should only be a child of <amp-story> -->
     </amp-story-page>
   </amp-story>
   <div></div> <!-- this should create an error for the 'no siblings allowed' rule on <amp-story> -->
