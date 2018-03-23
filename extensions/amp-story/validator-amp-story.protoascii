@@ -40,13 +40,6 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
-    name: "bookend-config-src"
-    value_url: {
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-    }
-  }
-  attrs: {
     name: "background-audio"
     value_url: {
       allowed_protocol: "http"
@@ -100,7 +93,8 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-PAGE"
   }
 }
-tags: {  # <amp-story> without metadata (deprecated)
+# TODO(choumx): Remove this spec prior to launch.
+tags: {  # <amp-story> without metadata attrs or <amp-story-bookend> element
   html_format: AMP
   tag_name: "AMP-STORY"
   spec_name: "AMP-STORY (beta)"
@@ -162,6 +156,44 @@ tags: {  # <amp-story-page>
     child_tag_name_oneof: "AMP-STORY-GRID-LAYER"
     mandatory_min_num_child_tags: 1
   }
+}
+tags: { # <amp-story-bookend>
+  html_format: AMP
+  tag_name: "AMP-STORY-BOOKEND"
+  mandatory_ancestor: "AMP-STORY"
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
+}
+tags: {  # <amp-story-bookend> (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "AMP-STORY-BOOKEND .json script"
+  requires_extension: "amp-story"
+  mandatory_parent: "AMP-STORY-BOOKEND"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 tags: {  # <amp-story-grid-layer>
   html_format: AMP
