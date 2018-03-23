@@ -77,3 +77,17 @@ export function fromIterator(iterator) {
   }
   return array;
 }
+
+/**
+ * Adds item to array if it is not already present.
+ *
+ * @param {Array<T>} array
+ * @param {T} item
+ * @template T
+ */
+export function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
+}
+

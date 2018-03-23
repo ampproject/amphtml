@@ -19,7 +19,7 @@ import {
   CreativeMetaDataDef,
   NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
+import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {tryParseJson} from '../../../src/json';

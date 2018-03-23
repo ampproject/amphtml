@@ -193,6 +193,8 @@ exports.rules = [
           'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
           'src/service/url-replacements-impl.js',
+      'extensions/amp-a4a/0.1/amp-ad-render.js->' +
+          'src/service/url-replacements-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-ooyala-player/0.1/amp-ooyala-player.js->' +
