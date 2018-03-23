@@ -48,6 +48,11 @@ import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {
+  LocalizationService,
+  LocalizedStringId,
+  createPseudoLocale,
+} from './localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
@@ -81,6 +86,8 @@ import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsDefault from './_locales/default';
+import LocalizedStringsEn from './_locales/en';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -162,7 +169,8 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'The page is best viewed in portrait mode',
+            localizedStringId:
+                LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
           },
         ],
       },
@@ -188,7 +196,8 @@ const DESKTOP_SIZE_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'Expand your window to view this experience',
+            localizedStringId:
+                LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
           },
         ],
       },
@@ -212,8 +221,8 @@ const UNSUPPORTED_BROWSER_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
-                'this experience',
+            localizedStringId:
+                LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
           },
         ],
       },
@@ -229,6 +238,14 @@ const UNSUPPORTED_BROWSER_WARNING = [
 const SHARE_WIDGET_PILL_CONTAINER = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-share-pill'}),
+  children: [
+    {
+      tag: 'span',
+      attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
+      localizedStringId:
+          LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+    },
+  ],
 };
 
 
@@ -320,6 +337,20 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private @const {!LocalizationService} */
+    this.localizationService_ = new LocalizationService(this.win);
+    this.localizationService_
+        .registerLocalizedStringBundle('default', LocalizedStringsDefault)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn);
+
+    const enXaPseudoLocaleBundle =
+        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+    this.localizationService_
+        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
+
+    registerServiceBuilder(this.win, 'localization',
+        () => this.localizationService_);
   }
 
 
@@ -570,7 +601,13 @@ export class AmpStory extends AMP.BaseElement {
 
     this.shareWidget_ = new ShareWidget(this.win);
 
-    container.appendChild(this.shareWidget_.build(this.getAmpDoc()));
+    const shareLabelEl = dev().assertElement(
+        container.querySelector('.i-amphtml-story-share-pill-label'),
+        'Expected share pill label to be present.');
+
+    container.insertBefore(
+        this.shareWidget_.build(this.getAmpDoc()),
+        shareLabelEl);
 
     this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
       if (bookendConfig !== null) {
@@ -724,16 +761,19 @@ export class AmpStory extends AMP.BaseElement {
     errorIconEl.classList.add('i-amphtml-story-experiment-icon-error');
 
     const errorMsgEl = this.win.document.createElement('span');
-    errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
-        'view this content.';
+    errorMsgEl.textContent = this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT);
 
     const experimentsLinkEl = this.win.document.createElement('button');
-    experimentsLinkEl.textContent = 'Enable';
+    experimentsLinkEl.textContent = this.localizationService_
+        .getLocalizedString(
+            LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
       toggleExperiment(this.win, 'amp-story', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
-      errorMsgEl.textContent = 'Experiment enabled.  Please reload.';
+      errorMsgEl.textContent = this.localizationService_.getLocalizedString(
+          LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
       removeElement(experimentsLinkEl);
     });
 
