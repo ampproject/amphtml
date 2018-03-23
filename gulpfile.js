@@ -144,7 +144,10 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {hasCss: true});
+declareExtension('amp-story', '0.1', {
+  hasCss: true,
+  cssBinaries: ['amp-story-bookend', 'amp-story-share'],
+});
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
@@ -175,10 +178,52 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1');
+declareExtension('amp-video-service', '0.1', {
+  // `amp-video-service` provides analytics and autoplay for all videos. We need
+  // those to be available asap. This service replaces a runtime-level provider,
+  // so loadPriority is set to high in lieu of delivering it as part of the core
+  // binary.
+  loadPriority: 'high',
+});
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+
+
+/**
+ * Extensions to build when `--extensions=minimal_set`.
+ * @private @const {!Set<string>}
+ */
+const MINIMAL_EXTENSION_SET = [
+  'amp-ad',
+  'amp-ad-network-adsense-impl',
+  'amp-analytics',
+  'amp-audio',
+  'amp-image-lightbox',
+  'amp-lightbox',
+  'amp-sidebar',
+  'amp-video',
+];
+
+
+/**
+ * Extensions that require `amp-video-service` to be built alongside them.
+ * @private @const {!Set<string>}
+ */
+// TODO(alanorozco): Determine dynamically?
+const VIDEO_EXTENSIONS = new Set([
+  'amp-3q-player',
+  'amp-brid-player',
+  'amp-dailymotion',
+  'amp-gfycat',
+  'amp-ima-video',
+  'amp-nexxtv-player',
+  'amp-ooyala-player',
+  'amp-video',
+  'amp-wistia-player',
+  'amp-youtube',
+]);
 
 
 /**
@@ -665,14 +710,18 @@ function parseExtensionFlags() {
         process.exit(1);
       }
       argv.extensions = argv.extensions.replace(/\s/g, '');
+
       if (argv.extensions === 'minimal_set') {
-        argv.extensions =
-            'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
-            'amp-image-lightbox,amp-lightbox,amp-sidebar,' +
-            'amp-analytics,amp-app-banner';
+        argv.extensions = MINIMAL_EXTENSION_SET.join(',');
       }
+
       log(green('Building extension(s):'),
-          cyan(argv.extensions.split(',').join(', ')));
+          cyan(argv.extensions.replace(/,/g, ', ')));
+
+      if (maybeAddVideoService()) {
+        log(green('⤷ Video component(s) being built, added'),
+            cyan('amp-video-service'), green('to extension set.'));
+      }
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
     } else {
@@ -682,6 +731,18 @@ function parseExtensionFlags() {
     log(extensionsMessage);
     log(minimalSetMessage);
   }
+}
+
+/**
+ * Adds `amp-video-service` to the extension set if a component requires it.
+ * @return {boolean}
+ */
+function maybeAddVideoService() {
+  if (!argv.extensions.split(',').find(ext => VIDEO_EXTENSIONS.has(ext))) {
+    return false;
+  }
+  argv.extensions += ',amp-video-service';
+  return true;
 }
 
 /**
@@ -1331,6 +1392,34 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
+ * Build "Iframe API".
+ *
+ * @param {!Object} options
+ */
+function buildAccessIframeApi(options) {
+  const version = '0.1';
+  options = options || {};
+  const path = `extensions/amp-access/${version}/iframe-api`;
+  let watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+  const minify = options.minify || argv.minify;
+  mkdirSync('dist.3p');
+  mkdirSync('dist.3p/current');
+  return compileJs(path + '/', 'amp-iframe-api-export.js',
+      './dist.3p/current', {
+        minifiedName: 'amp-iframe-api-v0.js',
+        checkTypes: options.checkTypes || argv.checkTypes,
+        watch,
+        minify,
+        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+        include3pDirectories: false,
+        includePolyfills: true,
+      });
+}
+
+/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -1483,3 +1572,5 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-access-iframe-api', 'Builds iframe-api.js',
+    buildAccessIframeApi);

@@ -21,6 +21,8 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const Events = {
   PAGE_VISIBLE: 'story-page-visible',
+  BOOKEND_ENTER: 'story-bookend-enter',
+  BOOKEND_EXIT: 'story-bookend-exit',
 };
 
 
@@ -48,6 +50,12 @@ export class AmpStoryAnalytics {
         this.onActivePageChange_(
             dev().assertNumber(pageIndex),
             dev().assertString(pageId));
+        break;
+      case StateChangeType.BOOKEND_ENTER:
+        this.triggerEvent_(Events.BOOKEND_ENTER);
+        break;
+      case StateChangeType.BOOKEND_EXIT:
+        this.triggerEvent_(Events.BOOKEND_ENTER);
         break;
     }
   }

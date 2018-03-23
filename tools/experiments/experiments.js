@@ -63,6 +63,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
+  },
+  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -245,6 +251,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
   {
+    id: 'inline-styles',
+    name: 'Enables the usage of inline styles for non fixed elements',
+    spec: 'https://github.com/ampproject/amphtml/issues/11881',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+  },
+  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
@@ -275,6 +287,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'video-service',
+    name: 'Enables new implementation of unified Video Interface services.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13674',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
   },
 ];
 
