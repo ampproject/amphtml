@@ -27,21 +27,21 @@ tags: {
 
 tags: {
   html_format: AMP
-  spec_name: "amp-date-picker[type=single][mode=static]"
   tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=static]"
   requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "single"
+  }
   attr_lists: "amp-date-picker-common-attributes"
   attr_lists: "amp-date-picker-single-type-attributes"
   attr_lists: "amp-date-picker-static-mode-attributes"
   attr_lists: "extended-amp-global"
-  attrs: {
-    name: "mode"
-    value_regex_casei: "static|"
-  }
-  attrs: {
-    name: "type"
-    value_regex_casei: "single|"
-  }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -55,20 +55,21 @@ tags: {
 
 tags: {
   html_format: AMP
-  spec_name: "amp-date-picker[type=single][mode=overlay]"
   tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=overlay]"
   requires_extension: "amp-date-picker"
-  attr_lists: "amp-date-picker-common-attributes"
-  attr_lists: "amp-date-picker-single-type-attributes"
-  attr_lists: "extended-amp-global"
   attrs: {
     name: "mode"
+    mandatory: true
     value_casei: "overlay"
   }
   attrs: {
     name: "type"
-    value_regex_casei: "single|"
+    value_casei: "single"
   }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: NODISPLAY
@@ -77,21 +78,22 @@ tags: {
 
 tags: {
   html_format: AMP
-  spec_name: "amp-date-picker[type=range][mode=static]"
   tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=static]"
   requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "range"
+  }
   attr_lists: "amp-date-picker-common-attributes"
   attr_lists: "amp-date-picker-range-type-attributes"
   attr_lists: "amp-date-picker-static-mode-attributes"
   attr_lists: "extended-amp-global"
-  attrs: {
-    name: "mode"
-    value_regex_casei: "static|"
-  }
-  attrs: {
-    name: "type"
-    value_casei: "range"
-  }
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -105,20 +107,22 @@ tags: {
 
 tags: {
   html_format: AMP
-  spec_name: "amp-date-picker[type=range][mode=overlay]"
   tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=overlay]"
   requires_extension: "amp-date-picker"
-  attr_lists: "amp-date-picker-common-attributes"
-  attr_lists: "amp-date-picker-range-type-attributes"
-  attr_lists: "extended-amp-global"
   attrs: {
     name: "mode"
+    mandatory: true
     value_casei: "overlay"
   }
   attrs: {
     name: "type"
+    mandatory: true
     value_casei: "range"
   }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: NODISPLAY
@@ -138,7 +142,7 @@ attr_lists: {
   }
   attrs: {
     name: "first-day-of-week"
-    value_regex: "[0-9]"
+    value_regex: "[0-6]"
   }
   attrs: { name: "format" }
   attrs: { name: "highlighted" }
@@ -160,7 +164,6 @@ attr_lists: {
   }
   attrs: {
     name: "src"
-    mandatory: true
     value_url: {
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
