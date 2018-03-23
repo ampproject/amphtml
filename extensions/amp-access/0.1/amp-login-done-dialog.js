@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {assertAbsoluteHttpOrHttpsUrl, parseQueryString} from '../../../src/url';
+import {
+  assertAbsoluteHttpOrHttpsUrl,
+  parseQueryString,
+  tryDecodeUriComponent,
+} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
 
 
@@ -57,7 +61,12 @@ export class LoginDoneDialog {
 
     if (query['url']) {
       // Source URL is specified. Try to redirect back.
-      this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(query['url']));
+      let url = query['url'];
+      // Protect against double-encoding.
+      if (/^https?\%/i.test(url)) {
+        url = tryDecodeUriComponent(url);
+      }
+      this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(url));
       return Promise.resolve();
     }
 
