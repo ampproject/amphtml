@@ -470,6 +470,20 @@ describes.realWin('amp-analytics', {
     });
   });
 
+  it('should not replace HTML_ATTR outside of amp-ad', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'htmlAttrRequest': 'https://example.com/bar&ids=${htmlAttr(div,id)}',
+      },
+      'triggers': [{'on': 'visible', 'request': 'htmlAttrRequest'}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(decodeURIComponent(sendRequestSpy.args[0][0])).to.equal('https://example.com/bar&ids=HTML_ATTR(div,id)');
+    });
+  });
+
   it('fills cid', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
