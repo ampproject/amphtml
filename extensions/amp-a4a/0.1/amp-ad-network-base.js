@@ -15,7 +15,6 @@
  */
 
 import {
-  AmpAdContext,
   FailureType,
   RecoveryModeType,
 } from './amp-ad-type-defs';
@@ -26,29 +25,6 @@ import {map} from '../../../src/utils/object';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
-
-class AmpAdContextBase extends AmpAdContext {
-  /**
-   * @param {!Window} win
-   * @param {AmpAdNetworkBase} ampAdInstance
-   */
-  constructor(win, ampAdInstance) {
-    super(win);
-
-    /** @private @const {!AmpAdNetwork} */
-    this.ampAdInstance_ = ampAdInstance;
-  }
-
-  /** @override */
-  applyFillContent(element) {
-    this.ampAdInstance.applyFillContent(element);
-  }
-
-  /** @override */
-  isInViewport() {
-    this.ampAdInstance.isInViewport();
-  }
-}
 
 /**
  * @abstract
@@ -70,8 +46,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.recoveryModes_ = map();
 
-    /** @const @private {!AmpAdContext} */
-    this.context_ = this.initContext();
+    /** @const @private {!Object} */
+    this.context_ = {};
 
     // Register default error modes.
     for (const failureType in FailureType) {
@@ -156,17 +132,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    */
   getRequestUrl() {
     // Subclass must override.
-  }
-
-  /**
-   * Creates an AmpAdContext instance. This method can be overriden by
-   * subclasses to generate custom AmpAdContext instances. If not overridden, a
-   * default is supplied.
-   *
-   * @return {!AmpAdContext}
-   */
-  initContext() {
-    return new AmpAdContextBase(this.win, this);
   }
 
   /** @param {number} retries */

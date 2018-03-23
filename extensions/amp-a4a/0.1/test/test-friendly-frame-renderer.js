@@ -33,20 +33,11 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
 
   beforeEach(() => {
     context = {
+      size: {width: '320', height: '50'},
+      requestUrl: 'http://www.google.com',
+      ampDoc: env.ampdoc,
       applyFillContent: () => {},
       isInViewport: () => true,
-      getAdditionalData: name => {
-        switch (name) {
-          case 'size':
-            return {width: '320', height: '50'};
-          case 'requestUrl':
-            return 'http://www.google.com';
-          case 'ampdoc':
-            return env.ampdoc;
-          default:
-            return null;
-        }
-      },
     };
     creativeData = {
       creativeMetaData: {

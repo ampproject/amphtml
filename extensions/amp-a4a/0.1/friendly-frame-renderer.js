@@ -60,9 +60,8 @@ export class FriendlyFrameRenderer extends Renderer {
 
     creativeData = /** @type {CreativeData} */ (creativeData);
 
-    const ampdoc = context.getAdditionalData('ampdoc');
-    const size = context.getAdditionalData('size');
-    const adUrl = context.getAdditionalData('requestUrl');
+    const size = context.size;
+    const adUrl = context.requestUrl;
     const creativeMetaData = creativeData.creativeMetaData;
 
     dev().assert(size, 'missing creative size');
@@ -103,8 +102,8 @@ export class FriendlyFrameRenderer extends Renderer {
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
         }, embedWin => {
-          installUrlReplacementsForEmbed(ampdoc, embedWin,
-              new A4AVariableSource(ampdoc, embedWin));
+          installUrlReplacementsForEmbed(context.ampDoc, embedWin,
+              new A4AVariableSource(context.ampDoc, embedWin));
         })
         .then(friendlyIframeEmbed => {
           setFriendlyIframeEmbedVisible(
