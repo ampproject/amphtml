@@ -98,8 +98,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
           .then(doc => this.attachShadowDoc_(doc), () => {})
           .then(amp => {
             this.win.document.title = amp.title || '';
+            if (this.win.history.replaceState) {
+              const url = parseUrl(next.ampUrl);
+              this.win.history.replaceState({}, amp.title, url.pathname);
+            }
 
-            // TODO(peterjosling): Send request to viewer with title
+            // TODO(peterjosling): Send request to viewer with title/URL
             // TODO(peterjosling): Set title back when scrolling up
             // TODO(peterjosling): Only set title when document becomes active
             // TODO(emarchiori): Trigger analtyics event when active
