@@ -33,6 +33,7 @@ const TAG = 'amp-story';
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    mutedstate: boolean,
+ *    currentpageid: string,
  * }}
  */
 export let State;
@@ -51,6 +52,7 @@ export const StateProperty = {
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   MUTED_STATE: 'mutedstate',
+  CURRENT_PAGE_ID: 'currentpageid',
 };
 
 
@@ -59,6 +61,7 @@ export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_MUTED: 'togglemuted',
+  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -86,6 +89,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+    case Action.CHANGE_PAGE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -172,6 +178,7 @@ export class AmpStoryStoreService {
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.CURRENT_PAGE_ID]: '',
     });
   }
 
