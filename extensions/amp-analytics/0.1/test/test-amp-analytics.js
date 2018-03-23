@@ -1996,8 +1996,9 @@ describes.realWin('amp-analytics', {
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
       const config = newConfig();
+      const trigger = config['triggers'][0];
       // Check precondition of responseAfter.
-      expect(config['resourceTimingSpec']['responseAFter']).to.be.undefined;
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.undefined;
 
       return runResourceTimingTest(
           [entry1, entry2], config,
@@ -2006,7 +2007,7 @@ describes.realWin('amp-analytics', {
               'foo_bar-script-700-100-0');
 
       // 'responseAfter' should be set to a positive number.
-      expect(config['resourceTimingSpec']['responseAFter']).to.be.above(0);
+      expect(trigger['resourceTimingSpec']['responseAfter']).to.be.above(0);
     });
 
     it('should url encode variables', () => {

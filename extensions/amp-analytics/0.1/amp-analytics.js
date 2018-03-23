@@ -719,9 +719,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
         const binding = 'RESOURCE_TIMING';
         const analyticsVar = 'resourceTiming';
-        const after = this.getAndUpdateLastReportedTime_(resourceTimingSpec);
         dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec, after);
+            serializeResourceTiming(this.win, resourceTimingSpec, lastTime);
         expansionOptions.vars[analyticsVar] = binding;
       }
     }
