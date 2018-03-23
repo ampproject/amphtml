@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
@@ -292,6 +293,20 @@ describes.realWin('amp-story', {
         expect(story.element.classList.contains('i-amphtml-story-landscape'))
             .to.be.false;
       });
+
+  it('should update page id in store', () => {
+    const firstPageId = 'page-one';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const dispatchStub =
+        sandbox.stub(story.storeService_, 'dispatch');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(dispatchStub)
+              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+        });
+  });
 });
 
 

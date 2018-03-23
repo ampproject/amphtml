@@ -103,4 +103,12 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
+
+  it('should update the current page', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
+    storeService.dispatch(Action.CHANGE_PAGE, 'test-page');
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith('test-page');
+  });
 });
