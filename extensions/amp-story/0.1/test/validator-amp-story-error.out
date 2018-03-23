@@ -31,9 +31,9 @@ FAIL
 |  <body>
 |    <amp-story> <!-- error because the 'standalone' attribute isn't set -->
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-error.html:31:2 The mandatory attribute 'standalone' is missing in tag 'AMP-STORY NO-METADATA'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
+amp-story/0.1/test/validator-amp-story-error.html:31:2 The mandatory attribute 'standalone' is missing in tag 'AMP-STORY (beta)'. (see https://www.ampproject.org/docs/reference/components/amp-story) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-error.html:31:2 The tag 'AMP-STORY NO-METADATA' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-story/0.1/test/validator-amp-story-error.html:31:2 The tag 'AMP-STORY (beta)' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-story-page> <!-- error because the 'id' attribute isn't set -->
 >>     ^~~~~~~~~
 amp-story/0.1/test/validator-amp-story-error.html:32:4 The mandatory attribute 'id' is missing in tag 'amp-story-page'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]

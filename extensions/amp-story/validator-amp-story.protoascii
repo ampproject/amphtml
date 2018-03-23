@@ -103,7 +103,7 @@ tags: {  # <amp-story>
 tags: {  # <amp-story> without metadata (deprecated)
   html_format: AMP
   tag_name: "AMP-STORY"
-  spec_name: "AMP-STORY NO-METADATA"
+  spec_name: "AMP-STORY (beta)"
   deprecation: "AMP-STORY"
   deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#announcements"
   requires_extension: "amp-story"
