@@ -49,6 +49,52 @@ export const ValidatorResult = {
     }} */
 export let ValidatorOutput;
 
+/**
+ * @abstract
+ */
+export class AmpAdContext {
+
+  /** @param {!Window} win */
+  constructor(win) {
+
+    /** @const {!Window} */
+    this.win = win;
+
+    /** @private {!Object<string, *>} */
+    this.data_ = {};
+  }
+
+  /**
+   * Configures the supplied element to have a "fill content" layout. The
+   * exact interpretation of "fill content" depends on the element's layout.
+   *
+   * @param {!Element} unusedElement
+   */
+  applyFillContent(unusedElement) {}
+
+  /**
+   * Returns true if the slot is within the viewport.
+   *
+   * @return {boolean}
+   */
+  isInViewport() {}
+
+  /**
+   * @param {string} name
+   * @return {*}
+   */
+  getAdditionalData(name) {
+    return this.data_[name];
+  }
+
+  /**
+   * @param {string} name
+   * @param {*} value
+   */
+  setAdditionalData(name, value) {
+    return this.data_[name] = value;
+  }
+}
 
 /**
  * @abstract
