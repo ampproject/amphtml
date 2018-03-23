@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-system-layer-0.1.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -127,13 +129,22 @@ export class SystemLayer {
 
     this.isBuilt_ = true;
 
-    this.root_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.root_ = this.win_.document.createElement('div');
+    const shadowRoot = createShadowRoot(this.root_);
 
-    this.root_.insertBefore(
+    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+
+    const style = this.win_.document.createElement('style');
+    style./*OK*/textContent = CSS;
+
+    shadowRoot.appendChild(style);
+    shadowRoot.appendChild(this.systemLayerEl_);
+
+    this.systemLayerEl_.insertBefore(
         this.progressBar_.build(pageIds), this.root_.lastChild);
 
     this.leftButtonTray_ =
-        this.root_.querySelector('.i-amphtml-story-ui-left');
+        this.systemLayerEl_.querySelector('.i-amphtml-story-ui-left');
 
     this.buildForDevelopmentMode_();
 
@@ -141,7 +152,7 @@ export class SystemLayer {
 
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
-      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+      this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
     }
 
     return this.getRoot();
