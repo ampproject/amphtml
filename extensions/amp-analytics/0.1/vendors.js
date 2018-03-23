@@ -88,6 +88,15 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
+
+  '_ping_': {
+    'requests': {
+      'old': {
+        'baseUrl': 'https://fake.com/vendor',
+      },
+    },
+  },
+
   'acquialift': {
     'vars': {
       'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',

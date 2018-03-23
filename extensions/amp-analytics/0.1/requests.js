@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -17,10 +18,20 @@
 import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
   ExpansionOptions,
+=======
+import {dev, user} from '../../../src/log';
+import {expandTemplate} from '../../../src/string';
+import {isObject} from '../../../src/types';
+import {hasOwn, map} from '../../../src/utils/object';
+import {filterSplice} from '../../../src/utils/array';
+import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {
+>>>>>>> wip
   variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
+<<<<<<< HEAD
 import {appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -70,10 +81,31 @@ export class RequestHandler {
       ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
           `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
       : null;
+=======
+
+
+export class RequestHandler {
+  constructor(win, obj, element, handler, isSandbox) {
+    const url = dev().assert(obj['baseUrl']);
+
+    this.win = win;
+
+    this.element = element;
+    // Expand any placeholders. For requests, we expand each string up to 5
+    // times to support nested requests. Leave any unresolved placeholders.
+    this.baseUrl = expandTemplate(url, key => {
+      return this.requests_[key] || '${' + key + '}';
+    }, 5);
+
+    this.maxDelay = obj['maxDelay'] || 0;
+
+    this.interval = obj['interval'] || 0;
+>>>>>>> wip
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
 
+<<<<<<< HEAD
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ =
       Services.urlReplacementsForDoc(ampAnalyticsElement);
@@ -318,18 +350,117 @@ export class RequestHandler {
         expansionOption.vars,
         expansionOption.iterations,
         true /* noEncode */);
+=======
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(this.element);
+
+    this.baseUrlPromise_ = null;
+
+    this.extraUrlParamsPromise_ = [];
+
+    this.sendViaIframePing_ = false;
+
+    this.handler_ = handler;
+
+    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+
+    this.schedule_ = null;
+  }
+
+  send(configParams, trigger, expansionOption) {
+    if (trigger['iframePing']) {
+      this.sendViaIframePing_ = true;
+    }
+    const triggerParams = trigger['extraUrlParams'];
+    if (!this.baseUrlPromise_) {
+      this.baseUrlPromise_ =
+          this.variableService_.expandTemplate(this.baseUrl, expansionOption)
+          .then(baseUrl => {
+            return this.urlReplacementService_.expandAsync(
+                baseUrl, undefined, this.whiteList_);
+          });
+    }
+
+    this.extraUrlParamsPromise_.push(
+        this.expandExtraUrlParams_(configParams, triggerParams, expansionOption)
+            .then(expandExtraUrlParams => {
+              console.log('expandExtrUrlParams are', expandExtraUrlParams);
+              return this.urlReplacementService_.expandAsync(
+                  expandExtraUrlParams, undefined, this.whiteList_);
+            })
+            .then(finalExtraUrlParams => {
+              return finalExtraUrlParams;
+            }));
+
+    this.trigger_();
+  }
+
+  dispose() {
+    if (this.schedule_) {
+      this.win.clearTimeout(this.schedule_);
+    }
+  }
+
+  trigger_() {
+    if (!this.schedule_) {
+      console.log('asdfasdfasdfasdfasdfadsf');
+      this.schedule_ = this.win.setTimeout(() => {
+        console.log('setTimeout');
+        this.fire_();
+      }, this.maxDelay * 1000);
+    }
+  }
+
+  fire_() {
+    //TODO: need to preconnect to request url at the right time
+    console.log('in fire function!!!!!');
+
+    this.baseUrlPromise_.then(request => {
+      return Promise.all(this.extraUrlParamsPromise_).then(paramStrs => {
+        filterSplice(paramStrs, item => {return !!item;});
+        const extraUrlParamsStr = paramStrs.join('&');
+        if (request.indexOf('${extraUrlParams}') >= 0) {
+          request.replace('${extraUrlParams}', extraUrlParamsStr);
+        } else {
+          request = appendEncodedParamStringToUrl(request, extraUrlParamsStr);
+        }
+        return request;
+      });
+    }).then(request => {
+      console.log('request is ', request);
+      this.handler_(request, this.sendViaIframePing_);
+      this.reset_();
+    });
+  }
+
+  reset_() {
+    this.baseUrlPromise_ = null;
+    this.extraUrlParamsPromise_ = [];
+    this.sendViaIframePing_ = false;
+    this.schedule_ = null;
+  }
+
+  // Function that handler extraUrlParams from config and trigger.
+  expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
+    const requestPromises = [];
+    const params = map();
+>>>>>>> wip
     // Add any given extraUrlParams as query string param
     if (configParams || triggerParams) {
       Object.assign(params, configParams, triggerParams);
       for (const k in params) {
         if (typeof params[k] == 'string') {
           requestPromises.push(
+<<<<<<< HEAD
               this.variableService_.expandTemplate(params[k], option)
+=======
+              this.variableService_.expandTemplate(params[k], expansionOption)
+>>>>>>> wip
                   .then(value => { params[k] = value; }));
         }
       }
     }
     return Promise.all(requestPromises).then(() => {
+<<<<<<< HEAD
       return params;
     });
   }
@@ -339,6 +470,13 @@ export class RequestHandler {
    * @param {!Object} params
    * @return {string}
    */
+=======
+      return this.getExtraUrlParamsString_(params);
+    });
+  }
+
+  //TODO: Need function to handler batchSegment as well
+>>>>>>> wip
   getExtraUrlParamsString_(params) {
     const s = [];
     for (const k in params) {
@@ -346,13 +484,18 @@ export class RequestHandler {
       if (v == null) {
         continue;
       } else {
+<<<<<<< HEAD
         const sv = this.variableService_.encodeVars(k, v);
+=======
+        const sv = this.variableService_.encodeVars(v, k);
+>>>>>>> wip
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }
     return s.join('&');
   }
 
+<<<<<<< HEAD
   /**
    * Handle batchInterval
    */
@@ -417,6 +560,39 @@ export class RequestHandler {
  * Expand config's request to object
  * @param {!JsonObject} config
  */
+=======
+
+
+    /**
+   * Adds parameters to URL. Similar to the function defined in url.js but with
+   * a different encoding method.
+   * @param {string} request
+   * @param {!Object<string, string>} params
+   * @return {string}
+   * @private
+   */
+  addParamsToUrl_(request, params) {
+    const s = [];
+    for (const k in params) {
+      const v = params[k];
+      if (v == null) {
+        continue;
+      } else {
+        const sv = this.variableService_.encodeVars(v, k);
+        s.push(`${encodeURIComponent(k)}=${sv}`);
+      }
+    }
+    const paramString = s.join('&');
+    if (request.indexOf('${extraUrlParams}') >= 0) {
+      return request.replace('${extraUrlParams}', paramString);
+    } else {
+      return appendEncodedParamStringToUrl(request, paramString);
+    }
+  }
+}
+
+
+>>>>>>> wip
 export function expandConfigRequest(config) {
   if (!config['requests']) {
     return config;
@@ -429,10 +605,14 @@ export function expandConfigRequest(config) {
   return config;
 }
 
+<<<<<<< HEAD
 /**
  * Expand single request to an object
  * @param {!JsonObject} request
  */
+=======
+
+>>>>>>> wip
 function expandRequestStr(request) {
   if (isObject(request)) {
     return request;
