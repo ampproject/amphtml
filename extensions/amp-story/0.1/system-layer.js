@@ -104,8 +104,17 @@ export class SystemLayer {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    /** @private {?Element} */
+    /**
+     * Root element containing a shadow DOM root.
+     * @private {?Element}
+     */
     this.root_ = null;
+
+    /**
+     * Actual system layer.
+     * @private {?Element}
+     */
+    this.systemLayerEl_ = null;
 
     /** @private {?Element} */
     this.leftButtonTray_ = null;
@@ -161,10 +170,11 @@ export class SystemLayer {
     // Initializes the component state.
     // TODO(gmajoulet): come up with a way to do this from the subscribe method.
     this.onDesktopStateUpdate_(
-        this.storeService_.get(StateProperty.DESKTOP_STATE));
+        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
     this.onHasAudioStateUpdate_(
-        this.storeService_.get(StateProperty.HAS_AUDIO_STATE));
-    this.onMutedStateUpdate_(this.storeService_.get(StateProperty.MUTED_STATE));
+        !!this.storeService_.get(StateProperty.HAS_AUDIO_STATE));
+    this.onMutedStateUpdate_(
+        !!this.storeService_.get(StateProperty.MUTED_STATE));
 
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
@@ -244,7 +254,7 @@ export class SystemLayer {
 
   /**
    * Reacts to has audio state updates, displays the audio controls if needed.
-   * @param {boolean} isActive
+   * @param {boolean} hasAudio
    * @private
    */
   onHasAudioStateUpdate_(hasAudio) {
