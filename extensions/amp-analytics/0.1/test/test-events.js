@@ -114,6 +114,8 @@ describes.realWin('Events', {amp: 1}, env => {
       const event = handler.args[0][0];
       expect(event.target).to.equal(target);
       expect(event.type).to.equal('click');
+      delete event.vars.elementHeight;
+      delete event.vars.elementWidth;
       expect(event.vars).to.deep.equal({});
     });
 
@@ -124,6 +126,8 @@ describes.realWin('Events', {amp: 1}, env => {
       const event = handler.args[0][0];
       expect(event.target).to.equal(target);
       expect(event.type).to.equal('click');
+      delete event.vars.elementHeight;
+      delete event.vars.elementWidth;
       expect(event.vars).to.deep.equal({});
     });
 
@@ -154,6 +158,8 @@ describes.realWin('Events', {amp: 1}, env => {
       target.setAttribute('data-vars-foo', 'bar');
       target.click();
       const event = handler.args[0][0];
+      delete event.vars.elementHeight;
+      delete event.vars.elementWidth;
       expect(event.vars).to.deep.equal({'foo': 'bar'});
     });
   });
