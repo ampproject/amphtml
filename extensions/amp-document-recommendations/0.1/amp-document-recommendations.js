@@ -93,9 +93,20 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
-      Services.xhrFor(this.win).fetchDocument(next.ampUrl).then(doc => {
-        this.attachShadowDoc_(doc);
-      }, () => {});
+      Services.xhrFor(this.win)
+          .fetchDocument(next.ampUrl)
+          .then(doc => this.attachShadowDoc_(doc), () => {})
+          .then(amp => {
+            this.win.document.title = amp.title || '';
+
+            // TODO(peterjosling): Send request to viewer with title
+            // TODO(peterjosling): Set title back when scrolling up
+            // TODO(peterjosling): Only set title when document becomes active
+            // TODO(emarchiori): Trigger analtyics event when active
+            // document changes.
+            // TODO(emarchiori): Hide position fixed elements of inactive
+            // documents and update approriately.
+          });
     }
   }
 
@@ -153,12 +164,6 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
           try {
             amp =
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
-
-            // TODO(peterjosling): Update document title.
-            // TODO(emarchiori): Trigger analtyics event when active
-            // document changes.
-            // TODO(emarchiori): Hide position fixed elements of inactive
-            // documents and update approriately.
 
             this.element.appendChild(shadowRoot);
             this.appendDivision_();
