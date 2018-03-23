@@ -15,6 +15,7 @@
   */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {VideoElementMixin, MediaPoolVideoMixin} from './mixins';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -66,8 +67,9 @@ const ATTRS_TO_PROPAGATE =
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
+ * @package
  */
-class AmpVideo extends AMP.BaseElement {
+export class AmpVideo extends AMP.BaseElement {
 
   /**
    * @param {!AmpElement} element
@@ -75,8 +77,13 @@ class AmpVideo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    const isStoryVideo = AmpVideo.isStoryVideo(element);
+    const mixin = isStoryVideo ?
+        MediaPoolVideoMixin :
+        VideoElementMixin;
+
     /** @private {?Element} */
-    this.video_ = null;
+    this.baseNode_ = null;
 
     /** @private {boolean} */
     this.muted_ = false;
@@ -87,11 +94,17 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
 
-    /** @private @const {!Array<!UnlistenDef>} */
-    this.unlisteners_ = [];
-
     /** @private @const {boolean} */
-    this.isStoryVideo_ = !!closestByTag(this.element, 'amp-story');
+    this.isStoryVideo_ = isStoryVideo;
+
+    /** @private @const {./mixins.AmpVideoMixin} */
+    this.mixin_ = new mixin(this);
+  }
+
+  /** @return {boolean} @visibleForTesting */
+  // TODO(alanorozco): Use mediapool service to determine mixin.
+  static isStoryVideo(element) {
+    return !!closestByTag(element, 'amp-story');
   }
 
   /**
@@ -168,26 +181,30 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.video_ = this.element.ownerDocument.createElement('video');
-
+    const baseNode = this.mixin_.createBaseNode();
     const poster = this.element.getAttribute('poster');
+
     if (!poster && getMode().development) {
-      console/*OK*/.error(
-          'No "poster" attribute has been provided for amp-video.');
+      console/*OK*/.error(TAG, 'No "poster" attribute provided.');
     }
 
     this.isPrerenderAllowed_ = this.hasAnyCachedSources_();
 
     // Enable inline play for iOS.
-    this.video_.setAttribute('playsinline', '');
-    this.video_.setAttribute('webkit-playsinline', '');
+    baseNode.setAttribute('playsinline', '');
+    baseNode.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
-    this.video_.setAttribute('preload', 'none');
-    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
+    baseNode.setAttribute('preload', 'none');
+    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, baseNode,
         /* opt_removeMissingAttrs */ true);
-    this.installEventHandlers_();
-    this.applyFillContent(this.video_, true);
-    this.element.appendChild(this.video_);
+
+    this.applyFillContent(baseNode, true);
+
+    this.mixin_.installEventHandlers(
+        [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED],
+        muted => this.setMuted_(muted));
+
+    this.baseNode_ = baseNode;
 
     // Gather metadata
     const artist = this.element.getAttribute('artist');
@@ -214,18 +231,19 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (!this.video_) {
+    if (!this.baseNode_) {
       return;
     }
     if (mutations['src']) {
+      // TODO(alanorozco): Update for mediapool.
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
-      this.propagateAttributes(['src'], dev().assertElement(this.video_));
+      this.propagateAttributes(['src'], dev().assertElement(this.baseNode_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
         value => mutations[value] !== undefined);
     this.propagateAttributes(
         attrs,
-        dev().assertElement(this.video_),
+        dev().assertElement(this.baseNode_),
         /* opt_removeMissingAttrs */ true);
     if (mutations['src']) {
       this.element.dispatchCustomEvent(VideoEvents.RELOAD);
@@ -261,7 +279,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.video_ = dev().assertElement(this.video_);
+    this.baseNode_ = dev().assertElement(this.baseNode_);
 
     if (!this.isVideoSupported_()) {
       this.toggleFallback(true);
@@ -271,7 +289,7 @@ class AmpVideo extends AMP.BaseElement {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT,
-        dev().assertElement(this.video_),
+        dev().assertElement(this.baseNode_),
         /* opt_removeMissingAttrs */ true);
 
     this.propagateCachedSources_();
@@ -281,7 +299,7 @@ class AmpVideo extends AMP.BaseElement {
     // If not in prerender mode, propagate everything.
     if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
-        this.video_.setAttribute('preload', 'auto');
+        this.baseNode_.setAttribute('preload', 'auto');
       }
       viewer.whenFirstVisible().then(() => {
         this.propagateLayoutChildren_();
@@ -290,8 +308,7 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateLayoutChildren_();
     }
 
-    // loadPromise for media elements listens to `loadstart`
-    return this.loadPromise(this.video_).then(() => {
+    return this.mixin_.whenLoadStarts().then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
   }
@@ -301,7 +318,7 @@ class AmpVideo extends AMP.BaseElement {
    * Propagate sources that are cached by the CDN.
    */
   propagateCachedSources_() {
-    dev().assert(this.video_);
+    const fragment = new DocumentFragment();
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -319,9 +336,11 @@ class AmpVideo extends AMP.BaseElement {
     // Origin sources will only be added when document becomes visible.
     sources.forEach(source => {
       if (this.isCachedByCDN_(source)) {
-        this.video_.appendChild(source);
+        fragment.appendChild(source);
       }
     });
+
+    this.mixin_.appendSources(fragment);
   }
 
   /**
@@ -329,7 +348,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    */
   propagateLayoutChildren_() {
-    dev().assert(this.video_);
+    const fragment = new DocumentFragment();
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -337,31 +356,33 @@ class AmpVideo extends AMP.BaseElement {
     if (this.element.hasAttribute('src') &&
         !this.isCachedByCDN_(this.element)) {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
-      this.propagateAttributes(['src'], dev().assertElement(this.video_));
+      this.propagateAttributes(['src'], dev().assertElement(this.baseNode_));
     }
 
     sources.forEach(source => {
       // Cached sources should have been moved from <amp-video> to <video>.
       dev().assert(!this.isCachedByCDN_(source));
       assertHttpsUrl(source.getAttribute('src'), source);
-      this.video_.appendChild(source);
+      fragment.appendChild(source);
     });
 
     // To handle cases where cached source may 404 if not primed yet,
     // duplicate the `origin` Urls for cached sources and insert them after each
-    const cached = toArray(this.video_.querySelectorAll('[amp-orig-src]'));
+    const cached = toArray(this.baseNode_.querySelectorAll('[amp-orig-src]'));
     cached.forEach(cachedSource => {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      insertAfterOrAtStart(dev().assertElement(this.video_),
+      insertAfterOrAtStart(dev().assertElement(this.baseNode_),
           origSource, cachedSource);
     });
 
     const tracks = toArray(childElementsByTag(this.element, 'track'));
     tracks.forEach(track => {
-      this.video_.appendChild(track);
+      fragment.appendChild(track);
     });
+
+    this.mixin_.appendSources(fragment);
   }
 
   /**
@@ -405,143 +426,91 @@ class AmpVideo extends AMP.BaseElement {
     return false;
   }
 
-
   /**
+   * @param {boolean} muted
    * @private
    */
-  installEventHandlers_() {
-    const video = dev().assertElement(this.video_);
-
-    this.unlisteners_.push(this.forwardEvents(
-        [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video));
-
-    this.unlisteners_.push(listen(video, 'volumechange', () => {
-      if (this.muted_ != this.video_.muted) {
-        this.muted_ = this.video_.muted;
-        const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
-        this.element.dispatchCustomEvent(evt);
-      }
-    }));
-  }
-
-  /** @private */
-  uninstallEventHandlers_() {
-    while (this.unlisteners_.length) {
-      this.unlisteners_.pop().call();
+  setMuted_(muted) {
+    if (this.muted_ == muted) {
+      return;
     }
-  }
-
-  /**
-   * Resets the component if the underlying <video> was changed.
-   * This should only be used in cases when a higher-level component manages
-   * this element's DOM.
-   */
-  resetOnDomChange() {
-    this.video_ = dev().assertElement(
-        childElementByTag(this.element, 'video'),
-        'Tried to reset amp-video without an underlying <video>.');
-
-    this.uninstallEventHandlers_();
-    this.installEventHandlers_();
+    const evt = muted ? VideoEvents.MUTED : VideoEvents.UNMUTED;
+    this.muted_ = muted;
+    this.element.dispatchCustomEvent(evt);
   }
 
   /** @override */
   pauseCallback() {
-    if (this.video_) {
-      this.video_.pause();
-    }
+    this.mixin_.pauseCallback();
   }
 
   /** @private */
   isVideoSupported_() {
-    return !!this.video_.play;
+    return this.mixin_.isVideoSupported();
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
-  /**
-   * @override
-   */
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
   supportsPlatform() {
     return this.isVideoSupported_();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   isInteractive() {
     return this.element.hasAttribute('controls');
   }
 
-  /**
-   * @override
-   */
+  // TODO(alanorozco): Implement mixin methods.
+
+  /** @override */
   play(unusedIsAutoplay) {
-    const ret = this.video_.play();
-
-    if (ret && ret.catch) {
-      ret.catch(() => {
-        // Empty catch to prevent useless unhandled promise rejection logging.
-        // Play can fail for many reasons such as video getting paused before
-        // play() is finished.
-        // We use events to know the state of the video and do not care about
-        // the success or failure of the play()'s returned promise.
-      });
-    }
+    this.mixin_.play();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   pause() {
-    this.video_.pause();
+    this.mixin_.pause();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   mute() {
-    this.video_.muted = true;
+    this.mixin_.toggleMuted(true);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   unmute() {
-    this.video_.muted = false;
+    this.mixin_.toggleMuted(false);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   showControls() {
-    this.video_.controls = true;
+    this.mixin_.toggleControls(true);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   hideControls() {
-    this.video_.controls = false;
+    this.mixin_.toggleControls(false);
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenEnter() {
-    fullscreenEnter(dev().assertElement(this.video_));
+    this.mixin_.fullscreenEnter();
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenExit() {
-    fullscreenExit(dev().assertElement(this.video_));
+    this.mixin_.fullscreenExit();
   }
 
   /** @override */
   isFullscreen() {
-    return isFullscreenElement(dev().assertElement(this.video_));
+    return this.mixin_.isFullscreen();
   }
 
   /** @override */
@@ -550,30 +519,17 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  preimplementsMediaSessionAPI() {
-    return false;
-  }
-
-  /** @override */
   getCurrentTime() {
-    return this.video_.currentTime;
+    return this.mixin_.getCurrentTime();
   }
 
   /** @override */
   getDuration() {
-    return this.video_.duration;
+    return this.mixin_.getDuration();
   }
 
-  /** @override */
   getPlayedRanges() {
-    // TODO(cvializ): remove this because it can be inferred by other events
-    const played = this.video_.played;
-    const length = played.length;
-    const ranges = [];
-    for (let i = 0; i < length; i++) {
-      ranges.push([played.start(i), played.end(i)]);
-    }
-    return ranges;
+    return this.mixin_.getPlayedRanges();
   }
 }
 

@@ -81,6 +81,7 @@ import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
+import {installMediaPoolServiceForDoc} from './media-pool';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
@@ -354,6 +355,8 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.assertAmpStoryExperiment_();
+
+    installMediaPoolServiceForDoc(this.getAmpDoc());
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.initializeStandaloneStory_();
