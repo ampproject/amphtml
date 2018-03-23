@@ -59,7 +59,7 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
-import {SystemLayer} from './system-layer';
+import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
   childElement,

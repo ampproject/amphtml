@@ -15,7 +15,7 @@
  */
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
-import {SystemLayer} from '../system-layer';
+import {SystemLayer} from '../amp-story-system-layer';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
