@@ -24,7 +24,7 @@ The instrumentation would normally look like this:
 
 ```
 /** Implements AccessController interface */
-class Controler {
+class Controller {
   connect(origin, protocol, config) {
     // Initialize the controller.
     // Important! Ensure that the "origin" is an acceptable value.
