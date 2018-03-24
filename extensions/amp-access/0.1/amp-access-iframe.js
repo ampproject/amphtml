@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Messenger} from './iframe-api/messenger';
+import {Messenger} from 'extensions/amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
 import {toggle} from '../../../src/style';
