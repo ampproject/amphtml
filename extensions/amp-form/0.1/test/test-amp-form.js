@@ -33,6 +33,7 @@ import {
 } from '../../../../src/service/cid-impl';
 import {fromIterator} from '../../../../src/utils/array';
 import {
+  getFormValidator,
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
@@ -1335,7 +1336,7 @@ describes.repeated('', {
       });
     });
 
-    it.only('should handle clear action and restore initial values', () => {
+    it('should handle clear action and restore initial values', () => {
       const form = getForm();
       document.body.appendChild(form);
 
@@ -1363,6 +1364,7 @@ describes.repeated('', {
 
     it.only('should remove all form state classes when form is cleared', () => {
       const form = getForm();
+      form.setAttribute('method', 'GET');
       document.body.appendChild(form);
 
       const ampForm = new AmpForm(form);
@@ -1380,7 +1382,7 @@ describes.repeated('', {
 
       const emailInput = document.createElement('input');
       emailInput.setAttribute('name', 'email');
-      emailInput.setAttribute('id', 'email');
+      emailInput.setAttribute('id', 'email1');
       emailInput.setAttribute('type', 'email');
       emailInput.setAttribute('required', '');
       emailInput.setAttribute('value', '');
@@ -1388,36 +1390,34 @@ describes.repeated('', {
 
       const validationMessage = document.createElement('span');
       validationMessage.setAttribute('visible-when-invalid', 'valueMissing');
-      validationMessage.setAttribute('validation-for', 'email');
+      validationMessage.setAttribute('validation-for', 'email1');
       fieldset.appendChild(validationMessage);
 
       ampForm.form_.appendChild(fieldset);
 
-      /**
-       * check validaty of input.
-       *  `usernameInput.className` should contain `user-valid`. but not
-       */
-      checkUserValidityAfterInteraction_(usernameInput);
-      /**
-       * Since above method not working, trying to simulate form submission
-       * which doesn't work either
-       */
-      ampForm.form_.querySelector('input[type="submit"]').click();
+      // trigger form validations
+      ampForm.checkValidity_();
+      const formValidator = getFormValidator(form);
+      debugger;
+      // show validity message
+      formValidator.report();
 
-      // Ideally, this should pass, but not passing
       expect(usernameInput.className).to.contain('user-valid');
-
-      checkUserValidityAfterInteraction_(emailInput);
-      // working fine
-      expect(ampForm.form_.className).to.contain('user-invalid');
       expect(emailInput.className).to.contain('user-invalid');
-      // Ideally this should pass, but not
-      // expect(validationMessage.className).to.contain('visible');
+      expect(emailInput.className).to.contain('valueMissing');
+      expect(fieldset.className).to.contain('user-valid');
+      expect(ampForm.form_.className).to.contain('user-invalid');
+      // This one is passing ONLY in debug mode
+      expect(validationMessage.className).to.contain('visible');
+      
       ampForm.handleClearAction_();
 
-      expect(ampForm.form_.className).to.not.contain('user-invalid');
-      // expect(usernameInput.className).to.contain('user-valid');
+      expect(usernameInput.className).to.not.contain('user-valid');
       expect(emailInput.className).to.not.contain('user-invalid');
+      expect(emailInput.className).to.not.contain('valueMissing');
+      expect(fieldset.className).to.not.contain('user-valid');
+      expect(ampForm.form_.className).to.contain('amp-form-initial');
+      expect(validationMessage.className).to.not.contain('visible');
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
