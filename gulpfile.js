@@ -1277,8 +1277,8 @@ function buildWebPushPublisherFilesVersion(version, options) {
 }
 
 function buildWebPushPublisherFile(version, fileName, watch, options) {
-  const basePath = 'extensions/amp-web-push/' + version + '/';
-  const tempBuildDir = 'build/all/v0/';
+  const basePath = `extensions/amp-web-push/${version}/`;
+  const tempBuildDir = `build/all/amp-web-push-${version}/`;
   const distDir = 'dist/v0';
 
   // Build Helper Frame JS
@@ -1295,6 +1295,9 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           minify: options.minify || argv.minify,
           minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          extraGlobs: [
+            tempBuildDir + '*.js',
+          ],
         });
       })
       .then(function() {
@@ -1331,7 +1334,8 @@ function buildLoginDone(options) {
  */
 function buildLoginDoneVersion(version, options) {
   options = options || {};
-  const path = 'extensions/amp-access/' + version + '/';
+  const path = `extensions/amp-access/${version}/`;
+  const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
   let watch = options.watch;
@@ -1378,15 +1382,19 @@ function buildLoginDoneVersion(version, options) {
   const latestName = 'amp-login-done-latest.js';
   return toPromise(gulp.src(path + '/*.js')
       .pipe($$.file(builtName, js))
-      .pipe(gulp.dest('build/all/v0/')))
+      .pipe(gulp.dest(buildDir)))
       .then(function() {
-        return compileJs('./build/all/v0/', builtName, './dist/v0/', {
+        return compileJs('./' + buildDir, builtName, './dist/v0/', {
           watch: false,
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName,
+          extraGlobs: [
+            buildDir + 'amp-login-done-0.1.max.js',
+            buildDir + 'amp-login-done-dialog.js',
+          ],
         });
       });
 }
