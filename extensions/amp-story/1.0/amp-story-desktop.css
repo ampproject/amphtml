@@ -1,0 +1,499 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-desktop-user-overridable.css';
+
+
+amp-story[standalone][desktop] {
+ max-width: none!important;
+ max-height: none!important;
+ width: 100vw!important;
+}
+
+[desktop] .i-amphtml-story-logo {
+ display: block!important;
+}
+
+.i-amphtml-story-background-container {
+ opacity: .8!important;
+ position: absolute!important;
+ top: 0!important;
+ right: 0!important;
+ bottom: 0!important;
+ left: 0!important;
+ overflow: hidden !important;
+}
+
+.i-amphtml-story-background-overlay,
+.i-amphtml-story-background-overlay::after {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1 !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Separate layer so overlay opacity can transition from 20% to 70%. */
+.i-amphtml-story-background-overlay::after {
+  content: '' !important;
+  display: block !important;
+  opacity: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  transition: opacity 0.3s !important;
+}
+
+.i-amphtml-story-bookend-active .i-amphtml-story-background-overlay::after {
+  opacity: 1 !important;
+}
+
+.i-amphtml-story-background {
+  position: absolute !important;
+  top: -150px !important;
+  right: -150px !important;
+  bottom: -150px !important;
+  left: -150px !important;
+  opacity: 0 !important;
+  filter: blur(50px) !important;
+  background-size: cover !important;
+  background-color: transparent !important;
+  background-position: center center !important;
+  will-change: opacity, z-index !important;
+  z-index: 0 !important;
+}
+
+.i-amphtml-story-background.active {
+  opacity: 1 !important;
+  z-index: 1 !important;
+}
+
+[desktop] amp-story-page {
+  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
+  opacity: .05!important;
+  transform-origin: left!important;
+  border-radius: 16px!important;
+}
+
+[desktop] amp-story-page[distance="0"],
+[desktop] amp-story-page[distance="1"] {
+  /* TODO(alanorozco): Enable transition for distance = 2.
+   * For some reason, enabling it breaks layout scheduling. */
+  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+[desktop] .i-amphtml-story-button-container {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100002 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+[desktop] .i-amphtml-story-button-container::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  /* Roughly equivalent to (viewport width - active page width) / 2  */
+  width: calc(50vw - 23vh - 32px) !important;
+}
+
+.i-amphtml-story-button-move,
+.i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
+.i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {
+  pointer-events: all !important;
+}
+
+.i-amphtml-story-button-hidden > .i-amphtml-story-button-move {
+  cursor: default !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+[desktop] > .next-container::before {
+  right: 0 !important;
+  background: linear-gradient(to right, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+}
+
+[desktop] > .prev-container::before {
+  left: 0 !important;
+  background: linear-gradient(to right, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
+}
+
+[desktop] > .next-container > .i-amphtml-story-button-move {
+  right: 0 !important;
+}
+
+[desktop] amp-story-page[pre-active],
+.prev-container > .i-amphtml-story-page-sentinel {
+  /* -150% + 15% */
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+}
+
+[desktop] amp-story-page[active] {
+  transform: scale(1.0) translateX(-50%) translateY(0%) !important;
+  opacity: 1!important;;
+}
+
+[desktop] amp-story-page[active] + amp-story-page,
+.next-container > .i-amphtml-story-page-sentinel {
+  /* 50% - 15% */
+  transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
+}
+
+[desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
+}
+
+[dir=rtl] [desktop] amp-story-page {
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
+}
+
+[dir=rtl] [desktop] amp-story-page[pre-active] {
+  /* 50% - 15% */
+  transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
+  /*transform: scale(1.0) translateX(35%) translateY(0%) !important;*/
+}
+
+[dir=rtl] [desktop] amp-story-page[active] {
+  transform: scale(1.0) translateX(-50%) translateY(0%) !important;
+  opacity: 1!important;
+}
+
+[dir=rtl] [desktop] amp-story-page[active] + amp-story-page {
+  /* -150% + 15% */
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  /*transform: scale(0.9) translateX(-135%) translateY(0%) !important;*/
+}
+
+[dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
+  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
+}
+
+[desktop] > amp-story-page,
+.i-amphtml-story-page-sentinel {
+  left: 50%!important;
+  right: auto !important;
+  margin: auto !important;
+  max-height: 75vh !important;
+  max-width: calc(3/5 * 75vh) !important;
+  min-width: 320px !important;
+  min-height: 533px !important;
+}
+
+[desktop] > amp-story-page {
+  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+}
+
+.i-amphtml-story-page-sentinel {
+  position: absolute !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin-left: -32px !important;
+  z-index: 100002 !important;
+  cursor: pointer;
+}
+
+/* Navigation buttons */
+.i-amphtml-story-button-move {
+  position: absolute!important;
+  top: 0!important;
+  bottom: 0!important;
+  margin: auto 40px!important;
+  width: 60px!important;
+  height: 60px!important;
+  border-radius: 50%!important;
+  border: 0!important;
+  background-color: #fff!important;
+  background-repeat: no-repeat!important;
+  background-size: 12px 17px!important;
+  display: flex!important;
+  justify-content: center!important;
+  align-items: center!important;
+  opacity: .5!important;
+  transition: 150ms opacity linear, 300ms transform linear!important;
+  cursor: pointer!important;
+  z-index: 100002!important;
+  outline: none!important;
+}
+
+.i-amphtml-story-prev-hover > amp-story-page[pre-active] {
+  opacity: 0.3 !important;
+}
+
+.i-amphtml-story-next-hover > amp-story-page[active] + amp-story-page {
+  opacity: 0.3 !important;
+}
+
+.prev-container > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>')!important;
+  background-position: 45% 50%!important;
+  left: 0!important;
+}
+
+.i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
+  background-position: 55% 50%!important;
+}
+
+.i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
+}
+
+.i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
+}
+
+/* On forward button mouseover */
+.i-amphtml-story-next-hover > .next-container > .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .prev-container > .i-amphtml-story-button-move {
+  transform: scale(1.1) !important;
+  opacity: 1!important;
+}
+
+/* Do not display when hidden. */
+.i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
+    .i-amphtml-story-button-move {
+  opacity: 0 !important;
+}
+
+/* On forward (next) button mouseover */
+.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
+    .i-amphtml-story-button-move {
+  transform: translateX(8px)!important;
+  opacity: 1!important;
+}
+
+/* On back button mouseover */
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
+    .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
+    .i-amphtml-story-button-move {
+  transform: translateX(-8px)!important;
+  opacity: 1!important;
+}
+
+/* Top bar */
+div.i-amphtml-story-top {
+  position: relative!important;
+  display: block!important;
+  height: 96px!important;
+  width: 100%!important;
+  z-index: 1!important;
+  background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
+}
+
+.i-amphtml-story-share-pill {
+  display: none !important;
+  position: absolute!important;
+  top: 0!important;
+  right: 40px!important;
+  bottom: 0!important;
+  margin: auto!important;
+  height: 40px!important;
+  align-items: center!important;
+}
+
+[desktop] .i-amphtml-story-share-pill {
+  display: flex !important;
+}
+
+/* Share text for share box */
+span.i-amphtml-story-share-pill-label {
+  font-family: 'Roboto', sans-serif!important;
+  position: absolute!important;
+  right: 15px!important;
+  text-align: center!important;
+  width: 60px!important;
+  font-size: 12px!important;
+  font-weight: bold!important;
+  letter-spacing: .5px!important;
+  margin: auto!important;
+  color:#fff!important;
+  box-sizing: initial !important;
+  text-transform: uppercase !important;
+}
+
+/* background for the share box */
+.i-amphtml-story-share-pill:before {
+  position: absolute!important;
+  content: ''!important;
+  width: 58px!important;
+  height: 40px!important;
+  padding: 0 16px!important;
+  background-color: rgba(255, 255, 255, .2)!important;
+  border-radius: 500px!important;
+  box-sizing: initial !important;
+  transition: width 300ms ease-in-out!important;
+  right: 0!important;
+}
+
+.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
+  opacity: 0!important;
+  transition: opacity 300ms linear!important;
+}
+
+.i-amphtml-story-share-pill:hover .i-amphtml-story-share-item {
+  opacity: 1!important;
+}
+
+.i-amphtml-story-share-pill .i-amphtml-story-share-item {
+  margin: 0 !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+}
+
+/* Incremental fade in */
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(9) {
+  transition-delay: calc(30ms * 1)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(8) {
+  transition-delay: calc(30ms * 2)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(7) {
+  transition-delay: calc(30ms * 3)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(6) {
+  transition-delay: calc(30ms * 4)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(5) {
+  transition-delay: calc(30ms * 5)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(4) {
+  transition-delay: calc(30ms * 6)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(3) {
+  transition-delay: calc(30ms * 7)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(2) {
+  transition-delay: calc(30ms * 8)!important;
+}
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(1) {
+  transition-delay: calc(30ms * 9)!important;
+}
+
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
+  padding: 0!important;
+  margin: 0 72px 0 0 !important;
+}
+
+.i-amphtml-story-share-pill:hover:before {
+  width: calc(100% - 32px) !important;
+}
+
+.i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0;
+}
+
+[desktop] .i-amphtml-story-share-icon {
+  font-size: 0px!important;
+  background-size: 24px 24px !important;
+  background-position: center center !important;
+  padding: 0 !important;
+}
+
+[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 28px 28px !important;
+  background-position: center center !important;
+}
+
+[desktop] .i-amphtml-story-share-icon::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-share-icon:active::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-share-list {
+  margin-right: 72px !important;
+}
+
+/* system layer changes */
+[desktop] .i-amphtml-story-system-layer {
+  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+  top: auto!important;
+  bottom: 0!important;
+  height: 96px!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[desktop] .i-amphtml-story-progress-bar {
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw/3) !important;
+  margin: 0px !important;
+}
+
+[desktop] .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
+}
+
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
+  display: none!important;
+}
+
+.i-amphtml-story-ui-left {
+  display: none!important;
+}
+
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
+  display: flex !important;
+  height: 40px !important;
+  flex: 1 !important;
+  min-width: 200px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 32px;
+}
+[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
+  display: block !important;
+  flex: 1 !important;
+}
+
+[desktop] .i-amphtml-story-top {
+  z-index: 100002 !important; /* 1 higher than bookend */
+}

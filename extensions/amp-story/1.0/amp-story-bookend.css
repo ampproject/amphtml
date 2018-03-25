@@ -1,0 +1,273 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-share.css';
+
+.i-amphtml-story-bookend {
+  text-align: left !important;
+  color: #fff !important;
+  bottom: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 100001 !important;
+  transition: transform 0.3s ease-out !important;
+}
+
+.i-amphtml-story-bookend.i-amphtml-hidden {
+  transition-timing-function: ease-in !important;
+  transform: translateY(100vh) !important;
+  pointer-events: none !important;
+}
+
+.i-amphtml-story-bookend-hidden {
+  pointer-events: none !important;
+}
+
+.i-amphtml-story-bookend-overflow {
+  overflow: auto !important;
+  margin-top: auto !important; /* positions it at the bottom of container */
+  transition: opacity 0.3s, transform 0.3s ease-out !important;
+}
+
+.i-amphtml-story-bookend-hidden .i-amphtml-story-bookend-overflow {
+  transform: translateY(200px) !important;
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-bookend-inner {
+  margin: 88px 0 0 !important;
+  position: relative !important;
+  padding-top: 32px !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-bookend-inner::before {
+  content: " " !important;
+  display: block !important;
+  z-index: -1 !important; /* places it under content */
+  background: rgba(0, 0, 0, 0.75) !important;
+  position: absolute !important;
+  left: 8px !important;
+  top: 8px !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  border-radius: 8px !important;
+}
+
+.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-inner::before,
+[desktop] .i-amphtml-story-bookend-inner::before {
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  border-radius: 0 !important;
+}
+
+.i-amphtml-story-bookend-heading {
+  text-transform: uppercase !important;
+  font-size: 12px !important;
+  padding-bottom: 8px !important;
+  margin: 48px 0 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: rgba(255, 255, 255, 0.54) !important;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700 !important;
+  letter-spacing: 0.83px !important;
+  line-height: 1 !important;
+}
+
+.i-amphtml-story-bookend-article-meta {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.i-amphtml-story-bookend-article {
+  box-sizing: border-box !important;
+  display: block !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  overflow: hidden !important;
+  flex: 1 0 320px !important;
+  min-width: calc(33%) !important;
+  margin: 24px 0 !important;
+  padding: 0 32px !important;
+}
+
+@media (min-width: 640px) {
+  .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
+}
+
+.i-amphtml-story-bookend-article-heading {
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  color: #fff !important;
+  line-height: 1.4;
+  margin: 0 0 8px !important;
+}
+
+.i-amphtml-story-bookend-article-image,
+.i-amphtml-story-bookend-replay-image {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.i-amphtml-story-bookend-article-image.amp-notsupported {
+  display: none !important;
+}
+
+.i-amphtml-story-bookend-article-image > img {
+  object-fit: cover;
+}
+
+.i-amphtml-story-bookend-replay-image {
+  background-position: center center !important;
+  background-size: cover !important;
+}
+
+.i-amphtml-story-bookend-article-image,
+.i-amphtml-story-bookend-replay-image,
+.i-amphtml-story-bookend-replay-icon {
+  float: right !important;
+  margin-left: 24px !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-bookend-replay {
+  padding: 16px 0 !important;
+  margin: 0 0 24px !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-bookend-replay-icon {
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24" fill="#ffffff"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>')
+      center center no-repeat !important;
+}
+
+/* Replay icon when image is rendered */
+.i-amphtml-story-bookend-replay-image > .i-amphtml-story-bookend-replay-icon {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  position: absolute !important; /* overlays image */
+  margin-left: 0 !important;
+}
+
+/* Replay icon when no image is rendered */
+.i-amphtml-story-bookend-replay > .i-amphtml-story-bookend-replay-icon {
+  width: 48px !important;
+  height: 48px !important;
+  background-color: rgba(60, 60, 60, 0.5) !important;
+  position: static !important; /* independent when no image is rendered */
+  border-radius: 4px !important;
+}
+
+.i-amphtml-story-bookend-heading + .i-amphtml-story-bookend-article-set {
+  border-top: none !important;
+}
+
+.i-amphtml-story-bookend-article-set {
+  border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+  margin-bottom: 32px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+}
+
+/* All top-level bookend elements need to set their own left/right margins */
+.i-amphtml-story-bookend-heading,
+.i-amphtml-story-bookend-replay {
+  margin-left: 32px !important;
+  margin-right: 32px !important;
+}
+
+.i-amphtml-story-bookend-fullbleed::before {
+  content: " " !important;
+  display: block !important;
+  background-image: linear-gradient(0deg, rgba(1,1,1,0.00) 0%, #000000 100%) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 40px !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-widget {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+[desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
+  /* TODO(alanorozco): Don't render at all when on desktop */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner {
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding: 104px 156px 64px !important;
+  margin: 0 !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-replay {
+  /* This is replaced with the forward button on desktop. */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-overflow {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 952px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 1272px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
+}
