@@ -114,21 +114,23 @@ describes.realWin('amp-gfycat', {
   });
 
   it('renders placeholder with an alt', () => {
-      return getGfycat('LeanMediocreBeardeddragon', {
-          withAlt: true,
-      }).then(gfycat => {
-          const placeHolder = gfycat.querySelector('amp-img');
-          expect(placeHolder).to.not.be.null;
-          expect(placeHolder.getAttribute('alt')).to.equal("Loading gif test alt label");
-      });
+    return getGfycat('LeanMediocreBeardeddragon', {
+      withAlt: true,
+    }).then(gfycat => {
+      const placeHolder = gfycat.querySelector('amp-img');
+      expect(placeHolder).to.not.be.null;
+      expect(placeHolder.getAttribute('alt')).to.equal(
+          'Loading gif test alt label');
+    });
   });
   it('renders placeholder with an aria-label', () => {
-      return getGfycat('LeanMediocreBeardeddragon', {
-          withAria: true,
-      }).then(gfycat => {
-          const placeHolder = gfycat.querySelector('amp-img');
-          expect(placeHolder).to.not.be.null;
-          expect(placeHolder.getAttribute('alt')).to.equal("Loading gif test aria label");
-      });
+    return getGfycat('LeanMediocreBeardeddragon', {
+      withAria: true,
+    }).then(gfycat => {
+      const placeHolder = gfycat.querySelector('amp-img');
+      expect(placeHolder).to.not.be.null;
+      expect(placeHolder.getAttribute('alt')).to.equal(
+          'Loading gif test aria label');
+    });
   });
 });
