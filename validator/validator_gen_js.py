@@ -407,6 +407,7 @@ SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
     'amp.validator.TagSpec.satisfies',
+    'amp.validator.TagSpec.excludes',
 ]
 
 

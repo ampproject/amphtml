@@ -617,7 +617,7 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 
 The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
 
-For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii#L221) field in the validation rules.
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.
 
 ## Animations
 
