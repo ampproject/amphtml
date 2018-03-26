@@ -50,13 +50,7 @@ amp-story/0.1/test/validator-amp-story-error.html:36:12 The attribute 'height' m
 |            </h1>
 |          </h5>
 |        </amp-story-grid-layer>
-|        <amp-story-bookend></amp-story-bookend><!-- error because 'amp-story-bookend' should only be a child of <amp-story> -->
->>       ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-error.html:40:6 The parent tag of tag 'amp-story-bookend' is 'amp-story-page', but it can only be 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 |      </amp-story-page>
-|      <amp-story-bookend></amp-story-bookend><!-- error because there should only be one instance of 'amp-story-bookend' -->
->>     ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-error.html:42:4 The tag 'amp-story-bookend' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-story) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    </amp-story>
 |    <div></div> <!-- this should create an error for the 'no siblings allowed' rule on <amp-story> -->
 |  </body>
