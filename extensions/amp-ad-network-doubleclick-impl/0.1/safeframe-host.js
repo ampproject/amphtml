@@ -279,8 +279,8 @@ export class SafeframeHostApi {
       bottom: ampAdBox.bottom - heightOffset,
       left: ampAdBox.left + widthOffset,
       right: ampAdBox.right - widthOffset,
-      height: this.creativeSize_.height,
-      width: this.creativeSize_.width,
+      height: this.initialCreativeSize_.height,
+      width: this.initialCreativeSize_.width,
     };
     return this.formatGeom_(iframeBox);
   }

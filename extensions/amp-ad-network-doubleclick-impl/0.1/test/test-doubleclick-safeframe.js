@@ -576,6 +576,43 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     /**
+     * If the safeframed creative asks to expand greater than the viewport,
+     * fail gracefully.
+     */
+    it('expand_request fails if expanding larger than viewport', () => {
+      sendExpandMessage(5000, 5000);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
+    });
+
+    /**
+     * If the safeframed creative asks to expand with invalid expand
+     * values, should fail gracefully.
+     */
+    it('expand_request fails if invalid values sent', () => {
+      const expandMessage = {};
+      expandMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+      expandMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+      expandMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.EXPAND_REQUEST;
+      expandMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        'uid': 0.623462509818004,
+        'expand_t': 'text',
+        'expand_r': 'Also text',
+        'expand_b': 50,
+        'expand_l': 0,
+        'push': 'not bool',
+        'sentinel': safeframeHost.sentinel_,
+      });
+      receiveMessage(expandMessage);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
+    });
+
+    /**
      * Request asks to expand past the bounds of the amp-ad element. First we
      * try to expand that element, and in this test it fails. Thus, we also
      * fail resizing the safeframe.
