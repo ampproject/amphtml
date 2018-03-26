@@ -681,12 +681,13 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent();
+          console.log('amp-a4a', JSON.stringify(fetchResponse));
           this.handleLifecycleStage_('adRequestEnd');
-          // If the response is null, we want to return null so that
-          // unlayoutCallback will attempt to render via x-domain iframe,
-          // assuming ad url or creative exist.
+          // If the response is null (can occur for non-200 responses), we want
+          // force collapse.
           if (!fetchResponse) {
-            return null;
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
               EXPERIMENT_FEATURE_HEADER_NAME)) {
@@ -707,7 +708,8 @@ export class AmpA4A extends AMP.BaseElement {
           }
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
-          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
+          if (!fetchResponse.arrayBuffer ||
+              fetchResponse.headers.get('amp-ff-empty-creative')) {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
