@@ -221,8 +221,12 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-fx-collection/0.1/providers/fade-in.js->' +
+          'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
           'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-fx-collection/0.1/providers/fade-in.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +

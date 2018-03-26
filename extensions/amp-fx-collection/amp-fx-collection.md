@@ -102,7 +102,16 @@ or specify a `custom-bezier()` input
 
 This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `25%`
 
-#### Example: Example 1
+#### Example: Main image fade in
+
+In this case the image in fades in over a duration of 1500ms.
+
+```html
+  <div amp-fx="fade-in" data-fade-in-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+
+```
 
 
 ## Validation

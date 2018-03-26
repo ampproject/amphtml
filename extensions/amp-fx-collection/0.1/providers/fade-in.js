@@ -18,13 +18,12 @@ import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../../src/services';
-import {clamp} from '../../../../src/utils/math';
-import {dev, user} from '../../../../src/log';
+import {dev} from '../../../../src/log';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyle, setStyles} from '../../../../src/style';
+import {setStyles} from '../../../../src/style';
 
 /**
  * Provides a fade-in visual effect.
@@ -54,7 +53,7 @@ export class FadeInProvider {
   }
 
   /**
-   * Installs parallax effect on the element
+   * Installs fade-in effect on the element
    * @param {!Element} element
    */
   installOn(element) {
@@ -101,7 +100,8 @@ class FadeInElement {
 
     /** @private {string} */
     this.easing_ = element.hasAttribute('data-fade-in-easing') ?
-      element.getAttribute('data-fade-in-easing') : 'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
+      element.getAttribute('data-fade-in-easing') :
+      'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
 
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-fade-in-duration') ?
@@ -138,16 +138,15 @@ class FadeInElement {
     dev().assert(this.adjustedViewportHeight_);
     // Outside viewport
     if (!entry.positionRect ||
-        entry.positionRect.top > this.adjustedViewportHeight_) {
+        entry.positionRect.top >
+          (1 - this.margin_) * this.adjustedViewportHeight_) {
       return;
     }
 
     // If above the threshold of trigger-position
-    if (entry.positionRect.top + (this.margin_ * entry.positionRect.width) < this.adjustedViewportHeight_) {
-      if (!this.animationScheduled_) {
-        this.animationScheduled_ = true;
-        this.resources_.mutateElement(this.element_, this.opacityAnimation_);
-      }      
+    if (!this.animationScheduled_) {
+      this.animationScheduled_ = true;
+      this.resources_.mutateElement(this.element_, this.opacityAnimation_);
     }
   }
 
@@ -156,7 +155,7 @@ class FadeInElement {
    */
   opacityAnimation_() {
     // What about timing?
-    this.mutateScheduled_ = false;
+    this.animationScheduled_ = false;
     // Translate the element offset pixels.
     setStyles(this.element_, {
       'transition-duration': this.duration_,

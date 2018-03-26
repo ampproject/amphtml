@@ -4504,7 +4504,7 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_casei: "parallax"
+    value_regex_casei: "(parallax|fade-in)"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
