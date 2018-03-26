@@ -21,15 +21,16 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of AMP Ad tag which requests early by XHR and
-    renders natively within the page if a valid AMP Ad is returned.  Should
+    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/extensions/amp-a4a/amp-a4a-internal.md">here</a>
+    for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
+    for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
     via the amp-ad tag.  However, in order to remove an async script load
     of this library, publishers can include its script declaration.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>In Development</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
