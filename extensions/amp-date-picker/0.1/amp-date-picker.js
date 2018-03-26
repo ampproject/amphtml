@@ -237,7 +237,8 @@ class AmpDatePicker extends AMP.BaseElement {
     this.format_ = this.element.getAttribute('format') || DEFAULT_FORMAT;
 
     /** @private @const */
-    this.firstDayOfWeek_ = this.element.getAttribute('first-day-of-week') ||
+    this.firstDayOfWeek_ =
+        Number(this.element.getAttribute('first-day-of-week')) ||
         DEFAULT_FIRST_DAY_OF_WEEK;
 
     /** @private @const */
