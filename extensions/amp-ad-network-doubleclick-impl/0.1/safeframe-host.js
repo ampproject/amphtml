@@ -160,6 +160,12 @@ export class SafeframeHostApi {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
 
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    this.initialCreativeSize_ = {
+      height: creativeSize['height'],
+      width: creativeSize['width'],
+    };
+
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
 
@@ -463,9 +469,9 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const expandHeight = Number(this.iframe_.height) +
+    const expandHeight = Number(this.creativeSize_.height) +
           payload['expand_b'] + payload['expand_t'];
-    const expandWidth = Number(this.iframe_.width) +
+    const expandWidth = Number(this.creativeSize_.width) +
           payload['expand_r'] + payload['expand_l'];
     // Verify that if expanding by push, that expandByPush is allowed.
     // If expanding by overlay, verify that expandByOverlay is allowed,
@@ -476,11 +482,15 @@ export class SafeframeHostApi {
          (expandWidth > this.creativeSize_.width ||
           expandHeight > this.creativeSize_.height))) {
       dev().error(TAG, 'Invalid expand values.');
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
     // Can't expand to greater than the viewport size
     if (expandHeight > this.viewport_.getSize().height ||
         expandWidth > this.viewport_.getSize().width) {
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
     this.handleSizeChange(expandHeight,
@@ -494,10 +504,12 @@ export class SafeframeHostApi {
   handleCollapseRequest_() {
     // Only collapse if expanded.
     if (this.isCollapsed_ || !this.isRegistered_) {
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.COLLAPSE_RESPONSE);
       return;
     }
-    this.handleSizeChange(this.creativeSize_.height,
-        this.creativeSize_.width,
+    this.handleSizeChange(this.initialCreativeSize_.height,
+        this.initialCreativeSize_.width,
         SERVICE.COLLAPSE_RESPONSE,
         /** isCollapse */ true);
   }
@@ -519,6 +531,8 @@ export class SafeframeHostApi {
               'height': height + 'px',
               'width': width + 'px',
             });
+            this.creativeSize_.height = height;
+            this.creativeSize_.width = width;
           }
           this.sendResizeResponse(/** SUCCESS */ true, messageType);
         },
@@ -561,9 +575,9 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const shrinkHeight = Number(this.iframe_.height) -
+    const shrinkHeight = Number(this.creativeSize_.height) -
           payload['shrink_b'] + payload['shrink_t'];
-    const shrinkWidth = Number(this.iframe_.width) -
+    const shrinkWidth = Number(this.creativeSize_.width) -
           payload['shrink_r'] + payload['shrink_l'];
     // Make sure we are actually shrinking here.
     if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||

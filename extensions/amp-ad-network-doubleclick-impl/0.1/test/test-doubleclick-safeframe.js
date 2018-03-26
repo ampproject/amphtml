@@ -72,7 +72,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       width: ampAdWidth,
       height: ampAdHeight,
     };
-    const creativeSize = initialSize;
+    const creativeSize = {
+      width: ampAdWidth,
+      height: ampAdHeight,
+    };
     safeframeHost = new SafeframeHostApi(
         doubleclickImpl, false, initialSize, creativeSize);
     doubleclickImpl.upgradeCallback();
@@ -509,14 +512,16 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * the amp-ad element, it succeeds immediately.
      */
     it('expand_request should succeed if within amp-ad bounds', () => {
+      safeframeHost.slotSize_.width = 500;
+      safeframeHost.slotSize_.height = 500;
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(100, 100);
-        expect(safeframeMock.style.height).to.equal('100px');
-        expect(safeframeMock.style.width).to.equal('100px');
+        expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
+        expect(safeframeMock.style.height).to.equal('300px');
+        expect(safeframeMock.style.width).to.equal('350px');
         expect(sendResizeResponseSpy).to.be.calledWith(
             true, SERVICE.EXPAND_RESPONSE);
         expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
@@ -531,22 +536,24 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request should succeed if expanding past amp-ad bounds and' +
        ' does not create reflow', () => {
+      const expandWidthBy = 550;
+      const expandHeightBy = 600;
       // Sneaky hack to do a synchronous mock of attemptChangeSize
       // Resize the ampAd to simulate a success.
       const then = f => {
-        ampAd.style.height = '600px';
-        ampAd.style.width = '600px';
+        ampAd.style.height = '850px';
+        ampAd.style.width = '850px';
         f();
         return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
-      sendExpandMessage(550,550);
+      sendExpandMessage(expandHeightBy, expandWidthBy);
 
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(600, 600);
-        expect(safeframeMock.style.height).to.equal('600px');
-        expect(safeframeMock.style.width).to.equal('600px');
+        expect(resizeSafeframeSpy).to.be.calledWith(850, 850);
+        expect(safeframeMock.style.height).to.equal('850px');
+        expect(safeframeMock.style.width).to.equal('850px');
         expect(sendResizeResponseSpy).to.be.calledWith(
             true, SERVICE.EXPAND_RESPONSE);
         expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
@@ -676,8 +683,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       // Sneaky hack to do a synchronous mock of attemptChangeSize
       // Resize the ampAd to simulate a success.
       const then = f => {
-        ampAd.style.height = '40px';
-        ampAd.style.width = '40px';
+        ampAd.style.height = '240px';
+        ampAd.style.width = '290px';
         f();
         return {'catch': () => {}};
       };
@@ -686,9 +693,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(resizeSafeframeSpy).to.be.calledOnce;
-        expect(resizeSafeframeSpy).to.be.calledWith(40, 40);
-        expect(safeframeMock.style.height).to.equal('40px');
-        expect(safeframeMock.style.width).to.equal('40px');
+        expect(resizeSafeframeSpy).to.be.calledWith(240, 290);
+        expect(safeframeMock.style.height).to.equal('240px');
+        expect(safeframeMock.style.width).to.equal('290px');
         expect(sendResizeResponseSpy).to.be.calledWith(
             true, SERVICE.SHRINK_RESPONSE);
         expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
