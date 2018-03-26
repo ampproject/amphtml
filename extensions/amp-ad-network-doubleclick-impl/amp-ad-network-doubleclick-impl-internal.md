@@ -115,10 +115,7 @@ Example:
 </amp-ad>
 ```
 
-#### Attributes
-Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
-- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
-- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
+For multi-size attributes, see the <a href="multi-size.md">multi-size documentation page</a>.
 
 ### Supported parameters
 
@@ -133,9 +130,11 @@ Supported via `json` attribute:
 - `tagForChildDirectedTreatment`
 - `targeting`
 
+### Supported DFP Formats
+- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads.</a>.
+- Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
+
 ### Unsupported DFP Formats
 - Interstitials
-- Expandables. Although expandables on interaction/click is a format that is work in progress.
 - Flash
-- Anchor Ads / Adhesion Units
 - Creatives served over HTTP.
