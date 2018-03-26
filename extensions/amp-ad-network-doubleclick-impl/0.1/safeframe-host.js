@@ -562,9 +562,9 @@ export class SafeframeHostApi {
       return;
     }
     const shrinkHeight = Number(this.iframe_.height) -
-          payload['shrink_b'] + payload['shrink_t'];
+          (payload['shrink_b'] + payload['shrink_t']);
     const shrinkWidth = Number(this.iframe_.width) -
-          payload['shrink_r'] + payload['shrink_l'];
+          (payload['shrink_r'] + payload['shrink_l']);
     // Make sure we are actually shrinking here.
     if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||
         shrinkWidth > this.creativeSize_.width ||
