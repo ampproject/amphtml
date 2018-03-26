@@ -125,10 +125,14 @@ For multi-size attributes, see the <a href="multi-size.md">multi-size documentat
 
 Supported via `json` attribute:
 
-- `categoryExclusions`
-- `cookieOptions`
-- `tagForChildDirectedTreatment`
-- `targeting`
+- `categoryExclusions`: Sets a slot-level category exclusion for the given label name/
+- `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
+  - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
+  - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
+- `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
+- `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
+  - `"<key_string>":"<value_string>"` or
+  - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
 Example with json attribute: 
 
