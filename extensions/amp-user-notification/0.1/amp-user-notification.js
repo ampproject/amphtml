@@ -421,9 +421,6 @@ export class UserNotificationManager {
       this.documentReadyPromise_,
     ]);
 
-    // /** @private {!Promise} */
-    // this.nextInQueue_ = this.managerReadyPromise_;
-
     this.notificationUiManagerPromise_ =
         getServicePromiseForDoc(this.ampdoc, NOTIFICATION_UI_MANAGER);
   }
