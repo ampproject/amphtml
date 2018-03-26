@@ -1362,12 +1362,16 @@ describe('amp-a4a', () => {
         fn: () => adResponse.status = 204,
       },
       {
+        name: '500',
+        fn: () => adResponse.status = 500,
+      },
+      {
         name: 'empty body',
         fn: () => adResponse.body = '',
       },
       {
         name: 'no fill header',
-        fn: () => adResponse.headers['amp-ff-empty-creative'] = 'true',
+        fn: () => adResponse.headers['amp-ff-empty-creative'] = '',
       },
     ].forEach(test => {
       it(`should collapse ${test.name}`, () => {

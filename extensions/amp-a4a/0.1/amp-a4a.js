@@ -681,11 +681,11 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
         .then(fetchResponse => {
           checkStillCurrent();
-          console.log('amp-a4a', JSON.stringify(fetchResponse));
           this.handleLifecycleStage_('adRequestEnd');
-          // If the response is null (can occur for non-200 responses), we want
-          // force collapse.
-          if (!fetchResponse) {
+          // If the response is null (can occur for non-200 responses)  or
+          // arrayBuffer is null, force collapse.
+          if (!fetchResponse || !fetchResponse.arrayBuffer ||
+              fetchResponse.headers.has('amp-ff-empty-creative')) {
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           }
@@ -705,13 +705,6 @@ export class AmpA4A extends AMP.BaseElement {
               this.populatePostAdResponseExperimentFeatures_(
                   tryDecodeUriComponent(match[1]));
             }
-          }
-          // If the response has response code 204, or arrayBuffer is null,
-          // collapse it.
-          if (!fetchResponse.arrayBuffer ||
-              fetchResponse.headers.get('amp-ff-empty-creative')) {
-            this.forceCollapse();
-            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
