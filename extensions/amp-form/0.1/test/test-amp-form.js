@@ -1398,7 +1398,6 @@ describes.repeated('', {
       // trigger form validations
       ampForm.checkValidity_();
       const formValidator = getFormValidator(form);
-      debugger;
       // show validity message
       formValidator.report();
 
@@ -1409,7 +1408,7 @@ describes.repeated('', {
       expect(ampForm.form_.className).to.contain('user-invalid');
       // This one is passing ONLY in debug mode
       expect(validationMessage.className).to.contain('visible');
-      
+
       ampForm.handleClearAction_();
 
       expect(usernameInput.className).to.not.contain('user-valid');
