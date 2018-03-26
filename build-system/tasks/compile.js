@@ -145,8 +145,6 @@ function compile(entryModuleFilenames, outputDir,
       'build/fake-module/**/*.js',
       'build/patched-module/**/*.js',
       'build/experiments/**/*.js',
-      // Strange access/login related files.
-      'build/all/v0/*.js',
       // A4A has these cross extension deps.
       'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
@@ -341,7 +339,8 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red('Compiler error:\n') +
+          console./* OK*/error(colors.red(
+              'Compiler error for ' + outputFilename + ':\n') +
               formatClosureCompilerError(err.message));
           process.exit(1);
         });

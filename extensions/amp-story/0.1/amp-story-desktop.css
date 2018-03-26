@@ -322,9 +322,8 @@ div.i-amphtml-story-top {
 }
 
 /* Share text for share box */
-.i-amphtml-story-share-pill:after {
+span.i-amphtml-story-share-pill-label {
   font-family: 'Roboto', sans-serif!important;
-  content: 'SHARE'!important;
   position: absolute!important;
   right: 15px!important;
   text-align: center!important;
@@ -335,6 +334,7 @@ div.i-amphtml-story-top {
   margin: auto!important;
   color:#fff!important;
   box-sizing: initial !important;
+  text-transform: uppercase !important;
 }
 
 /* background for the share box */
