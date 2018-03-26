@@ -119,8 +119,8 @@ For multi-size attributes, see the <a href="multi-size.md">multi-size documentat
 
 ### Supported parameters
 
-- `data-slot`
-- `data-multi-size`
+- `data-slot`: Full path of the ad unit with the network code and unit code.
+- `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
 - `data-multi-size-validation`
 
 Supported via `json` attribute:
@@ -130,8 +130,18 @@ Supported via `json` attribute:
 - `tagForChildDirectedTreatment`
 - `targeting`
 
+Example with json attribute: 
+
+```html
+<amp-ad width=320 height=50
+    type="doubleclick"
+    data-slot="/4119129/mobile_ad_banner"
+    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'>
+</amp-ad>
+```
+
 ### Supported DFP Formats
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads.</a>.
+- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-ad-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
 - Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats
