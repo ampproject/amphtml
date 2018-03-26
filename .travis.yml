@@ -20,7 +20,9 @@ before_script:
   - chromedriver -v
   - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
-after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
+after_script:
+  - ./node_modules/.bin/greenkeeper-lockfile-upload
+  - build-system/stop_sauce_connect.sh
 branches:
   only:
     - master
@@ -31,11 +33,9 @@ branches:
 env:
   global:
     - SAUCE_USERNAME="amphtml-travis-sauce"
-    - SAUCE_ACCESS_KEY="`curl --silent https://amphtml-sauce-token-dealer.appspot.com/getToken`"
     - NPM_CONFIG_PROGRESS="false"
 addons:
   chrome: stable
-  sauce_connect: true
   hosts:
     - ads.localhost
     - iframe.localhost
