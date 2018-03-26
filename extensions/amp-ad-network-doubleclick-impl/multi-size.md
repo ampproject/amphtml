@@ -25,6 +25,11 @@ set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
 two dimensions, of their primary size counterpart, unless 
 `data-multi-size-validation` is explicitly set to false.
 
+#### Attributes
+Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
+- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
+- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
+
 Examples - With multi-size request
 ```html
 <amp-ad width=728 height=90
