@@ -749,7 +749,7 @@ export class Bind {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
       if (newValue === undefined ||
-          recursiveEquals(newValue, previousResult, /* depth */ 3)) {
+          recursiveEquals(newValue, previousResult, /* depth */ 5)) {
         user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
