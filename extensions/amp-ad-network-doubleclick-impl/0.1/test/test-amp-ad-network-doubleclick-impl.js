@@ -57,6 +57,8 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {utf8Encode} from '../../../../src/utils/bytes';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -773,7 +775,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     function mockSendXhrRequest() {
       return {
-        arrayBuffer,
+        arrayBuffer: () => Promise.resolve(utf8Encode(
+            '<html><body>Hello, World!</body></html>')),
         headers: {
           get(prop) {
             switch (prop) {
@@ -843,6 +846,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('amp creative - should force iframe to match size of creative', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      // Stub ini load otherwise FIE could delay test
+      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .returns(Promise.resolve());
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -870,6 +876,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       sandbox.stub(impl, 'sendXhrRequest').callsFake(() => null);
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
+      // Stub ini load otherwise FIE could delay test
+      sandbox.stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .returns(Promise.resolve());
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
       impl.buildCallback();
