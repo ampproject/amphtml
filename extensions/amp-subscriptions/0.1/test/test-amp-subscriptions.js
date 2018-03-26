@@ -179,27 +179,34 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   describe('fetchEntitlements_', () => {
     let platform;
     let serviceAdapter;
+    let firstVisibleStub;
     beforeEach(() => {
       serviceAdapter = new ServiceAdapter(subscriptionService);
+      firstVisibleStub = sandbox.stub(subscriptionService.viewer_,
+          'whenFirstVisible').callsFake(() => Promise.resolve());
       subscriptionService.pageConfig_ = pageConfig;
       platform = new LocalSubscriptionPlatform(ampdoc,
           serviceConfig.services[0],
           serviceAdapter);
       subscriptionService.platformStore_ = new PlatformStore(['local']);
     });
-    it('should report failure if platform timeouts', () => {
+    afterEach(() => {
+      expect(firstVisibleStub).to.be.called;
+    });
+    it('should report failure if platform timeouts', done => {
       sandbox.stub(platform, 'getEntitlements')
-          .callsFake(() => new Promise(resolve => setTimeout(resolve, 5000)));
+          .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
           'reportPlatformFailure');
       const promise = subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
+            done();
           });
       expect(promise).to.throw;
-    }).timeout(4000);
+    }).timeout(7000);
 
-    it('should report failure if platform reject promise', () => {
+    it('should report failure if platform reject promise', done => {
       sandbox.stub(platform, 'getEntitlements')
           .callsFake(() => Promise.reject());
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
@@ -207,6 +214,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       const promise = subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
+            done();
           });
       expect(promise).to.throw;
     });
