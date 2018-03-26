@@ -22,6 +22,7 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
+import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {setTimeout} from 'timers';
 
@@ -280,6 +281,34 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               expect(resolvedEntitlement.json()).to.deep.equal(
                   entitlement.json());
             });
+      });
+    });
+
+    it('should not fetch entitlements for any platform other than '
+        + 'local', () => {
+      const fetchEntitlementsStub = sandbox.stub(
+          subscriptionService, 'fetchEntitlements_');
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        subscriptionService.registerPlatform('google.subscription',
+            new SubscriptionPlatform());
+        expect(fetchEntitlementsStub).to.not.be.called;
+      });
+    });
+
+    it('should fetch entitlements for other platforms if viewer does '
+        + 'not provide auth', () => {
+      capabilityStub.restore();
+      capabilityStub = sandbox.stub(subscriptionService.viewer_,
+          'hasCapability').callsFake(() => false);
+      const fetchEntitlementsStub = sandbox.stub(
+          subscriptionService, 'fetchEntitlements_');
+      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.start();
+      subscriptionService.registerPlatform('google.subscription',
+          new SubscriptionPlatform());
+      return subscriptionService.initialize_().then(() => {
+        expect(fetchEntitlementsStub).to.be.called;
       });
     });
   });

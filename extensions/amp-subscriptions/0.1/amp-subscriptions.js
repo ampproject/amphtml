@@ -26,6 +26,7 @@ import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
@@ -146,6 +147,10 @@ export class SubscriptionService {
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
+      console.log('hi1');
+      if (this.viewer_.hasCapability('auth')) {
+        return; // External platforms should not register if viewer provides auth
+      }
       const matchedServices = this.platformConfig_['services'].filter(
           service => (service.serviceId || 'local') === serviceId);
 
@@ -237,16 +242,17 @@ export class SubscriptionService {
       if (this.viewer_.hasCapability('auth')) {
         const serviceIds = ['local'];
         this.platformStore_ = new PlatformStore(serviceIds);
-        this.viewer_.sendMessageAwaitResponse('auth',
-        /** @type {JsonObject} */({})).then(entitlementData => {
-          dev().assert(typeof entitlementData == 'object',
-              'entitlementData should be JsonObject');
-          const entitlement = Entitlement.parseFromJson(
-              /** @type {JsonObject}*/(entitlementData));
-          this.platformStore_.resolveEntitlement('local', entitlement);
-        }, reason => {
-          throw user().createError('Viewer authorization failed', reason);
-        });
+        this.viewer_.sendMessageAwaitResponse('auth', dict())
+            .then(entitlementData => {
+              dev().assert(typeof entitlementData == 'object',
+                  'entitlementData should be JsonObject');
+              const entitlement = Entitlement.parseFromJson(
+                  /** @type {JsonObject}*/ (entitlementData));
+              // Viewer authorization is redirected to use local platform instead.
+              this.platformStore_.resolveEntitlement('local', entitlement);
+            }, reason => {
+              throw user().createError('Viewer authorization failed', reason);
+            });
         return;
       }
 
