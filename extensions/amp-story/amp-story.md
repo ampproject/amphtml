@@ -72,7 +72,7 @@ We're adding four new required attributes and two optional attributes to the `<a
 
 These metadata attributes will be used for displaying a preview of this story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
 
-Note that these metadata attributes supplement and does not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
 
 The new attributes:
 
@@ -180,7 +180,16 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Example
 
 ```html
-<amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
+<amp-story
+    standalone
+    title="My Story"
+    publisher="The AMP Team"
+    publisher-logo-src="https://example.com/logo/1x1.png"
+    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+    bookend-config-src="./related.json"
+    background-audio="my.mp3">
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
   <amp-story-page>[...]</amp-story-page>
@@ -203,11 +212,11 @@ The name of the story's publisher.
 
 ##### publisher-logo-src [required]
 
-A publisher's logo in square format (1x1 aspect ratio).
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 pixel logo.
 
 ##### poster-portrait-src [required]
 
-The story poster in portrait format (3x4 aspect ratio).
+A URL to the [story poster](#posters) in portrait format (3x4 aspect ratio).
 
 ##### bookend-config-src [optional]
 
@@ -215,15 +224,19 @@ A URL endpoint that accepts GET requests and returns a JSON response with links 
 
 ##### background-audio [optional]
 
-A URI to an audio file that plays throughout the story.
+A URL to an audio file that plays throughout the story.
 
 ##### poster-square-src [optional]
 
-The story poster in square format (1x1 aspect ratio).
+A URL to the [story poster](#posters) in square format (1x1 aspect ratio).
 
 ##### poster-landscape-src [optional]
 
-The story poster in landscape format (4x3 aspect ratio).
+A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
+
+### Posters
+
+A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although any image that is representative of the story.
 
 ### Children (of amp-story)
 
