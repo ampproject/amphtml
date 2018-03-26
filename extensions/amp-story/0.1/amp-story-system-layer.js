@@ -212,6 +212,10 @@ export class SystemLayer {
       }
     });
 
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     });
@@ -237,6 +241,16 @@ export class SystemLayer {
    */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
+  }
+
+  /**
+   * Reacts to the bookend state updates and updates the UI accordingly.
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.getShadowRoot()
+        .classList.toggle('i-amphtml-story-bookend-active', isActive);
   }
 
   /**

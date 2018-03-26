@@ -33,7 +33,7 @@
   pointer-events: auto !important;
 }
 
-.i-amphtml-story-bookend-active > .i-amphtml-story-system-layer {
+.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
   opacity: 0.3 !important;
 }
 
