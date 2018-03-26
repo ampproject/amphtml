@@ -38,7 +38,7 @@ import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
-import {CSS} from '../../../build/amp-story-0.1.css';
+import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,
@@ -1650,6 +1650,6 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 
-AMP.extension('amp-story', '0.1', AMP => {
+AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
 });

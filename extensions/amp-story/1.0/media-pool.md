@@ -30,5 +30,5 @@ To resolve this, we create a task queue, stored as a property on each media elem
 
 # Code
 
-- MediaPool: https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/0.1/media-pool.js
-- Tasks for queue: https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/0.1/media-tasks.js
+- MediaPool: https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/media-pool.js
+- Tasks for queue: https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/media-tasks.js
