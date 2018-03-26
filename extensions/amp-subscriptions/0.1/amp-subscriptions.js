@@ -234,6 +234,22 @@ export class SubscriptionService {
 
       user().assert(this.pageConfig_, 'Page config is null');
 
+      if (this.viewer_.hasCapability('auth')) {
+        const serviceIds = ['local'];
+        this.platformStore_ = new PlatformStore(serviceIds);
+        this.viewer_.sendMessageAwaitResponse('auth',
+        /** @type {JsonObject} */({})).then(entitlementData => {
+          dev().assert(typeof entitlementData == 'object',
+              'entitlementData should be JsonObject');
+          const entitlement = Entitlement.parseFromJson(
+              /** @type {JsonObject}*/(entitlementData));
+          this.platformStore_.resolveEntitlement('local', entitlement);
+        }, reason => {
+          throw user().createError('Viewer authorization failed', reason);
+        });
+        return;
+      }
+
       user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
 

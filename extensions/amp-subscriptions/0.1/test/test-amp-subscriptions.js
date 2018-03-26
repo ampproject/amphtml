@@ -232,4 +232,55 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       });
     });
   });
+
+  describe('viewer authorization', () => {
+    let capabilityStub, responseStub;
+    const entitlementData = {source: 'local',
+      service: 'local', products, subscriptionToken: 'token'};
+    const entitlement = Entitlement.parseFromJson(entitlementData);
+    entitlement.service = 'local';
+    beforeEach(() => {
+      subscriptionService.pageConfig_ = pageConfig;
+      capabilityStub = sandbox.stub(subscriptionService.viewer_,
+          'hasCapability').callsFake(() => true);
+      responseStub = sandbox.stub(subscriptionService.viewer_,
+          'sendMessageAwaitResponse').callsFake(() =>
+        Promise.resolve(entitlementData));
+      sandbox.stub(subscriptionService, 'initialize_')
+          .callsFake(() => Promise.resolve());
+    });
+    it('should not ask for auth if viewer does not have the capability', () => {
+      capabilityStub.restore();
+      capabilityStub = sandbox.stub(subscriptionService.viewer_,
+          'hasCapability').callsFake(() => false);
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(responseStub).to.be.not.called;
+      });
+    });
+
+    it('should ask for auth if viewer has the capability', () => {
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(responseStub).to.be.calledOnce;
+        expect(subscriptionService.platformStore_.serviceIds_)
+            .to.deep.equal(['local']);
+      });
+    });
+
+    it('should resolve local with the entitlement given from the'
+        + ' viewer', () => {
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        return subscriptionService.viewer_.sendMessageAwaitResponse()
+            .then(() => {
+              const resolvedEntitlement =
+                  subscriptionService.platformStore_.entitlements_['local'];
+              expect(resolvedEntitlement).to.be.not.null;
+              expect(resolvedEntitlement.json()).to.deep.equal(
+                  entitlement.json());
+            });
+      });
+    });
+  });
 });
