@@ -31,7 +31,9 @@ const TAG = 'amp-story';
  *    canshowpreviouspagehelp: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
+ *    desktopstate: boolean,
  *    mutedstate: boolean,
+ *    currentpageid: string,
  * }}
  */
 export let State;
@@ -48,14 +50,18 @@ export const StateProperty = {
 
   // App States.
   BOOKEND_STATE: 'bookendstate',
+  DESKTOP_STATE: 'desktopstate',
   MUTED_STATE: 'mutedstate',
+  CURRENT_PAGE_ID: 'currentpageid',
 };
 
 
 /** @private @const @enum {string} */
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
+  TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_MUTED: 'togglemuted',
+  CHANGE_PAGE: 'changepage',
 };
 
 
@@ -68,15 +74,24 @@ export const Action = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
         return state;
       }
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.BOOKEND_STATE]: !!data}));
+    // Triggers the desktop UI.
+    case Action.TOGGLE_DESKTOP:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+    // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+    case Action.CHANGE_PAGE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -161,7 +176,9 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
+      [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.CURRENT_PAGE_ID]: '',
     });
   }
 
@@ -181,6 +198,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+          [StateProperty.MUTED_STATE]: false,
         };
       default:
         return {};

@@ -718,17 +718,17 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * @param {number} height Pixels to shrink height by.
      * @param {number} width Pixels to shrink width by.
      */
-    function sendShrinkMessage(height, width) {
+    function sendShrinkMessage(top, bottom, left, right) {
       const shrinkMessage = {};
       shrinkMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
       shrinkMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
       shrinkMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.SHRINK_REQUEST;
       shrinkMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
         'uid': 0.623462509818004,
-        'shrink_t': 0,
-        'shrink_r': width,
-        'shrink_b': height,
-        'shrink_l': 0,
+        'shrink_t': top,
+        'shrink_r': right,
+        'shrink_b': bottom,
+        'shrink_l': left,
         'sentinel': safeframeHost.sentinel_,
       });
       receiveMessage(shrinkMessage);
@@ -745,7 +745,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
-      sendShrinkMessage(10, 10);
+      sendShrinkMessage(5, 5, 5, 5);
 
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(resizeSafeframeSpy).to.be.calledOnce;
