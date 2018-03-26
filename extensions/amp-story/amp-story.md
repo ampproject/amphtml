@@ -212,7 +212,7 @@ The name of the story's publisher.
 
 ##### publisher-logo-src [required]
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 pixel logo.
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
 
 ##### poster-portrait-src [required]
 
@@ -236,7 +236,7 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 ### Posters
 
-A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although any image that is representative of the story.
+A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
 ### Children (of amp-story)
 
