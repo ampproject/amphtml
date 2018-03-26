@@ -144,7 +144,7 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {
+declareExtension('amp-story', '1.0', {
   hasCss: true,
   cssBinaries: ['amp-story-bookend', 'amp-story-share'],
 });
@@ -189,6 +189,8 @@ declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+declareExtensionVersionAlias(
+    'amp-story', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
 
 
 /**

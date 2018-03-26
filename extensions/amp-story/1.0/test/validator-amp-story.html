@@ -1,9 +1,12 @@
 <!--
-  Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
+
       http://www.apache.org/licenses/LICENSE-2.0
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS-IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,45 +21,33 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
-  <title>My Story</title>
-  <meta name="description" content="Get started with amp-story">
+  <title>STAMP examples</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link rel="canonical" href="grid-layer-templates.html">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <style amp-custom>
-    body {
-      font-family: 'Roboto', sans-serif;
-    }
-    amp-story-page {
-      background: white;
-    }
-    .button {
-      font: bold 20px Arial;
-      text-decoration: none;
-      background-color: rgba(0, 240, 248, 0.63);
-      color: #333333;
-      padding: 2px 6px 2px 6px;
-      border-top: 1px solid #CCCCCC;
-      border-right: 1px solid #333333;
-      border-bottom: 1px solid #333333;
-      border-left: 1px solid #CCCCCC;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-    }
-  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
 </head>
 <body>
-  <amp-story standalone>
-    <amp-story-page id="fill-template-title">
-      <amp-story-grid-layer template="vertical">
-        <h1>fill</h1>
+  <amp-story standalone bookend-config-src="./bookend-config-src.json" background-audio="path/to/my.mp3">
+    <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+      <amp-story-grid-layer template="horizontal">
+        <h5 animate-in="drop">
+          <h1>
+            <h4 animate-in-delay="anything"></h4>
+          </h1>
+          <h2></h2>
+        </h5>
+        <h3 grid-area="any value">
+          <h6 animate-in-after="whatever-value"></h6>
+        </h3>
+        <h3 align-content="center"></h3>
+        <h3 align-items="stretch"></h3>
+        <h3 align-self="start"></h3>
       </amp-story-grid-layer>
-      <amp-story-cta-layer>
-        <a href="http://www.google.com" class="button"> Call to action! </a>
-      </amp-story-cta-layer>
+      <amp-story-grid-layer template="horizontal">
+        <h1></h1>
+      </amp-story-grid-layer>
     </amp-story-page>
   </amp-story>
 </body>

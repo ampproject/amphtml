@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -82,7 +82,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <title>Hello, amp-story</title>
     <link rel="canonical" href="http://example.ampproject.org/my-story.html" />
     <meta name="viewport"
@@ -126,7 +126,7 @@ The AMP Story HTML format follows the [same markup requirements as a valid AMP H
 | RULE | DESCRIPTION |
 | ---- | --- |
 | The `<amp-story standalone>` element is the only child element of `<body>`. | Identifies that the document is an AMP Story. |
-| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-0.1.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
+| Contain a `<script async src="https://cdn.ampproject.org/v0/amp-story-1.0.js" custom-element="amp-story"></script>` tag as the third child of their `<head>` tag. | Includes and loads the amp-story JS library. |
 
 ## Story: `amp-story`
 

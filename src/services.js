@@ -284,28 +284,28 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
           true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
@@ -313,17 +313,17 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
    */
   static localizationService(win) {
     return getService(win, 'localization');

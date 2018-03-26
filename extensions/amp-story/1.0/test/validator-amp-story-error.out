@@ -27,21 +27,31 @@ FAIL
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 |  </head>
 |  <body>
-|    <amp-story standalone bookend-config-src="./related.json" background-audio="path/to/my.mp3">
-|      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
-|        <amp-story-grid-layer template="horizontal">
-|          <img class="footer-logo" src="img/foot-logo.svg" width="40" height="40" /> <!-- The real error here is that <img/> tag is not allowed. But this is a weird use case where the validator error will comment about reference points. This needs to be fixed in the near future. -->
->>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img', a child tag of 'amp-story-grid-layer', does not satisfy one of the acceptable reference points: AMP-STORY-GRID-LAYER default, AMP-STORY-GRID-LAYER animate-in. [AMP_TAG_PROBLEM]
->>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
->>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+|    <amp-story> <!-- error because the 'standalone' attribute isn't set -->
+>>   ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:31:2 The mandatory attribute 'standalone' is missing in tag 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+>>   ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:31:2 The tag 'amp-story' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|      <amp-story-page> <!-- error because the 'id' attribute isn't set -->
+>>     ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:32:4 The mandatory attribute 'id' is missing in tag 'amp-story-page'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+>>     ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:32:4 The tag 'amp-story-page' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|        <amp-story-grid-layer> <!-- error because one of 'fill', 'horizontal', 'vertical', 'thirds' should be set. -->
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:33:6 The mandatory attribute 'template' is missing in tag 'amp-story-grid-layer'. [AMP_TAG_PROBLEM]
+|          <h5>
+|            <h1>
+|              <h4 height="50px"></h4> <!-- error because 'height' is not an allowed attribute. -->
+>>             ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-error.html:36:12 The attribute 'height' may not appear in tag 'h4'. [DISALLOWED_HTML]
+|            </h1>
+|          </h5>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |    </amp-story>
+|    <div></div> <!-- this should create an error for the 'no siblings allowed' rule on <amp-story> -->
 |  </body>
 |  </html>
