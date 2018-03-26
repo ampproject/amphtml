@@ -694,6 +694,25 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
     });
 
+    it('should send collapse failure message if already collapsed', () => {
+      safeframeHost.isCollapsed_ = true;
+      sendCollapseMessage();
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.COLLAPSE_RESPONSE);
+      });
+    });
+
+    it('should send collapse failure message if not registered', () => {
+      safeframeHost.isCollapsed_ = false;
+      safeframeHost.isRegistered_ = false;
+      sendCollapseMessage();
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.COLLAPSE_RESPONSE);
+      });
+    });
+
     /**
      * Send a message requesting a shrink.
      * @param {number} height Pixels to shrink height by.
