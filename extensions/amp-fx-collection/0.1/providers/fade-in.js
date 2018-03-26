@@ -94,9 +94,9 @@ class FadeInElement {
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private {number} */
+    /** @private {string} */
     this.margin_ = element.hasAttribute('data-fade-in-margin') ?
-      parseInt(element.getAttribute('data-fade-in-margin'), 10) : 0.25;
+      element.getAttribute('data-fade-in-margin') : '0.25';
 
     /** @private {string} */
     this.easing_ = element.hasAttribute('data-fade-in-easing') ?
@@ -105,7 +105,7 @@ class FadeInElement {
 
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-fade-in-duration') ?
-      element.getAttribute('data-fade-in-duration') : '1.5s';
+      element.getAttribute('data-fade-in-duration') : '1500ms';
 
     /** @private {number} */
     this.opacityOffset_ = 0;
