@@ -294,17 +294,28 @@ export class SubscriptionService {
       'origin': origin,
     })).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
-      dev().assert(authData, 'authorization is not defined');
+      if (!authData) {
+        return this.platformStore_.resolveEntitlement('local',
+            Entitlement.empty('local'));
+      }
       const decodedData = this.jwtHelper_.decode(authData);
-      if (decodedData['aud'] != origin) {
-        user().error(TAG, 'Audience does not match');
-      }
-      if (Date.now() - decodedData['exp'] < 1000 * 60) {
-        user().error(TAG, 'Payload about to expire');
-      }
+      user().assert(decodedData['aud'] == origin, 'Bad Audience');
+      user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
       const entitlements = decodedData['entitlements'];
-      user().assert(entitlements[0], 'No entitlements found');
-      const entitlement = Entitlement.parseFromJson(entitlements[0]);
+      let entitlementJson = Entitlement.empty('local').json();
+      if (Array.isArray(entitlements)) {
+        for (let index = 0; index < entitlements.length; index++) {
+          const entitlementObject =
+              Entitlement.parseFromJson(entitlements[index]);
+          if (entitlementObject.enables(currentProductId)) {
+            entitlementJson = entitlements[index];
+            break;
+          }
+        }
+      } else if (entitlements) { // Not null
+        entitlementJson = entitlements;
+      }
+      const entitlement = Entitlement.parseFromJson(entitlementJson);
       // Viewer authorization is redirected to use local platform instead.
       this.platformStore_.resolveEntitlement('local', entitlement);
     }, reason => {

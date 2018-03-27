@@ -63,7 +63,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
-    pageConfig = new PageConfig('example.org:basic', true);
+    pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(() => Promise.resolve(pageConfig));
     sandbox.stub(subscriptionService, 'getPlatformConfig_')
@@ -285,6 +285,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               const resolvedEntitlement =
                   subscriptionService.platformStore_.entitlements_['local'];
               expect(resolvedEntitlement).to.be.not.null;
+              console.log(resolvedEntitlement.json(), entitlement.json());
               expect(resolvedEntitlement.json()).to.deep.equal(
                   entitlement.json());
             });
