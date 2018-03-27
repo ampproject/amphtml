@@ -188,8 +188,8 @@ export class DoubleclickA4aEligibility {
     if (isExperimentOn(win, dfDepRollbackExperiment) ||
         experimentId ==
         DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT) {
-      return !hasUSDRD &&
-          (!useRemoteHtml || !!element.getAttribute('rtc-config'));
+      return !!element.getAttribute('rtc-config') ||
+          !(hasUSDRD || useRemoteHtml);
     }
     return true;
   }
