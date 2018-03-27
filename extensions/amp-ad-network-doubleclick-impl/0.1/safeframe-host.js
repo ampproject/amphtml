@@ -162,7 +162,8 @@ export class SafeframeHostApi {
 
     /** @private {{width:number, height:number}} */
     this.initialCreativeSize_ =
-      /** @private {{width:number, height:number}} */ (Object.assign({}, creativeSize));
+      /** @private {{width:number, height:number}} */
+      (Object.assign({}, creativeSize));
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
