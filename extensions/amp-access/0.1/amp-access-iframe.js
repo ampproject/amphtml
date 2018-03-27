@@ -138,7 +138,7 @@ export class AccessIframeAdapter {
   }
 
   /**
-   * @return {!Promise<!JsonConfig>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   resolveConfig_() {
