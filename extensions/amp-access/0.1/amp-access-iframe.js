@@ -59,7 +59,7 @@ export class AccessIframeAdapter {
     /** @private {?function()} */
     this.connectedResolver_ = null;
 
-    /** @private @const {?Promise} */
+    /** @private {?Promise} */
     this.connectedPromise_ = null;
 
     /** @private @const {!Element} */
@@ -72,7 +72,7 @@ export class AccessIframeAdapter {
         () => this.iframe_.contentWindow,
         this.targetOrigin_);
 
-    /** @private @const {?Promise<!JsonObject>} */
+    /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
   }
 
