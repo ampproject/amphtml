@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  PositionObserverFidelity,
-} from '../../../../src/service/position-observer/position-observer-worker';
-import {Services} from '../../../../src/services';
+import {FxElement, FxProvider} from './fx-provider';
 import {dev, user} from '../../../../src/log';
-import {getServiceForDoc} from '../../../../src/service';
-import {
-  installPositionObserverServiceForDoc,
-} from '../../../../src/service/position-observer/position-observer-impl';
 import {setStyle, setStyles} from '../../../../src/style';
 
 const FACTOR_ATTR = 'data-parallax-factor';
@@ -32,29 +25,10 @@ const FACTOR_ATTR = 'data-parallax-factor';
  *
  * @implements {../amp-fx-collection.FxProviderInterface}
  */
-export class ParallaxProvider {
+export class ParallaxProvider extends FxProvider {
 
   /**
-   * @param  {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-
-    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
-    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(ampdoc);
-
-    /** @private @const {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
-
-    installPositionObserverServiceForDoc(ampdoc);
-
-    /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
-  }
-
-  /**
+   * @override
    * Installs parallax effect on the element
    * @param {!Element} element
    */
@@ -69,7 +43,7 @@ export class ParallaxProvider {
 /**
  * Encapsulates and tracks an element's linear parallax effect.
  */
-class ParallaxElement {
+class ParallaxElement extends FxElement {
   /**
    * @param {!Element} element The element to give a parallax effect.
    * @param {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} positionObserver
@@ -77,15 +51,7 @@ class ParallaxElement {
    * @param {!../../../../src/service/resources-impl.Resources} resources
    */
   constructor(element, positionObserver, viewport, resources) {
-
-    /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = positionObserver;
-
-    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = viewport;
-
-    /** @const @private {!../../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    super(element, positionObserver, viewport, resources);
 
     /** @const {string} */
     const factorValue = user().assert(element.getAttribute(FACTOR_ATTR),
@@ -94,38 +60,17 @@ class ParallaxElement {
     /** @private @const {number} */
     this.factor_ = parseFloat(factorValue);
 
-    /** @private {?number} */
-    this.adjustedViewportHeight_ = null;
-
     user().assert(this.factor_ > 0,
         `${FACTOR_ATTR} must be a number and greater than 0 for: %s`, element);
 
-    /** @private @const {!Element} */
-    this.element_ = element;
-
     /** @private {number} */
     this.translateYOffset_ = 0;
-
-    /** @private {boolean} */
-    this.mutateScheduled_ = false;
 
     this.boundTranslateY_ = this.translateY_.bind(this);
   }
 
   /**
-   * Handles initializations such as getting initial positions and listening to
-   * events.
-   */
-  initialize() {
-    this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-      this.adjustedViewportHeight_ = adjustedViewportHeight;
-
-      // start observing position of the element.
-      this.observePositionChanges_();
-    });
-  }
-
-  /**
+   * @override
    * Apply the parallax effect to the offset given how much the page
    * has moved since the last frame.
    * @private
@@ -165,42 +110,4 @@ class ParallaxElement {
     );
   }
 
-  /**
-   * @private
-   */
-  observePositionChanges_() {
-    this.positionObserver_.observe(this.element_, PositionObserverFidelity.HIGH,
-        this.update_.bind(this)
-    );
-
-    this.viewport_.onResize(() => {
-      this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-        this.adjustedViewportHeight_ = adjustedViewportHeight;
-      });
-    });
-  }
-
-  /**
-   * Parallax effect behaves differently for elements that are initially above
-   * the fold.
-   *
-   * Normally, parallax factor is spread across a whole viewport height however
-   * for elements above the fold, we should only apply the parallax after
-   * between the element and top of the page.
-   * @returns {!Promise<number>}
-   * @private
-   */
-  getAdjustedViewportHeight_() {
-    return this.resources_.measureElement(() => {
-      const viewportHeight = this.viewport_.getHeight();
-
-      let offsetTop = 0;
-      for (let node = this.element_; node; node = node./*OK*/offsetParent) {
-        offsetTop += node./*OK*/offsetTop;
-      }
-      const aboveTheFold = (offsetTop < viewportHeight);
-
-      return aboveTheFold ? offsetTop : viewportHeight;
-    });
-  }
 }
