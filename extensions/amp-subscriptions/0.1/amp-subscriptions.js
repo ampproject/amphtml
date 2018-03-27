@@ -295,13 +295,14 @@ export class SubscriptionService {
     })).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
       dev().assert(authData, 'authorization is not defined');
-      const {aud, exp, entitlements} = this.jwtHelper_.decode(authData);
-      if (aud != origin) {
+      const decodedData = this.jwtHelper_.decode(authData);
+      if (decodedData['aud'] != origin) {
         user().error(TAG, 'Audience does not match');
       }
-      if (Date.now() - exp < 1000 * 60) {
+      if (Date.now() - decodedData['exp'] < 1000 * 60) {
         user().error(TAG, 'Payload about to expire');
       }
+      const entitlements = decodedData['entitlements'];
       user().assert(entitlements[0], 'No entitlements found');
       const entitlement = Entitlement.parseFromJson(entitlements[0]);
       // Viewer authorization is redirected to use local platform instead.

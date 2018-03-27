@@ -24,8 +24,8 @@ import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
+import {getWinOrigin} from '../../../../src/url';
 import {setTimeout} from 'timers';
-import { getWinOrigin } from '../../../../src/url';
 
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
