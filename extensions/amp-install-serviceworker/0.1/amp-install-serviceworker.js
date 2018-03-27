@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
@@ -29,7 +30,6 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 import {toggle} from '../../../src/style';
-import {LayoutPriority} from '../../../src/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
