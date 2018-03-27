@@ -200,7 +200,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.attemptChangeHeight = () => Promise.resolve();
     sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
       arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
-      headers: {has: () => false, get: () => undefined}
+      headers: {has: () => false, get: () => undefined},
     }));
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
