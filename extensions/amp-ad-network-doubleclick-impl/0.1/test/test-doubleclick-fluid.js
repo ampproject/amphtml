@@ -198,6 +198,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
             })), '*');
         </script>`;
     impl.attemptChangeHeight = () => Promise.resolve();
+    sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
+      arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
+      headers: {has: () => false, get: () => undefined},
+    }));
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
     impl.safeframeApi_ = new SafeframeHostApi(
@@ -209,7 +213,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
         'onFluidResize_');
     return impl.adPromise_.then(() => {
-      impl.creativeBody_ = utf8Encode(rawCreative);
       return impl.layoutCallback().then(() => {
         expect(connectMessagingChannelSpy).to.be.calledOnce;
         expect(onFluidResizeSpy).to.be.calledOnce;
