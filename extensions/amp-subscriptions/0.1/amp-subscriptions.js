@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {Entitlement} from './entitlement';
-import {JwtHelper} from '../../../src/utils/jwt';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -29,6 +29,7 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -94,7 +95,7 @@ export class SubscriptionService {
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
 
     /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper();
+    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
@@ -246,20 +247,7 @@ export class SubscriptionService {
       user().assert(this.pageConfig_, 'Page config is null');
 
       if (this.doesViewerProvideAuth_) {
-        const serviceIds = ['local'];
-        this.platformStore_ = new PlatformStore(serviceIds);
-        this.viewer_.sendMessageAwaitResponse('auth', dict())
-            .then(entitlementData => {
-              const authData = (entitlementData || {})['authorization'];
-              dev().assert(authData, 'authorization is not defined');
-              const payload = this.jwtHelper_.decode(authData)['payload'];
-              const entitlement = Entitlement.parseFromJson(payload);
-              // Viewer authorization is redirected to use local platform instead.
-              this.platformStore_.resolveEntitlement('local', entitlement);
-            }, reason => {
-              throw user().createError('Viewer authorization failed', reason);
-            });
-        return;
+        return this.delegateAuthToViewer_();
       }
 
       user().assert(this.platformConfig_['services'],
@@ -283,6 +271,44 @@ export class SubscriptionService {
 
     });
     return this;
+  }
+
+  /**
+   * Delegates authentication to viewer
+   */
+  delegateAuthToViewer_() {
+    const serviceIds = ['local'];
+    const currentProductId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getProductId(),
+        'Product id is null'
+    ));
+    const publicationId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getPublicationId(),
+        'Publication id is null'
+    ));
+    const origin = getWinOrigin(this.ampdoc_.win);
+    this.platformStore_ = new PlatformStore(serviceIds);
+    this.viewer_.sendMessageAwaitResponse('auth', dict({
+      'publicationId': publicationId,
+      'productId': currentProductId,
+      'origin': origin,
+    })).then(entitlementData => {
+      const authData = (entitlementData || {})['authorization'];
+      dev().assert(authData, 'authorization is not defined');
+      const {aud, exp, entitlements} = this.jwtHelper_.decode(authData);
+      if (aud != origin) {
+        user().error(TAG, 'Audience does not match');
+      }
+      if (Date.now() - exp < 1000 * 60) {
+        user().error(TAG, 'Payload about to expire');
+      }
+      user().assert(entitlements[0], 'No entitlements found');
+      const entitlement = Entitlement.parseFromJson(entitlements[0]);
+      // Viewer authorization is redirected to use local platform instead.
+      this.platformStore_.resolveEntitlement('local', entitlement);
+    }, reason => {
+      throw user().createError('Viewer authorization failed', reason);
+    });
   }
 
   /**

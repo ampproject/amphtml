@@ -25,6 +25,7 @@ import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {setTimeout} from 'timers';
+import { getWinOrigin } from '../../../../src/url';
 
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
@@ -235,25 +236,31 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   describe('viewer authorization', () => {
-    let capabilityStub, responseStub;
+    let responseStub;
     const entitlementData = {source: 'local',
       service: 'local', products, subscriptionToken: 'token'};
     const entitlement = Entitlement.parseFromJson(entitlementData);
     entitlement.service = 'local';
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
-      capabilityStub = sandbox.stub(subscriptionService.viewer_,
-          'hasCapability').callsFake(() => true);
+      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.doesViewerProvideAuth_ = true;
       responseStub = sandbox.stub(subscriptionService.viewer_,
           'sendMessageAwaitResponse').callsFake(() =>
-        Promise.resolve(entitlementData));
+        Promise.resolve({
+          'authorization': 'faketoken',
+        }));
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
+      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': Date.now() + 4000 * 60, // expiry after 4 minutes
+            'entitlements': [entitlementData],
+          };});
     });
     it('should not ask for auth if viewer does not have the capability', () => {
-      capabilityStub.restore();
-      capabilityStub = sandbox.stub(subscriptionService.viewer_,
-          'hasCapability').callsFake(() => false);
+      subscriptionService.doesViewerProvideAuth_ = false;
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
         expect(responseStub).to.be.not.called;
@@ -298,12 +305,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
     it('should fetch entitlements for other platforms if viewer does '
         + 'not provide auth', () => {
-      capabilityStub.restore();
-      capabilityStub = sandbox.stub(subscriptionService.viewer_,
-          'hasCapability').callsFake(() => false);
+      subscriptionService.doesViewerProvideAuth_ = false;
       const fetchEntitlementsStub = sandbox.stub(
           subscriptionService, 'fetchEntitlements_');
-      subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.start();
       subscriptionService.registerPlatform('google.subscription',
           new SubscriptionPlatform());
