@@ -32,6 +32,7 @@ const TAG = 'amp-story';
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    fallbackstate: boolean,
  *    hasaudiostate: boolean,
  *    mutedstate: boolean,
  *    currentpageid: string,
@@ -52,6 +53,7 @@ export const StateProperty = {
   // App States.
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
+  FALLBACK_STATE: 'fallbackstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
   MUTED_STATE: 'mutedstate',
   CURRENT_PAGE_ID: 'currentpageid',
@@ -62,6 +64,7 @@ export const StateProperty = {
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_FALLBACK: 'togglefallback',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_MUTED: 'togglemuted',
   CHANGE_PAGE: 'changepage',
@@ -99,6 +102,23 @@ const actions = (state, action, data) => {
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
+    case Action.TOGGLE_FALLBACK:
+      if (!data) {
+        dev().error(TAG, 'Cannot exit fallback state.');
+      }
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+            [StateProperty.CAN_SHOW_BOOKEND]: false,
+            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+            [StateProperty.BOOKEND_STATE]: false,
+            [StateProperty.DESKTOP_STATE]: false,
+            [StateProperty.FALLBACK_STATE]: true,
+            [StateProperty.HAS_AUDIO_STATE]: false,
+            [StateProperty.MUTED_STATE]: true,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -190,6 +210,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.FALLBACK_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
