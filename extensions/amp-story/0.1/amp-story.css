@@ -104,7 +104,6 @@ amp-story .amp-video-eq {
 /** Page level */
 amp-story-page {
   bottom: 0 !important;
-  display: none !important;
   height: auto !important;
   left: 0 !important;
   position: absolute !important;
@@ -113,8 +112,8 @@ amp-story-page {
   transition: none !important;
 }
 
-amp-story-page.i-amphtml-layout-container {
-  display: block !important;
+.i-amphtml-story-fallback amp-story-page {
+  display: none !important;
 }
 
 /* Setting `translateY` distances as a trick so that the runtime schedules
