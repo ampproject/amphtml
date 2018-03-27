@@ -146,7 +146,11 @@ declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {
   hasCss: true,
-  cssBinaries: ['amp-story-bookend', 'amp-story-share'],
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-share',
+    'amp-story-system-layer',
+  ],
 });
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
 declareExtension('amp-selector', '0.1', {hasCss: true});
