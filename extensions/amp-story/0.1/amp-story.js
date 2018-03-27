@@ -427,6 +427,15 @@ export class AmpStory extends AMP.BaseElement {
       this.onMutedStateUpdate_(isMuted);
     });
 
+    this.storeService_.subscribe(StateProperty.FALLBACK_STATE,
+        fallbackState => {
+          if (fallbackState) {
+            this.enterFallback_();
+          } else {
+            dev().error(TAG, 'No handler to exit fallback state.');
+          }
+        });
+
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
         // Disallow switching pages while the bookend is active.
@@ -618,8 +627,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
-      this.buildUnsupportedBrowserOverlay_();
-      dev().expectedError(TAG, 'Unsupported browser');
+      this.storeService_.dispatch(Action.ENTER_FALLBACK);
       return Promise.resolve();
     }
 
@@ -1072,6 +1080,22 @@ export class AmpStory extends AMP.BaseElement {
           this.element.firstChild);
     });
   }
+
+
+  /** @private */
+  enterFallback_() {
+    const fallbackEl = this.getFallback();
+    this.mutateElement(() => {
+      this.element.classList.add('i-amphtml-story-fallback');
+    });
+
+    if (fallbackEl) {
+      this.toggleFallback(true);
+    } else {
+      this.buildUnsupportedBrowserOverlay_();
+    }
+  }
+
 
   /**
    * Build overlay for Landscape mode mobile
