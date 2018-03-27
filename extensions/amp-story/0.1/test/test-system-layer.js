@@ -15,7 +15,7 @@
  */
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
-import {SystemLayer} from '../system-layer';
+import {SystemLayer} from '../amp-story-system-layer';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -43,11 +43,11 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
     sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    systemLayer = new SystemLayer(win);
-
     sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
     });
+
+    systemLayer = new SystemLayer(win);
   });
 
   it('should build UI', () => {

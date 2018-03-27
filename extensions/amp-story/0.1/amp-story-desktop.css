@@ -450,49 +450,6 @@ span.i-amphtml-story-share-pill-label {
 }
 
 /* system layer changes */
-[desktop] .i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
-  top: auto!important;
-  bottom: 0!important;
-  height: 96px!important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-[desktop] .i-amphtml-story-progress-bar {
-  position: relative !important;
-  height: 3px !important;
-  width: calc(100vw/3) !important;
-  margin: 0px !important;
-}
-
-[desktop] .i-amphtml-story-page-progress-bar {
-  border-radius: 100px !important;
-}
-
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
-  display: none!important;
-}
-
-.i-amphtml-story-ui-left {
-  display: none!important;
-}
-
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
-  display: flex !important;
-  height: 40px !important;
-  flex: 1 !important;
-  min-width: 200px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-right: 32px;
-}
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
-  display: block !important;
-  flex: 1 !important;
-}
 
 [desktop] .i-amphtml-story-top {
   z-index: 100002 !important; /* 1 higher than bookend */
