@@ -73,13 +73,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 
   /**
-   * Append a divider between two recommendations or articles.
+   * Creates a divider between two recommendations or articles.
+   * @return {!Element}
    */
-  appendDivision_() {
+  createDivider_() {
     const doc = this.win.document;
     const topDivision = doc.createElement('div');
     topDivision.classList.add('amp-document-recommendations-division');
-    this.element.appendChild(topDivision);
+    return topDivision;
   }
 
   /**
@@ -123,6 +124,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     const doc = this.win.document;
     let article = from;
 
+    const recommendations = doc.createElement('div');
+
     while (article < this.config_.recommendations.length &&
            article - from < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
@@ -147,10 +150,11 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
 
-      this.element.appendChild(articleHolder);
-
-      this.appendDivision_();
+      recommendations.appendChild(articleHolder);
+      recommendations.appendChild(this.createDivider_());
     }
+
+    this.element.appendChild(recommendations);
   }
 
   /**
@@ -170,7 +174,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
             this.element.appendChild(shadowRoot);
-            this.appendDivision_();
+            this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
 
             if (this.nextArticle_ < this.config_.recommendations.length) {
@@ -217,7 +221,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.config_ = assertConfig(configJson, host);
 
     this.mutateElement(() => {
-      this.appendDivision_();
+      this.element.appendChild(this.createDivider_());
       this.appendArticleLinks_(this.nextArticle_ + 1);
     });
   }
