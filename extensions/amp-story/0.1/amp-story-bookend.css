@@ -38,6 +38,7 @@
 
 .i-amphtml-story-bookend-overflow {
   overflow: auto !important;
+  -webkit-overflow-scrolling: touch !important;
   margin-top: auto !important; /* positions it at the bottom of container */
 }
 
