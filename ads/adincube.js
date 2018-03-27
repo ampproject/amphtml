@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ function parseParams(data) {
     let queryParams = '';
     for (const p in params) {
       if (params.hasOwnProperty(p)) {
-        queryParams += '&' + p + '=' + params[p];
+        queryParams += '&' + p + '=' + encodeURIComponent(params[p]);
       }
     }
     return queryParams;
