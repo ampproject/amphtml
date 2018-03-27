@@ -79,6 +79,9 @@ export class SubscriptionService {
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
 
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /** @private {?Promise} */
     this.viewTrackerPromise_ = null;
 
@@ -200,21 +203,23 @@ export class SubscriptionService {
     if (getMode().development || getMode().localDev) {
       timeout = SERVICE_TIMEOUT * 2;
     }
-    return this.timer_.timeoutPromise(
-        timeout,
-        subscriptionPlatform.getEntitlements()
-    ).then(entitlement => {
-      entitlement = entitlement || Entitlement.empty(
-          subscriptionPlatform.getServiceId());
-      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
-          entitlement);
-      return entitlement;
-    }).catch(reason => {
-      const serviceId = subscriptionPlatform.getServiceId();
-      this.platformStore_.reportPlatformFailure(serviceId);
-      throw user().createError(
-          `fetch entitlements failed for ${serviceId}`, reason
-      );
+    return this.viewer_.whenFirstVisible().then(() => {
+      return this.timer_.timeoutPromise(
+          timeout,
+          subscriptionPlatform.getEntitlements()
+      ).then(entitlement => {
+        entitlement = entitlement || Entitlement.empty(
+            subscriptionPlatform.getServiceId());
+        this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
+            entitlement);
+        return entitlement;
+      }).catch(reason => {
+        const serviceId = subscriptionPlatform.getServiceId();
+        this.platformStore_.reportPlatformFailure(serviceId);
+        throw user().createError(
+            `fetch entitlements failed for ${serviceId}`, reason
+        );
+      });
     });
   }
 
@@ -246,8 +251,8 @@ export class SubscriptionService {
             this.fetchEntitlements_(subscriptionPlatform);
           }
       );
-
       this.startAuthorizationFlow_();
+
     });
     return this;
   }
