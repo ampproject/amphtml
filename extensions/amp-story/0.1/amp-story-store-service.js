@@ -106,18 +106,19 @@ const actions = (state, action, data) => {
       if (!data) {
         dev().error(TAG, 'Cannot exit fallback state.');
       }
-      return /** @type {!State} */ ({
-        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-        [StateProperty.CAN_SHOW_BOOKEND]: false,
-        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-        [StateProperty.BOOKEND_STATE]: false,
-        [StateProperty.DESKTOP_STATE]: false,
-        [StateProperty.FALLBACK_STATE]: true,
-        [StateProperty.HAS_AUDIO_STATE]: false,
-        [StateProperty.MUTED_STATE]: true,
-      });
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+            [StateProperty.CAN_SHOW_BOOKEND]: false,
+            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+            [StateProperty.BOOKEND_STATE]: false,
+            [StateProperty.DESKTOP_STATE]: false,
+            [StateProperty.FALLBACK_STATE]: true,
+            [StateProperty.HAS_AUDIO_STATE]: false,
+            [StateProperty.MUTED_STATE]: true,
+          }));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
