@@ -15,6 +15,8 @@
  */
 
 import {
+  base64UrlDecodeToBytes,
+  base64UrlEncodeFromBytes,
   bytesToString,
   bytesToUInt32,
   getCryptoRandomBytesArray,
@@ -127,6 +129,19 @@ describe('utf8', function() {
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
       expect(utf8Decode(new Uint8Array(bytes[i]))).to.equal(strings[i]);
+    }
+  });
+
+  it('should decode correctly', () => {
+    for (let i = 0; i < strings.length; i++) {
+      const data = strings[i];
+      const utf8Bytes = utf8Encode(data);
+      const encoded = base64UrlEncodeFromBytes(utf8Bytes);
+      expect(encoded).not.to.equal(data);
+      expect(encoded).not.to.match(/[+/=]/g);
+      const decodedUtf8Bytes = base64UrlDecodeToBytes(encoded);
+      const decoded = utf8Decode(decodedUtf8Bytes);
+      expect(decoded).to.equal(data);
     }
   });
 });

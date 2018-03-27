@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {Entitlement} from './entitlement';
+import {JwtHelper} from '../../../src/utils/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -88,6 +89,12 @@ export class SubscriptionService {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(ampdoc.win);
+
+    /** @private @const {boolean} */
+    this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper();
   }
 
   /**
@@ -147,8 +154,7 @@ export class SubscriptionService {
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
-      console.log('hi1');
-      if (this.viewer_.hasCapability('auth')) {
+      if (this.doesViewerProvideAuth_) {
         return; // External platforms should not register if viewer provides auth
       }
       const matchedServices = this.platformConfig_['services'].filter(
@@ -239,15 +245,15 @@ export class SubscriptionService {
 
       user().assert(this.pageConfig_, 'Page config is null');
 
-      if (this.viewer_.hasCapability('auth')) {
+      if (this.doesViewerProvideAuth_) {
         const serviceIds = ['local'];
         this.platformStore_ = new PlatformStore(serviceIds);
         this.viewer_.sendMessageAwaitResponse('auth', dict())
             .then(entitlementData => {
-              dev().assert(typeof entitlementData == 'object',
-                  'entitlementData should be JsonObject');
-              const entitlement = Entitlement.parseFromJson(
-                  /** @type {JsonObject}*/ (entitlementData));
+              const authData = (entitlementData || {})['authorization'];
+              dev().assert(authData, 'authorization is not defined');
+              const payload = this.jwtHelper_.decode(authData)['payload'];
+              const entitlement = Entitlement.parseFromJson(payload);
               // Viewer authorization is redirected to use local platform instead.
               this.platformStore_.resolveEntitlement('local', entitlement);
             }, reason => {
