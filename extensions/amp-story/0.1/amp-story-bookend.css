@@ -235,15 +235,15 @@
 }
 
 [desktop].i-amphtml-story-bookend {
-  transition: opacity 0.25s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
   transform: translateY(0) !important;
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 [desktop].i-amphtml-story-bookend.i-amphtml-hidden {
   transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
   transform: translateY(100vh) !important;
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 [desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {
