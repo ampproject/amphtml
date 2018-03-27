@@ -32,6 +32,7 @@ const TAG = 'amp-story';
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
+ *    hasaudiostate: boolean,
  *    mutedstate: boolean,
  *    currentpageid: string,
  * }}
@@ -51,6 +52,7 @@ export const StateProperty = {
   // App States.
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
+  HAS_AUDIO_STATE: 'hasaudiostate',
   MUTED_STATE: 'mutedstate',
   CURRENT_PAGE_ID: 'currentpageid',
 };
@@ -60,6 +62,7 @@ export const StateProperty = {
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_MUTED: 'togglemuted',
   CHANGE_PAGE: 'changepage',
 };
@@ -85,6 +88,10 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_DESKTOP:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.DESKTOP_STATE]: !!data}));
+    // Shows or hides the audio controls.
+    case Action.TOGGLE_HAS_AUDIO:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.HAS_AUDIO_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
@@ -177,6 +184,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
     });

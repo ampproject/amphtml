@@ -59,7 +59,7 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
-import {SystemLayer} from './system-layer';
+import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
   childElement,
@@ -137,12 +137,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
   [MediaType.VIDEO]: 8,
 };
-
-
-/**
- * @private @const {string}
- */
-const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -1483,7 +1477,6 @@ export class AmpStory extends AMP.BaseElement {
     this.pages_.forEach(page => {
       page.muteAllMedia();
     });
-    this.toggleMutedAttribute_(true);
   }
 
   /**
@@ -1503,41 +1496,17 @@ export class AmpStory extends AMP.BaseElement {
 
     this.mediaPool_.blessAll()
         .then(unmuteAllMedia, unmuteAllMedia);
-    this.toggleMutedAttribute_(false);
   }
-
 
   /**
    * Reapplies the muting status for the currently-active media in the story.
+   * @private
    */
   reapplyMuting_() {
-    const isMuted = this.isMuted_();
+    const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
     if (!isMuted) {
       this.mute_();
       this.unmute_();
-    }
-  }
-
-
-  /**
-   * @return {boolean} Whether the story is currently muted.
-   * @private
-   */
-  isMuted_() {
-    return this.element.hasAttribute(AUDIO_MUTED_ATTRIBUTE);
-  }
-
-
-  /**
-   * Toggles mute or unmute attribute on element.
-   * @param {boolean} isMuted
-   * @private
-   */
-  toggleMutedAttribute_(isMuted) {
-    if (isMuted) {
-      this.element.setAttribute(AUDIO_MUTED_ATTRIBUTE, '');
-    } else {
-      this.element.removeAttribute(AUDIO_MUTED_ATTRIBUTE);
     }
   }
 
@@ -1553,9 +1522,8 @@ export class AmpStory extends AMP.BaseElement {
         'amp-audio, amp-video, [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 
-    if (containsMediaElement || hasStoryAudio) {
-      this.element.classList.add('audio-playing');
-    }
+    this.storeService_.dispatch(
+        Action.TOGGLE_HAS_AUDIO, containsMediaElement || hasStoryAudio);
   }
 
   /** @private */
