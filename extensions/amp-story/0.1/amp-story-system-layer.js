@@ -44,27 +44,7 @@ const TEMPLATE = {
   children: [
     {
       tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-ui-left'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': MUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-ui-right'}),
+      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
         {
           tag: 'div',
@@ -117,7 +97,7 @@ export class SystemLayer {
     this.systemLayerEl_ = null;
 
     /** @private {?Element} */
-    this.leftButtonTray_ = null;
+    this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
@@ -160,8 +140,9 @@ export class SystemLayer {
     this.systemLayerEl_.insertBefore(
         this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
 
-    this.leftButtonTray_ =
-        this.systemLayerEl_.querySelector('.i-amphtml-story-ui-left');
+    this.buttonsContainer_ =
+        this.systemLayerEl_.querySelector(
+            '.i-amphtml-story-system-layer-buttons');
 
     this.buildForDevelopmentMode_();
 
@@ -183,9 +164,9 @@ export class SystemLayer {
       return;
     }
 
-    this.leftButtonTray_.appendChild(this.developerButtons_.build(
+    this.buttonsContainer_.appendChild(this.developerButtons_.build(
         this.developerLog_.toggle.bind(this.developerLog_)));
-    this.root_.appendChild(this.developerLog_.build());
+    this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
   /**
