@@ -30,12 +30,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
-import {removeElement, closestBySelector} from '../../../src/dom';
-import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {Services} from '../../../src/services';
-import {user, dev} from '../../../src/log';
-import {utf8EncodeSync} from '../../../src/utils/bytes';
-import {urls} from '../../../src/config';
+import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
 import {utf8Encode} from '../../../src/utils/bytes.js';
@@ -614,7 +609,7 @@ export class AmpIframe extends AMP.BaseElement {
         const data = getData(e);
         let sanitizedData;
         try {
-          sanitizedData = JSON.parse(JSON.stringify(data));
+          sanitizedData = parseJson(JSON.stringify(data));
         } catch (e) {
           user().error(TAG_, 'Message may only contain JSON data.');
           return;
