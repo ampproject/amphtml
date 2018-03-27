@@ -583,8 +583,8 @@ export class AmpIframe extends AMP.BaseElement {
         this.iframe_.contentWindow./*OK*/postMessage(
             invocation.args, this.targetOrigin_);
       } else {
-        user().error(TAG_, '"postMessage" action is only allowed only ' +
-            'amp-iframe src with an origin.');
+        user().error(TAG_, '"postMessage" action is only allowed with "src"' +
+            'attribute with an origin.');
       }
     }, ActionTrust.HIGH);
 
@@ -637,6 +637,7 @@ export class AmpIframe extends AMP.BaseElement {
    * Returns true if a user gesture was recently performed.
    * @return {boolean}
    * @private
+   * @visibleForTesting
    */
   isUserGesture_() {
     // Best effort polyfill until native support is available: check that
@@ -650,6 +651,14 @@ export class AmpIframe extends AMP.BaseElement {
       return false;
     }
     return true;
+  }
+
+  /**
+   * @param {string} value
+   * @visibleForTesting
+   */
+  setTargetOriginForTesting(value) {
+    this.targetOrigin_ = value;
   }
 }
 
@@ -718,7 +727,6 @@ export function isAdLike(element) {
 export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
-
 
 AMP.extension(TAG_, '0.1', AMP => {
   AMP.registerElement(TAG_, AmpIframe);
