@@ -10962,9 +10962,9 @@ wd@^1.4.0:
     underscore.string "3.3.4"
     vargs "0.1.0"
 
-web-activities@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.5.0.tgz#64363baed86c415c8698d8fb181973f72c742b47"
+web-activities@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/web-activities/-/web-activities-1.6.0.tgz#e6cce55da957fe2726c08ffe0b0cb5b3103f7108"
   dependencies:
     promise-pjs "1.1.3"
 
