@@ -644,6 +644,12 @@ The following animation effects are available as presets for AMP stories:
 | `twirl-in`        | 1000                  | 0 |
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
+| `pan-left`        | 1000                  | 0 |
+| `pan-right`       | 1000                  | 0 |
+| `pan-down`        | 1000                  | 0 |
+| `pan-up`          | 1000                  | 0 |
+| `zoom-in`         | 1000                  | 0 |
+| `zoom-out`        | 1000                  | 0 |
 
 
 {% call callout('Tip', type='success') %}
