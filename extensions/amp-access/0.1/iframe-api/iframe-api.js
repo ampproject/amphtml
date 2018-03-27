@@ -116,7 +116,7 @@ export class AmpAccessIframeApi {
         return null;
       }
       return new Promise(resolve => {
-        resolve(this.controller_.pingback());
+        resolve(this.controller_.pingback().then(() => {}));
       });
     }
   }

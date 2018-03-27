@@ -16,6 +16,8 @@
 
 import {Messenger} from './iframe-api/messenger';
 import {assertHttpsUrl} from '../../../src/url';
+import {isArray} from '../../../src/types';
+import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
 import {toggle} from '../../../src/style';
 import {user} from '../../../src/log';
@@ -44,16 +46,21 @@ export class AccessIframeAdapter {
         '"iframeSrc" URL must be specified');
     assertHttpsUrl(this.iframeSrc_, '"iframeSrc"');
 
+    /** @const @private {?Array} */
+    this.iframeVars_ = configJson['iframeVars'] || null;
+    if (this.iframeVars_) {
+      user().assert(isArray(this.iframeVars_),
+          '"iframeVars" must be an array');
+    }
+
     /** @private @const {string} */
     this.targetOrigin_ = parseUrl(this.iframeSrc_).origin;
 
     /** @private {?function()} */
     this.connectedResolver_ = null;
 
-    /** @private @const {!Promise} */
-    this.connectedPromise_ = new Promise(resolve => {
-      this.connectedResolver_ = resolve;
-    });
+    /** @private {?Promise} */
+    this.connectedPromise_ = null;
 
     /** @private @const {!Element} */
     this.iframe_ = ampdoc.win.document.createElement('iframe');
@@ -65,10 +72,8 @@ export class AccessIframeAdapter {
         () => this.iframe_.contentWindow,
         this.targetOrigin_);
 
-    // Connect.
-    this.messenger_.connect(this.handleCommand_.bind(this));
-    this.ampdoc.getBody().appendChild(this.iframe_);
-    this.iframe_.src = this.iframeSrc_;
+    /** @private {?Promise<!JsonObject>} */
+    this.configPromise_ = null;
   }
 
   /**
@@ -83,6 +88,7 @@ export class AccessIframeAdapter {
   getConfig() {
     return {
       'iframeSrc': this.iframeSrc_,
+      'iframeVars': this.iframeVars_,
     };
   }
 
@@ -93,10 +99,10 @@ export class AccessIframeAdapter {
 
   /** @override */
   authorize() {
-    return this.connectedPromise_.then(() => {
+    return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('authorize', {});
     }).then(response => {
-      // TODO(dvoytenko): reformat the response.
+      // TODO(dvoytenko): process the `granted` flag.
       return response;
     });
   }
@@ -108,8 +114,48 @@ export class AccessIframeAdapter {
 
   /** @override */
   pingback() {
-    return this.connectedPromise_.then(() => {
+    return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('pingback', {});
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @package Visible for testing only.
+   */
+  connect() {
+    if (!this.connectedPromise_) {
+      this.connectedPromise_ = new Promise(resolve => {
+        this.connectedResolver_ = resolve;
+      });
+      this.configPromise_ = this.resolveConfig_();
+      // Connect.
+      this.messenger_.connect(this.handleCommand_.bind(this));
+      this.ampdoc.getBody().appendChild(this.iframe_);
+      this.iframe_.src = this.iframeSrc_;
+    }
+    return this.connectedPromise_;
+  }
+
+  /**
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  resolveConfig_() {
+    return new Promise(resolve => {
+      const configJson = parseJson(JSON.stringify(this.configJson_));
+      if (this.iframeVars_) {
+        const varsString = this.iframeVars_.join('&');
+        const varsPromise = this.context_.collectUrlVars(
+            varsString,
+            /* useAuthData */ false);
+        resolve(varsPromise.then(vars => {
+          configJson['iframeVars'] = vars;
+          return configJson;
+        }));
+      } else {
+        resolve(configJson);
+      }
     });
   }
 
@@ -122,15 +168,17 @@ export class AccessIframeAdapter {
   handleCommand_(cmd, unusedPayload) {
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
-      this.messenger_.sendCommandRsvp('start', {
-        'protocol': 'amp-access',
-        'config': this.configJson_,
-      }).then(() => {
-        // Confirmation that connection has been successful.
-        if (this.connectedResolver_) {
-          this.connectedResolver_();
-          this.connectedResolver_ = null;
-        }
+      this.configPromise_.then(configJson => {
+        this.messenger_.sendCommandRsvp('start', {
+          'protocol': 'amp-access',
+          'config': configJson,
+        }).then(() => {
+          // Confirmation that connection has been successful.
+          if (this.connectedResolver_) {
+            this.connectedResolver_();
+            this.connectedResolver_ = null;
+          }
+        });
       });
       return;
     }

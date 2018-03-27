@@ -21,7 +21,7 @@
     };
     Controller.prototype.authorize = function() {
       log('authorize');
-      return {granted: true};
+      return {granted: true, data: {}};
     };
     Controller.prototype.pingback = function() {
       log('pingback');
