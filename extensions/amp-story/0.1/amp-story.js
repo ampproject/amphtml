@@ -627,7 +627,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
-      this.storeService_.dispatch(Action.TOGGLE_FALLBACK);
+      this.storeService_.dispatch(Action.TOGGLE_FALLBACK, true);
       return Promise.resolve();
     }
 
