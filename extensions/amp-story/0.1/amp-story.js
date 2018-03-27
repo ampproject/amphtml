@@ -332,6 +332,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.win);
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -614,7 +617,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!AmpStory.isBrowserSupported(this.win)) {
+    if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       this.buildUnsupportedBrowserOverlay_();
       dev().expectedError(TAG, 'Unsupported browser');
       return Promise.resolve();
@@ -943,8 +946,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   forceRepaintForSafari_() {
-    const platform = Services.platformFor(this.win);
-    if (!platform.isSafari() && !platform.isIos()) {
+    if (!this.platform_.isSafari() && !this.platform_.isIos()) {
       return;
     }
     if (this.isDesktop_()) {
@@ -1054,9 +1056,7 @@ export class AmpStory extends AMP.BaseElement {
    * Return right overlay for mobile or desktop
    */
   viewportWarningOverlay_() {
-    const platform = Services.platformFor(this.win);
-
-    return (platform.isIos() || platform.isAndroid())
+    return (this.platform_.isIos() || this.platform_.isAndroid())
       ? LANDSCAPE_ORIENTATION_WARNING
       : DESKTOP_SIZE_WARNING;
   }
