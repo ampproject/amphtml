@@ -122,7 +122,7 @@ export class SafeframeHostApi {
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
    * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
-   * @param {{width, height}} creativeSize
+   * @param {{width:number, height:number}} creativeSize
    * @param {?string} fluidImpressionUrl
    */
   constructor(baseInstance, isFluid, initialSize, creativeSize,
@@ -157,12 +157,12 @@ export class SafeframeHostApi {
     /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
     this.slotSize_ = initialSize;
 
-    /** @private {{width, height}} */
+    /** @private {{width:number, height:number}} */
     this.creativeSize_ = creativeSize;
 
-    /** @private {{width, height}} */
+    /** @private {{width:number, height:number}} */
     this.initialCreativeSize_ =
-      /** @type {{width, height}} */ (Object.assign({}, creativeSize));
+      /** @private {{width:number, height:number}} */ (Object.assign({}, creativeSize));
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
