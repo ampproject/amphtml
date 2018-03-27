@@ -758,7 +758,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe.only('#multi-size', () => {
+  describe('#multi-size', () => {
     /**
      * Calling this function ensures that the enclosing test will behave as if
      * it has an AMP creative.
