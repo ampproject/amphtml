@@ -139,8 +139,10 @@ export class AmpStoryStoreService {
    * Subscribes to a state property mutations.
    * @param  {string} key
    * @param  {!Function} listener
+   * @param  {boolean=} callToInitialize Whether the listener should be
+   *                                     triggered with current value.
    */
-  subscribe(key, listener) {
+  subscribe(key, listener, callToInitialize = false) {
     if (!this.state_.hasOwnProperty(key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
@@ -149,6 +151,10 @@ export class AmpStoryStoreService {
       this.listeners_[key] = new Observable();
     }
     this.listeners_[key].add(listener);
+
+    if (callToInitialize) {
+      listener(this.get(key));
+    }
   }
 
   /**

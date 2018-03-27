@@ -167,15 +167,6 @@ export class SystemLayer {
 
     this.initializeListeners_();
 
-    // Initializes the component state.
-    // TODO(gmajoulet): come up with a way to do this from the subscribe method.
-    this.onDesktopStateUpdate_(
-        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
-    this.onHasAudioStateUpdate_(
-        !!this.storeService_.get(StateProperty.HAS_AUDIO_STATE));
-    this.onMutedStateUpdate_(
-        !!this.storeService_.get(StateProperty.MUTED_STATE));
-
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
       this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
@@ -218,15 +209,15 @@ export class SystemLayer {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
       this.onHasAudioStateUpdate_(hasAudio);
-    });
+    }, true /** callToInitialize */);
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
-    });
+    }, true /** callToInitialize */);
   }
 
   /**

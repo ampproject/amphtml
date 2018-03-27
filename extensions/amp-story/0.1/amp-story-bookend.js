@@ -282,10 +282,6 @@ export class Bookend {
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
 
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
-      this.toggleDesktopAttribute_(true);
-    }
-
     this.vsync_.mutate(() => {
       this.storyElement_.appendChild(this.getRoot());
     });
@@ -321,7 +317,7 @@ export class Bookend {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
   }
 
   /**
