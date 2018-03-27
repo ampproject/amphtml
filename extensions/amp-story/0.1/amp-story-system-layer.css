@@ -1,0 +1,180 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-story-system-layer {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 46px !important;
+  z-index: 100000 !important;
+  padding: 4px 0 0 !important;
+  box-sizing: border-box !important;
+  transition: opacity 0.3s !important;
+  pointer-events: none !important;
+}
+
+.i-amphtml-story-ui-left,
+.i-amphtml-story-ui-right {
+  pointer-events: auto !important;
+}
+
+.i-amphtml-story-bookend-active.i-amphtml-story-system-layer {
+  opacity: 0.3 !important;
+}
+
+.i-amphtml-story-ui-right {
+  float: right !important;
+}
+
+.i-amphtml-story-button {
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  height: 48px !important;
+  width: 48px !important;
+  cursor: pointer !important;
+  border-radius: 50% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+
+  /* for svg backgrounds: */
+  background: center center no-repeat !important;
+}
+
+.i-amphtml-story-button:active {
+  /* TODO(alanorozco): do we want material ripple effect? */
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.i-amphtml-story-system-layer .i-amphtml-story-button {
+  float: left !important;
+}
+
+.i-amphtml-story-progress-bar {
+  border: 0 !important;
+  display: flex !important;
+  height: 2px !important;
+  left: 0 !important;
+  margin: 4px 0 0 !important;
+  padding: 0 2px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  visibility: visible !important;
+  z-index: 100001 !important;
+}
+
+.i-amphtml-story-page-progress-bar {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 1px !important;
+  height: 100% !important;
+  list-style-type: none !important;
+  margin: 0 2px!important;
+  overflow: hidden!important;
+  width: 100% !important;
+
+  /* An empty mask image works around Safari not clipping rounded corners.
+   * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
+  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
+}
+
+.i-amphtml-story-page-progress-value {
+  /* Do not remove `translateZ(0)` or `will-change` as they prevent an iOS
+   * repaint issue. */
+  background: rgba(255, 255, 255, 1) !important;
+  height: 100% !important;
+  width: 100% !important;
+  transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
+  transform-origin: left !important;
+  will-change: transform, transition !important;
+}
+
+[dir=rtl] .i-amphtml-story-progress-value {
+  transform-origin: right !important;
+}
+
+.i-amphtml-story-mute-audio-control,
+.i-amphtml-story-unmute-audio-control {
+  display: none !important;
+}
+
+.audio-playing:not([muted]) .i-amphtml-story-mute-audio-control,
+.audio-playing[muted] .i-amphtml-story-unmute-audio-control {
+  display: block !important;
+}
+
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-left,
+[desktop] .i-amphtml-story-ui-no-buttons .i-amphtml-story-ui-right {
+  display: none !important;
+}
+
+.i-amphtml-story-unmute-audio-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-mute-audio-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+
+[desktop].i-amphtml-story-system-layer {
+  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+  top: auto!important;
+  bottom: 0!important;
+  height: 96px!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[desktop] .i-amphtml-story-progress-bar {
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw/3) !important;
+  margin: 0px !important;
+}
+
+[desktop] .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
+}
+
+[desktop].i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
+[desktop].i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
+  display: none!important;
+}
+
+.i-amphtml-story-ui-left {
+  display: none!important;
+}
+
+[desktop].i-amphtml-story-system-layer .i-amphtml-story-ui-left {
+  display: flex !important;
+  height: 40px !important;
+  flex: 1 !important;
+  min-width: 200px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 32px;
+}
+
+[desktop].i-amphtml-story-system-layer .i-amphtml-story-ui-right {
+  display: block !important;
+  flex: 1 !important;
+}
