@@ -35,15 +35,16 @@ export class AccessController {
 
   /**
    * Authorize document.
-   * @return {!Promise}
-   * TODO(dvoytenko): define args and result.
+   * @return {!Promise<{
+   *   granted: boolean,
+   *   data: !JsonObject,
+   * }>}
    */
   authorize() {}
 
   /**
    * Pingback document view.
    * @return {!Promise}
-   * TODO(dvoytenko): define args.
    */
   pingback() {}
 }
