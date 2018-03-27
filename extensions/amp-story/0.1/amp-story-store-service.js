@@ -75,10 +75,10 @@ export const Action = {
  * Returns the new sate.
  * @param  {!State} state Immutable state
  * @param  {!Action} action
- * @param  {*=} data
+ * @param  {*} data
  * @return {!State} new state
  */
-const actions = (state, action, data = undefined) => {
+const actions = (state, action, data) => {
   switch (action) {
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
@@ -171,9 +171,9 @@ export class AmpStoryStoreService {
    * Dispatches an action and triggers the listeners for the updated state
    * properties.
    * @param  {!Action} action
-   * @param  {*=} data
+   * @param  {*} data
    */
-  dispatch(action, data = undefined) {
+  dispatch(action, data) {
     const oldState = Object.assign({}, this.state_);
     this.state_ = actions(this.state_, action, data);
 
