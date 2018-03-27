@@ -234,11 +234,13 @@ function applyResponse(win, response) {
       return;
     }
 
+    const viewer = Services.viewerForDoc(win.document);
     const currentHref = win.location.href;
     const url = parseUrl(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
     win.history.replaceState(null, '', newHref);
+    viewer.maybeUpdateFragmentForCct();
   }
 }
 

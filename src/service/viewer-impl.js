@@ -268,7 +268,9 @@ export class Viewer {
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
      */
-    this.isCustomTab_ = this.win.location.search.indexOf('amp_agsa=1') != -1;
+    const queryParams = parseQueryString(parseUrl(this.win.location.href).search);
+    this.isCctEmbedded_ = !this.isIframed_ &&
+        queryParams['amp_agsa'] == '1';
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -427,7 +429,7 @@ export class Viewer {
     // This fragment may get cleared by impression tracking. If so, it will be
     // reset afterward.
     // TODO: how? Use original hash? Is hash currently used to flag dev mode?
-    this.maybeUpdateFragmentForCustomTab();
+    this.maybeUpdateFragmentForCct();
   }
 
   /**
@@ -512,30 +514,34 @@ export class Viewer {
   }
 
   /**
-   * Whether the document is using Chrome Custom Tabs.
+   * Whether the document is embedded in a Chrome Custom Tab.
    * @return {boolean}
    */
-  isCustomTab() {
-    return this.isCustomTab_;
+  isCctEmbedded() {
+    return this.isCctEmbedded_;
   }
 
   /**
-   * Update the URL fragment with data needed to support custom tabs.
+   * Update the URL fragment with data needed to support custom tabs. This will
+   * not clear query string parameters, but will clear the fragment.
    */
-  maybeUpdateFragmentForCustomTab() {
-    if (!this.isCustomTab()) {
+  maybeUpdateFragmentForCct() {
+    if (!this.isCctEmbedded_) {
       return;
     }
+    // CCT only works with versions of Chrome that support the history API.
     if (!this.win.history.replaceState) {
       return;
     }
     // Ensure that canonical URL origin matches document URL.
     const url = parseUrl(this.win.location.href);
     const canonicalUrl = parseUrl(Services.documentInfoForDoc(this.ampdoc).canonicalUrl);
-    if (url.origin == canonicalUrl.origin &&
-        getSourceOrigin(url) == getSourceOrigin(canonicalUrl)) {
-      this.win.history.replaceState({}, '', '#ampshare=' +
-        encodeURIComponent(canonicalUrl.href));
+    // TODO: This doesn't ignore subdomains. Is there support code for obtaining
+    // the root domain (so that amp.example.com and www.example.com are
+    // considered acceptably related)?
+    if (getSourceOrigin(url) == getSourceOrigin(canonicalUrl)) {
+      const fragment = '#ampshare=' + encodeURIComponent(canonicalUrl.href);
+      this.win.history.replaceState({}, '', fragment);
     }
   }
 
