@@ -85,7 +85,7 @@ describe('doubleclick-a4a-config', () => {
     });
 
 
-    it('should use DF if useRemoteHtml is true and no RTC, in rollback', () => {
+    it('should use DF: DFD AMP Rollback | useRemoteHtml=true | No RTC,', () => {
       toggleExperiment(
           mockWin, dfDepRollbackExperiment, true);
       // Ensure no selection in order to very experiment attribute.
@@ -101,7 +101,7 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
-    it('should use FF if useRemoteHtml=true, RTC is set, in rollback', () => {
+    it('should use FF: DFD AMP Rollback | useRemoteHtml=true | w/ RTC', () => {
       toggleExperiment(
           mockWin, dfDepRollbackExperiment, true);
       // Ensure no selection in order to very experiment attribute.
@@ -119,8 +119,27 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
+    it('should use FF: DFD AMP Rollback | USDRUD=true | w/ RTC', () => {
+      toggleExperiment(
+          mockWin, dfDepRollbackExperiment, true);
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype,
+          'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute(
+          'json', '{"useSameDomainRenderingUntilDeprecated": 1}');
+      elem.setAttribute('rtc-config', '{"urls": ["https://www.foo.com/"]}');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = false;
+      expect(
+          doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
 
-    it('should use Fast Fetch if useRemoteHtml is true and RTC is set', () => {
+    it('should use FF: No experiment | useRemoteHtml=true | w/ RTC', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
@@ -180,7 +199,7 @@ describe('doubleclick-a4a-config', () => {
      * correctly honored in the past. This test checks multiple different
      * ways that this test could be specified to assure they all work.
      */
-    it('should use FF if useSameDomainRenderingUntilDeprecated in use', () => {
+    it('should use FF: no experiment | USDRUD=true', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
@@ -202,7 +221,7 @@ describe('doubleclick-a4a-config', () => {
       expect(elem2.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
     });
 
-    it('should use DF if USDRUD in use and in rollback', () => {
+    it('should use DF: DFD AMP Rollback | USDRUD=true | no RTC', () => {
       toggleExperiment(
           mockWin, dfDepRollbackExperiment, true);
       // Ensure no selection in order to very experiment attribute.
