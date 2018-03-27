@@ -87,7 +87,7 @@ The `config` argument in the `connect` method will contain the original document
 
 ## Authorize method
 
-The `authize` method checks whether the user should be able to access this document. It's expected to be in the following format:
+The `authorize` method checks whether the user should be able to access this document. It's expected to be in the following format:
 
 ```
 {
