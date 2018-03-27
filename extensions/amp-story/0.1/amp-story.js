@@ -1174,6 +1174,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Toggle content when bookend is opened/closed.
+   * TODO(gmajoulet): these elements should get hidden by listening to bookend
+   *                  state events.
    * @param {boolean} isActive
    * @private
    */
@@ -1189,7 +1191,7 @@ export class AmpStory extends AMP.BaseElement {
       if (isActive) {
         setImportantStyles(el, {
           opacity: 0,
-          transition: 'opacity 0.3s',
+          transition: 'opacity 0.1s',
         });
       } else {
         resetStyles(el, ['opacity', 'transition']);
