@@ -682,11 +682,12 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent();
           this.handleLifecycleStage_('adRequestEnd');
-          // If the response is null, we want to return null so that
-          // unlayoutCallback will attempt to render via x-domain iframe,
-          // assuming ad url or creative exist.
-          if (!fetchResponse) {
-            return null;
+          // If the response is null (can occur for non-200 responses)  or
+          // arrayBuffer is null, force collapse.
+          if (!fetchResponse || !fetchResponse.arrayBuffer ||
+              fetchResponse.headers.has('amp-ff-empty-creative')) {
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
               EXPERIMENT_FEATURE_HEADER_NAME)) {
@@ -704,12 +705,6 @@ export class AmpA4A extends AMP.BaseElement {
               this.populatePostAdResponseExperimentFeatures_(
                   tryDecodeUriComponent(match[1]));
             }
-          }
-          // If the response has response code 204, or arrayBuffer is null,
-          // collapse it.
-          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
-            this.forceCollapse();
-            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
