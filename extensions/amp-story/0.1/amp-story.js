@@ -373,10 +373,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.navigationState_.observe(stateChangeEvent =>
       this.variableService_.onStateChange(stateChangeEvent));
-
-    // Set muted state for `amp-story` in beginning.
-    const isMuted = this.storeService_.get(StateProperty.MUTED_STATE);
-    this.onMutedStateUpdate_(!!isMuted);
   }
 
 
@@ -425,7 +421,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
-    });
+    }, true /** callToInitialize */);
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
       if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
