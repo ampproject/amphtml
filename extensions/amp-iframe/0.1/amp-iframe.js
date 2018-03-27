@@ -26,6 +26,7 @@ import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
@@ -258,7 +259,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_ = makeIOsScrollable(this.element);
 
-    this.registerActionsAndEvents_();
+    if (isExperimentOn(this.win, 'iframe-messaging')) {
+      this.registerIframeMessaging_();
+    }
   }
 
   /**
@@ -567,61 +570,67 @@ export class AmpIframe extends AMP.BaseElement {
    * Registers 'postMessage' action and 'message' event.
    * @private
    */
-  registerActionsAndEvents_() {
+  registerIframeMessaging_() {
     const src = this.element.getAttribute('src');
     if (src) {
       this.targetOrigin_ = parseUrl(src).origin;
     }
 
+    // Register action (even if targetOrigin_ is not available so we can
+    // provide a helpful error message).
     this.registerAction('postMessage', invocation => {
       if (this.targetOrigin_) {
         this.iframe_.contentWindow./*OK*/postMessage(
             invocation.args, this.targetOrigin_);
       } else {
-        user().error(TAG_, '"postMessage" only allowed with src with origin.');
+        user().error(TAG_, '"postMessage" action is only allowed only ' +
+            'amp-iframe src with an origin.');
       }
     }, ActionTrust.HIGH);
 
-    if (this.targetOrigin_) {
-      const maxUnexpectedMessages = 10;
-      let unexpectedMessages = 0;
-
-      const listener = e => {
-        if (e.source !== this.iframe_.contentWindow) {
-          // Ignore messages from other iframes.
-          return;
-        }
-        if (e.origin !== this.targetOrigin_) {
-          user().error(TAG_, '"message" received from unexpected origin: ' +
-              e.origin + '. Only allowed from: ' + this.targetOrigin_);
-          return;
-        }
-        if (!this.isUserGesture_()) {
-          unexpectedMessages++;
-          user().error(TAG_, '"message" event may only be triggered ' +
-              'from a user gesture.');
-          // Disable the 'message' event if the iframe is behaving badly.
-          if (unexpectedMessages >= maxUnexpectedMessages) {
-            this.win.removeEventListener('message', listener);
-          }
-          return;
-        }
-        const data = getData(e);
-        let sanitizedData;
-        try {
-          sanitizedData = parseJson(JSON.stringify(data));
-        } catch (e) {
-          user().error(TAG_, 'Message may only contain JSON data.');
-          return;
-        }
-        const event =
-            createCustomEvent(this.win, 'amp-iframe:message', sanitizedData);
-        const actionService = Services.actionServiceForDoc(this.getAmpDoc());
-        actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
-      };
-      // TODO(choumx): Consider using global listener in iframe-helper.
-      this.win.addEventListener('message', listener);
+    // However, don't listen for 'message' event if targetOrigin_ is null.
+    if (!this.targetOrigin_) {
+      return;
     }
+
+    const maxUnexpectedMessages = 10;
+    let unexpectedMessages = 0;
+
+    const listener = e => {
+      if (e.source !== this.iframe_.contentWindow) {
+        // Ignore messages from other iframes.
+        return;
+      }
+      if (e.origin !== this.targetOrigin_) {
+        user().error(TAG_, '"message" received from unexpected origin: ' +
+            e.origin + '. Only allowed from: ' + this.targetOrigin_);
+        return;
+      }
+      if (!this.isUserGesture_()) {
+        unexpectedMessages++;
+        user().error(TAG_, '"message" event may only be triggered ' +
+            'from a user gesture.');
+        // Disable the 'message' event if the iframe is behaving badly.
+        if (unexpectedMessages >= maxUnexpectedMessages) {
+          this.win.removeEventListener('message', listener);
+        }
+        return;
+      }
+      const data = getData(e);
+      let sanitizedData;
+      try {
+        sanitizedData = parseJson(JSON.stringify(data));
+      } catch (e) {
+        user().error(TAG_, 'Data from "message" event must be JSON.');
+        return;
+      }
+      const event =
+          createCustomEvent(this.win, 'amp-iframe:message', sanitizedData);
+      const actionService = Services.actionServiceForDoc(this.getAmpDoc());
+      actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
+    };
+    // TODO(choumx): Consider using global listener in iframe-helper.
+    this.win.addEventListener('message', listener);
   }
 
   /**
@@ -642,7 +651,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
 /**
  * We always set a sandbox. Default is that none of the things that need
