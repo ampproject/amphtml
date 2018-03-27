@@ -429,11 +429,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.FALLBACK_STATE,
         fallbackState => {
-          if (fallbackState) {
-            this.enterFallback_();
-          } else {
+          if (!fallbackState) {
             dev().error(TAG, 'No handler to exit fallback state.');
           }
+
+          this.enterFallback_();
         });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -627,7 +627,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
-      this.storeService_.dispatch(Action.ENTER_FALLBACK);
+      this.storeService_.dispatch(Action.TOGGLE_FALLBACK);
       return Promise.resolve();
     }
 

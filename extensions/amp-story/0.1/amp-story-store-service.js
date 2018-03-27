@@ -64,10 +64,10 @@ export const StateProperty = {
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
+  TOGGLE_FALLBACK: 'togglefallback',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_MUTED: 'togglemuted',
   CHANGE_PAGE: 'changepage',
-  ENTER_FALLBACK: 'enterfallback',
 };
 
 
@@ -102,7 +102,10 @@ const actions = (state, action, data) => {
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
-    case Action.ENTER_FALLBACK:
+    case Action.TOGGLE_FALLBACK:
+      if (!data) {
+        dev().error(TAG, 'Cannot exit fallback state.');
+      }
       return /** @type {!State} */ ({
         [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
         [StateProperty.CAN_SHOW_BOOKEND]: false,
