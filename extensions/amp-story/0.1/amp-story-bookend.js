@@ -20,7 +20,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
+import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -263,15 +263,9 @@ export class Bookend {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
-    const shadowRoot = createShadowRoot(this.root_);
-
     this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
 
-    const style = this.win_.document.createElement('style');
-    style./*OK*/textContent = CSS;
-
-    shadowRoot.appendChild(style);
-    shadowRoot.appendChild(this.bookendEl_);
+    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
