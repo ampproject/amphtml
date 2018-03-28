@@ -17,8 +17,6 @@
 import {dev, user} from '../../../../src/log';
 import {setStyles} from '../../../../src/style';
 
-// First keyframe will always be considered offset: 0 and will be applied to the
-// element as the first frame before animation starts.
 export const Presets = {
   'parallax': {
     userAsserts(element) {
