@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
   SIGNATURE_VERIFIER_PROPERTY_NAME,
 } from '../cryptographic-validator';
 import {VerificationStatus} from '../signature-verifier';
+import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
@@ -32,30 +32,20 @@ const realWinConfig = {
 describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   const headers = {'Content-Type': 'application/jwk-set+json'};
-  const minifiedCreative = '<p>Hello, World!</p>';
-
-  let sandbox;
   let validator;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    validator = new CryptographicValidator();
+  });
+
+  it('should have AMP validator result', () => {
     // We are mocking out the actual verifier for simplicity, but that's okay
     // since its logic is well tested in test-signature-verifier.js.
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
       verify: () => Promise.resolve(VerificationStatus.OK),
     };
-    validator = new CryptographicValidator();
-  });
-
-  it('should have AMP validator result', () => {
-    sandbox.stub(CryptographicValidator.prototype, 'getAmpAdMetadata_')
-        .withArgs(minifiedCreative).returns({
-          minifiedCreative,
-          customElementExtensions: [],
-          customStyleSheets: [],
-        });
     return validator.validate(
-        {win: env.win}, utf8Encode(minifiedCreative), headers)
+        {win: env.win}, utf8Encode(data.reserialized), headers)
         .then(validatorOutput => {
           expect(validatorOutput).to.be.ok;
           expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
@@ -65,7 +55,28 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
 
           const creativeMetadata =
               validatorOutput.creativeData.creativeMetadata;
-          expect(creativeMetadata.minifiedCreative).to.equal(minifiedCreative);
+          expect(creativeMetadata.minifiedCreative).to.equal(
+              data.minifiedCreative);
+        });
+  });
+
+  it('should have non-AMP validator result', () => {
+    env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
+      verify: () => Promise.resolve(VerificationStatus.UNVERIFIED),
+    };
+    return validator.validate(
+        {win: env.win}, utf8Encode(data.reserialized), headers)
+        .then(validatorOutput => {
+          expect(validatorOutput).to.be.ok;
+          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+          expect(validatorOutput.adResponseType).to.equal(
+              AdResponseType.CRYPTO);
+          expect(validatorOutput.creativeData).to.be.ok;
+
+          const creativeMetadata =
+              validatorOutput.creativeData.creativeMetadata;
+          expect(creativeMetadata.minifiedCreative).to.equal(
+              data.minifiedCreative);
         });
   });
 });
