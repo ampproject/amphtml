@@ -88,6 +88,7 @@ describes.realWin('amp-consent', {
           },
         };
         consentElement = doc.createElement('amp-consent');
+        consentElement.setAttribute('id', 'amp-consent');
         consentElement.setAttribute('layout', 'nodisplay');
         scriptElement = doc.createElement('script');
         scriptElement.setAttribute('type', 'application/json');
@@ -139,6 +140,7 @@ describes.realWin('amp-consent', {
         },
       };
       const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
       const scriptElement = doc.createElement('script');
       scriptElement.setAttribute('type', 'application/json');
@@ -182,6 +184,7 @@ describes.realWin('amp-consent', {
         },
       };
       const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
       const scriptElement = doc.createElement('script');
       scriptElement.setAttribute('type', 'application/json');
