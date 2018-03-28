@@ -626,8 +626,9 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 #### HTML Attributes
 
 Provides values of attributes of HTML elements inside of an amp-ad tag which match a given CSS selector. 
-This is only available within the same amp-ad tag; it will not, for instance, allow a publisher to obtain information
- about the content of an ad.
+This only allows an amp-analytics tag to query attributes of HTML elements loaded by that amp-analytics tag's parent
+amp-ad tag. It will not allow a publisher to obtain information about the content of an ad, nor will it allow metrics
+of one ad to be seen by the provider of another ad on the page.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${htmlAttr}`
@@ -649,7 +650,7 @@ represented in the returned array.
 * The returned values will be in the form of a URL encoded JSON array of objects wherein the object keys are the 
 requested attribute names and the object values are the elements' values for those attributes.
 * The CSS selector may contain only letters (upper- and/or lower-case), numbers, hyphens, underscores, and periods. 
-Issue #14252 has been created to address potential future demand for more complex CSS selectors.
+[Issue #14252](https://github.com/ampproject/amphtml/issues/14252) has been created to address potential future demand for more complex CSS selectors.
 
 
 #### Intersection Ratio
