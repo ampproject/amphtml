@@ -420,7 +420,7 @@ The `<script>` tag must have an `async` attribute and must have a `custom-elemen
 
 Runtime implementations may use the name to render placeholders for these elements.
 
-The script URL must start with `https://cdn.ampproject.org` and must follow a very strict pattern of `/v\d+/[a-z-]+-(latest|\d+|\d+.\d+).js`.
+The script URL must start with `https://cdn.ampproject.org` and must follow a very strict pattern of `/v\d+/[a-z-]+-(latest|\d+|\d+\.\d+)\.js`.
 
 ##### URL
 
@@ -450,7 +450,7 @@ Extended components are loaded by including a `<script>` tag in the head of the 
 
 The `<script>` tag must have an `async` attribute and must have a `custom-template` attribute referencing the type of the
 template. The script URL must start with `https://cdn.ampproject.org` and must follow a very strict pattern of
-`/v\d+/[a-z-]+-(latest|\d+|\d+.\d+).js`.
+`/v\d+/[a-z-]+-(latest|\d+|\d+\.\d+)\.js`.
 
 The templates are declared in the document as following:
 
