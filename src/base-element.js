@@ -15,14 +15,13 @@
  */
 
 import {ActionTrust} from './action-trust';
-import {Layout} from './layout';
+import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
-import {getData, listen} from './event-helper';
+import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
 import {isExperimentOn} from './experiments';
-import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -185,11 +184,11 @@ export class BaseElement {
   *
   * The lower the number, the higher the priority.
   *
-  * The default priority for base elements is 0.
+  * The default priority for base elements is LayoutPriority.CONTENT.
   * @return {number}
   */
   getLayoutPriority() {
-    return 0;
+    return LayoutPriority.CONTENT;
   }
 
   /**
@@ -1039,3 +1038,5 @@ export class BaseElement {
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }
+
+

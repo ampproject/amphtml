@@ -16,6 +16,7 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+import {LayoutPriority} from '../../../src/layout';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {
@@ -124,7 +125,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   renderOutsideViewport() {
