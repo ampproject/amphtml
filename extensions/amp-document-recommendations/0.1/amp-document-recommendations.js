@@ -17,8 +17,15 @@
 import {CSS} from '../../../build/amp-document-recommendations-0.1.css';
 import {Layout} from '../../../src/layout';
 import {MultidocManager} from '../../../src/runtime';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {assertConfig} from './config';
+import {getServiceForDoc} from '../../../src/service';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
@@ -62,6 +69,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
     activeInstance_ = this;
 
+    const ampDoc = this.getAmpDoc();
+    installPositionObserverServiceForDoc(ampDoc);
+
     /** @private {?./config.AmpDocumentRecommendationsConfig} */
     this.config_ = null;
 
@@ -72,7 +82,13 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.nextArticle_ = 0;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(ampDoc);
+
+    /**
+     * @private @const
+     * {!../../../../src/service/position-observer/position-observer-impl.PositionObserver}
+     */
+    this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     /** @private @const {!Array<!DocumentRef>} */
     this.documentRefs_ = [{
@@ -113,23 +129,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       Services.xhrFor(this.win)
           .fetchDocument(next.ampUrl)
           .then(doc => this.attachShadowDoc_(doc), () => {})
-          .then(amp => {
-            documentRef.amp = amp;
-
-            this.win.document.title = amp.title || '';
-            if (this.win.history.replaceState) {
-              const url = parseUrl(next.ampUrl);
-              this.win.history.replaceState({}, amp.title, url.pathname);
-            }
-
-            // TODO(peterjosling): Send request to viewer with title/URL
-            // TODO(peterjosling): Set title back when scrolling up
-            // TODO(peterjosling): Only set title when document becomes active
-            // TODO(emarchiori): Trigger analtyics event when active
-            // document changes.
-            // TODO(emarchiori): Hide position fixed elements of inactive
-            // documents and update approriately.
-          });
+          .then(amp => documentRef.amp = amp);
     }
   }
 
@@ -173,6 +173,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
 
     this.element.appendChild(recommendations);
+    this.positionObserver_.observe(recommendations,
+        PositionObserverFidelity.LOW,
+        position => this.positionUpdate_(from - 1, position));
   }
 
   /**
@@ -250,6 +253,48 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     // based on PositionObserver.
     this.appendNextArticle_();
     return Promise.resolve();
+  }
+
+  /**
+   * Handles updates from the {@code PositionObserver} indicating a change in
+   * the position of a recommendation unit in the viewport.
+   * @param {number} i Index of the documentRef this recommendation unit is
+   *     attached to.
+   * @param
+   * {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+   *     position Position of the current recommendation unit in the viewport.
+   */
+  positionUpdate_(i, position) {
+    // We're only interested when the recommendations exit the viewport
+    if (position.positionRect !== null) {
+      return;
+    }
+
+    if (position.relativePos === 'top') {
+      this.setActiveDocument_(this.documentRefs_[i + 1]);
+    } else if (position.relativePos === 'bottom') {
+      this.setActiveDocument_(this.documentRefs_[i]);
+    }
+  }
+
+  /**
+   * Sets the specified document as active, updating the document title and URL.
+   * @param {!DocumentRef} documentRef Reference to the document to set as
+   *     active.
+   */
+  setActiveDocument_(documentRef) {
+    const amp = documentRef.amp;
+    this.win.document.title = amp.title || '';
+    if (this.win.history.replaceState) {
+      const url = parseUrl(documentRef.ampUrl);
+      this.win.history.replaceState({}, amp.title, url.pathname);
+    }
+
+    // TODO(peterjosling): Send request to viewer with title/URL
+    // TODO(emarchiori): Trigger analtyics event when active
+    // document changes.
+    // TODO(emarchiori): Hide position fixed elements of inactive
+    // documents and update approriately.
   }
 }
 
