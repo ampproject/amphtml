@@ -42,21 +42,25 @@ export class FxProvider {
     /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @protected @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @protected @const {!../../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     installPositionObserverServiceForDoc(ampdoc);
 
-    /** @protected @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
+    /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
 
-    /** @protected @string */
+    /** @private @string */
     this.fxType_ = fxType;
   }
 
+  /**
+   * Installs effect on the element
+   * @param {!Element} element
+   */
   installOn(element) {
     setStyle(element, 'will-change', propertyAnimated[this.fxType_]);
     const parallaxElement = new FxElement(
@@ -78,28 +82,28 @@ export class FxElement {
    */
   constructor(element, positionObserver, viewport, resources, fxType) {
 
-    /** @protected @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
+    /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = positionObserver;
 
-    /** @protected @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = viewport;
 
-    /** @const @protected {!../../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
 
-    /** @protected {?number} */
+    /** @private {?number} */
     this.adjustedViewportHeight_ = null;
 
-    /** @protected @const {!Element} */
+    /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @protected {boolean} */
+    /** @private {boolean} */
     this.mutateScheduled_ = false;
 
     /** @private {number} */
     this.offset_ = 0;
 
-    /** @protected @string */
+    /** @private @string */
     this.fxType_ = fxType;
 
     Presets[this.fxType_].userAsserts(element);
