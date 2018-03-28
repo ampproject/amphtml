@@ -299,10 +299,11 @@ export class SubscriptionService {
             Entitlement.empty('local'));
       }
       const decodedData = this.jwtHelper_.decode(authData);
-      user().assert(decodedData['aud'] == origin, 'Bad Audience');
+      user().assert(decodedData['aud'] == origin,
+          `The mismatching "aud" field: ${decodedData['aud']}`);
       user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
       const entitlements = decodedData['entitlements'];
-      let entitlementJson = Entitlement.empty('local').json();
+      let entitlementJson;
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
           const entitlementObject =
@@ -315,7 +316,9 @@ export class SubscriptionService {
       } else if (entitlements) { // Not null
         entitlementJson = entitlements;
       }
-      const entitlement = Entitlement.parseFromJson(entitlementJson);
+      const entitlement = entitlementJson ?
+        Entitlement.parseFromJson(entitlementJson) :
+        Entitlement.empty('local');
       // Viewer authorization is redirected to use local platform instead.
       this.platformStore_.resolveEntitlement('local', entitlement);
     }, reason => {
