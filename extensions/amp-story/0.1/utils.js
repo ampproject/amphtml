@@ -15,6 +15,7 @@
  */
 
 import {closestBySelector} from '../../../src/dom';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {user} from '../../../src/log';
 
 /**
@@ -83,4 +84,25 @@ export function unscaledClientRect(el) {
  */
 export function ampMediaElementFor(el) {
   return closestBySelector(el, 'amp-video, amp-audio');
+}
+
+
+/**
+ * Creates a shadow root for the provided container, and appends the element
+ * along with its CSS.
+ * @param  {!Element} container
+ * @param  {!Element} element
+ * @param  {string} css
+ * @return {!ShadowRoot}
+ */
+export function createShadowRootWithStyle(container, element, css) {
+  const shadowRoot = createShadowRoot(container);
+
+  const style = self.document.createElement('style');
+  style./*OK*/textContent = css;
+
+  shadowRoot.appendChild(style);
+  shadowRoot.appendChild(element);
+
+  return shadowRoot;
 }
