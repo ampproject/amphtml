@@ -163,6 +163,7 @@ object of the ad response.
    * EXPLORE: "Explore Now"
    * SHOP: "Shop Now"
    * READ: "Read Now"
+   * INSTALL: "Install Now"
    * If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 * `ctaUrl`: the landing page URL for the CTA button
 
