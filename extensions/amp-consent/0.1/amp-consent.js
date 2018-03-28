@@ -29,7 +29,7 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
@@ -64,7 +64,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.notificationUiManager_ = null;
 
     /** @private {!Object<string, Element>} */
-    this.consentUI_ = {};
+    this.consentUI_ = map();
 
     /** @private {!JsonObject} */
     this.consentConfig_ = dict();
@@ -73,7 +73,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.policyConfig_ = dict();
 
     /** @private {!Object} */
-    this.consentUIRequired_ = {};
+    this.consentUIRequired_ = map();
 
     /** @private {boolean} */
     this.uiInit_ = false;
@@ -85,7 +85,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.revokeUI_ = null;
 
     /** @private {!Object<string, function()>} */
-    this.dialogResolver_ = {};
+    this.dialogResolver_ = map();
   }
 
   buildCallback() {
@@ -93,9 +93,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
-    if (!this.element.getAttribute('id')) {
-      this.element.setAttribute('id', 'amp-consent');
-    }
+    user().assert(this.element.getAttribute('id'),
+        'amp-consent should have an id');
 
     this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
