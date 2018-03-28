@@ -285,7 +285,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               const resolvedEntitlement =
                   subscriptionService.platformStore_.entitlements_['local'];
               expect(resolvedEntitlement).to.be.not.null;
-              console.log(resolvedEntitlement.json(), entitlement.json());
               expect(resolvedEntitlement.json()).to.deep.equal(
                   entitlement.json());
             });
