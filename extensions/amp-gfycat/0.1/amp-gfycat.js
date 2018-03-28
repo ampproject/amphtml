@@ -18,7 +18,12 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {fullscreenEnter, fullscreenExit, isFullscreenElement, removeElement} from '../../../src/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {
@@ -85,8 +90,7 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     const videoid = dev().assertString(this.videoid_);
-    this.propagateAttributes(['alt', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], placeholder);
+    this.propagateAttributes(['alt', 'aria-label'], placeholder);
     placeholder.setAttribute('src',
         'https://thumbs.gfycat.com/' +
         encodeURIComponent(videoid) + '-poster.jpg');
