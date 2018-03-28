@@ -981,7 +981,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if ((this.isFluid_ && width > 0 && height > 0) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
