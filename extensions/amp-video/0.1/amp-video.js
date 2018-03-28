@@ -47,10 +47,9 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'aria-label',
   'aria-labelledby',
   'controls',
+  'controlsList',
   'crossorigin',
   'disableremoteplayback',
-  'poster',
-  'controlsList',
 ];
 
 /**
@@ -58,7 +57,11 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
-const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = [
+  'loop',
+  'poster',
+  'preload',
+];
 
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE =
