@@ -231,6 +231,10 @@ exports.rules = [
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
           'src/service/url-replacements-impl.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
+          'src/service/notification-ui-manager.js',
+      'extensions/amp-consent/0.1/amp-consent.js->' +
+          'src/service/notification-ui-manager.js',
     ],
   },
   {
