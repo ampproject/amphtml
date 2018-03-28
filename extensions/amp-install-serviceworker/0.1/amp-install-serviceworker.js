@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
@@ -111,7 +112,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override  */
   getLayoutPriority() {
-    return 3;
+    return LayoutPriority.BACKGROUND;
   }
 
   /** @private */
