@@ -163,7 +163,7 @@ object of the ad response.
    * EXPLORE: "Explore Now"
    * SHOP: "Shop Now"
    * READ: "Read Now"
-   * INSTALL: "Install Now"
+   * INSTALL: "Install Now" (Note that deep links to apps (e.g. whatsapp://chat) are not supported but publishers can link to the App Store page or the Google Play Store page using http/https).
    * If you need support for a new CTA button, please open a [GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 * `ctaUrl`: the landing page URL for the CTA button
 
