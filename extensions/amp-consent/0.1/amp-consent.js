@@ -63,7 +63,7 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?NotificationUiManager} */
     this.notificationUiManager_ = null;
 
-    /** @private {!Object<string, Element>} */
+    /** @private {!Object<string, !Element>} */
     this.consentUI_ = map();
 
     /** @private {!JsonObject} */
