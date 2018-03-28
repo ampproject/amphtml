@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {Resources} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
@@ -54,7 +55,7 @@ describe('Resources', () => {
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
-    element.getLayoutPriority = () => 0;
+    element.getLayoutPriority = () => LayoutPriority.CONTENT;
     element.dispatchCustomEvent = () => {};
     element.getLayout = () => 'fixed';
     return element;
@@ -307,7 +308,7 @@ describe('Resources', () => {
       isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
@@ -331,7 +332,7 @@ describe('Resources', () => {
       isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#P',
@@ -372,7 +373,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       idleRenderOutsideViewport: () => false,
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -393,7 +394,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       idleRenderOutsideViewport: () => false,
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -414,7 +415,7 @@ describe('Resources', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       idleRenderOutsideViewport: () => true,
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       startLayout: () => {},
       layoutScheduled: () => {},
       getTaskId: () => 'resource#L',
@@ -533,13 +534,13 @@ describe('Resources', () => {
   it('should update priority and schedule pass', () => {
     const element = document.createElement('div');
     element.isBuilt = () => true;
-    element.getLayoutPriority = () => 2;
+    element.getLayoutPriority = () => LayoutPriority.ADS;
     const resource = new Resource(1, element, resources);
     resources.pass_.cancel();
-    expect(resource.getLayoutPriority()).to.equal(2);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.ADS);
 
-    resources.updateLayoutPriority(element, 1);
-    expect(resource.getLayoutPriority()).to.equal(1);
+    resources.updateLayoutPriority(element, LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     expect(resources.pass_.isPending()).to.be.true;
   });
 
@@ -549,27 +550,27 @@ describe('Resources', () => {
     // Target element.
     const element = document.createElement('div');
     element.isBuilt = () => true;
-    element.getLayoutPriority = () => 2;
+    element.getLayoutPriority = () => LayoutPriority.ADS;
     const resource = new Resource(1, element, resources);
     resources.schedule_(resource, 'L', 0, 0, () => {});
     const task = resources.queue_.tasks_[0];
-    expect(task.priority).to.equal(2);
+    expect(task.priority).to.equal(LayoutPriority.ADS);
 
     // Another element.
     const element2 = document.createElement('div');
     element2.isBuilt = () => true;
-    element2.getLayoutPriority = () => 2;
+    element2.getLayoutPriority = () => LayoutPriority.ADS;
     const resource2 = new Resource(2, element2, resources);
     resources.schedule_(resource2, 'L', 0, 0, () => {});
     const task2 = resources.queue_.tasks_[1];
-    expect(task2.priority).to.equal(2);
+    expect(task2.priority).to.equal(LayoutPriority.ADS);
 
-    resources.updateLayoutPriority(element, 1);
-    expect(resource.getLayoutPriority()).to.equal(1);
+    resources.updateLayoutPriority(element, LayoutPriority.METADATA);
+    expect(resource.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     expect(resources.pass_.isPending()).to.be.true;
-    expect(task.priority).to.equal(1);
+    expect(task.priority).to.equal(LayoutPriority.METADATA);
     // The other task is not updated.
-    expect(task2.priority).to.equal(2);
+    expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
 });
 
@@ -1063,7 +1064,7 @@ describe('Resources discoverWork', () => {
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
-      getLayoutPriority: () => 1,
+      getLayoutPriority: () => LayoutPriority.METADATA,
       signals() {
         return signals;
       },
@@ -1736,7 +1737,7 @@ describe('Resources changeSize', () => {
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
-      getLayoutPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
       signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
@@ -2475,7 +2476,7 @@ describe('Resources mutateElement and collapse', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
-      getLayoutPriority: () => 0,
+      getLayoutPriority: () => LayoutPriority.CONTENT,
       signals: () => signals,
       getLayout: () => 'fixed',
     };

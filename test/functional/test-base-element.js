@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
+import {LayoutPriority} from '../../src/layout';
 import {Resource} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
@@ -44,7 +45,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
     customElement.getResources = () => resources;
     const updateLayoutPriorityStub = sandbox.stub(
         resources, 'updateLayoutPriority');
-    element.updateLayoutPriority(1);
+    element.updateLayoutPriority(LayoutPriority.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
@@ -30,7 +31,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return 1;
+    return LayoutPriority.METADATA;
   }
 
   /** @override */

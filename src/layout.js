@@ -24,7 +24,6 @@ import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
 
-
 /**
  * @enum {string}
  */
@@ -38,6 +37,19 @@ export const Layout = {
   FLEX_ITEM: 'flex-item',
   FLUID: 'fluid',
   INTRINSIC: 'intrinsic',
+};
+
+
+/**
+ * Layout priorities to use with BaseElement#getLayoutPriority() and
+ * BaseElement#updateLayoutPriority().
+ * @enum {number}
+ */
+export const LayoutPriority = {
+  CONTENT: 0,
+  METADATA: 1,
+  ADS: 2,
+  BACKGROUND: 3,
 };
 
 

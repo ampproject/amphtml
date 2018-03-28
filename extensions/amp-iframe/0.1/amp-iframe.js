@@ -17,6 +17,7 @@
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {closestBySelector, removeElement} from '../../../src/dom';
@@ -429,10 +430,10 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override  */
   getLayoutPriority() {
     if (this.isAdLike_) {
-      return 2; // See AmpAd3PImpl.
+      return LayoutPriority.ADS; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
-      return 1;
+      return LayoutPriority.METADATA;
     }
     return super.getLayoutPriority();
   }
