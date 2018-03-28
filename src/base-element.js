@@ -184,7 +184,7 @@ export class BaseElement {
   *
   * The lower the number, the higher the priority.
   *
-  * The default priority for base elements is LayoutPriority.CONTENT (0).
+  * The default priority for base elements is LayoutPriority.CONTENT.
   * @return {number}
   */
   getLayoutPriority() {
