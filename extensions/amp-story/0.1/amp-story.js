@@ -483,6 +483,14 @@ export class AmpStory extends AMP.BaseElement {
       this.onKeyDown_(e);
     }, true);
 
+    // keep track of page-id in browser history API
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      const history = this.win.history;
+      history.pushState({
+        ampStoryPageId: pageId,
+      }, 'amp-story', '');
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
   }
@@ -631,6 +639,9 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
+    const firstPageId = (this.win.history && this.win.history.state &&
+      this.win.history.state.ampStoryPageId) || firstPageEl.id;
+
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
     }
@@ -644,7 +655,7 @@ export class AmpStory extends AMP.BaseElement {
             page.setActive(false);
           });
         })
-        .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.switchTo_(firstPageId))
         .then(() => this.preloadPagesByDistance_());
 
     // Do not block the layout callback on the completion of these promises, as
