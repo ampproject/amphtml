@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
-} from '../../amp-analytics/0.1/vendors';
+} from '../../../amp-analytics/0.1/vendors';
 import {AmpAdExit} from '../amp-ad-exit';
 import {toggleExperiment} from '../../../../src/experiments';
 

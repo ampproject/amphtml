@@ -246,9 +246,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  'bg': {
-  },
-
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
