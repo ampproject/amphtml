@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-import {Presets} from './amp-fx-presets';
 import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
+import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyle, setStyles} from '../../../../src/style';
-
-/**
- * Enum for list of supported visual effects.
- * @enum {string}
- */
-const FxType = {
-  PARALLAX: 'parallax',
-};
+import {setStyle} from '../../../../src/style';
 
 const propertyAnimated = {
-  'parallax' : 'transform',
+  'parallax': 'transform',
 };
 
 /**
@@ -68,7 +60,8 @@ export class FxProvider {
   installOn(element) {
     setStyle(element, 'will-change', propertyAnimated[this.fxType_]);
     const parallaxElement = new FxElement(
-        element, this.positionObserver_, this.viewport_, this.resources_, this.fxType_);
+        element, this.positionObserver_, this.viewport_, this.resources_,
+        this.fxType_);
     parallaxElement.initialize();
   }
 }
@@ -108,6 +101,11 @@ export class FxElement {
 
     /** @protected @string */
     this.fxType_ = fxType;
+
+    Presets[this.fxType_].userAsserts(element);
+
+    /** @private @const {number} */
+    this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
   }
 
   /**
@@ -128,7 +126,7 @@ export class FxElement {
    */
   observePositionChanges_() {
     this.positionObserver_.observe(this.element_, PositionObserverFidelity.HIGH,
-        Presets[this.fxType_].update.bind(this, this.element_)
+        Presets[this.fxType_].update.bind(this)
     );
 
     this.viewport_.onResize(() => {

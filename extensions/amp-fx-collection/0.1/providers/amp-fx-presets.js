@@ -15,60 +15,51 @@
  */
 
 import {dev, user} from '../../../../src/log';
+import {setStyles} from '../../../../src/style';
 
-/**
- * @typedef {{
- *   duration: number,
- *   easing: (string|undefined),
- *   keyframes: !KeyframesOrFilterFnDef,
- * }}
- */
-export let AmpFxPresetDef;
-
-/** @const {!Object<string, !AmpFxPresetDef>} */
 // First keyframe will always be considered offset: 0 and will be applied to the
 // element as the first frame before animation starts.
 export const Presets = {
   'parallax': {
     userAsserts(element) {
-      const factorValue = user().assert(element.getAttribute('data-parallax-factor'),
-          `data-parallax-factor=<number> attribute must be provided for: %s`, element);
+      const factorValue = user().assert(
+          element.getAttribute('data-parallax-factor'),
+          'data-parallax-factor=<number> attribute must be provided for: %s',
+          element);
       user().assert(parseFloat(factorValue) > 0,
-          `data-parallax-factor must be a number and greater than 0 for: %s`, element);
+          'data-parallax-factor must be a number and greater than 0 for: %s',
+          element);
 
     },
     update(entry) {
-      console.log(this)
-      dev().assert(this.adjustedViewportHeight_);
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
       // outside viewport
       if (!entry.positionRect ||
-          entry.positionRect.top > this.adjustedViewportHeight_) {
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
         return;
       }
 
       // User provided factor is 1-based for easier understanding.
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
-      const adjustedFactor = -(parseFloat(this.getAttribute('data-parallax-factor')) - 1);
+      const adjustedFactor = -(parseFloat(fxElement.factor_) - 1);
       const top = entry.positionRect.top;
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = (this.adjustedViewportHeight_ - top) * adjustedFactor;
-      this.offset_ = offset;
+      const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
+      fxElement.offset_ = offset;
 
-      console.log('MUTATE ' + this.mutateScheduled_)
-      if (!this.mutateScheduled_) {
-        this.mutateScheduled_ = true;
-        console.log('MUTATE')
-        this.resources_.mutateElement(this.element_, function () {
-          this.mutateScheduled_ = false;
+      if (!fxElement.mutateScheduled_) {
+        fxElement.mutateScheduled_ = true;
+        fxElement.resources_.mutateElement(fxElement.element_, function() {
+          fxElement.mutateScheduled_ = false;
           // Translate the element offset pixels.
-          console.log(this)
-          setStyles(this.element_,
-              {transform: `translateY(${this.offset_.toFixed(0)}px)`}
-          );        
+          setStyles(fxElement.element_,
+              {transform: `translateY(${fxElement.offset_.toFixed(0)}px)`}
+          );
         });
       }
-    } 
-  }
+    },
+  },
 };

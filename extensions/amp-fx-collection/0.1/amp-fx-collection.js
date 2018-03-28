@@ -63,7 +63,7 @@ class AmpFxCollection {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!Object<FxType, FxProviderInterface>} */
+    /** @private @const {!Object<FxType, FxProvider>} */
     this.fxProviderInstances_ = map();
 
     Promise.all([
@@ -146,11 +146,9 @@ class AmpFxCollection {
    * @param {FxType} fxType
    */
   getFxProvider_(fxType) {
-    dev().assert(fxProviders[fxType],
-        `No provider for ${fxType} found, did you forget to register it?`);
-
     if (!this.fxProviderInstances_[fxType]) {
-      this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc_, fxType);
+      this.fxProviderInstances_[fxType] =
+        new FxProvider(this.ampdoc_, fxType);
     }
     return this.fxProviderInstances_[fxType];
   }
