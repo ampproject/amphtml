@@ -55,9 +55,9 @@ In this example, we display a fixed-height static calendar, where a user can sel
 
 
 ```html
-<amp-date-picker
-    layout="fixed-height"
-    height="360">
+<amp-date-picker 
+  layout="fixed-height"
+  height="360">
 </amp-date-picker>
 ```
 
@@ -99,31 +99,31 @@ This example demonstrates using a static date picker in a form, where the user c
 ```html
 <form
   method="post"
-  action-xhr="/form/echo-json/post"
+  action-xhr="/form-post"
   target="_blank">
-  <fieldset>
-    <label>
-      <span>Your name</span>
-      <input type="text" name="name" required>
-    </label>
-    <label for="date">Your date</label>
-    <amp-date-picker
-        type="range"
-        mode="static"
-        id="date"
-        layout="fixed-height"
-        height="360">
-      <!-- automatically generates hidden input fields:
-      <input type="hidden" name="start-input">
-      <input type="hidden" name="end-input"> -->
-    </amp-date-picker>
-    <input type="submit" value="Subscribe">
-  </fieldset>
-  <div submit-success>
-    <template type="amp-mustache">
-      Success! Thanks {{name}} for choosing {{date}}.
-    </template>
-  </div>
+<fieldset>
+  <label>
+    <span>Your name</span>
+    <input type="text" name="name" id="name" required>
+  </label>
+  <label for="date">Your date</label>
+  <amp-date-picker
+      type="range"
+      mode="static"
+      id="date"
+      layout="fixed-height"
+      height="360">
+    <!-- automatically generates hidden input fields:
+    <input type="hidden" name="start-input">
+    <input type="hidden" name="end-input"> -->
+  </amp-date-picker>
+  <input type="submit" value="Subscribe">
+</fieldset>
+<div submit-success>
+<template type="amp-mustache">
+  Success! Thanks {{name}} for choosing {{start-input}} and {{end-input}}.
+</template>
+</div>
 </form>
 ```
 
@@ -135,35 +135,28 @@ For an overlay date picker, you must specify `layout="container"` and contain th
 
 *Example: overlay date picker in a form*
 
-This example demonstrates using an overlay date picker in a form. As there are no connected inputs to the amp-date-picker, hidden input fields are automatically generated.
-
+This example demonstrates using a overlay date picker in a form where the user can choose a date.  The date picker is connected to a specific input field via the `input-selector` attribute.
 
 ```html
 <form
   method="post"
-  action-xhr="/form/echo-json/post"
+  action-xhr="/form-post"
   target="_blank">
-  <fieldset>
-    <label>
-      <span>Your name</span>
-      <input type="text" name="name" required>
-    </label>
-    <label for="date">Your date</label>
-    <amp-date-picker
-        type="range"
-        mode="overlay"
-        layout="container"
-        input-selector="[name=date]">
-      <input type="tel" name="date" placeholder="Publish date">
-    </amp-date-picker>
-    <input type="submit" value="Subscribe">
-  </fieldset>
+  <input type="text" name="name" placeholder="Your Name" required>
+  <amp-date-picker
+      type="single"
+      mode="overlay"
+      layout="container"
+      input-selector="[name=date]">
+    <input type="text" name="date" placeholder="Your Date">
+  </amp-date-picker>
+  <input type="submit" value="Subscribe">
   <div submit-success>
     <template type="amp-mustache">
       Success! Thanks {{name}} for choosing {{date}}.
     </template>
   </div>
-</form>
+  </form>
 ```
 
 <!-- TODO(cvializ): talk about why type="tel" is on the inputs -->
@@ -171,31 +164,37 @@ This example demonstrates using an overlay date picker in a form. As there are n
 
 ## Selection types
 
-The `amp-date-picker` provides two selection types:
+The `amp-date-picker` provides two types of dates to select:
 
-* single: renders a date picker for selecting a single date.
-* range: renders a date picker for selecting a date range.
+* `single`: Select a single date within the date picker.  
+* `range`: Select a date range within the date picker.
 
 ### `type="single"`
 
-Using `type="single"`, the date picker optionally attaches to a single input,
-and the user can select a single date.
-
-If no `type` attribute is present, the type will be `single` by default.
+By specifying `type="single"`, the date picker attaches to a single input,
+and the user can select a single date. This is the default selection type. 
 
 ```html
-<amp-date-picker type="single"></amp-date-picker>
+<amp-date-picker
+  type="single"
+  layout="fixed-height"
+  height="360">
+</amp-date-picker>
 ```
 
 <!-- TODO(cvializ): add image -->
 
 ### `type="range"`
 
-Using `type="range"`, the date picker optionally attaches to two inputs,
-and the user can select a date range.
+By specifying  `type="range"`, the date picker attaches to two inputs,
+and the user can select a date range with a starting date and ending date.
 
 ```html
-<amp-date-picker type="range"></amp-date-picker>
+<amp-date-picker
+  type="range"
+  layout="fixed-height"
+  height="360">
+</amp-date-picker>
 ```
 
 <!-- TODO(cvializ): add image -->
@@ -220,23 +219,51 @@ Specifies the selection type for the date picker. Allowed values are:
 ##### input-selector [optional]
 
 A query selector for a single date picker's input. If this is omitted,
-the date picker automatically generates a hidden input field. It will assign it
-a name `date` or `${id}-date` using the date picker's id. If either of these conflict
-with an existing element in the form, an error will be emitted.
+the date picker automatically generates a hidden input field, and assigns it
+a name of `input` or `${id}-input` using the date picker's id. If either of these conflict
+with an existing element in the form, an error is emitted.
+
+```html
+<amp-date-picker
+    type="single"
+    mode="overlay"
+    layout="container"
+    input-selector="[name=deliverydate]">
+  <input type="text" name="deliverydate" placeholder="Delivery Date">
+</amp-date-picker>
+```
 
 ##### start-input-selector [optional]
 
-A query selector for a date range picker's input. If this is omitted,
-the date picker will automatically generate a hidden input field. It will assign it
-a name `start-date` or `${id}-start-date` using the date picker's id. If either of these conflict
+A query selector for a date range picker's start date input. If this is omitted,
+the date picker automatically generates a hidden input field, and assigns it
+a name of `start-input` or `${id}-start-input` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
+
+```html
+<amp-date-picker 
+    type="range" 
+    start-input-selector="#a2" 
+    end-input-selector="#b2"
+    layout="fixed-height" height="360">
+</amp-date-picker>
+```
 
 ##### end-input-selector [optional]
 
-A query selector for a date range picker's input. If this is omitted,
-the date picker automatically generates a hidden input field. It will assign it
-a name `end-date` or `${id}-end-date` using the date picker's id. If either of these conflict
+A query selector for a date range picker's end date input. If this is omitted,
+the date picker automatically generates a hidden input field, and assigns it
+a name of `end-input` or `${id}-end-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
+
+```html
+<amp-date-picker 
+    type="range" 
+    start-input-selector="#a2" 
+    end-input-selector="#b2"
+    layout="fixed-height" height="360">
+</amp-date-picker>
+```
 
 ##### min [optional]
 
@@ -261,7 +288,19 @@ The default format is `"YYYY-MM-DD"`.
 ##### week-day-format [optional]
 
 The format to use for displaying the day of the week in the calendar view.
-If no `week-day-format` is present, the weekdays will display as the first character of the weekday.
+If no `week-day-format` is present, the weekdays display as the first character of the weekday.
+
+```html
+<amp-date-picker
+    type="single"
+    mode="overlay"
+    layout="container"
+    format="MM/DD/YYYY"
+    week-day-format="ddd"
+    input-selector="[name=date]">
+  <input type="text" name="date" placeholder="Your Date">
+</amp-date-picker>
+```
 
 ##### locale [optional]
 
@@ -443,7 +482,7 @@ and for an extra information area below the calendar view.
 These templates must only be used for dates that will not need to be updated
 often, like holidays. For rendering special information in the calendar days
 like days with sales, or amounts of money, or other information that must change
-often, consider [using the `src` attribute](#src-[optional]) instead.
+often, consider [using the `src` attribute](#src-optional) instead.
 Using `src` prevents chached AMP documents from showing out-of-date information.
 
 
