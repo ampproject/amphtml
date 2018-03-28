@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {Entitlement} from './entitlement';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -26,7 +27,9 @@ import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -87,6 +90,12 @@ export class SubscriptionService {
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(ampdoc.win);
+
+    /** @private @const {boolean} */
+    this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
@@ -146,6 +155,9 @@ export class SubscriptionService {
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_) {
+        return; // External platforms should not register if viewer provides auth
+      }
       const matchedServices = this.platformConfig_['services'].filter(
           service => (service.serviceId || 'local') === serviceId);
 
@@ -234,6 +246,10 @@ export class SubscriptionService {
 
       user().assert(this.pageConfig_, 'Page config is null');
 
+      if (this.doesViewerProvideAuth_) {
+        return this.delegateAuthToViewer_();
+      }
+
       user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
 
@@ -255,6 +271,59 @@ export class SubscriptionService {
 
     });
     return this;
+  }
+
+  /**
+   * Delegates authentication to viewer
+   */
+  delegateAuthToViewer_() {
+    const serviceIds = ['local'];
+    const currentProductId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getProductId(),
+        'Product id is null'
+    ));
+    const publicationId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getPublicationId(),
+        'Publication id is null'
+    ));
+    const origin = getWinOrigin(this.ampdoc_.win);
+    this.platformStore_ = new PlatformStore(serviceIds);
+    this.viewer_.sendMessageAwaitResponse('auth', dict({
+      'publicationId': publicationId,
+      'productId': currentProductId,
+      'origin': origin,
+    })).then(entitlementData => {
+      const authData = (entitlementData || {})['authorization'];
+      if (!authData) {
+        return this.platformStore_.resolveEntitlement('local',
+            Entitlement.empty('local'));
+      }
+      const decodedData = this.jwtHelper_.decode(authData);
+      user().assert(decodedData['aud'] == origin,
+          `The mismatching "aud" field: ${decodedData['aud']}`);
+      user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
+      const entitlements = decodedData['entitlements'];
+      let entitlementJson;
+      if (Array.isArray(entitlements)) {
+        for (let index = 0; index < entitlements.length; index++) {
+          const entitlementObject =
+              Entitlement.parseFromJson(entitlements[index]);
+          if (entitlementObject.enables(currentProductId)) {
+            entitlementJson = entitlements[index];
+            break;
+          }
+        }
+      } else if (entitlements) { // Not null
+        entitlementJson = entitlements;
+      }
+      const entitlement = entitlementJson ?
+        Entitlement.parseFromJson(entitlementJson) :
+        Entitlement.empty('local');
+      // Viewer authorization is redirected to use local platform instead.
+      this.platformStore_.resolveEntitlement('local', entitlement);
+    }, reason => {
+      throw user().createError('Viewer authorization failed', reason);
+    });
   }
 
   /**
