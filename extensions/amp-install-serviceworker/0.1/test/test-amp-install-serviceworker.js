@@ -34,6 +34,7 @@ describes.realWin('amp-install-serviceworker', {
 }, env => {
 
   let doc;
+  let clock;
   let sandbox;
   let container;
   let ampdoc;
@@ -42,6 +43,7 @@ describes.realWin('amp-install-serviceworker', {
   beforeEach(() => {
     doc = env.win.document;
     sandbox = env.sandbox;
+    clock = sandbox.useFakeTimers();
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
@@ -206,23 +208,35 @@ describes.realWin('amp-install-serviceworker', {
       const iframeSrc = 'https://www.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
       implementation.buildCallback();
+      let iframe;
       const appendChild = install.appendChild;
       install.appendChild = child => {
-        child.complete = true; // Mark as loaded.
-        expect(child.src).to.equal(iframeSrc);
-        child.src = 'about:blank';
-        appendChild.call(install, child);
+        iframe = child;
+        iframe.complete = true; // Mark as loaded.
+        expect(iframe.src).to.equal(iframeSrc);
+        iframe.src = 'about:blank';
+        appendChild.call(install, iframe);
       };
-      expect(install.children).to.have.lengthOf(0);
-      implementation.layoutCallback();
-      expect(install.children).to.have.lengthOf(1);
-      const iframe = install.children[0];
-      expect(iframe).to.exist;
-      expect(calledSrc).to.undefined;
-      expect(install.style.display).to.equal('none');
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.getAttribute('sandbox')).to.equal(
-          'allow-same-origin allow-scripts');
+      let deferredMutate;
+      implementation.deferMutate = fn => {
+        expect(deferredMutate).to.be.undefined;
+        deferredMutate = fn;
+      };
+      return whenVisible.then(() => {
+        clock.tick(9999);
+        expect(deferredMutate).to.be.undefined;
+        expect(iframe).to.be.undefined;
+        clock.tick(1);
+        expect(deferredMutate).to.exist;
+        expect(iframe).to.be.undefined;
+        deferredMutate();
+        expect(iframe).to.exist;
+        expect(calledSrc).to.undefined;
+        expect(install.style.display).to.equal('none');
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.getAttribute('sandbox')).to.equal(
+            'allow-same-origin allow-scripts');
+      });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
@@ -241,13 +255,11 @@ describes.realWin('amp-install-serviceworker', {
       install.setAttribute('data-iframe-src', iframeSrc);
       expect(() => {
         implementation.buildCallback();
-        implementation.layoutCallback();
       }).to.throw(/should be a URL on the same origin as the source/);
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
       expect(() => {
         implementation.buildCallback();
-        implementation.layoutCallback();
       }).to.throw(/https/);
     });
   });

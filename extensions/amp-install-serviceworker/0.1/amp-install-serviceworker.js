@@ -50,9 +50,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     /** @private {?UrlRewriter_}  */
     this.urlRewriter_ = null;
-
-    /** @private {boolean}  */
-    this.insertframeOnFirstLayout_ = false;
   }
 
   /** @override */
@@ -66,23 +63,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     assertHttpsUrl(src, this.element);
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
-      // Schedule loading the iframe in firstLayoutCompleted().
-      this.insertframeOnFirstLayout_ = true;
-    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      this.loadPromise(this.win).then(() => {
-        return install(this.win, src);
-      });
-    } else {
-      this.user().error(TAG,
-          'Did not install ServiceWorker because it does not ' +
-          'match the current origin: ' + src);
-    }
-  }
-
-  /** @override */
-  layoutCallback() {
-    if (this.insertframeOnFirstLayout_) {
-      this.insertframeOnFirstLayout_ = false;
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
@@ -97,27 +77,43 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        this.insertIframe_();
+        this.scheduleIframeLoad_();
       }
+      return;
     }
-    return Promise.resolve();
+
+    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+      this.loadPromise(this.win).then(() => {
+        return install(this.win, src);
+      });
+    } else {
+      this.user().error(TAG,
+          'Did not install ServiceWorker because it does not ' +
+          'match the current origin: ' + src);
+    }
   }
 
-  /** @override */
-  renderOutsideViewport() {
-    // We want the service worker to be installed wherever the element is
-    // located in the document.
-    return true;
-  }
-
-  /** @override  */
-  getLayoutPriority() {
-    return LayoutPriority.BACKGROUND;
+  /** @private */
+  scheduleIframeLoad_() {
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      // If the user is longer than 10 seconds on this page, load
+      // the external iframe to install the ServiceWorker. The wait is
+      // introduced to avoid installing SWs for content that the user
+      // only engaged with superficially.
+      Services.timerFor(this.win).delay(() => {
+        this.deferMutate(this.insertIframe_.bind(this));
+      }, 10000);
+    });
   }
 
   /** @private */
   insertIframe_() {
-    // Should only be called from layoutCallback.
+    // If we are no longer visible, we will not do a SW registration on this
+    // page view.
+    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
+      return;
+    }
+    // The iframe will stil be loaded.
     setStyle(this.element, 'display', 'none');
     const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
