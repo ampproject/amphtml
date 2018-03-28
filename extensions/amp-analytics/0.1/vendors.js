@@ -2048,6 +2048,30 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'scroll': {
+    'enabled': 'AUTHDATA(scroll.scroll)',
+    'requests': {
+      'base': 'https://connect.scroll.com/amp/analytics',
+      'scroll': '${base}?rid=ACCESS_READER_ID'
+                + '&cid=CLIENT_ID(cid-fallback-cookie)'
+                + '&o=SOURCE_URL'
+                + '&c=CANONICAL_URL'
+                + '&d=AUTHDATA(scroll.scroll)'
+                + '&v=AUTHDATA(scroll.visitId)'
+                + '&s=${totalEngagedTime}',
+    },
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'maxTimerLength': 7200,
+        },
+        'request': 'scroll',
+      },
+    },
+  },
+
 });
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
