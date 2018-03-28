@@ -22,6 +22,7 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
+import {isProtocolValid} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 
 
@@ -342,7 +343,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     a.href = ctaUrl;
     a.textContent = ctaText;
 
-    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+    if (!isProtocolValid(ctaUrl)) {
       user().warn(TAG, 'CTA url is not valid. Ad was discarded');
       return false;
     }
