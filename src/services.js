@@ -398,6 +398,18 @@ export class Services {
   }
 
   /**
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
+  }
+
+  /**
    * Returns a promise for the experiment variants or a promise for null if it is
    * not available on the current page.
    * @param {!Window} win

@@ -23,6 +23,7 @@ import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
+import {CONSENT_POLICY_STATE} from '../../src/consent-states.js';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -525,6 +526,48 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.whenBuilt(); // Should eventually resolve.
       });
     });
+
+    it('should build on consent sufficient', () => {
+      const element = new ElementClass();
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve({
+              whenPolicyResolved: () => {
+                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              },
+            });
+          });
+      sandbox.stub(element.implementation_, 'getConsentPolicy')
+          .callsFake(() => {
+            return 'default';
+          });
+
+      clock.tick(1);
+      container.appendChild(element);
+      return element.whenBuilt();
+    });
+
+    it('should not build on consent insufficient', () => {
+      const element = new ElementClass();
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve({
+              whenPolicyResolved: () => {
+                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              },
+            });
+          });
+      sandbox.stub(element.implementation_, 'getConsentPolicy')
+          .callsFake(() => {
+            return 'default';
+          });
+
+      clock.tick(1);
+      container.appendChild(element);
+      return expect(element.whenBuilt())
+          .to.be.eventually.rejectedWith(/BLOCKBYCONSENT/);
+    });
+
 
     it('should anticipate build errors', () => {
       const element = new ElementClass();

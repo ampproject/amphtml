@@ -15,21 +15,13 @@
  */
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-states';
 import {dev} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {map} from '../../../src/utils/object';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
-
-/**
- * Possible consent policy state to proceed with.
- * @enum {number}
- */
-export const CONSENT_POLICY_STATE = {
-  SUFFICIENT: 0,
-  INSUFFICIENT: 1,
-  UNKNOWN: 2,
-};
 
 export class ConsentPolicyManager {
   constructor(ampdoc) {
@@ -37,13 +29,13 @@ export class ConsentPolicyManager {
     this.ampdoc_ = ampdoc;
 
     /** @private {!Object<string, ?Promise>} */
-    this.policyInstancePromise_ = {};
+    this.policyInstancePromise_ = map();
 
     /** @private {!Object<string, ?function()>} */
-    this.policyInstancePromiseResolver_ = {};
+    this.policyInstancePromiseResolver_ = map();
 
     /** @private {!Object<string, ConsentPolicyInstance>} */
-    this.instances_ = {};
+    this.instances_ = map();
 
     /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
@@ -55,8 +47,8 @@ export class ConsentPolicyManager {
    * Example policy config format:
    * {
    *   "waitFor": {
-   *     "consentABC": undefined,
-   *     "consentDEF": undefined
+   *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
+   *     "consentDEF": []
    *   }
    * }
    *
@@ -127,13 +119,28 @@ export class ConsentPolicyInstance {
     /** @private {!Array<string>} */
     this.pendingItems_ = pendingItems;
 
-    /** @private {?function()} */
+    this.itemMap_ = map();
+
+    this.pendingItemCount_ = 0;
+
+    this.rejectedItemCount_ = 0;
+
+    /** @private {?function(CONSENT_POLICY_STATE)} */
     this.readyPromiseResolver_ = null;
 
-    /** @private {!Promise} */
+    /** @private {!Promise<CONSENT_POLICY_STATE>} */
     this.readyPromise_ = new Promise(resolve => {
       this.readyPromiseResolver_ = resolve;
     });
+
+    this.init_(pendingItems);
+  }
+
+  init_(pendingItems) {
+    for (let i = 0; i < pendingItems.length; i++) {
+      this.itemMap_[pendingItems[i]] = CONSENT_ITEM_STATE.UNKNOWN;
+    }
+    this.pendingItemCount_ = Object.keys(this.itemMap_).length;
   }
 
   /**
@@ -144,18 +151,29 @@ export class ConsentPolicyInstance {
   consentStateChangeHandler(consentId, state) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
+    dev().assert(this.itemMap_[consentId] != undefined,
+        `cannot find ${consentId} in policy state`);
     if (state == CONSENT_ITEM_STATE.GRANTED) {
-      const index = this.pendingItems_.indexOf(consentId);
-      if (index > -1) {
-        this.pendingItems_.splice(index, 1);
+      console.log('dafdsf');
+      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        this.pendingItemCount_--;
       }
+      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
+        this.rejectedItemCount_--;
+      }
+      this.itemMap_[consentId] = CONSENT_ITEM_STATE.GRANTED;
     }
 
     if (state == CONSENT_ITEM_STATE.REJECTED) {
-      const index = this.pendingItems_.indexOf(consentId);
-      if (index == -1) {
-        this.pendingItems_.push(consentId);
+      console.log('dfdfdfdfdfdfd');
+      console.log(this.itemMap_);
+      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        this.pendingItemCount_--;
       }
+      if (this.itemMap_[consentId] != CONSENT_ITEM_STATE.REJECTED) {
+        this.rejectedItemCount_++;
+      }
+      this.itemMap_[consentId] = CONSENT_ITEM_STATE.REJECTED;
     }
 
     // We don't need to move around state UNKNOWN because it will be in pending
@@ -165,8 +183,14 @@ export class ConsentPolicyInstance {
 
 
   evaluate_() {
-    if (this.pendingItems_.length == 0) {
-      this.readyPromiseResolver_();
+    if (this.pendingItemCount_ == 0) {
+      if (this.rejectedItemCount_ == 0) {
+        console.log(this.rejectedItemCount_);
+        // Consent Sufficient
+        this.readyPromiseResolver_(CONSENT_POLICY_STATE.SUFFICIENT);
+      } else {
+        this.readyPromiseResolver_(CONSENT_POLICY_STATE.INSUFFICIENT);
+      }
       this.readyPromiseResolver_ = null;
     } else {
       // It's possible user toggle state. And ready promise needs to be reset

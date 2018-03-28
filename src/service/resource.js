@@ -26,6 +26,7 @@ import {
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
+import {isBlockByConsent} from '../error'
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -327,7 +328,9 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      if (!isBlockByConsent(reason)) {
+        dev().error(TAG, 'failed to build:', this.debugid, reason);
+      }
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;

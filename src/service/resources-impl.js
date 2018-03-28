@@ -35,7 +35,7 @@ import {isArray} from '../types';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
+import {reportError,isBlockByConsent} from '../error';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -625,7 +625,9 @@ export class Resources {
       // Build failed: remove the resource. No other state changes are
       // needed.
       this.removeResource_(resource);
-      throw error;
+      if (!isBlockByConsent(error)) {
+        throw error;
+      }
     });
   }
 
