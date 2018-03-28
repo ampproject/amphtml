@@ -120,7 +120,7 @@ export class FxElement {
 
     /** @private {number} */
     this.margin_ = element.hasAttribute('data-fade-in-margin') ?
-      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.25;
+      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.2;
 
     /** @private {string} */
     this.easing_ = element.hasAttribute('data-fade-in-easing') ?
@@ -129,7 +129,7 @@ export class FxElement {
 
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-fade-in-duration') ?
-      element.getAttribute('data-fade-in-duration') : '1500ms';
+      element.getAttribute('data-fade-in-duration') : '1000ms';
   }
 
   /**
