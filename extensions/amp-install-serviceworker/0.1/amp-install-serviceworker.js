@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
