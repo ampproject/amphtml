@@ -88,7 +88,8 @@ Using JSON-LD, the markup would look like:
   "isPartOf": {
     "@type": ["CreativeWork", "Product"],
     "name" : "The Norcal Tribune",
-    "productID": "norcal_tribune.com:basic"
+    "productID": "norcal_tribune.com:basic",
+    "preferViewerSupport": true
   }
 }
 </script>
@@ -96,7 +97,8 @@ Using JSON-LD, the markup would look like:
 
 Thus, notice that:
  1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
- 2. This document is currently locked (`"isAccessibleForFree": false`)
+ 2. This document is currently locked (`"isAccessibleForFree": false`).
+ 3. This document will give extra preference to the platform supported by the viewer.
 
 ### Microdata markup
 
