@@ -278,9 +278,13 @@ export class SubscriptionService {
 
   /** @private */
   selectAndActivatePlatform_() {
+    let preferSupportedViewer = true;
+    if ('preferSupportedViewer' in this.platformConfig_) {
+      preferSupportedViewer = this.platformConfig_['preferSupportedViewer'];
+    }
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
-      this.platformStore_.selectPlatform(),
+      this.platformStore_.selectPlatform(preferSupportedViewer),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
