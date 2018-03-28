@@ -22,11 +22,11 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 
 1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime.
 1. Develop a patch that implements the following:
-    1. A new block in [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
-        1. "vars": {} for additional default variables.
-        1. "requests": {} for requests that your service will use.
-        1. "transport": { "iframe": *url* } if you are using iframe transport.
-        1. "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
+    1. A new block in ANALYTICS_CONFIG in  [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
+        1. ```"vars": {}``` for additional default variables.
+        1. ```"requests": {}``` for requests that your service will use.
+        1. ```"optout":``` if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
+        1. If you are using iframe transport, add a new block to ANALYTICS_IFRAME_TRANSPORT_CONFIG in vendors.js containing ```"transport": { "iframe": *url* }```
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 reference.
     1. A new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
