@@ -16,8 +16,8 @@
 
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
+import {dev, user} from './log';
 import {getValueForExpr} from './json';
-import {user} from './log';
 
 /**
  * @enum {number}
@@ -67,6 +67,8 @@ export function batchFetchJsonFor(
               'triggered by amp-bind will soon require opt-in. Please add ' +
               `data-amp-replace="${unwhitelisted.join(' ')}" to the ` +
               `<${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
+          // For tracking in error reporting.
+          dev().expectedError(TAG, 'amp-bind CORS fetch without opt-in!');
         }
       });
     }
