@@ -26,7 +26,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
         1. ```"vars": {}``` for additional default variables.
         1. ```"requests": {}``` for requests that your service will use.
         1. ```"optout":``` if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
-        1. If you are using iframe transport, add a new block to ANALYTICS_IFRAME_TRANSPORT_CONFIG in vendors.js containing ```"transport": { "iframe": *url* }```
+    1. If you are using iframe transport, add a new block to ANALYTICS_IFRAME_TRANSPORT_CONFIG in vendors.js containing ```"transport": { "iframe": *url* }```
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 reference.
     1. A new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
