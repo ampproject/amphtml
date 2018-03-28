@@ -247,9 +247,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   },
 
   'bg': {
-    'transport': {
-      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
-    },
   },
 
   'burt': {
@@ -2064,3 +2061,23 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+/**
+ * @const {!JsonObject}
+ */
+export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+    },
+  },
+});
+
+// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
+for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
+  ANALYTICS_CONFIG[vendor] = ANALYTICS_CONFIG[vendor] || {};
+  ANALYTICS_CONFIG[vendor]['transport'] =
+      ANALYTICS_CONFIG[vendor]['transport'] || {};
+  ANALYTICS_CONFIG[vendor]['transport']['iframe'] =
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'];
+}
