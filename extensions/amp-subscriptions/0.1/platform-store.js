@@ -228,7 +228,7 @@ export class PlatformStore {
    * @param {boolean} preferViewerSupport
    * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
-  selectPlatform(preferViewerSupport = true) {
+  selectPlatform(preferViewerSupport) {
 
     return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
