@@ -261,7 +261,6 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatform_(preferViewerSupport) {
-    console.log('hi');
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
