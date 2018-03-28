@@ -42,6 +42,14 @@ const SEPARATOR_RECOS = 3;
 /** @private {AmpDocumentRecommendations} */
 let activeInstance_ = null;
 
+/**
+ * @typedef {{
+ *   ampUrl: string,
+ *   amp: ?Object
+ * }}
+ */
+export let DocumentRef;
+
 export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -65,6 +73,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+
+    /** @private @const {!Array<!DocumentRef>} */
+    this.documentRefs_ = [{
+      ampUrl: this.win.document.location.href,
+      amp: {title: this.win.document.title},
+    }];
   }
 
   /** @override */
@@ -90,6 +104,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
       const next = this.config_.recommendations[this.nextArticle_];
+      const documentRef = {ampUrl: next.ampUrl, amp: null};
+      this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
       // TODO(emarchiori): ampUrl needs to be updated to point to
@@ -98,6 +114,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
           .fetchDocument(next.ampUrl)
           .then(doc => this.attachShadowDoc_(doc), () => {})
           .then(amp => {
+            documentRef.amp = amp;
+
             this.win.document.title = amp.title || '';
             if (this.win.history.replaceState) {
               const url = parseUrl(next.ampUrl);
