@@ -218,7 +218,7 @@ describes.realWin('amp-install-serviceworker', {
         appendChild.call(install, iframe);
       };
       let deferredMutate;
-      implementation.deferMutate = fn => {
+      implementation.mutateElement = fn => {
         expect(deferredMutate).to.be.undefined;
         deferredMutate = fn;
       };

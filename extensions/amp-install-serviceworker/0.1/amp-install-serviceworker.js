@@ -101,7 +101,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
       Services.timerFor(this.win).delay(() => {
-        this.deferMutate(this.insertIframe_.bind(this));
+        this.mutateElement(this.insertIframe_.bind(this));
       }, 10000);
     });
   }
