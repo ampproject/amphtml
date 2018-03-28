@@ -515,6 +515,11 @@ data.tag;
 data.tag.tta;
 data.tag.ttp;
 
+// voluum.js
+data.domain;
+data.placement;
+data.publisher;
+
 // webediads.js
 var wads;
 wads.init;

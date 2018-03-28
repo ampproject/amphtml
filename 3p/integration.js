@@ -217,6 +217,7 @@ import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
+import {voluum} from '../ads/voluum';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
@@ -253,6 +254,7 @@ const AMP_EMBED_ALLOWED = {
   smartclip: true,
   smi2: true,
   taboola: true,
+  voluum: true,
   zergnet: true,
 };
 
@@ -419,6 +421,7 @@ register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);
 register('vmfive', vmfive);
+register('voluum', voluum);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);

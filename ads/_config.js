@@ -857,6 +857,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  voluum: {},
+
   webediads: {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: [
