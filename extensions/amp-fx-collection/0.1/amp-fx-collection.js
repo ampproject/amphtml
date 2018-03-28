@@ -33,14 +33,6 @@ const FxType = {
 };
 
 /**
- * Map of fx type to fx provider class.
- * @type {Object<FxType, function(new:FxProvider, !../../../src/service/ampdoc-impl.AmpDoc)>}
- */
-const fxProviders = map({
-  [FxType.PARALLAX]: FxProvider,
-});
-
-/**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
  */
