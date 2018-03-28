@@ -31,7 +31,7 @@ export class PlatformStore {
    *
    * @param {!Array<string>} expectedServiceIds
    */
-  constructor(expectedServiceIds, platformConfig) {
+  constructor(expectedServiceIds) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -53,7 +53,6 @@ export class PlatformStore {
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
-
   }
 
   /**

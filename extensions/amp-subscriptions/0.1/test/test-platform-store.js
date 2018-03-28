@@ -236,8 +236,8 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another', products: ['product2'],
         subscriptionToken: null}));
-      expect(platformStore.selectApplicablePlatform_(false).getServiceId()).to.be
-          .equal(localPlatform.getServiceId());
+      expect(platformStore.selectApplicablePlatform_(false).getServiceId())
+          .to.be.equal(localPlatform.getServiceId());
     });
 
     it('should choose a local if all other conditions are same', () => {
