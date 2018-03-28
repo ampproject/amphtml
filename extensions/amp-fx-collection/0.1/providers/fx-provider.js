@@ -23,10 +23,17 @@ import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyle} from '../../../../src/style';
+import {setStyles} from '../../../../src/style';
 
-const propertyAnimated = {
-  'parallax': 'transform',
+const installStyles = {
+  'parallax': {
+    'will-change': 'transform',
+  },
+  'fade-in': {
+    'will-change': 'opacity',
+    'opacity': 0,
+
+  },
 };
 
 /**
@@ -62,7 +69,7 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    setStyle(element, 'will-change', propertyAnimated[this.fxType_]);
+    setStyles(element, installStyles[this.fxType_]);
     const parallaxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.fxType_);
@@ -110,6 +117,19 @@ export class FxElement {
 
     /** @private @const {number} */
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
+
+    /** @private {number} */
+    this.margin_ = element.hasAttribute('data-fade-in-margin') ?
+      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.25;
+
+    /** @private {string} */
+    this.easing_ = element.hasAttribute('data-fade-in-easing') ?
+      element.getAttribute('data-fade-in-easing') :
+      'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
+
+    /** @private {string} */
+    this.duration_ = element.hasAttribute('data-fade-in-duration') ?
+      element.getAttribute('data-fade-in-duration') : '1500ms';
   }
 
   /**

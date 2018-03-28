@@ -60,4 +60,39 @@ export const Presets = {
       }
     },
   },
+  'fade-in': {
+    userAsserts(element) {
+      if (!element.hasAttribute('data-fade-in-margin')) {
+        return;
+      }
+      const margin = element.getAttribute('data-fade-in-margin');
+      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
+          'data-fade-in-margin must be a number and be between 0 and 1 for: %s',
+          element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top >
+            (1 - fxElement.margin_) * fxElement.adjustedViewportHeight_) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      if (!fxElement.mutateScheduled_) {
+        fxElement.mutateScheduled_ = true;
+        fxElement.resources_.mutateElement(fxElement.element_, function() {
+          fxElement.mutateScheduled_ = false;
+          // Translate the element offset pixels.
+          setStyles(fxElement.element_, {
+            'transition-duration': fxElement.duration_,
+            'transition-timing-function': fxElement.easing_,
+            'opacity': 1,
+          });
+        });
+      }
+    },
+  },
 };
