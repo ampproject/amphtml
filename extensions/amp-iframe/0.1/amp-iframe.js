@@ -259,9 +259,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_ = makeIOsScrollable(this.element);
 
-    if (isExperimentOn(this.win, 'iframe-messaging')) {
-      this.registerIframeMessaging_();
-    }
+    this.registerIframeMessaging_();
   }
 
   /**
@@ -571,6 +569,10 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   registerIframeMessaging_() {
+    if (!isExperimentOn(this.win, 'iframe-messaging')) {
+      return;
+    }
+
     const src = this.element.getAttribute('src');
     if (src) {
       this.targetOrigin_ = parseUrl(src).origin;
@@ -612,6 +614,8 @@ export class AmpIframe extends AMP.BaseElement {
             'from a user gesture.');
         // Disable the 'message' event if the iframe is behaving badly.
         if (unexpectedMessages >= maxUnexpectedMessages) {
+          user().error(TAG_, 'Too many non-gesture-triggered "message" ' +
+              'events; detaching event listener.');
           this.win.removeEventListener('message', listener);
         }
         return;
