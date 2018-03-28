@@ -39,6 +39,7 @@ import {
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
@@ -1072,7 +1073,8 @@ describe('amp-a4a', () => {
             expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                 .to.be.calledOnce;
             expect(updateLayoutPriorityStub).to.be.calledOnce;
-            expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
+            expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+                LayoutPriority.CONTENT);
             expect(lifecycleEventStub).to.be.calledWith(
                 'adResponseValidateEnd', {
                   'signatureValidationResult': 0,
@@ -1196,7 +1198,8 @@ describe('amp-a4a', () => {
               expect(onCreativeRenderSpy.withArgs(sinon.match.object))
                   .to.be.calledOnce;
               expect(updateLayoutPriorityStub).to.be.calledOnce;
-              expect(updateLayoutPriorityStub.args[0][0]).to.equal(0);
+              expect(updateLayoutPriorityStub.args[0][0]).to.equal(
+                  LayoutPriority.CONTENT);
             } else {
               expect(iframe.getAttribute('srcdoc')).to.be.null;
               expect(iframe.src, 'verify iframe src w/ origin').to
@@ -1355,125 +1358,100 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should collapse for 204 response code', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        adResponse.status = 204;
-        adResponse.body = null;
-        fetchMock.getOnce(
-            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
-            {name: 'ad'});
-        const doc = fixture.doc;
-        const a4aElement = createA4aElement(doc);
-        const a4a = new MockA4AImpl(a4aElement);
-        a4a.buildCallback();
-        const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const noContentUISpy = sandbox.spy();
-        const unlayoutUISpy = sandbox.spy();
-        a4a.uiHandler = {
-          applyNoContentUI: () => {noContentUISpy();},
-          applyUnlayoutUI: () => {unlayoutUISpy();},
-        };
-        sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
-        a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.ok;
-        return a4a.adPromise_.then(() => {
-          expect(forceCollapseSpy).to.be.calledOnce;
-          expect(noContentUISpy).to.be.calledOnce;
-          return a4a.layoutCallback().then(() => {
-            // should have no iframe.
-            expect(a4aElement.querySelector('iframe')).to.not.be.ok;
-            expect(onCreativeRenderSpy).to.not.be.called;
-            // call unlayout callback and verify it attempts to revert the size
-            expect(a4a.originalSlotSize_).to.deep
-                .equal({width: 123, height: 456});
-            let attemptChangeSizeResolver;
-            const attemptChangeSizePromise = new Promise(resolve => {
-              attemptChangeSizeResolver = resolve;
-            });
-            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-                .returns(attemptChangeSizePromise);
-            a4a.unlayoutCallback();
-            expect(unlayoutUISpy).to.be.calledOnce;
-            expect(a4a.originalSlotSize_).to.be.ok;
-            attemptChangeSizeResolver();
-            return Services.timerFor(a4a.win).promise(1).then(() => {
-              expect(a4a.originalSlotSize_).to.not.be.ok;
+
+    [
+      {
+        name: '204',
+        fn: () => adResponse.status = 204,
+      },
+      {
+        name: '500',
+        fn: () => adResponse.status = 500,
+      },
+      {
+        name: 'empty body',
+        fn: () => adResponse.body = '',
+      },
+      {
+        name: 'no fill header',
+        fn: () => adResponse.headers['amp-ff-empty-creative'] = '',
+      },
+    ].forEach(test => {
+      it(`should collapse ${test.name}`, () => {
+        return createIframePromise().then(fixture => {
+          setupForAdTesting(fixture);
+          test.fn();
+          fetchMock.getOnce(
+              TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+              adResponse,
+              {name: 'ad'});
+          const doc = fixture.doc;
+          const a4aElement = createA4aElement(doc);
+          const a4a = new MockA4AImpl(a4aElement);
+          a4a.buildCallback();
+          const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
+          const noContentUISpy = sandbox.spy();
+          const unlayoutUISpy = sandbox.spy();
+          a4a.uiHandler = {
+            applyNoContentUI: () => {noContentUISpy();},
+            applyUnlayoutUI: () => {unlayoutUISpy();},
+          };
+          sandbox.stub(a4a, 'getLayoutBox').returns(
+              {width: 123, height: 456});
+          a4a.onLayoutMeasure();
+          expect(a4a.adPromise_).to.be.ok;
+          return a4a.adPromise_.then(() => {
+            expect(forceCollapseSpy).to.be.calledOnce;
+            expect(noContentUISpy).to.be.calledOnce;
+            return a4a.layoutCallback().then(() => {
+              // should have no iframe.
+              expect(a4aElement.querySelector('iframe')).to.not.be.ok;
+              expect(onCreativeRenderSpy).to.not.be.called;
+              // call unlayout callback & verify it attempts to revert size
+              expect(a4a.originalSlotSize_).to.deep
+                  .equal({width: 123, height: 456});
+              let attemptChangeSizeResolver;
+              const attemptChangeSizePromise = new Promise(resolve => {
+                attemptChangeSizeResolver = resolve;
+              });
+              sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
+                  .returns(attemptChangeSizePromise);
+              a4a.unlayoutCallback();
+              expect(unlayoutUISpy).to.be.calledOnce;
+              expect(a4a.originalSlotSize_).to.be.ok;
+              attemptChangeSizeResolver();
+              return Services.timerFor(a4a.win).promise(1).then(() => {
+                expect(a4a.originalSlotSize_).to.not.be.ok;
+              });
             });
           });
         });
       });
     });
-    it('should collapse for empty array buffer', () => {
+
+    it('should process safeframe version header properly', () => {
+      adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
+      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
-        adResponse.body = '';
         fetchMock.getOnce(
-            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
-            {name: 'ad'});
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+            () => adResponse, {name: 'ad'});
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.buildCallback();
-        const forceCollapseSpy = sandbox.spy(a4a, 'forceCollapse');
-        const noContentUISpy = sandbox.spy();
-        a4a.uiHandler = {
-          applyNoContentUI: () => {noContentUISpy();},
-          applyUnlayoutUI: () => {},
-        };
-        sandbox.stub(a4a, 'getLayoutBox').returns({width: 123, height: 456});
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_).to.be.ok;
         return a4a.adPromise_.then(() => {
-          expect(forceCollapseSpy).to.be.calledOnce;
-          expect(noContentUISpy).to.be.calledOnce;
+          expect(fetchMock.called('ad')).to.be.true;
           return a4a.layoutCallback().then(() => {
-            // should have no iframe.
-            expect(a4aElement.querySelector('iframe')).to.not.be.ok;
-            expect(onCreativeRenderSpy).to.not.be.called;
-            // call unlayout callback and verify it attempts to revert the size
-            expect(a4a.originalSlotSize_).to.deep
-                .equal({width: 123, height: 456});
-            let attemptChangeSizeResolver;
-            const attemptChangeSizePromise = new Promise(resolve => {
-              attemptChangeSizeResolver = resolve;
-            });
-            sandbox.stub(AMP.BaseElement.prototype, 'attemptChangeSize')
-                .returns(attemptChangeSizePromise);
-            a4a.unlayoutCallback();
-            expect(a4a.originalSlotSize_).to.be.ok;
-            attemptChangeSizeResolver();
-            return Services.timerFor(a4a.win).promise(1).then(() => {
-              expect(a4a.originalSlotSize_).to.not.be.ok;
-            });
-          });
-        });
-      });
-
-      it('should process safeframe version header properly', () => {
-        adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
-        adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
-        delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-        delete adResponse.headers[AMP_SIGNATURE_HEADER];
-        return createIframePromise().then(fixture => {
-          setupForAdTesting(fixture);
-          fetchMock.getOnce(
-              TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
-              () => adResponse, {name: 'ad'});
-          const doc = fixture.doc;
-          const a4aElement = createA4aElement(doc);
-          const a4a = new MockA4AImpl(a4aElement);
-          a4a.buildCallback();
-          a4a.onLayoutMeasure();
-          return a4a.adPromise_.then(() => {
-            expect(fetchMock.called('ad')).to.be.true;
-            return a4a.layoutCallback().then(() => {
-              verifySafeFrameRender(a4aElement, '1-2-3');
-              // Verify preload to safeframe with header version.
-              expect(doc.querySelector('link[rel=preload]' +
-                '[href="https://tpc.googlesyndication.com/safeframe/' +
-                '1-2-3/html/container.html"]')).to.be.ok;
-            });
+            verifySafeFrameRender(a4aElement, '1-2-3');
+            // Verify preload to safeframe with header version.
+            expect(doc.querySelector('link[rel=preload]' +
+              '[href="https://tpc.googlesyndication.com/safeframe/' +
+              '1-2-3/html/container.html"]')).to.be.ok;
           });
         });
       });
@@ -1763,7 +1741,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getLayoutPriority()).to.equal(1);
+        expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
       });
     });
 
@@ -1776,7 +1754,7 @@ describe('amp-a4a', () => {
         const body = env.ampdoc.getBody();
         const a4aElement = createA4aElement(env.win.document, null, body);
         const a4a = new MockA4AImpl(a4aElement);
-        expect(a4a.getLayoutPriority()).to.equal(2);
+        expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
       });
     });
   });

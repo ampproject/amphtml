@@ -20,7 +20,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
+import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -112,12 +112,12 @@ function buildArticleTemplate(articleData) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: articleData.title,
+        unlocalizedString: articleData.title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: articleData.domainName,
+        unlocalizedString: articleData.domainName,
       },
     ],
   });
@@ -150,7 +150,7 @@ function buildArticlesContainerTemplate(articleSets) {
       template.push({
         tag: 'h3',
         attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
-        text: articleSet.heading,
+        unlocalizedString: articleSet.heading,
       });
     }
     template.push({
@@ -188,12 +188,12 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: title,
+        unlocalizedString: title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: domainName,
+        unlocalizedString: domainName,
       },
     ],
   });
@@ -263,15 +263,9 @@ export class Bookend {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
-    const shadowRoot = createShadowRoot(this.root_);
-
     this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
 
-    const style = this.win_.document.createElement('style');
-    style./*OK*/textContent = CSS;
-
-    shadowRoot.appendChild(style);
-    shadowRoot.appendChild(this.bookendEl_);
+    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
@@ -281,10 +275,6 @@ export class Bookend {
     innerContainer.appendChild(this.replayButton_);
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
-
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
-      this.toggleDesktopAttribute_(true);
-    }
 
     this.vsync_.mutate(() => {
       this.storyElement_.appendChild(this.getRoot());
@@ -321,7 +311,7 @@ export class Bookend {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
   }
 
   /**

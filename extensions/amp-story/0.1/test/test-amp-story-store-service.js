@@ -48,6 +48,19 @@ describes.fakeWin('amp-story-store-service', {}, env => {
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
   });
+
+  it('should not trigger a listener on subscribe by default', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
+    expect(listenerSpy).to.have.callCount(0);
+  });
+
+  it('should trigger a listener on subscribe if option is set to true', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(false);
+  });
 });
 
 describes.fakeWin('amp-story-store-service embed mode', {}, env => {
@@ -100,6 +113,30 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_DESKTOP, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should update the current page', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
+    storeService.dispatch(Action.CHANGE_PAGE, 'test-page');
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith('test-page');
+  });
+
+  it('should toggle the has audio state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.HAS_AUDIO_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_HAS_AUDIO, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should set the fallback state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.FALLBACK_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_FALLBACK, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });

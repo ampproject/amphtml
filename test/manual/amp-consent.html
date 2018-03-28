@@ -110,6 +110,33 @@
       background: #f4f4f4;
     }
 
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
     hr {
       margin: 0;
     }
@@ -125,14 +152,34 @@
     </div>
   </header>
   <main role="main">
-    <amp-consent id='ABC' layout='nodisplay'>
+    <amp-consent layout='nodisplay'>
       <script type="application/json">{
         "consents": {
           "DEF": {
-            "checkConsentHref": "http://localhost:8000/get-consent-v1"
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui1",
+            "revokeUI": "revoke"
+          },
+          "ABC": {
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui2"
           }
         }
       }</script>
+      <div id="ui1">
+        Learn more.
+        <button on="tap:amp-consent.accept" role="button">Accept</button>
+        <button on="tap:amp-consent.reject" role="button">Reject</button>
+      </div>
+       <div id="ui2">
+        Learn more V2.
+        <button on="tap:amp-consent.accept" role="button">Accept</button>
+        <button on="tap:amp-consent.reject" role="button">Reject</button>
+      </div>
+      <div id="revoke">
+        Revoke.
+        <button role="button">Ahahaha</button>
+      </div>
     </amp-consent>
     <article>
 

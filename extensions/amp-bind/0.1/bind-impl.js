@@ -748,8 +748,10 @@ export class Bind {
     boundProperties.forEach(boundProperty => {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
+      // Support equality checks for arrays of objects containing arrays.
+      // Useful for rendering amp-list with amp-bind state via [src].
       if (newValue === undefined ||
-          recursiveEquals(newValue, previousResult, /* depth */ 3)) {
+          recursiveEquals(newValue, previousResult, /* depth */ 5)) {
         user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {
