@@ -25,40 +25,22 @@ limitations under the License.
         data-sid="2847717911664"
         data-tag="sync"
         data-click-tracker="false"
-        data-viewability="true"
->
-</amp-ad>
-<br/>
-<amp-ad width="300" height="250"
-        type="pixels"
-        data-origin="px"
-        data-sid="6210422023544"
-        data-tag="sync"
-        data-click-tracker="false"
-        data-viewability="true"
->
-</amp-ad>
-<br/>
-<amp-ad width="320" height="50"
-        type="pixels"
-        data-origin="sn"
-        data-sid="9583368923543"
-        data-tag="sync"
-        data-click-tracker="false"
-        data-viewability="true"
->
+        data-viewability="true">
 </amp-ad>
 ```
 
 ## Configuration
 
+For additional details and support contact techteam@pixels.asia
+
+
 Required parameters:
 
-- data-origin
-- data-sid
-- data-tag
+- data-origin - Specify which ad server group to handle the ad request.
+- data-sid - Unique ad tag identifier.
+- data-tag - Specify whether this tag is a sync tag. 
 
 Optional parameters:
 
-- data-click-tracker
-- data-viewability
+- data-click-tracker - Specify whether there is a third party click-tracker.
+- data-viewability - Specify whether the tag should record viewability statistics. 
