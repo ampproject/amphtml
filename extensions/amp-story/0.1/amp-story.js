@@ -486,9 +486,11 @@ export class AmpStory extends AMP.BaseElement {
     // keep track of page-id in browser history API
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
       const history = this.win.history;
-      history.pushState({
-        ampStoryPageId: pageId,
-      }, 'amp-story', '');
+      if (history.pushState) {
+        history.pushState({
+          ampStoryPageId: pageId,
+        }, 'amp-story', '');
+      }
     });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
