@@ -137,6 +137,10 @@ export const adConfig = {
 
   adocean: {},
 
+  adpicker: {
+    renderStartImplemented: true,
+  },
+
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
     renderStartImplemented: true,
@@ -731,6 +735,10 @@ export const adConfig = {
   },
 
   rubicon: {},
+
+  sekindo: {
+    renderStartImplemented: true,
+  },
 
   sharethrough: {
     renderStartImplemented: true,

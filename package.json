@@ -28,7 +28,7 @@
     "babel-polyfill": "6.26.0",
     "document-register-element": "1.5.0",
     "promise-pjs": "1.1.3",
-    "web-activities": "1.5.0",
+    "web-activities": "1.6.0",
     "web-animations-js": "2.3.1"
   },
   "greenkeeper": {

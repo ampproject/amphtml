@@ -110,6 +110,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/messaging.js->src/event-helper.js',
+      '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
@@ -132,6 +133,7 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -291,6 +293,18 @@ exports.rules = [
     ],
   },
 
+  {
+    mustNotDependOn: [
+      /** DO NOT WHITELIST ANY FILES */
+      'ads/google/deprecated_doubleclick.js',
+      /** DO NOT WHITELIST ANY FILES */
+    ],
+    whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
+      '3p/integration.js->ads/google/deprecated_doubleclick.js',
+    ],
+  },
+
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
   // Doubleclick.js will be deleted from the repository at that time.
   // Please see https://github.com/ampproject/amphtml/issues/11834
@@ -314,7 +328,6 @@ exports.rules = [
       'ads/yieldbot.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
       'ads/criteo.js->ads/google/doubleclick.js',
-      '3p/integration.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST **/
     ],
   },

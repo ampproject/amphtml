@@ -12,12 +12,19 @@
     body {
       font-family: sans-serif;
     }
-    h1 {
+    h1, p {
       font-family: Menlo, Monaco, monospace;
-      font-weight: bold;
-      font-size: 24px;
       width: 100%;
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 24px;
+      z-index: 1;
       text-align: left;
+    }
+    p {
+      font-size: 18px;
+      text-align: right;
     }
     amp-story-page {
       background: #ddd;
@@ -33,6 +40,9 @@
     }
     .circle {
       border-radius: 80px;
+    }
+    .img-container {
+      position: absolute;
     }
     </style>
 </head>
@@ -147,6 +157,39 @@
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
+
+    <amp-story-page id="ken-burns-effect">
+      <amp-story-grid-layer template="vertical">
+        <h1>ken-burns-effect</h1>
+        <div animate-in="zoom-in" animate-in-duration="30s" class="img-container">
+            <amp-img id="ken-burns-img1"
+              src="https://picsum.photos/1024/768?image=1077"
+              animate-in="pan-right"
+              animate-in-duration="30s"
+              layout="fixed"
+              width="1024"
+              height="768">
+            </amp-img>
+        </div>
+        <div animate-in="fade-in" animate-in-after="ken-burns-img1" animate-in-delay="0.25s" animate-in-duration="1s">
+          <div
+            animate-in="zoom-out"
+            animate-in-duration="30s"
+            class="img-container"
+            animate-in-after="ken-burns-img1">
+            <amp-img id="ken-burns-img2"
+              src="https://picsum.photos/1024/768?image=1026"
+              layout="fixed"
+              width="1024"
+              height="768"
+              animate-in="pan-down"
+              animate-in-duration="30s"
+              animate-in-after="ken-burns-img1">
+            </amp-img>
+          </div>
+        </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
   </amp-story>
 </body>
 </html>

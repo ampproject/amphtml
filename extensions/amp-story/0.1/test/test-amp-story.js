@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {PaginationButtons} from '../pagination-buttons';
-import {Services} from '../../../../src/services';
 
 
 const NOOP = () => {};
@@ -130,66 +130,29 @@ describes.realWin('amp-story', {
 
   it('should preload the bookend if navigating to the last page', () => {
     createPages(story.element, 1, ['cover']);
-    const bookendUrl = 'foo.com';
-    story.element.setAttribute('bookend-config-src', bookendUrl);
 
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.have.been.calledOnce;
-          expect(fetchJsonStub.getCall(0).args[0]).to.equal(bookendUrl);
-        });
-  });
-
-  // The empty bookend is built even if no bookend-config-src attribute was set.
-  it('should prerender the bookend if navigating to the last page', () => {
-    createPages(story.element, 1, ['cover']);
-    const fakeBookendElement = win.document.createElement('div');
-    const buildBookendStub =
-        sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const appendChildSpy = sandbox.spy(story.element, 'appendChild');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(buildBookendStub).to.have.been.calledWith(story.getAmpDoc());
-          expect(appendChildSpy).to.have.been.calledWith(fakeBookendElement);
-        });
-  });
-
-  it('should not preload the bookend if no attribute was set', () => {
-    createPages(story.element, 1, ['cover']);
-
-    const fakeBookendElement = win.document.createElement('div');
-    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
-
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.have.been.calledOnce;
+          expect(loadBookendStub).to.have.been.calledOnce;
         });
   });
 
   it('should not preload the bookend if not on the last page', () => {
     createPages(story.element, 2, ['cover']);
-    story.element.setAttribute('bookend-config-src', 'foo.com');
 
-    const xhr = Services.xhrFor(win);
-    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
     return story.layoutCallback()
         .then(() => {
-          expect(fetchJsonStub).to.not.have.been.called;
+          expect(buildBookendStub).to.not.have.been.called;
+          expect(loadBookendStub).to.not.have.been.called;
         });
   });
 
@@ -330,6 +293,20 @@ describes.realWin('amp-story', {
         expect(story.element.classList.contains('i-amphtml-story-landscape'))
             .to.be.false;
       });
+
+  it('should update page id in store', () => {
+    const firstPageId = 'page-one';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const dispatchStub =
+        sandbox.stub(story.storeService_, 'dispatch');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(dispatchStub)
+              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+        });
+  });
 });
 
 
