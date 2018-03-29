@@ -31,12 +31,12 @@ export default {
         'been successfully enabled.',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Next',
+    string: 'Tap Next',
     description: 'Label indicating that users can navigate to the next ' +
         'page, in the amp-story hint UI.',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Back',
+    string: 'Tap Back',
     description: 'Label indicating that users can navigate to the previous ' +
         'page, in the amp-story hint UI.',
   },
