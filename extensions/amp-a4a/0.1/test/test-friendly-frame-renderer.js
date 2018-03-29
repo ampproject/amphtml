@@ -30,6 +30,7 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   let context;
   let creativeData;
   let renderer;
+  let renderPromise;
 
   beforeEach(() => {
     context = {
@@ -57,6 +58,8 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
       left: 0, top: 0, width: 0, height: 0,
     });
     document.body.appendChild(containerElement);
+
+    renderPromise = renderer.render(context, containerElement, creativeData);
   });
 
   afterEach(() => {
@@ -64,12 +67,45 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
   });
 
   it('should append iframe child', () => {
-    return renderer.render(context, containerElement, creativeData).then(
-        () => {
-          const iframe = containerElement.querySelector('iframe');
-          expect(iframe).to.be.ok;
-          expect(iframe.contentWindow.document.body.innerHTML)
-              .to.equal(minifiedCreative);
-        });
+    return renderPromise.then(() => {
+      const iframe = containerElement.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      expect(iframe.contentWindow.document.body.innerHTML)
+          .to.equal(minifiedCreative);
+    });
+  });
+
+  it('should set the correct srcdoc on the iframe', () => {
+    const srcdoc = '<base href="http://www.google.com">'
+        + '<meta http-equiv=Content-Security-Policy content="script-src '
+        + '\'none\';object-src \'none\';child-src \'none\'">'
+        + '<p>Hello, World!</p>';
+    return renderPromise.then(() => {
+      const iframe = containerElement.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
+    });
+  });
+
+  it('should set correct attributes on the iframe', () => {
+    return renderPromise.then(() => {
+      const iframe = containerElement.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      expect(iframe.getAttribute('width')).to.equal('320');
+      expect(iframe.getAttribute('height')).to.equal('50');
+      expect(iframe.getAttribute('frameborder')).to.equal('0');
+      expect(iframe.getAttribute('allowfullscreen')).to.equal('');
+      expect(iframe.getAttribute('allowtransparency')).to.equal('');
+      expect(iframe.getAttribute('scrolling')).to.equal('no');
+    });
+  });
+
+  it('should style body of iframe document to be visible', () => {
+    return renderPromise.then(() => {
+      const iframe = containerElement.querySelector('iframe');
+      expect(iframe).to.be.ok;
+      expect(iframe.contentWindow.document.body.style.visibility)
+          .to.equal('visible');
+    });
   });
 });
