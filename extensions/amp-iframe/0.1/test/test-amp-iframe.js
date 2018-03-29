@@ -755,7 +755,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(1, 500);
+        yield waitForJsInIframe(1);
         expect(content).to.equal('foo-123');
       });
 
@@ -809,7 +809,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(1, 500);
+        yield waitForJsInIframe(1);
         expect(actions.trigger).to.not.be.called;
         expect(userError).calledWithMatch('amp-iframe',
             /may only be triggered from a user gesture/);
@@ -821,7 +821,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(2, 500);
+        yield waitForJsInIframe(2);
         // Once for 'loaded-iframe' and once for 'content-iframe'.
         expect(actions.trigger).to.be.calledTwice;
         const eventMatcher = sinon.match({
