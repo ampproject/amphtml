@@ -96,7 +96,7 @@ Using JSON-LD, the markup would look like:
 
 Thus, notice that:
  1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
- 2. This document is currently locked (`"isAccessibleForFree": false`)
+ 2. This document is currently locked (`"isAccessibleForFree": false`).
 
 ### Microdata markup
 
@@ -117,12 +117,15 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
     {
       // Service 2, etc
     }
-  ]
+  ],
+  "preferViewerSupport": true
 }
 </script>
 ```
 
 The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+
+Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
 
 ### The "local" service configuration
 
