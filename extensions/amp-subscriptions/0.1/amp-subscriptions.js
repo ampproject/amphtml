@@ -29,7 +29,7 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getWinOrigin} from '../../../src/url';
+import {getWinOrigin, getSourceOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -287,6 +287,7 @@ export class SubscriptionService {
         'Publication id is null'
     ));
     const origin = getWinOrigin(this.ampdoc_.win);
+    const cdnOrigin = getSourceOrigin(this.ampdoc_.win.location);
     this.platformStore_ = new PlatformStore(serviceIds);
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
@@ -299,9 +300,11 @@ export class SubscriptionService {
             Entitlement.empty('local'));
       }
       const decodedData = this.jwtHelper_.decode(authData);
-      user().assert(decodedData['aud'] == origin,
-          `The mismatching "aud" field: ${decodedData['aud']}`);
+      user().assert(decodedData['aud'] == origin ||
+        decodedData['aud'] == cdnOrigin,
+      `The mismatching "aud" field: ${decodedData['aud']}`);
       user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
+
       const entitlements = decodedData['entitlements'];
       let entitlementJson;
       if (Array.isArray(entitlements)) {
