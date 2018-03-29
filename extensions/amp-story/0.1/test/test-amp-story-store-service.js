@@ -140,4 +140,20 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
+
+  it('should toggle the landscape state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.LANDSCAPE_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_LANDSCAPE, true);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(true);
+  });
+
+  it('should toggle the supported browser state', () => {
+    const listenerSpy = sandbox.spy();
+    storeService.subscribe(StateProperty.SUPPORTED_BROWSER_STATE, listenerSpy);
+    storeService.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
+    expect(listenerSpy).to.have.been.calledOnce;
+    expect(listenerSpy).to.have.been.calledWith(false);
+  });
 });
