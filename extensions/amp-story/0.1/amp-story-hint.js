@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-story-hint-0.1.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -116,13 +117,16 @@ const FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT = 275;
  * User Hint Layer for <amp-story>.
  */
 export class AmpStoryHint {
-
   /**
    * @param {!Window} win
+   * @param {!Element} storyElement Element where to append the bookend
    */
-  constructor(win) {
+  constructor(win, storyElement) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {boolean} Whether the component is built. */
+    this.isBuilt_ = false;
 
     /** @private {!Document} */
     this.document_ = this.win_.document;
@@ -141,6 +145,9 @@ export class AmpStoryHint {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
+
+    /** @private @const {!Element} */
+    this.storyElement_ = storyElement;
   }
 
   /**
@@ -148,11 +155,27 @@ export class AmpStoryHint {
    * @return {!Element}
    */
   build() {
+    if (this.isBuilt()) {
+      return;
+    }
+
+    this.isBuilt_ = true;
+
     const root = this.document_.createElement('div');
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
-    return root;
+    this.vsync_.mutate(() => {
+      this.storyElement_.appendChild(root);
+    });
+  }
+
+  /**
+   * Whether the component is built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.isBuilt_;
   }
 
   /**
@@ -164,6 +187,8 @@ export class AmpStoryHint {
     if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
       return;
     }
+
+    this.build();
 
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.toggle(NAVIGATION_OVERLAY_CLASS,
@@ -216,6 +241,10 @@ export class AmpStoryHint {
 
   /** @private */
   hideInternal_() {
+    if (!this.isBuilt()) {
+      return;
+    }
+
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.add('i-amphtml-hidden');
     });

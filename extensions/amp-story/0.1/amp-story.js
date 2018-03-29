@@ -249,7 +249,7 @@ export class AmpStory extends AMP.BaseElement {
     this.originWhitelist_ = ORIGIN_WHITELIST;
 
     /** @private {!AmpStoryHint} */
-    this.ampStoryHint_ = new AmpStoryHint(this.win);
+    this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
@@ -323,14 +323,6 @@ export class AmpStory extends AMP.BaseElement {
     const pageIds = this.pages_.map(page => page.element.id);
     this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
-  }
-
-  /**
-   * Builds the hint layer DOM.
-   * @private
-   */
-  buildLayer_() {
-    this.element.appendChild(this.ampStoryHint_.build());
   }
 
 
