@@ -21,7 +21,8 @@ import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
 import {isProxyOrigin, parseUrl} from '../url';
 
-const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
+const PUBLISHER_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
+const CACHE_API_URL = 'https://ampcid.google.com/v1/cache:getClientId?key=';
 
 const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';

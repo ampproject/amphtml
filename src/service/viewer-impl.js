@@ -263,6 +263,12 @@ export class Viewer {
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
+    /**
+     * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * @private @const {boolean}
+     */
+    this.isCctEmbedded_ = this.win.location.search.indexOf('amp_agsa=1') != -1;
+
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
@@ -497,6 +503,14 @@ export class Viewer {
    */
   isWebviewEmbedded() {
     return this.isWebviewEmbedded_;
+  }
+
+  /**
+   * Whether the document is using Chrome Custom Tabs.
+   * @return {boolean}
+   */
+  isCctEmbedded() {
+    return this.isCctEmbedded_;
   }
 
   /**
