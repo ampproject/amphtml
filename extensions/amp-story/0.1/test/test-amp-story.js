@@ -307,6 +307,24 @@ describes.realWin('amp-story', {
               .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
         });
   });
+
+  it('should update page id in browser history', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'page-zero';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.have.been.calledWith(
+              {ampStoryPageId: firstPageId},
+              '',
+          );
+        });
+  });
 });
 
 
