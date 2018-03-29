@@ -34,6 +34,7 @@ const TAG = 'amp-story';
  *    desktopstate: boolean,
  *    fallbackstate: boolean,
  *    hasaudiostate: boolean,
+ *    landscapestate: boolean,
  *    mutedstate: boolean,
  *    currentpageid: string,
  * }}
@@ -55,6 +56,7 @@ export const StateProperty = {
   DESKTOP_STATE: 'desktopstate',
   FALLBACK_STATE: 'fallbackstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
   CURRENT_PAGE_ID: 'currentpageid',
 };
@@ -66,6 +68,7 @@ export const Action = {
   TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_FALLBACK: 'togglefallback',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
+  TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
   CHANGE_PAGE: 'changepage',
 };
@@ -95,6 +98,9 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.HAS_AUDIO_STATE]: !!data}));
+    case Action.TOGGLE_LANDSCAPE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
@@ -212,6 +218,7 @@ export class AmpStoryStoreService {
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.FALLBACK_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
+      [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
     });

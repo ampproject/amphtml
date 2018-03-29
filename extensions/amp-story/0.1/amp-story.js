@@ -61,6 +61,7 @@ import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
+import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {
   childElement,
   closest,
@@ -141,63 +142,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 /** @type {string} */
 const TAG = 'amp-story';
 
-const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
-
-
-
-const LANDSCAPE_ORIENTATION_WARNING = [
-  {
-    tag: 'div',
-    attrs: dict({
-      'class': 'i-amphtml-story-no-rotation-overlay ' +
-          'i-amphtml-story-system-reset'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-overlay-container'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-rotate-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            localizedStringId:
-                LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT,
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const DESKTOP_SIZE_WARNING = [
-  {
-    tag: 'div',
-    attrs: dict({
-      'class': 'i-amphtml-story-no-rotation-overlay ' +
-          'i-amphtml-story-system-reset'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-overlay-container'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-desktop-size-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            localizedStringId:
-                LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT,
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const UNSUPPORTED_BROWSER_WARNING = [
   {
@@ -276,7 +220,11 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_ = new Bookend(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win);
+    this.systemLayer_ = new SystemLayer(this.win, this.element);
+
+    /** @private @const {!ViewportWarningLayer} */
+    this.viewportWarningLayer_ =
+        new ViewportWarningLayer(this.win, this.element);
 
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
@@ -638,7 +586,7 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
-        .then(() => this.buildLandscapeOrientationOverlay_())
+        .then(() => this.viewportWarningLayer_.build())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -1015,8 +963,7 @@ export class AmpStory extends AMP.BaseElement {
         state.isLandscape = offsetWidth > offsetHeight;
       },
       mutate: state => {
-        this.element.classList.toggle(LANDSCAPE_OVERLAY_CLASS,
-            state.isLandscape);
+        this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, state.isLandscape);
       },
     }, {});
   }
@@ -1030,7 +977,6 @@ export class AmpStory extends AMP.BaseElement {
     if (isDesktop) {
       this.vsync_.mutate(() => {
         this.element.setAttribute('desktop', '');
-        this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
       });
       if (!this.topBar_) {
         this.buildTopBar_();
@@ -1055,28 +1001,6 @@ export class AmpStory extends AMP.BaseElement {
   isDesktop_() {
     return this.desktopMedia_.matches;
   }
-
-  /**
-   * Return right overlay for mobile or desktop
-   */
-  viewportWarningOverlay_() {
-    return (this.platform_.isIos() || this.platform_.isAndroid())
-      ? LANDSCAPE_ORIENTATION_WARNING
-      : DESKTOP_SIZE_WARNING;
-  }
-
-  /**
-   * Build overlay for Landscape mode mobile
-   */
-  buildLandscapeOrientationOverlay_() {
-    this.mutateElement(() => {
-      this.element.insertBefore(
-          renderSimpleTemplate(this.win.document,
-              this.viewportWarningOverlay_()),
-          this.element.firstChild);
-    });
-  }
-
 
   /** @private */
   enterFallback_() {
