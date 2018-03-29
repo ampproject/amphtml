@@ -138,6 +138,9 @@ export class AmpStoryHint {
 
     /** @private {?(number|string)} */
     this.hintTimeout_ = null;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
   }
 
   /**
@@ -153,9 +156,15 @@ export class AmpStoryHint {
   }
 
   /**
-   * Shows the given hint
+   * Shows the given hint, only if not desktop.
+   * @param {string} hintClass
+   * @private
    */
   showHint_(hintClass) {
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+      return;
+    }
+
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.toggle(NAVIGATION_OVERLAY_CLASS,
           hintClass == NAVIGATION_OVERLAY_CLASS);
