@@ -150,4 +150,9 @@ export class AccessClientAdapter {
       });
     });
   }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
+  }
 }

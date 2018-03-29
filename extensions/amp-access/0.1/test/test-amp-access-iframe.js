@@ -34,6 +34,9 @@ describes.realWin('AccessIframeAdapter', {
 
     validConfig = {
       'iframeSrc': 'https://acme.com/iframe',
+      'defaultResponse': {
+        'response': 'default',
+      },
     };
 
     context = {
@@ -83,6 +86,13 @@ describes.realWin('AccessIframeAdapter', {
       expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
       }).to.throw(/https/);
+    });
+
+    it('should require "defaultResponse"', () => {
+      delete validConfig['defaultResponse'];
+      expect(() => {
+        new AccessIframeAdapter(ampdoc, validConfig, context);
+      }).to.throw(/defaultResponse/);
     });
 
     it('should disallow non-array vars', () => {
@@ -145,23 +155,23 @@ describes.realWin('AccessIframeAdapter', {
   describe('runtime', () => {
     let adapter;
     let messengerMock;
+    let storageMock;
 
     beforeEach(() => {
+      const storage = {
+        getItem: () => {},
+        setItem: () => {},
+        removeItem: () => {},
+      };
+      storageMock = sandbox.mock(storage);
+      Object.defineProperty(ampdoc.win, 'sessionStorage', {value: storage});
       adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
       messengerMock = sandbox.mock(adapter.messenger_);
-      messengerMock.expects('sendCommandRsvp')
-          .withExactArgs('start', {
-            'protocol': 'amp-access',
-            'config': validConfig,
-          })
-          .returns(Promise.resolve())
-          .once();
-      adapter.connect();
-      adapter.handleCommand_('connect');
     });
 
     afterEach(() => {
       messengerMock.verify();
+      storageMock.verify();
     });
 
     it('should connect', () => {
@@ -169,24 +179,168 @@ describes.realWin('AccessIframeAdapter', {
     });
 
     describe('authorize', () => {
+      beforeEach(() => {
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('start', {
+              'protocol': 'amp-access',
+              'config': validConfig,
+            })
+            .returns(Promise.resolve())
+            .once();
+        adapter.connect();
+        adapter.handleCommand_('connect');
+      });
+
       it('should issue authorization', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({granted: true}))
+            .returns(Promise.resolve({granted: true, data: {a: 1}}))
             .once();
         return adapter.authorize().then(result => {
-          expect(result).to.deep.equal({granted: true});
+          expect(result).to.deep.equal({a: 1});
+        });
+      });
+
+      it('should default to the default response', () => {
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(new Promise(() => {}))
+            .once();
+        const p = adapter.authorize();
+        clock.tick(3001);
+        return p.then(result => {
+          expect(result).to.deep.equal({response: 'default'});
+        });
+      });
+
+      it('should store successful authorization', () => {
+        const data = {a: 1};
+        storageMock.expects('setItem')
+            .withExactArgs('amp-access-iframe', JSON.stringify({
+              't': ampdoc.win.Date.now(),
+              'd': data,
+            }))
+            .once();
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(Promise.resolve({granted: true, data}))
+            .once();
+        return adapter.authorize().then(() => {
+          // Skip a microtask.
+          return Promise.resolve().then(() => Promise.resolve());
+        });
+      });
+
+      it('should recover the response from storage', () => {
+        const data = {a: 1};
+        storageMock.expects('getItem')
+            .withExactArgs('amp-access-iframe')
+            .returns(JSON.stringify({
+              't': ampdoc.win.Date.now() - 1000 * 60 * 60 * 24 * 7 + 3000 + 2,
+              'd': data,
+            }))
+            .once();
+        storageMock.expects('removeItem')
+            .withExactArgs('amp-access-iframe')
+            .never();
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(new Promise(() => {}))
+            .once();
+        const p = adapter.authorize();
+        clock.tick(3001);
+        return p.then(result => {
+          expect(result).to.deep.equal(data);
+        });
+      });
+
+      it('should reject the expired response from storage', () => {
+        const data = {a: 1};
+        storageMock.expects('getItem')
+            .withExactArgs('amp-access-iframe')
+            .returns(JSON.stringify({
+              't': ampdoc.win.Date.now() - 1000 * 60 * 60 * 24 * 7 + 3000 - 1,
+              'd': data,
+            }))
+            .once();
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(new Promise(() => {}))
+            .once();
+        const p = adapter.authorize();
+        clock.tick(3001);
+        return p.then(result => {
+          expect(result).to.deep.equal({response: 'default'});
+        });
+      });
+
+      it('should tolerate storage failures', () => {
+        storageMock.expects('getItem')
+            .withExactArgs('amp-access-iframe')
+            .throws(new Error('intentional'))
+            .once();
+        storageMock.expects('removeItem')
+            .withExactArgs('amp-access-iframe')
+            // Ensure that removal errors are also tolerated.
+            .throws(new Error('intentional'))
+            .once();
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(new Promise(() => {}))
+            .once();
+        const p = adapter.authorize();
+        clock.tick(3001);
+        return p.then(result => {
+          expect(result).to.deep.equal({response: 'default'});
+        });
+      });
+
+      it('should ignore absent storage', () => {
+        Object.defineProperty(ampdoc.win, 'sessionStorage', {value: null});
+        Object.defineProperty(ampdoc.win, 'localStorage', {value: null});
+        storageMock.expects('getItem')
+            .withExactArgs('amp-access-iframe')
+            .never();
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('authorize', {})
+            .returns(new Promise(() => {}))
+            .once();
+        const p = adapter.authorize();
+        clock.tick(3001);
+        return p.then(result => {
+          expect(result).to.deep.equal({response: 'default'});
         });
       });
     });
 
     describe('pingback', () => {
+      beforeEach(() => {
+        messengerMock.expects('sendCommandRsvp')
+            .withExactArgs('start', {
+              'protocol': 'amp-access',
+              'config': validConfig,
+            })
+            .returns(Promise.resolve())
+            .once();
+        adapter.connect();
+        adapter.handleCommand_('connect');
+      });
+
       it('should send pingback', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('pingback', {})
             .returns(Promise.resolve())
             .once();
         return adapter.pingback();
+      });
+    });
+
+    describe('actions', () => {
+      it('should reset stored state after action', () => {
+        storageMock.expects('removeItem')
+            .withExactArgs('amp-access-iframe')
+            .once();
+        adapter.postAction();
       });
     });
   });
