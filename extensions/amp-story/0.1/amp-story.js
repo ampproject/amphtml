@@ -483,6 +483,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onKeyDown_(e);
     }, true);
 
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
+      this.onCurrentPageIdUpdate_(pageId);
+    });
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
   }
@@ -631,6 +635,8 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
+    const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
+
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
     }
@@ -644,7 +650,7 @@ export class AmpStory extends AMP.BaseElement {
             page.setActive(false);
           });
         })
-        .then(() => this.switchTo_(firstPageEl.id))
+        .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_());
 
     // Do not block the layout callback on the completion of these promises, as
@@ -992,6 +998,43 @@ export class AmpStory extends AMP.BaseElement {
         this.next_();
         break;
     }
+  }
+
+
+  /**
+   * @param {string} pageId new current page id
+   * @private
+   * */
+  onCurrentPageIdUpdate_(pageId) {
+    this.setHistoryStatePageId_(pageId);
+  }
+
+
+  /**
+   * Save page id using history API.
+   * @param {string} pageId page id to be saved
+   * @private
+   */
+  setHistoryStatePageId_(pageId) {
+    const history = this.win.history;
+    if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
+      history.replaceState({
+        ampStoryPageId: pageId,
+      }, '');
+    }
+  }
+
+
+  /**
+   * @private
+   * @return {?string}
+   */
+  getHistoryStatePageId_() {
+    const history = this.win.history;
+    if (history && history.state) {
+      return history.state.ampStoryPageId;
+    }
+    return null;
   }
 
 
