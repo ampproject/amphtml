@@ -78,10 +78,10 @@ describes.realWin('amp-iframe', {
       setTrackingIframeTimeoutForTesting(20);
     });
 
-    function waitForJsInIframe(opt_ranJs = 1) {
+    function waitForJsInIframe(opt_ranJs = 1, opt_timeout = 300) {
       return poll('waiting for JS to run', () => {
         return ranJs >= opt_ranJs;
-      }, undefined, IFRAME_MESSAGE_TIMEOUT * 6);
+      }, undefined, opt_timeout);
     }
 
     function waitForAmpIframeLayoutPromise(doc, ampIframe) {
@@ -755,7 +755,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe();
+        yield waitForJsInIframe(1, 500);
         expect(content).to.equal('foo-123');
       });
 
@@ -809,7 +809,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(1);
+        yield waitForJsInIframe(1, 500);
         expect(actions.trigger).to.not.be.called;
         expect(userError).calledWithMatch('amp-iframe',
             /may only be triggered from a user gesture/);
@@ -821,7 +821,7 @@ describes.realWin('amp-iframe', {
           satisfiesTrust: () => true,
         });
 
-        yield waitForJsInIframe(2);
+        yield waitForJsInIframe(2, 500);
         // Once for 'loaded-iframe' and once for 'content-iframe'.
         expect(actions.trigger).to.be.calledTwice;
         const eventMatcher = sinon.match({
