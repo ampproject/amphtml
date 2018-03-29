@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-story-orientation-layer-0.1.css';
+import {CSS} from '../../../build/amp-story-viewport-warning-layer-0.1.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
@@ -130,6 +130,8 @@ export class ViewportWarningLayer {
       return;
     }
 
+    this.isBuilt_ = true;
+
     const root = this.win_.document.createElement('div');
     this.overlayEl_ =
         renderAsElement(
@@ -137,9 +139,9 @@ export class ViewportWarningLayer {
 
     createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
-    this.isBuilt_ = true;
-
-    // SHOULD CHECK IF DESKTOP IN THIS PR.
+    // Initializes the desktop state now that the component is built.
+    this.onDesktopStateUpdate_(
+        this.storeService_.get(StateProperty.DESKTOP_STATE));
 
     this.vsync_.mutate(() => {
       this.storyElement_.prepend(root);
@@ -151,7 +153,7 @@ export class ViewportWarningLayer {
    * @return {boolean}
    */
   isBuilt() {
-    return this.built_;
+    return this.isBuilt_;
   }
 
   /**
@@ -173,6 +175,7 @@ export class ViewportWarningLayer {
    * @private
    */
   onLandscapeStateUpdate_(isLandscape) {
+    console.log('onLandscapeStateUpdate_', isLandscape);
     const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
 
     // Adds the landscape class if (not desktop and landscape).

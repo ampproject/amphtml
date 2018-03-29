@@ -929,11 +929,11 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_DESKTOP, isDesktop);
 
     if (isDesktop) {
+      this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, false);
       return;
     }
 
     // On mobile, maybe display the landscape overlay warning.
-    // TODO(gmajoulet): This code seems to fail if the story is not standalone.
     this.vsync_.run({
       measure: state => {
         const {offsetWidth, offsetHeight} = this.element;
