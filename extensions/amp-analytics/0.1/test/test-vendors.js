@@ -28,9 +28,9 @@ describe('analytics vendors', () => {
     for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
       const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
       expect(Object.keys(vendorITEntry).length).to.equal(1);
-      expect(vendorITEntry.transport).to.not.be.null;
+      expect(vendorITEntry.transport).to.exist;
       expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
-      expect(vendorITEntry.transport.iframe).to.not.be.null;
+      expect(vendorITEntry.transport.iframe).to.exist;
     }
   });
 
@@ -41,11 +41,9 @@ describe('analytics vendors', () => {
       if (vendorEntry.hasOwnProperty('transport') &&
           vendorEntry.transport.hasOwnProperty('iframe')) {
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-        expect(vendorITEntry).to.not.be.null;
-        expect(vendorITEntry.transport).to.not.be.null;
-        /*
-        expect(vendorITEntry.transport.iframe).to.not.be.null;
-            */
+        expect(vendorITEntry).to.exist;
+        expect(vendorITEntry.transport).to.exist;
+        expect(vendorITEntry.transport.iframe).to.exist;
       }
     }
   });
