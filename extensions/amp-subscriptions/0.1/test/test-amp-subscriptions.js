@@ -143,25 +143,49 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
-        const entitlement = new Entitlement({source: 'local', raw: 'raw',
-          service: 'local', products, subscriptionToken: 'token'});
-        entitlement.setCurrentProduct('product1');
+        resolveRequiredPromises(subscriptionService);
         const localPlatform =
-          subscriptionService.platformStore_.getLocalPlatform();
-        subscriptionService.platformStore_.resolveEntitlement('local',
-            entitlement);
-        sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
-            .callsFake(() => Promise.resolve());
-        sandbox.stub(subscriptionService.platformStore_, 'selectPlatform')
-            .callsFake(() => Promise.resolve(localPlatform));
-        expect(localPlatform).to.be.not.null;
+            subscriptionService.platformStore_.getLocalPlatform();
+        const selectPlatformStub =
+            subscriptionService.platformStore_.selectPlatform;
         const activateStub = sandbox.stub(localPlatform, 'activate');
+        expect(localPlatform).to.be.not.null;
         subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
+          expect(selectPlatformStub).to.be.calledWith(true);
           done();
         });
       });
     });
+    it('should call selectPlatform with preferViewerSupport config', done => {
+      subscriptionService.start();
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.initialize_().then(() => {
+        resolveRequiredPromises(subscriptionService);
+        const selectPlatformStub =
+          subscriptionService.platformStore_.selectPlatform;
+        subscriptionService.platformConfig_['preferViewerSupport'] = false;
+        subscriptionService.selectAndActivatePlatform_().then(() => {
+          expect(selectPlatformStub).to.be.calledWith(false);
+          done();
+        });
+      });
+    });
+    function resolveRequiredPromises(subscriptionService) {
+      const entitlement = new Entitlement({source: 'local', raw: 'raw',
+        service: 'local', products, subscriptionToken: 'token'});
+      entitlement.setCurrentProduct('product1');
+      const localPlatform =
+        subscriptionService.platformStore_.getLocalPlatform();
+      sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
+          .callsFake(() => Promise.resolve());
+      subscriptionService.platformStore_.resolveEntitlement('local',
+          entitlement);
+      sandbox.stub(
+          subscriptionService.platformStore_,
+          'selectPlatform'
+      ).callsFake(() => Promise.resolve(localPlatform));
+    }
   });
 
   describe('startAuthorizationFlow_', () => {

@@ -103,6 +103,10 @@ amp-subscriptions-dialog {
   cursor: pointer;
 }
 
+html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+  display: none;
+}
+
 /**
  * The maximum width allowed for the dialog is 480 px. Default width
  * is 100% (for container width < 480 px).
