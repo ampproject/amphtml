@@ -287,7 +287,7 @@ export class SubscriptionService {
         'Publication id is null'
     ));
     const origin = getWinOrigin(this.ampdoc_.win);
-    const cdnOrigin = getSourceOrigin(this.ampdoc_.win.location);
+    const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
     this.platformStore_ = new PlatformStore(serviceIds);
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
@@ -301,7 +301,7 @@ export class SubscriptionService {
       }
       const decodedData = this.jwtHelper_.decode(authData);
       user().assert(decodedData['aud'] == origin ||
-        decodedData['aud'] == cdnOrigin,
+        decodedData['aud'] == sourceOrigin,
       `The mismatching "aud" field: ${decodedData['aud']}`);
       user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
 
