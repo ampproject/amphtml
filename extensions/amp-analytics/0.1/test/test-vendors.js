@@ -35,7 +35,35 @@ describe('analytics vendors', () => {
   });
 
   it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
-      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG)', () => {
+      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 1', () => {
+    for (const vendor in ANALYTICS_CONFIG) {
+      const vendorEntry = ANALYTICS_CONFIG[vendor];
+      if (vendorEntry.hasOwnProperty('transport') &&
+          vendorEntry.transport.hasOwnProperty('iframe')) {
+        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+        expect(vendorITEntry).to.exist;
+        //expect(vendorITEntry.transport).to.exist;
+        //expect(vendorITEntry.transport.iframe).to.exist;
+      }
+    }
+  });
+
+  it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
+      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 2', () => {
+    for (const vendor in ANALYTICS_CONFIG) {
+      const vendorEntry = ANALYTICS_CONFIG[vendor];
+      if (vendorEntry.hasOwnProperty('transport') &&
+          vendorEntry.transport.hasOwnProperty('iframe')) {
+        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+        expect(vendorITEntry).to.exist;
+        expect(vendorITEntry.transport).to.exist;
+        //expect(vendorITEntry.transport.iframe).to.exist;
+      }
+    }
+  });
+
+  it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
+      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 3', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (vendorEntry.hasOwnProperty('transport') &&
