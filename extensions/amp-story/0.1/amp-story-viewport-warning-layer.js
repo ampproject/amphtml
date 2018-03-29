@@ -31,7 +31,7 @@ const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 
 
 /**
- * Container for "pill-style" share widget, rendered on desktop.
+ * Full viewport layer advising the user to rotate his device. Mobile only.
  * @private @const {!./simple-template.ElementDef}
  */
 const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
@@ -61,7 +61,8 @@ const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
 
 
 /**
- * Container for "pill-style" share widget, rendered on desktop.
+ * Full viewport layer advising the user to expand his window. Only displayed
+ * for small desktop viewports.
  * @private @const {!./simple-template.ElementDef}
  */
 const DESKTOP_SIZE_WARNING_TEMPLATE = {
@@ -176,7 +177,7 @@ export class ViewportWarningLayer {
   onLandscapeStateUpdate_(isLandscape) {
     const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
 
-    // Adds the landscape class if (not desktop and landscape).
+    // Adds the landscape class if we are mobile landscape.
     const shouldShowLandscapeOverlay = !isDesktop && isLandscape;
 
     // Don't build the layer until we need to display it.

@@ -24,7 +24,7 @@ import {renderAsElement} from './simple-template';
 
 
 /**
- * Container for "pill-style" share widget, rendered on desktop.
+ * Full viewport black layer indicating browser is not supported.
  * @private @const {!./simple-template.ElementDef}
  */
 const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
