@@ -15,12 +15,19 @@
  */
 
 import {Messenger} from './iframe-api/messenger';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
 import {toggle} from '../../../src/style';
-import {user} from '../../../src/log';
+
+const AUTHORIZATION_TIMEOUT = 3000;
+const EXPIRATION_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days
+const TAG = 'amp-access-iframe';
 
 
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
@@ -41,6 +48,9 @@ export class AccessIframeAdapter {
     /** @const @private {!JsonObject} */
     this.configJson_ = configJson;
 
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
+
     /** @const @private {string} */
     this.iframeSrc_ = user().assert(configJson['iframeSrc'],
         '"iframeSrc" URL must be specified');
@@ -52,6 +62,10 @@ export class AccessIframeAdapter {
       user().assert(isArray(this.iframeVars_),
           '"iframeVars" must be an array');
     }
+
+    /** @const @private {!JsonObject} */
+    this.defaultResponse_ = user().assert(configJson['defaultResponse'],
+        '"defaultResponse" must be specified');
 
     /** @private @const {string} */
     this.targetOrigin_ = parseUrl(this.iframeSrc_).origin;
@@ -99,12 +113,10 @@ export class AccessIframeAdapter {
 
   /** @override */
   authorize() {
-    return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('authorize', {});
-    }).then(response => {
-      // TODO(dvoytenko): process the `granted` flag.
-      return response;
-    });
+    return Promise.race([
+      this.authorizeLocal_(),
+      this.authorizeRemote_(),
+    ]);
   }
 
   /** @override */
@@ -117,6 +129,12 @@ export class AccessIframeAdapter {
     return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('pingback', {});
     });
+  }
+
+  /** @override */
+  postAction() {
+    // Reset the storage.
+    this.store_(null);
   }
 
   /**
@@ -157,6 +175,92 @@ export class AccessIframeAdapter {
         resolve(configJson);
       }
     });
+  }
+
+  /**
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  authorizeLocal_() {
+    const timeout = AUTHORIZATION_TIMEOUT * (getMode().development ? 2 : 1);
+    return this.timer_.promise(timeout).then(() => {
+      return this.restore_() || this.defaultResponse_;
+    });
+  }
+
+  /**
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  authorizeRemote_() {
+    return this.connect().then(() => {
+      return this.messenger_.sendCommandRsvp('authorize', {});
+    }).then(response => {
+      const data = response['data'];
+      if (data) {
+        // Store the value in a non-blocking microtask.
+        Promise.resolve().then(() => this.store_(data));
+      }
+      return data;
+    });
+  }
+
+  /**
+   * @return {?JsonObject} data
+   * @private
+   */
+  restore_() {
+    const win = this.ampdoc.win;
+    const storage = win.sessionStorage || win.localStorage;
+    if (!storage) {
+      return null;
+    }
+    try {
+      const raw = storage.getItem(TAG);
+      if (!raw) {
+        return null;
+      }
+      const parsed = parseJson(raw);
+      const time = parsed['t'];
+      if ((time + EXPIRATION_TIMEOUT) < this.ampdoc.win.Date.now()) {
+        // Already expired.
+        return null;
+      }
+      return parsed['d'] || null;
+    } catch (e) {
+      dev().error(TAG, 'failed to restore access response: ', e);
+      try {
+        // Remove the poisoned value.
+        storage.removeItem(TAG);
+      } catch (e) {
+        // Ignore.
+      }
+      return null;
+    }
+  }
+
+  /**
+   * @param {?JsonObject} data
+   * @private
+   */
+  store_(data) {
+    const win = this.ampdoc.win;
+    const storage = win.sessionStorage || win.localStorage;
+    if (!storage) {
+      return;
+    }
+    try {
+      if (data) {
+        storage.setItem(TAG, JSON.stringify(dict({
+          't': this.ampdoc.win.Date.now(),
+          'd': data,
+        })));
+      } else {
+        storage.removeItem(TAG);
+      }
+    } catch (e) {
+      dev().error(TAG, 'failed to store access response: ', e);
+    }
   }
 
   /**

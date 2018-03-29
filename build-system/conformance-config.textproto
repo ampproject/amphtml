@@ -204,6 +204,7 @@ requirement: {
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/netletix.js'
   whitelist: 'ads/yandex.js'
+  whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
 }
 
