@@ -30,6 +30,7 @@
   opacity: 0 !important;
 }
 
+/* TODO IN THIS PR: REMOVE THIS CODE AND HANDLE IT DIRECTLY WITH DESKTOP STATE. */
 [desktop] .i-amphtml-story-hint-container {
   display: none !important;
 }

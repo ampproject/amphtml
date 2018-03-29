@@ -330,7 +330,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildHintLayer_() {
-    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
+    this.element.appendChild(this.ampStoryHint_.buildHint());
   }
 
 

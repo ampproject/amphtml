@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-story-hint-0.1.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
+import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -142,9 +144,12 @@ export class AmpStoryHint {
    * Builds the hint layer DOM.
    * @return {!Element}
    */
-  buildHintContainer() {
+  buildHint() {
+    const root = this.document_.createElement('div');
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
-    return this.hintContainer_;
+    createShadowRootWithStyle(root, this.hintContainer_, CSS);
+
+    return root;
   }
 
   /**
