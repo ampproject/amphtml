@@ -34,6 +34,11 @@ export let SubscriptionService;
 
 export class Services {
   /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
+  /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}

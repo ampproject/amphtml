@@ -15,7 +15,7 @@
  */
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-states';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {dev} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {map} from '../../../src/utils/object';
@@ -154,7 +154,6 @@ export class ConsentPolicyInstance {
     dev().assert(this.itemMap_[consentId] != undefined,
         `cannot find ${consentId} in policy state`);
     if (state == CONSENT_ITEM_STATE.GRANTED) {
-      console.log('dafdsf');
       if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
         this.pendingItemCount_--;
       }
@@ -165,8 +164,6 @@ export class ConsentPolicyInstance {
     }
 
     if (state == CONSENT_ITEM_STATE.REJECTED) {
-      console.log('dfdfdfdfdfdfd');
-      console.log(this.itemMap_);
       if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
         this.pendingItemCount_--;
       }
@@ -185,7 +182,6 @@ export class ConsentPolicyInstance {
   evaluate_() {
     if (this.pendingItemCount_ == 0) {
       if (this.rejectedItemCount_ == 0) {
-        console.log(this.rejectedItemCount_);
         // Consent Sufficient
         this.readyPromiseResolver_(CONSENT_POLICY_STATE.SUFFICIENT);
       } else {

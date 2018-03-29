@@ -16,8 +16,8 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
+import {CONSENT_POLICY_STATE} from './consent-state';
 import {CommonSignals} from './common-signals';
-import {CONSENT_POLICY_STATE} from './consent-states';
 import {ElementStub} from './element-stub';
 import {
   Layout,
@@ -30,6 +30,7 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {blockByConsent, isBlockByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -38,7 +39,6 @@ import {
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
-import {blockByConsent, reportError, isBlockByConsent} from './error';
 import {setStyle} from './style';
 import {toWin} from './types';
 
@@ -490,16 +490,13 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     build() {
-      console.log('element build');
       assertNotTemplate(this);
       dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        console.log('dafsdfasdf');
         this.waitForConsentPolicy_().then(state => {
-          console.log('state is ', state);
           if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
             // Need to change after support more policy state
             reject(blockByConsent());

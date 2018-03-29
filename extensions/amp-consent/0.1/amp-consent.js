@@ -113,7 +113,6 @@ export class AmpConsent extends AMP.BaseElement {
           this.generateDefaultPolicy_();
           const policyKeys = Object.keys(this.policyConfig_);
           for (let i = 0; i < policyKeys.length; i++) {
-            console.log('register consent policy ', policyKeys[i]);
             this.consentPolicyManager_.registerConsentPolicyInstance(
                 policyKeys[i], this.policyConfig_[policyKeys[i]]);
           }

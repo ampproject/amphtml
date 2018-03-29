@@ -18,6 +18,7 @@ import {AmpEvents} from '../amp-events';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
+import {isBlockByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
@@ -26,7 +27,6 @@ import {
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
-import {isBlockByConsent} from '../error'
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

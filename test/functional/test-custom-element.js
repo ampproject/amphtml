@@ -17,13 +17,13 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
-import {CONSENT_POLICY_STATE} from '../../src/consent-states.js';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {

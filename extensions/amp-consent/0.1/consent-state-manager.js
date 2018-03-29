@@ -198,7 +198,6 @@ export class ConsentInstance {
    * @return {!Promise<CONSENT_ITEM_STATE>}
    */
   get() {
-    return Promise.resolve(CONSENT_ITEM_STATE.UNKNOWN);
     if (this.localValue_) {
       return Promise.resolve(
           /** @type {CONSENT_ITEM_STATE} */ (this.localValue_));
