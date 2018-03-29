@@ -347,18 +347,18 @@ templates specified in the markup.
   "highlighted": ["2018-02-15"],
   "templates": [
     {
-      "selector": "#my-template-id",
+      "id": "my-template-id",
       "dates": ["2018-01-01"]
     },
     {
-      "selector": "#my-second-template-id",
+      "id": "my-second-template-id",
       "dates": [
         "2018-01-01",
         "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
       ]
     },
     {
-      "selector": "#my-default-template-id"
+      "id": "my-default-template-id"
     }
   ]
 }
