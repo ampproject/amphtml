@@ -76,4 +76,9 @@ export class AccessOtherAdapter {
     dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
   }
+
+  /** @override */
+  postAction() {
+    // Nothing to do.
+  }
 }

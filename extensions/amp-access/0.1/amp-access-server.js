@@ -184,6 +184,11 @@ export class AccessServerAdapter {
     return this.clientAdapter_.pingback();
   }
 
+  /** @override */
+  postAction() {
+    // Nothing to do.
+  }
+
   /**
    * @param {!Document} doc
    * @return {!Promise}

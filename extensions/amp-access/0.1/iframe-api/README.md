@@ -33,7 +33,8 @@ The document's access configuration would use the "iframe" type. For instance:
       "AMPDOC_URL",
       "SOURCE_URL",
       "DOCUMENT_REFERRER"
-    ]
+    ],
+    "defaultResponse": {...}
   }
 </script>
 ```
@@ -99,6 +100,8 @@ The `authorize` method checks whether the user should be able to access this doc
 Where:
  - `granted` field is a true/false boolean field. It returns true when the document is accessible.
  - `data` is an open-ended JSON structure that can be used for access expressions.
+
+Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
 
 
 ## Pingback method
