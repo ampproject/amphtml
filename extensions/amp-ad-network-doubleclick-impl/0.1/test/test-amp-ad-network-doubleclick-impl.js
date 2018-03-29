@@ -170,6 +170,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
 
+    it('should ignore creative-size header for fluid response', () => {
+      impl.isFluid_ = true;
+      impl.element.setAttribute('height', 'fluid');
+      const resizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+      expect(impl.extractSize({
+        get(name) {
+          return name == CREATIVE_SIZE_HEADER ? '0x0' : undefined;
+        },
+        has(name) {
+          return name == CREATIVE_SIZE_HEADER;
+        },
+      })).to.deep.equal({width: 0, height: 0});
+      expect(resizeSpy).to.not.be.called;
+    });
+
     it('should not load amp-analytics without an analytics header', () => {
       expect(impl.extractSize({
         get() {
