@@ -23,14 +23,17 @@ import {validateData, writeScript} from '../3p/3p';
 export function voluum(global, data) {
 
   validateData(data, ['domain', 'publisher', 'placement']);
+  const VISIBILITY_MIN_PERCENTAGE = 70;
 
   global._voluum = global._voluum || new VLM(data);
 
   global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       if (c.intersectionRect.height) {
+        const ratio = Math.round(c.intersectionRatio * 100);
         global._voluum.appendIntersect({
-          visible: true,
+          visible: ratio >= VISIBILITY_MIN_PERCENTAGE,
+          visiblePercentage: ratio,
           rects: c,
           placement: data.placement,
         });
