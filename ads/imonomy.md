@@ -26,6 +26,7 @@ Imonomy supports Header Tag style bidding using Doubleclick as the ad server.
   data-pid="5656544455"
   data-sub-id="636gd"
   data-slot="/36653869/amp_imo_multi_size"
+  data-extraParams='{"track_id":1}'
 </amp-ad>
 ```
 
