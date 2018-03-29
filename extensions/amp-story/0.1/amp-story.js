@@ -483,14 +483,8 @@ export class AmpStory extends AMP.BaseElement {
       this.onKeyDown_(e);
     }, true);
 
-    // keep track of page-id in browser history API
     this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      const history = this.win.history;
-      if (history.pushState) {
-        history.pushState({
-          ampStoryPageId: pageId,
-        }, 'amp-story', '');
-      }
+      this.onCurrentPageIdUpdate_(pageId);
     });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
@@ -641,8 +635,7 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const firstPageId = (this.win.history && this.win.history.state &&
-      this.win.history.state.ampStoryPageId) || firstPageEl.id;
+    const initialPageId = this.getHistoryStatePage_() || firstPageEl.id;
 
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
@@ -657,7 +650,7 @@ export class AmpStory extends AMP.BaseElement {
             page.setActive(false);
           });
         })
-        .then(() => this.switchTo_(firstPageId))
+        .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_());
 
     // Do not block the layout callback on the completion of these promises, as
@@ -1005,6 +998,36 @@ export class AmpStory extends AMP.BaseElement {
         this.next_();
         break;
     }
+  }
+
+
+  /** @private */
+  onCurrentPageIdUpdate_(pageId) {
+    this.setHistoryState_(pageId);
+  }
+
+
+  /**
+   * Save page id using history API
+   * @private
+   */
+  setHistoryState_(pageId) {
+    const history = this.win.history;
+    if (history.replaceState && this.getHistoryStatePage_() !== pageId) {
+      history.replaceState({
+        ampStoryPageId: pageId,
+      }, '');
+    }
+  }
+
+
+  /**
+   * @private
+   * @return {?string}
+   */
+  getHistoryStatePage_() {
+    return this.win.history && this.win.history.state &&
+      this.win.history.state.ampStoryPageId;
   }
 
 
