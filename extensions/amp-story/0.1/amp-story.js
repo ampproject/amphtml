@@ -559,7 +559,6 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
-        .then(() => this.viewportWarningLayer_.build())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -985,7 +984,7 @@ export class AmpStory extends AMP.BaseElement {
     if (fallbackEl) {
       this.toggleFallback(true);
     } else {
-      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, true);
+      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
     }
   }
 
@@ -1519,7 +1518,7 @@ export class AmpStory extends AMP.BaseElement {
    *     for amp-story.
    */
   static isBrowserSupported(win) {
-    return Boolean(win.CSS && win.CSS.supports &&
+    return false && Boolean(win.CSS && win.CSS.supports &&
         win.CSS.supports('display', 'grid'));
   }
 }

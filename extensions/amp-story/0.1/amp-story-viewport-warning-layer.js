@@ -21,7 +21,7 @@ import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {renderAsElement} from './simple-template';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 
 
 /**
@@ -130,6 +130,9 @@ export class ViewportWarningLayer {
     /** @private @const {!Window} */
     this.win_ = win;
 
+    /** @private {boolean} */
+    this.isBuilt_ = false;
+
     /** @private {?Element} */
     this.overlayEl_ = null;
 
@@ -139,6 +142,9 @@ export class ViewportWarningLayer {
     /** @private {?Element} */
     this.root_ = null;
 
+    /** @private {?ShadowRoot} */
+    this.shadowRoot_ = null;
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
 
@@ -147,13 +153,15 @@ export class ViewportWarningLayer {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    this.initializeListeners_();
   }
 
   /**
    * Builds and appends the component in the story.
    */
   build() {
-    if (this.root_) {
+    if (this.isBuilt()) {
       return;
     }
 
@@ -162,14 +170,17 @@ export class ViewportWarningLayer {
         renderAsElement(
             this.win_.document, this.getViewportWarningOverlayTemplate_());
 
-    createShadowRootWithStyle(this.root_, this.overlayEl_, CSS);
+    this.shadowRoot_ =
+        createShadowRootWithStyle(this.root_, this.overlayEl_, CSS);
+
+    this.isBuilt_ = true;
+
+    // SHOULD CHECK IF DESKTOP IN THIS PR.
 
     this.vsync_.mutate(() => {
       this.storyElement_
           .insertBefore(this.root_, this.storyElement_.firstChild);
     });
-
-    this.initializeListeners_();
   }
 
   /**
@@ -180,10 +191,18 @@ export class ViewportWarningLayer {
   }
 
   /**
-   * @return {!Element}
+   * @return {!ShadowRoot}
    */
   getShadowRoot() {
-    return dev().assertElement(this.overlayEl_);
+    return dev().assert(this.shadowRoot_);
+  }
+
+  /**
+   * Whether the element has been built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.built_;
   }
 
   /**
@@ -207,13 +226,23 @@ export class ViewportWarningLayer {
   /**
    * Reacts to the landscape state update, only on mobile.
    * @param  {boolean} isLandscape
+   * @private
    */
   onLandscapeStateUpdate_(isLandscape) {
     const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
 
     // Adds the landscape class if (not desktop and landscape).
+    const shouldShowLandscapeOverlay = !isDesktop && isLandscape;
+
+    // Don't build the layer until we need to display it.
+    if (!shouldShowLandscapeOverlay && !this.isBuilt()) {
+      return;
+    }
+
+    this.build();
+
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
+      this.overlayEl_
           .classList.toggle(LANDSCAPE_OVERLAY_CLASS, !isDesktop && isLandscape);
     });
   }
@@ -224,10 +253,14 @@ export class ViewportWarningLayer {
    * @private
    */
   onDesktopStateUpdate_(isDesktop) {
+    if (!this.isBuilt()) {
+      return;
+    }
+
     this.vsync_.mutate(() => {
       isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+        this.overlayEl_.setAttribute('desktop', '') :
+        this.overlayEl_.removeAttribute('desktop');
     });
   }
 
@@ -240,8 +273,14 @@ export class ViewportWarningLayer {
     if (isBrowserSupported) {
       return;
     }
-    this.getShadowRoot().prepend(
-          renderSimpleTemplate(this.win_.document, UNSUPPORTED_BROWSER_WARNING));
+
+    this.build();
+
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().prepend(
+          renderSimpleTemplate(
+              this.win_.document, UNSUPPORTED_BROWSER_WARNING_TEMPLATE));
+    })
   }
 
   /**
