@@ -41,7 +41,7 @@ export function voluum(global, data) {
     });
   });
 
-  writeScript(global, `//${data.domain}/index.js?b=${(new Date).getTime()}`);
+  writeScript(global, `//${data.domain}/index.js?b=${Date.now()}`);
 }
 
 VLM.prototype.appendIntersect = function(o) {
