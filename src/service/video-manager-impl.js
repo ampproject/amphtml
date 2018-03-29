@@ -38,6 +38,7 @@ import {
 import {RelativePositions, layoutRectLtwh} from '../layout-rect';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
+import {VideoUtils} from '../utils/video';
 import {
   createCustomEvent,
   getData,
@@ -233,6 +234,12 @@ export class VideoManager {
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
+    // moment in the element's lifecycle and the promise will resolve
+    // appropriately each time.
+    video.element.signals().signal(VideoEvents.REGISTERED);
+
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
   }
@@ -486,7 +493,6 @@ class VideoEntry {
    * @param {boolean} allowAutoplay
    */
   constructor(manager, video, allowAutoplay) {
-
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
@@ -533,8 +539,10 @@ class VideoEntry {
         () => analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
-    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, this.ampdoc_.win,
-        getMode(this.ampdoc_.win).lite);
+    this.supportsAutoplay_ = () => {
+      const {win} = this.ampdoc_;
+      return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
+    };
 
     const element = dev().assert(video.element);
 
@@ -795,12 +803,12 @@ class VideoEntry {
     }
     // Put the video in/out of fullscreen depending on screen orientation
     if (!isLandscape && this.isFullscreenByOrientationChange_) {
-    	this.exitFullscreen_();
+      this.exitFullscreen_();
     } else if (isLandscape
                && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
                && this.isVisible_
                && Services.viewerForDoc(this.ampdoc_).isVisible()) {
-    	this.enterFullscreen_();
+      this.enterFullscreen_();
     }
   }
 
@@ -837,7 +845,7 @@ class VideoEntry {
       return;
     }
 
-    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then(supportsAutoplay => {
       const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
 
       if (canAutoplay && supportsAutoplay) {
@@ -863,7 +871,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -1866,7 +1874,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const video = this.video;
-    return this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    return this.supportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = this.video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
@@ -1890,71 +1898,6 @@ class VideoEntry {
   }
 }
 
-/* @type {?Promise<boolean>} */
-let supportsAutoplayCache_ = null;
-
-/**
- * Detects whether autoplay is supported.
- * Note that even if platfrom supports autoplay, users or browsers can disable
- * autoplay to save data / battery. This function detects both platfrom support
- * and when autoplay is disabled.
- *
- * Service dependencies are taken explicitly for testability.
- *
- * @private visible for testing.
- * @param {!Window} win
- * @param {boolean} isLiteViewer
- * @return {!Promise<boolean>}
- */
-export function supportsAutoplay(win, isLiteViewer) {
-
-  // Use cached result if available.
-  if (supportsAutoplayCache_) {
-    return supportsAutoplayCache_;
-  }
-
-  // We do not support autoplay in amp-lite viewer regardless of platform.
-  if (isLiteViewer) {
-    return supportsAutoplayCache_ = Promise.resolve(false);
-  }
-
-  // To detect autoplay, we create a video element and call play on it, if
-  // `paused` is true after `play()` call, autoplay is supported. Although
-  // this is unintuitive, it works across browsers and is currently the lightest
-  // way to detect autoplay without using a data source.
-  const detectionElement = win.document.createElement('video');
-  // NOTE(aghassemi): We need both attributes and properties due to Chrome and
-  // Safari differences when dealing with non-attached elements.
-  detectionElement.setAttribute('muted', '');
-  detectionElement.setAttribute('playsinline', '');
-  detectionElement.setAttribute('webkit-playsinline', '');
-  detectionElement.muted = true;
-  detectionElement.playsinline = true;
-  detectionElement.webkitPlaysinline = true;
-  detectionElement.setAttribute('height', '0');
-  detectionElement.setAttribute('width', '0');
-  setStyles(detectionElement, {
-    position: 'fixed',
-    top: '0',
-    width: '0',
-    height: '0',
-    opacity: '0',
-  });
-
-  try {
-    const playPromise = detectionElement.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch(() => {
-        // Suppress any errors, useless to report as they are expected.
-      });
-    }
-  } catch (e) {
-    // Suppress any errors, useless to report as they are expected.
-  }
-
-  const supportsAutoplay = !detectionElement.paused;
-  return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
-}
 
 /**
  * @param {!VideoEntry} entry
@@ -1973,14 +1916,6 @@ function analyticsEvent(entry, eventType, opt_vars) {
   });
 }
 
-/**
- * Clears the cache used by supportsAutoplay method.
- *
- * @private visible for testing.
- */
-export function clearSupportsAutoplayCacheForTesting() {
-  supportsAutoplayCache_ = null;
-}
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
