@@ -15,8 +15,8 @@
  */
 
 import {Services} from '../services';
-import {dict} from '../utils/object';
 import {dev, user} from '../log';
+import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 
 const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
@@ -31,10 +31,12 @@ const API_KEYS = {
  * The Client ID service key.
  * @const @private {string}
  */
-const DEFAULT_SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
+const SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
 
 const TAG = 'CacheCidApi';
 const CACHE_API_URL = 'https://ampcid.google.com/v1/cache:getClientId?key=';
+
+const TIMEOUT = 30000;
 
 /**
  * Exposes CID API for cache-served pages without a viewer.
@@ -90,11 +92,11 @@ export class CacheCidApi {
     }
 
     if (!this.publisherCidPromise_) {
-      let url = CACHE_API_URL + DEFAULT_SERVICE_KEY;
+      const url = CACHE_API_URL + SERVICE_KEY_;
       this.publisherCidPromise_ = this.fetchCid_(url);
     }
 
-    return this.publisherCidPromise_.then((publisherCid) => {
+    return this.publisherCidPromise_.then(publisherCid => {
       return this.scopeCid_(publisherCid, scope);
     });
   }
@@ -123,14 +125,15 @@ export class CacheCidApi {
 	  if (response['optOut']) {
 	    return null;
 	  }
-          if (!response['publisherClientId'] && response['alternateUrl']) {
+	  const cid = response['publisherClientId'];
+          if (!cid && response['alternateUrl']) {
             // If an alternate url is provided, try again with the alternate url
             // The client is still responsible for appending API keys to the URL.
-            const altUrl = `${response['alternateUrl']}?key=${DEFAULT_SERVICE_KEY}`;
-            return this.fetchCid_(dev().assertString(altUrl))
-                .then((alt) => {
-		  return alt.json()['publisherClientId'] || null;
-		});
+            const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
+            return this.fetchCid_(dev().assertString(alt))
+                .then(altRes => {
+                  return altRes.json()['publisherClientId'] || null;
+                });
 	  }
           return cid;
         }).catch(e => {
@@ -155,8 +158,10 @@ export class CacheCidApi {
     if (!publisherCid) {
       return Promise.resolve(null);
     }
-    let text = publisherCid + ';' + scope;
-    return Services.cryptoFor(this.ampdoc.win).sha384Base64(text).then(encoded => { return 'amp-' + encoded; });
+    const text = publisherCid + ';' + scope;
+    return Services.cryptoFor(this.ampdoc.win).sha384Base64(text).then(enc => {
+      return 'amp-' + enc;
+    });
   }
 
   /**
