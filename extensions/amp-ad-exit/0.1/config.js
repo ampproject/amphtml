@@ -167,10 +167,10 @@ function assertTarget(name, target, config) {
  * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
-  user().assert(ANALYTICS_IFRAME_TRANSPORT_CONFIG &&
+  return user().assertString(
       ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor] &&
       ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport'] &&
       ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'],
-  'Unknown vendor: ' + vendor);
-  return ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'];
+      `Unknown or invalid vendor ${vendor}, ` +
+      `note that vendor must use transport: iframe`);
 }

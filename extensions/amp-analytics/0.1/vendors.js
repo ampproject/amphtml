@@ -2060,6 +2060,10 @@ ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 /**
+ * Vendors who have IAB viewability certification may use iframe transport
+ * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
+ * put only the specification of the iframe location in the object below,
+ * and put everything else (requests, triggers, etc.) in the object above.
  * @const {!JsonObject}
  */
 export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
@@ -2071,10 +2075,4 @@ export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
 });
 
 // Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
-for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
-  ANALYTICS_CONFIG[vendor] = ANALYTICS_CONFIG[vendor] || {};
-  ANALYTICS_CONFIG[vendor]['transport'] =
-      ANALYTICS_CONFIG[vendor]['transport'] || {};
-  ANALYTICS_CONFIG[vendor]['transport']['iframe'] =
-      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'];
-}
+Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
