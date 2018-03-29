@@ -1546,9 +1546,15 @@
 
   <h2>Yieldbot</h2>
   <amp-ad width="300" height="250"
-      type="yieldbot"
-      data-psn="1234"
-      data-yb-slot="medrec"
+      type="doubleclick"
+      rtc-config='{
+        "vendors": {
+          "yieldbot": {
+            "YB_PSN": "1234",
+            "YB_SLOT": "medrec"
+          }
+        }
+      }'
       data-slot="/2476204/medium-rectangle"
       data-multi-size="300x220,300x200"
       json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>
