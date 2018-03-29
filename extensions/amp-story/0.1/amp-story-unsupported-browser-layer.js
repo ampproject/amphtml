@@ -20,37 +20,35 @@ import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
-import {renderSimpleTemplate} from './simple-template';
+import {renderAsElement} from './simple-template';
 
 
 /**
  * Container for "pill-style" share widget, rendered on desktop.
  * @private @const {!./simple-template.ElementDef}
  */
-const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-overlay-container'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-gear-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            localizedStringId:
-                LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
-          },
-        ],
-      },
-    ],
-  },
-];
+const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
+  tag: 'div',
+  attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-overlay-container'}),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-gear-icon'}),
+        },
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
+          localizedStringId:
+              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
+        },
+      ],
+    },
+  ],
+};
 
 
 export class UnsupportedBrowserLayer {
@@ -81,21 +79,20 @@ export class UnsupportedBrowserLayer {
    * Builds and appends the component in the story.
    */
   build() {
-  	if (this.isBuilt()) {
-  		return;
-  	}
+    if (this.isBuilt()) {
+      return;
+    }
 
     const root = this.win_.document.createElement('div');
     const overlayEl =
-        renderSimpleTemplate(
-        		this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
+        renderAsElement(this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
 
     createShadowRootWithStyle(root, overlayEl, CSS);
 
     this.isBuilt_ = true;
 
     this.vsync_.mutate(() => {
-      this.storyElement_.prepend(root);
+      this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
     });
   }
 
@@ -104,7 +101,7 @@ export class UnsupportedBrowserLayer {
    * @return {boolean}
    */
   isBuilt() {
-  	return this.isBuilt_;
+    return this.isBuilt_;
   }
 
   /**
@@ -113,8 +110,8 @@ export class UnsupportedBrowserLayer {
   initializeListeners_() {
     this.storeService_.subscribe(
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
-      this.onSupportedBrowserStateUpdate_(isBrowserSupported);
-    }, true /** callToInitialize */);
+          this.onSupportedBrowserStateUpdate_(isBrowserSupported);
+        }, true /** callToInitialize */);
   }
 
   /**

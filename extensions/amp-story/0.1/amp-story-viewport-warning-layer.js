@@ -19,7 +19,6 @@ import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
-import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -141,10 +140,10 @@ export class ViewportWarningLayer {
 
     // Initializes the desktop state now that the component is built.
     this.onDesktopStateUpdate_(
-        this.storeService_.get(StateProperty.DESKTOP_STATE));
+        !!this.storeService_.get(StateProperty.DESKTOP_STATE));
 
     this.vsync_.mutate(() => {
-      this.storyElement_.prepend(root);
+      this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
     });
   }
 
@@ -175,7 +174,6 @@ export class ViewportWarningLayer {
    * @private
    */
   onLandscapeStateUpdate_(isLandscape) {
-    console.log('onLandscapeStateUpdate_', isLandscape);
     const isDesktop = this.storeService_.get(StateProperty.DESKTOP_STATE);
 
     // Adds the landscape class if (not desktop and landscape).

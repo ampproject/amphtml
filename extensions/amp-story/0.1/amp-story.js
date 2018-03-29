@@ -194,7 +194,7 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_ = new Bookend(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win, this.element);
+    this.systemLayer_ = new SystemLayer(this.win);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ =
@@ -1523,7 +1523,7 @@ export class AmpStory extends AMP.BaseElement {
    *     for amp-story.
    */
   static isBrowserSupported(win) {
-    return false && Boolean(win.CSS && win.CSS.supports &&
+    return Boolean(win.CSS && win.CSS.supports &&
         win.CSS.supports('display', 'grid'));
   }
 }
