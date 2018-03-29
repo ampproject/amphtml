@@ -101,7 +101,7 @@ Where:
  - `granted` field is a true/false boolean field. It returns true when the document is accessible.
  - `data` is an open-ended JSON structure that can be used for access expressions.
 
-Keep in mind that strong timeout and one-behind semantics are observed for this call. If the `authorize()` method does not yield within the 3s timeout, the previously yielded authorization response is used defaulted to the "defaultResponse" field in the configuration. However, the iframe authorization is continued until fully complete and will be available for the next cycle if needed.
+Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
 
 
 ## Pingback method
