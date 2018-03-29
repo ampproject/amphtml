@@ -15,38 +15,43 @@
  */
 
 import {AmpStoryHint} from '../amp-story-hint';
+import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
+import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
 
 describes.fakeWin('amp-story hint layer', {}, env => {
+  let host;
   let win;
   let ampStoryHint;
 
   beforeEach(() => {
     win = env.win;
 
+    const storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
+
     sandbox.stub(Services, 'vsyncFor').callsFake(
         () => ({mutate: task => task()}));
     sandbox.stub(Services, 'timerFor').callsFake(
         () => ({delay: NOOP, cancel: NOOP}));
 
-    ampStoryHint = new AmpStoryHint(win);
+    host = win.document.createElement('div');
+    ampStoryHint = new AmpStoryHint(win, host);
   });
 
-  it('should build the UI', () => {
-    const hint = ampStoryHint.build();
-    expect(hint).to.not.be.null;
-    expect(getHintContainerFromHintRoot(hint)).to.not.be.null;
+  it('should not build the UI until we have to display it', () => {
+    expect(getHintContainerFromHost(host)).to.be.null;
   });
 
   it('should be able to show navigation help overlay', () => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
-    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
-
     ampStoryHint.showNavigationOverlay();
+
+    const hintContainer = getHintContainerFromHost(host);
 
     expect(hintContainer.className).to.contain('show-navigation-overlay');
     expect(hintContainer.className).to.not.contain('show-first-page-overlay');
@@ -58,9 +63,9 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
-    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
-
     ampStoryHint.showFirstPageHintOverlay();
+
+    const hintContainer = getHintContainerFromHost(host);
 
     expect(hintContainer.className).to.contain('show-first-page-overlay');
     expect(hintContainer.className).to.not.contain('show-navigation-overlay');
@@ -69,21 +74,25 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to hide shown hint', () => {
-    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
-
     ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
+
+    const hintContainer = getHintContainerFromHost(host);
 
     expect(hintContainer.className).to.contain('i-amphtml-hidden');
   });
 });
 
 /**
- * Helper method to get the actual hint container from its host.
- * @param  {!Element} hintContainer
- * @return {!Element}
+ * Helper function to get the actual hint container from its host.
+ * @param  {!Element} host
+ * @return {?Element}
  */
-function getHintContainerFromHintRoot(hintRoot) {
-  return hintRoot.shadowRoot
-      .querySelector('.i-amphtml-story-hint-container');
+function getHintContainerFromHost(host) {
+  if (!host.lastElementChild || !host.lastElementChild.shadowRoot) {
+    return null;
+  }
+
+  return host.lastElementChild.shadowRoot.querySelector(
+      '.i-amphtml-story-hint-container');
 }
