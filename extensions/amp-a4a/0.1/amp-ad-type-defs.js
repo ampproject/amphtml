@@ -49,7 +49,6 @@ export const ValidatorResult = {
     }} */
 export let ValidatorOutput;
 
-
 /**
  * @abstract
  */
