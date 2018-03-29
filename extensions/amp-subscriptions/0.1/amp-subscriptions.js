@@ -29,7 +29,7 @@ import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getWinOrigin, getSourceOrigin} from '../../../src/url';
+import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
