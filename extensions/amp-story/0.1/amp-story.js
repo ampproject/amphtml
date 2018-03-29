@@ -1001,7 +1001,10 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
-  /** @private */
+  /**
+   * @param {string} pageId new current page id
+   * @private
+   * */
   onCurrentPageIdUpdate_(pageId) {
     this.setHistoryState_(pageId);
   }
@@ -1009,6 +1012,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Save page id using history API
+   * @param {string} pageId page id to be saved
    * @private
    */
   setHistoryState_(pageId) {
