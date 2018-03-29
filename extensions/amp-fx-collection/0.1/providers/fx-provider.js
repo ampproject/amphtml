@@ -19,6 +19,7 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
+import {convertEasingKeyword} from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -124,7 +125,7 @@ export class FxElement {
 
     /** @private {string} */
     this.easing_ = element.hasAttribute('data-fade-in-easing') ?
-      element.getAttribute('data-fade-in-easing') :
+      convertEasingKeyword(element.getAttribute('data-fade-in-easing')) :
       'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
 
     /** @private {string} */
