@@ -172,5 +172,5 @@ export function assertVendor(vendor) {
       ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport'] &&
       ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'],
       `Unknown or invalid vendor ${vendor}, ` +
-      `note that vendor must use transport: iframe`);
+      'note that vendor must use transport: iframe');
 }
