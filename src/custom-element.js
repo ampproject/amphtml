@@ -30,7 +30,7 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {blockByConsent, isBlockByConsent, reportError} from './error';
+import {blockByConsent, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -528,7 +528,7 @@ function createBaseCustomElementClass(win) {
       }, reason => {
         this.signals_.rejectSignal(CommonSignals.BUILT,
             /** @type {!Error} */ (reason));
-        if (!isBlockByConsent(reason)) {
+        if (!isBlockedByConsent(reason)) {
           reportError(reason, this);
         }
         throw reason;

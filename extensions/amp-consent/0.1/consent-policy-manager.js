@@ -119,10 +119,13 @@ export class ConsentPolicyInstance {
     /** @private {!Array<string>} */
     this.pendingItems_ = pendingItems;
 
+    /** @private {!Object<string, CONSENT_ITEM_STATE>} */
     this.itemMap_ = map();
 
+    /** @private {number} */
     this.pendingItemCount_ = 0;
 
+    /** @private {number} */
     this.rejectedItemCount_ = 0;
 
     /** @private {?function(CONSENT_POLICY_STATE)} */
@@ -136,6 +139,9 @@ export class ConsentPolicyInstance {
     this.init_(pendingItems);
   }
 
+  /**
+   * @param {!Array<string>} pendingItems
+   */
   init_(pendingItems) {
     for (let i = 0; i < pendingItems.length; i++) {
       this.itemMap_[pendingItems[i]] = CONSENT_ITEM_STATE.UNKNOWN;
@@ -180,23 +186,22 @@ export class ConsentPolicyInstance {
 
 
   evaluate_() {
-    if (this.pendingItemCount_ == 0) {
-      if (this.rejectedItemCount_ == 0) {
-        // Consent Sufficient
-        this.readyPromiseResolver_(CONSENT_POLICY_STATE.SUFFICIENT);
-      } else {
-        this.readyPromiseResolver_(CONSENT_POLICY_STATE.INSUFFICIENT);
-      }
-      this.readyPromiseResolver_ = null;
-    } else {
-      // It's possible user toggle state. And ready promise needs to be reset
-      // TODO: Do not reset ready promise in case of timeout
-      if (!this.readyPromiseResolver_) {
-        this.readyPromise_ = new Promise(resolve => {
-          this.readyPromiseResolver_ = resolve;
-        });
-      }
+    // TODO: Providing real time consent policy state to other components
+    if (this.pendingItemCount_ != 0) {
+      return;
     }
+
+    if (!this.readyPromiseResolver_) {
+      return;
+    }
+
+    if (this.rejectedItemCount_ == 0) {
+      // Consent Sufficient
+      this.readyPromiseResolver_(CONSENT_POLICY_STATE.SUFFICIENT);
+    } else {
+      this.readyPromiseResolver_(CONSENT_POLICY_STATE.INSUFFICIENT);
+    }
+    this.readyPromiseResolver_ = null;
   }
 
   /**

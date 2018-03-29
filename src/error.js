@@ -247,7 +247,7 @@ export function blockByConsent() {
  * @param {*} errorOrMessage
  * @return {boolean}
  */
-export function isBlockByConsent(errorOrMessage) {
+export function isBlockedByConsent(errorOrMessage) {
   if (!errorOrMessage) {
     return false;
   }

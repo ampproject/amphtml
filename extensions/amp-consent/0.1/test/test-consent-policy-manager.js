@@ -15,6 +15,7 @@
  */
 
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
@@ -88,39 +89,29 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
     it('on consent state change', () => {
       instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
-      expect(instance.pendingItems_).to.deep.equal(['DEF']);
+      expect(instance.pendingItemCount_).to.equal(1);
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.GRANTED);
-      expect(instance.pendingItems_).to.deep.equal([]);
+      expect(instance.pendingItemCount_).to.equal(0);
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.REJECTED);
-      expect(instance.pendingItems_).to.deep.equal(['DEF']);
+      expect(instance.pendingItemCount_).to.equal(0);
+      expect(instance.rejectedItemCount_).to.equal(1);
     });
 
     describe('getReadyPromise', () => {
-      it('promise should resolve when all consents are granted', function* () {
+      it('promise should resolve when all consents are gathered', function* () {
         instance = new ConsentPolicyInstance(['ABC']);
-        let isResolved = false;
-        instance.getReadyPromise().then(() => isResolved = true);
+        let policyState = null;
+        instance.getReadyPromise().then(state => policyState = state);
         yield macroTask();
-        expect(isResolved).to.be.false;
+        expect(policyState).to.be.null;
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         yield macroTask();
-        expect(isResolved).to.be.false;
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
-        yield macroTask();
-        expect(isResolved).to.be.true;
-      });
-
-      it('promise should be reset after consent is revoked', function* () {
+        expect(policyState).to.equal(CONSENT_POLICY_STATE.INSUFFICIENT);
         instance = new ConsentPolicyInstance(['ABC']);
-        let isResolved1 = false;
-        let isResolved2 = false;
-        instance.getReadyPromise().then(() => isResolved1 = true);
+        instance.getReadyPromise().then(state => policyState = state);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
-        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
-        instance.getReadyPromise().then(() => isResolved2 = true);
         yield macroTask();
-        expect(isResolved1).to.be.true;
-        expect(isResolved2).to.be.false;
+        expect(policyState).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
       });
     });
   });
