@@ -61,6 +61,7 @@ import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
+import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
 import {
   childElement,
@@ -194,6 +195,10 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
+
+    /** @private @const {!UnsupportedBrowserLayer} */
+    this.unsupportedBrowserLayer_ =
+        new UnsupportedBrowserLayer(this.win, this.element);
 
     /** @private @const {!ViewportWarningLayer} */
     this.viewportWarningLayer_ =
@@ -1518,7 +1523,7 @@ export class AmpStory extends AMP.BaseElement {
    *     for amp-story.
    */
   static isBrowserSupported(win) {
-    return false && Boolean(win.CSS && win.CSS.supports &&
+    return Boolean(win.CSS && win.CSS.supports &&
         win.CSS.supports('display', 'grid'));
   }
 }

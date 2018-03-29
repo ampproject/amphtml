@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {renderAsElement} from './simple-template';
 
 
 /**
@@ -91,35 +91,6 @@ const DESKTOP_SIZE_WARNING_TEMPLATE = {
 };
 
 
-/**
- * Container for "pill-style" share widget, rendered on desktop.
- * @private @const {!./simple-template.ElementDef}
- */
-const UNSUPPORTED_BROWSER_WARNING_TEMPLATE = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-overlay-container'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-gear-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            localizedStringId:
-                LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
-          },
-        ],
-      },
-    ],
-  },
-];
-
 
 export class ViewportWarningLayer {
   /**
@@ -138,12 +109,6 @@ export class ViewportWarningLayer {
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win_);
-
-    /** @private {?Element} */
-    this.root_ = null;
-
-    /** @private {?ShadowRoot} */
-    this.shadowRoot_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
@@ -165,36 +130,20 @@ export class ViewportWarningLayer {
       return;
     }
 
-    this.root_ = this.win_.document.createElement('div');
+    const root = this.win_.document.createElement('div');
     this.overlayEl_ =
         renderAsElement(
             this.win_.document, this.getViewportWarningOverlayTemplate_());
 
-    this.shadowRoot_ =
-        createShadowRootWithStyle(this.root_, this.overlayEl_, CSS);
+    createShadowRootWithStyle(root, this.overlayEl_, CSS);
 
     this.isBuilt_ = true;
 
     // SHOULD CHECK IF DESKTOP IN THIS PR.
 
     this.vsync_.mutate(() => {
-      this.storyElement_
-          .insertBefore(this.root_, this.storyElement_.firstChild);
+      this.storyElement_.prepend(root);
     });
-  }
-
-  /**
-   * @return {!Element}
-   */
-  getRoot() {
-    return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @return {!ShadowRoot}
-   */
-  getShadowRoot() {
-    return dev().assert(this.shadowRoot_);
   }
 
   /**
@@ -215,11 +164,6 @@ export class ViewportWarningLayer {
 
     this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
       this.onLandscapeStateUpdate_(isLandscape);
-    }, true /** callToInitialize */);
-
-    this.storeService_.subscribe(
-        StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
-      this.onSupportedBrowserStateUpdate_(isBrowserSupported);
     }, true /** callToInitialize */);
   }
 
@@ -262,25 +206,6 @@ export class ViewportWarningLayer {
         this.overlayEl_.setAttribute('desktop', '') :
         this.overlayEl_.removeAttribute('desktop');
     });
-  }
-
-  /**
-   * Reacts to browser compatibility updates. Can only be changed to false.
-   * @param {boolean} isBrowserSupported
-   * @private
-   */
-  onSupportedBrowserStateUpdate_(isBrowserSupported) {
-    if (isBrowserSupported) {
-      return;
-    }
-
-    this.build();
-
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().prepend(
-          renderSimpleTemplate(
-              this.win_.document, UNSUPPORTED_BROWSER_WARNING_TEMPLATE));
-    })
   }
 
   /**
