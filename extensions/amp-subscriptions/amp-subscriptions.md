@@ -125,7 +125,7 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
 
 The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
-Based on `preferViewerSupport`(default: true) this document will give extra preference to the platform supported by the viewer.
+Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
 
 ### The "local" service configuration
 
