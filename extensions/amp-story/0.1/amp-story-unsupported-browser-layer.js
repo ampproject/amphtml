@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-story-orientation-layer-0.1.css';
+import {CSS} from '../../../build/amp-story-unsupported-browser-layer-0.1.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
@@ -27,7 +27,7 @@ import {renderSimpleTemplate} from './simple-template';
  * Container for "pill-style" share widget, rendered on desktop.
  * @private @const {!./simple-template.ElementDef}
  */
-const UNSUPPORTED_BROWSER_WARNING_TEMPLATE = [
+const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = [
   {
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
@@ -88,7 +88,7 @@ export class UnsupportedBrowserLayer {
     const root = this.win_.document.createElement('div');
     const overlayEl =
         renderSimpleTemplate(
-        		this.win_.document, UNSUPPORTED_BROWSER_WARNING_TEMPLATE);
+        		this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
 
     createShadowRootWithStyle(root, overlayEl, CSS);
 
