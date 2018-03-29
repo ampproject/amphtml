@@ -147,7 +147,7 @@ export class AmpStoryHint {
    * Builds the hint layer DOM.
    * @return {!Element}
    */
-  buildHint() {
+  build() {
     const root = this.document_.createElement('div');
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
     createShadowRootWithStyle(root, this.hintContainer_, CSS);

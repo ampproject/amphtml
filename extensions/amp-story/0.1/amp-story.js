@@ -329,8 +329,8 @@ export class AmpStory extends AMP.BaseElement {
    * Builds the hint layer DOM.
    * @private
    */
-  buildHintLayer_() {
-    this.element.appendChild(this.ampStoryHint_.buildHint());
+  buildLayer_() {
+    this.element.appendChild(this.ampStoryHint_.build());
   }
 
 
@@ -564,7 +564,6 @@ export class AmpStory extends AMP.BaseElement {
 
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
-        .then(() => this.buildHintLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);

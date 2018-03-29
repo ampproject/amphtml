@@ -35,7 +35,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should build the UI', () => {
-    const hint = ampStoryHint.buildHint();
+    const hint = ampStoryHint.build();
     expect(hint).to.not.be.null;
     expect(getHintContainerFromHintRoot(hint)).to.not.be.null;
   });
@@ -44,8 +44,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
-    const hintContainer =
-        getHintContainerFromHintRoot(ampStoryHint.buildHint());
+    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
 
     ampStoryHint.showNavigationOverlay();
 
@@ -59,8 +58,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
-    const hintContainer =
-        getHintContainerFromHintRoot(ampStoryHint.buildHint());
+    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
 
     ampStoryHint.showFirstPageHintOverlay();
 
@@ -71,8 +69,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to hide shown hint', () => {
-    const hintContainer =
-        getHintContainerFromHintRoot(ampStoryHint.buildHint());
+    const hintContainer = getHintContainerFromHintRoot(ampStoryHint.build());
 
     ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
