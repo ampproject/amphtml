@@ -26,11 +26,11 @@ describe('analytics vendors', () => {
   it('should contain only iframe transport in ' +
       'ANALYTICS_IFRAME_TRANSPORT_CONFIG', () => {
     for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
-      const vendorEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-      expect(Object.keys(vendorEntry).length).to.equal(1);
-      expect(vendorEntry.transport).to.not.be.null;
-      expect(Object.keys(vendorEntry.transport).length).to.equal(1);
-      expect(vendorEntry.transport.iframe).to.not.be.null;
+      const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+      expect(Object.keys(vendorITEntry).length).to.equal(1);
+      expect(vendorITEntry.transport).to.not.be.null;
+      expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
+      expect(vendorITEntry.transport.iframe).to.not.be.null;
     }
   });
 
@@ -40,12 +40,11 @@ describe('analytics vendors', () => {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (vendorEntry.hasOwnProperty('transport') &&
           vendorEntry.transport.hasOwnProperty('iframe')) {
-        expect(ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]).to.not.be.null;
+        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+        expect(vendorITEntry).to.not.be.null;
+        expect(vendorITEntry.transport).to.not.be.null;
         /*
-        expect(ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor].transport)
-            .to.not.be.null;
-        expect(ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor].transport.iframe)
-            .to.not.be.null;
+        expect(vendorITEntry.transport.iframe).to.not.be.null;
             */
       }
     }
