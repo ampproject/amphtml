@@ -133,14 +133,6 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
     expect(listenerSpy).to.have.been.calledWith(true);
   });
 
-  it('should set the fallback state', () => {
-    const listenerSpy = sandbox.spy();
-    storeService.subscribe(StateProperty.FALLBACK_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_FALLBACK, true);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
   it('should toggle the landscape state', () => {
     const listenerSpy = sandbox.spy();
     storeService.subscribe(StateProperty.LANDSCAPE_STATE, listenerSpy);

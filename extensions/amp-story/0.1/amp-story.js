@@ -197,8 +197,7 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_ = new SystemLayer(this.win);
 
     /** @private @const {!UnsupportedBrowserLayer} */
-    this.unsupportedBrowserLayer_ =
-        new UnsupportedBrowserLayer(this.win, this.element);
+    this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
     /** @private @const {!ViewportWarningLayer} */
     this.viewportWarningLayer_ =
@@ -349,13 +348,9 @@ export class AmpStory extends AMP.BaseElement {
       this.onMutedStateUpdate_(isMuted);
     }, true /** callToInitialize */);
 
-    this.storeService_.subscribe(StateProperty.FALLBACK_STATE,
-        fallbackState => {
-          if (!fallbackState) {
-            dev().error(TAG, 'No handler to exit fallback state.');
-          }
-
-          this.enterFallback_();
+    this.storeService_.subscribe(
+        StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
+          this.onSupportedBrowserStateUpdate_(isBrowserSupported);
         });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
@@ -549,7 +544,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
-      this.storeService_.dispatch(Action.TOGGLE_FALLBACK, true);
+      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
       return Promise.resolve();
     }
 
@@ -979,17 +974,29 @@ export class AmpStory extends AMP.BaseElement {
     return this.desktopMedia_.matches;
   }
 
-  /** @private */
-  enterFallback_() {
+  /**
+   * Displays the unsupported browser UI: either the publisher provided UI, or
+   * fallbacks to a generic default.
+   * @param {boolean} isBrowserSupported
+   * @private
+   */
+  onSupportedBrowserStateUpdate_(isBrowserSupported) {
+    if (isBrowserSupported) {
+      dev().error(TAG, 'No handler to exit unsupported browser state.');
+    }
+
     const fallbackEl = this.getFallback();
+
     this.mutateElement(() => {
       this.element.classList.add('i-amphtml-story-fallback');
     });
 
+    // Displays the publisher provided fallback, or fallbacks to the default
+    // unsupported browser layer.
     if (fallbackEl) {
       this.toggleFallback(true);
     } else {
-      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
+      this.element.appendChild(this.unsupportedBrowserLayer_.build());
     }
   }
 

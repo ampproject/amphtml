@@ -16,8 +16,6 @@
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-0.1.css';
 import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
-import {StateProperty} from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -54,77 +52,29 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
 export class UnsupportedBrowserLayer {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the component
    */
-  constructor(win, storyElement) {
+  constructor(win) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
-
-    /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win_);
-
-    this.initializeListeners_();
+    /** @private {?Element} */
+    this.root_ = null;
   }
 
   /**
    * Builds and appends the component in the story.
    */
   build() {
-    if (this.isBuilt()) {
-      return;
+    if (this.root_) {
+      return this.root_;
     }
 
-    const root = this.win_.document.createElement('div');
+    this.root_ = this.win_.document.createElement('div');
     const overlayEl =
         renderAsElement(this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
 
-    createShadowRootWithStyle(root, overlayEl, CSS);
+    createShadowRootWithStyle(this.root_, overlayEl, CSS);
 
-    this.isBuilt_ = true;
-
-    this.vsync_.mutate(() => {
-      this.storyElement_.insertBefore(root, this.storyElement_.firstChild);
-    });
-  }
-
-  /**
-   * Whether the component is built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
-  }
-
-  /**
-   * @private
-   */
-  initializeListeners_() {
-    this.storeService_.subscribe(
-        StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
-          this.onSupportedBrowserStateUpdate_(isBrowserSupported);
-        }, true /** callToInitialize */);
-  }
-
-  /**
-   * Reacts to browser compatibility updates. Can only be changed to false,
-   * which shows the layer.
-   * @param {boolean} isBrowserSupported
-   * @private
-   */
-  onSupportedBrowserStateUpdate_(isBrowserSupported) {
-    if (isBrowserSupported) {
-      return;
-    }
-
-    this.build();
+    return this.root_;
   }
 }
