@@ -635,7 +635,7 @@ export class AmpStory extends AMP.BaseElement {
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
-    const initialPageId = this.getHistoryStatePage_() || firstPageEl.id;
+    const initialPageId = this.getHistoryStatePageId_() || firstPageEl.id;
 
     if (!this.paginationButtons_) {
       this.buildPaginationButtons_();
@@ -1006,18 +1006,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    * */
   onCurrentPageIdUpdate_(pageId) {
-    this.setHistoryState_(pageId);
+    this.setHistoryStatePageId_(pageId);
   }
 
 
   /**
-   * Save page id using history API
+   * Save page id using history API.
    * @param {string} pageId page id to be saved
    * @private
    */
-  setHistoryState_(pageId) {
+  setHistoryStatePageId_(pageId) {
     const history = this.win.history;
-    if (history.replaceState && this.getHistoryStatePage_() !== pageId) {
+    if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
         ampStoryPageId: pageId,
       }, '');
@@ -1029,9 +1029,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    * @return {?string}
    */
-  getHistoryStatePage_() {
-    return this.win.history && this.win.history.state &&
-      this.win.history.state.ampStoryPageId;
+  getHistoryStatePageId_() {
+    const history = this.win.history;
+    if (history) {
+      return history.state.ampStoryPageId;
+    }
+    return null;
   }
 
 
