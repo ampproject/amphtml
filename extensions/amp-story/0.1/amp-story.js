@@ -1032,7 +1032,7 @@ export class AmpStory extends AMP.BaseElement {
   getHistoryStatePageId_() {
     const history = this.win.history;
     if (history) {
-      return history.state.ampStoryPageId;
+      return history.state && history.state.ampStoryPageId;
     }
     return null;
   }
