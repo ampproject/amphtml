@@ -143,32 +143,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 const TAG = 'amp-story';
 
 
-const UNSUPPORTED_BROWSER_WARNING = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-overlay-container'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-gear-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
-            localizedStringId:
-                LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
-          },
-        ],
-      },
-    ],
-  },
-];
-
-
 /**
  * Container for "pill-style" share widget, rendered on desktop.
  * @private @const {!./simple-template.ElementDef}
@@ -185,7 +159,6 @@ const SHARE_WIDGET_PILL_CONTAINER = {
     },
   ],
 };
-
 
 
 /**
@@ -1012,22 +985,9 @@ export class AmpStory extends AMP.BaseElement {
     if (fallbackEl) {
       this.toggleFallback(true);
     } else {
-      this.buildUnsupportedBrowserOverlay_();
+      this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, true);
     }
   }
-
-
-  /**
-   * Build overlay for Landscape mode mobile
-   */
-  buildUnsupportedBrowserOverlay_() {
-    this.mutateElement(() => {
-      this.element.insertBefore(
-          renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
-          this.element.firstChild);
-    });
-  }
-
 
   /**
    * Get the URL of the given page's background resource.

@@ -91,6 +91,36 @@ const DESKTOP_SIZE_WARNING_TEMPLATE = {
 };
 
 
+/**
+ * Container for "pill-style" share widget, rendered on desktop.
+ * @private @const {!./simple-template.ElementDef}
+ */
+const UNSUPPORTED_BROWSER_WARNING_TEMPLATE = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-gear-icon'}),
+          },
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
+            localizedStringId:
+                LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
+          },
+        ],
+      },
+    ],
+  },
+];
+
+
 export class ViewportWarningLayer {
   /**
    * @param {!Window} win
@@ -167,6 +197,11 @@ export class ViewportWarningLayer {
     this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
       this.onLandscapeStateUpdate_(isLandscape);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(
+        StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
+      this.onSupportedBrowserStateUpdate_(isBrowserSupported);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -194,6 +229,19 @@ export class ViewportWarningLayer {
         this.getShadowRoot().setAttribute('desktop', '') :
         this.getShadowRoot().removeAttribute('desktop');
     });
+  }
+
+  /**
+   * Reacts to browser compatibility updates. Can only be changed to false.
+   * @param {boolean} isBrowserSupported
+   * @private
+   */
+  onSupportedBrowserStateUpdate_(isBrowserSupported) {
+    if (isBrowserSupported) {
+      return;
+    }
+    this.getShadowRoot().prepend(
+          renderSimpleTemplate(this.win_.document, UNSUPPORTED_BROWSER_WARNING));
   }
 
   /**
