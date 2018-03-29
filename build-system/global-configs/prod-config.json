@@ -32,7 +32,7 @@
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "rollback-delayed-fetch-deprecation": 1,
+  "rollback-delayed-fetch-deprecation": 0,
   "rollback-dfd-ix": 1,
   "rollback-dfd-criteo": 1,
   "rollback-dfd-rubicon": 1,
