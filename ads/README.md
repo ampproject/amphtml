@@ -250,7 +250,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 
 ### Verify your examples
 
-To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `npx gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
@@ -263,7 +263,7 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+npx gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
 
 ```
 
@@ -271,7 +271,7 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 ### Lint and type-check
 
-To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
+To speed up the review process, please run `npx gulp lint` and `npx gulp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 
