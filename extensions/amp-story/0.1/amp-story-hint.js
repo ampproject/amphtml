@@ -152,7 +152,6 @@ export class AmpStoryHint {
 
   /**
    * Builds the hint layer DOM.
-   * @return {!Element}
    */
   build() {
     if (this.isBuilt()) {
