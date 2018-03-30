@@ -304,6 +304,7 @@ describes.realWin('amp-analytics', {
       expect(preloadSpy.withArgs(
           'http://localhost:9876/dist/iframe-transport-client-lib.js',
           'script')).to.be.calledOnce;
+      delete analytics.predefinedConfig_['foo'];
     });
   });
 
