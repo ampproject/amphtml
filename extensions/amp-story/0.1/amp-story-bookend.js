@@ -209,9 +209,9 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 export class Bookend {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the bookend
+   * @param {!Element} parentEl Element where to append the bookend
    */
-  constructor(win, storyElement) {
+  constructor(win, parentEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -246,7 +246,7 @@ export class Bookend {
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -269,7 +269,7 @@ export class Bookend {
 
     this.replayButton_ = this.buildReplayButton_();
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -277,7 +277,7 @@ export class Bookend {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      this.storyElement_.appendChild(this.getRoot());
+      this.parentEl_.appendChild(this.getRoot());
     });
   }
 
@@ -397,15 +397,15 @@ export class Bookend {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
+    if (!this.parentEl_.hasAttribute(attributeName)) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const rawUrl = this.parentEl_.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     return Services.urlReplacementsForDoc(ampdoc)
         .expandUrlAsync(user().assertString(rawUrl))
@@ -569,7 +569,7 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_() {
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {

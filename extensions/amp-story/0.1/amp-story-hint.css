@@ -30,10 +30,6 @@
   opacity: 0 !important;
 }
 
-[desktop] .i-amphtml-story-hint-container {
-  display: none !important;
-}
-
 .i-amphtml-story-hint-container .i-amphtml-story-navigation-help-overlay {
   position: absolute !important;
   left: 0 !important;
