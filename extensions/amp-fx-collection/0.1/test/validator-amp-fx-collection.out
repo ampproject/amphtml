@@ -29,10 +29,16 @@ PASS
 |    <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
 |  </head>
 |  <body>
+|    <div>
+|      <h1 amp-fx="parallax"></h1>
+|    </div>
 |    <div amp-fx="parallax" data-parallax-factor="0.8"></div>
 |    <amp-img amp-fx="parallax" data-parallax-factor="1.2" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
 |    <div>
-|      <h1 amp-fx="parallax"></h1>
+|      <h1 amp-fx="fade-in"></h1>
+|    </div>
+|    <div amp-fx="fade-in" data-fade-in-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+|      <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
 |    </div>
 |  </body>
 |  </html>
