@@ -6,6 +6,7 @@
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <title>My Story</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="helloworld.html">
@@ -28,6 +29,43 @@
 
   <body>
     <amp-story standalone bookend-config-src="bookend.json">
+
+      <amp-analytics type="adobeanalytics">
+        <script type="application/json">
+          {
+            "requests": {
+              "base": "https://localhost:8000/s${random}",
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}"
+            },
+            "vars": {
+              "trackingServer": "metrics.example.com",
+              "accounts": "example"
+            },
+            "triggers": {
+              "trackPageview": {
+                "on": "story-page-visible",
+                "request": "pageView"
+              },
+              "trackBookendEnter": {
+                "on": "story-bookend-enter",
+                "request": "pageView"
+              },
+              "trackBookendExit": {
+                "on": "story-bookend-exit",
+                "request": "pageView"
+              },
+              "trackAudioEnable": {
+                "on": "story-audio-muted",
+                "request": "pageView"
+              },
+              "trackAudioDisable": {
+                "on": "story-audio-unmuted",
+                "request": "pageView"
+              }
+            }
+          }
+        </script>
+      </amp-analytics>
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">

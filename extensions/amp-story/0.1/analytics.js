@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
 import {dev} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
+/** @enum {string} */
 const Events = {
   PAGE_VISIBLE: 'story-page-visible',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  STORY_MUTED: 'story-audio-muted',
+  STORY_UNMUTED: 'story-audio-unmuted',
 };
 
 
@@ -31,25 +35,27 @@ const Events = {
  */
 export class AmpStoryAnalytics {
   /**
+   * @param {!Window} win
    * @param {!Element} element
    */
-  constructor(element) {
+  constructor(win, element) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private @const {!Object<number, boolean>} */
-    this.seenPagesIndices_ = map();
+    /** @private @const {!Object<string, boolean>} */
+    this.seenPagesIds_ = map();
   }
 
   /**
    * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
    */
-  onStateChange(stateChangeEvent) {
+  onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        this.onActivePageChange_(
-            dev().assertNumber(pageIndex),
-            dev().assertString(pageId));
+        this.triggerEvent_(Events.PAGE_VISIBLE);
         break;
       case StateChangeType.BOOKEND_ENTER:
         this.triggerEvent_(Events.BOOKEND_ENTER);
@@ -61,26 +67,25 @@ export class AmpStoryAnalytics {
   }
 
   /**
-   * @param {number} pageIndex
-   * @param {string} pageId
+   * @param {boolean} isMuted
    */
-  onActivePageChange_(pageIndex, pageId) {
-    if (!this.seenPagesIndices_[pageIndex]) {
-      this.triggerEvent_(Events.PAGE_VISIBLE, {
-        'storyPageIndex': pageIndex.toString(),
-        'storyPageId': pageId,
-      });
-
-      this.seenPagesIndices_[pageIndex] = true;
-    }
+  onMutedStateChange(isMuted) {
+    const event = isMuted ? Events.STORY_MUTED : Events.STORY_UNMUTED;
+    this.triggerEvent_(event);
   }
 
   /**
    * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
    * @private
    */
-  triggerEvent_(eventType, opt_vars) {
-    triggerAnalyticsEvent(this.element_, eventType, opt_vars);
+  triggerEvent_(eventType) {
+    const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
+    variablesPromise.then(
+        variables => {
+          triggerAnalyticsEvent(this.element_, eventType, variables);
+        },
+        reason => {
+          dev().error('AMP-STORY', 'Could not get analytics variables', reason);
+        });
   }
 }

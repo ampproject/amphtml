@@ -25,7 +25,7 @@ describes.fakeWin('amp-story variable service', {}, () => {
   });
 
   it('should update pageIndex and pageId on change', () => {
-    variableService.onStateChange({
+    variableService.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,
       value: {
         pageIndex: 123,
