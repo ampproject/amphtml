@@ -32,9 +32,10 @@ const TAG = 'amp-story';
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
- *    fallbackstate: boolean,
  *    hasaudiostate: boolean,
+ *    landscapestate: boolean,
  *    mutedstate: boolean,
+ *    supportedbrowserstate: boolean,
  *    currentpageid: string,
  * }}
  */
@@ -53,9 +54,10 @@ export const StateProperty = {
   // App States.
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
-  FALLBACK_STATE: 'fallbackstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
+  SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
 };
 
@@ -64,9 +66,10 @@ export const StateProperty = {
 export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
-  TOGGLE_FALLBACK: 'togglefallback',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
+  TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
+  TOGGLE_SUPPORTED_BROWSER: 'supportedbrowserstate',
   CHANGE_PAGE: 'changepage',
 };
 
@@ -95,16 +98,16 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.HAS_AUDIO_STATE]: !!data}));
+    case Action.TOGGLE_LANDSCAPE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
-    case Action.CHANGE_PAGE:
-      return /** @type {!State} */ (Object.assign(
-          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
-    case Action.TOGGLE_FALLBACK:
-      if (!data) {
-        dev().error(TAG, 'Cannot exit fallback state.');
+    case Action.TOGGLE_SUPPORTED_BROWSER:
+      if (data) {
+        dev().error(TAG, 'Cannot exit unsupported browser state.');
       }
       return /** @type {!State} */ (Object.assign(
           {}, state, {
@@ -115,10 +118,13 @@ const actions = (state, action, data) => {
             [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
             [StateProperty.BOOKEND_STATE]: false,
             [StateProperty.DESKTOP_STATE]: false,
-            [StateProperty.FALLBACK_STATE]: true,
             [StateProperty.HAS_AUDIO_STATE]: false,
             [StateProperty.MUTED_STATE]: true,
+            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
           }));
+    case Action.CHANGE_PAGE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
     default:
       dev().error(TAG, `Unknown action ${action}.`);
       return state;
@@ -210,9 +216,10 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
-      [StateProperty.FALLBACK_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
+      [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
     });
   }
