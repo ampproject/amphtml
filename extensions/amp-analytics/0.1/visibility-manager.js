@@ -701,7 +701,13 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     return this.backgroundedAtStart_;
   }
 
-  /** @override */
+  /**
+   * Gets the layout box of the embedded document. Note that this may be
+   * smaller than the size allocated by the host. In that case, the document
+   * will be centered, and the unfilled space will not be reflected in this
+   * return value.
+   * @override
+   */
   getRootLayoutBox() {
     const rootElement = dev().assertElement(this.embed.iframe);
     return Services.viewportForDoc(this.ampdoc).getLayoutRect(rootElement);
