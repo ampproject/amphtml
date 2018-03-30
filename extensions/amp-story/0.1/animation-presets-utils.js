@@ -77,3 +77,39 @@ export function whooshIn(startX, startY, endX, endY) {
     },
   ];
 }
+
+/**
+ * Checks if page dimensions are larger than those of the target to be animated.
+ * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
+ */
+export function pageIsLargerThanTarget(dimensions) {
+  return dimensions.pageWidth > dimensions.targetWidth ||
+         dimensions.pageHeight > dimensions.targetHeight;
+}
+
+/**
+ * Calculate target scaling factor so that it is at least 25% larger than the page.
+ * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
+ * @return {number}
+ */
+export function calculateTargetScalingFactor(dimensions) {
+  const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
+                      dimensions.pageWidth / dimensions.targetWidth : 1;
+  const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
+                       dimensions.pageHeight / dimensions.targetHeight : 1;
+  return Math.max(widthFactor, heightFactor) + 0.25;
+}
+
+/**
+ * Scale the image in every frame by a certain factor.
+ * @param {KeyframesDef} keyframes Keyframes that will be used for the animation.
+ * @param {number} scalingFactor Scaling factor at which target will be scaled.
+ * @return {KeyframesDef}
+ */
+export function enlargeKeyFrames(keyframes, scalingFactor) {
+  keyframes.forEach(frame => {
+    frame["transform"] += " " + scale(scalingFactor);
+    frame["transform-origin"] = "left top";
+  });
+  return keyframes;
+}

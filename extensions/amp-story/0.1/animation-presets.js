@@ -20,6 +20,9 @@ import {
   rotateAndTranslate,
   translate2d,
   whooshIn,
+  pageIsLargerThanTarget,
+  calculateTargetScalingFactor,
+  enlargeKeyFrames
 } from './animation-presets-utils';
 
 
@@ -183,36 +186,89 @@ export const PRESETS = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+      let resized = false;
+      let scalingFactor = 1;
+
+      if(pageIsLargerThanTarget(dimensions)) {
+        scalingFactor = calculateTargetScalingFactor(dimensions);
+        resized = true;
+        dimensions.targetWidth *= scalingFactor;
+        dimensions.targetHeight *= scalingFactor;
+      }
+
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
-      return translate2d(offsetX, offsetY, 0, offsetY);
+
+      let frames = translate2d(offsetX, offsetY, 0, offsetY);
+
+      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
+      return frames;
     },
   },
   'pan-right': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+      let resized = false;
+      let scalingFactor = 1;
+
+      if(pageIsLargerThanTarget(dimensions)) {
+        scalingFactor = calculateTargetScalingFactor(dimensions);
+        resized = true;
+        dimensions.targetWidth *= scalingFactor;
+        dimensions.targetHeight *= scalingFactor;
+      }
+
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
-      return translate2d(0, offsetY, offsetX, offsetY);
+
+      let frames = translate2d(0, offsetY, offsetX, offsetY);
+      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
+      return frames;
     },
   },
   'pan-down': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+      let resized = false;
+      let scalingFactor = 1;
+
+      if(pageIsLargerThanTarget(dimensions)) {
+        scalingFactor = calculateTargetScalingFactor(dimensions);
+        resized = true;
+        dimensions.targetWidth *= scalingFactor;
+        dimensions.targetHeight *= scalingFactor;
+      }
+
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
-      return translate2d(offsetX, 0, offsetX, offsetY);
+
+      let frames = translate2d(offsetX, 0, offsetX, offsetY);
+      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
+      return frames;
     },
   },
   'pan-up': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
+      let resized = false;
+      let scalingFactor = 1;
+
+      if(pageIsLargerThanTarget(dimensions)) {
+        scalingFactor = calculateTargetScalingFactor(dimensions);
+        resized = true;
+        dimensions.targetWidth *= scalingFactor;
+        dimensions.targetHeight *= scalingFactor;
+      }
+
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
-      return translate2d(offsetX, offsetY, offsetX, 0);
+
+      let frames = translate2d(offsetX, offsetY, offsetX, 0);
+      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
+      return frames;
     },
   },
   'zoom-in': {
