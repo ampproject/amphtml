@@ -56,8 +56,7 @@ export const Presets = {
               // Translate the element offset pixels.
               setStyles(fxElement.getElement(),
                   {transform:
-                    `translateY(${fxElement.getOffset().toFixed(0)}px)`}
-              );
+                    `translateY(${fxElement.getOffset().toFixed(0)}px)`});
             });
       }
     },
