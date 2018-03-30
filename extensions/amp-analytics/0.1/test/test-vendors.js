@@ -41,28 +41,10 @@ describe('analytics vendors', () => {
       if (vendorEntry.hasOwnProperty('transport') &&
           vendorEntry.transport.hasOwnProperty('iframe')) {
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-        if (typeof vendorITEntry === 'undefined') {
-          expect('ANALYTICS_IFRAME_TRANSPORT_CONFIG[' + vendor +
-              '] is undefined').to.equal(vendorITEntry);
-        }
         expect(vendorITEntry).to.exist;
-        if (typeof vendorITEntry.transport === 'undefined') {
-          expect('ANALYTICS_IFRAME_TRANSPORT_CONFIG[' + vendor +
-              '].transport is undefined').to.equal(vendorITEntry.transport);
-        }
         expect(vendorITEntry.transport).to.exist;
-        if (typeof vendorITEntry.transport.iframe === 'undefined') {
-          expect('ANALYTICS_IFRAME_TRANSPORT_CONFIG[' + vendor +
-              '].transport.iframe is undefined')
-              .to.equal(vendorITEntry.transport.iframe);
-        }
         expect(vendorITEntry.transport.iframe).to.exist;
       }
     }
-  });
-
-  it('temp debugging test', () => {
-    expect(JSON.stringify(ANALYTICS_IFRAME_TRANSPORT_CONFIG))
-        .to.equal('ANALYTICS_IFRAME_TRANSPORT_CONFIG');
   });
 });
