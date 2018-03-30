@@ -21,8 +21,10 @@ import {Services} from '../../../src/services';
 import {assertConfig} from './config';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
+import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+
 import {user} from '../../../src/log';
 
 /** @const */
@@ -93,9 +95,22 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       // the cache or same domain, otherwise this is a CORS request.
       Services.xhrFor(this.win)
           .fetchDocument(next.ampUrl)
-          .then(
-              doc => {this.attachShadowDoc_(doc);},
-              () => {});
+          .then(doc => this.attachShadowDoc_(doc), () => {})
+          .then(amp => {
+            this.win.document.title = amp.title || '';
+            if (this.win.history.replaceState) {
+              const url = parseUrl(next.ampUrl);
+              this.win.history.replaceState({}, amp.title, url.pathname);
+            }
+
+            // TODO(peterjosling): Send request to viewer with title/URL
+            // TODO(peterjosling): Set title back when scrolling up
+            // TODO(peterjosling): Only set title when document becomes active
+            // TODO(emarchiori): Trigger analtyics event when active
+            // document changes.
+            // TODO(emarchiori): Hide position fixed elements of inactive
+            // documents and update approriately.
+          });
     }
   }
 
@@ -109,7 +124,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     let article = from;
 
     while (article < this.config_.recommendations.length &&
-        article - from < SEPARATOR_RECOS) {
+           article - from < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
@@ -120,14 +135,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       });
 
       const imageElement = doc.createElement('div');
-      imageElement.classList.add('i-amphtml-next-article-image',
-          'amp-document-recommendations-image');
+      imageElement.classList.add(
+          'i-amphtml-next-article-image', 'amp-document-recommendations-image');
       setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
-      titleElement.classList.add('i-amphtml-next-article-title',
-          'amp-document-recommendations-text');
+      titleElement.classList.add(
+          'i-amphtml-next-article-title', 'amp-document-recommendations-text');
 
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
@@ -141,38 +156,36 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   /**
    * Attach a ShadowDoc using the given document.
    * @param {!Document} doc
+   * @return {!Promise<?Object>} Promise resolved with the return value of
+   *     {@link MultiDocManager#attachShadowDoc}
    */
   attachShadowDoc_(doc) {
-    this.getVsync().mutate(() => {
-      const shadowRoot = this.win.document.createElement('div');
+    let amp = null;
+    return this.getVsync()
+        .mutatePromise(() => {
+          const shadowRoot = this.win.document.createElement('div');
 
-      try {
-        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+          try {
+            amp =
+                this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-        // TODO(peterjosling): Update document title.
-        // TODO(emarchiori): Trigger analtyics event when active
-        // document changes.
-        // TODO(emarchiori): Hide position fixed elements of inactive
-        // documents and update approriately.
+            this.element.appendChild(shadowRoot);
+            this.appendDivision_();
+            this.appendArticleLinks_(this.nextArticle_ + 1);
 
-        this.element.appendChild(shadowRoot);
-        this.appendDivision_();
-        this.appendArticleLinks_(this.nextArticle_ + 1);
-
-        if (this.nextArticle_ < this.config_.recommendations.length) {
-          this.appendNextArticle_();
-        }
-
-      } catch (e) {
-        // TODO(emarchiori): Handle loading errors.
-      }
-    });
+            if (this.nextArticle_ < this.config_.recommendations.length) {
+              this.appendNextArticle_();
+            }
+          } catch (e) {
+            // TODO(emarchiori): Handle loading errors.
+          }
+        })
+        .then(() => amp);
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
+    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
     if (activeInstance_ !== this) {
       return Promise.resolve();
@@ -180,11 +193,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     this.element.classList.add('i-amphtml-document-recommendations');
 
-    this.multidocManager_ = new MultidocManager(
-        this.win,
-        Services.ampdocServiceFor(this.win),
-        Services.extensionsFor(this.win),
-        Services.timerFor(this.win));
+    this.multidocManager_ =
+        new MultidocManager(this.win, Services.ampdocServiceFor(this.win),
+          Services.extensionsFor(this.win), Services.timerFor(this.win));
 
     // TODO(peterjosling): Read config from another source.
 
@@ -192,18 +203,18 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const scriptElement = children[0];
-    user().assert(
-        isJsonScriptTag(scriptElement),
+    user().assert(isJsonScriptTag(scriptElement),
         'The amp-document-recommendations config should ' +
-        'be inside a <script> tag with type="application/json"');
+            'be inside a <script> tag with type="application/json"');
 
-    const configJson = tryParseJson(
-        scriptElement.textContent, error => {
-          throw user().createError(
-              'failed to parse content discovery script', error);
-        });
+    const configJson = tryParseJson(scriptElement.textContent, error => {
+      throw user().createError(
+          'failed to parse content discovery script', error);
+    });
 
-    this.config_ = assertConfig(configJson);
+    const docInfo = Services.documentInfoForDoc(this.element);
+    const host = parseUrl(docInfo.sourceUrl).host;
+    this.config_ = assertConfig(configJson, host);
 
     this.mutateElement(() => {
       this.appendDivision_();

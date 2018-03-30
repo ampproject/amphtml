@@ -181,6 +181,11 @@ export class AccessServerJwtAdapter {
     return this.clientAdapter_.pingback();
   }
 
+  /** @override */
+  postAction() {
+    // Nothing to do.
+  }
+
   /**
    * @return {!Promise<{encoded:string, jwt:!JsonObject}>}
    * @private

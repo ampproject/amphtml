@@ -133,6 +133,7 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -230,6 +231,10 @@ exports.rules = [
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
           'src/service/url-replacements-impl.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
+          'src/service/notification-ui-manager.js',
+      'extensions/amp-consent/0.1/amp-consent.js->' +
+          'src/service/notification-ui-manager.js',
     ],
   },
   {
@@ -299,6 +304,7 @@ exports.rules = [
       /** DO NOT WHITELIST ANY FILES */
     ],
     whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
       '3p/integration.js->ads/google/deprecated_doubleclick.js',
     ],
   },
