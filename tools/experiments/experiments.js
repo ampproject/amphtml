@@ -282,6 +282,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
   },
+  {
+    id: 'iframe-messaging',
+    name: 'Enables "postMessage" action on amp-iframe.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9074',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
 ];
 
 if (getMode().localDev) {
