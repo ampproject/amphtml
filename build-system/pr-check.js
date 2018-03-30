@@ -255,6 +255,22 @@ function determineBuildTargets(filePaths) {
   return targetSet;
 }
 
+function startSauceConnect() {
+  process.env['SAUCE_ACCESS_KEY'] = getStdout(
+      'curl --silent https://amphtml-sauce-token-dealer.appspot.com/getToken')
+      .trim();
+  const startScCmd = 'build-system/start_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Starting Sauce Connect Proxy:', colors.cyan(startScCmd));
+  exec(startScCmd);
+}
+
+function stopSauceConnect() {
+  const stopScCmd = 'build-system/stop_sauce_connect.sh';
+  console.log('\n' + fileLogPrefix,
+      'Stopping Sauce Connect Proxy:', colors.cyan(stopScCmd));
+  exec(stopScCmd);
+}
 
 const command = {
   testBuildSystem: function() {
@@ -286,16 +302,18 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild --headless';
+    let cmd = 'gulp test --unit --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
     // Unit tests with Travis' default chromium
-    timedExecOrDie(cmd);
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+    timedExecOrDie(cmd + ' --headless');
+    if (!!process.env.SAUCE_USERNAME) {
       // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
+      startSauceConnect();
       timedExecOrDie(cmd);
+      stopSauceConnect();
     }
   },
   runIntegrationTests: function(compiled) {
@@ -307,12 +325,15 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+    if (!!process.env.SAUCE_USERNAME) {
+      startSauceConnect();
       cmd += ' --saucelabs';
+      timedExecOrDie(cmd);
+      stopSauceConnect();
     } else {
       cmd += ' --headless';
+      timedExecOrDie(cmd);
     }
-    timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
     if (process.env.TRAVIS) {
