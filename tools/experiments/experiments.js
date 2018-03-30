@@ -288,6 +288,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
+  {
+    id: 'amp-fx-fade-in',
+    name: 'Enables amp-fx="fade-in" - a scroll triggered timed fade in animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
 ];
 
 if (getMode().localDev) {
