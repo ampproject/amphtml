@@ -119,9 +119,9 @@ const FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT = 275;
 export class AmpStoryHint {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the bookend
+   * @param {!Element} parentEl Element where to append the component
    */
-  constructor(win, storyElement) {
+  constructor(win, parentEl) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -147,7 +147,7 @@ export class AmpStoryHint {
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.parentEl_ = parentEl;
   }
 
   /**
@@ -166,7 +166,7 @@ export class AmpStoryHint {
     createShadowRootWithStyle(root, this.hintContainer_, CSS);
 
     this.vsync_.mutate(() => {
-      this.storyElement_.appendChild(root);
+      this.parentEl_.appendChild(root);
     });
   }
 
