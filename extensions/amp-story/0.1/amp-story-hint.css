@@ -57,7 +57,7 @@
   flex: 1 !important;
 }
 
-.show-first-page-overlay .i-amphtml-story-navigation-help-overlay{
+.show-first-page-overlay .i-amphtml-story-navigation-help-overlay {
   background: rgba(0,0,0,0) !important;
 }
 
@@ -155,6 +155,9 @@
 .i-amphtml-story-hint-placeholder {
   top: 50% !important;
   position: absolute;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
 }
 
 .i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button-text {
