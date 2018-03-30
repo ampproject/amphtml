@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
 
 /**
  * @typedef {!Object<string, *>}
