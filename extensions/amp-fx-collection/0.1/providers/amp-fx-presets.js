@@ -50,13 +50,14 @@ export const Presets = {
 
       if (!fxElement.isMutateScheduled()) {
         fxElement.setIsMutateScheduled(true);
-        fxElement.resources_.mutateElement(fxElement.getElement(), function() {
-          fxElement.setIsMutateScheduled(false);
-          // Translate the element offset pixels.
-          setStyles(fxElement.getElement(),
-              {transform: `translateY(${fxElement.getOffset().toFixed(0)}px)`}
-          );
-        });
+        fxElement.getResources().mutateElement(fxElement.getElement(),
+            function() {
+              fxElement.setIsMutateScheduled(false);
+              // Translate the element offset pixels.
+              setStyles(fxElement.getElement(),
+                  {transform:
+                    `translateY(${fxElement.getOffset().toFixed(0)}px)`});
+            });
       }
     },
   },
