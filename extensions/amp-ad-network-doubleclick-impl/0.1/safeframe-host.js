@@ -122,7 +122,7 @@ export class SafeframeHostApi {
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
    * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
-   * @param {?({width, height}|../../../src/layout-rect.LayoutRectDef)} creativeSize
+   * @param {{width:number, height:number}} creativeSize
    * @param {?string} fluidImpressionUrl
    */
   constructor(baseInstance, isFluid, initialSize, creativeSize,
@@ -157,8 +157,13 @@ export class SafeframeHostApi {
     /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
     this.slotSize_ = initialSize;
 
-    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
+    /** @private {{width:number, height:number}} */
     this.creativeSize_ = creativeSize;
+
+    /** @private {{width:number, height:number}} */
+    this.initialCreativeSize_ =
+      /** @private {{width:number, height:number}} */
+      (Object.assign({}, creativeSize));
 
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
@@ -273,8 +278,8 @@ export class SafeframeHostApi {
       bottom: ampAdBox.bottom - heightOffset,
       left: ampAdBox.left + widthOffset,
       right: ampAdBox.right - widthOffset,
-      height: this.creativeSize_.height,
-      width: this.creativeSize_.width,
+      height: this.initialCreativeSize_.height,
+      width: this.initialCreativeSize_.width,
     };
     return this.formatGeom_(iframeBox);
   }
@@ -463,9 +468,9 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const expandHeight = Number(this.iframe_.height) +
+    const expandHeight = Number(this.creativeSize_.height) +
           payload['expand_b'] + payload['expand_t'];
-    const expandWidth = Number(this.iframe_.width) +
+    const expandWidth = Number(this.creativeSize_.width) +
           payload['expand_r'] + payload['expand_l'];
     // Verify that if expanding by push, that expandByPush is allowed.
     // If expanding by overlay, verify that expandByOverlay is allowed,
@@ -476,11 +481,15 @@ export class SafeframeHostApi {
          (expandWidth > this.creativeSize_.width ||
           expandHeight > this.creativeSize_.height))) {
       dev().error(TAG, 'Invalid expand values.');
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
     // Can't expand to greater than the viewport size
     if (expandHeight > this.viewport_.getSize().height ||
         expandWidth > this.viewport_.getSize().width) {
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.EXPAND_RESPONSE);
       return;
     }
     this.handleSizeChange(expandHeight,
@@ -494,10 +503,12 @@ export class SafeframeHostApi {
   handleCollapseRequest_() {
     // Only collapse if expanded.
     if (this.isCollapsed_ || !this.isRegistered_) {
+      this.sendResizeResponse(
+          /* SUCCESS? */ false, SERVICE.COLLAPSE_RESPONSE);
       return;
     }
-    this.handleSizeChange(this.creativeSize_.height,
-        this.creativeSize_.width,
+    this.handleSizeChange(this.initialCreativeSize_.height,
+        this.initialCreativeSize_.width,
         SERVICE.COLLAPSE_RESPONSE,
         /** isCollapse */ true);
   }
@@ -519,6 +530,8 @@ export class SafeframeHostApi {
               'height': height + 'px',
               'width': width + 'px',
             });
+            this.creativeSize_.height = height;
+            this.creativeSize_.width = width;
           }
           this.sendResizeResponse(/** SUCCESS */ true, messageType);
         },
@@ -561,10 +574,11 @@ export class SafeframeHostApi {
     if (!this.isRegistered_) {
       return;
     }
-    const shrinkHeight = Number(this.iframe_.height) -
-          payload['shrink_b'] + payload['shrink_t'];
-    const shrinkWidth = Number(this.iframe_.width) -
-          payload['shrink_r'] + payload['shrink_l'];
+    const shrinkHeight = Number(this.creativeSize_.height) -
+          (payload['shrink_b'] + payload['shrink_t']);
+    const shrinkWidth = Number(this.creativeSize_.width) -
+          (payload['shrink_r'] + payload['shrink_l']);
+
     // Make sure we are actually shrinking here.
     if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||
         shrinkWidth > this.creativeSize_.width ||

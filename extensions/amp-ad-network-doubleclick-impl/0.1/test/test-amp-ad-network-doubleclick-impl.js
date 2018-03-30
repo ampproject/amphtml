@@ -43,6 +43,7 @@ import {
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -57,6 +58,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -168,6 +170,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.size_ = size;
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+    });
+
+    it('should ignore creative-size header for fluid response', () => {
+      impl.isFluid_ = true;
+      impl.element.setAttribute('height', 'fluid');
+      const resizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+      expect(impl.extractSize({
+        get(name) {
+          return name == CREATIVE_SIZE_HEADER ? '0x0' : undefined;
+        },
+        has(name) {
+          return name == CREATIVE_SIZE_HEADER;
+        },
+      })).to.deep.equal({width: 0, height: 0});
+      expect(resizeSpy).to.not.be.called;
     });
 
     it('should not load amp-analytics without an analytics header', () => {
@@ -757,10 +774,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
   describe('#multi-size', () => {
-    const arrayBuffer = () => Promise.resolve({
-      byteLength: 256,
-    });
-
     /**
      * Calling this function ensures that the enclosing test will behave as if
      * it has an AMP creative.
@@ -771,16 +784,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           () => Promise.resolve(VerificationStatus.OK));
     }
 
-    function mockSendXhrRequest() {
+    function mockSendXhrRequest(size) {
       return {
-        arrayBuffer,
+        arrayBuffer: () => Promise.resolve(utf8Encode(
+            '<html><body>Hello, World!</body></html>')),
         headers: {
           get(prop) {
             switch (prop) {
               case QQID_HEADER:
                 return 'qqid-header';
               case CREATIVE_SIZE_HEADER:
-                return '150x50';
+                return size;
               case AMP_SIGNATURE_HEADER:
                 return 'fake-sig';
               default:
@@ -842,7 +856,11 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('amp creative - should force iframe to match size of creative', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      sandbox.stub(impl, 'sendXhrRequest').returns(
+          mockSendXhrRequest('150x50'));
+      // Stub ini load otherwise FIE could delay test
+      sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .returns(Promise.resolve());
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -854,7 +872,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should force iframe to match size of creative', () => {
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
+      sandbox.stub(impl, 'sendXhrRequest').returns(
+          mockSendXhrRequest('150x50'));
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {
@@ -867,9 +886,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => null);
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
+      // Stub ini load otherwise FIE could delay test
+      sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .returns(Promise.resolve());
       // This would normally be set in AmpA4a#buildCallback.
       impl.creativeSize_ = {width: 200, height: 50};
       impl.buildCallback();
@@ -883,7 +905,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should force iframe to match size of slot', () => {
-      sandbox.stub(impl, 'sendXhrRequest').callsFake(() => null);
+      sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
       // This would normally be set in AmpA4a#buildCallback.
@@ -902,6 +924,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       impl.element.setAttribute('data-multi-size', '201x50');
+      // Stub ini load otherwise FIE could delay test
+      sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+          .returns(Promise.resolve());
       impl.buildCallback();
       impl.onLayoutMeasure();
       return impl.layoutCallback().then(() => {

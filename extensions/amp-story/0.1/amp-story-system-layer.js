@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-system-layer-0.1.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
+import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -25,8 +27,13 @@ import {renderAsElement} from './simple-template';
 
 
 
+/** @private @const {string} */
+const AUDIO_MUTED_ATTRIBUTE = 'muted';
+
+/** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
+/** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -37,27 +44,7 @@ const TEMPLATE = {
   children: [
     {
       tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-ui-left'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': MUTE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-ui-right'}),
+      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
         {
           tag: 'div',
@@ -97,11 +84,20 @@ export class SystemLayer {
     /** @private {boolean} */
     this.isBuilt_ = false;
 
-    /** @private {?Element} */
+    /**
+     * Root element containing a shadow DOM root.
+     * @private {?Element}
+     */
     this.root_ = null;
 
+    /**
+     * Actual system layer.
+     * @private {?Element}
+     */
+    this.systemLayerEl_ = null;
+
     /** @private {?Element} */
-    this.leftButtonTray_ = null;
+    this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win);
@@ -114,6 +110,9 @@ export class SystemLayer {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
   }
 
   /**
@@ -127,13 +126,17 @@ export class SystemLayer {
 
     this.isBuilt_ = true;
 
-    this.root_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.root_ = this.win_.document.createElement('div');
+    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
 
-    this.root_.insertBefore(
-        this.progressBar_.build(pageIds), this.root_.lastChild);
+    createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
-    this.leftButtonTray_ =
-        this.root_.querySelector('.i-amphtml-story-ui-left');
+    this.systemLayerEl_.insertBefore(
+        this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
+
+    this.buttonsContainer_ =
+        this.systemLayerEl_.querySelector(
+            '.i-amphtml-story-system-layer-buttons');
 
     this.buildForDevelopmentMode_();
 
@@ -141,7 +144,7 @@ export class SystemLayer {
 
     // TODO(newmuis): Observe this value.
     if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
-      this.root_.classList.add('i-amphtml-story-ui-no-buttons');
+      this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
     }
 
     return this.getRoot();
@@ -155,9 +158,9 @@ export class SystemLayer {
       return;
     }
 
-    this.leftButtonTray_.appendChild(this.developerButtons_.build(
+    this.buttonsContainer_.appendChild(this.developerButtons_.build(
         this.developerLog_.toggle.bind(this.developerLog_)));
-    this.root_.appendChild(this.developerLog_.build());
+    this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
   /**
@@ -165,7 +168,7 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.root_.addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', event => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
@@ -174,6 +177,22 @@ export class SystemLayer {
         this.onUnmuteAudioClick_();
       }
     });
+
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
+      this.onHasAudioStateUpdate_(hasAudio);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      this.onMutedStateUpdate_(isMuted);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -181,6 +200,60 @@ export class SystemLayer {
    */
   getRoot() {
     return dev().assertElement(this.root_);
+  }
+
+  /**
+   * @return {!Element}
+   */
+  getShadowRoot() {
+    return dev().assertElement(this.systemLayerEl_);
+  }
+
+  /**
+   * Reacts to the bookend state updates and updates the UI accordingly.
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.getShadowRoot()
+        .classList.toggle('i-amphtml-story-bookend-active', isActive);
+  }
+
+  /**
+   * Reacts to desktop state updates and triggers the desktop UI.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    this.vsync_.mutate(() => {
+      isDesktop ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
+    });
+  }
+
+  /**
+   * Reacts to has audio state updates, displays the audio controls if needed.
+   * @param {boolean} hasAudio
+   * @private
+   */
+  onHasAudioStateUpdate_(hasAudio) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle('audio-playing', hasAudio);
+    });
+  }
+
+  /**
+   * Reacts to muted state updates.
+   * @param {boolean} isMuted
+   * @private
+   */
+  onMutedStateUpdate_(isMuted) {
+    this.vsync_.mutate(() => {
+      isMuted ?
+        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+    });
   }
 
   /**
@@ -238,7 +311,7 @@ export class SystemLayer {
       return;
     }
 
-    Services.vsyncFor(this.win_).mutate(() => {
+    this.vsync_.mutate(() => {
       logEntries.forEach(logEntry => this.logInternal_(logEntry));
     });
   }

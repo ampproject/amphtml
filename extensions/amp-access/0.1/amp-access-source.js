@@ -492,6 +492,7 @@ export class AccessSource {
         // Also do this for an empty response to avoid false negatives.
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
+        this.adapter_.postAction();
         return exchangePromise.then(() => {
           const authorizationPromise = this.runAuthorization(
               /* disableFallback */ true);
@@ -586,4 +587,9 @@ export class AccessTypeAdapterDef {
    * @return {!Promise}
    */
   pingback() {}
+
+  /**
+   * Called after an action (login/subscribe/etc) is complete.
+   */
+  postAction() {}
 }

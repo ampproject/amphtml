@@ -981,7 +981,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if ((this.isFluid_ && width && height) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1206,10 +1206,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.isFluid_ && !isSafeFrame) {
       return;
     }
-
+    const creativeSize = this.getCreativeSize();
+    dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
+            this, this.isFluid_, this.initialSize_,
+            /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();
