@@ -47,4 +47,8 @@ describe('analytics vendors', () => {
       }
     }
   });
+
+  it('temp debugging test', () => {
+    expect(JSON.stringify(ANALYTICS_IFRAME_TRANSPORT_CONFIG)).to.equal('foo');
+  });
 });
