@@ -62,6 +62,35 @@ const ELEMENTS_ACTIONS_MAP_ = {
 };
 
 /**
+ * Interactable widgets which should trigger tap events when the user clicks
+ * or activates via the keyboard. Not all are here, e.g. progressbar, tabpanel,
+ * since they are readonly or composite widgets that shouldn't need to trigger
+ * tap events on their own.
+ * See https://www.w3.org/TR/wai-aria-1.1/#widget_roles
+ * @const {!Array<string>}
+ */
+export const TAP_WIDGET_ROLES = [
+  'button',
+  'checkbox',
+  'combobox',
+  'link',
+  'listbox',
+  'menuitem',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'option',
+  'radio',
+  'scrollbar',
+  'searchbox',
+  'slider',
+  'spinbutton',
+  'switch',
+  'tab',
+  'textbox',
+  'treeitem',
+];
+
+/**
  * An expression arg value, e.g. `foo.bar` in `e:t.m(arg=foo.bar)`.
  * @typedef {{expression: string}}
  */
@@ -234,8 +263,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          if (!event.defaultPrevented &&
-              element.getAttribute('role') == 'button') {
+          const isTapWidgetRole = TAP_WIDGET_ROLES.includes(
+              element.getAttribute('role').toLowerCase());
+          if (!event.defaultPrevented && isTapWidgetRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
           }
