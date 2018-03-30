@@ -21,13 +21,13 @@ import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
+import {hasOwn, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
-import {map} from '../utils/object';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -67,28 +67,28 @@ const ELEMENTS_ACTIONS_MAP_ = {
  * since they are readonly or composite widgets that shouldn't need to trigger
  * tap events on their own.
  * See https://www.w3.org/TR/wai-aria-1.1/#widget_roles
- * @const {!Array<string>}
+ * @const {!Object<boolean>}
  */
-export const TAP_WIDGET_ROLES = [
-  'button',
-  'checkbox',
-  'combobox',
-  'link',
-  'listbox',
-  'menuitem',
-  'menuitemcheckbox',
-  'menuitemradio',
-  'option',
-  'radio',
-  'scrollbar',
-  'searchbox',
-  'slider',
-  'spinbutton',
-  'switch',
-  'tab',
-  'textbox',
-  'treeitem',
-];
+export const TAP_EVENT_ROLE_WHITELIST = {
+  'button': true,
+  'checkbox': true,
+  'combobox': true,
+  'link': true,
+  'listbox': true,
+  'menuitem': true,
+  'menuitemcheckbox': true,
+  'menuitemradio': true,
+  'option': true,
+  'radio': true,
+  'scrollbar': true,
+  'searchbox': true,
+  'slider': true,
+  'spinbutton': true,
+  'switch': true,
+  'tab': true,
+  'textbox': true,
+  'treeitem': true,
+};
 
 /**
  * An expression arg value, e.g. `foo.bar` in `e:t.m(arg=foo.bar)`.
@@ -263,9 +263,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const isTapWidgetRole = TAP_WIDGET_ROLES.includes(
+          const isTapEventRole = hasOwn(TAP_EVENT_ROLE_WHITELIST,
               element.getAttribute('role').toLowerCase());
-          if (!event.defaultPrevented && isTapWidgetRole) {
+          if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
           }

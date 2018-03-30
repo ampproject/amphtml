@@ -20,7 +20,7 @@ import {
   ActionService,
   DeferredEvent,
   OBJECT_STRING_ARGS_KEY,
-  TAP_WIDGET_ROLES,
+  TAP_EVENT_ROLE_WHITELIST,
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
@@ -1053,7 +1053,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
 
   it('should trigger tap event on key press if focused element has ' +
      'role=button', () => {
-    TAP_WIDGET_ROLES.forEach(role => {
+    Object.keys(TAP_EVENT_ROLE_WHITELIST).forEach(role => {
       expect(window.document.addEventListener).to.have.been.calledWith(
           'keydown');
       const handler = window.document.addEventListener.getCall(1).args[1];
