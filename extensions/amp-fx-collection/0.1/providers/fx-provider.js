@@ -194,6 +194,20 @@ export class FxElement {
   }
 
   /**
+   * @returns {string}
+   */
+  getDuration() {
+    return this.duration_;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getEasing() {
+    return this.easing_;
+  }
+
+  /**
    * @returns {Element}
    */
   getElement() {

@@ -81,14 +81,14 @@ export const Presets = {
       }
 
       // If above the threshold of trigger-position
-      if (!fxElement.mutateScheduled_) {
-        fxElement.mutateScheduled_ = true;
-        fxElement.resources_.mutateElement(fxElement.element_, function() {
-          fxElement.mutateScheduled_ = false;
+      if (!fxElement.isMutateScheduled()) {
+        fxElement.setIsMutateScheduled(true);
+        fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+          fxElement.setIsMutateScheduled(false);
           // Translate the element offset pixels.
-          setStyles(fxElement.element_, {
-            'transition-duration': fxElement.duration_,
-            'transition-timing-function': fxElement.easing_,
+          setStyles(fxElement.getElement(), {
+            'transition-duration': fxElement.getDuration(),
+            'transition-timing-function': fxElement.getEasing(),
             'opacity': 1,
           });
         });
