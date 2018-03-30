@@ -34,45 +34,38 @@ describe('analytics vendors', () => {
     }
   });
 
-  it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
-      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 1', () => {
+  it('BROKEN/DEBUGGING: should not contain iframe transport in' +
+      ' ANALYTICS_CONFIG (other than those in' +
+      ' ANALYTICS_IFRAME_TRANSPORT_CONFIG)', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (vendorEntry.hasOwnProperty('transport') &&
           vendorEntry.transport.hasOwnProperty('iframe')) {
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-        expect(vendorITEntry).to.exist;
-        //expect(vendorITEntry.transport).to.exist;
-        //expect(vendorITEntry.transport.iframe).to.exist;
-      }
-    }
-  });
-
-  it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
-      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 2', () => {
-    for (const vendor in ANALYTICS_CONFIG) {
-      const vendorEntry = ANALYTICS_CONFIG[vendor];
-      if (vendorEntry.hasOwnProperty('transport') &&
-          vendorEntry.transport.hasOwnProperty('iframe')) {
-        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
-        expect(vendorITEntry).to.exist;
+        expect(vendorITEntry).to.exist; // fails
         expect(vendorITEntry.transport).to.exist;
-        //expect(vendorITEntry.transport.iframe).to.exist;
+        expect(vendorITEntry.transport.iframe).to.exist;
+        expect(42).to.equal(123); // If we hit this, failure 2 lines above
+        // is not from first time through the loop.
       }
     }
   });
 
-  it('should not contain iframe transport in ANALYTICS_CONFIG (other than' +
-      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG) 3', () => {
+  it('temp debugging test', () => {
     for (const vendor in ANALYTICS_CONFIG) {
       const vendorEntry = ANALYTICS_CONFIG[vendor];
       if (vendorEntry.hasOwnProperty('transport') &&
           vendorEntry.transport.hasOwnProperty('iframe')) {
+        expect(vendor).to.equal('foo');
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
         expect(vendorITEntry).to.exist;
         expect(vendorITEntry.transport).to.exist;
         expect(vendorITEntry.transport.iframe).to.exist;
       }
     }
+  });
+
+  it('temp debugging test 2', () => {
+    expect(JSON.stringify(ANALYTICS_IFRAME_TRANSPORT_CONFIG)).to.equal('foo');
   });
 });
