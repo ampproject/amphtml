@@ -66,7 +66,7 @@ export class FxProvider {
     const parallaxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.fxType_);
-    parallaxElement.initialize();
+    parallaxElement.initialize_();
   }
 }
 
@@ -108,15 +108,16 @@ export class FxElement {
 
     Presets[this.fxType_].userAsserts(element);
 
-    /** @private @const {number} */
+    /** @private {number} */
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
   }
 
   /**
    * Handles initializations such as getting initial positions and listening to
    * events.
+   * @private
    */
-  initialize() {
+  initialize_() {
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
       this.adjustedViewportHeight_ = adjustedViewportHeight;
 
@@ -162,5 +163,47 @@ export class FxElement {
 
       return aboveTheFold ? offsetTop : viewportHeight;
     });
+  }
+
+  /**
+   * @returns {number}
+   */
+  getFactor() {
+    return this.factor_;
+  }
+
+  /**
+   * @returns {Element}
+   */
+  getElement() {
+    return this.element_;
+  }
+
+  /**
+   * @returns {number}
+   */
+  getOffset() {
+    return this.offset_;
+  }
+
+  /**
+   * @param {number} offset
+   */
+  setOffset(offset) {
+    this.offset_ = offset;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isMutateScheduled() {
+    return this.mutateScheduled_;
+  }
+
+  /**
+   * @param {boolean} mutateScheduled
+   */
+  setIsMutateScheduled(mutateScheduled) {
+    this.mutateScheduled_ = mutateScheduled;
   }
 }

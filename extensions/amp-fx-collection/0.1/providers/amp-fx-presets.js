@@ -41,20 +41,20 @@ export const Presets = {
       // User provided factor is 1-based for easier understanding.
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
-      const adjustedFactor = -(parseFloat(fxElement.factor_) - 1);
+      const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
       const top = entry.positionRect.top;
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
-      fxElement.offset_ = offset;
+      fxElement.setOffset(offset);
 
-      if (!fxElement.mutateScheduled_) {
-        fxElement.mutateScheduled_ = true;
-        fxElement.resources_.mutateElement(fxElement.element_, function() {
-          fxElement.mutateScheduled_ = false;
+      if (!fxElement.isMutateScheduled()) {
+        fxElement.setIsMutateScheduled(true);
+        fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+          fxElement.setIsMutateScheduled(false);
           // Translate the element offset pixels.
-          setStyles(fxElement.element_,
-              {transform: `translateY(${fxElement.offset_.toFixed(0)}px)`}
+          setStyles(fxElement.getElement(),
+              {transform: `translateY(${fxElement.getOffset().toFixed(0)}px)`}
           );
         });
       }
