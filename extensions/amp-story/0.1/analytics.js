@@ -61,7 +61,7 @@ export class AmpStoryAnalytics {
         this.triggerEvent_(Events.BOOKEND_ENTER);
         break;
       case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent_(Events.BOOKEND_ENTER);
+        this.triggerEvent_(Events.BOOKEND_EXIT);
         break;
     }
   }
