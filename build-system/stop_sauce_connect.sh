@@ -31,7 +31,7 @@ if [ ! -f $PID_FILE ]; then
 fi
 
 # Wait for clean exit.
-PID=`cat $PID_FILE`
+PID=$(cat $PID_FILE)
 echo $LOG_PREFIX "Stopping Sauce Connect Proxy pid" $(CYAN $PID)
 kill $PID
 ( tail -f -n0 $LOG_FILE & ) | grep -q "$STOP_MESSAGE"
@@ -39,11 +39,11 @@ kill $PID
 # Clean up files.
 if [ -f $LOG_FILE ]; then
   echo $LOG_PREFIX "Cleaning up log file" $(CYAN $LOG_FILE)
-  eval "rm $LOG_FILE"
+  rm $LOG_FILE
 fi
 if [ -f $PID_FILE ]; then
   echo $LOG_PREFIX "Cleaning up pid file" $(CYAN $PID_FILE)
-  eval "rm $PID_FILE"
+  rm $PID_FILE
 fi
 
 # Done.
