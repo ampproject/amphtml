@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
 import {isExperimentOn} from '../experiments';
@@ -81,6 +82,17 @@ export class VideoServiceSync {
   register(video, unusedFromV1manageAutoplay = true) {
     this.asyncImpl_.then(impl =>
       impl.register(video));
+  }
+
+  /** @override */
+  delegateAutoplay(video, optObservable = null) {
+    // TODO(alanorozco): Make observable required once implementation of
+    // `VideoService` finalizes.
+    const observable = dev().assert(optObservable,
+        '`VideoService` requires an observable for autoplay delegation.');
+
+    this.asyncImpl_.then(impl =>
+      impl.delegateAutoplay(video, observable));
   }
 
   /** @override */

@@ -70,9 +70,8 @@ let VideoAnalyticsDef; // alias for line length
 export class VideoService {
   /**
    * @param {!../video-interface.VideoInterface} unusedVideo
-   * @param {boolean=} opt_unusedFromV1manageAutoplay
    */
-  register(unusedVideo, opt_unusedFromV1manageAutoplay) {}
+  register(unusedVideo) {}
 
   /**
    * Gets the current analytics details for the given video.
@@ -81,6 +80,14 @@ export class VideoService {
    * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
    */
   getAnalyticsDetails(unusedVideo) {}
+
+  /**
+   * Delegates autoplay.
+   * @param {!AmpElement} unusedVideo
+   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
+   *    If provided, video will be played or paused when this observable fires.
+   */
+  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
 }
 
 
@@ -240,7 +247,7 @@ export class VideoManager {
   }
 
   /** @override */
-  register(video, manageAutoplay = true) {
+  register(video) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -250,7 +257,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video, manageAutoplay);
+    const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
@@ -264,6 +271,14 @@ export class VideoManager {
 
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
+  }
+
+  /** @override */
+  delegateAutoplay(videoElement, opt_unusedObservable) {
+    videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
+      const entry = this.getEntryForElement_(videoElement);
+      entry.delegateAutoplay();
+    });
   }
 
   /**
@@ -507,9 +522,8 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
-   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video, allowAutoplay) {
+  constructor(manager, video) {
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
@@ -522,8 +536,8 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
-    /** @private @const {boolean} */
-    this.allowAutoplay_ = allowAutoplay;
+    /** @private {boolean} */
+    this.allowAutoplay_ = true;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -660,15 +674,21 @@ class VideoEntry {
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    // Currently we only register after video player is build.
-    this.videoBuilt_();
+    element.signals().whenSignal(VideoEvents.REGISTERED)
+        .then(() => this.onRegister_());
   }
 
-  /**
-   * Called when the video element is built.
-   * @private
-   */
-  videoBuilt_() {
+  /** Delegates autoplay to a different module. */
+  delegateAutoplay() {
+    this.allowAutoplay_ = false;
+
+    if (this.isPlaying_) {
+      this.video.pause();
+    }
+  }
+
+  /** @private */
+  onRegister_() {
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();

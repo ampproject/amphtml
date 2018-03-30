@@ -73,6 +73,14 @@ export class VideoService {
     warnUnimplemented('Video analytics');
     return Promise.resolve();
   }
+
+  /**
+   * @param {!AmpElement} unusedVideo
+   * @param {!../../../src/observable.Observable<boolean>} unusedObservable
+   */
+  delegateAutoplay(unusedVideo, unusedObservable) {
+    warnUnimplemented('Autoplay delegation');
+  }
 }
 
 
