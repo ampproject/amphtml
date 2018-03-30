@@ -34,7 +34,7 @@ describes.fakeWin('amp-story variable service', {}, () => {
     });
 
     const variables = variableService.get();
-    expect(variables.pageIndex).to.equal(123);
-    expect(variables.pageId).to.equal('my-page-id');
+    expect(variables['storyPageIndex']).to.equal(123);
+    expect(variables['storyPageId']).to.equal('my-page-id');
   });
 });
