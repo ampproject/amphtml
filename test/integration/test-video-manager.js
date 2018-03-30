@@ -17,6 +17,7 @@
 import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
 import {Services} from '../../src/services';
+import {VideoUtils} from '../../src/utils/video';
 import {
   installVideoManagerForDoc,
 } from '../../src/service/video-manager-impl';
@@ -262,6 +263,136 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
   });
 });
 
+
+describe.configure().ifNewChrome().run('Autoplay support', () => {
+  const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
+
+  let sandbox;
+
+  let win;
+  let video;
+
+  let isLite;
+
+  let createElementSpy;
+  let setAttributeSpy;
+  let playStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    video = {
+      setAttribute() {},
+      style: {
+        position: null,
+        top: null,
+        width: null,
+        height: null,
+        opacity: null,
+      },
+      muted: null,
+      playsinline: null,
+      webkitPlaysinline: null,
+      paused: false,
+      play() {},
+    };
+
+    const doc = {
+      createElement() {
+        return video;
+      },
+    };
+
+    win = {
+      document: doc,
+    };
+
+    isLite = false;
+
+    createElementSpy = sandbox.spy(doc, 'createElement');
+    setAttributeSpy = sandbox.spy(video, 'setAttribute');
+    playStub = sandbox.stub(video, 'play');
+
+    VideoUtils.resetIsAutoplaySupported();
+  });
+
+  afterEach(() => {
+    VideoUtils.resetIsAutoplaySupported();
+
+    sandbox.restore();
+  });
+
+  it('should create an invisible test video element', () => {
+    return supportsAutoplay(win, isLite).then(() => {
+      expect(video.style.position).to.equal('fixed');
+      expect(video.style.top).to.equal('0');
+      expect(video.style.width).to.equal('0');
+      expect(video.style.height).to.equal('0');
+      expect(video.style.opacity).to.equal('0');
+
+      expect(setAttributeSpy).to.have.been.calledWith('muted', '');
+      expect(setAttributeSpy).to.have.been.calledWith('playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('webkit-playsinline', '');
+      expect(setAttributeSpy).to.have.been.calledWith('height', '0');
+      expect(setAttributeSpy).to.have.been.calledWith('width', '0');
+
+      expect(video.muted).to.be.true;
+      expect(video.playsinline).to.be.true;
+      expect(video.webkitPlaysinline).to.be.true;
+
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should return false if `paused` is true after `play()` call', () => {
+    video.paused = true;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.false;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should return true if `paused` is false after `play()` call', () => {
+    video.paused = false;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.true;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should suppress errors if detection play call throws', () => {
+    playStub.throws();
+    video.paused = true;
+    expect(supportsAutoplay(win, isLite)).not.to.throw;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.false;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should suppress errors if detection play call rejects a promise', () => {
+    const p = Promise.reject('play() can only be initiated by a user gesture.');
+    playStub.returns(p);
+    video.paused = true;
+    expect(supportsAutoplay(win, isLite)).not.to.throw;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.false;
+      expect(playStub.called).to.be.true;
+      expect(createElementSpy.called).to.be.true;
+    });
+  });
+
+  it('should be false when in amp-lite mode', () => {
+    isLite = true;
+    return supportsAutoplay(win, isLite).then(supportsAutoplay => {
+      expect(supportsAutoplay).to.be.false;
+    });
+  });
+
+});
 
 
 function createFakeVideoPlayerClass(win) {
