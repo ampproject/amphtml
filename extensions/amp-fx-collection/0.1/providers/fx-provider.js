@@ -180,6 +180,13 @@ export class FxElement {
   }
 
   /**
+   * @returns {!../../../../src/service/resources-impl.Resources}
+   */
+  getResources() {
+    return this.resources_;
+  }
+
+  /**
    * @returns {number}
    */
   getOffset() {
