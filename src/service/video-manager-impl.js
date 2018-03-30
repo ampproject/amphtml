@@ -37,6 +37,7 @@ import {
 } from './position-observer/position-observer-worker';
 import {RelativePositions, layoutRectLtwh} from '../layout-rect';
 import {Services} from '../services';
+import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils} from '../utils/video';
 import {
@@ -46,6 +47,7 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev} from '../log';
+import {getAmpdoc} from '../service'
 import {getMode} from '../mode';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {
@@ -1917,9 +1919,15 @@ function analyticsEvent(entry, eventType, opt_vars) {
 }
 
 
-/**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- */
+/** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
+// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
-  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  // TODO(alanorozco, #13674): Rename to `video-service`
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
+    const {win} = ampdoc;
+    if (VideoServiceSync.shouldBeUsedIn(win)) {
+      return new VideoServiceSync(ampdoc);
+    }
+    return new VideoManager(ampdoc);
+  });
 }
