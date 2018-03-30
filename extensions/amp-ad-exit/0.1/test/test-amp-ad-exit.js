@@ -15,7 +15,9 @@
  */
 
 import * as sinon from 'sinon';
-import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
+import {
+  ANALYTICS_IFRAME_TRANSPORT_CONFIG,
+} from '../../../amp-analytics/0.1/vendors';
 import {AmpAdExit} from '../amp-ad-exit';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -170,12 +172,14 @@ describes.realWin('amp-ad-exit', {
     addAdDiv();
     // TODO(jonkeller): Remove after rebase
     win.top.document.body.getResourceId = () => '6789';
-    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
-    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
-      transport: {
-        iframe: '/nowhere.html',
-      },
-    };
+    // TEST_3P_VENDOR must be in ANALYTICS_IFRAME_TRANSPORT_CONFIG
+    // *before* makeElementWithConfig
+    ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] =
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR] || {
+        transport: {
+          iframe: '/nowhere.html',
+        },
+      };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -186,6 +190,8 @@ describes.realWin('amp-ad-exit', {
     env.win.document.body.removeChild(element);
     env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
+    // Without the following, will break amp-analytics' test-vendor.js
+    delete ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR];
   });
 
   it('should reject non-JSON children', () => {

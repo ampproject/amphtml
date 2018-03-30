@@ -14,12 +14,37 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
+import {ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../vendors';
+import {isSecureUrl} from '../../../../src/url';
 
-describe('analyaitcs vendors', () => {
+describe('analytics vendors', () => {
   it('googleanalytics & googleanalytics-alpha should be identical', () => {
     const gaConfig = ANALYTICS_CONFIG['googleanalytics'];
     expect(gaConfig).to
         .deep.equal(ANALYTICS_CONFIG['googleanalytics-alpha']);
+  });
+
+  it('should contain only iframe transport in ' +
+      'ANALYTICS_IFRAME_TRANSPORT_CONFIG', () => {
+    for (const vendor in ANALYTICS_IFRAME_TRANSPORT_CONFIG) {
+      const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+      expect(Object.keys(vendorITEntry).length).to.equal(1);
+      expect(vendorITEntry.transport).to.exist;
+      expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
+      expect(vendorITEntry.transport.iframe).to.exist;
+      expect(isSecureUrl(vendorITEntry.transport.iframe)).to.be.true;
+    }
+  });
+
+  it('Should not contain iframe transport in ANALYTICS_CONFIG (other than' +
+      ' those in ANALYTICS_IFRAME_TRANSPORT_CONFIG)', () => {
+    for (const vendor in ANALYTICS_CONFIG) {
+      const vendorEntry = ANALYTICS_CONFIG[vendor];
+      if (vendorEntry.hasOwnProperty('transport') &&
+          vendorEntry.transport.hasOwnProperty('iframe')) {
+        const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
+        expect(vendorITEntry).to.exist;
+      }
+    }
   });
 });
