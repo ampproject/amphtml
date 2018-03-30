@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isSecureUrl} from '../../../../src/url';
 import {ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../vendors';
 
 describe('analytics vendors', () => {
@@ -31,6 +32,7 @@ describe('analytics vendors', () => {
       expect(vendorITEntry.transport).to.exist;
       expect(Object.keys(vendorITEntry.transport).length).to.equal(1);
       expect(vendorITEntry.transport.iframe).to.exist;
+      expect(isSecureUrl(vendorITEntry.transport.iframe)).to.be.true;
     }
   });
 
@@ -42,8 +44,6 @@ describe('analytics vendors', () => {
           vendorEntry.transport.hasOwnProperty('iframe')) {
         const vendorITEntry = ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor];
         expect(vendorITEntry).to.exist;
-        expect(vendorITEntry.transport).to.exist;
-        expect(vendorITEntry.transport.iframe).to.exist;
       }
     }
   });

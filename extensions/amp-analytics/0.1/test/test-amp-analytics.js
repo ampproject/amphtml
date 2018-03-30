@@ -284,27 +284,30 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     const preloadSpy = sandbox.spy(analytics, 'preload');
-    analytics.predefinedConfig_['foo'] = {
-      'transport': {
-        'iframe': 'https://www.google.com',
-      },
-      'triggers': {
-        'sample_visibility_trigger': {
-          'on': 'visible',
-          'request': 'sample_visibility_request',
-        },
-      },
-      'requests': {
-        'sample_visibility_request': 'fake-request',
-      },
-    };
+    sandbox.stub(analytics, 'predefinedConfig_').value(
+        {
+          'foo': {
+            'transport': {
+              'iframe': 'https://www.google.com',
+            },
+            'triggers': {
+              'sample_visibility_trigger': {
+                'on': 'visible',
+                'request': 'sample_visibility_request',
+              },
+            },
+            'requests': {
+              'sample_visibility_request': 'fake-request',
+            },
+          },
+        }
+    );
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
       expect(preloadSpy.withArgs(
           'http://localhost:9876/dist/iframe-transport-client-lib.js',
           'script')).to.be.calledOnce;
-      delete analytics.predefinedConfig_['foo'];
     });
   });
 
