@@ -166,8 +166,8 @@
 
 .i-amphtml-lbg-desc-box.standard .i-amphtml-lbg-desc-mask {
   z-index: 1 !important;
-  height: 4rem !important;
-  background: linear-gradient(transparent, transparent 50%, rgba(0,0,0,0.9));
+  height: 1rem !important;
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
   transition: background-color ease-out 0.5s !important;
 }
 .i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-mask {

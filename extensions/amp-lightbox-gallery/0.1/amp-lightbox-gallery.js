@@ -306,7 +306,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.carousel_.setAttribute('type', 'slides');
       this.carousel_.setAttribute('layout', 'fill');
       this.carousel_.setAttribute('loop', '');
-      this.carousel_.setAttribute('controls', '');
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
       return this.vsync_.mutatePromise(() => {
@@ -364,36 +363,38 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         toggle(dev().assertElement(this.descriptionBox_), false);
       });
     } else {
-      const measureOverflow = state => {
-        state.isOverflown = this.descriptionBox_./*OK*/clientHeight
-          !== this.descriptionBox_./*OK*/scrollHeight;
-        state.overflowOn = this.descriptionBox_.classList.contains('overflow');
+      const measureOverflowState = state => {
+        // The height of the description without overflow is set to 4 rem.
+        // The height of the overflow mask is set to 1 rem. We allow 3 lines
+        // for the description and consider it to have overflow if more than 3
+        // lines of text.
+        state.hasOverflow = this.descriptionBox_./*OK*/scrollHeight
+            - this.descriptionBox_./*OK*/clientHeight
+            >= this.descriptionOverflowMask_./*OK*/clientHeight;
       };
 
-      const mutateOverflowIfApplicable = state => {
-        if (state.isOverflown || state.overflowOn) {
-          toggle(dev().assertElement(this.descriptionOverflowMask_), true);
-        } else if (!state.overflowOn) {
-          toggle(dev().assertElement(this.descriptionOverflowMask_), false);
+      const mutateOverflowState = state => {
+        if (state.hasOverflow) {
+          st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
+            opacity: 1,
+          });
+        } else {
+          st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
+            opacity: 0,
+          });
         }
       };
 
-      this.vsync_.mutate(() => {
+      this.vsync_.mutatePromise(() => {
         // The problem with setting innerText is that it not only removes
         // child nodes from the element, but also permanently destroys all
         // descendant text nodes. It is okay in this case because the description
         // text area is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
-
-        // Avoid flickering out if transitioning from a slide with no text
-        this.descriptionBox_.classList.remove('fade-out');
-        toggle(dev().assertElement(this.descriptionBox_), true);
-
-        // If the description is in overflow mode, we set it to the correct
-        // overflow position top pending the length of text.
+      }).then(() => {
         this.vsync_.run({
-          measure: measureOverflow,
-          mutate: mutateOverflowIfApplicable,
+          measure: measureOverflowState,
+          mutate: mutateOverflowState,
         }, {});
       });
     }
@@ -406,13 +407,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   toggleDescriptionOverflow_() {
     const measureOverflowState = state => {
       state.isStandard = this.descriptionBox_.classList.contains('standard');
+      state.isOverflown = this.descriptionBox_.classList.contains('overflow');
+
+      // The height of the description without overflow is set to 4 rem.
+      // The height of the overflow mask is set to 1 rem. We allow 3 lines
+      // for the description and consider it to have overflow if more than 3
+      // lines of text.
+      state.hasOverflow = this.descriptionBox_./*OK*/scrollHeight
+          - this.descriptionBox_./*OK*/clientHeight
+          >= this.descriptionOverflowMask_./*OK*/clientHeight;
     };
 
     const mutateOverflowState = state => {
-      if (state.isStandard) {
+      if (state.isStandard && state.hasOverflow) {
         this.descriptionBox_.classList.remove('standard');
         this.descriptionBox_.classList.add('overflow');
-      } else {
+      } else if (state.isOverflown) {
         this.descriptionBox_./*OK*/scrollTop = 0;
         this.descriptionBox_.classList.remove('overflow');
         this.descriptionBox_.classList.add('standard');
@@ -519,8 +529,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   showControls_() {
-    this.carousel_.setAttribute('controls', '');
-
     this.topBar_.classList.remove('fade-out');
     this.topBar_.classList.remove('hidden');
     this.topBar_.classList.add('show');
@@ -542,8 +550,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   hideControls_() {
-    this.carousel_.removeAttribute('controls');
-
     this.topBar_.classList.remove('fade-in');
     this.topBar_.classList.remove('fade-out');
     this.topBar_.classList.remove('show');
