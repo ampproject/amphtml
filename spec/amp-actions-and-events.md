@@ -323,12 +323,20 @@ event.response</pre></td>
   <tr>
     <td><code>play</code></td>
     <td>Plays the animation.</td>
+  </tr>
+  <tr>
     <td><code>pause</code></td>
     <td>Pauses the animation.</td>
+  </tr>
+  <tr>
     <td><code>stop</code></td>
     <td>Stops the animation.</td>
+  </tr>
+  <tr>
     <td><code>seekTo(time=INTEGER)</code></td>
     <td>Sets the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+  <tr>
     <td><code>seekTo(percent=[0,1])</code></td>
     <td>Uses the given percentage value to determine the currentTime of the animation to the specified value and pauses animation. </td>
   </tr>
