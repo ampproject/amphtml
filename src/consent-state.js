@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
+
 /**
  * Possible consent policy state to proceed with.
  * @enum {number}
@@ -22,3 +24,21 @@ export const CONSENT_POLICY_STATE = {
   SUFFICIENT: 0,
   INSUFFICIENT: 1,
 };
+
+/**
+ * Returns a promise that resolve when all consent state the policy wait
+ * for resolve. Or if consent service is not available.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} policyId
+ * @return {!Promise<?CONSENT_POLICY_STATE>}
+ */
+export function getConsentPolicyPromise(ampdoc, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return null;
+        }
+        return consentPolicy.whenPolicyResolved(
+            /** @type {string} */ (policyId));
+      });
+}

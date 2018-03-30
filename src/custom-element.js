@@ -16,7 +16,10 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
-import {CONSENT_POLICY_STATE} from './consent-state';
+import {
+  CONSENT_POLICY_STATE,
+  getConsentPolicyPromise,
+} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -289,8 +292,6 @@ function createBaseCustomElementClass(win) {
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
 
-      this.consentPolicyState_ = null;
-
       if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
         delete this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
@@ -462,25 +463,6 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns the promise that's resolved when the consent has been resolved.
-     * @return {!Promise}
-     */
-    waitForConsentPolicy_() {
-      const policyId = this.implementation_.getConsentPolicy();
-      if (!policyId) {
-        return Promise.resolve();
-      }
-      return Services.consentPolicyServiceForDocOrNull(this)
-          .then(consentPolicy => {
-            if (!consentPolicy) {
-              return;
-            }
-            return consentPolicy.whenPolicyResolved(
-                /** @type {string} */ (policyId));
-          });
-    }
-
-    /**
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
@@ -496,14 +478,19 @@ function createBaseCustomElementClass(win) {
         return this.buildingPromise_;
       }
       return this.buildingPromise_ = new Promise((resolve, reject) => {
-        this.waitForConsentPolicy_().then(state => {
-          if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
-            // Need to change after support more policy state
-            reject(blockByConsent());
-          } else {
-            resolve(this.implementation_.buildCallback());
-          }
-        });
+        const policyId = this.implementation_.getConsentPolicy();
+        if (!policyId) {
+          resolve(this.implementation_.buildCallback());
+        } else {
+          getConsentPolicyPromise(this.getAmpDoc(), policyId).then(state => {
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
+              // Need to change after support more policy state
+              reject(blockByConsent());
+            } else {
+              resolve(this.implementation_.buildCallback());
+            }
+          });
+        }
       }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
