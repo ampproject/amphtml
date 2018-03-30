@@ -190,6 +190,8 @@ describes.realWin('amp-ad-exit', {
     env.win.document.body.removeChild(element);
     env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
+    // Without the following, will break amp-analytics' test-vendor.js
+    delete ANALYTICS_IFRAME_TRANSPORT_CONFIG[TEST_3P_VENDOR];
   });
 
   it('should reject non-JSON children', () => {
