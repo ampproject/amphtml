@@ -25,10 +25,7 @@ import {
   childElementsByTag,
   closestByTag,
   elementByTag,
-  fullscreenEnter,
-  fullscreenExit,
   insertAfterOrAtStart,
-  isFullscreenElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';

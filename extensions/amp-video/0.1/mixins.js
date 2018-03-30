@@ -16,7 +16,13 @@
 import {MediaPoolEvents} from '../../../extensions/amp-story/0.1/media-pool';
 import {Services} from '../../../src/services';
 import {VideoUtils} from '../../../src/utils/video';
-import {createElementWithAttributes} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  fullscreenEnter,
+  fullscreenExit,
+  insertAfterOrAtStart,
+  isFullscreenElement,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
