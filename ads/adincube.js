@@ -21,13 +21,14 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adincube(global, data) {
-  validateData(data, ['adType','siteKey'], ['params']);
+  validateData(data, ['adType', 'siteKey'], ['params']);
 
   let url = global.context.location.protocol;
   url += '//tag.adincube.com/tag/1.0/next?';
-  url += 'ad_type=' + data['adType'].toUpperCase();
-  url += '&ad_subtype=' + data['width'] + 'x' + data['height'];
-  url += '&site_key=' + data['siteKey'];
+  url += 'ad_type=' + encodeURIComponent(String(data['adType']).toUpperCase());
+  url += '&ad_subtype=' + encodeURIComponent(data['width']);
+  url += 'x' + encodeURIComponent(data['height']);
+  url += '&site_key=' + encodeURIComponent(data['siteKey']);
   url += '&r=' + encodeURIComponent(global.context.referrer);
   url += '&h=' + encodeURIComponent(global.context.location.href);
   url += '&c=amp';

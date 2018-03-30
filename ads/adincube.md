@@ -20,7 +20,7 @@ Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to crea
 
 ## Examples
 
-### IN_CONTENT Ad
+### IN_CONTENT
 Uses fixed size by given ```width``` and ```height```.
 
 ```html
@@ -43,6 +43,8 @@ Uses fixed size by given ```width``` and ```height```.
     </amp-ad>
 </amp-sticky-ad>
 ```
+Refer to the [amp-sticky-ad](https://www.ampproject.org/docs/reference/components/amp-sticky-ad) documentation to see how to implement this ad.
+
 
 ## Configuration
 For semantics of configuration, please see ad network documentation.
