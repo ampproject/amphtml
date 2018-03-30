@@ -32,7 +32,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
-import {isBlockedByConsent,reportError} from '../error';
+import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';

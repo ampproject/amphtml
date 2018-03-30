@@ -29,10 +29,10 @@ export class ConsentPolicyManager {
     this.ampdoc_ = ampdoc;
 
     /** @private {!Object<string, ?Promise>} */
-    this.policyInstancePromise_ = map();
+    this.policyInstancePromises_ = map();
 
     /** @private {!Object<string, ?function()>} */
-    this.policyInstancePromiseResolver_ = map();
+    this.policyInstancePromiseResolvers_ = map();
 
     /** @private {!Object<string, ConsentPolicyInstance>} */
     this.instances_ = map();
@@ -66,10 +66,10 @@ export class ConsentPolicyManager {
 
     this.instances_[policyId] = instance;
 
-    if (this.policyInstancePromiseResolver_[policyId]) {
-      this.policyInstancePromiseResolver_[policyId]();
-      this.policyInstancePromiseResolver_[policyId] = null;
-      this.policyInstancePromise_[policyId] = null;
+    if (this.policyInstancePromiseResolvers_[policyId]) {
+      this.policyInstancePromiseResolvers_[policyId]();
+      this.policyInstancePromiseResolvers_[policyId] = null;
+      this.policyInstancePromises_[policyId] = null;
     }
 
     this.ConsentStateManagerPromise_.then(manager => {
@@ -105,12 +105,12 @@ export class ConsentPolicyManager {
     if (this.instances_[policyId]) {
       return Promise.resolve();
     }
-    if (!this.policyInstancePromise_[policyId]) {
-      this.policyInstancePromise_[policyId] = new Promise(resolve => {
-        this.policyInstancePromiseResolver_[policyId] = resolve;
+    if (!this.policyInstancePromises_[policyId]) {
+      this.policyInstancePromises_[policyId] = new Promise(resolve => {
+        this.policyInstancePromiseResolvers_[policyId] = resolve;
       });
     }
-    return /** @type {!Promise} */ (this.policyInstancePromise_[policyId]);
+    return /** @type {!Promise} */ (this.policyInstancePromises_[policyId]);
   }
 }
 
