@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isSecureUrl} from '../../../../src/url';
 import {ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG} from '../vendors';
+import {isSecureUrl} from '../../../../src/url';
 
 describe('analytics vendors', () => {
   it('googleanalytics & googleanalytics-alpha should be identical', () => {
