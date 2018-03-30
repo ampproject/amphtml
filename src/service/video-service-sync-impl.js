@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Service} from '../services';
-import {dev} from '../log';
+import {Services} from '../services';
+import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
 import {isExperimentOn} from '../experiments';
 
@@ -26,7 +26,7 @@ const EXTENSION = 'amp-video-service';
 
 /**
  * @typedef
- * {{../../extensions/amp-video-service/0.1/amp-video-service.VideoService}}
+ * {../../extensions/amp-video-service/0.1/amp-video-service.VideoService}
  */
 let VideoServiceDef; // alias for line length.
 
@@ -39,6 +39,8 @@ let VideoServiceDef; // alias for line length.
  *
  * This co-eexists with `VideoManager` (deprecated) while the implementation
  * is migrated.
+ *
+ * @implements {./video-manager-impl.VideoService}
  */
 export class VideoServiceSync {
 
@@ -69,14 +71,21 @@ export class VideoServiceSync {
   // instantiate or access the service.
   static videoServiceFor(win, nodeOrDoc) {
     const extensions = Services.extensionsFor(win);
-    return extensions.installExtensionForDoc(nodeOrDoc, EXTENSION)
-        .then(def => /** @type {!Promise<!VideoServiceDef>} */ (
-          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)))
+    const ampdoc = getAmpdoc(nodeOrDoc);
+    return extensions.installExtensionForDoc(ampdoc, EXTENSION)
+        .then(() => /** @type {!Promise<!VideoServiceDef>} */ (
+          getElementServiceForDoc(nodeOrDoc, 'video-service', EXTENSION)));
   }
 
-  /** @param {!../video-interface.VideoInterface} video */
-  register(video) {
+  /** @override */
+  register(video, unusedFromV1manageAutoplay = true) {
     this.asyncImpl_.then(impl =>
-        impl.register(video));
+      impl.register(video));
+  }
+
+  /** @override */
+  getAnalyticsDetails(video) {
+    return this.asyncImpl_.then(impl =>
+      impl.getAnalyticsDetails(video));
   }
 }

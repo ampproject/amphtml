@@ -47,7 +47,6 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev} from '../log';
-import {getAmpdoc} from '../service'
 import {getMode} from '../mode';
 import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
 import {
@@ -61,6 +60,29 @@ import {setStyles} from '../style';
 import {startsWith} from '../string.js';
 
 const TAG = 'video-manager';
+
+
+/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
+let VideoAnalyticsDef; // alias for line length
+
+
+/** @interface */
+export class VideoService {
+  /**
+   * @param {!../video-interface.VideoInterface} unusedVideo
+   * @param {boolean=} opt_unusedFromV1manageAutoplay
+   */
+  register(unusedVideo, opt_unusedFromV1manageAutoplay) {}
+
+  /**
+   * Gets the current analytics details for the given video.
+   * Fails silently if the video is not registered.
+   * @param {!AmpElement} unusedVideo
+   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
+   */
+  getAnalyticsDetails(unusedVideo) {}
+}
+
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -135,6 +157,8 @@ export const DockStates = {
  *
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
+ *
+ * @implements {VideoService}
  */
 export class VideoManager {
 
@@ -215,11 +239,7 @@ export class VideoManager {
     }
   }
 
-  /**
-   * Registers a video component that implements the VideoInterface.
-   * @param {!../video-interface.VideoInterface} video
-   * @param {boolean=} manageAutoplay
-   */
+  /** @override */
   register(video, manageAutoplay = true) {
     dev().assert(video);
 
@@ -423,13 +443,8 @@ export class VideoManager {
     return null;
   }
 
-  /**
-   * Get the current analytics details for the given video.
-   * Silently fail if the video is not found in this manager.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
-   */
-  getVideoAnalyticsDetails(videoElement) {
+  /** @override */
+  getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }

@@ -53,16 +53,35 @@ const TAG = 'amp-video-service';
  * them in the runtime-level service class.
  */
 export class VideoService {
+
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
   }
 
-  /* @param {!../../../src/video-interface.VideoInterface} video */
-  register(video) {
-    dev().warn(TAG, '`video-service` registration unimplemented.');
+  /** @param {!../../../src/video-interface.VideoInterface} unusedVideo */
+  register(unusedVideo) {
+    warnUnimplemented('Video registration');
   }
+
+  /**
+   * @param {!AmpElement} unusedVideo
+   * @return {!Promise}
+   */
+  getAnalyticsDetails(unusedVideo) {
+    warnUnimplemented('Video analytics');
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * @param {string} feature
+ * @private
+ */
+function warnUnimplemented(feature) {
+  dev().warn(TAG, `${feature} unimplemented.`);
 }
 
 
