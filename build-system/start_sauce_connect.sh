@@ -30,35 +30,35 @@ START_MESSAGE="Sauce Connect is up, you may start your tests."
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
 
 # Download and unpack sauce connect proxy binary.
-echo $LOG_PREFIX "Downloading" $(CYAN $DOWNLOAD_URL)
-wget -q $DOWNLOAD_URL
-echo $LOG_PREFIX "Unpacking" $(CYAN $TAR_FILE)
-tar -xzf $TAR_FILE
+echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
+wget -q "$DOWNLOAD_URL"
+echo "$LOG_PREFIX Unpacking $(CYAN "$TAR_FILE")"
+tar -xzf "$TAR_FILE"
 
 # Clean up old log files, if any.
-if [ -f $LOG_FILE ]; then
-  echo $LOG_PREFIX "Deleting old log file" $(CYAN $LOG_FILE)
-  rm $LOG_FILE
+if [[ -f "$LOG_FILE" ]]; then
+  echo "$LOG_PREFIX Deleting old log file $(CYAN "$LOG_FILE")"
+  rm "$LOG_FILE"
 fi
-if [ -f $PID_FILE ]; then
-  echo $LOG_PREFIX "Deleting old pid file" $(CYAN $PID_FILE)
-  rm $PID_FILE
+if [[ -f $PID_FILE ]]; then
+  echo "$LOG_PREFIX Deleting old pid file $(CYAN "$PID_FILE")"
+  rm "$PID_FILE"
 fi
 
 # Establish the tunnel identifier (job number on Travis / username during local dev).
-if [ -z $TRAVIS_JOB_NUMBER ]; then
-  TUNNEL_IDENTIFIER=$(git log -1 --pretty=format:"%ae")
+if [[ -z "$TRAVIS_JOB_NUMBER" ]]; then
+  TUNNEL_IDENTIFIER="$(git log -1 --pretty=format:"%ae")"
 else
-  TUNNEL_IDENTIFIER=$TRAVIS_JOB_NUMBER
+  TUNNEL_IDENTIFIER="$TRAVIS_JOB_NUMBER"
 fi
 
 # Launch proxy and wait for completion.
-echo $LOG_PREFIX "Launching" $(CYAN $BINARY_FILE)
-$BINARY_FILE --tunnel-identifier $TUNNEL_IDENTIFIER --pidfile $PID_FILE 1>$LOG_FILE 2>&1 &
+echo "$LOG_PREFIX Launching $(CYAN "$BINARY_FILE")"
+"$BINARY_FILE" --tunnel-identifier "$TUNNEL_IDENTIFIER" --pidfile "$PID_FILE" 1>"$LOG_FILE" 2>&1 &
 sleep 2
-( tail -f -n0 $LOG_FILE & ) | grep -q "$START_MESSAGE"
+( tail -f -n0 "$LOG_FILE" & ) | grep -q "$START_MESSAGE"
 
 # Print confirmation.
-PID=$(cat $PID_FILE)
-TUNNEL_ID=$(grep -oP "Tunnel ID: \K.*$" $LOG_FILE)
-echo $LOG_PREFIX "Sauce Connect Proxy with tunnel ID" $(CYAN $TUNNEL_ID) "and identifier" $(CYAN $TUNNEL_IDENTIFIER) "is now running as pid" $(CYAN $PID)
+PID="$(cat "$PID_FILE")"
+TUNNEL_ID="$(grep -oP "Tunnel ID: \K.*$" "$LOG_FILE")"
+echo "$LOG_PREFIX Sauce Connect Proxy with tunnel ID $(CYAN "$TUNNEL_ID") and identifier $(CYAN "$TUNNEL_IDENTIFIER") is now running as pid $(CYAN "$PID")"

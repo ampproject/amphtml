@@ -25,26 +25,26 @@ STOP_MESSAGE="Goodbye."
 LOG_PREFIX=$(YELLOW "stop_sauce_connect.sh")
 
 # Early exit if there's no proxy running.
-if [ ! -f $PID_FILE ]; then
-  echo $LOG_PREFIX "Sauce Connect Proxy is not running"
+if [[ ! -f "$PID_FILE" ]]; then
+  echo "$LOG_PREFIX Sauce Connect Proxy is not running"
   exit 0
 fi
 
 # Wait for clean exit.
-PID=$(cat $PID_FILE)
-echo $LOG_PREFIX "Stopping Sauce Connect Proxy pid" $(CYAN $PID)
-kill $PID
-( tail -f -n0 $LOG_FILE & ) | grep -q "$STOP_MESSAGE"
+PID="$(cat "$PID_FILE")"
+echo "$LOG_PREFIX Stopping Sauce Connect Proxy pid $(CYAN "$PID")"
+kill "$PID"
+( tail -f -n0 "$LOG_FILE" & ) | grep -q "$STOP_MESSAGE"
 
 # Clean up files.
-if [ -f $LOG_FILE ]; then
-  echo $LOG_PREFIX "Cleaning up log file" $(CYAN $LOG_FILE)
-  rm $LOG_FILE
+if [[ -f "$LOG_FILE" ]]; then
+  echo "$LOG_PREFIX Cleaning up log file $(CYAN "$LOG_FILE")"
+  rm "$LOG_FILE"
 fi
-if [ -f $PID_FILE ]; then
-  echo $LOG_PREFIX "Cleaning up pid file" $(CYAN $PID_FILE)
-  rm $PID_FILE
+if [[ -f "$PID_FILE" ]]; then
+  echo "$LOG_PREFIX Cleaning up pid file $(CYAN "$PID_FILE")"
+  rm "$PID_FILE"
 fi
 
 # Done.
-echo $LOG_PREFIX "Successfully stopped Sauce Connect Proxy"
+echo "$LOG_PREFIX Successfully stopped Sauce Connect Proxy"
