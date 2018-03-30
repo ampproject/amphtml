@@ -42,8 +42,8 @@ limitations under the License.
 The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently, only the `parallax` effect is supported. More effects such as `fade-in`, `slide-in`
-are planned to be supported soon.
+Currently, only the `parallax` and `fade-in` effects are supported. 
+More effects such as `slide-in` are planned to be supported soon.
 
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
 
