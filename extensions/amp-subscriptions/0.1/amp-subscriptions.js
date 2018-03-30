@@ -17,19 +17,27 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {Entitlement} from './entitlement';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
+import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
+/** @const */
+const SERVICE_TIMEOUT = 3000;
 
 /** @typedef {{loggedIn: boolean, subscribed: boolean, granted: boolean, entitlement: !JsonObject, metered: boolean}} */
 export let RenderState;
@@ -74,8 +82,20 @@ export class SubscriptionService {
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
 
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /** @private {?Promise} */
     this.viewTrackerPromise_ = null;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
+
+    /** @private @const {boolean} */
+    this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
@@ -135,6 +155,9 @@ export class SubscriptionService {
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
     return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_) {
+        return; // External platforms should not register if viewer provides auth
+      }
       const matchedServices = this.platformConfig_['services'].filter(
           service => (service.serviceId || 'local') === serviceId);
 
@@ -185,16 +208,30 @@ export class SubscriptionService {
 
   /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
-   * @return {!Promise<!./entitlement.Entitlement>}
+   * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    return subscriptionPlatform.getEntitlements().then(entitlement => {
-      if (!entitlement) {
-        entitlement = Entitlement.empty(subscriptionPlatform.getServiceId());
-      }
-      this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
-          entitlement);
-      return entitlement;
+    let timeout = SERVICE_TIMEOUT;
+    if (getMode().development || getMode().localDev) {
+      timeout = SERVICE_TIMEOUT * 2;
+    }
+    return this.viewer_.whenFirstVisible().then(() => {
+      return this.timer_.timeoutPromise(
+          timeout,
+          subscriptionPlatform.getEntitlements()
+      ).then(entitlement => {
+        entitlement = entitlement || Entitlement.empty(
+            subscriptionPlatform.getServiceId());
+        this.resolveEntitlementsToStore_(subscriptionPlatform.getServiceId(),
+            entitlement);
+        return entitlement;
+      }).catch(reason => {
+        const serviceId = subscriptionPlatform.getServiceId();
+        this.platformStore_.reportPlatformFailure(serviceId);
+        throw user().createError(
+            `fetch entitlements failed for ${serviceId}`, reason
+        );
+      });
     });
   }
 
@@ -208,6 +245,10 @@ export class SubscriptionService {
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
+
+      if (this.doesViewerProvideAuth_) {
+        return this.delegateAuthToViewer_();
+      }
 
       user().assert(this.platformConfig_['services'],
           'Services not configured in service config');
@@ -226,10 +267,66 @@ export class SubscriptionService {
             this.fetchEntitlements_(subscriptionPlatform);
           }
       );
-
       this.startAuthorizationFlow_();
+
     });
     return this;
+  }
+
+  /**
+   * Delegates authentication to viewer
+   */
+  delegateAuthToViewer_() {
+    const serviceIds = ['local'];
+    const currentProductId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getProductId(),
+        'Product id is null'
+    ));
+    const publicationId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getPublicationId(),
+        'Publication id is null'
+    ));
+    const origin = getWinOrigin(this.ampdoc_.win);
+    const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
+    this.platformStore_ = new PlatformStore(serviceIds);
+    this.viewer_.sendMessageAwaitResponse('auth', dict({
+      'publicationId': publicationId,
+      'productId': currentProductId,
+      'origin': origin,
+    })).then(entitlementData => {
+      const authData = (entitlementData || {})['authorization'];
+      if (!authData) {
+        return this.platformStore_.resolveEntitlement('local',
+            Entitlement.empty('local'));
+      }
+      const decodedData = this.jwtHelper_.decode(authData);
+      user().assert(decodedData['aud'] == origin ||
+        decodedData['aud'] == sourceOrigin,
+      `The mismatching "aud" field: ${decodedData['aud']}`);
+      user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
+
+      const entitlements = decodedData['entitlements'];
+      let entitlementJson;
+      if (Array.isArray(entitlements)) {
+        for (let index = 0; index < entitlements.length; index++) {
+          const entitlementObject =
+              Entitlement.parseFromJson(entitlements[index]);
+          if (entitlementObject.enables(currentProductId)) {
+            entitlementJson = entitlements[index];
+            break;
+          }
+        }
+      } else if (entitlements) { // Not null
+        entitlementJson = entitlements;
+      }
+      const entitlement = entitlementJson ?
+        Entitlement.parseFromJson(entitlementJson) :
+        Entitlement.empty('local');
+      // Viewer authorization is redirected to use local platform instead.
+      this.platformStore_.resolveEntitlement('local', entitlement);
+    }, reason => {
+      throw user().createError('Viewer authorization failed', reason);
+    });
   }
 
   /**
@@ -253,9 +350,13 @@ export class SubscriptionService {
 
   /** @private */
   selectAndActivatePlatform_() {
+    let preferViewerSupport = true;
+    if ('preferViewerSupport' in this.platformConfig_) {
+      preferViewerSupport = this.platformConfig_['preferViewerSupport'];
+    }
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
-      this.platformStore_.selectPlatform(),
+      this.platformStore_.selectPlatform(preferViewerSupport),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {

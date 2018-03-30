@@ -45,7 +45,6 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  setNameframeExperimentConfigs,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {
@@ -336,19 +335,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
-    this.nameframeExperimentConfig_ = {
-      instantLoad: false,
-      writeInBody: false,
-    };
-
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
-  }
-
-  /** @visibleForTesting */
-  getNameFrameExperimentConfig() {
-    return this.nameframeExperimentConfig_;
   }
 
   /** @override */
@@ -383,16 +371,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    /**
-     * isValidElement used to also check that we are in a valid A4A environment,
-     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
-     * which is always called as part of the upgrade path from an amp-ad element
-     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
-     * that it has been verified.
-     */
-    return this.isAmpAdElement() &&
-      // Ensure not within remote.html iframe.
-      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    return this.isAmpAdElement();
   }
 
   /** @override */
@@ -760,10 +739,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-
-    setNameframeExperimentConfigs(responseHeaders,
-        this.nameframeExperimentConfig_);
-
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
@@ -1006,7 +981,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if ((this.isFluid_ && width && height) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1231,10 +1206,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.isFluid_ && !isSafeFrame) {
       return;
     }
-
+    const creativeSize = this.getCreativeSize();
+    dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
+            this, this.isFluid_, this.initialSize_,
+            /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();

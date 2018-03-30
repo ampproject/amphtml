@@ -298,10 +298,11 @@ export function validateRtcConfig_(element) {
           if (isNaN(timeout)) {
             user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
                         `using default timeout ${defaultTimeoutMillis}ms`);
-          } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
             timeout = undefined;
+          } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
             user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
                         `using default timeout ${defaultTimeoutMillis}ms`);
+            timeout = undefined;
           }
           break;
         default:
