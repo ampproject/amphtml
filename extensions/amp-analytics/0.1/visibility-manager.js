@@ -706,6 +706,11 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
    * smaller than the size allocated by the host. In that case, the document
    * will be centered, and the unfilled space will not be reflected in this
    * return value.
+   * embed.iframe is used to calculate the root layoutbox, since it is more
+   * important for the embedded document to know its own size, rather than
+   * the size of the host rectangle which it may or may not entirely fill.
+   * embed.host is used to calculate the root visibility, however, since
+   * that will reflect whether the embedded document is embedded at all.
    * @override
    */
   getRootLayoutBox() {

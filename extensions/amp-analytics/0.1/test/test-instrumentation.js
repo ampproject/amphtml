@@ -76,8 +76,6 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     const event = triggerStub.args[0][0];
     expect(event.target).to.equal(target);
     expect(event.type).to.equal('test-event');
-    delete event.vars.elementHeight;
-    delete event.vars.elementWidth;
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });
 
@@ -91,8 +89,6 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     const event = triggerStub.args[0][0];
     expect(event.target).to.equal(ampdoc);
     expect(event.type).to.equal('test-event');
-    delete event.vars.elementHeight;
-    delete event.vars.elementWidth;
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });
 
