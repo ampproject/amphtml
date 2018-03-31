@@ -68,9 +68,8 @@ let VideoAnalyticsDef; // alias for line length
 
 /** @interface */
 export class VideoService {
-  /**
-   * @param {!../video-interface.VideoInterface} unusedVideo
-   */
+
+  /** @param {!../video-interface.VideoInterface} unusedVideo */
   register(unusedVideo) {}
 
   /**

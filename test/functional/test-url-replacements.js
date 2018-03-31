@@ -620,11 +620,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
     const win = getFakeWindow();
-
     sandbox.stub(Services, 'videoManagerForDoc').returns({
-      getAnalyticsDetails: () => Promise.resolve({currentTime: 1.5}),
+      getAnalyticsDetails() {
+        return Promise.resolve({currentTime: 1.5});
+      },
     });
-
     sandbox.stub(win.document, 'getElementById')
         .withArgs('video')
         .returns(document.createElement('video'));
