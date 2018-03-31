@@ -21,7 +21,8 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function kuadio(global, data) {
-  validateData(data, ['widgetId']);
+  validateData(data, ['widgetId'],
+      ['region', 'baseUrl', 'betaMode', 'debugMode', 'fastParse']);
 
   global._pvmax = {
     region: data.region,

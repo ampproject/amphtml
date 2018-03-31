@@ -35,10 +35,11 @@ limitations under the License.
 
 For semantics of configuration , please contact [Kuadio](https://www.tenmax.io/kuadio)
 
-Supported parameters:
-
-- data-region
+Required parameters::
 - data-widget-id
+
+Optional parameters::
+- data-region
 - data-debug-mode
 - data-beta-mode
 - data-fast-parse
