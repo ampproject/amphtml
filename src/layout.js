@@ -322,7 +322,7 @@ export function applyStaticLayout(element) {
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
         parseLayout(completedLayoutAttr)));
-    if ((layout == Layout.RESPONSIVE || layout === Layout.INTRINSIC)
+    if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =

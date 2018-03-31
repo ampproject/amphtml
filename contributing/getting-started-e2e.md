@@ -184,23 +184,13 @@ amphtml uses Node.js, the Yarn package manager and the Gulp build system to buil
     127.0.0.1 ads.localhost iframe.localhost
     ```
 
-* The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
-
-   You can install Gulp using Yarn:
-
-   ```
-   yarn global add gulp
-   ```
-
-   The preceding command might require elevated privileges using `sudo` on some platforms.
-
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
 ```
-gulp
+npx gulp
 ```
 
-Running the `gulp` command will compile the code and start up a Node.js server listening on port 8000.  Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000)
+`npx` is a command that comes with Node.js that runs a command installed locally with `yarn`, as `gulp` is. Running the `npx gulp` command will compile the code and start up a Node.js server listening on port 8000.  Once you see a message like `Finished 'default'` you can access the local server in your browser at [http://localhost:8000](http://localhost:8000)
 
 You can browse the [http://localhost:8000/examples](http://localhost:8000/examples) directory to see some demo pages for various AMP components and combination of components.
 
@@ -212,7 +202,7 @@ Note that by default each of the pages in the /examples directory uses the unmin
 
 - [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
 
-  Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
+  Minified AMP JavaScript is served from the local server. This is only available after running `npx gulp dist --fortesting`.
 
 - [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
 
@@ -348,12 +338,12 @@ Before sending your code changes for review, you will want to make sure that all
 Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
 ```
-gulp test
+npx gulp test
 ```
 
-You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
+You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `npx gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
 
-By default `gulp test` runs tests on Chrome.  Depending on what your tests affect (e.g. if you're fixing a bug in a different browser), you may need to run `gulp test --firefox` or `gulp test --safari` to run in other browsers.
+By default `gulp test` runs tests on Chrome.  Depending on what your tests affect (e.g. if you're fixing a bug in a different browser), you may need to run `npx gulp test --firefox` or `npx gulp test --safari` to run in other browsers.
 
 If the tests have failed you will need to determine whether the failure is related to your change.
 
@@ -366,26 +356,26 @@ Fixing the tests will depend heavily on the change you are making and what tests
 Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
 
 ```
-gulp pr-check
+npx gulp pr-check
 ```
 
 To run all Travis CI checks, but skip the `gulp build` step, you can run:
 
 ```
-gulp pr-check --nobuild
+npx gulp pr-check --nobuild
 ```
 
 To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
 
 ```
-gulp pr-check --files=<test-files-path-glob>
+npx gulp pr-check --files=<test-files-path-glob>
 ```
 
 Notes:
 
 * This will force a clean build and run all the PR checks one by one.
 * Just like on Travis, a failing check will prevent subsequent checks from being run.
-* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
+* The `npx gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
 * The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
 
 ## Adding tests for your change
@@ -394,15 +384,15 @@ If your change was not already covered by existing tests, you will generally be 
 
 The amphtml unit tests use the [Mocha](https://mochajs.org/) framework, the [Chai](http://chaijs.com/) assertion library and the [Sinon](http://sinonjs.org/) mocking library.  The specifics of the tests you will need to add will vary depending on the issue/feature you are working on.  If you are fixing a bug in an existing component there should already be tests in the test directory for that component that you can look at for guidance.  For example the [amp-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/amp-video.md) component has [tests](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video/0.1/test/test-amp-video.js).
 
-You can run the tests in a single file by running `gulp test --files=<file to test>`, e.g. for amp-video:
+You can run the tests in a single file by running `npx gulp test --files=<file to test>`, e.g. for amp-video:
 
 ```
-gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
+npx gulp test --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
 
-Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
+Alternatively you can take advantage of a Mocha feature that allows for running only certain tests--`describe.only`.  Simply replace the `describe` in the Mocha tests you want to run with `describe.only` and only those tests will be run when you run `npx gulp test`.  Make sure to remove the `.only` and run all tests before sending your code for review.
 
-To make running the tests more convenient you can also use the `--watch` flag in any `gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
+To make running the tests more convenient you can also use the `--watch` flag in any `npx gulp test` command.  This will cause the tests you've indicated to automatically be rerun whenever a file is modified.
 
 If you are not sure how to create these tests you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
