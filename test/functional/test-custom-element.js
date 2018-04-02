@@ -565,7 +565,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       clock.tick(1);
       container.appendChild(element);
       return expect(element.whenBuilt())
-          .to.be.eventually.rejectedWith(/BLOCKBYCONSENT/);
+          .to.be.eventually.rejectedWith(/BLOCK_BY_CONSENT/);
     });
 
 

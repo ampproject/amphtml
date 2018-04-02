@@ -118,10 +118,7 @@ export class ConsentPolicyInstance {
   constructor(pendingItems) {
 
     /** @private {!Object<string, CONSENT_ITEM_STATE>} */
-    this.itemMap_ = map();
-
-    /** @private {!Array<string>} */
-    this.items_ = [];
+    this.itemToConsentState_ = map();
 
     /** @private {?function(CONSENT_POLICY_STATE)} */
     this.readyPromiseResolver_ = null;
@@ -139,9 +136,8 @@ export class ConsentPolicyInstance {
    */
   init_(pendingItems) {
     for (let i = 0; i < pendingItems.length; i++) {
-      this.itemMap_[pendingItems[i]] = CONSENT_ITEM_STATE.UNKNOWN;
+      this.itemToConsentState_[pendingItems[i]] = CONSENT_ITEM_STATE.UNKNOWN;
     }
-    this.items_ = Object.keys(this.itemMap_);
   }
 
   /**
@@ -152,10 +148,10 @@ export class ConsentPolicyInstance {
   consentStateChangeHandler(consentId, state) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
-    dev().assert(this.itemMap_[consentId] != undefined,
+    dev().assert(this.itemToConsentState_[consentId] != undefined,
         `cannot find ${consentId} in policy state`);
 
-    this.itemMap_[consentId] = state;
+    this.itemToConsentState_[consentId] = state;
 
     this.evaluate_();
   }
@@ -170,11 +166,15 @@ export class ConsentPolicyInstance {
     let isReject = false;
     // Decide to traverse item list every time instead of keeping reject/pending counts
     // Performance should be OK since we expect item list to be small.
-    for (let i = 0; i < this.items_.length; i++) {
-      const consentId = this.items_[i];
-      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+    const items = Object.keys(this.itemToConsentState_);
+    for (let i = 0; i < items.length; i++) {
+      const consentId = items[i];
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
         return;
-      } else if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
+      }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
         isReject = true;
       }
     }
