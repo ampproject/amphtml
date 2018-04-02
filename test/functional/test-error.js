@@ -455,7 +455,8 @@ describe('reportErrorToServer', () => {
     expect(data.s).to.be.undefined;
   });
 
-  it('should report experiments', () => {
+  // TODO(#14350): unskip flaky test
+  it.skip('should report experiments', () => {
     resetExperimentTogglesForTesting(window);
     toggleExperiment(window, 'test-exp', true);
     // Toggle on then off, so it's stored
