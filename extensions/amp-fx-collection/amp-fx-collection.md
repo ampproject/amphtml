@@ -93,13 +93,13 @@ This parameter lets you vary the animation's speed over the course of its durati
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
 * “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
-* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
 
 or specify a `custom-bezier()` input
 
 ##### data-fade-in-margin
 
-This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `25%`
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `5%`
 
 #### Example: Main image fade in
 
