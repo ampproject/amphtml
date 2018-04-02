@@ -89,12 +89,20 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
     it('on consent state change', () => {
       instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
-      expect(instance.pendingItemCount_).to.equal(1);
+      expect(instance.itemMap_).to.deep.equal({
+        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'DEF': CONSENT_ITEM_STATE.UNKNOWN,
+      });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.GRANTED);
-      expect(instance.pendingItemCount_).to.equal(0);
+      expect(instance.itemMap_).to.deep.equal({
+        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'DEF': CONSENT_ITEM_STATE.GRANTED,
+      });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.REJECTED);
-      expect(instance.pendingItemCount_).to.equal(0);
-      expect(instance.rejectedItemCount_).to.equal(1);
+      expect(instance.itemMap_).to.deep.equal({
+        'ABC': CONSENT_ITEM_STATE.GRANTED,
+        'DEF': CONSENT_ITEM_STATE.REJECTED,
+      });
     });
 
     describe('getReadyPromise', () => {

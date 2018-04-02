@@ -33,7 +33,7 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {blockByConsent, isBlockedByConsent, reportError} from './error';
+import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -485,7 +485,7 @@ function createBaseCustomElementClass(win) {
           getConsentPolicyPromise(this.getAmpDoc(), policyId).then(state => {
             if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
               // Need to change after support more policy state
-              reject(blockByConsent());
+              reject(blockedByConsentError());
             } else {
               resolve(this.implementation_.buildCallback());
             }

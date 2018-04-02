@@ -116,17 +116,12 @@ export class ConsentPolicyManager {
 
 export class ConsentPolicyInstance {
   constructor(pendingItems) {
-    /** @private {!Array<string>} */
-    this.pendingItems_ = pendingItems;
 
     /** @private {!Object<string, CONSENT_ITEM_STATE>} */
     this.itemMap_ = map();
 
-    /** @private {number} */
-    this.pendingItemCount_ = 0;
-
-    /** @private {number} */
-    this.rejectedItemCount_ = 0;
+    /** @private {!Array<string>} */
+    this.items_ = [];
 
     /** @private {?function(CONSENT_POLICY_STATE)} */
     this.readyPromiseResolver_ = null;
@@ -146,7 +141,7 @@ export class ConsentPolicyInstance {
     for (let i = 0; i < pendingItems.length; i++) {
       this.itemMap_[pendingItems[i]] = CONSENT_ITEM_STATE.UNKNOWN;
     }
-    this.pendingItemCount_ = Object.keys(this.itemMap_).length;
+    this.items_ = Object.keys(this.itemMap_);
   }
 
   /**
@@ -159,48 +154,35 @@ export class ConsentPolicyInstance {
     // if necessary.
     dev().assert(this.itemMap_[consentId] != undefined,
         `cannot find ${consentId} in policy state`);
-    if (state == CONSENT_ITEM_STATE.GRANTED) {
-      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
-        this.pendingItemCount_--;
-      }
-      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
-        this.rejectedItemCount_--;
-      }
-      this.itemMap_[consentId] = CONSENT_ITEM_STATE.GRANTED;
-    }
 
-    if (state == CONSENT_ITEM_STATE.REJECTED) {
-      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
-        this.pendingItemCount_--;
-      }
-      if (this.itemMap_[consentId] != CONSENT_ITEM_STATE.REJECTED) {
-        this.rejectedItemCount_++;
-      }
-      this.itemMap_[consentId] = CONSENT_ITEM_STATE.REJECTED;
-    }
+    this.itemMap_[consentId] = state;
 
-    // We don't need to move around state UNKNOWN because it will be in pending
-    // list at first.
     this.evaluate_();
   }
 
 
   evaluate_() {
-    // TODO: Providing real time consent policy state to other components
-    if (this.pendingItemCount_ != 0) {
-      return;
-    }
-
+    // TODO(@zhouyx): Providing real time consent policy state to other components
     if (!this.readyPromiseResolver_) {
       return;
     }
 
-    if (this.rejectedItemCount_ == 0) {
-      // Consent Sufficient
-      this.readyPromiseResolver_(CONSENT_POLICY_STATE.SUFFICIENT);
-    } else {
-      this.readyPromiseResolver_(CONSENT_POLICY_STATE.INSUFFICIENT);
+    let isReject = false;
+    // Decide to traverse item list every time instead of keeping reject/pending counts
+    // Performance should be OK since we expect item list to be small.
+    for (let i = 0; i < this.items_.length; i++) {
+      const consentId = this.items_[i];
+      if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        return;
+      } else if (this.itemMap_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
+        isReject = true;
+      }
     }
+    const state = isReject ?
+      CONSENT_POLICY_STATE.INSUFFICIENT : CONSENT_POLICY_STATE.SUFFICIENT;
+
+    this.readyPromiseResolver_(state);
+
     this.readyPromiseResolver_ = null;
   }
 

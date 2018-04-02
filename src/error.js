@@ -45,7 +45,7 @@ const CANCELLED = 'CANCELLED';
 /**
  * @const {string}
  */
-const BLOCKBYCONSENT = 'BLOCKBYCONSENT';
+const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
 
 
 /**
@@ -239,8 +239,12 @@ export function isCancellation(errorOrMessage) {
   return false;
 }
 
-export function blockByConsent() {
-  return new Error(BLOCKBYCONSENT);
+/**
+ * Returns an error for component blocked by consent
+ * @return {!Error}
+ */
+export function blockedByConsentError() {
+  return new Error(BLOCK_BY_CONSENT);
 }
 
 /**
@@ -252,10 +256,10 @@ export function isBlockedByConsent(errorOrMessage) {
     return false;
   }
   if (typeof errorOrMessage == 'string') {
-    return startsWith(errorOrMessage, BLOCKBYCONSENT);
+    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
   }
   if (typeof errorOrMessage.message == 'string') {
-    return startsWith(errorOrMessage.message, BLOCKBYCONSENT);
+    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
   }
   return false;
 }
