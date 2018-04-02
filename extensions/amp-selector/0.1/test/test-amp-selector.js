@@ -162,7 +162,7 @@ describes.realWin('amp-selector', {
       expect(impl.options_[1].hasAttribute('selected')).to.be.true;
       expect(
           impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
-      expect(setInputsSpy).to.have.been.calledOnce;
+      expect(setInputsSpy).to.have.been.calledThrice; // once to set, twice to clear
     });
 
     it('should init properly for multiselect', function* () {
@@ -226,7 +226,7 @@ describes.realWin('amp-selector', {
       expect(impl.isMultiple_).to.be.false;
       expect(initSpy).to.have.been.calledOnce;
       expect(impl.selectedOptions_.length).to.equal(1);
-      expect(setInputsSpy).to.have.been.calledOnce;
+      expect(setInputsSpy).to.have.been.calledThrice;
       expect(impl.options_[1].hasAttribute('selected')).to.be.true;
       expect(
           impl.options_[1].getAttribute('aria-selected')).to.be.equal('true');
@@ -628,7 +628,7 @@ describes.realWin('amp-selector', {
       expect(impl.options_[0].hasAttribute('selected')).to.be.true;
       expect(impl.options_[3].hasAttribute('selected')).to.be.false;
 
-      expect(setInputsSpy).calledTwice;
+      expect(setInputsSpy).to.have.callCount(4);
     });
 
     it('should trigger `toggle` action even when no `value` argument is' +
@@ -985,6 +985,7 @@ describes.realWin('amp-selector', {
         });
         ampSelector.children[1].setAttribute('selected', '');
         yield ampSelector.build();
+        yield ampSelector.layoutCallback();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');
@@ -993,6 +994,8 @@ describes.realWin('amp-selector', {
         button.click();
 
         expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.querySelectorAll('input[type="hidden"]').length)
+            .to.equal(0);
       });
 
       it('should clear selection of a multiselect', function* () {
@@ -1008,6 +1011,7 @@ describes.realWin('amp-selector', {
         ampSelector.children[0].setAttribute('selected', '');
         ampSelector.children[3].setAttribute('selected', '');
         yield ampSelector.build();
+        yield ampSelector.layoutCallback();
 
         const button = win.document.createElement('button');
         button.setAttribute('on', 'tap:ampSelector.clear');
@@ -1017,6 +1021,8 @@ describes.realWin('amp-selector', {
 
         expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
         expect(ampSelector.children[3].hasAttribute('selected')).to.be.false;
+        expect(ampSelector.querySelectorAll('input[type="hidden"]').length)
+            .to.equal(0);
       });
     });
   });
