@@ -121,7 +121,7 @@ export class FxElement {
 
     /** @private {number} */
     this.margin_ = element.hasAttribute('data-fade-in-margin') ?
-      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.2;
+      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.05;
 
     /** @private {string} */
     this.easing_ = element.hasAttribute('data-fade-in-easing') ?

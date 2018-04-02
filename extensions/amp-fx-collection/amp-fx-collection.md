@@ -42,7 +42,7 @@ limitations under the License.
 The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently, only the `parallax` and `fade-in` effects are supported. 
+Currently, the `parallax` and `fade-in` effects are supported.
 More effects such as `slide-in` are planned to be supported soon.
 
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
@@ -85,11 +85,11 @@ The `fade-in` effect allows an element to fade in once the element being targett
 
 ##### data-fade-in-duration
 
-This is the duration over which the animation takes places. The default value is `1500ms`.
+This is the duration over which the animation takes places. The default value is `1000ms`.
 
 ##### data-fade-in-easing
 
-This parameter lets you vary the animation's speed over the course of its duration. The default is `linear` which is `cubic-bezier(0.00, 0.00, 1.00, 1.00)`. You can also choose from one of the presets available:
+This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can also choose from one of the presets available:
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
 * “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)

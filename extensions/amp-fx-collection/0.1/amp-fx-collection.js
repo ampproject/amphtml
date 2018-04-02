@@ -130,7 +130,7 @@ class AmpFxCollection {
     fxTypes.forEach(fxType => {
       if (fxType == FxType.FADE_IN) {
         user().assert(isExperimentOn(this.ampdoc_.win, 'amp-fx-fade-in'),
-          'amp-fx-fade-in experiment is not turned on.')
+            'amp-fx-fade-in experiment is not turned on.');
       }
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });

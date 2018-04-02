@@ -290,7 +290,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-fx-fade-in',
-    name: 'Enables amp-fx="fade-in" - a scroll triggered timed fade in animation',
+    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
