@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.2 */
+ /** Version: 0.1.22.3 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
+
+const CSS = "@media (min-width:480px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important}}\n@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}\n@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
 
@@ -573,16 +575,16 @@ function transition(el, props, durationMillis, curve) {
 class Graypane {
 
   /**
-   * @param {!Document} doc
+   * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
    */
   constructor(doc, zIndex) {
-
-    /** @private @const {!Document} */
+    /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
-    this.fadeBackground_ = this.doc_.createElement('swg-popup-background');
+    this.fadeBackground_ = this.doc_.getWin().document.createElement(
+        'swg-popup-background');
     setImportantStyles(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
@@ -613,14 +615,14 @@ class Graypane {
    * Attaches the graypane to the document.
    */
   attach() {
-    this.doc_.body.appendChild(this.fadeBackground_);
+    this.doc_.getBody().appendChild(this.fadeBackground_);
   }
 
   /**
    * Detaches the graypane to the document.
    */
   destroy() {
-    this.doc_.body.removeChild(this.fadeBackground_);
+    this.doc_.getBody().removeChild(this.fadeBackground_);
   }
 
   /**
@@ -804,16 +806,6 @@ function injectStyleSheet(doc, styleText) {
 }
 
 
-/**
- * Returns the BODY element of the document.
- * @param {!Document} doc
- * @return {!Element}
- */
-function getBody(doc) {
-  return /** @type {!Element} */ (doc.body);
-}
-
-
 
 
 /**
@@ -958,7 +950,7 @@ class FriendlyIframe {
    * @return {!Element}
    */
   getBody() {
-    return getBody(this.getDocument());
+    return /** @type {!Element} */ (this.getDocument().body);
   }
 
   /**
@@ -1036,24 +1028,21 @@ const PositionAt = {
 class Dialog {
 
   /**
-   * Create a dialog with optionally provided window and override important
-   * styles and position styles.
-   * @param {!Window} win
+   * Create a dialog for the provided doc.
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
-  constructor(win, importantStyles = {}, styles = {}) {
-
-    this.win_ = win;
-
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = this.win_.document;
+  constructor(doc, importantStyles = {}, styles = {}) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-dialog'});
+    this.iframe_ = new FriendlyIframe(
+        doc.getWin().document, {'class': 'swg-dialog'});
 
     /** @private @const {!Graypane} */
-    this.graypane_ = new Graypane(this.doc_, Z_INDEX - 1);
+    this.graypane_ = new Graypane(doc, Z_INDEX - 1);
 
     const modifiedImportantStyles =
         Object.assign({}, rootElementImportantStyles, importantStyles);
@@ -1089,7 +1078,7 @@ class Dialog {
     }
 
     // Attach.
-    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
+    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
     this.graypane_.attach();
 
     if (animated) {
@@ -1150,7 +1139,7 @@ class Dialog {
       animating = Promise.resolve();
     }
     return animating.then(() => {
-      this.doc_.body.removeChild(this.iframe_.getElement());
+      this.doc_.getBody().removeChild(this.iframe_.getElement());
       this.removePaddingToHtml_();
       this.graypane_.destroy();
     });
@@ -1303,7 +1292,7 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.win_./*OK*/innerHeight * 0.9);
+    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
   }
 
   /**
@@ -1331,8 +1320,7 @@ class Dialog {
   updatePaddingToHtml_(newHeight) {
     if (this.inferPosition_() == PositionAt.BOTTOM) {
       const bottomPadding = newHeight + 20;  // Add some extra padding.
-      const htmlElement = this.doc_.documentElement;
-
+      const htmlElement = this.doc_.getRootElement();
       setImportantStyles(htmlElement, {
         'padding-bottom': `${bottomPadding}px`,
       });
@@ -1344,7 +1332,7 @@ class Dialog {
    * @private`
    */
   removePaddingToHtml_() {
-    this.doc_.documentElement.style.removeProperty('padding-bottom');
+    this.doc_.getRootElement().style.removeProperty('padding-bottom');
   }
 
 
@@ -1403,11 +1391,11 @@ const POPUP_Z_INDEX = 2147483647;
 class DialogManager {
 
   /**
-   * @param {!Window} win
+   * @param {!../model/doc.Doc} doc
    */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+  constructor(doc) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
 
     /** @private {?Dialog} */
     this.dialog_ = null;
@@ -1416,7 +1404,7 @@ class DialogManager {
     this.openPromise_ = null;
 
     /** @private @const {!Graypane} */
-    this.popupGraypane_ = new Graypane(win.document, POPUP_Z_INDEX);
+    this.popupGraypane_ = new Graypane(doc, POPUP_Z_INDEX);
 
     /** @private {?Window} */
     this.popupWin_ = null;
@@ -1437,7 +1425,7 @@ class DialogManager {
    */
   openDialog() {
     if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.win_);
+      this.dialog_ = new Dialog(this.doc_);
       this.openPromise_ = this.dialog_.open();
     }
     return this.openPromise_;
@@ -1510,6 +1498,148 @@ class DialogManager {
       // Ignore.
     }
   }
+}
+
+
+
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
 }
 
 
@@ -1900,11 +2030,8 @@ class Toast {
    */
   constructor(deps, src, args) {
 
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = this.win_.document;
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -1918,7 +2045,10 @@ class Toast {
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes));
+            createElement(
+                this.doc_.getWin().document,
+                'iframe',
+                iframeAttributes));
 
     setImportantStyles(this.iframe_, toastImportantStyles);
     setStyles(this.iframe_, topFriendlyIframePositionStyles);
@@ -1942,7 +2072,7 @@ class Toast {
    * @return {!Promise}
    */
   open() {
-    this.doc_.body.appendChild(this.iframe_);  // Fires onload.
+    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
     return this.buildToast_();
   }
 
@@ -1961,7 +2091,7 @@ class Toast {
                   + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
                   's normal forwards',
           });
-          this.win_.setTimeout(() => {
+          this.doc_.getWin().setTimeout(() => {
             this.close();
           }, (toastDurationSeconds + 1) * 1000);
         });
@@ -1971,7 +2101,7 @@ class Toast {
    * Closes the toast.
    */
   close() {
-    this.doc_.body.removeChild(this.iframe_);
+    this.doc_.getBody().removeChild(this.iframe_);
   }
 }
 
@@ -2156,7 +2286,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.2',
+    '_client': 'SwG 0.1.22.3',
   });
 }
 
@@ -3836,7 +3966,7 @@ class AbbrvOfferFlow {
           'list': options && options.list || 'default',
           'skus': options && options.skus || null,
         }),
-        /* shouldFadeBody */ true);
+        /* shouldFadeBody */ false);
   }
 
   /**
@@ -3873,72 +4003,6 @@ class AbbrvOfferFlow {
 }
 
 
-
-
-
-
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
-
-
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
 
 
 
@@ -4086,33 +4150,37 @@ function storageKey(key) {
 class ConfiguredRuntime {
 
   /**
-   * @param {!Window} win
+   * @param {!Window|!Document|!Doc} winOrDoc
    * @param {!../model/page-config.PageConfig} config
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
    */
-  constructor(win, config, opt_integr) {
+  constructor(winOrDoc, config, opt_integr) {
+    /** @private @const {!Doc} */
+    this.doc_ = resolveDoc(winOrDoc);
+
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = this.doc_.getWin();
 
     /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
     /** @private @const {!Promise} */
-    this.documentParsed_ = whenDocumentReady(this.win_.document);
+    this.documentParsed_ = this.doc_.whenReady();
 
     /** @private @const {!Fetcher} */
-    this.fetcher_ = opt_integr && opt_integr.fetcher || new XhrFetcher(win);
+    this.fetcher_ = opt_integr && opt_integr.fetcher ||
+        new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */
     this.storage_ = new Storage(this.win_);
 
     /** @private @const {!DialogManager} */
-    this.dialogManager_ = new DialogManager(win);
+    this.dialogManager_ = new DialogManager(this.doc_);
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts(win);
+    this.activityPorts_ = new ActivityPorts(this.win_);
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -4129,6 +4197,13 @@ class ConfiguredRuntime {
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
     PayStartFlow.preconnect(preconnect);
+
+    injectStyleSheet(this.win_.document, CSS);
+  }
+
+  /** @override */
+  doc() {
+    return this.doc_;
   }
 
   /** @override */
