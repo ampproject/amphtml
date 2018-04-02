@@ -70,24 +70,26 @@
 
 .i-amphtml-lbg-mask,
 .i-amphtml-lbg-gallery {
-  opacity: 1 !important;
-  background-color: rgba(0,0,0, 1) !important;
   position: absolute !important;
-  top:0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
 }
 
+.i-amphtml-lbg-mask {
+  background-color: rgba(0,0,0, 1) !important;
+  top: 0 !important;
+}
+
 .i-amphtml-lbg-gallery {
   display: none;
-  padding-top: 56px !important;
+  top: 56px !important;
   overflow: auto !important;
 }
 
 @media (min-width: 1024px) {
   .i-amphtml-lbg-gallery {
-    padding-top: 80px !important;
+    top: 80px !important;
   }
 }
 
@@ -97,19 +99,14 @@
   right: 0 !important;
   top: 0 !important;
   height: 56px !important;
+  z-index: 1 !important;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
-  z-index: 2 !important;
 }
 
 @media (min-width: 1024px) {
   .i-amphtml-lbg-top-bar {
-    height: 100px !important;
+    height: 80px !important;
   }
-}
-
-.i-amphtml-lbg-controls.show {
-  opacity: 1;
-  visibility: visible;
 }
 
 .i-amphtml-lbg-controls.hidden {
@@ -131,15 +128,14 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  overflow: hidden !important;
   color: #ffffff;
-  z-index: 2 !important;
 }
 
 .i-amphtml-lbg-desc-box.standard {
   background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
   max-height: 6rem !important;
   transition: max-height ease-out 0.3s !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-lbg-desc-box.overflow {
@@ -173,8 +169,6 @@
 .i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-mask {
   background-color: rgba(0,0,0,0.4) !important;
   top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
   z-index: 0 !important;
   transition: background-color ease-in 0.4s !important;
 }

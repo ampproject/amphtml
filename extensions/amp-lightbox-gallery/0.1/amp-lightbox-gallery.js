@@ -112,8 +112,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
+    /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
+    this.elementsMetadata_ = {
+      default: [],
+    };
+
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?Element} */
+    this.carouselContainer_ = null;
+
+    /** @private {?Element} */
+    this.controlsContainer_ = null;
 
     /** @private {?Element} */
     this.carousel_ = null;
@@ -126,11 +137,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.descriptionOverflowMask_ = null;
-
-    /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
-    this.elementsMetadata_ = {
-      default: [],
-    };
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -189,17 +195,27 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return Promise.resolve();
   }
 
+  buildControls_() {
+    this.controlsContainer_ = this.win.document.createElement('div');
+    this.controlsContainer_.classList.add('i-amphtml-lbg-controls');
+    this.buildDescriptionBox_();
+    this.buildTopBar_();
+    this.container_.appendChild(this.controlsContainer_);
+  }
+
   /**
    * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
    */
   findOrInitializeLightbox_(lightboxGroupId) {
-    if (!this.descriptionBox_) {
-      this.buildDescriptionBox_();
+    if (!this.carouselContainer_) {
+      this.carouselContainer_ = this.win.document.createElement('div');
+      this.container_.appendChild(this.carouselContainer_);
     }
-    if (!this.topBar_) {
-      this.buildTopBar_();
+
+    if (!this.controlsContainer_) {
+      this.buildControls_();
     }
     return this.findOrBuildCarousel_(lightboxGroupId);
   }
@@ -309,7 +325,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
       return this.vsync_.mutatePromise(() => {
-        this.container_.appendChild(this.carousel_);
+        this.carouselContainer_.appendChild(this.carousel_);
       });
     });
   }
@@ -330,7 +346,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildDescriptionBox_() {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
-    this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
     this.descriptionBox_.classList.add('standard');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
@@ -347,9 +362,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       event.stopPropagation();
     });
 
-    this.vsync_.mutate(() => {
-      this.container_.appendChild(this.descriptionBox_);
-    });
+    this.controlsContainer_.appendChild(this.descriptionBox_);
   }
 
   /**
@@ -374,13 +387,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       };
 
       const mutateOverflowState = state => {
+        // We toggle visibility instead of display because we rely on the height
+        // of this element to measure 1 rem.
         if (state.hasOverflow) {
           st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-            opacity: 1,
+            visibility: 'visible',
           });
         } else {
           st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-            opacity: 0,
+            visibility: 'hidden',
           });
         }
       };
@@ -391,6 +406,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         // descendant text nodes. It is okay in this case because the description
         // text area is a div that does not contain descendant elements.
         this.descriptionTextArea_./*OK*/innerText = descText;
+
+        // Avoid flickering out if transitioning from a slide with no text
+        this.descriptionBox_.classList.remove('fade-out');
+        toggle(dev().assertElement(this.descriptionBox_), true);
+
       }).then(() => {
         this.vsync_.run({
           measure: measureOverflowState,
@@ -443,7 +463,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     dev().assert(this.container_);
     this.topBar_ = this.win.document.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
-    this.topBar_.classList.add('i-amphtml-lbg-controls');
 
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
@@ -454,9 +473,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.buildButton_('Gallery', 'i-amphtml-lbg-button-gallery', openGallery);
     this.buildButton_('Content', 'i-amphtml-lbg-button-slide', closeGallery);
 
-    this.vsync_.mutate(() => {
-      this.container_.appendChild(this.topBar_);
-    });
+    this.controlsContainer_.appendChild(this.topBar_);
   }
 
   /**
@@ -517,29 +534,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
       this.showControls_();
-    } else {
+    } else if (!this.container_.hasAttribute('gallery-view')) {
       this.hideControls_();
-      // Toggle version of hide uses fade animation effects
-      this.topBar_.classList.add('fade-out');
-      this.descriptionBox_.classList.add('fade-out');
-    } }
+    }
+  }
 
   /**
    * Show lightbox controls.
    * @private
    */
   showControls_() {
-    this.topBar_.classList.remove('fade-out');
-    this.topBar_.classList.remove('hidden');
-    this.topBar_.classList.add('show');
-    this.topBar_.classList.add('fade-in');
-
-    this.descriptionBox_.classList.remove('fade-out');
+    this.controlsContainer_.classList.remove('fade-out');
+    this.controlsContainer_.classList.remove('hidden');
+    this.controlsContainer_.classList.add('fade-in');
 
     if (!this.container_.hasAttribute('gallery-view')) {
-      this.descriptionBox_.classList.remove('hidden');
-      this.descriptionBox_.classList.add('fade-in');
-      this.descriptionBox_.classList.add('show');
       this.updateDescriptionBox_();
     }
     this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
@@ -550,17 +559,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   hideControls_() {
-    this.topBar_.classList.remove('fade-in');
-    this.topBar_.classList.remove('fade-out');
-    this.topBar_.classList.remove('show');
-    this.topBar_.classList.add('hidden');
-    if (!this.container_.hasAttribute('gallery-view')) {
-      this.descriptionBox_.classList.remove('fade-in');
-      this.descriptionBox_.classList.remove('fade-out');
-      this.descriptionBox_.classList.remove('show');
-      this.descriptionBox_.classList.add('hidden');
-    }
-
+    this.controlsContainer_.classList.remove('fade-in');
+    this.controlsContainer_.classList.add('fade-out');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
   }
 
@@ -670,7 +670,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           opacity: 0,
           display: '',
         });
-        this.hideControls_();
+        this.controlsContainer_.classList.remove('fade-in');
+        this.controlsContainer_.classList.add('hidden');
       });
     }).then(() => {
       this.getViewport().enterLightboxMode();
@@ -1164,9 +1165,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   closeGallery_() {
     this.container_.removeAttribute('gallery-view');
-    if (this.descriptionBox_.classList.contains('standard')) {
-      this.topBar_.classList.remove('fullscreen');
-    }
     toggle(dev().assertElement(this.carousel_), true);
     this.updateDescriptionBox_();
     toggle(dev().assertElement(this.descriptionBox_), true);
