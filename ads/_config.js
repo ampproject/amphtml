@@ -119,6 +119,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adincube: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
