@@ -7473,18 +7473,19 @@ nodemailer@^2.5.0:
     nodemailer-smtp-transport "2.7.2"
     socks "1.1.9"
 
-nodemon@1.15.0:
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.15.0.tgz#ddec01eeb9c33d53dfbf7eddb2fa32f723474c1e"
+nodemon@1.17.2:
+  version "1.17.2"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-1.17.2.tgz#17c0062629610e03dd01241c576f1c4068da9fdd"
   dependencies:
     chokidar "^2.0.2"
     debug "^3.1.0"
     ignore-by-default "^1.0.1"
     minimatch "^3.0.4"
     pstree.remy "^1.1.0"
-    semver "^5.4.1"
+    semver "^5.5.0"
+    supports-color "^5.2.0"
     touch "^3.1.0"
-    undefsafe "^2.0.1"
+    undefsafe "^2.0.2"
     update-notifier "^2.3.0"
 
 nomnom@1.5.2:
@@ -9383,6 +9384,10 @@ semver@^4.1.0, semver@~4.3.3:
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/semver/-/semver-4.3.6.tgz#300bc6e0e86374f7ba61068b5b1ecd57fc6532da"
 
+semver@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
+
 semver@~5.0.1:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.0.3.tgz#77466de589cd5d3c95f138aa78bc569a3cb5d27a"
@@ -10603,9 +10608,9 @@ unc-path-regex@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
 
-undefsafe@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.1.tgz#03b2f2a16c94556e14b2edef326cd66aaf82707a"
+undefsafe@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.2.tgz#225f6b9e0337663e0d8e7cfd686fc2836ccace76"
   dependencies:
     debug "^2.2.0"
 
