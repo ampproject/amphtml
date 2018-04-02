@@ -64,15 +64,14 @@ const ELEMENTS_ACTIONS_MAP_ = {
 /**
  * Interactable widgets which should trigger tap events when the user clicks
  * or activates via the keyboard. Not all are here, e.g. progressbar, tabpanel,
- * since they are readonly or composite widgets that shouldn't need to trigger
- * tap events on their own.
+ * since they are text inputs, readonly, or composite widgets that shouldn't
+ * need to trigger tap events from spacebar or enter on their own.
  * See https://www.w3.org/TR/wai-aria-1.1/#widget_roles
  * @const {!Object<boolean>}
  */
-export const TAP_EVENT_ROLE_WHITELIST = {
+export const TAPPABLE_ARIA_ROLES = {
   'button': true,
   'checkbox': true,
-  'combobox': true,
   'link': true,
   'listbox': true,
   'menuitem': true,
@@ -81,12 +80,10 @@ export const TAP_EVENT_ROLE_WHITELIST = {
   'option': true,
   'radio': true,
   'scrollbar': true,
-  'searchbox': true,
   'slider': true,
   'spinbutton': true,
   'switch': true,
   'tab': true,
-  'textbox': true,
   'treeitem': true,
 };
 
@@ -263,7 +260,7 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          const isTapEventRole = hasOwn(TAP_EVENT_ROLE_WHITELIST,
+          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
               element.getAttribute('role').toLowerCase());
           if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
