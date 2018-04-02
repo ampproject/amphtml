@@ -15,7 +15,7 @@
  */
 
 import * as sinon from 'sinon';
-import {Observable} from '../../src/observable';
+import {LazyObservable, Observable} from '../../src/observable';
 
 describe('Observable', () => {
 
@@ -69,4 +69,84 @@ describe('Observable', () => {
     expect(observer2Called).to.equal(2);
   });
 
+});
+
+
+describe('LazyObservable', () => {
+
+  let sandbox;
+  let observable;
+  let installSpy;
+  let uninstallSpy;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    uninstallSpy = sandbox.spy();
+    installSpy = sandbox.stub().returns(uninstallSpy);
+    observable = new LazyObservable(installSpy);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not install with no observers', () => {
+    observable.fire();
+    expect(installSpy).to.not.have.been.called;
+  });
+
+  it('should install on first observer', () => {
+    const triggerSpy = sandbox.spy();
+
+    observable.add(triggerSpy);
+    observable.add(triggerSpy);
+    observable.add(triggerSpy);
+
+    expect(installSpy).to.have.been.called(1);
+
+    observable.fire(1);
+
+    // once for every handler
+    expect(triggerSpy.withArgs(1)).to.have.been.called(3).times;
+  });
+
+  it('should uninstall when removing last element', () => {
+    const noop1 = () => {};
+    const noop2 = () => {};
+    const noop3 = () => {};
+
+    observable.add(noop1);
+    observable.add(noop2);
+    observable.add(noop3);
+
+    expect(installSpy).to.have.been.called(1).times;
+
+    observable.remove(noop1);
+
+    expect(uninstallSpy).to.not.have.been.called;
+
+    observable.remove(noop2);
+
+    expect(uninstallSpy).to.not.have.been.called;
+
+    observable.remove(noop3);
+
+    expect(uninstallSpy).to.have.been.called(1).times;
+  });
+
+  it('should uninstall when removing last element', () => {
+    const noop1 = () => {};
+    const noop2 = () => {};
+    const noop3 = () => {};
+
+    observable.add(noop1);
+    observable.add(noop2);
+    observable.add(noop3);
+
+    expect(installSpy).to.have.been.called(1).times;
+
+    observable.removeAll();
+
+    expect(uninstallSpy).to.have.been.called(1).times;
+  });
 });

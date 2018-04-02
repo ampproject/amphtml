@@ -14,11 +14,43 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
+import {once} from './utils/function';
+
+
+/** @interface @template TYPE */
+export class ObservableInterface {
+/**
+   * Adds the observer to this instance.
+   * @param {function(TYPE)} unusedHandler Observer's handler.
+   * @return {!UnlistenDef}
+   */
+  add(unusedHandler) {}
+
+  /**
+   * Removes the observer from this instance.
+   * @param {function(TYPE)} unusedHandler Observer's instance.
+   */
+  remove(unusedHandler) {}
+
+  /** Removes all observers. */
+  removeAll() {}
+
+  /**
+   * Fires an event. All observers are called.
+   * @param {TYPE=} opt_event
+   */
+  fire(opt_event) {}
+
+  /** @return {number} */
+  getHandlerCount() {}
+}
 
 
 /**
  * This class helps to manage observers. Observers can be added, removed or
  * fired through and instance of this class.
+ * @implements ObservableInterface
  * @template TYPE
  */
 export class Observable {
@@ -28,11 +60,7 @@ export class Observable {
     this.handlers_ = null;
   }
 
-  /**
-   * Adds the observer to this instance.
-   * @param {function(TYPE)} handler Observer's handler.
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   add(handler) {
     if (!this.handlers_) {
       this.handlers_ = [];
@@ -43,10 +71,7 @@ export class Observable {
     };
   }
 
-  /**
-   * Removes the observer from this instance.
-   * @param {function(TYPE)} handler Observer's instance.
-   */
+  /** @override */
   remove(handler) {
     if (!this.handlers_) {
       return;
@@ -57,9 +82,7 @@ export class Observable {
     }
   }
 
-  /**
-   * Removes all observers.
-   */
+  /** @override */
   removeAll() {
     if (!this.handlers_) {
       return;
@@ -67,10 +90,7 @@ export class Observable {
     this.handlers_.length = 0;
   }
 
-  /**
-   * Fires an event. All observers are called.
-   * @param {TYPE=} opt_event
-   */
+  /** @override */
   fire(opt_event) {
     if (!this.handlers_) {
       return;
@@ -82,14 +102,115 @@ export class Observable {
     }
   }
 
-  /**
-   * Returns number of handlers. Mostly needed for tests.
-   * @return {number}
-   */
+  /** @override */
   getHandlerCount() {
     if (!this.handlers_) {
       return 0;
     }
     return this.handlers_.length;
+  }
+}
+
+
+/**
+ * Runs a given constructor when first observed (i.e. observable on-demand).
+ * Optionally unlistens when no longer observed.
+ * @implements ObservableInterface
+ * @template TYPE
+ */
+export class LazyObservable {
+  /**
+   * @param {function():!UnlistenDef} ctor
+   */
+  constructor(ctor) {
+    /** @private @const {function():!UnlistenDef} */
+    this.ctor_ = ctor;
+
+    /** @private @const {!Observable<TYPE>} */
+    this.observable_ = new Observable();
+
+    /** @private {function():!UnlistenDef} */
+    this.instantiate_ = this.createInstantiateFn_();
+
+    /** @private {boolean} */
+    this.isInstantiated_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.disposeFn_ = null;
+
+    /** @private {?Array<TYPE>} */
+    this.queue_ = null;
+  }
+
+  /** @override */
+  add(handler) {
+    const unlisten = this.observable_.add(handler);
+
+    this.instantiate_();
+
+    return () => {
+      unlisten();
+      this.maybeDispose_();
+    };
+  }
+
+  /** @override */
+  remove(handler) {
+    this.observable_.remove(handler);
+    this.maybeDispose_();
+  }
+
+  /** @override */
+  removeAll() {
+    this.observable_.removeAll();
+    this.dispose_();
+  }
+
+  /** @override */
+  fire(opt_event) {
+    if (!this.isInstantiated_) {
+      return;
+    }
+    this.observable_.fire(opt_event);
+  }
+
+  /** @override */
+  getHandlerCount() {
+    return this.observable_.getHandlerCount();
+  }
+
+  /** @private @return {!Function} */
+  createInstantiateFn_() {
+    return once(() => {
+      this.isInstantiated_ = true;
+      this.disposeFn_ = this.ctor_() || null;
+
+      while (this.queue_ && this.queue_.length) {
+        this.observable_.fire(this.queue_.shift());
+      }
+    });
+  }
+
+  /** @private */
+  maybeDispose_() {
+    if (this.observable_.getHandlerCount() > 0) {
+      return;
+    }
+    this.dispose_();
+  }
+
+  /** @private */
+  dispose_() {
+    if (!this.disposeFn_) {
+      return;
+    }
+    const dispose = dev().assert(this.disposeFn_);
+
+    this.instantiate_ = this.createInstantiateFn_();
+    this.disposeFn_ = null; // GC
+    this.isInstantiated_ = false;
+    this.queue_ = null;
+
+    dispose();
   }
 }
