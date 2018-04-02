@@ -15,15 +15,19 @@
  */
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
+import {
+  NOTIFICATION_UI_MANAGER,
+  NotificationUiManager,
+} from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, rethrowAsync} from '../../../src/log';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {setStyle} from '../../../src/style';
-import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
@@ -175,7 +179,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assertString(this.showIfHref_);
-    return this.urlReplacements_.expandAsync(showIfHref).then(href => {
+    return this.urlReplacements_.expandUrlAsync(showIfHref).then(href => {
       const data = /** @type {!JsonObject} */({
         'elementId': this.elementId_,
         'ampUserId': ampUserId,
@@ -417,8 +421,8 @@ export class UserNotificationManager {
       this.documentReadyPromise_,
     ]);
 
-    /** @private {!Promise} */
-    this.nextInQueue_ = this.managerReadyPromise_;
+    this.notificationUiManagerPromise_ =
+        getServicePromiseForDoc(this.ampdoc, NOTIFICATION_UI_MANAGER);
   }
 
   /**
@@ -458,13 +462,15 @@ export class UserNotificationManager {
     const deferred = this.getOrCreateDeferById_(id);
     // Compose the registered notifications into a promise queue
     // that blocks until one notification is dismissed.
-    return this.nextInQueue_ = this.nextInQueue_
-        .then(() => {
-          return userNotification.shouldShow().then(shouldShow => {
-            if (shouldShow) {
-              return userNotification.show();
-            }
-          });
+    return this.managerReadyPromise_
+        .then(() => userNotification.shouldShow())
+        .then(shouldShow => {
+          if (shouldShow) {
+            return this.notificationUiManagerPromise_.then(manager => {
+              return manager.registerUI(
+                  userNotification.show.bind(userNotification));
+            });
+          }
         })
         .then(deferred.resolve.bind(this, userNotification))
         .catch(rethrowAsync.bind(null,
@@ -505,5 +511,6 @@ export function installUserNotificationManagerForTesting(ampdoc) {
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(SERVICE_ID, UserNotificationManager);
+  AMP.registerServiceForDoc(NOTIFICATION_UI_MANAGER, NotificationUiManager);
   AMP.registerElement(TAG, AmpUserNotification, CSS);
 });

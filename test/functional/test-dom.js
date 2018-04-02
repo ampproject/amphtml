@@ -15,10 +15,10 @@
  */
 
 import * as dom from '../../src/dom';
-import {loadPromise} from '../../src/event-helper';
-import {toArray} from '../../src/types';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {loadPromise} from '../../src/event-helper';
+import {toArray} from '../../src/types';
 
 
 describes.sandboxed('DOM', {}, env => {
@@ -87,6 +87,39 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.isConnectedNode(c)).to.be.false;
   });
 
+  it('isConnectedNode (no Node.p.isConnected)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'isConnected');
+    try {
+      delete Node.prototype.isConnected;
+
+      expect(dom.isConnectedNode(document)).to.be.true;
+
+      const a = document.createElement('div');
+      expect(dom.isConnectedNode(a)).to.be.false;
+
+      const b = document.createElement('div');
+      b.appendChild(a);
+
+      document.body.appendChild(b);
+      expect(dom.isConnectedNode(a)).to.be.true;
+
+      const shadow = a.attachShadow({mode: 'open'});
+      const c = document.createElement('div');
+      shadow.appendChild(c);
+      expect(dom.isConnectedNode(c)).to.be.true;
+
+      document.body.removeChild(b);
+      expect(dom.isConnectedNode(c)).to.be.false;
+    } finally {
+      Object.defineProperty(Node.prototype, 'isConnected', desc);
+    }
+  });
+
   it('rootNodeFor', () => {
     const a = document.createElement('div');
     expect(dom.rootNodeFor(a)).to.equal(a);
@@ -98,6 +131,31 @@ describes.sandboxed('DOM', {}, env => {
     const c = document.createElement('div');
     b.appendChild(c);
     expect(dom.rootNodeFor(c)).to.equal(a);
+  });
+
+  it('rootNodeFor (no Node.p.getRootNode)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'getRootNode');
+    try {
+      delete Node.prototype.getRootNode;
+
+      const a = document.createElement('div');
+      expect(dom.rootNodeFor(a)).to.equal(a);
+
+      const b = document.createElement('div');
+      a.appendChild(b);
+      expect(dom.rootNodeFor(b)).to.equal(a);
+
+      const c = document.createElement('div');
+      b.appendChild(c);
+      expect(dom.rootNodeFor(c)).to.equal(a);
+    } finally {
+      Object.defineProperty(Node.prototype, 'getRootNode', desc);
+    }
   });
 
   it('closest should find itself', () => {
@@ -817,12 +875,8 @@ describes.sandboxed('DOM', {}, env => {
 
   describe('escapeCssSelectorIdent', () => {
 
-    it('should escape natively', () => {
-      expect(dom.escapeCssSelectorIdent(window, 'a b')).to.equal('a\\ b');
-    });
-
-    it('should polyfill escape', () => {
-      expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
+    it('should escape', () => {
+      expect(dom.escapeCssSelectorIdent('a b')).to.equal('a\\ b');
     });
   });
 
@@ -929,6 +983,30 @@ describes.sandboxed('DOM', {}, env => {
     b.appendChild(c);
     expect(dom.isEnabled(a)).to.be.true;
   });
+
+  it('templateContentClone on a <template> element (browser supports' +
+      ' HTMLTemplateElement)', () => {
+    const template = document.createElement('template');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
+
+  it('templateContentClone on a <template> element (simulate a browser' +
+      ' that does not support HTMLTemplateElement)', () => {
+    const template = document.createElement('div');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
 });
 
 describes.realWin('DOM', {
@@ -937,7 +1015,7 @@ describes.realWin('DOM', {
   },
 }, env => {
   let doc;
-  class TestElement extends BaseElement {};
+  class TestElement extends BaseElement {}
   describe('whenUpgradeToCustomElement function', () => {
     beforeEach(() => {
       doc = env.win.document;

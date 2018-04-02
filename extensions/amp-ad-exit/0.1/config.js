@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
-import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
+import {
+  ANALYTICS_IFRAME_TRANSPORT_CONFIG,
+} from '../../amp-analytics/0.1/vendors';
 import {FilterType} from './filters/filter';
+import {user} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -70,6 +72,14 @@ export let ClickDelayConfig;
  */
 export let ClickLocationConfig;
 
+/**
+ * @typedef {{
+ *   type: !FilterType,
+ *   selector: string
+ * }}
+ */
+export let InactiveElementConfig;
+
 /** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
 
@@ -110,14 +120,16 @@ function assertTransport(transport) {
 }
 
 function assertFilters(filters) {
+  const validFilters = [
+    FilterType.CLICK_DELAY,
+    FilterType.CLICK_LOCATION,
+    FilterType.INACTIVE_ELEMENT,
+  ];
   for (const name in filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
-    user().assert(
-        filters[name].type == FilterType.CLICK_DELAY ||
-        filters[name].type == FilterType.CLICK_LOCATION,
-        'Only ClickDelayFilter and ClickLocationDelay are currently ' +
-        'supported.');
+    user().assert(validFilters.indexOf(filters[name].type) != -1,
+        'Supported filters: ' + validFilters.join(', '));
   }
 }
 
@@ -155,10 +167,10 @@ function assertTarget(name, target, config) {
  * @return {string} The vendor's iframe URL
  */
 export function assertVendor(vendor) {
-  user().assert(ANALYTICS_CONFIG &&
-      ANALYTICS_CONFIG[vendor] &&
-      ANALYTICS_CONFIG[vendor]['transport'] &&
-      ANALYTICS_CONFIG[vendor]['transport']['iframe'],
-  'Unknown vendor: ' + vendor);
-  return ANALYTICS_CONFIG[vendor]['transport']['iframe'];
+  return user().assertString(
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor] &&
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport'] &&
+      ANALYTICS_IFRAME_TRANSPORT_CONFIG[vendor]['transport']['iframe'],
+      `Unknown or invalid vendor ${vendor}, ` +
+      'note that vendor must use transport: iframe');
 }

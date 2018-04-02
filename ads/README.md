@@ -78,7 +78,7 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 
 #### Position in viewport
 
-Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/WICG/IntersectionObserver/blob/gh-pages/explainer.md) of the ad's intersection with the parent viewport.
+Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/w3c/IntersectionObserver/blob/master/explainer.md) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
@@ -250,7 +250,7 @@ If you're adding support for a new 3P ad service, changes to the following files
 
 ### Verify your examples
 
-To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `npx gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
@@ -263,7 +263,7 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 Please make sure your changes pass the tests:
 
 ```
-gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
+npx gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
 
 ```
 
@@ -271,7 +271,7 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 ### Lint and type-check
 
-To speed up the review process, please run `gulp lint` and `gulp check-types`, then fix errors, if any, before sending out the PR.
+To speed up the review process, please run `npx gulp lint` and `npx gulp check-types`, then fix errors, if any, before sending out the PR.
 
 ### Other tips
 
@@ -280,4 +280,4 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ## Developer announcements for ads related API changes 
 
-For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlgroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 

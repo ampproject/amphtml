@@ -100,7 +100,7 @@ You can add it as a query string field (e.g.,
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
 {% endcall %}
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
@@ -126,7 +126,7 @@ When specified, AMP will make a CORS POST request to the specified URL transmitt
 If this attribute is not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](../../spec/amp-cors-requests.md).
+For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
 {% endcall %}
 
 **POST request** JSON fields: `elementId`, `ampUserId`
@@ -191,6 +191,7 @@ This notification should ALWAYS show - if shouldShow endpoint response was true.
 <a href="#learn-more">Learn more.</a>
 <button on="tap:amp-user-notification7.dismiss">Dismiss</button>
 </amp-user-notification>
+```
 
 ## JSON Fields
 
@@ -247,7 +248,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events):
 
 <table>
   <tr>
@@ -269,8 +270,8 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
 - [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](../amp-ad/amp-ad.md)
-- [`amp-analytics`](../amp-analytics/amp-analytics.md)
+- [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad)
+- [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
 
 ## Validation
 

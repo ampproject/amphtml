@@ -15,8 +15,8 @@
  */
 
 import {Layout, applyStaticLayout,
-  assertLength, getLengthNumeral, getLengthUnits, parseLength,
-  parseLayout, assertLengthOrPercent} from '../../src/layout';
+  assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
+  parseLayout, parseLength} from '../../src/layout';
 
 
 describe('Layout', () => {
@@ -273,6 +273,40 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
+  });
+
+
+  it('layout=intrinsic', () => {
+    div.setAttribute('layout', 'intrinsic');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('i-amphtml-layout-intrinsic');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].children.length).to.equal(1);
+    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
+  });
+
+  it('layout=intrinsic - default with sizes', () => {
+    div.setAttribute('layout', 'intrinsic');
+    div.setAttribute('sizes', '50vw');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('i-amphtml-layout-intrinsic');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].children.length).to.equal(1);
+    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
   });
 
   it('layout=fill', () => {

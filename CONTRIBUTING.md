@@ -17,7 +17,7 @@ We hope you'll become an ongoing participant in our open source community but we
 - [Contributor License Agreement](#contributor-license-agreement)
 - [Ongoing participation](#ongoing-participation)
   * [Discussion channels](#discussion-channels)
-  * [Weekly status updates](#weekly-status-updates)
+  * [Status updates](#status-updates)
   * [Weekly design reviews](#weekly-design-reviews)
   * [Working groups](#working-groups)
   * [See Also](#see-also)
@@ -96,15 +96,16 @@ For further detail on integrating third party services, fonts, embeds, etc. see 
 
 ## Contributor License Agreement
 
-The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
+The AMP Project hosted at GitHub requires all contributors to either sign an individual Contributor License Agreement or be covered by a corporate Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-We recommend signing the CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
+We recommend you handle signing/being covered by a CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
 
-**Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
+**Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
 
-* If you are contributing code on your own behalf you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
-* If you are planning on contributing code on behalf of your company your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process, so to ensure you can get your code reviewed and merged quickly please start this process as soon as possible.
-* If your company has already agreed to a corporate CLA you can indicate agreement to the CLA by having the appropriate person at your company add your email address added to the Google Group associated with your corporate CLA.
+* **If you are contributing code on your own behalf** you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
+* **If you are planning on contributing code on behalf of your company:**
+  * Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days.  To ensure you can get your code reviewed and merged quickly please start this process as soon as possible.  The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
+  * To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
 
 ## Ongoing participation
 
@@ -116,13 +117,17 @@ Technical issues, designs, etc. are discussed using several different channels:
 
 - [GitHub issues](https://github.com/ampproject/amphtml/issues) and [pull requests](https://github.com/ampproject/amphtml/pulls)
 - [Slack](https://amphtml.slack.com) ([signup](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877))
+  - the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel is the main channel for you to discuss/ask questions about *contributing* to the open source project
+  - if you're *new to contributing* to AMP stop by [#welcome-contributors](https://amphtml.slack.com/messages/C432AFMFE/details/) to say hi!
+  - if you have a question about *using AMP on your site*, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html) first; if you can't find answers there the [#using-amp](https://amphtml.slack.com/messages/C9HPA6HGB/details/) Slack channel is available
+  - there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
-### Weekly status updates
+### Status updates
 
-Weekly updates from members of the community are tracked using [Weekly Status GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Weekly+Status%22).
+Status updates from members of the community are tracked using approximately bi-weekly [Status Update GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Status+Update%22).
 
-We encourage everyone who is actively contributing to AMP to add a comment to the relevant Weekly Status issue.
+We encourage everyone who is actively contributing to AMP to add a comment to the relevant Status Update issue.
 
 ### Weekly design reviews
 

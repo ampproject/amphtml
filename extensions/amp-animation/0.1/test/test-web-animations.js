@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   Builder,
   WebAnimationRunner,
@@ -24,7 +25,6 @@ import {
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
 describes.realWin('MeasureScanner', {amp: 1}, env => {
@@ -1511,17 +1511,25 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   let runner;
 
   class WebAnimationStub {
+    constructor() {
+      this.playState = WebAnimationPlayState.IDLE;
+    }
+
     play() {
+      this.playState = WebAnimationPlayState.RUNNING;
       return;
     }
     pause() {
+      this.playState = WebAnimationPlayState.PAUSED;
       return;
     }
     reverse() {
       throw new Error('not implemented');
     }
     finish() {
-      throw new Error('not implemented');
+      this.playState = WebAnimationPlayState.FINISHED;
+      this.onfinish();
+      return;
     }
     cancel() {
       throw new Error('not implemented');
@@ -1635,10 +1643,10 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1.onfinish();
+    anim1.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim2.onfinish();
+    anim2.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
 
     expect(playStateSpy).to.be.calledTwice;
@@ -1650,8 +1658,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
   });
@@ -1666,20 +1674,47 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.pause();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
 
-    anim1Mock.expects('play').once();
-    anim2Mock.expects('play').once();
+    anim1Mock.expects('play').callThrough().once();
+    anim2Mock.expects('play').callThrough().once();
     runner.resume();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1.onfinish();
+    anim1.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim2.onfinish();
+    anim2.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
+
+    expect(playStateSpy.callCount).to.equal(4);
+    expect(playStateSpy.args[0][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[1][0]).to.equal(WebAnimationPlayState.PAUSED);
+    expect(playStateSpy.args[2][0]).to.equal(WebAnimationPlayState.RUNNING);
+    expect(playStateSpy.args[3][0]).to.equal(WebAnimationPlayState.FINISHED);
+  });
+
+  it('should not resume partially finished animations', () => {
+    runner.start();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1.finish();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim1Mock.expects('pause').callThrough().never();
+    anim2Mock.expects('pause').callThrough().once();
+    runner.pause();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
+
+    anim1Mock.expects('play').callThrough().never();
+    anim2Mock.expects('play').callThrough().once();
+    runner.resume();
+    expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
+
+    anim2.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
 
     expect(playStateSpy.callCount).to.equal(4);
@@ -1715,8 +1750,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('finish').once();
-    anim2Mock.expects('finish').once();
+    anim1Mock.expects('finish').callThrough().once();
+    anim2Mock.expects('finish').callThrough().once();
     runner.finish();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.FINISHED);
   });
@@ -1745,8 +1780,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekTo(101);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(101);
@@ -1758,8 +1793,8 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
     sandbox.stub(runner, 'getTotalDuration_').returns(500);
-    anim1Mock.expects('pause').once();
-    anim2Mock.expects('pause').once();
+    anim1Mock.expects('pause').callThrough().once();
+    anim2Mock.expects('pause').callThrough().once();
     runner.seekToPercent(0.5);
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.PAUSED);
     expect(anim1.currentTime).to.equal(250);

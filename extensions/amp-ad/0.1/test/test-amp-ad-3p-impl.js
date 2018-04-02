@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {stubService} from '../../../../testing/test-helper';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {adConfig} from '../../../../ads/_config';
-import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
-import {macroTask} from '../../../../testing/yield';
+import * as adCid from '../../../../src/ad-cid';
 import * as lolex from 'lolex';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {LayoutPriority} from '../../../../src/layout';
+import {adConfig} from '../../../../ads/_config';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {macroTask} from '../../../../testing/yield';
+import {stubService} from '../../../../testing/test-helper';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -291,9 +292,8 @@ describes.realWin('amp-ad-3p-impl', {
       expect(ad3p.renderOutsideViewport()).to.equal(1.25);
     });
 
-    // TODO(lannka, #12486): Make this test work with lolex v2.
-    it.skip('should only allow rendering one ad per second', function* () {
-      const clock = lolex.install();
+    it('should only allow rendering one ad per second', function* () {
+      const clock = lolex.install({target: win});
       const ad3p2 = createAmpAd(win);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);
@@ -526,7 +526,7 @@ describes.realWin('amp-ad-3p-impl', {
   });
 });
 
-describe('#getPriority', () => {
+describe('#getLayoutPriority', () => {
   describes.realWin('with shadow AmpDoc', {
     amp: {
       ampdoc: 'shadow',
@@ -534,7 +534,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 1', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(1);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     });
   });
 
@@ -545,7 +545,7 @@ describe('#getPriority', () => {
   }, env => {
     it('should return priority of 2', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getPriority()).to.equal(2);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
     });
   });
 });

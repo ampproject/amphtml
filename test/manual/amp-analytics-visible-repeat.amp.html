@@ -68,6 +68,26 @@
             "on": "visible",
             "request": "base",
             "visibilitySpec": {
+              "visiblePercentageMin": "0",
+              "continuousTimeMin": 2000
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "base": "fake.com/ad1?repeat=true&continuousTimeMin=2000"
+        },
+        "triggers": {
+          "repeat": {
+            "on": "visible",
+            "request": "base",
+            "visibilitySpec": {
               "selector": "#ad1",
               "visiblePercentageMin": "0",
               "continuousTimeMin": 2000,

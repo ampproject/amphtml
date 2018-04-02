@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {scopedQuerySelector} from '../src/dom';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
@@ -87,10 +86,10 @@ export class AmpImg extends BaseElement {
         return;
       }
       // We try to find the first url in the srcset
-      const srcseturls = srcset.match(/https?:\/\/[^\s]+/);
+      const srcseturl = /https?:\/\/\S+/.exec(srcset);
       // Connect to the first url if it exists
-      if (srcseturls) {
-        this.preconnect.url(srcseturls[0], onLayout);
+      if (srcseturl) {
+        this.preconnect.url(srcseturl[0], onLayout);
       }
     }
   }
@@ -116,17 +115,14 @@ export class AmpImg extends BaseElement {
     if (!this.srcset_) {
       this.srcset_ = srcsetFromElement(this.element);
     }
-    this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
-    if (this.element.hasAttribute('fallback')) {
-      this.allowImgLoadFallback_ = false;
-    }
+    this.allowImgLoadFallback_ = !this.element.hasAttribute('fallback');
 
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = scopedQuerySelector(this.element, 'img');
+      this.img_ = this.element.querySelector('img');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -194,7 +190,7 @@ export class AmpImg extends BaseElement {
         // The width should never be 0, but we fall back to the screen width
         // just in case.
         this.getViewport().getWidth() || this.win.screen.width,
-        this.getDpr()).url;
+        this.getDpr());
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -222,7 +218,7 @@ export class AmpImg extends BaseElement {
       this.togglePlaceholder(false);
     });
   }
-};
+}
 
 /**
  * @param {!Window} win Destination window for the new element.

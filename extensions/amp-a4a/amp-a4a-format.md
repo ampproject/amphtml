@@ -15,24 +15,24 @@ limitations under the License.
 -->
 
 
-# AMP AD CREATIVE FORMAT
+# AMPHTML Ad Creative Format
 
 _If you'd like to propose changes to the standard, please comment on the [Intent
 to Implement](https://github.com/ampproject/amphtml/issues/4264)_.
 
-A4A (AMP for Ads) is a mechanism for rendering fast,
-performant ads in AMP pages.  To ensure that AMP ad documents ("AMP
+AMPHTML ads is a mechanism for rendering fast,
+performant ads in AMP pages.  To ensure that AMPHTML ad documents ("AMP
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, AMP creatives must obey a set of validation
 rules.  Similar in spirit to the
-[AMP format rules](../../spec/amp-html-format.md), AMP ads have
+[AMP format rules](../../spec/amp-html-format.md), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
 
-## AMP Ad Format Rules
+## AMPHTML ad format rules
 
 - Unless otherwise specified below, the creative must obey all rules
    given by the [AMP format rules](../../spec/amp-html-format.md),
-   included here by reference.  For example, the AMP AD
+   included here by reference.  For example, the AMPHTML ad
    [Boilerplate](amp-a4a-format.md#2) deviates from the AMP
    standard boilerplate.
 
@@ -42,14 +42,14 @@ access to a limited set of allowed tags, capabilities, and extensions.
    tags.
 
    _Rationale_: Allows validators to identify a creative document as either a
-   general AMP doc or a restricted AMP ad doc and to dispatch appropriately.
+   general AMP doc or a restricted AMPHTML ad doc and to dispatch appropriately.
 
 - The creative must include `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>`
    as the runtime script instead of `https://cdn.ampproject.org/v0.js`.
 
-   _Rationale_: Allows tailored runtime behaviors for AMP ads served in cross-origin iframes.
+   _Rationale_: Allows tailored runtime behaviors for AMPHTML ads served in cross-origin iframes.
 
-- Unlike in general AMP, the creative must not include a `<link
+- Unlike in general AMP pages, the creative must not include a `<link
 rel="canonical">` tag.
 
    _Rationale_: Ad creatives don't have a "non-AMP canonical version"
@@ -92,7 +92,7 @@ both the `<amp-video>`
    particular, it may not target any selectors for elements within the ad
    creative.
 
-   _Rationale_: In some cases, AMP ad may choose to render an ad creative in an
+   _Rationale_: In some cases, AMPHTML ads may choose to render an ad creative in an
    iframe.  In those cases, host page analytics can only target the entire
    iframe anyway, and won’t have access to any finer-grained selectors.
 
@@ -123,7 +123,7 @@ both the `<amp-video>`
 
 ### Boilerplate
 
-AMP ad creatives require a different, and considerably simpler, boilerplate style line than
+AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than
 [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```html
@@ -133,14 +133,14 @@ AMP ad creatives require a different, and considerably simpler, boilerplate styl
 _Rationale:_ The `amp-boilerplate` style hides body content until the AMP
 runtime is ready and can unhide it.  If Javascript is disabled or the AMP
 runtime fails to load, the default boilerplate ensures that the content is
-eventually displayed regardless.  In A4A, however, if Javascript is entirely
-disabled, AMP ads won't run and no ad will ever be shown, so there is no need for
+eventually displayed regardless.  In AMPHTML ads, however, if Javascript is entirely
+disabled, AMPHTML ads won't run and no ad will ever be shown, so there is no need for
 the `<noscript>` section.  In the absence of the AMP runtime, most of the
-machinery that AMP ads rely on (e.g., analytics for visibility
+machinery that AMPHTML ads rely on (e.g., analytics for visibility
 tracking or `amp-img` for content display) won't be available, so it's better to
 display no ad than a malfunctioning one.
 
-Finally, the AMP ad boilerplate uses `amp-a4a-boilerplate` rather than
+Finally, the AMPHTML ad boilerplate uses `amp-a4a-boilerplate` rather than
 `amp-boilerplate` so that validators can easily identify it and produce
 more accurate error messages to help developers.
 
@@ -151,8 +151,8 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 
 1. `position:fixed` and `position:sticky` are prohibited in creative CSS.
 
-   _Rationale_: position:fixed breaks out of shadow DOM, which AMP ad depends on.
-   Also, Ads in AMP are already not allowed to use fixed position.
+   _Rationale_: position:fixed breaks out of shadow DOM, which AMPHTML ads depend on.
+   Also, ads in AMP are already not allowed to use fixed position.
 
 1. `touch-action` is prohibited.
 
@@ -188,14 +188,13 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 The `transition` and `animation` properties are only allowed on selectors that:
 - Contain only `transition`, `animation`, `transform`, `visibility`, or
   `opacity` properties.
-- Start with `.amp-animate` followed by a space.
 
   _Rationale:_ This allows the AMP runtime to remove this  class from context
    to deactivate animations, when necessary for page performance.
 
 **Good**
 ```css
-.amp-animate .box {
+.box {
     transform: rotate(180deg);
     transition: transform 2s;
 }
@@ -205,16 +204,8 @@ The `transition` and `animation` properties are only allowed on selectors that:
 
 Property not allowed in CSS class.
 ```css
-.amp-animate .box {
-    color: red;  // non-animation property not allowed in animation selector
-    transform: rotate(180deg);
-    transition: transform 2s;
-}
-```
-
-Missing context class `.amp-animate`.
-```css
 .box {
+    color: red;  // non-animation property not allowed in animation selector
     transform: rotate(180deg);
     transition: transform 2s;
 }
@@ -267,14 +258,14 @@ transition: background-color 2s;
 ### AMP Extensions and Builtins
 
 The following are _allowed_ AMP extension modules and AMP builtin tags in an
-A4A creative. Extensions or builtin tags not explicitly allowed are prohibited.
+AMPHTML ad creative. Extensions or builtin tags not explicitly allowed are prohibited.
 
-Most of the omissions are either for performance or to make AMP ads
+Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.
 
 _Example:_ `<amp-ad>` is omitted from this list.  It is explicitly disallowed
 because allowing an `<amp-ad>` inside an `<amp-ad>` could potentially lead to
-unbounded waterfalls of ad loading, which does not meet AMP ad performance goals.
+unbounded waterfalls of ad loading, which does not meet AMPHTML ads performance goals.
 
 _Example:_ `<amp-iframe>` is omitted from this list.  It is disallowed
 because ads could use it to execute arbitrary Javascript and load arbitrary
@@ -291,7 +282,7 @@ _Example:_ `<amp-ad-network-*-impl>` are omitted from this list.  The
 `<amp-ad>` tag handles delegation to these implementation tags; creatives
 should not attempt to include them directly.
 
-_Example:_ `<amp-lightbox>` is not yet included because even some AMP ad creatives
+_Example:_ `<amp-lightbox>` is not yet included because even some AMPHTML ads creatives
 may be rendered in an iframe and there is currently no mechanism for an ad to
 expand beyond an iframe.  Support may be added for this in the future, if there
 is demonstrated desire for it.
@@ -309,6 +300,7 @@ is demonstrated desire for it.
   <tr><td>amp-form</td></tr>
   <tr><td>amp-img</td></tr>
   <tr><td>amp-layout</td></tr>
+  <tr><td>amp-mustache</td></tr>
   <tr><td>amp-pixel</td></tr>
   <tr><td>amp-position-observer</td></tr>
   <tr><td>amp-social-share</td></tr>
@@ -318,13 +310,13 @@ is demonstrated desire for it.
 
 ### HTML Tags
 
-The following are _allowed_ tags in an A4A creative.  Tags not explicitly
+The following are _allowed_ tags in an AMPHTML ads creative.  Tags not explicitly
 allowed are prohibited.  This list is a subset of the general [AMP tag
 addendum whitelist](../../spec/amp-tag-addendum.md). Like that list, it is
 ordered consistent with HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 Most of the omissions are either for performance or because the tags are not
-HTML5 standard.  For example, `<noscript>` is omitted because AMP ad depends on
+HTML5 standard.  For example, `<noscript>` is omitted because AMPHTML ads depends on
 JavaScript being enabled, so a `<noscript>` block will never execute and,
 therefore, will only bloat the creative and cost bandwidth and latency.
 Similarly, `<acronym>`, `<big>`, et al. are prohibited because they are not
@@ -464,8 +456,8 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 - Like a general AMP document, the creative's `<head>` tag must contain a
   `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>` tag.
 - Unlike general AMP, `<noscript>` is prohibited.
-  - _Rationale:_ Since AMP ads requires Javascript to be enabled to function
-    at all, `<noscript>` blocks serve no purpose in an AMP ad and
+  - _Rationale:_ Since AMPHTML ads requires Javascript to be enabled to function
+    at all, `<noscript>` blocks serve no purpose in AMPHTML ads and
     only cost network bandwidth.
 - Unlike general AMP, `<script type="application/ld+json">` is
   prohibited.

@@ -193,7 +193,7 @@ function instrumentEntryPoints(win) {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
@@ -261,4 +261,4 @@ export function installEmbedStateListener() {
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
-};
+}

@@ -256,6 +256,12 @@ that have elapsed since Thursday, 1 January 1970).
 
 If present, the entry is assumed to be deleted.
 
+##### sort (Optional)
+
+If present and has a value of "ascending" (any other value is currently
+invalid), newer items will be inserted at the bottom of the live-list instead
+of the top.
+
 ## Styling
 
 On very slow connections the javascript and styles of the component
@@ -280,7 +286,7 @@ added, and will be removed once the next set of new items are inserted on a subs
 highlighting effect like the css below.
 
 ```css
-.live-list-item-new {
+.amp-live-list-item-new {
   animation: amp-live-list-item-highlight 2s;
 }
 

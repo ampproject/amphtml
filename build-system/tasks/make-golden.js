@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const dirname = require('path').dirname;
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
@@ -23,8 +24,7 @@ const gulp = require('gulp');
 // imageDiff is currently a bad dependency as it has a fixed node 0.8 engine
 // requirement.
 const imageDiff = require('gulp-image-diff');
-const util = require('gulp-util');
-
+const log = require('fancy-log');
 
 /**
  * Use phantomjs to take a screenshot of a page at the given url and save it
@@ -40,7 +40,7 @@ const util = require('gulp-util');
 function doScreenshot(host, path, output, device, verbose, cb) {
   fs.mkdirpSync(dirname(output));
   if (verbose) {
-    util.log('Output to: ', output);
+    log('Output to: ', output);
   }
   exec('phantomjs --ssl-protocol=any --ignore-ssl-errors=true ' +
        '--load-images=true ' +
@@ -51,13 +51,13 @@ function doScreenshot(host, path, output, device, verbose, cb) {
       '"' + device + '" ',
   function(err, stdout, stderr) {
     if (verbose) {
-      util.log(util.colors.gray('stdout: ', stdout));
+      log(colors.gray('stdout: ', stdout));
       if (stderr.length) {
-        util.log(util.colors.red('stderr: ', stderr));
+        log(colors.red('stderr: ', stderr));
       }
     }
     if (err != null) {
-      util.log(util.colors.red('exec error: ', err));
+      log(colors.red('exec error: ', err));
     }
     cb();
   });
@@ -139,26 +139,26 @@ function testScreenshots(cb) {
 
   let todo = goldenFiles.length;
   if (verbose) {
-    util.log('Diffs to be done: ', todo, goldenFiles);
+    log('Diffs to be done: ', todo, goldenFiles);
   }
   goldenFiles.forEach(function(file) {
     diffScreenshot_(file, dir, host, verbose, function(res) {
       reportRecord(reportFile, file, dir, res);
       if (res.error || res.disparity > 0) {
         errorCount++;
-        util.log(util.colors.red('Screenshot diff failed: ', file,
+        log(colors.red('Screenshot diff failed: ', file,
             JSON.stringify(res)));
       } else if (verbose) {
-        util.log(util.colors.green('Screenshot diff successful: ', file));
+        log(colors.green('Screenshot diff successful: ', file));
       }
 
       todo--;
       if (todo == 0) {
         reportPostambule(reportFile);
         if (errorCount == 0) {
-          util.log(util.colors.green('Screenshots tests successful'));
+          log(colors.green('Screenshots tests successful'));
         } else {
-          util.log(util.colors.red('Screenshots tests failed: ', errorCount,
+          log(colors.red('Screenshots tests failed: ', errorCount,
               reportFile));
           process.exit(1);
         }
@@ -179,7 +179,7 @@ function testScreenshots(cb) {
  */
 function diffScreenshot_(file, dir, host, verbose, cb) {
   if (verbose) {
-    util.log('Screenshot diff for ', file);
+    log('Screenshot diff for ', file);
   }
 
   const goldenFile = 'screenshots/' + file;
@@ -201,7 +201,7 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
         .pipe(imageDiff.jsonReporter())
         .pipe(gulp.dest(diffFile + '.json'))
         .on('error', function(error) {
-          util.log(util.colors.red('Screenshot diff failed: ', file, error));
+          log(colors.red('Screenshot diff failed: ', file, error));
           cb({error});
         })
         .on('end', function() {

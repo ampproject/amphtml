@@ -50,27 +50,25 @@ understood by the ad server(s) which you are calling.
 ```
 
 ### Two ads with different slots
+The template can be specified outside the `amp-ad` tag for sharing. You can refer to the template using its ID via the `template` attribute of `amp-ad`. You can also provide a `data-slot` attribute for each `amp-ad`, so they can share one single remote request to fetch the ads data.
 
 ```html
+<template type="amp-mustache" id="amp-template-id">
+  <a href="{{href}}">
+    <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
+  </a>
+</template>
 <amp-ad width=300 height=250
     type="custom"
+    template="amp-template-id"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
     data-slot="1">
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}">
-        <amp-img layout='fixed' height="300" width="250" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>
 </amp-ad>
 <amp-ad width=400 height=300
     type="custom"
+    template="amp-template-id"
     data-url="https://mysite/my-ad-server?someparam=somevalue"
     data-slot="2">
-    <template type="amp-mustache" id="amp-template-id">
-      <a href="{{href}}">
-        <amp-img layout='fixed' height="400" width="300" src="{{src}}" data-info="{{info}}"></amp-img>
-      </a>
-    </template>
 </amp-ad>
 <!-- The ad server will be called with the URL https://mysite/my-ad-server?someparam=somevalue&ampslots=1,2 -->
 ```
@@ -117,7 +115,8 @@ understood by the ad server(s) which you are calling.
 ### data-url (mandatory)
 
 This must be starting with `https://`, and it must be the address of an ad
-server returning json in the format defined below.
+server returning json in the format defined below. This endpoint must be available
+cross-origin. (See [CORS in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).)
 
 ### data-slot (optional)
 

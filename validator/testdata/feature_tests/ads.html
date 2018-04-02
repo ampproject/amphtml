@@ -91,6 +91,7 @@
         <option>adhese</option>
         <option>adman</option>
         <option>admanmedia</option>
+        <option>adplugg</option>
         <option>adreactor</option>
         <option>adsense</option>
         <option>adsnative</option>
@@ -300,6 +301,13 @@
   <amp-ad width="300" height="250"
       type="admanmedia"
       data-id="8e916419">
+  </amp-ad>
+
+  <h2>AdPlugg</h2>
+  <amp-ad width="300" height="250"
+      type="adplugg"
+      data-access-code="A48214096"
+      data-zone="my_amp_zone_300x250">
   </amp-ad>
 
   <h2>AdReactor</h2>
@@ -629,6 +637,13 @@
   <amp-ad width="320" height="50"
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner">
+  </amp-ad>
+
+  <h2>Doubleclick with RTC config</h2>
+  <amp-ad width="320" height="50"
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      rtc-config="{foo: bar}">
   </amp-ad>
 
   <h2>Doubleclick with JSON based parameters</h2>
@@ -1101,17 +1116,6 @@
       data-size="43"
       data-kw="amp-test, test"
       json='{"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
-  </amp-ad>
-
-  <h2>Rubicon Project FastLane Single Slot</h2>
-  <amp-ad width="320" height="50"
-      type="rubicon"
-      data-slot="/5300653/amp_test"
-      data-method="fastLane"
-      data-account="14062"
-      data-pos="atf"
-      data-kw="amp-test"
-      json='{"targeting":{"kw":"amp-test","age":"18-24","gender":"male","section":"amp"},"visitor":{"age":"18-24","gender":"male"},"inventory":{"section":"amp"}}'>
   </amp-ad>
 
   <h2>Sharethrough</h2>

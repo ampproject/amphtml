@@ -34,6 +34,13 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {};
 
 // Under 3p folder
 
+// beopinion.js
+data.account;
+data.content;
+data.name;
+//data['my-content'];
+window.BeOpinionSDK;
+
 // facebook.js
 data.embedAs;
 data.href;
@@ -48,6 +55,13 @@ data.src;
 
 //twitter.js
 data.tweetid
+
+//mathml.js
+data.formula
+var mathjax
+mathjax.Hub
+mathjax.Hub.Queue
+window.MathJax
 
 // Under ads/google folder
 
@@ -163,6 +177,9 @@ data.ws;
 data.host;
 data.s;
 
+// adpicker.js
+data.ph;
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -213,6 +230,21 @@ data.pageOpts;
 data.debug;
 data.adUnits;
 data.target;
+
+// adventive.js
+const adventive = {};
+adventive.Ad;
+adventive.addArgs = () => {};
+adventive.addInstance = () => {};
+adventive.ads;
+adventive.args;
+adventive.instances;
+adventive.isLibLoaded;
+adventive.modes;
+adventive.Plugin;
+adventive.plugins;
+adventive.utility;
+window.adventive = adventive;
 
 // colombia.js
 data.clmb_slot;
@@ -286,6 +318,10 @@ data.queue;
 
 // imedia.js
 data.positions
+
+// imonomy.js
+data.pid;
+data.subId;
 
 // improvedigital.js
 data.placement;
@@ -418,24 +454,16 @@ data.section;
 window.PulsePointHeaderTag;
 
 // rubicon.js
-var rubicontag;
-rubicontag.setFPV;
-rubicontag.setFPI;
-rubicontag.getSlot;
-rubicontag.getAdServerTargeting;
-rubicontag.addKW;
-rubicontag.setUrl;
-rubicontag.setIntegration;
 data.method;
-data.overrideWidth;
 data.width;
-data.overrideHeight;
 data.height;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
 data.size;
+data.site;
+data.zone;
 data.callback;
 
 // sharethrough.js

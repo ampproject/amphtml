@@ -19,11 +19,13 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
+  getCorsUrl,
   getSourceOrigin,
   getSourceUrl,
-  isProxyOrigin,
+  getWinOrigin,
   isLocalhostOrigin,
   isProtocolValid,
+  isProxyOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -31,8 +33,6 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-  getCorsUrl,
-  getWinOrigin,
 } from '../../src/url';
 
 describe('getWinOrigin', () => {
@@ -82,9 +82,6 @@ describe('getWinOrigin', () => {
       },
     })).to.equal('null');
   });
-
-
-
 });
 
 
@@ -119,6 +116,28 @@ describe('parseUrl', () => {
     const a1 = parseUrl(url);
     const a2 = parseUrl(url);
     expect(a1).to.equal(a2);
+  });
+
+  // TODO(#14349): unskip flaky test
+  it.skip('caches up to 100 results', () => {
+    const url = 'https://foo.com:123/abc?123#foo';
+    const a1 = parseUrl(url);
+
+    // should grab url from the cache
+    expect(a1).to.equal(parseUrl(url));
+
+    // cache 99 more urls in order to reach max capacity of LRU cache: 100
+    for (let i = 0; i < 100; i++) {
+      parseUrl(`${url}-${i}`);
+    }
+
+    const a2 = parseUrl(url);
+
+    // the old cached url should not be in the cache anymore
+    // the newer instance should
+    expect(a1).to.not.equal(parseUrl(url));
+    expect(a2).to.equal(parseUrl(url));
+    expect(a1).to.not.equal(a2);
   });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
@@ -594,6 +613,10 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/a/www.origin.com/foo/?f=0#h',
       'http://www.origin.com/foo/?f=0#h');
+  testOrigin(
+      'https://cdn.ampproject.org/ad/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
+
 
   // Prefixed CDN
   testOrigin(

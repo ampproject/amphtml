@@ -20,22 +20,23 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 import {
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  forceExperimentBranch,
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   isCdnProxy,
 } from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  forceExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
-import {getMode} from '../../../src/mode';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -55,7 +56,12 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  DF_DEP_HOLDBACK_CONTROL: '21061787',
+  DF_DEP_HOLDBACK_EXPERIMENT: '21061788',
 };
+
+/** @const {string} */
+export const dfDepRollbackExperiment = 'rollback-delayed-fetch-deprecation';
 
 /** @const @enum{string} */
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
@@ -70,6 +76,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  // Delayed Fetch Deprecation Launch Holdback
+  '5': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_CONTROL,
+  '6': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -108,7 +117,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} branches
-   * @param {!string} expName
+   * @param {string} expName
    */
   selectAndSetUnconditionedExp(win, element, branches, expName) {
     const experimentId = this.maybeSelectExperiment(
@@ -122,14 +131,14 @@ export class DoubleclickA4aEligibility {
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!boolean} useRemoteHtml
+   * @param {boolean} useRemoteHtml
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
     const warnDeprecation = feature => user().warn(
-        TAG, `${feature} will no longer ` +
-          'be supported starting on March 29, 2018. Please refer to ' +
+        TAG, `${feature} is no longer supported for DoubleClick.` +
+          'Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
           'for more information');
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
@@ -141,11 +150,8 @@ export class DoubleclickA4aEligibility {
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
-    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
-      return false;
-    }
     let experimentId;
-    const urlExperimentId = extractUrlExperimentId(win, element);
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
       if (urlExperimentId == -1 &&
@@ -176,6 +182,15 @@ export class DoubleclickA4aEligibility {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
+
+    // If we need to rollback the launch, or we are in the launch's holdback experiment,
+    // still use Delayed Fetch if USDRUD or custom remote.html in use
+    if (isExperimentOn(win, dfDepRollbackExperiment) ||
+        experimentId ==
+        DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT) {
+      return !!element.getAttribute('rtc-config') ||
+          !(hasUSDRD || useRemoteHtml);
+    }
     return true;
   }
 
@@ -183,7 +198,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
-   * @param {!string} experimentName}
+   * @param {string} experimentName}
    * @return {?string} Experiment branch ID or null if not selected.
    * @visibileForTesting
    */
@@ -205,7 +220,7 @@ const singleton = new DoubleclickA4aEligibility();
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {

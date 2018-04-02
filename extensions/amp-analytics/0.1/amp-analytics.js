@@ -14,37 +14,39 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {expandTemplate} from '../../../src/string';
-import {isArray, isObject} from '../../../src/types';
-import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
-import {getIframeTransportScriptUrl, IframeTransport} from './iframe-transport';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getTopWindow} from '../../../src/service';
-import {Services} from '../../../src/services';
-import {toggle} from '../../../src/style';
-import {isEnumValue} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {getMode} from '../../../src/mode';
+import {ANALYTICS_CONFIG} from './vendors';
 import {Activity} from './activity-impl';
 import {AnalyticsEventType} from './events';
-import {
-  InstrumentationService,
-  instrumentationServicePromiseForDoc,
-} from './instrumentation';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from './variables';
-import {ANALYTICS_CONFIG} from './vendors';
+import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {
-  expandConfigRequest,
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
+} from './instrumentation';
+import {LayoutPriority} from '../../../src/layout';
+import {
   RequestHandler,
+  expandConfigRequest,
 } from './requests';
+import {Services} from '../../../src/services';
+import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict, hasOwn, map} from '../../../src/utils/object';
+import {expandTemplate} from '../../../src/string';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
+import {getTopWindow} from '../../../src/service';
+import {isArray, isObject} from '../../../src/types';
+import {isEnumValue} from '../../../src/types';
+import {isJsonScriptTag} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
+import {sendRequest, sendRequestUsingIframe} from './transport';
+import {serializeResourceTiming} from './resource-timing';
+import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
@@ -124,9 +126,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? 0 : 1;
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -158,16 +160,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
     }
-  }
-
-  /**
-   * Prefetches and preconnects URLs related to the analytics.
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
-    this.preconnect.preload(url, 'script');
   }
 
   /** @override */
@@ -305,6 +297,10 @@ export class AmpAnalytics extends AMP.BaseElement {
           // replace selector and selectionMethod
           if (this.isSandbox_) {
             // Only support selection of parent element for analytics in scope
+            if (!this.element.parentElement) {
+              // In case parent element has been removed from DOM, do nothing
+              return;
+            }
             trigger['selector'] = this.element.parentElement.tagName;
             trigger['selectionMethod'] = 'closest';
             this.addTriggerNoInline_(trigger);
@@ -337,17 +333,39 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iframeTransport_) {
       return;
     }
-    const TAG = this.getName_();
-    const ampAdResourceId = user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly amp-ad ancestor element was found for ` +
-        'amp-analytics tag with iframe transport.');
+    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
+    const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
         // Create  3p transport frame within creative frame if inabox.
         this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
+  }
+
+  /**
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @VisibleForTesting
+   */
+  preload(url, opt_preloadAs) {
+    this.preconnect.preload(url, opt_preloadAs);
+  }
+
+  /**
+   * Gets the resourceID of the parent amp-ad element.
+   * Throws an exception if no such element.
+   * @returns {string}
+   * @VisibleForTesting
+   */
+  assertAmpAdResourceId() {
+    return user().assertString(
+        getAmpAdResourceId(this.element, getTopWindow(this.win)),
+        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
+        'for amp-analytics tag with iframe transport.');
   }
 
   /**
@@ -420,13 +438,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     assertHttpsUrl(remoteConfigUrl, this.element);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {};
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: false,
+    };
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(remoteConfigUrl)
+        .expandUrlAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return Services.xhrFor(ampdoc.win).fetchJson(
@@ -605,7 +625,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
+              this.element, request, this.preconnect,
               this.sendRequest_.bind(this),
               this.isSandbox_);
         }
@@ -620,20 +640,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
 
-    const resultPromises = [];
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
-      resultPromises.push(
-          this.handleRequestForEvent_(requestName, trigger, event));
+      this.handleRequestForEvent_(requestName, trigger, event);
     }
-    return Promise.all(resultPromises);
   }
 
   /**
@@ -642,14 +658,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} requestName The requestName to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleRequestForEvent_(requestName, trigger, event) {
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
       dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
-      return Promise.resolve();
     }
 
     const request = this.requests_[requestName];
@@ -658,30 +672,61 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       this.user().error(TAG, 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
-      return Promise.resolve();
+      return;
     }
 
-    return this.checkTriggerEnabled_(trigger, event).then(enabled => {
+    this.checkTriggerEnabled_(trigger, event).then(enabled => {
       if (!enabled) {
         return;
       }
-      return this.expandAndSendRequest_(request, trigger, event);
+      this.expandAndSendRequest_(request, trigger, event);
     });
+  }
+
+  /**
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
+   * @private
+   */
+  getDynamicVariableBindings_(trigger, expansionOptions) {
+    const dynamicBindings = {};
+    const resourceTimingSpec = trigger['resourceTimingSpec'];
+    if (resourceTimingSpec) {
+      const on = trigger['on'];
+      if (on == 'ini-load') {
+        const binding = 'RESOURCE_TIMING';
+        const analyticsVar = 'resourceTiming';
+        // TODO(warrengm): Consider limiting resource timings to avoid
+        // duplicates by excluding timings that were previously reported.
+        dynamicBindings[binding] =
+            serializeResourceTiming(resourceTimingSpec, this.win);
+        expansionOptions.vars[analyticsVar] = binding;
+      } else {
+        // TODO(warrengm): Instead of limiting resource timing to ini-load,
+        // analytics should have throttling or de-dupe timings that have already
+        // been reported.
+        user().warn(
+            TAG, 'resource timing is only allowed on ini-load triggers');
+      }
+    }
+    return dynamicBindings;
   }
 
   /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string>} The request that was sent out.
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    //TODO: get rid of handleEvent promise eventually.
-    return request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions);
+    const dynamicBindings =
+        this.getDynamicVariableBindings_(trigger, expansionOptions);
+    request.send(
+        this.config_['extraUrlParams'], trigger, expansionOptions,
+        dynamicBindings);
   }
 
   /**

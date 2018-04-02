@@ -13,21 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, user} from '../../../src/log';
-import {scopedQuerySelector} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {listenOnce} from '../../../src/event-helper';
+import {map} from '../../../src/utils/object';
 
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @const {number} */
-const POLL_INTERVAL_MS = 250;
+export const POLL_INTERVAL_MS = 300;
 
+/** @const @enum */
+export const TapNavigationDirection = {
+  'NEXT': 1,
+  'PREVIOUS': 2,
+};
+
+/** @const */
+const PROTECTED_ELEMENTS = map({
+  A: true,
+  BUTTON: true,
+});
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -44,6 +55,9 @@ export class AdvancementConfig {
 
     /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
+
+    /** @private @const {!Array<function(number)>} */
+    this.tapNavigationListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -73,6 +87,14 @@ export class AdvancementConfig {
    */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
+  }
+
+  /**
+   * @param {function(number)} onTapNavigationListener A function that handles when a
+   * navigation listener to be fired.
+   */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
   /**
@@ -124,6 +146,16 @@ export class AdvancementConfig {
   onPrevious() {
     this.previousListeners_.forEach(previousListener => {
       previousListener();
+    });
+  }
+
+  /**
+   * @param {number} navigationDirection Direction of navigation
+   * @protected
+   */
+  onTapNavigation(navigationDirection) {
+    this.tapNavigationListeners_.forEach(navigationListener => {
+      navigationListener(navigationDirection);
     });
   }
 
@@ -181,6 +213,13 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
+    });
+  }
+
+  /** @override */
   addAdvanceListener(advanceListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addAdvanceListener(advanceListener);
@@ -226,12 +265,16 @@ class ManualAdvancement extends AdvancementConfig {
     super();
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
+    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
   }
 
   /** @override */
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
+    if (!this.hasAutoAdvanceStr_) {
+      super.onProgressUpdate();
+    }
   }
 
   /** @override */
@@ -260,13 +303,23 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * We want clicks on certain elements to be exempted from normal page navigation
+   * @param {!Event} event
+   * @return {boolean}
+   */
+  isProtectedTarget_(event) {
+    return !!PROTECTED_ELEMENTS[event.target.tagName];
+  }
+
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
    * @private
    */
   maybePerformNavigation_(event) {
-    if (!this.isNavigationalClick_(event)) {
+    if (!this.isNavigationalClick_(event) || this.isProtectedTarget_(event)) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -287,9 +340,9 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onAdvance();
+      this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onPrevious();
+      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
 }
@@ -437,10 +490,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return this.element_;
     } else if (this.element_.hasAttribute('background-audio') &&
         (tagName === 'amp-story' || tagName === 'amp-story-page')) {
-      return scopedQuerySelector(this.element_,
-          '.i-amphtml-story-background-audio');
+      return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
-      return scopedQuerySelector(this.element_, 'audio');
+      return this.element_.querySelector('audio');
     }
 
     return null;
@@ -450,6 +502,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // Prevents race condition when checking for video interface classname.
+    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
+        .then(() => this.startWhenBuilt_());
+  }
+
+  /** @private */
+  startWhenBuilt_() {
     if (this.isVideoInterfaceVideo_()) {
       this.startVideoInterfaceElement_();
       return;
@@ -528,7 +587,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = scopedQuerySelector(rootEl, `#${autoAdvanceStr}`);
+      const element = rootEl.querySelector(`#${
+        escapeCssSelectorIdent(autoAdvanceStr)
+      }`);
 
       if (!element) {
         return null;

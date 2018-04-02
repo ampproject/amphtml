@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
-import {isArray, isFiniteNumber} from './types';
-import {dict} from './utils/object';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
+import {dev} from './log';
+import {dict} from './utils/object';
+import {isArray, isFiniteNumber} from './types';
+import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -95,10 +95,10 @@ export class IntersectionObserverApi {
     /** @private {?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.shouldObserve_ = false;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isInViewport_ = false;
 
     /** @private {?function()} */
@@ -153,7 +153,7 @@ export class IntersectionObserverApi {
 
   /**
    * Enable to the PositionObserver to listen to viewport events
-   * @param {!boolean} inViewport
+   * @param {boolean} inViewport
    */
   onViewportCallback(inViewport) {
     this.isInViewport_ = inViewport;
@@ -187,7 +187,7 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {!function(?Array<!IntersectionObserverEntry>)} callback.
+   * @param {function(?Array<!IntersectionObserverEntry>)} callback.
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {

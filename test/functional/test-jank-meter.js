@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {JankMeter} from '../../src/service/jank-meter';
 import * as lolex from 'lolex';
+import {JankMeter} from '../../src/service/jank-meter';
 
 
 describes.realWin('jank-meter', {}, env => {
@@ -26,7 +26,8 @@ describes.realWin('jank-meter', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
 
     meter = new JankMeter(win);
     meter.perf_ = {
@@ -40,8 +41,7 @@ describes.realWin('jank-meter', {}, env => {
     clock.uninstall();
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should use first schedule time when scheduled ' +
+  it('should use first schedule time when scheduled ' +
       'multiple times ', () => {
     meter.onScheduled();
     clock.tick(5);
@@ -52,8 +52,7 @@ describes.realWin('jank-meter', {}, env => {
     expect(meter.badFrameCnt_).to.equal(1);
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should count bad frames correctly', () => {
+  it('should count bad frames correctly', () => {
     runTask(16);
     expect(meter.totalFrameCnt_).to.equal(1);
     expect(meter.badFrameCnt_).to.equal(0);

@@ -42,7 +42,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       return {
         repeat: model.repeat_,
       };
-    };
+    }
 
     it('should parse visiblePercentageMin', () => {
       expect(config({}).visiblePercentageMin).to.equal(0);
@@ -359,6 +359,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
     it('conditions not met, schedule for total time', () => {
       vh.totalVisibleTime_ = 5;
+      vh.continuousTime_ = 2;
       visibilityValueForTesting = 0.1;
       vh.update_(visibilityValueForTesting);
       expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
@@ -368,6 +369,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
+      clock.tick(3);
+      expect(updateStub).to.be.calledTwice;
       expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
@@ -381,6 +384,19 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
+    });
+
+    it('conditions not met, schedule timeout again', () => {
+      vh.spec_.totalTimeMin = 50;
+      vh.totalVisibleTime_ = 4;
+      vh.continuousTime_ = 4;
+      visibilityValueForTesting = 0.1;
+      vh.update_(visibilityValueForTesting);
+      clock.tick(6);
+      expect(updateStub).to.be.calledOnce;
+      clock.tick(40);
+      expect(updateStub).to.be.calledTwice;
       expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
