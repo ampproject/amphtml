@@ -117,7 +117,9 @@ describe('parseUrl', () => {
     const a2 = parseUrl(url);
     expect(a1).to.equal(a2);
   });
-  it('caches up to 100 results', () => {
+
+  // TODO(#14349): unskip flaky test
+  it.skip('caches up to 100 results', () => {
     const url = 'https://foo.com:123/abc?123#foo';
     const a1 = parseUrl(url);
 
