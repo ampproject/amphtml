@@ -26,6 +26,7 @@ import {
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
@@ -44,6 +45,7 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {Layout} from '../../../../src/layout';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -475,6 +477,37 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/&tfcd=1&/);
+      });
+    });
+
+    describe('data-force-safeframe', () => {
+      const regexp = /(\?|&)fsf=1(&|$)/;
+      it('handles default', () => expect(
+          new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+          .to.eventually.not.match(regexp));
+
+      it('case insensitive attribute name', () => {
+        element.setAttribute('data-FORCE-SafeFraMe', '1');
+        return expect(
+            new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+            .to.eventually.match(regexp);
+      });
+
+      ['tRuE', 'true', 'TRUE', '1'].forEach(val => {
+        it(`valid attribute: ${val}`, () => {
+          element.setAttribute('data-force-safeframe', val);
+          return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+              .to.eventually.match(regexp);
+        });
+      });
+
+      ['aTrUe', 'trueB', '0', '01', '10', 'false', '', ' true', 'true ',
+        ' true '].forEach(val => {
+        it(`invalid attribute: ${val}`, () => {
+          element.setAttribute('data-force-safeframe', val);
+          return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+              .to.eventually.not.match(regexp);
+        });
       });
     });
 
@@ -1188,6 +1221,31 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       };
       impl.win = env.win;
       expect(impl.postTroubleshootMessage()).to.be.null;
+    });
+  });
+
+  describe('#getNonAmpCreativeRenderingMethod', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(element);
+    });
+
+    it('should return safeframe if fluid', () => {
+      impl.isLayoutSupported(Layout.FLUID);
+      expect(impl.getNonAmpCreativeRenderingMethod()).to
+          .equal(XORIGIN_MODE.SAFEFRAME);
+    });
+
+    it('should return safeframe if force safeframe', () => {
+      element.setAttribute('data-force-safeframe', '1');
+      expect(new AmpAdNetworkDoubleclickImpl(element)
+          .getNonAmpCreativeRenderingMethod()).to.equal(XORIGIN_MODE.SAFEFRAME);
     });
   });
 });
