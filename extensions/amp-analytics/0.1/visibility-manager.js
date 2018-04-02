@@ -710,7 +710,8 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
    * important for the embedded document to know its own size, rather than
    * the size of the host rectangle which it may or may not entirely fill.
    * embed.host is used to calculate the root visibility, however, since
-   * that will reflect whether the embedded document is embedded at all.
+   * the visibility of the host element directly determines the embedded
+   * document's visibility.
    * @override
    */
   getRootLayoutBox() {
