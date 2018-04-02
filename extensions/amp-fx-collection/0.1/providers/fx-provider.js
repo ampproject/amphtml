@@ -17,27 +17,27 @@
 import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
+import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
-import {dev, user} from '../../../../src/log';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyle, setStyles} from '../../../../src/style';
+import {setStyle} from '../../../../src/style';
 
-const FACTOR_ATTR = 'data-parallax-factor';
+const propertyAnimated = {
+  'parallax': 'transform',
+};
 
 /**
- * Provides a parallax visual effect given a parallax factor.
- *
- * @implements {../amp-fx-collection.FxProviderInterface}
+ * Class that implements the various preset animation providers.
  */
-export class ParallaxProvider {
+export class FxProvider {
 
   /**
    * @param  {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, fxType) {
 
     /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -52,31 +52,35 @@ export class ParallaxProvider {
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
+
+    /** @private @string */
+    this.fxType_ = fxType;
   }
 
   /**
-   * Installs parallax effect on the element
+   * Installs effect on the element
    * @param {!Element} element
    */
   installOn(element) {
-    setStyle(element, 'will-change', 'transform');
-    const parallaxElement = new ParallaxElement(
-        element, this.positionObserver_, this.viewport_, this.resources_);
-    parallaxElement.initialize();
+    setStyle(element, 'will-change', propertyAnimated[this.fxType_]);
+    const parallaxElement = new FxElement(
+        element, this.positionObserver_, this.viewport_, this.resources_,
+        this.fxType_);
+    parallaxElement.initialize_();
   }
 }
 
 /**
  * Encapsulates and tracks an element's linear parallax effect.
  */
-class ParallaxElement {
+export class FxElement {
   /**
-   * @param {!Element} element The element to give a parallax effect.
+   * @param {!Element} element The element to give a preset effect.
    * @param {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} positionObserver
    * @param {!../../../../src/service/viewport/viewport-impl.Viewport} viewport
    * @param {!../../../../src/service/resources-impl.Resources} resources
    */
-  constructor(element, positionObserver, viewport, resources) {
+  constructor(element, positionObserver, viewport, resources, fxType) {
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = positionObserver;
@@ -87,36 +91,33 @@ class ParallaxElement {
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
 
-    /** @const {string} */
-    const factorValue = user().assert(element.getAttribute(FACTOR_ATTR),
-        `${FACTOR_ATTR}=<number> attribute must be provided for: %s`, element);
-
-    /** @private @const {number} */
-    this.factor_ = parseFloat(factorValue);
-
     /** @private {?number} */
     this.adjustedViewportHeight_ = null;
-
-    user().assert(this.factor_ > 0,
-        `${FACTOR_ATTR} must be a number and greater than 0 for: %s`, element);
 
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private {number} */
-    this.translateYOffset_ = 0;
-
     /** @private {boolean} */
     this.mutateScheduled_ = false;
 
-    this.boundTranslateY_ = this.translateY_.bind(this);
+    /** @private {number} */
+    this.offset_ = 0;
+
+    /** @private @string */
+    this.fxType_ = fxType;
+
+    Presets[this.fxType_].userAsserts(element);
+
+    /** @private {number} */
+    this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
   }
 
   /**
    * Handles initializations such as getting initial positions and listening to
    * events.
+   * @private
    */
-  initialize() {
+  initialize_() {
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
       this.adjustedViewportHeight_ = adjustedViewportHeight;
 
@@ -126,51 +127,11 @@ class ParallaxElement {
   }
 
   /**
-   * Apply the parallax effect to the offset given how much the page
-   * has moved since the last frame.
-   * @private
-   */
-  update_(entry) {
-    dev().assert(this.adjustedViewportHeight_);
-    // outside viewport
-    if (!entry.positionRect ||
-        entry.positionRect.top > this.adjustedViewportHeight_) {
-      return;
-    }
-
-    // User provided factor is 1-based for easier understanding.
-    // Also negating number since we are using tranformY so negative = upward,
-    // positive = downward.
-    const adjustedFactor = -(this.factor_ - 1);
-    const top = entry.positionRect.top;
-    // Offset is how much extra to move the element which is position within
-    // viewport times adjusted factor.
-    const offset = (this.adjustedViewportHeight_ - top) * adjustedFactor;
-    this.translateYOffset_ = offset;
-
-    if (!this.mutateScheduled_) {
-      this.mutateScheduled_ = true;
-      this.resources_.mutateElement(this.element_, this.boundTranslateY_);
-    }
-  }
-
-  /**
-   * This must be called inside a mutate phase.
-   */
-  translateY_() {
-    this.mutateScheduled_ = false;
-    // Translate the element offset pixels.
-    setStyles(this.element_,
-        {transform: `translateY(${this.translateYOffset_.toFixed(0)}px)`}
-    );
-  }
-
-  /**
    * @private
    */
   observePositionChanges_() {
     this.positionObserver_.observe(this.element_, PositionObserverFidelity.HIGH,
-        this.update_.bind(this)
+        Presets[this.fxType_].update.bind(this)
     );
 
     this.viewport_.onResize(() => {
@@ -181,11 +142,11 @@ class ParallaxElement {
   }
 
   /**
-   * Parallax effect behaves differently for elements that are initially above
+   * Preset effect behaves differently for elements that are initially above
    * the fold.
    *
-   * Normally, parallax factor is spread across a whole viewport height however
-   * for elements above the fold, we should only apply the parallax after
+   * Normally, preset factor is spread across a whole viewport height however
+   * for elements above the fold, we should only apply the animation after
    * between the element and top of the page.
    * @returns {!Promise<number>}
    * @private
@@ -202,5 +163,54 @@ class ParallaxElement {
 
       return aboveTheFold ? offsetTop : viewportHeight;
     });
+  }
+
+  /**
+   * @returns {number}
+   */
+  getFactor() {
+    return this.factor_;
+  }
+
+  /**
+   * @returns {Element}
+   */
+  getElement() {
+    return this.element_;
+  }
+
+  /**
+   * @returns {!../../../../src/service/resources-impl.Resources}
+   */
+  getResources() {
+    return this.resources_;
+  }
+
+  /**
+   * @returns {number}
+   */
+  getOffset() {
+    return this.offset_;
+  }
+
+  /**
+   * @param {number} offset
+   */
+  setOffset(offset) {
+    this.offset_ = offset;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isMutateScheduled() {
+    return this.mutateScheduled_;
+  }
+
+  /**
+   * @param {boolean} mutateScheduled
+   */
+  setIsMutateScheduled(mutateScheduled) {
+    this.mutateScheduled_ = mutateScheduled;
   }
 }
