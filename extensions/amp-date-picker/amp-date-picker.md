@@ -47,7 +47,7 @@ limitations under the License.
 
 ## Behavior
 
-You can use the `amp-date-picker` to render a calendar on a page that a user can select dates from. 
+You can use the `amp-date-picker` to render a calendar on a page that a user can select dates from.
 
 *Example: Basic calendar*
 
@@ -55,7 +55,7 @@ In this example, we display a fixed-height static calendar, where a user can sel
 
 
 ```html
-<amp-date-picker 
+<amp-date-picker
   layout="fixed-height"
   height="360">
 </amp-date-picker>
@@ -82,7 +82,7 @@ In this example, the calendar displays as an overlay for the specific form field
 
 ## Display modes
 
-The `amp-date-picker` provides two modes to render the date picker: static (default) or overlay. 
+The `amp-date-picker` provides two modes to render the date picker: static (default) or overlay.
 
 ### Static mode
 
@@ -166,13 +166,13 @@ This example demonstrates using a overlay date picker in a form where the user c
 
 The `amp-date-picker` provides two types of dates to select:
 
-* `single`: Select a single date within the date picker.  
+* `single`: Select a single date within the date picker.
 * `range`: Select a date range within the date picker.
 
 ### `type="single"`
 
 By specifying `type="single"`, the date picker attaches to a single input,
-and the user can select a single date. This is the default selection type. 
+and the user can select a single date. This is the default selection type.
 
 ```html
 <amp-date-picker
@@ -241,9 +241,9 @@ a name of `start-input` or `${id}-start-input` using the date picker's id. If ei
 with an existing element in the form, an error is emitted.
 
 ```html
-<amp-date-picker 
-    type="range" 
-    start-input-selector="#a2" 
+<amp-date-picker
+    type="range"
+    start-input-selector="#a2"
     end-input-selector="#b2"
     layout="fixed-height" height="360">
 </amp-date-picker>
@@ -257,9 +257,9 @@ a name of `end-input` or `${id}-end-date` using the date picker's id. If either 
 with an existing element in the form, an error is emitted.
 
 ```html
-<amp-date-picker 
-    type="range" 
-    start-input-selector="#a2" 
+<amp-date-picker
+    type="range"
+    start-input-selector="#a2"
     end-input-selector="#b2"
     layout="fixed-height" height="360">
 </amp-date-picker>
@@ -347,18 +347,18 @@ templates specified in the markup.
   "highlighted": ["2018-02-15"],
   "templates": [
     {
-      "selector": "#my-template-id",
+      "id": "my-template-id",
       "dates": ["2018-01-01"]
     },
     {
-      "selector": "#my-second-template-id",
+      "id": "my-second-template-id",
       "dates": [
         "2018-01-01",
         "FREQ=WEEKLY;DTSTART=20180101T000000Z;COUNT=52;WKST=SU;BYDAY=TU"
       ]
     },
     {
-      "selector": "#my-default-template-id"
+      "id": "my-default-template-id"
     }
   ]
 }
