@@ -15,7 +15,6 @@
  */
 
 import {StoryAnimationPresetDef} from './animation-types';
-import {px} from '../../../src/style';
 import {
   calculateTargetScalingFactor,
   enlargeKeyFrames,
@@ -24,6 +23,7 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
+import {px} from '../../../src/style';
 
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */

@@ -27,12 +27,6 @@ import {
 } from '../../../src/style';
 
 /**
- * Factor used to increase size to images that are too small to outgrow the viewport.
- * @const {number}
- */
-const scalingFactor = 1.25;
-
-/**
  * Translates the element on the 2d plane according to the given points.
  * @param {number} startX Starting point in the abscissa.
  * @param {number} startY Starting point in the ordinate.
@@ -99,10 +93,11 @@ export function pageIsLargerThanTarget(dimensions) {
  * @return {number}
  */
 export function calculateTargetScalingFactor(dimensions) {
+  const scalingFactor = 1.25;
   const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
-      dimensions.pageWidth / dimensions.targetWidth : 1;
+    dimensions.pageWidth / dimensions.targetWidth : 1;
   const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
-      dimensions.pageHeight / dimensions.targetHeight : 1;
+    dimensions.pageHeight / dimensions.targetHeight : 1;
   return Math.max(widthFactor, heightFactor) * scalingFactor;
 }
 
