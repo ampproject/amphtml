@@ -27,7 +27,6 @@ export const Presets = {
       user().assert(parseFloat(factorValue) > 0,
           'data-parallax-factor must be a number and greater than 0 for: %s',
           element);
-
     },
     update(entry) {
       const fxElement = this;
