@@ -19,7 +19,10 @@
  * presets.
  */
 
-import {KeyframesDef} from './animation-types';
+import {
+  KeyframesDef,
+  StoryAnimationDimsDef,
+} from './animation-types';
 import {
   rotate,
   scale,
