@@ -19,6 +19,8 @@ import {Services} from '../../src/services';
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from
+  '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -55,6 +57,7 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
+    windowApi.Math = window.Math;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
@@ -75,6 +78,7 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
+      querySelector() { return parseUrl('http://www.example.com/'); },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
@@ -89,6 +93,7 @@ describe('Viewer', () => {
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);
+    installDocumentInfoServiceForDoc(windowApi.document);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     expectedErrorStub = sandbox.stub(dev(), 'expectedError');
@@ -143,13 +148,36 @@ describe('Viewer', () => {
     expect(viewer.hasCapability('foo')).to.be.false;
   });
 
-  it('should NOT clear fragment in embedded mode', () => {
+  it('should not clear fragment in embedded mode', () => {
     windowApi.parent = {};
     windowApi.location.href = 'http://www.example.com#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState).to.not.be.called;
     expect(viewer.getParam('test')).to.equal('1');
+  });
+
+  it('should set ampshare fragment within custom tab', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/';
+    windowApi.location.hash = '#origin=g.com';
+    windowApi.location.search = '?amp_agsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+  });
+
+  it('should merge fragments within custom tab', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com/#test=1';
+    windowApi.location.hash = '#origin=g.com&test=1';
+    windowApi.location.search = '?amp_agsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.isCctEmbedded()).to.be.true;
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
   it('should clear fragment when click param is present', () => {
@@ -161,6 +189,19 @@ describe('Viewer', () => {
     const replace = windowApi.history.replaceState.lastCall;
     expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
     expect(viewer.getParam('click')).to.equal('abc');
+  });
+
+  it('should restore fragment within custom tab when click param is present', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com#click=abc';
+    windowApi.location.hash = '#click=abc';
+    windowApi.location.search = '?amp_agsa=1';
+    const viewer = new Viewer(ampdoc);
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        'http://www.example.com');
+    expect(viewer.getParam('click')).to.equal('abc');
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
   it('should configure visibilityState visible by default', () => {
@@ -1028,6 +1069,34 @@ describe('Viewer', () => {
           expect(res).to.be.true;
         });
       });
+    });
+
+    function testRootDomain(origin, result) {
+      it('getting root domain for ' + origin, () => {
+        const viewer = new Viewer(ampdoc);
+        expect(viewer.getRootDomain_(origin)).to.equal(result);
+      });
+    }
+
+    describe('should get root domain from url', () => {
+      testRootDomain('http://google.com', 'google.com');
+      testRootDomain('https://google.com', 'google.com');
+      testRootDomain('https://www.google.com', 'google.com');
+      testRootDomain('https://www.google.net', 'google.net');
+      testRootDomain('https://www.google.co.uk', 'google.co.uk');
+      testRootDomain('https://www.www.google.com', 'google.com');
+      testRootDomain('https://www.www.www.google.com', 'google.com');
+      testRootDomain('https://amp.google.com', 'google.com');
+      testRootDomain('https://www.amp.google.com', 'google.com');
+      testRootDomain('https://amp.www.google.com', 'google.com');
+      testRootDomain('https://mobile.google.com', 'google.com');
+      testRootDomain('https://amp.mobile.google.com', 'google.com');
+      testRootDomain('https://amp.mobile.google.co.uk', 'google.co.uk');
+      testRootDomain('https://www1.www2.www3.google.com', 'google.com');
+      // TODO: eventually, we should obtain the real root domain. Since we're
+      // using pattern matching, we can't reduce these further.
+      testRootDomain('https://www.xyz.google.com', 'xyz.google.com');
+      testRootDomain('https://xyz.www.xyz.google.com', 'xyz.www.xyz.google.com');
     });
 
     function test(origin, toBeTrusted, opt_inWebView) {

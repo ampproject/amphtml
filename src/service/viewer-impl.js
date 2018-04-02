@@ -21,7 +21,9 @@ import {dev, duplicateErrorIfNecessary} from '../log';
 import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
+  getFragment,
   getSourceOrigin,
+  getSourceUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -40,6 +42,13 @@ const SENTINEL_ = '__AMP__';
  * @private {number}
  */
 const VIEWER_ORIGIN_TIMEOUT_ = 1000;
+
+/**
+ * Prefixes to remove when trimming a hostname for comparison.
+ * @const
+ * @private {!RegExp}
+ */
+const TRIM_DOMAIN_PATTERN_ = /^((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -268,7 +277,7 @@ export class Viewer {
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
      */
-    const queryParams = parseQueryString(parseUrl(this.win.location.href).search);
+    const queryParams = parseQueryString(this.win.location.search);
     this.isCctEmbedded_ = !this.isIframed_ &&
         queryParams['amp_agsa'] == '1';
 
@@ -427,8 +436,7 @@ export class Viewer {
     this.onVisibilityChange_();
   
     // This fragment may get cleared by impression tracking. If so, it will be
-    // reset afterward.
-    // TODO: how? Use original hash? Is hash currently used to flag dev mode?
+    // restored afterward.
     this.maybeUpdateFragmentForCct();
   }
 
@@ -533,16 +541,33 @@ export class Viewer {
     if (!this.win.history.replaceState) {
       return;
     }
-    // Ensure that canonical URL origin matches document URL.
-    const url = parseUrl(this.win.location.href);
-    const canonicalUrl = parseUrl(Services.documentInfoForDoc(this.ampdoc).canonicalUrl);
-    // TODO: This doesn't ignore subdomains. Is there support code for obtaining
-    // the root domain (so that amp.example.com and www.example.com are
-    // considered acceptably related)?
-    if (getSourceOrigin(url) == getSourceOrigin(canonicalUrl)) {
-      const fragment = '#ampshare=' + encodeURIComponent(canonicalUrl.href);
-      this.win.history.replaceState({}, '', fragment);
+    const sourceUrl = getSourceUrl(this.win.location.href);
+    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
+    const canonicalSourceUrl = getSourceUrl(canonicalUrl);
+    // Ensure that both origins are related.
+    if (this.getRootDomain_(sourceUrl) == this.getRootDomain_(canonicalSourceUrl)) {
+      const oldFragment = getFragment(this.win.location.href);
+      const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
+      // Attempt to merge the fragments, if an old fragment was present.
+      this.win.history.replaceState({}, '',
+          oldFragment ? `${oldFragment}&${newFragment}` : `#${newFragment}`);
     }
+  }
+
+  /**
+   * Removes extraneous subdomains from a URL for comparison.
+   * @param {string} url
+   * @return {string} The root domain.
+   * @private
+   */
+  getRootDomain_(url) {
+    let hostname = parseUrl(url).hostname;
+    // TODO: this should compute the root domain, and not just remove common
+    // subdomains.
+    if (hostname.split('.').length > 2) {
+      hostname = hostname.replace(TRIM_DOMAIN_PATTERN_, '');
+    }
+    return hostname;
   }
 
   /**
