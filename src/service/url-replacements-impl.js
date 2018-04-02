@@ -541,7 +541,7 @@ export class GlobalVariableSource extends VariableSource {
           root.getElementById(/** @type {string} */ (id)),
           `Could not find an element with id="${id}" for VIDEO_STATE`);
       return Services.videoManagerForDoc(this.ampdoc)
-          .getVideoAnalyticsDetails(video)
+          .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
 
