@@ -83,8 +83,8 @@ export function whooshIn(startX, startY, endX, endY) {
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
  */
 export function pageIsLargerThanTarget(dimensions) {
-  return dimensions.pageWidth > dimensions.targetWidth ||
-         dimensions.pageHeight > dimensions.targetHeight;
+  return dimensions.pageWidth >= dimensions.targetWidth ||
+         dimensions.pageHeight >= dimensions.targetHeight;
 }
 
 /**
