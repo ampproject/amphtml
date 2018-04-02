@@ -33,7 +33,7 @@ import {Sources} from './sources';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {isConnectedNode} from '../../../src/dom';
+import {closest, isConnectedNode} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
@@ -574,34 +574,28 @@ export class MediaPool {
         });
   }
 
-  /**
-   * @param {!Element} element
-   * @param {boolean} isAllocated
-   */
-  triggerAllocationEvent_(element, isAllocated) {
-    const win = this.win_;
+  /** @private */
+  triggerAllocationEvent_(/* !Element */ element, /* boolean */ isAllocated) {
     const {parentNode} = element;
-    const type = isAllocated ?
-        MediaPoolEvents.ALLOCATED :
-        MediaPoolEvents.DEALLOCATED;
-
-    const detailOptional = !isAllocated ?
-        this.getDeallocationDetail_(element) :
-        null;
-
-    const event = createCustomEvent(win, type, detailOptional, {bubbles: true});
-
+    const event = createAllocationEvent_(element, isAllocated);
     dev().assertElement(parentNode).dispatchEvent(event);
   }
 
-  /**
-   * Gets a snapshot of the video state on deallocation time. This is so that
-   * the media pool consumer can know details of the video without access to the
-   * element itself.
-   * @return {!MediaInfoDef}
-   */
-  getDeallocationDetail_(element) {
-    const {currentTime, duration, paused} = element;
+  /** @private @return {!Event} */
+  createAllocationEvent_(/* !Element */ element, /* boolean */ isAllocated) {
+    const win = this.win_;
+    if (isAllocated) {
+      const type = MediaPoolEvents.ALLOCATED;
+      return createCustomEvent(win, type, /* detail */ null, {bubbles: true});
+    }
+    const type = MediaPoolEvents.DEALLOCATED;
+    const detail = this.getDeallocationDetail_(element);
+    return createCustomEvent(win, type, detail, {bubbles: true});
+  }
+
+  /** @private @return {!MediaInfoDef} */
+  getDeallocationDetail_(/* !Element */ element) {
+    const {currentTime, duration} = element;
     return {currentTime, duration, paused: true};
   }
 
@@ -830,15 +824,57 @@ export class MediaPool {
         });
   }
 
-  /**
-   * Pauses the specified media element in the DOM.
-   * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
-   * @param {boolean=} rewindToBeginning Whether to rewind the currentTime
-   *     of media items to the beginning.
-   * @return {!Promise} A promise that is resolved when the specified media
-   *     element has been successfully paused.
-   */
-  pause(domMediaEl, rewindToBeginning = false) {
+  // /**
+  //  * @param {!HTMLMediaElement} domMediaEl
+  //  * @param {boolean} muted
+  //  * @return {!Promise} Resolved when muted/unmuted successfully
+  //  */
+  // toggleMuted(domMediaEl, muted) {
+  //   const mediaType = this.getMediaType_(domMediaEl);
+  //   const poolMediaEl =
+  //       this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+  //   if (!poolMediaEl) {
+  //     return Promise.resolve();
+  //   }
+
+  //   return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
+  //       .then(() => {
+  //         if (rewindToBeginning) {
+  //           this.enqueueMediaElementTask_(
+  //               /** @type {!HTMLMediaElement} */ (poolMediaEl),
+  //               new MuteTask(muted));
+  //         }
+  //       });
+  // }
+
+
+  // /**
+  //  * @param {!HTMLMediaElement} domMediaEl
+  //  * @param {boolean} controls
+  //  * @return {!Promise} Resolved when controls toggled successfully
+  //  */
+  // toggleControls(domMediaEl, controls) {
+  //   const mediaType = this.getMediaType_(domMediaEl);
+  //   const poolMediaEl =
+  //       this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+  //   if (!poolMediaEl) {
+  //     return Promise.resolve();
+  //   }
+
+  //   return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
+  //       .then(() => {
+  //         if (rewindToBeginning) {
+  //           this.enqueueMediaElementTask_(
+  //               /** @type {!HTMLMediaElement} */ (poolMediaEl),
+  //               new ToggleControlsTask(muted, controls));
+  //         }
+  //       });
+  // }
+
+  withAllocated(domMediaEl, tasks) {
+  toggleControls(domMediaEl, controls) {
     const mediaType = this.getMediaType_(domMediaEl);
     const poolMediaEl =
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
@@ -847,14 +883,12 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
-        .then(() => {
-          if (rewindToBeginning) {
-            this.enqueueMediaElementTask_(
-                /** @type {!HTMLMediaElement} */ (poolMediaEl),
-                new RewindTask());
-          }
-        });
+    return this.enqueueMediaElementTask_(poolMediaEl, tasks.shift())
+        .then(result =>
+          tasks.length < 1 ?
+            this.enqueueMediaElementTask_(poolMediaEl, tasks.shift()) :
+            null
+        })
   }
 
 
@@ -1048,24 +1082,28 @@ export class MediaPool {
 }
 
 
+/** Provides Mediapools. */
 export class MediaPoolService {
-  constructor(ampdoc) {
+  constructor(/** !../../src/service/ampdoc-impl.AmpDoc */ ampdoc) {
+    /** @private @const {{../../src/service/ampdoc-impl.AmpDoc}} */
     this.ampdoc_ = ampdoc;
   }
 
   /**
-   * Gets the pool associated with an element. Traverses up the DOM tree to
-   * find the pool, otherwise fails.
-   * @param {element} element Element that is pool-bound.
+   * Traverses up the DOM tree to find a media pool.
+   * @return {?MediaPool}
+   */
+  poolForOrNull(/* !Element */ el) {
+    const owner = closest(el, el => !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
+    return owner && owner[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+  }
+
+  /**
+   * Traverses up the DOM tree to find a media pool, otherwise fails.
    * @return {!MediaPool}
    */
-  poolFor(element) {
-    const owner = closest(element, el =>
-        !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
-
-    dev().assert(owner, 'Element is not bound by a media-pool');
-
-    return owner[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+  poolFor(/* !Element */ el) {
+    return dev().assert(this.poolForOrNull(el));
   }
 }
 
