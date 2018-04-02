@@ -233,6 +233,15 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => getFirstInstanceValue_(instances,
       instance => instance.buildIdentityParams_()),
+  instances => {
+    let safeframeForced = false;
+    const forceSafeframes = [];
+    instances.forEach(instance => {
+      safeframeForced = safeframeForced || instance.forceSafeframe_;
+      forceSafeframes.push(Number(instance.forceSafeframe_));
+    });
+    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
 ];
 
 
@@ -338,7 +347,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
 
-    /** @private {bool} whether safeframe forced via tag */
+    /** @private {boolean} whether safeframe forced via tag */
     this.forceSafeframe_ = false;
     if ('forceSafeframe' in this.element.dataset) {
       if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
@@ -1330,6 +1339,7 @@ export function constructSRARequest_(win, doc, instances) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Object<string, *>}
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {

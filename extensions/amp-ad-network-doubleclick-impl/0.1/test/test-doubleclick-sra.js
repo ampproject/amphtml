@@ -121,65 +121,74 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
   });
 
   describe('#constructSRABlockParameters', () => {
-    it('should combine for SRA request', () => {
-      const targeting1 = {
-        cookieOptOut: 1,
-        categoryExclusions: 'sports',
-        targeting: {foo: 'bar', names: ['x', 'y', 'z']},
-      };
-      targeting1[TFCD] = 'some_tfcd';
-      const config1 = {
-        type: 'doubleclick',
-        height: 320,
-        width: 50,
-        'data-slot': '/1234/abc/def',
-        'json': JSON.stringify(targeting1),
-      };
-      const element1 =
-        createElementWithAttributes(doc, 'amp-ad', config1);
-      const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
-      element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
-      sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320').returns('13579');
-      impl1.populateAdUrlState();
-      impl1.identityToken =
-        /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
-          token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
-        });
-      const targeting2 = {
-        cookieOptOut: 1,
-        categoryExclusions: 'food',
-        targeting: {hello: 'world'},
-      };
-      targeting2[TFCD] = 'some_other_tfcd';
-      const config2 = {
-        type: 'doubleclick',
-        height: 300,
-        width: 250,
-        'data-slot': '/1234/def/xyz',
-        'json': JSON.stringify(targeting2),
-      };
-      const element2 =
-        createElementWithAttributes(doc, 'amp-ad', config2);
-      const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-      sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300').returns('2468');
-      element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
-      impl2.populateAdUrlState();
-      expect(constructSRABlockParameters([impl1, impl2])).to.jsonEqual({
-        'iu_parts': '1234,abc,def,xyz',
-        'enc_prev_ius': '0/1/2,0/2/3',
-        adks: '13579,2468',
-        'prev_iu_szs': '50x320,250x300',
-        'prev_scp':
-          'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
-        co: '1',
-        adtest: 'on',
-        tfcd: 'some_tfcd',
-        eid: MANUAL_EXPERIMENT_ID,
-        output: 'ldjh',
-        impl: 'fifs',
-        adsid: 'abcdef',
-        jar: 'some_jar',
-        pucrd: 'some_pucrd',
+    [true, false].forEach(force => {
+      it(`should combine for SRA request, forceSafeframe ${force}`, () => {
+        const targeting1 = {
+          cookieOptOut: 1,
+          categoryExclusions: 'sports',
+          targeting: {foo: 'bar', names: ['x', 'y', 'z']},
+        };
+        targeting1[TFCD] = 'some_tfcd';
+        const config1 = {
+          type: 'doubleclick',
+          height: 320,
+          width: 50,
+          'data-slot': '/1234/abc/def',
+          'json': JSON.stringify(targeting1),
+          'data-force-safeframe': force ? '1' : '0',
+        };
+        const element1 =
+          createElementWithAttributes(doc, 'amp-ad', config1);
+        const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
+        element1.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320')
+            .returns('13579');
+        impl1.populateAdUrlState();
+        impl1.identityToken =
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+            token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+          });
+        const targeting2 = {
+          cookieOptOut: 1,
+          categoryExclusions: 'food',
+          targeting: {hello: 'world'},
+        };
+        targeting2[TFCD] = 'some_other_tfcd';
+        const config2 = {
+          type: 'doubleclick',
+          height: 300,
+          width: 250,
+          'data-slot': '/1234/def/xyz',
+          'json': JSON.stringify(targeting2),
+        };
+        const element2 =
+          createElementWithAttributes(doc, 'amp-ad', config2);
+        const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
+        sandbox.stub(impl2, 'generateAdKey_').withArgs('250x300')
+            .returns('2468');
+        element2.setAttribute(EXPERIMENT_ATTRIBUTE, MANUAL_EXPERIMENT_ID);
+        impl2.populateAdUrlState();
+        const exp = {
+          'iu_parts': '1234,abc,def,xyz',
+          'enc_prev_ius': '0/1/2,0/2/3',
+          adks: '13579,2468',
+          'prev_iu_szs': '50x320,250x300',
+          'prev_scp':
+            'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
+          co: '1',
+          adtest: 'on',
+          tfcd: 'some_tfcd',
+          eid: MANUAL_EXPERIMENT_ID,
+          output: 'ldjh',
+          impl: 'fifs',
+          adsid: 'abcdef',
+          jar: 'some_jar',
+          pucrd: 'some_pucrd',
+        };
+        if (force) {
+          exp['fsfs'] = '1,0';
+        }
+        expect(constructSRABlockParameters([impl1, impl2])).to.jsonEqual(exp);
       });
     });
   });
