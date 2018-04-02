@@ -464,7 +464,11 @@ describe('reportErrorToServer', () => {
     const e = user().createError('123');
     const data = getErrorReportData(undefined, undefined, undefined, undefined,
         e, true);
-    expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
+    if (data.exps.indexOf('inabox-rov=1') == -1 {
+      expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
+    } else {
+      expect(data.exps).to.equal('inabox-rov=1,test-exp=1,disabled-exp=0');
+    }
   });
 
   describe('detectNonAmpJs', () => {
