@@ -63,11 +63,6 @@ export let ValidatorOutput;
     }} */
 export let CreativeMetaDataDef;
 
-/** @typedef {{
-      creativeMetaData: CreativeMetaDataDef,
-    }} */
-export let CreativeData;
-
 /**
  * @abstract
  */
@@ -89,7 +84,7 @@ export class Renderer {
   /**
    * @param {!Object} unusedContext
    * @param {!Element} unusedContainerElement
-   * @param {!CreativeData} unusedCreativeData
+   * @param {!Object} unusedCreativeData
    * @return {!Promise}
    * @abstract
    */
