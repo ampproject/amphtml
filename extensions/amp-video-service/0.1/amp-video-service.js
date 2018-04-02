@@ -32,8 +32,7 @@ const TAG = 'amp-video-service';
  * Manages all AMP video players that implement the common Video API
  * {@see ../src/video-interface.VideoInterface}.
  *
- * Provides a unified UX and analytics triggers for all videos within a
- * document regardless of implementation.
+* Provides unified behavior for all videos regardless of implementation.
  *
  *
  * __          __              _
@@ -52,15 +51,47 @@ const TAG = 'amp-video-service';
  * If you need to add methods to this class that are public to components,
  * it's most likely that you'll want to implement them here and set wrappers for
  * them in the runtime-level service class.
- *
- * @visibleForTesting
  */
 export class VideoService {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc */
-  constructor(unusedAmpdoc) {
-    dev().error(TAG, 'Unimplemented');
+
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+  }
+
+  /** @param {!../../../src/video-interface.VideoInterface} unusedVideo */
+  register(unusedVideo) {
+    warnUnimplemented('Video registration');
+  }
+
+  /**
+   * @param {!AmpElement} unusedVideo
+   * @return {!Promise}
+   */
+  getAnalyticsDetails(unusedVideo) {
+    warnUnimplemented('Video analytics');
+    return Promise.resolve();
+  }
+
+  /**
+   * @param {!AmpElement} unusedVideo
+   * @param {!../../../src/observable.Observable<boolean>} unusedObservable
+   */
+  delegateAutoplay(unusedVideo, unusedObservable) {
+    warnUnimplemented('Autoplay delegation');
   }
 }
+
+
+/**
+ * @param {string} feature
+ * @private
+ */
+function warnUnimplemented(feature) {
+  dev().warn(TAG, `${feature} unimplemented.`);
+}
+
 
 AMP.extension(TAG, 0.1, function(AMP) {
   AMP.registerServiceForDoc('video-service', VideoService);

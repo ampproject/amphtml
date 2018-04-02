@@ -37,6 +37,7 @@ import {
 } from './position-observer/position-observer-worker';
 import {RelativePositions, layoutRectLtwh} from '../layout-rect';
 import {Services} from '../services';
+import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils} from '../utils/video';
 import {
@@ -59,6 +60,35 @@ import {setStyles} from '../style';
 import {startsWith} from '../string.js';
 
 const TAG = 'video-manager';
+
+
+/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
+let VideoAnalyticsDef; // alias for line length
+
+
+/** @interface */
+export class VideoService {
+
+  /** @param {!../video-interface.VideoInterface} unusedVideo */
+  register(unusedVideo) {}
+
+  /**
+   * Gets the current analytics details for the given video.
+   * Fails silently if the video is not registered.
+   * @param {!AmpElement} unusedVideo
+   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
+   */
+  getAnalyticsDetails(unusedVideo) {}
+
+  /**
+   * Delegates autoplay.
+   * @param {!AmpElement} unusedVideo
+   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
+   *    If provided, video will be played or paused when this observable fires.
+   */
+  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
+}
+
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -133,6 +163,8 @@ export const DockStates = {
  *
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
+ *
+ * @implements {VideoService}
  */
 export class VideoManager {
 
@@ -213,12 +245,8 @@ export class VideoManager {
     }
   }
 
-  /**
-   * Registers a video component that implements the VideoInterface.
-   * @param {!../video-interface.VideoInterface} video
-   * @param {boolean=} manageAutoplay
-   */
-  register(video, manageAutoplay = true) {
+  /** @override */
+  register(video) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -228,7 +256,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video, manageAutoplay);
+    const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
@@ -242,6 +270,14 @@ export class VideoManager {
 
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
+  }
+
+  /** @override */
+  delegateAutoplay(videoElement, opt_unusedObservable) {
+    videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
+      const entry = this.getEntryForElement_(videoElement);
+      entry.delegateAutoplay();
+    });
   }
 
   /**
@@ -421,13 +457,8 @@ export class VideoManager {
     return null;
   }
 
-  /**
-   * Get the current analytics details for the given video.
-   * Silently fail if the video is not found in this manager.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
-   */
-  getVideoAnalyticsDetails(videoElement) {
+  /** @override */
+  getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
@@ -490,9 +521,8 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
-   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video, allowAutoplay) {
+  constructor(manager, video) {
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
@@ -505,8 +535,8 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
-    /** @private @const {boolean} */
-    this.allowAutoplay_ = allowAutoplay;
+    /** @private {boolean} */
+    this.allowAutoplay_ = true;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -643,15 +673,21 @@ class VideoEntry {
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    // Currently we only register after video player is build.
-    this.videoBuilt_();
+    element.signals().whenSignal(VideoEvents.REGISTERED)
+        .then(() => this.onRegister_());
   }
 
-  /**
-   * Called when the video element is built.
-   * @private
-   */
-  videoBuilt_() {
+  /** Delegates autoplay to a different module. */
+  delegateAutoplay() {
+    this.allowAutoplay_ = false;
+
+    if (this.isPlaying_) {
+      this.video.pause();
+    }
+  }
+
+  /** @private */
+  onRegister_() {
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
@@ -1917,9 +1953,15 @@ function analyticsEvent(entry, eventType, opt_vars) {
 }
 
 
-/**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- */
+/** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
+// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
-  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  // TODO(alanorozco, #13674): Rename to `video-service`
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
+    const {win} = ampdoc;
+    if (VideoServiceSync.shouldBeUsedIn(win)) {
+      return new VideoServiceSync(ampdoc);
+    }
+    return new VideoManager(ampdoc);
+  });
 }
