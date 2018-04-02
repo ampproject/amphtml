@@ -53,7 +53,7 @@
   content: " " !important;
   display: block !important;
   z-index: -1 !important; /* places it under content */
-  background: rgba(0, 0, 0, 0.75) !important;
+  background: rgba(0, 0, 0, 0.70) !important;
   position: absolute !important;
   left: 8px !important;
   top: 8px !important;
@@ -223,6 +223,18 @@
 .i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
   padding-left: 16px !important;
   padding-right: 16px !important;
+}
+
+[desktop].i-amphtml-story-bookend {
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+[desktop].i-amphtml-story-bookend.i-amphtml-hidden {
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transform: translateY(100vh) !important;
+  opacity: 0 !important;
 }
 
 [desktop].i-amphtml-story-bookend .i-amphtml-story-share-widget {

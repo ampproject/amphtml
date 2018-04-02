@@ -30,7 +30,7 @@ Before you start developing in AMP, check out these resources:
 
 For most developers the instructions in the [Getting Started Quick Start Guide](getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
 
-The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, yarn, and Gulp which you'll need before running these commands.
+The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, yarn, and Gulp which you'll need before running these commands. You can prefix `gulp` with `npx` to use it without installing Gulp globally.
 
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |

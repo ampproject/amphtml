@@ -33,7 +33,9 @@ const TAG = 'amp-story';
  *    bookendstate: boolean,
  *    desktopstate: boolean,
  *    hasaudiostate: boolean,
+ *    landscapestate: boolean,
  *    mutedstate: boolean,
+ *    supportedbrowserstate: boolean,
  *    currentpageid: string,
  * }}
  */
@@ -53,7 +55,9 @@ export const StateProperty = {
   BOOKEND_STATE: 'bookendstate',
   DESKTOP_STATE: 'desktopstate',
   HAS_AUDIO_STATE: 'hasaudiostate',
+  LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
+  SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
 };
 
@@ -63,7 +67,9 @@ export const Action = {
   TOGGLE_BOOKEND: 'togglebookend',
   TOGGLE_DESKTOP: 'toggledesktop',
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
+  TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
+  TOGGLE_SUPPORTED_BROWSER: 'supportedbrowserstate',
   CHANGE_PAGE: 'changepage',
 };
 
@@ -92,10 +98,30 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_HAS_AUDIO:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.HAS_AUDIO_STATE]: !!data}));
+    case Action.TOGGLE_LANDSCAPE:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.LANDSCAPE_STATE]: !!data}));
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.MUTED_STATE]: !!data}));
+    case Action.TOGGLE_SUPPORTED_BROWSER:
+      if (data) {
+        dev().error(TAG, 'Cannot exit unsupported browser state.');
+      }
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {
+            [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+            [StateProperty.CAN_SHOW_BOOKEND]: false,
+            [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+            [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+            [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+            [StateProperty.BOOKEND_STATE]: false,
+            [StateProperty.DESKTOP_STATE]: false,
+            [StateProperty.HAS_AUDIO_STATE]: false,
+            [StateProperty.MUTED_STATE]: true,
+            [StateProperty.SUPPORTED_BROWSER_STATE]: false,
+          }));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
@@ -139,8 +165,10 @@ export class AmpStoryStoreService {
    * Subscribes to a state property mutations.
    * @param  {string} key
    * @param  {!Function} listener
+   * @param  {boolean=} callToInitialize Whether the listener should be
+   *                                     triggered with current value.
    */
-  subscribe(key, listener) {
+  subscribe(key, listener, callToInitialize = false) {
     if (!this.state_.hasOwnProperty(key)) {
       dev().error(TAG, `Can't subscribe to unknown state ${key}.`);
       return;
@@ -149,6 +177,10 @@ export class AmpStoryStoreService {
       this.listeners_[key] = new Observable();
     }
     this.listeners_[key].add(listener);
+
+    if (callToInitialize) {
+      listener(this.get(key));
+    }
   }
 
   /**
@@ -185,7 +217,9 @@ export class AmpStoryStoreService {
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_AUDIO_STATE]: false,
+      [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
     });
   }

@@ -20,7 +20,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
-import {createShadowRoot} from '../../../src/shadow-embed';
+import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -209,9 +209,9 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 export class Bookend {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the bookend
+   * @param {!Element} parentEl Element where to append the bookend
    */
-  constructor(win, storyElement) {
+  constructor(win, parentEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -246,7 +246,7 @@ export class Bookend {
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -263,31 +263,21 @@ export class Bookend {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
-    const shadowRoot = createShadowRoot(this.root_);
-
     this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
 
-    const style = this.win_.document.createElement('style');
-    style./*OK*/textContent = CSS;
-
-    shadowRoot.appendChild(style);
-    shadowRoot.appendChild(this.bookendEl_);
+    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
     innerContainer.appendChild(this.shareWidget_.build(ampdoc));
     this.initializeListeners_();
 
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
-      this.toggleDesktopAttribute_(true);
-    }
-
     this.vsync_.mutate(() => {
-      this.storyElement_.appendChild(this.getRoot());
+      this.parentEl_.appendChild(this.getRoot());
     });
   }
 
@@ -321,7 +311,7 @@ export class Bookend {
 
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
-    });
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -407,15 +397,15 @@ export class Bookend {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
+    if (!this.parentEl_.hasAttribute(attributeName)) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const rawUrl = this.parentEl_.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     return Services.urlReplacementsForDoc(ampdoc)
         .expandUrlAsync(user().assertString(rawUrl))
@@ -579,7 +569,7 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_() {
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
