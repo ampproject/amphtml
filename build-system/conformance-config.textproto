@@ -183,6 +183,7 @@ requirement: {
   error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
   value: 'JSON.parse'
   whitelist: 'ads/adfox.js'
+  whitelist: 'ads/adincube.js'
   whitelist: 'ads/imedia.js'
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
