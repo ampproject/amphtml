@@ -82,12 +82,13 @@ export function whooshIn(startX, startY, endX, endY) {
 }
 
 /**
- * Checks if page dimensions are larger than those of the target to be animated.
+ * Checks if the target's dimensions are smaller than or equal to those of the page.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
+ * @return {boolean}
  */
-export function pageIsLargerThanTarget(dimensions) {
-  return dimensions.pageWidth >= dimensions.targetWidth ||
-         dimensions.pageHeight >= dimensions.targetHeight;
+export function targetFitsWithinPage(dimensions) {
+  return dimensions.targetWidth <= dimensions.pageWidth ||
+         dimensions.targetHeight <= dimensions.pageHeight;
 }
 
 /**

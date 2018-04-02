@@ -18,8 +18,8 @@ import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
   enlargeKeyFrames,
-  pageIsLargerThanTarget,
   rotateAndTranslate,
+  targetFitsWithinPage,
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
@@ -189,7 +189,7 @@ export const PRESETS = {
       let resized = false;
       let scalingFactor = 1;
 
-      if (pageIsLargerThanTarget(dimensions)) {
+      if (targetFitsWithinPage(dimensions)) {
         scalingFactor = calculateTargetScalingFactor(dimensions);
         resized = true;
         dimensions.targetWidth *= scalingFactor;
@@ -212,7 +212,7 @@ export const PRESETS = {
       let resized = false;
       let scalingFactor = 1;
 
-      if (pageIsLargerThanTarget(dimensions)) {
+      if (targetFitsWithinPage(dimensions)) {
         scalingFactor = calculateTargetScalingFactor(dimensions);
         resized = true;
         dimensions.targetWidth *= scalingFactor;
@@ -234,7 +234,7 @@ export const PRESETS = {
       let resized = false;
       let scalingFactor = 1;
 
-      if (pageIsLargerThanTarget(dimensions)) {
+      if (targetFitsWithinPage(dimensions)) {
         scalingFactor = calculateTargetScalingFactor(dimensions);
         resized = true;
         dimensions.targetWidth *= scalingFactor;
@@ -256,7 +256,7 @@ export const PRESETS = {
       let resized = false;
       let scalingFactor = 1;
 
-      if (pageIsLargerThanTarget(dimensions)) {
+      if (targetFitsWithinPage(dimensions)) {
         scalingFactor = calculateTargetScalingFactor(dimensions);
         resized = true;
         dimensions.targetWidth *= scalingFactor;
