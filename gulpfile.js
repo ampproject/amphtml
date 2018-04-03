@@ -192,6 +192,7 @@ declareExtension('amp-video-service', '0.1', {
   // binary.
   loadPriority: 'high',
 });
+declareExtension('amp-viqeo', '0.1');
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
