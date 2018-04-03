@@ -56,13 +56,13 @@ export class AmpAd extends AMP.BaseElement {
       ? Services.userNotificationManagerForDoc(this.element)
           .then(service => service.get(consentId))
       : Promise.resolve();
+    const type = this.element.getAttribute('type');
 
     // This is required as part of doubleclick's delayed fetch deprecation
     // effort.
-    this.maybeFlagSelfAsDoubleclickOriginal();
+    this.maybeSelectIntoDblckDelayedFetchWhitelistDeprecationExperiment(type);
 
     return consent.then(() => {
-      const type = this.element.getAttribute('type');
       const isCustom = type === 'custom';
       user().assert(isCustom || hasOwn(adConfig, type)
           || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
@@ -112,10 +112,22 @@ export class AmpAd extends AMP.BaseElement {
     });
   }
 
-  maybeFlagSelfAsDoubleclickOriginal() {
-    if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation') &&
-        this.element.getAttribute('type') == 'doubleclick') {
-      this.element.setAttribute('data-amp-is-dc-origin', 1);
+  /** @param {string} type */
+  maybeSelectIntoDblckDelayedFetchWhitelistDeprecationExperiment(type) {
+    switch (type) {
+      case 'ix':
+      case 'imonomy':
+      case 'medianet':
+      case 'navegg':
+      case 'openx':
+      case 'pulsepoint':
+      case 'rubicon':
+      case 'yieldbot':
+      case 'criteo':
+      case 'doubleclick':
+        if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation')) {
+          this.element.setAttribute('data-amp-is-in-dcdfwld-experiment', 1);
+        }
     }
   }
 }

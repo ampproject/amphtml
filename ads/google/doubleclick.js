@@ -28,10 +28,9 @@ export function doubleclick(global, data) {
     )['attributes']['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
-      const dcdfwld =
-          context['experimentToggles']['dcdf-whitelist-deprecation'];
-      const isDoubleclickOrigin = data['ampIsDcOrigin'];
-      if (dcdfwld && !isDoubleclickOrigin) {
+      const dcdfwld = data['ampIsInDcdfwldExperiment'];
+      delete data['ampIsInDcdfwldExperiment'];
+      if (dcdfwld && data['type'] != 'doubleclick') {
         // We are in the experiment AND we're not coming from a doubleclick
         // tag, so we want to halt immediately.
         return;
