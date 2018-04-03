@@ -156,10 +156,22 @@ describes.realWin('amp-brid-player', {
             'https://cdn.brid.tv/live/partners/264/snapshot/13663.jpg');
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('alt')).to.equal('Loading video');
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
       });
     });
-
+    it('should propagate aria label for placeholder image', () => {
+      return getBridPlayer({
+        'data-partner': '264',
+        'data-player': '979',
+        'data-video': '13663',
+        'aria-label' : 'great video'
+      }).then(brid => {
+        const img = brid.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('alt')).to.equal('Loading video - great video');
+      });
+    });
     it('should create a fallback for default snapshot', () => {
       return getBridPlayer({
         'data-partner': '264',
