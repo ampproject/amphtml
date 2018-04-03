@@ -91,7 +91,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
       expect(instance.itemToConsentState_).to.deep.equal({
         'ABC': CONSENT_ITEM_STATE.GRANTED,
-        'DEF': CONSENT_ITEM_STATE.UNKNOWN,
+        'DEF': null,
       });
       instance.consentStateChangeHandler('DEF', CONSENT_ITEM_STATE.GRANTED);
       expect(instance.itemToConsentState_).to.deep.equal({

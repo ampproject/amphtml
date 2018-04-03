@@ -28,6 +28,7 @@ export const CONSENT_ITEM_STATE = {
   UNKNOWN: 0,
   GRANTED: 1,
   REJECTED: 2,
+  DISMISSED: 3,
 };
 
 export class ConsentStateManager {
@@ -179,6 +180,8 @@ export class ConsentInstance {
     }
 
     this.localValue_ = state;
+
+    state = this.mapToInternalConsentState_(state);
     if (state == CONSENT_ITEM_STATE.UNKNOWN) {
       return;
     }
@@ -222,5 +225,17 @@ export class ConsentInstance {
       dev().error(TAG, 'Failed to read storage', e);
       return CONSENT_ITEM_STATE.UNKNOWN;
     });
+  }
+
+  /**
+   * Map the consent state to internal stored value
+   * @param {!CONSENT_ITEM_STATE} state
+   */
+  mapToInternalConsentState_(state) {
+    if (state == CONSENT_ITEM_STATE.DISMISSED
+      || state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      state = CONSENT_ITEM_STATE.UNKNOWN;
+    }
+    return state;
   }
 }

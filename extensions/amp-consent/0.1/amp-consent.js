@@ -41,12 +41,12 @@ const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 const TAG = 'amp-consent';
 
 /**
- * @enum {boolean}
+ * @enum {number}
  */
 const ACTION_TYPE = {
-  // We can support DISMISS if requested
-  ACCEPT: true,
-  REJECT: false,
+  ACCEPT: 0,
+  REJECT: 1,
+  DISMISS: 2,
 };
 
 
@@ -103,6 +103,8 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
+    this.registerAction('dismiss',
+        () => this.handleAction_(ACTION_TYPE.DISMISS));
 
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
@@ -202,6 +204,9 @@ export class AmpConsent extends AMP.BaseElement {
       // reject
       this.consentStateManager_.updateConsentInstanceState(
           this.currentDisplayInstance_, CONSENT_ITEM_STATE.REJECTED);
+    } else if (action == ACTION_TYPE.DISMISS) {
+      this.consentStateManager_.updateConsentInstanceState(
+          this.currentDisplayInstance_, CONSENT_ITEM_STATE.DISMISSED);
     }
     // Hide current dialog
     this.hide_();
