@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpConsent} from '../amp-consent';
+import {ACTION_TYPE, AmpConsent} from '../amp-consent';
+import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
@@ -64,6 +65,7 @@ describes.realWin('amp-consent', {
           return Promise.resolve(storageValue[name]);
         },
         set: (name, value) => {
+          console.log('set', name, value);
           storageValue[name] = value;
           return Promise.resolve();
         },
@@ -209,6 +211,74 @@ describes.realWin('amp-consent', {
   });
 
   describe('UI', () => {
+    let uiElement;
+    let defaultConfig;
+    let ampConsent;
+    let updateConsentInstanceStateSpy;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'checkConsentHref': 'response1',
+            'promptUI': '123',
+          },
+          'DEF': {
+            'checkConsentHref': 'response1',
+            'promptUI': '123',
+          },
+          'GH': {
+            'checkConsentHref': 'response1',
+            'promptUI': '123',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      uiElement = document.createElement('div');
+      uiElement.setAttribute('id', '123');
+      consentElement.appendChild(uiElement);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+    });
 
+    it('update current displaying consent', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      updateConsentInstanceStateSpy =
+          sandbox.spy(ampConsent.consentStateManager_,
+              'updateConsentInstanceState');
+      ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
+      expect(updateConsentInstanceStateSpy).to.be.calledWith(
+          'ABC', CONSENT_ITEM_STATE.GRANTED);
+      yield macroTask();
+      ampConsent.handleAction_(ACTION_TYPE.REJECT);
+      expect(updateConsentInstanceStateSpy).to.be.calledWith(
+          'DEF', CONSENT_ITEM_STATE.REJECTED);
+      yield macroTask();
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      expect(updateConsentInstanceStateSpy).to.be.calledWith(
+          'GH', CONSENT_ITEM_STATE.DISMISSED);
+    });
+
+    it('throw error when no consent is displaying', function* () {
+      ampConsent.buildCallback();
+      yield macroTask();
+      updateConsentInstanceStateSpy =
+          sandbox.spy(ampConsent.consentStateManager_,
+              'updateConsentInstanceState');
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      yield macroTask();
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      yield macroTask();
+      ampConsent.handleAction_(ACTION_TYPE.DISMISS);
+      yield macroTask();
+      expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
+          /No consent is displaying/);
+    });
   });
 });

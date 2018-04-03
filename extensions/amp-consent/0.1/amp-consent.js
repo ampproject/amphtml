@@ -42,8 +42,9 @@ const TAG = 'amp-consent';
 
 /**
  * @enum {number}
+ * @visibleForTesting
  */
-const ACTION_TYPE = {
+export const ACTION_TYPE = {
   ACCEPT: 0,
   REJECT: 1,
   DISMISS: 2,
