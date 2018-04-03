@@ -20,7 +20,7 @@ import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
+export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 
 export class AmpStoryRequestService {
