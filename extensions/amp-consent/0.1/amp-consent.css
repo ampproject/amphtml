@@ -26,7 +26,8 @@
  }
 
  amp-consent > * {
-   display: none;
+   display: none !important;
+   max-height: 100vh !important;
  }
 
  amp-consent.amp-active {
