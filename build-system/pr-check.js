@@ -379,6 +379,12 @@ const command = {
   buildValidator: function() {
     timedExecOrDie('gulp validator');
   },
+  checkBundleSize: function(compiled) {
+    const args = compiled
+      ? '-f "./dist/v0.js" -s "75 kB"'
+      : '-f "./dist/amp.js" -s "315 kB"';
+    timedExecOrDie(`npx bundlesize ${args}`);
+  },
 };
 
 function runAllCommands() {
@@ -387,6 +393,7 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
+    command.checkBundleSize(/* compiled */ false);
     command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runLintCheck();
     command.runJsonCheck();
@@ -400,6 +407,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
+    command.checkBundleSize(/* compiled */ true);
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -420,6 +428,7 @@ function runAllCommandsLocally() {
   }
 
   // These tests need a build.
+  command.checkBundleSize(/* compiled */ false);
   command.runPresubmitTests();
   command.runVisualDiffTests();
   command.runUnitTests();

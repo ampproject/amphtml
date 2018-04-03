@@ -169,15 +169,5 @@
     "concurrency": 5,
     "tap": true,
     "failFast": true
-  },
-  "bundlesize": [
-    {
-      "path": "./dist/amp.js",
-      "maxSize": "320 kB"
-    },
-    {
-      "path": "./dist/v0.js",
-      "maxSize": "75 kB"
-    }
-  ]
+  }
 }
