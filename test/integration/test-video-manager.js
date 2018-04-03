@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
-import {isLayoutSizeDefined} from '../../src/layout';
+import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
+import {Services} from '../../src/services';
+import {VideoUtils} from '../../src/utils/video';
 import {
   installVideoManagerForDoc,
-  supportsAutoplay,
-  clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../src/layout';
+import {listenOncePromise} from '../../src/event-helper';
 import {
   runVideoPlayerIntegrationTests,
 } from './test-video-players-helper';
-import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
@@ -142,8 +141,8 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
 
       const entry = videoManager.getEntryForVideo_(impl);
 
-      const supportsAutoplayStub =
-          sandbox.stub(entry, 'boundSupportsAutoplay_');
+      const supportsAutoplayStub = sandbox.stub(entry, 'supportsAutoplay_');
+
       supportsAutoplayStub.returns(Promise.reject());
 
       entry.isVisible_ = true;
@@ -264,7 +263,10 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
   });
 });
 
-describe.configure().ifNewChrome().run('Supports Autoplay', () => {
+
+describe.configure().ifNewChrome().run('Autoplay support', () => {
+  const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
+
   let sandbox;
 
   let win;
@@ -275,6 +277,50 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
   let createElementSpy;
   let setAttributeSpy;
   let playStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    video = {
+      setAttribute() {},
+      style: {
+        position: null,
+        top: null,
+        width: null,
+        height: null,
+        opacity: null,
+      },
+      muted: null,
+      playsinline: null,
+      webkitPlaysinline: null,
+      paused: false,
+      play() {},
+    };
+
+    const doc = {
+      createElement() {
+        return video;
+      },
+    };
+
+    win = {
+      document: doc,
+    };
+
+    isLite = false;
+
+    createElementSpy = sandbox.spy(doc, 'createElement');
+    setAttributeSpy = sandbox.spy(video, 'setAttribute');
+    playStub = sandbox.stub(video, 'play');
+
+    VideoUtils.resetIsAutoplaySupported();
+  });
+
+  afterEach(() => {
+    VideoUtils.resetIsAutoplaySupported();
+
+    sandbox.restore();
+  });
 
   it('should create an invisible test video element', () => {
     return supportsAutoplay(win, isLite).then(() => {
@@ -329,12 +375,10 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
 
   it('should suppress errors if detection play call rejects a promise', () => {
     const p = Promise.reject('play() can only be initiated by a user gesture.');
-    const promiseCatchSpy = sandbox.spy(p, 'catch');
     playStub.returns(p);
     video.paused = true;
     expect(supportsAutoplay(win, isLite)).not.to.throw;
     return supportsAutoplay(win, isLite).then(supportsAutoplay => {
-      expect(promiseCatchSpy.called).to.be.true;
       expect(supportsAutoplay).to.be.false;
       expect(playStub.called).to.be.true;
       expect(createElementSpy.called).to.be.true;
@@ -348,59 +392,8 @@ describe.configure().ifNewChrome().run('Supports Autoplay', () => {
     });
   });
 
-  it('should cache the result', () => {
-    const firstResultRef = supportsAutoplay(win, isLite);
-    const secondResultRef = supportsAutoplay(win, isLite);
-    expect(firstResultRef).to.equal(secondResultRef);
-
-    clearSupportsAutoplayCacheForTesting();
-
-    const thirdResultRef = supportsAutoplay(win, isLite);
-    expect(thirdResultRef).to.not.equal(firstResultRef);
-    expect(thirdResultRef).to.not.equal(secondResultRef);
-  });
-
-  beforeEach(() => {
-    clearSupportsAutoplayCacheForTesting();
-    sandbox = sinon.sandbox.create();
-
-    video = {
-      setAttribute() {},
-      style: {
-        position: null,
-        top: null,
-        width: null,
-        height: null,
-        opacity: null,
-      },
-      muted: null,
-      playsinline: null,
-      webkitPlaysinline: null,
-      paused: false,
-      play() {},
-    };
-
-    const doc = {
-      createElement() {
-        return video;
-      },
-    };
-
-    win = {
-      document: doc,
-    };
-
-    isLite = false;
-
-    createElementSpy = sandbox.spy(doc, 'createElement');
-    setAttributeSpy = sandbox.spy(video, 'setAttribute');
-    playStub = sandbox.stub(video, 'play');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 });
+
 
 function createFakeVideoPlayerClass(win) {
   /**

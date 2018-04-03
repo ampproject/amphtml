@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {DomFingerprint} from '../../src/utils/dom-fingerprint';
+import {Services} from '../../src/services';
 import {
   addDataAndJsonAttributes_,
-  getIframe,
   getBootstrapBaseUrl,
   getDefaultBootstrapBaseUrl,
+  getIframe,
   getSubDomain,
   preloadBootstrap,
-  resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+  resetCountForTesting,
 } from '../../src/3p-frame';
 import {
-  serializeMessage,
   deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {Services} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
+import {toggleExperiment} from '../../src/experiments';
 import {validateData} from '../../3p/3p';
-import {DomFingerprint} from '../../src/utils/dom-fingerprint';
-import * as sinon from 'sinon';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 
@@ -252,6 +252,24 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
       validateData(win.context.data, ['ping', 'testAttr']);
       document.head.removeChild(link);
     });
+  });
+
+  it('should copy attributes to iframe', () => {
+    const div = document.createElement('my-element');
+    div.setAttribute('width', '50');
+    div.setAttribute('height', '100');
+    div.setAttribute('title', 'a_title');
+    div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe');
+    setupElementFunctions(div);
+
+    container.appendChild(div);
+
+    const iframe = getIframe(window, div, 'none');
+
+    expect(iframe.width).to.equal('50');
+    expect(iframe.height).to.equal('100');
+    expect(iframe.title).to.equal('a_title');
+    expect(iframe.not_whitelisted).to.equal(undefined);
   });
 
   it('should pick the right bootstrap url for local-dev mode', () => {

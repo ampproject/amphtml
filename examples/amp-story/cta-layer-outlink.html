@@ -1,0 +1,161 @@
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+  <title>My Story</title>
+  <meta name="description" content="Get started with amp-story">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="grid-layer-templates.html">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    amp-story-page {
+      background: white;
+    }
+
+    .content {
+      background: #f2f2f2;
+      border: solid #ccc;
+      width: 100%;
+      height: 100%;
+      padding: 8px;
+    }
+
+    .button {
+      font: bold 20px Arial;
+      text-decoration: none;
+      background-color: rgba(0, 240, 248, 0.63);
+      color: #333333;
+      padding: 2px 6px 2px 6px;
+      border-top: 1px solid #CCCCCC;
+      border-right: 1px solid #333333;
+      border-bottom: 1px solid #333333;
+      border-left: 1px solid #CCCCCC;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body>
+  <amp-story standalone>
+
+    <amp-story-page id="fill-template-title">
+      <amp-story-grid-layer template="vertical">
+        <h1>fill</h1>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="fill-template-example">
+      <amp-story-grid-layer template="fill">
+        <amp-img src="https://unsplash.it/800/400/" width="800" height="400"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="vertical-template-title">
+      <amp-story-grid-layer template="vertical">
+        <h1>vertical</h1>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="vertical-template-example-1">
+      <amp-story-grid-layer template="vertical">
+        <div class="content">A paragraph</div>
+        <div class="content">A longer paragraph</div>
+        <div class="content">A much longer paragraph</div>
+        <div class="content">The looooongest Paragraph. By far. So very very much longer.</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="vertical-template-example-2">
+      <amp-story-grid-layer template="vertical">
+        <div class="content">Paragraph 1</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="vertical-template-example-3">
+      <amp-story-grid-layer template="vertical">
+        <div class="content">Paragraph 1</div>
+        <div class="content">Paragraph 2</div>
+        <div class="content">Paragraph 3</div>
+        <div class="content">Paragraph 4</div>
+        <div class="content">Paragraph 5</div>
+        <div class="content">Paragraph 6</div>
+        <div class="content">Paragraph 7</div>
+        <div class="content">Paragraph 8</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="vertical-template-thirds">
+      <amp-story-grid-layer template="thirds">
+        <div class="content" grid-area="upper-third">Paragraph 1</div>
+        <div class="content" grid-area="middle-third">Paragraph 2</div>
+        <div class="content" grid-area="lower-third">Paragraph 3</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="horizontal-template-title">
+      <amp-story-grid-layer template="vertical">
+        <h1>horizontal</h1>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="horizontal-template-example-1">
+      <amp-story-grid-layer template="horizontal">
+        <div class="content">Paragraph 1</div>
+        <div class="content">Paragraph 2</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="horizontal-template-example-2">
+      <amp-story-grid-layer template="horizontal">
+        <div class="content">Paragraph 1</div>
+        <div class="content">Paragraph 2</div>
+        <div class="content">Paragraph 3</div>
+        <div class="content">Paragraph 4</div>
+        <div class="content">Paragraph 5</div>
+        <div class="content">Paragraph 6</div>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="http://www.google.com" class="button"> Call to action! </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+  </amp-story>
+</body>
+
+</html>

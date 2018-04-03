@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
+import * as url from '../../src/url';
+import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
-  optOutOfCid,
   isOptedOutOfCid,
+  optOutOfCid,
 } from '../../src/service/cid-impl';
-import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {parseUrl} from '../../src/url';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+import {getCookie, setCookie} from '../../src/cookies';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import * as url from '../../src/url';
-import {setCookie, getCookie} from '../../src/cookies';
-import * as sinon from 'sinon';
-import * as lolex from 'lolex';
+import {parseUrl} from '../../src/url';
+import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -98,10 +99,12 @@ describe('cid', () => {
       document: {
         nodeType: /* DOCUMENT */ 9,
         body: {},
+        querySelector: () => {},
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Math: window.Math,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -109,6 +112,7 @@ describe('cid', () => {
     ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
+    installDocumentInfoServiceForDoc(ampdoc);
 
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
@@ -719,7 +723,8 @@ describes.realWin('cid', {amp: true}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     sandbox = env.sandbox;
-    clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install({
+      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
   });
 
@@ -741,35 +746,20 @@ describes.realWin('cid', {amp: true}, env => {
     expect(fooCid).to.equal(fooCid2);
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('get method should return CID when in Viewer ' +
-      'when visible', function* () {
+  it('get method should return CID when in Viewer ', () => {
     win.parent = {};
-    const sendMsgSpy =
-        stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
-            .returns(Promise.resolve('cid-from-viewer'));
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
+        .returns(Promise.resolve('cid-from-viewer'));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')
         .withArgs('cid').returns(true);
     sandbox.stub(url, 'isProxyOrigin').returns(true);
-    let viewerVisibleResolver;
-    const viewerNextVisiblePromise = new Promise(resolve => {
-      viewerVisibleResolver = resolve;
-    });
-    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'whenNextVisible')
-        .returns(viewerNextVisiblePromise);
-    const requestCidPromise = cid.get({scope: 'foo'}, hasConsent);
-    yield macroTask();
-    expect(sendMsgSpy).to.not.be.called;
-    viewerVisibleResolver();
-    yield macroTask();
-    expect(sendMsgSpy).to.be.calledOnce;
-    return expect(requestCidPromise).to.eventually.equal('cid-from-viewer');
+    return expect(cid.get({scope: 'foo'}, hasConsent))
+        .to.eventually.equal('cid-from-viewer');
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('get method should time out when in Viewer', function *() {
+  it('get method should time out when in Viewer', function *() {
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
@@ -805,8 +795,7 @@ describes.realWin('cid', {amp: true}, env => {
       setCookie(win, '_ga', '', 0);
     });
 
-    // TODO(lannka, #12486): Make this test work with lolex v2.
-    it.skip('should use cid api on pub origin if opted in', () => {
+    it('should use cid api on pub origin if opted in', () => {
       const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
       getScopedCidStub.returns(Promise.resolve('cid-from-api'));
       return cid.get({
@@ -821,8 +810,7 @@ describes.realWin('cid', {amp: true}, env => {
       });
     });
 
-    // TODO(lannka, #12486): Make this test work with lolex v2.
-    it.skip('should fallback to cookie if cid api returns nothing', () => {
+    it('should fallback to cookie if cid api returns nothing', () => {
       sandbox.stub(cid.cidApi_, 'getScopedCid').returns(Promise.resolve());
       return cid.get({
         scope: 'AMP_ECID_GOOGLE',

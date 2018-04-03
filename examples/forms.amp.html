@@ -572,7 +572,7 @@
 </form>
 
 
-<h4 id="header1">Using button[type=submit]</h4>
+<h4 id="header2">Using button[type=submit]</h4>
 <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank">
@@ -580,11 +580,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" id="name1" required>
+            <input type="text" name="name" id="name8" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" id="email1" required>
+            <input type="email" name="email" id="email8" required>
         </label>
         <input type="submit" value="Subscribe - Input">
         <input type="submit" value="Subscribe 2 - Input">
@@ -621,7 +621,7 @@
 
 
 
-<h4 id="header1">Redirect After POST (works only if running on localhost)</h4>
+<h4 id="header3">Redirect After POST (works only if running on localhost)</h4>
 <form method="post"
       action-xhr="http://iframe.localhost:8000/form/redirect-to/post"
       target="_top">
@@ -643,11 +643,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" id="name3" required>
+            <input type="text" name="name" id="name9" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" id="email3" required>
+            <input type="email" name="email" id="email9" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -756,3 +756,26 @@
 
 </body>
 </html>
+
+<h4>Using a submit-success template referenced by id</h4>
+
+<template type="amp-mustache" id="submit_success_template">
+    <h1>You searched for: {{term}}</h1>
+</template>
+
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success template="submit_success_template"></div>
+</form>

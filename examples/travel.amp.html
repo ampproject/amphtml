@@ -6,21 +6,38 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
+  .DateRangePicker_picker {
+    margin-top: -70px;
+  }
+
   .DateRangePicker,
   .DateRangePickerInput {
-    width: 100%;
+    font-size: 100%;
+  }
+
+  .CalendarDay_container.CalendarDay_container {
+    border-color: transparent;
   }
 
   .CalendarDay_container {
-    border-color: transparent!important;
     color: #000;
     font-family: sans-serif;
   }
 
+  tr:first-child td:not(.CalendarDay__selected_span) + .CalendarDay__selected_span,
+  tr:first-child td:not(.CalendarDay__selected_span) + .CalendarDay__selected_end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
   td:not(.CalendarDay__selected_span):not(.CalendarDay__selected) + .CalendarDay__selected_span,
-  .CalendarDay__selected:not(.CalendarDay__selected_span),
+  .CalendarDay__selected:not(.CalendarDay__selected_span):not(.CalendarDay__selected_end),
   .CalendarDay__selected_span:first-child {
     border-radius: 3px 0 0 3px;
+  }
+
+  .CalendarDay__selected_end {
+    border-radius: 0 3px 3px 0;
   }
 
   .CalendarDay__selected:not(.CalendarDay__selected_span) + .CalendarDay__selected:not(.CalendarDay__selected_span),
@@ -37,6 +54,7 @@
     color: #999;
   }
 
+  .CalendarDay__selected_span:hover,
   .CalendarDay__selected_span,
   .CalendarDay__selected {
     color: #fff;
@@ -86,9 +104,11 @@
     font-size: 2em;
     margin: 20px 0 5px;
     color: #000;
+    background: transparent;
   }
 
   .DayPicker_weekHeader {
+    top: 0;
     padding: 40px 0 5px;
   }
 
@@ -104,40 +124,7 @@
     font-size: small;
   }
 
-  .variations {
-    font-family: sans-serif;
-    display: flex;
-    margin: 15px 0;
-  }
-
-  .variations label {
-    display: flex;
-    width: 50%;
-    margin: 0 10px;
-  }
-
-  .variations select {
-    flex: 1 0 0;
-    margin-left: 5px;
-  }
-
-  .select-dates {
-    border: 0;
-    padding: 10px;
-    color: #fff;
-    text-align: center;
-    letter-spacing: 2px;
-    line-height: 1.875em;
-    background-image: linear-gradient(to bottom right,#ff7a0d 0%,#ff5956 100%);
-    font-size: 16px;
-    width: 100%;
-  }
-
-  .select-dates-container {
-    margin: 10px;
-  }
-
-  .wow {
+  .button-area {
     display: block;
     position: fixed;
     bottom: 0;
@@ -145,22 +132,21 @@
     left: 0;
     margin: auto;
     z-index: 10;
+    height: 40px;
 
     background: #f6f7f8;
     box-shadow: 0 -2px 1px 0 rgba(0,0,0,0.1);
   }
 
-  .hidden {
-    display: none;
-  }
-
   .tooltip {
     visibility: hidden;
-    transform: translateY(-100%);
+    transform: translateY(0);
     position: fixed;
-    z-index: 100;
+    z-index: 2;
     width: 100%;
+    top: 100%;
     height: 50px;
+    padding-bottom: 40px;
     color: #fff;
     background-color: #20bf7c;
     text-align: center;
@@ -175,57 +161,145 @@
   }
 
   @keyframes slide-in-out {
-    0% {
-      transform: translateY(-100%);
-    }
+    0% { transform: translateY(0) }
+    10% { transform: translateY(-100%) }
+    90% { transform: translateY(-100%) }
+    100% { transform: translateY(0) }
+  }
 
-    10% {
-      transform: translateY(0);
-    }
+  .search {
+    box-sizing: border-box;
+    text-align: center;
+    min-width: 320px;
+    width: 80%;
+    margin: 50px auto;
+    padding: 50px;
+    background: rgba(0, 17, 255, 0.1);
+  }
 
-    90% {
-      transform: translateY(0);
-    }
+  .fields {
+    display: flex;
+    flex-flow: column nowrap;
+  }
 
-    100% {
-      transform: translateY(-100%);
+  #departing, #returning {
+    flex: 1 0 0;
+    width: auto;
+    padding: 13px 0 13px 35px;
+    font-size: 16px;
+    border: 1px solid lightgray;
+  }
+
+  #departing {
+    background-image: url('data:image/svg+xml,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1393.1 1500" style="enable-background:new 0 0 1393.1 1500;" xml:space="preserve"><path d="M107.2,1392.9h241.1v-241.1H107.2V1392.9z M401.9,1392.9h267.9v-241.1H401.9V1392.9z M107.2,1098.2h241.1V830.4H107.2 V1098.2z M401.9,1098.2h267.9V830.4H401.9V1098.2z M107.2,776.8h241.1V535.7H107.2V776.8z M723.4,1392.9h267.9v-241.1H723.4V1392.9z M401.9,776.8h267.9V535.7H401.9V776.8z M1044.8,1392.9H1286v-241.1h-241.1V1392.9z M723.4,1098.2h267.9V830.4H723.4V1098.2z M428.7,375V133.9c0-7.3-2.7-13.5-8-18.8c-5.3-5.3-11.6-8-18.8-8h-53.6c-7.3,0-13.5,2.7-18.8,8c-5.3,5.3-8,11.6-8,18.8V375 c0,7.3,2.7,13.5,8,18.8c5.3,5.3,11.6,8,18.8,8h53.6c7.3,0,13.5-2.7,18.8-8C426,388.5,428.7,382.3,428.7,375z M1044.8,1098.2H1286 V830.4h-241.1V1098.2z M723.4,776.8h267.9V535.7H723.4V776.8z M1044.8,776.8H1286V535.7h-241.1V776.8z M1071.6,375V133.9 c0-7.3-2.7-13.5-8-18.8c-5.3-5.3-11.6-8-18.8-8h-53.6c-7.3,0-13.5,2.7-18.8,8c-5.3,5.3-8,11.6-8,18.8V375c0,7.3,2.7,13.5,8,18.8 c5.3,5.3,11.6,8,18.8,8h53.6c7.3,0,13.5-2.7,18.8-8C1069,388.5,1071.6,382.3,1071.6,375z M1393.1,321.4v1071.4 c0,29-10.6,54.1-31.8,75.3c-21.2,21.2-46.3,31.8-75.3,31.8H107.2c-29,0-54.1-10.6-75.3-31.8C10.6,1447,0,1421.9,0,1392.9V321.4 c0-29,10.6-54.1,31.8-75.3s46.3-31.8,75.3-31.8h107.2v-80.4c0-36.8,13.1-68.4,39.3-94.6S311.4,0,348.3,0h53.6 c36.8,0,68.4,13.1,94.6,39.3c26.2,26.2,39.3,57.8,39.3,94.6v80.4h321.5v-80.4c0-36.8,13.1-68.4,39.3-94.6 C922.9,13.1,954.4,0,991.3,0h53.6c36.8,0,68.4,13.1,94.6,39.3s39.3,57.8,39.3,94.6v80.4H1286c29,0,54.1,10.6,75.3,31.8 C1382.5,267.3,1393.1,292.4,1393.1,321.4z"/></svg>');
+    background-position: 5px 40%;
+    background-repeat: no-repeat;
+    background-size: 25px 25px;
+  }
+
+  #returning {
+    border-left: 0;
+  }
+
+  @media (min-width: 480px) {
+    .fields {
+      flex-flow: row nowrap;
+    }
+    #departing, #returning {
+      width: 50%;
     }
   }
+
+
+  .lightbox-close {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 20px;
+    height: 20px;
+    padding: 20px 15px;
+    cursor: pointer;
+    box-sizing: content-box;
+    border: 0;
+    background-color: transparent;
+  }
+  .lightbox-close::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-image: url('data:image/svg+xml,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><path fill-rule="evenodd" d="M11.53,0.47 C11.237,0.177 10.762,0.177 10.469,0.47 L5.999,4.94 L1.529,0.47 C1.236,0.177 0.761,0.177 0.468,0.47 C0.175,0.763 0.175,1.238 0.468,1.531 L4.938,6.001 L0.468,10.471 C0.175,10.764 0.175,11.239 0.468,11.532 C0.761,11.825 1.236,11.825 1.529,11.532 L5.999,7.062 L10.469,11.532 C10.762,11.825 11.237,11.825 11.53,11.532 C11.823,11.239 11.823,10.764 11.53,10.471 L7.06,6.001 L11.53,1.531 C11.823,1.238 11.823,0.763 11.53,0.47 L11.53,0.47 Z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: 100%;
+  }
+
+  .select-button {
+    background-image: linear-gradient(to bottom right,#ff7a0d 0%,#ff5956 100%);
+    width: 100%;
+    height: 100%;
+    display: block;
+    font-family: sans-serif;
+    font-size: 16px;
+    color: #fff;
+    font-weight: bold;
+  }
+
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-<div class="tooltip" [class]="'tooltip' + (tooltip ? ' tooltip-show' : '')">
-  Great price
+<div class="search">
+  <p>Choose your travel dates</p>
+  <div class="fields">
+    <input on="tap:lb.open" placeholder="Departing" id="departing"/>
+    <input on="tap:lb.open" placeholder="Returning" id="returning"/>
+    <button on="tap:dp.clear">clear</button>
+  </div>
 </div>
-<amp-date-picker
-  type="range"
-  number-of-months="12"
-  orientation="verticalScrollable"
-  with-full-screen-portal
-  show-clear-dates
-  keep-open-on-date-select
-  src="date-picker.json"
-  day-size="50"
-  week-day-format="dd"
-  on="
-    select:
-      AMP.setState({
-        tooltip: event.dates.filter(d => d.id == 'low').length > 0
-      })"
-  month-format="MMM"
->
-  <input amp-date-placeholder-start placeholder="Departing" id="departing"/>
-  <input amp-date-placeholder-end placeholder="Returning" id="returning"/>
-  <template date-template id="low" type="amp-mustache">
-    {{D}}
-    <span class="highlight-square"></span>
-  </template>
-</amp-date-picker>
+<amp-lightbox id="lb" layout="nodisplay">
+  <button class="lightbox-close" on="tap:lb.close" tabindex="0"></button>
+  <div class="date-picker-wrapper">
+    <amp-date-picker
+      layout="fill"
+      class="date-picker"
+      id="dp"
+      type="range"
+      number-of-months="12"
+      fullscreen
+      open-after-select
+      src="travel.json"
+      format="MM/DD/YYYY"
+      week-day-format="dd"
+      month-format="MMM"
+      mode="static"
+      locale="fa"
+      on="
+        activate: lb.open;
+        deactivate: lb.close;
+        select:
+          AMP.setState({
+            tooltip: event.dates.filter(d => d.id == 'deal').length > 0
+          })"
+      start-input-selector="#departing"
+      end-input-selector="#returning"
+    >
+      <template date-template id="deal" type="amp-mustache">
+        {{D}}
+        <span class="highlight-square"></span>
+      </template>
+    </amp-date-picker>
+  </div>
+  <div class="tooltip" [class]="'tooltip' + (tooltip ? ' tooltip-show' : '')">
+    Great price
+  </div>
+  <div class="button-area"><button class="select-button" on="tap:lb.close">Select these dates</button></div>
+</amp-lightbox>
 
 </body>
 </html>

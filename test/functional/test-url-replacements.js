@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
+import * as trackPromise from '../../src/impression';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {user} from '../../src/log';
-import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
   '../../src/service/cid-impl';
+import {createIframePromise} from '../../testing/iframe';
+import {
+  extractClientIdFromGaCookie,
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from
   '../../src/service/document-info-impl';
 import {
-  installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 import {
-  installUrlReplacementsServiceForDoc,
-  extractClientIdFromGaCookie,
-} from '../../src/service/url-replacements-impl';
+  mockWindowInterface,
+  stubServiceForDoc,
+} from '../../testing/test-helper';
+import {parseUrl} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
-import {parseUrl} from '../../src/url';
-import * as trackPromise from '../../src/impression';
-import {
-  stubServiceForDoc,
-  mockWindowInterface,
-} from '../../testing/test-helper';
+import {user} from '../../src/log';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {
@@ -108,6 +108,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
+        if (opt_options.withViewerIntegrationVariableService) {
+          markElementScheduledForTesting(iframe.win, 'amp-viewer-integration');
+          registerServiceBuilder(iframe.win, 'viewer-integration-variable',
+              function() {
+                return Promise.resolve(
+                    opt_options.withViewerIntegrationVariableService);
+              });
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -115,9 +123,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   }
 
-  function expandAsync(url, opt_bindings, opt_options) {
+  function expandUrlAsync(url, opt_bindings, opt_options) {
     return getReplacements(opt_options).then(
-        replacements => replacements.expandAsync(url, opt_bindings)
+        replacements => replacements.expandUrlAsync(url, opt_bindings)
     );
   }
 
@@ -172,13 +180,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
   }
 
   it('should replace RANDOM', () => {
-    return expandAsync('ord=RANDOM?').then(res => {
+    return expandUrlAsync('ord=RANDOM?').then(res => {
       expect(res).to.match(/ord=(\d+(\.\d+)?)\?$/);
     });
   });
 
   it('should replace COUNTER', () => {
-    return expandAsync(
+    return expandUrlAsync(
         'COUNTER(foo),COUNTER(bar),COUNTER(foo),COUNTER(bar),COUNTER(bar)')
         .then(res => {
           expect(res).to.equal('1,1,2,2,3');
@@ -186,31 +194,31 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace CANONICAL_URL', () => {
-    return expandAsync('?href=CANONICAL_URL').then(res => {
+    return expandUrlAsync('?href=CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
     });
   });
 
   it('should replace CANONICAL_HOST', () => {
-    return expandAsync('?host=CANONICAL_HOST').then(res => {
+    return expandUrlAsync('?host=CANONICAL_HOST').then(res => {
       expect(res).to.equal('?host=pinterest.com%3A8080');
     });
   });
 
   it('should replace CANONICAL_HOSTNAME', () => {
-    return expandAsync('?host=CANONICAL_HOSTNAME').then(res => {
+    return expandUrlAsync('?host=CANONICAL_HOSTNAME').then(res => {
       expect(res).to.equal('?host=pinterest.com');
     });
   });
 
   it('should replace CANONICAL_PATH', () => {
-    return expandAsync('?path=CANONICAL_PATH').then(res => {
+    return expandUrlAsync('?path=CANONICAL_PATH').then(res => {
       expect(res).to.equal('?path=%2Fpin1');
     });
   });
 
   it('should replace DOCUMENT_REFERRER', () => {
-    return expandAsync('?ref=DOCUMENT_REFERRER').then(res => {
+    return expandUrlAsync('?ref=DOCUMENT_REFERRER').then(res => {
       expect(res).to.equal('?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
     });
   });
@@ -221,7 +229,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve('http://example.org/page.html'));
-      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+      return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
     }).then(res => {
       expect(res).to.equal('?ref=http%3A%2F%2Fexample.org%2Fpage.html');
     });
@@ -234,7 +242,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve('http://example.org/page.html'));
-      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+      return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
     }).then(res => {
       expect(res).to.equal('?ref=');
     });
@@ -248,7 +256,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve(
               'https://example-org.cdn.ampproject.org/v/example.org/page.html'));
-      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+      return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
     }).then(res => {
       expect(res).to.equal('?ref=');
     });
@@ -262,32 +270,32 @@ describes.sandboxed('UrlReplacements', {}, () => {
       stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
           .returns(Promise.resolve(
               'https://cdn.ampproject.org/v/example.org/page.html'));
-      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+      return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
     }).then(res => {
       expect(res).to.equal('?ref=');
     });
   });
 
   it('should replace TITLE', () => {
-    return expandAsync('?title=TITLE').then(res => {
+    return expandUrlAsync('?title=TITLE').then(res => {
       expect(res).to.equal('?title=Pixel%20Test');
     });
   });
 
   it('should replace AMPDOC_URL', () => {
-    return expandAsync('?ref=AMPDOC_URL').then(res => {
+    return expandUrlAsync('?ref=AMPDOC_URL').then(res => {
       expect(res).to.not.match(/AMPDOC_URL/);
     });
   });
 
   it('should replace AMPDOC_HOST', () => {
-    return expandAsync('?ref=AMPDOC_HOST').then(res => {
+    return expandUrlAsync('?ref=AMPDOC_HOST').then(res => {
       expect(res).to.not.match(/AMPDOC_HOST/);
     });
   });
 
   it('should replace AMPDOC_HOSTNAME', () => {
-    return expandAsync('?ref=AMPDOC_HOSTNAME').then(res => {
+    return expandUrlAsync('?ref=AMPDOC_HOSTNAME').then(res => {
       expect(res).to.not.match(/AMPDOC_HOSTNAME/);
     });
   });
@@ -296,7 +304,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
-    return expandAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
+    return expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOST/);
     });
@@ -306,7 +314,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
-    return expandAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
+    return expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOSTNAME/);
     });
@@ -322,20 +330,20 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?url=SOURCE_URL')
+        .expandUrlAsync('?url=SOURCE_URL')
         .then(res => {
           expect(res).to.contain('example.com');
         });
   });
 
   it('should replace SOURCE_PATH', () => {
-    return expandAsync('?path=SOURCE_PATH').then(res => {
+    return expandUrlAsync('?path=SOURCE_PATH').then(res => {
       expect(res).to.not.match(/SOURCE_PATH/);
     });
   });
 
   it('should replace PAGE_VIEW_ID', () => {
-    return expandAsync('?pid=PAGE_VIEW_ID').then(res => {
+    return expandUrlAsync('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);
     });
   });
@@ -344,7 +352,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     setCookie(window, 'url-abc', 'cid-for-abc');
     // Make sure cookie does not exist
     setCookie(window, 'url-xyz', '');
-    return expandAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
+    return expandUrlAsync('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
       expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
     });
@@ -354,7 +362,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return getReplacements().then(replacements => {
       stubServiceForDoc(sandbox, ampdoc, 'cid', 'get')
           .returns(Promise.resolve());
-      return replacements.expandAsync('?a=CLIENT_ID(_ga)');
+      return replacements.expandUrlAsync('?a=CLIENT_ID(_ga)');
     }).then(res => {
       expect(res).to.equal('?a=');
     });
@@ -364,7 +372,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     setCookie(window, 'url-abc', 'cid-for-abc');
     // Make sure cookie does not exist
     setCookie(window, 'url-xyz', '');
-    return expandAsync('?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
+    return expandUrlAsync(
+        '?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
       expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
     });
@@ -372,7 +381,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should parse _ga cookie correctly', () => {
     setCookie(window, '_ga', 'GA1.2.12345.54321');
-    return expandAsync('?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
+    return expandUrlAsync(
+        '?a=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&b=CLIENT_ID(_ga)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
       expect(res).to.match(/^\?a=12345.54321&b=12345.54321/);
     });
@@ -385,42 +395,47 @@ describes.sandboxed('UrlReplacements', {}, () => {
       setCookie(window, 'url-abc', 'cid-for-abc');
       setCookie(window, 'url-xyz', 'cid-for-xyz');
       // Only requests cid-for-xyz in async path
-      return urlReplacements.expandAsync('b=CLIENT_ID(url-xyz)').then(res => {
-        expect(res).to.equal('b=cid-for-xyz');
-      }).then(() => {
-        const result = urlReplacements.expandSync(
-            '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)&c=CLIENT_ID(other)');
-        expect(result).to.equal('?a=&b=cid-for-xyz&c=');
-      });
+      return urlReplacements.expandUrlAsync('b=CLIENT_ID(url-xyz)')
+          .then(res => {
+            expect(res).to.equal('b=cid-for-xyz');
+          }).then(() => {
+            const result = urlReplacements.expandUrlSync(
+                '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)' +
+                '&c=CLIENT_ID(other)');
+            expect(result).to.equal('?a=&b=cid-for-xyz&c=');
+          });
     });
   });
 
   it('should replace VARIANT', () => {
-    return expect(expandAsync('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
+    return expect(expandUrlAsync(
+        '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
         /*opt_bindings*/undefined, {withVariant: true}))
         .to.eventually.equal('?x1=v1&x2=none&x3=');
   });
 
   it('should replace VARIANT with empty string if ' +
       'amp-experiment is not configured ', () => {
-    return expect(expandAsync('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
+    return expect(expandUrlAsync(
+        '?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
         .to.eventually.equal('?x1=&x2=&x3=');
   });
 
   it('should replace VARIANTS', () => {
-    return expect(expandAsync('?VARIANTS', /*opt_bindings*/undefined,
+    return expect(expandUrlAsync('?VARIANTS', /*opt_bindings*/undefined,
         {withVariant: true})).to.eventually.equal('?x1.v1!x2.none');
   });
 
   it('should replace VARIANTS with empty string if ' +
       'amp-experiment is not configured ', () => {
-    return expect(expandAsync('?VARIANTS')).to.eventually.equal('?');
+    return expect(expandUrlAsync('?VARIANTS')).to.eventually.equal('?');
   });
 
   it('should replace SHARE_TRACKING_INCOMING and' +
       ' SHARE_TRACKING_OUTGOING', () => {
     return expect(
-        expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
+        expandUrlAsync(
+            '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
             /*opt_bindings*/undefined, {withShareTracking: true}))
         .to.eventually.equal('?in=12345&out=54321');
   });
@@ -428,13 +443,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING' +
       ' with empty string if amp-share-tracking is not configured', () => {
     return expect(
-        expandAsync('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'))
+        expandUrlAsync(
+            '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'))
         .to.eventually.equal('?in=&out=');
   });
 
   it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
     return expect(
-        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
+        expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
             /*opt_bindings*/ undefined, {withStoryVariableService: true}))
         .to.eventually.equal('?index=546&id=id-123');
   });
@@ -442,18 +458,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
       ' with empty string if amp-story is not configured', () => {
     return expect(
-        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID'))
+        expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID'))
         .to.eventually.equal('?index=&id=');
   });
 
   it('should replace TIMESTAMP', () => {
-    return expandAsync('?ts=TIMESTAMP').then(res => {
+    return expandUrlAsync('?ts=TIMESTAMP').then(res => {
       expect(res).to.match(/ts=\d+/);
     });
   });
 
   it('should replace TIMESTAMP_ISO', () => {
-    return expandAsync('?tsf=TIMESTAMP_ISO').then(res => {
+    return expandUrlAsync('?tsf=TIMESTAMP_ISO').then(res => {
       expect(res).to.match(/tsf=\d+/);
     });
   });
@@ -461,68 +477,116 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should return correct ISO timestamp', () => {
     const fakeTime = 1499979336612;
     sandbox.useFakeTimers(fakeTime);
-    return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
+    return expect(expandUrlAsync('?tsf=TIMESTAMP_ISO'))
         .to.eventually.equal('?tsf=2017-07-13T20%3A55%3A36.612Z');
   });
 
   it('should replace TIMEZONE', () => {
-    return expandAsync('?tz=TIMEZONE').then(res => {
+    return expandUrlAsync('?tz=TIMEZONE').then(res => {
       expect(res).to.match(/tz=-?\d+/);
     });
   });
 
+  it('should replace TIMEZONE_CODE', () => {
+    return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
+      expect(res).to.match(/tz_code=\w+|^$/);
+    });
+  });
+
   it('should replace SCROLL_TOP', () => {
-    return expandAsync('?scrollTop=SCROLL_TOP').then(res => {
+    return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       expect(res).to.match(/scrollTop=\d+/);
     });
   });
 
   it('should replace SCROLL_LEFT', () => {
-    return expandAsync('?scrollLeft=SCROLL_LEFT').then(res => {
+    return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
       expect(res).to.match(/scrollLeft=\d+/);
     });
   });
 
   it('should replace SCROLL_HEIGHT', () => {
-    return expandAsync('?scrollHeight=SCROLL_HEIGHT').then(res => {
+    return expandUrlAsync('?scrollHeight=SCROLL_HEIGHT').then(res => {
       expect(res).to.match(/scrollHeight=\d+/);
     });
   });
 
   it('should replace SCREEN_WIDTH', () => {
-    return expandAsync('?sw=SCREEN_WIDTH').then(res => {
+    return expandUrlAsync('?sw=SCREEN_WIDTH').then(res => {
       expect(res).to.match(/sw=\d+/);
     });
   });
 
   it('should replace SCREEN_HEIGHT', () => {
-    return expandAsync('?sh=SCREEN_HEIGHT').then(res => {
+    return expandUrlAsync('?sh=SCREEN_HEIGHT').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace VIEWPORT_WIDTH', () => {
-    return expandAsync('?vw=VIEWPORT_WIDTH').then(res => {
+    return expandUrlAsync('?vw=VIEWPORT_WIDTH').then(res => {
       expect(res).to.match(/vw=\d+/);
     });
   });
 
   it('should replace VIEWPORT_HEIGHT', () => {
-    return expandAsync('?vh=VIEWPORT_HEIGHT').then(res => {
+    return expandUrlAsync('?vh=VIEWPORT_HEIGHT').then(res => {
       expect(res).to.match(/vh=\d+/);
     });
   });
 
   it('should replace PAGE_LOAD_TIME', () => {
-    return expandAsync('?sh=PAGE_LOAD_TIME').then(res => {
+    return expandUrlAsync('?sh=PAGE_LOAD_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
+  });
+
+  it('should replace FIRST_CONTENTFUL_PAINT', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'performanceFor')
+        .returns({
+          getFirstContentfulPaint() {
+            return 1;
+          },
+        });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('FIRST_CONTENTFUL_PAINT').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
+  });
+
+  it('should replace FIRST_VIEWPORT_READY', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'performanceFor')
+        .returns({
+          getFirstViewportReady() {
+            return 1;
+          },
+        });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('FIRST_VIEWPORT_READY').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
+  });
+
+  it('should replace MAKE_BODY_VISIBLE', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'performanceFor')
+        .returns({
+          getMakeBodyVisible() {
+            return 1;
+          },
+        });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('MAKE_BODY_VISIBLE').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
   });
 
   it('should reject protocol changes', () => {
     const win = getFakeWindow();
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-    return urlReplacements.expandAsync(
+    return urlReplacements.expandUrlAsync(
         'PROTOCOL://example.com/?r=RANDOM', {
           'PROTOCOL': Promise.resolve('abc'),
         }).then(expanded => {
@@ -536,7 +600,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       obj: {isVisible: () => true},
     };
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=BACKGROUND_STATE')
+        .expandUrlAsync('?sh=BACKGROUND_STATE')
         .then(res => {
           expect(res).to.equal('?sh=0');
         });
@@ -548,7 +612,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       obj: {isVisible: () => false},
     };
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=BACKGROUND_STATE')
+        .expandUrlAsync('?sh=BACKGROUND_STATE')
         .then(res => {
           expect(res).to.equal('?sh=1');
         });
@@ -556,18 +620,17 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'videoManagerForDoc')
-        .returns({
-          getVideoAnalyticsDetails(unusedVideo) {
-            return Promise.resolve({currentTime: 1.5});
-          },
-        });
+    sandbox.stub(Services, 'videoManagerForDoc').returns({
+      getAnalyticsDetails() {
+        return Promise.resolve({currentTime: 1.5});
+      },
+    });
     sandbox.stub(win.document, 'getElementById')
         .withArgs('video')
         .returns(document.createElement('video'));
 
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=VIDEO_STATE(video,currentTime)')
+        .expandUrlAsync('?sh=VIDEO_STATE(video,currentTime)')
         .then(res => {
           expect(res).to.equal('?sh=1.5');
         });
@@ -593,7 +656,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('is replaced if timing info is not available', () => {
       win.document.readyState = 'complete';
       return Services.urlReplacementsForDoc(win.ampdoc)
-          .expandAsync('?sh=PAGE_LOAD_TIME&s')
+          .expandUrlAsync('?sh=PAGE_LOAD_TIME&s')
           .then(res => {
             expect(res).to.match(/sh=&s/);
           });
@@ -601,7 +664,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
     it('is replaced if PAGE_LOAD_TIME is available within a delay', () => {
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-      const validMetric = urlReplacements.expandAsync('?sh=PAGE_LOAD_TIME&s');
+      const validMetric =
+          urlReplacements.expandUrlAsync('?sh=PAGE_LOAD_TIME&s');
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       win.document.readyState = 'complete';
       loadObservable.fire({type: 'load'});
@@ -612,21 +676,22 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace NAV_REDIRECT_COUNT', () => {
-    return expandAsync('?sh=NAV_REDIRECT_COUNT').then(res => {
+    return expandUrlAsync('?sh=NAV_REDIRECT_COUNT').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   // TODO(cvializ, #12336): unskip
   it.skip('should replace NAV_TIMING', () => {
-    return expandAsync('?a=NAV_TIMING(navigationStart)' +
+    return expandUrlAsync('?a=NAV_TIMING(navigationStart)' +
         '&b=NAV_TIMING(navigationStart,responseStart)').then(res => {
       expect(res).to.match(/a=\d+&b=\d+/);
     });
   });
 
   it('should replace NAV_TIMING when attribute names are invalid', () => {
-    return expandAsync('?a=NAV_TIMING(invalid)&b=NAV_TIMING(invalid,invalid)' +
+    return expandUrlAsync('?a=NAV_TIMING(invalid)' +
+        '&b=NAV_TIMING(invalid,invalid)' +
         '&c=NAV_TIMING(navigationStart,invalid)' +
         '&d=NAV_TIMING(invalid,responseStart)').then(res => {
       expect(res).to.match(/a=&b=&c=&d=/);
@@ -634,80 +699,80 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace NAV_TYPE', () => {
-    return expandAsync('?sh=NAV_TYPE').then(res => {
+    return expandUrlAsync('?sh=NAV_TYPE').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace DOMAIN_LOOKUP_TIME', () => {
-    return expandAsync('?sh=DOMAIN_LOOKUP_TIME').then(res => {
+    return expandUrlAsync('?sh=DOMAIN_LOOKUP_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace TCP_CONNECT_TIME', () => {
-    return expandAsync('?sh=TCP_CONNECT_TIME').then(res => {
+    return expandUrlAsync('?sh=TCP_CONNECT_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace SERVER_RESPONSE_TIME', () => {
-    return expandAsync('?sh=SERVER_RESPONSE_TIME').then(res => {
+    return expandUrlAsync('?sh=SERVER_RESPONSE_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace PAGE_DOWNLOAD_TIME', () => {
-    return expandAsync('?sh=PAGE_DOWNLOAD_TIME').then(res => {
+    return expandUrlAsync('?sh=PAGE_DOWNLOAD_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   // TODO(cvializ, #12336): unskip
   it.skip('should replace REDIRECT_TIME', () => {
-    return expandAsync('?sh=REDIRECT_TIME').then(res => {
+    return expandUrlAsync('?sh=REDIRECT_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace DOM_INTERACTIVE_TIME', () => {
-    return expandAsync('?sh=DOM_INTERACTIVE_TIME').then(res => {
+    return expandUrlAsync('?sh=DOM_INTERACTIVE_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace CONTENT_LOAD_TIME', () => {
-    return expandAsync('?sh=CONTENT_LOAD_TIME').then(res => {
+    return expandUrlAsync('?sh=CONTENT_LOAD_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace AVAILABLE_SCREEN_HEIGHT', () => {
-    return expandAsync('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
+    return expandUrlAsync('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace AVAILABLE_SCREEN_WIDTH', () => {
-    return expandAsync('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
+    return expandUrlAsync('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace SCREEN_COLOR_DEPTH', () => {
-    return expandAsync('?sh=SCREEN_COLOR_DEPTH').then(res => {
+    return expandUrlAsync('?sh=SCREEN_COLOR_DEPTH').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
   it('should replace BROWSER_LANGUAGE', () => {
-    return expandAsync('?sh=BROWSER_LANGUAGE').then(res => {
+    return expandUrlAsync('?sh=BROWSER_LANGUAGE').then(res => {
       expect(res).to.match(/sh=\w+/);
     });
   });
 
   it('should replace USER_AGENT', () => {
-    return expandAsync('?sh=USER_AGENT').then(res => {
+    return expandUrlAsync('?sh=USER_AGENT').then(res => {
       expect(res).to.match(/sh=\w+/);
     });
   });
@@ -716,7 +781,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return getReplacements().then(replacements => {
       sandbox.stub(viewerService, 'getViewerOrigin').returns(
           Promise.resolve('https://www.google.com'));
-      return replacements.expandAsync('?sh=VIEWER').then(res => {
+      return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
         expect(res).to.equal('?sh=https%3A%2F%2Fwww.google.com');
       });
     });
@@ -726,39 +791,71 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return getReplacements().then(replacements => {
       sandbox.stub(viewerService, 'getViewerOrigin').returns(
           Promise.resolve(''));
-      return replacements.expandAsync('?sh=VIEWER').then(res => {
+      return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
         expect(res).to.equal('?sh=');
       });
     });
   });
 
   it('should replace TOTAL_ENGAGED_TIME', () => {
-    return expandAsync('?sh=TOTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
+    return expandUrlAsync('?sh=TOTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
         {withActivity: true}).then(res => {
       expect(res).to.match(/sh=\d+/);
     });
   });
 
+  it('should replace INCREMENTAL_ENGAGED_TIME', () => {
+    return expandUrlAsync('?sh=' +
+      'INCREMENTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
+    {withActivity: true}).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should replace AMP_VERSION', () => {
-    return expandAsync('?sh=AMP_VERSION').then(res => {
+    return expandUrlAsync('?sh=AMP_VERSION').then(res => {
       expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
     });
   });
 
+  it('should replace ANCESTOR_ORIGIN', () => {
+    return expect(
+        expandUrlAsync('ANCESTOR_ORIGIN/recipes',
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
+              ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
+              fragmentParam: (param, defaultValue) => {
+                return param == 'ice_cream' ? '2' : defaultValue;
+              },
+            }}))
+        .to.eventually.equal('http://margarine-paradise.com/recipes');
+  });
+
+  it('should replace FRAGMENT_PARAM with 2', () => {
+    return expect(
+        expandUrlAsync('?sh=FRAGMENT_PARAM(ice_cream)&s',
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
+              ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
+              fragmentParam: (param, defaultValue) => {
+                return param == 'ice_cream' ? '2' : defaultValue;
+              },
+            }}))
+        .to.eventually.equal('?sh=2&s');
+  });
+
   it('should accept $expressions', () => {
-    return expandAsync('?href=$CANONICAL_URL').then(res => {
+    return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
     });
   });
 
   it('should ignore unknown substitutions', () => {
-    return expandAsync('?a=UNKNOWN').then(res => {
+    return expandUrlAsync('?a=UNKNOWN').then(res => {
       expect(res).to.equal('?a=UNKNOWN');
     });
   });
 
   it('should replace several substitutions', () => {
-    return expandAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE')
+    return expandUrlAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE')
         .then(res => {
           expect(res).to.equal('?a=UNKNOWN' +
               '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
@@ -769,10 +866,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace new substitutions', () => {
     const replacements = Services.urlReplacementsForDoc(window.document);
     replacements.getVariableSource().set('ONE', () => 'a');
-    expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=a');
+    expect(replacements.expandUrlAsync('?a=ONE')).to.eventually.equal('?a=a');
     replacements.getVariableSource().set('ONE', () => 'b');
     replacements.getVariableSource().set('TWO', () => 'b');
-    return expect(replacements.expandAsync('?a=ONE&b=TWO'))
+    return expect(replacements.expandUrlAsync('?a=ONE&b=TWO'))
         .to.eventually.equal('?a=b&b=b');
   });
 
@@ -782,7 +879,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     replacements.getVariableSource().set('ONE', () => {
       throw new Error('boom');
     });
-    const p = expect(replacements.expandAsync('?a=ONE')).to.eventually
+    const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually
         .equal('?a=');
     expect(() => {
       clock.tick(1);
@@ -796,7 +893,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     replacements.getVariableSource().set('ONE', () => {
       return Promise.reject(new Error('boom'));
     });
-    return expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=')
+    return expect(replacements.expandUrlAsync('?a=ONE'))
+        .to.eventually.equal('?a=')
         .then(() => {
           expect(() => {
             clock.tick(1);
@@ -807,7 +905,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should support positional arguments', () => {
     const replacements = Services.urlReplacementsForDoc(window.document);
     replacements.getVariableSource().set('FN', one => one);
-    return expect(replacements.expandAsync('?a=FN(xyz1)')).to
+    return expect(replacements.expandUrlAsync('?a=FN(xyz1)')).to
         .eventually.equal('?a=xyz1');
   });
 
@@ -816,7 +914,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
-    return expect(replacements.expandAsync('?a=FN(xyz,abc)')).to
+    return expect(replacements.expandUrlAsync('?a=FN(xyz,abc)')).to
         .eventually.equal('?a=xyz-abc');
   });
 
@@ -825,7 +923,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     replacements.getVariableSource().set('FN', (one, two) => {
       return one + '-' + two;
     });
-    return expect(replacements.expandAsync('?a=FN(xy.z,ab.c)')).to
+    return expect(replacements.expandUrlAsync('?a=FN(xy.z,ab.c)')).to
         .eventually.equal('?a=xy.z-ab.c');
   });
 
@@ -835,33 +933,35 @@ describes.sandboxed('UrlReplacements', {}, () => {
     replacements.getVariableSource().set('P2', () => Promise.resolve('xyz'));
     replacements.getVariableSource().set('P3', () => Promise.resolve('123'));
     replacements.getVariableSource().set('OTHER', () => 'foo');
-    return expect(replacements.expandAsync('?a=P1&b=P2&c=P3&d=OTHER'))
+    return expect(replacements.expandUrlAsync('?a=P1&b=P2&c=P3&d=OTHER'))
         .to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
   });
 
   it('should override an existing binding', () => {
-    return expandAsync('ord=RANDOM?', {'RANDOM': 'abc'}).then(res => {
+    return expandUrlAsync('ord=RANDOM?', {'RANDOM': 'abc'}).then(res => {
       expect(res).to.match(/ord=abc\?$/);
     });
   });
 
   it('should add an additional binding', () => {
-    return expandAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'}).then(res => {
-      expect(res).to.match(/rid=abc\?$/);
-    });
+    return expandUrlAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'})
+        .then(res => {
+          expect(res).to.match(/rid=abc\?$/);
+        });
   });
 
   it('should NOT overwrite the cached expression with new bindings', () => {
-    return expandAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'}).then(res => {
-      expect(res).to.match(/rid=abc\?$/);
-      return expandAsync('rid=NONSTANDARD?').then(res => {
-        expect(res).to.match(/rid=NONSTANDARD\?$/);
-      });
-    });
+    return expandUrlAsync('rid=NONSTANDARD?', {'NONSTANDARD': 'abc'})
+        .then(res => {
+          expect(res).to.match(/rid=abc\?$/);
+          return expandUrlAsync('rid=NONSTANDARD?').then(res => {
+            expect(res).to.match(/rid=NONSTANDARD\?$/);
+          });
+        });
   });
 
   it('should expand bindings as functions', () => {
-    return expandAsync('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
+    return expandUrlAsync('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
         .then(
             res => {
               expect(res).to.match(/rid=func_abc\?$/);
@@ -869,7 +969,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should expand bindings as functions with promise', () => {
-    return expandAsync('rid=FUNC(abc)?', {
+    return expandUrlAsync('rid=FUNC(abc)?', {
       'FUNC': value => Promise.resolve('func_' + value),
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
@@ -877,38 +977,38 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should expand null as empty string', () => {
-    return expandAsync('v=VALUE', {'VALUE': null}).then(res => {
+    return expandUrlAsync('v=VALUE', {'VALUE': null}).then(res => {
       expect(res).to.equal('v=');
     });
   });
 
   it('should expand undefined as empty string', () => {
-    return expandAsync('v=VALUE', {'VALUE': undefined}).then(res => {
+    return expandUrlAsync('v=VALUE', {'VALUE': undefined}).then(res => {
       expect(res).to.equal('v=');
     });
   });
 
   it('should expand empty string as empty string', () => {
-    return expandAsync('v=VALUE', {'VALUE': ''}).then(res => {
+    return expandUrlAsync('v=VALUE', {'VALUE': ''}).then(res => {
       expect(res).to.equal('v=');
     });
   });
 
   it('should expand zero as zero', () => {
-    return expandAsync('v=VALUE', {'VALUE': 0}).then(res => {
+    return expandUrlAsync('v=VALUE', {'VALUE': 0}).then(res => {
       expect(res).to.equal('v=0');
     });
   });
 
   it('should expand false as false', () => {
-    return expandAsync('v=VALUE', {'VALUE': false}).then(res => {
+    return expandUrlAsync('v=VALUE', {'VALUE': false}).then(res => {
       expect(res).to.equal('v=false');
     });
   });
 
   it('should resolve sub-included bindings', () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
-    return expandAsync('r=RANDOM&ro=RANDOM_OTHER?', {'RANDOM_OTHER': 'ABC'})
+    return expandUrlAsync('r=RANDOM&ro=RANDOM_OTHER?', {'RANDOM_OTHER': 'ABC'})
         .then(
             res => {
               expect(res).to.match(/r=(\d+(\.\d+)?)&ro=ABC\?$/);
@@ -916,7 +1016,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should expand multiple vars', () => {
-    return expandAsync('a=VALUEA&b=VALUEB?', {
+    return expandUrlAsync('a=VALUEA&b=VALUEB?', {
       'VALUEA': 'aaa',
       'VALUEB': 'bbb',
     }).then(res => {
@@ -935,7 +1035,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
         .then(res => {
           expect(res).to.match(/sh=foo&s/);
         });
@@ -948,7 +1048,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Promise.resolve();
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=QUERY_PARAM(query_string_param1)&s')
+        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
         .then(res => {
           expect(res).to.match(/sh=&s/);
         });
@@ -961,7 +1061,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       return Promise.resolve();
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
-        .expandAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+        .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
         .then(res => {
           expect(res).to.match(/sh=default_value&s/);
         });
@@ -990,11 +1090,23 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
+  it('should collect unwhitelisted vars', () => {
+    const win = getFakeWindow();
+    const element = document.createElement('amp-foo');
+    element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .collectUnwhitelistedVars(element)
+        .then(res => {
+          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
+        });
+  });
+
   it('should reject javascript protocol', () => {
     const win = getFakeWindow();
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     /*eslint no-script-url: 0*/
-    return urlReplacements.expandAsync('javascript://example.com/?r=RANDOM')
+    return urlReplacements.expandUrlAsync('javascript://example.com/?r=RANDOM')
         .then(
             () => { throw new Error('never here'); },
             err => {
@@ -1009,7 +1121,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
       urlReplacements.ampdoc.win.performance.timing.loadEventStart = 109;
       const collectVars = {};
-      const expanded = urlReplacements.expandSync(
+      const expanded = urlReplacements.expandUrlSync(
           'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
           {
             'CONST': 'ABC',
@@ -1029,12 +1141,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should reject protocol changes', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-      let expanded = urlReplacements.expandSync(
+      let expanded = urlReplacements.expandUrlSync(
           'PROTOCOL://example.com/?r=RANDOM', {
             'PROTOCOL': 'abc',
           });
       expect(expanded).to.equal('PROTOCOL://example.com/?r=RANDOM');
-      expanded = urlReplacements.expandSync(
+      expanded = urlReplacements.expandUrlSync(
           'FUNCT://example.com/?r=RANDOM', {
             'FUNCT': function() { return 'abc'; },
           });
@@ -1046,7 +1158,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
       expect(() => {
         /*eslint no-script-url: 0*/
-        urlReplacements.expandSync('javascript://example.com/?r=RANDOM');
+        urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
       }).to.throw('invalid protocol');
     });
   });
@@ -1054,7 +1166,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should expand sync and respect white list', () => {
     const win = getFakeWindow();
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-    const expanded = urlReplacements.expandSync(
+    const expanded = urlReplacements.expandUrlSync(
         'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
         {
           'CONST': 'ABC',
@@ -1085,7 +1197,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       accessServiceMock.verify();
     });
 
-    function expandAsync(url, opt_disabled) {
+    function expandUrlAsync(url, opt_disabled) {
       return createIframePromise().then(iframe => {
         iframe.doc.title = 'Pixel Test';
         const link = iframe.doc.createElement('link');
@@ -1101,7 +1213,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           }
           return Promise.resolve(accessService);
         };
-        return replacements.expandAsync(url);
+        return replacements.expandUrlAsync(url);
       });
     }
 
@@ -1109,7 +1221,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       accessServiceMock.expects('getAccessReaderId')
           .returns(Promise.resolve('reader1'))
           .once();
-      return expandAsync('?a=ACCESS_READER_ID') .then(res => {
+      return expandUrlAsync('?a=ACCESS_READER_ID') .then(res => {
         expect(res).to.match(/a=reader1/);
         expect(userErrorStub).to.have.not.been.called;
       });
@@ -1120,7 +1232,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .withExactArgs('field1')
           .returns(Promise.resolve('value1'))
           .once();
-      return expandAsync('?a=AUTHDATA(field1)').then(res => {
+      return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
         expect(userErrorStub).to.have.not.been.called;
       });
@@ -1129,7 +1241,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should report error if not available', () => {
       accessServiceMock.expects('getAccessReaderId')
           .never();
-      return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
+      return expandUrlAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
           .then(res => {
             expect(res).to.match(/a=;/);
             expect(userErrorStub).to.be.calledOnce;
@@ -1262,7 +1374,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       expect(a.href).to.equal(
           'https://canonical.com/link?out=bar&c=');
       // Get a cid, then proceed.
-      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+      return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
@@ -1289,7 +1401,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-replace', 'CLIENT_ID');
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
-      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+      return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example.com/link?out=QUERY_PARAM(foo)&guid=123&c=test-cid(abc)');
@@ -1302,7 +1414,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-replace', 'CLIENT_ID');
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
-      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+      return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example2.com/link?out=QUERY_PARAM(foo)&guid=123&c=CLIENT_ID(abc)');
@@ -1314,7 +1426,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
-      return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
+      return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
         urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://whitelisted.com/link?out=bar&guid=123&c=test-cid(abc)');

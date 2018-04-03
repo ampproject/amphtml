@@ -1,0 +1,120 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Loading indicator.
+ * Hide when `i-amphtml-subs-loading` class is not set.
+ */
+html:not(.i-amphtml-subs-loading) [subscriptions-section="loading"] {
+  display: none !important;
+}
+
+
+/**
+ * Content section.
+ * Hide when not known or denied.
+ */
+html:not(.i-amphtml-subs-grant-yes) [subscriptions-section="content"] {
+  display: none !important;
+}
+
+
+/**
+ * Content-not-granted section.
+ * Hide when not known or granted.
+ */
+html:not(.i-amphtml-subs-grant-no) [subscriptions-section="content-not-granted"] {
+  display: none !important;
+}
+
+
+/**
+ * Actions sections.
+ * Hide when not known or delegated.
+ */
+html.i-amphtml-subs-grant-unk [subscriptions-section="actions"],
+html.i-amphtml-subs-delegated [subscriptions-section="actions"] {
+  display: none !important;
+}
+
+
+/**
+ * Actions.
+ */
+
+/** Hide actions until state is known. */
+html.i-amphtml-subs-grant-unk [subscriptions-action] {
+  display: none !important;
+}
+
+[subscriptions-actions]:not([i-amphtml-subs-display]),
+[subscriptions-section="actions"]:not([i-amphtml-subs-display]),
+[subscriptions-action]:not([i-amphtml-subs-display]) {
+  display: none !important;
+}
+
+/** Dialog. */
+amp-subscriptions-dialog {
+  display: block !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  margin-left: 0 !important;
+  width: 100% !important;
+  z-index: 2147483641;  /* Behind lightbox if available. */
+  max-height: 90vh;
+  box-sizing: border-box;
+  opacity: 1;
+  background-image: none;
+  background-color: #fff;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
+  margin-bottom: 0;
+  transition: transform 0.3s ease-in;
+}
+
+.i-amphtml-subs-dialog-close-button {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  top: -28px;
+  right: 0;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="13" height="13" viewBox="341 8 13 13" xmlns="http://www.w3.org/2000/svg"><path fill="#4F4F4F" d="M354 9.31L352.69 8l-5.19 5.19L342.31 8 341 9.31l5.19 5.19-5.19 5.19 1.31 1.31 5.19-5.19 5.19 5.19 1.31-1.31-5.19-5.19z" fill-rule="evenodd"/></svg>');
+  background-size: 13px 13px;
+  background-position: 9px center;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  box-shadow: 0 -1px 1px 0 rgba(0,0,0, 0.2);
+  border: none;
+  border-radius: 12px 0 0 0;
+  cursor: pointer;
+}
+
+html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+  display: none;
+}
+
+/**
+ * The maximum width allowed for the dialog is 480 px. Default width
+ * is 100% (for container width < 480 px).
+ */
+@media (min-width: 480px) {
+  amp-subscriptions-dialog {
+    width: 480px !important;
+    left: -240px !important;
+    margin-left: calc(100vw - 100vw / 2) !important;
+  }
+}

@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
+import * as log from '../../../../src/log';
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {variableServiceFor} from '../variables';
-import {
-  installUserNotificationManagerForTesting,
-} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {LayoutPriority} from '../../../../src/layout';
+import {Services} from '../../../../src/services';
+import {cidServiceForDocForTesting} from
+  '../../../../src/service/cid-impl';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
+import {
+  installUserNotificationManagerForTesting,
+} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 import {map} from '../../../../src/utils/object';
-import {cidServiceForDocForTesting} from
-  '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
-import * as log from '../../../../src/log';
+import {
+  newPerformanceResourceTiming,
+  newResourceTimingSpec,
+} from './test-resource-timing';
+import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -76,7 +82,7 @@ describes.realWin('amp-analytics', {
     resetServiceForTesting(win, 'xhr');
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
-        expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
+        expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
         } else {
@@ -184,7 +190,7 @@ describes.realWin('amp-analytics', {
       describe('analytics vendor: ' + vendor, function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
-              '. If this test fails update vendor-requests.json', () => {
+              '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                 Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
@@ -217,51 +223,92 @@ describes.realWin('amp-analytics', {
                 });
             analytics.createdCallback();
             analytics.buildCallback();
-            return analytics.layoutCallback().then(() => {
-              return analytics.handleEvent_({
-                request: name,
-              }, {
-                vars: Object.create(null),
-              }).then(urls => {
-                const url = urls[0];
-                const vendorData = VENDOR_REQUESTS[vendor];
-                if (!vendorData) {
-                  throw new Error('Add vendor ' + vendor +
-                      ' to vendor-requests.json');
-                }
-                const val = vendorData[name];
-                if (val == '<ignore for test>') {
-                  return;
-                }
-                if (val == null) {
-                  throw new Error('Define ' + vendor + '.' + name +
-                      ' in vendor-requests.json. Expected value: ' + url);
-                }
-                actualResults[vendor][name] = url;
-                // Write this out for easy copy pasting.
-                // top.document.documentElement.setAttribute('json',
-                //     JSON.stringify(actualResults, null, '  '));
-                expect(url).to.equal(val);
-              });
+            yield analytics.layoutCallback();
+
+            // Wait for event queue to clear and reset sendRequestSpy
+            // to avoid pageView pings.
+            yield macroTask();
+            sendRequestSpy.reset();
+
+
+            analytics.handleEvent_({
+              request: name,
+            }, {
+              vars: Object.create(null),
             });
+            yield macroTask();
+            expect(sendRequestSpy).to.be.calledOnce;
+            const url = sendRequestSpy.args[0][0];
+
+            expect(sendRequestSpy).to.be.calledOnce;
+            const vendorData = VENDOR_REQUESTS[vendor];
+            if (!vendorData) {
+              throw new Error('Add vendor ' + vendor +
+                  ' to vendor-requests.json');
+            }
+            const val = vendorData[name];
+            if (val == '<ignore for test>') {
+              return;
+            }
+            if (val == null) {
+              throw new Error('Define ' + vendor + '.' + name +
+                  ' in vendor-requests.json. Expected value: ' + url);
+            }
+            actualResults[vendor][name] = url;
+            // Write this out for easy copy pasting.
+            // top.document.documentElement.setAttribute('json',
+            //     JSON.stringify(actualResults, null, '  '));
+            expect(url).to.equal(val);
           });
         }
       });
     }
   });
 
-  it('preload script', function() {
+  it('does not unnecessarily preload iframe transport script', function() {
     const el = doc.createElement('amp-analytics');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
     analytics.buildCallback();
     analytics.preconnectCallback();
-    return Promise.resolve().then(() => {
-      const preloads = doc.querySelectorAll('link[rel=preload]');
-      expect(preloads).to.have.length(1);
-      expect(preloads[0]).to.have.property(
-          'href',
-          'http://localhost:9876/dist/iframe-transport-client-lib.js');
+    return analytics.layoutCallback().then(() => {
+      expect(preloadSpy).to.have.not.been.called;
+    });
+  });
+
+  it('preloads iframe transport script if relevant', function() {
+    const el = doc.createElement('amp-analytics');
+    el.setAttribute('type', 'foo');
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
+    sandbox.stub(analytics, 'predefinedConfig_').value(
+        {
+          'foo': {
+            'transport': {
+              'iframe': 'https://www.google.com',
+            },
+            'triggers': {
+              'sample_visibility_trigger': {
+                'on': 'visible',
+                'request': 'sample_visibility_request',
+              },
+            },
+            'requests': {
+              'sample_visibility_request': 'fake-request',
+            },
+          },
+        }
+    );
+    analytics.buildCallback();
+    analytics.preconnectCallback();
+    return analytics.layoutCallback().then(() => {
+      expect(preloadSpy.withArgs(
+          'http://localhost:9876/dist/iframe-transport-client-lib.js',
+          'script')).to.be.calledOnce;
     });
   });
 
@@ -357,8 +404,10 @@ describes.realWin('amp-analytics', {
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
+    const spy = sandbox.spy(analytics, 'expandAndSendRequest_');
 
     return waitForNoSendRequest(analytics).then(() => {
+      expect(spy).to.have.not.been.called;
       expect(sendRequestSpy).to.have.not.been.called;
     });
   });
@@ -426,6 +475,20 @@ describes.realWin('amp-analytics', {
     });
   });
 
+  it('should not replace HTML_ATTR outside of amp-ad', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'htmlAttrRequest': 'https://example.com/bar&ids=${htmlAttr(div,id)}',
+      },
+      'triggers': [{'on': 'visible', 'request': 'htmlAttrRequest'}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(decodeURIComponent(sendRequestSpy.args[0][0])).to.equal('https://example.com/bar&ids=HTML_ATTR(div,id)');
+    });
+  });
+
   it('fills cid', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
@@ -490,7 +553,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag({
         'requests': {'foo': {
           'baseUrl': 'https://example.com/${bar}',
-          'maxDelay': 0,
+          'batchInterval': 0,
         }, 'bar': 'bar-i'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': 'xyz'});
@@ -500,7 +563,7 @@ describes.realWin('amp-analytics', {
             'foo': 'foo',
             'bar': {
               'baseUrl': 'bar-v',
-              'maxDelay': 2,
+              'batchInterval': 2,
             }},
         },
       };
@@ -508,11 +571,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-i',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-i',
-            'maxDelay': 2,
+            'batchInterval': 2,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -525,10 +588,10 @@ describes.realWin('amp-analytics', {
         'requests': {
           'foo': {
             'baseUrl': 'https://example.com/${bar}',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         },
         'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -538,7 +601,7 @@ describes.realWin('amp-analytics', {
           'requests': {
             'foo': {
               'baseUrl': 'foo',
-              'maxDelay': 5,
+              'batchInterval': 5,
             },
             'bar': {
               'baseUrl': 'bar-v',
@@ -549,11 +612,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-v',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-v',
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -1623,7 +1686,7 @@ describes.realWin('amp-analytics', {
       });
 
       return waitForNoSendRequest(analytics).then(() => {
-        expect(addStub).to.not.be.called;;
+        expect(addStub).to.not.be.called;
       });
     });
 
@@ -1790,7 +1853,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('getPriority', () => {
+  describe('getLayoutPriority', () => {
     function getConfig() {
       return {
         'requests': {
@@ -1808,12 +1871,14 @@ describes.realWin('amp-analytics', {
     }
 
     it('is 1 for non-inabox', () => {
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
+          LayoutPriority.METADATA);
     });
 
     it('is 0 for inabox', () => {
       env.win.AMP_MODE.runtime = 'inabox';
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(0);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
+          LayoutPriority.CONTENT);
     });
   });
 
@@ -1870,6 +1935,91 @@ describes.realWin('amp-analytics', {
         expect(sendRequestSpy).to.be.calledOnce;
         expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
       });
+    });
+  });
+
+  describe('resourceTiming', () => {
+    // NOTE: The following tests verify plumbing for resource timing variables.
+    // More tests for resource timing can be found in test-resource-timing.js.
+    const newConfig = function() {
+      return {
+        'requests': {
+          'pageview': 'https://ping.example.com/endpoint',
+        },
+        'triggers': [{
+          'on': 'ini-load',
+          'request': 'pageview',
+          'extraUrlParams': {
+            'rt': '${resourceTiming}',
+          },
+          'resourceTimingSpec': newResourceTimingSpec(),
+        }],
+      };
+    };
+
+    const runResourceTimingTest = function(entries, config, expectedPing) {
+      sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
+      });
+    };
+
+    it('should evaluate ${resourceTiming} to be empty by default', () => {
+      runResourceTimingTest(
+          [], newConfig(), 'https://ping.example.com/endpoint?rt=');
+    });
+
+    it('should capture multiple matching resources', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      runResourceTimingTest(
+          [entry1, entry2], newConfig(),
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar-script-100-500-7200~' +
+              'foo_bar-script-700-100-0');
+    });
+
+    it('should url encode variables', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      const config = newConfig();
+      const spec = config['triggers'][0]['resourceTimingSpec'];
+      spec['encoding']['entry'] = '${key}?${startTime},${duration}';
+      spec['encoding']['delim'] = ':';
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+    });
+
+
+    it('should ignore resourceTimingSpec outside of triggers', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const config = newConfig();
+      config['resourceTimingSpec'] =
+          config['triggers'][0]['resourceTimingSpec'];
+      delete config['triggers'][0]['resourceTimingSpec'];
+      runResourceTimingTest(
+          [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
+    });
+
+    it('should only report timings on ini-load', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const config = newConfig();
+      config['triggers'][0]['on'] = 'visible';
+      runResourceTimingTest(
+          [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });
 });

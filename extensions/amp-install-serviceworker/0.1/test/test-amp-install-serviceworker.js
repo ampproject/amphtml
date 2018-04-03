@@ -16,13 +16,13 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {loadPromise} from '../../../../src/event-helper';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
 
 describes.realWin('amp-install-serviceworker', {
@@ -218,7 +218,7 @@ describes.realWin('amp-install-serviceworker', {
         appendChild.call(install, iframe);
       };
       let deferredMutate;
-      implementation.deferMutate = fn => {
+      implementation.mutateElement = fn => {
         expect(deferredMutate).to.be.undefined;
         deferredMutate = fn;
       };
@@ -368,12 +368,12 @@ describes.fakeWin('url rewriter', {
   });
 
   describe('start shell preload', () => {
-    let deferMutateStub;
+    let mutateElementStub;
     let preloadStub;
 
     beforeEach(() => {
-      deferMutateStub = sandbox.stub(implementation, 'deferMutate').callsFake(
-          callback => callback());
+      mutateElementStub = sandbox.stub(implementation, 'mutateElement')
+          .callsFake(callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');
     });
@@ -400,7 +400,7 @@ describes.fakeWin('url rewriter', {
         return viewer.whenFirstVisible();
       }).then(() => {
         expect(preloadStub).to.be.calledOnce;
-        expect(deferMutateStub).to.be.calledOnce;
+        expect(mutateElementStub).to.be.calledOnce;
       });
     });
   });

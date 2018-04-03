@@ -183,6 +183,7 @@ requirement: {
   error_message: 'Use jsonParse instead. Usage in 3p ads can be whitelisted for now.'
   value: 'JSON.parse'
   whitelist: 'ads/adfox.js'
+  whitelist: 'ads/adincube.js'
   whitelist: 'ads/imedia.js'
   whitelist: 'ads/kargo.js'
   whitelist: 'ads/mads.js'
@@ -204,6 +205,8 @@ requirement: {
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/netletix.js'
   whitelist: 'ads/yandex.js'
+  whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
+  whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
 }
 
 requirement: {
@@ -214,7 +217,7 @@ requirement: {
   whitelist: 'src/web-worker/web-worker.js'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
   whitelist: 'ads/google/imaVideo.js'
 }
 
@@ -226,5 +229,33 @@ requirement: {
   value: 'JSON.stringify:function((?JsonObject|AmpViewerMessage|string|number|boolean|undefined|Array),!Function=)'
   # Allowing violations in ads code for now.
   # We would have to fix this to property obfuscated the 3p frame code.
-  whitelist: 'ads/google/doubleclick.js'
+  whitelist: 'ads/google/deprecated_doubleclick.js'
+}
+
+# Cookies
+
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use cookies#getCookie or cookies#setCookie to read or write cookies. Note that usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'Document.prototype.cookie'
+  whitelist: 'src/cookies.js'
+}
+
+requirement: {
+  type: BANNED_NAME
+  error_message: 'Usage of cookies requires dedicated review due to being privacy sensitive. Please file an issue asking for permission to use if you have not yet done so'
+  value: 'module$src$cookies.getCookie'
+  value: 'module$src$cookies.setCookie'
+  whitelist: 'src/cookies.js'
+  whitelist: 'src/experiments.js'
+  whitelist: 'src/service/cid-api.js'
+  whitelist: 'src/service/cid-impl.js'
+}
+
+# Function
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Function.prototype.name is not allowed due to IE11 non-support.'
+  value: 'Function.prototype.name'
 }

@@ -48,7 +48,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 }
 
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
-  resetServiceForTesting(ampdoc.win, 'viewer');
+  resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
   methods.forEach(method => {
     impl[method] = () => {};
@@ -94,8 +94,8 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
   expect(computedStyle.getPropertyValue('top')).to.equal('0px');
   expect(computedStyle.getPropertyValue('left')).to.equal('0px');
-  expect(computedStyle.getPropertyValue('width')).to.equal('2px');
-  expect(computedStyle.getPropertyValue('height')).to.equal('2px');
+  expect(computedStyle.getPropertyValue('width')).to.equal('4px');
+  expect(computedStyle.getPropertyValue('height')).to.equal('4px');
   expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
   expect(computedStyle.getPropertyValue('overflow')).to.equal('hidden');
   expect(computedStyle.getPropertyValue('border')).to.contain('none');

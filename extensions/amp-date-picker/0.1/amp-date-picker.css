@@ -14,8 +14,256 @@
  * limitations under the License.
  */
 
-@import '../../../node_modules/react-dates/lib/css/_datepicker.css';
+@import '../../../third_party/react-dates/_datepicker.css';
+
+
+amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 10px;
+  z-index: 10;
+}
+
+amp-date-picker[fullscreen] .i-amphtml-date-picker-container,
+amp-date-picker[with-full-screen-portal],
+amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.amp-date-picker-calendar-container * {
+  box-sizing: border-box;
+}
+
+.amp-date-picker-calendar-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
 
 .DateInput_input {
   font-size: 100%;
+}
+
+.CalendarMonth_caption {
+  font-weight: lighter;
+  margin: 0 -30px 38px;
+  padding-bottom: 20px;
+  background-color: #000;
+  color: #fff;
+}
+
+.CalendarMonth_caption > * {
+  font-weight: lighter;
+}
+
+.DayPicker_weekHeader {
+  top: 75px;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li::first-letter {
+  font-size: small;
+}
+
+.i-amphtml-default-week-day-format .DayPicker_weekHeader li {
+  font-size: 0;
+}
+
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-color: #fff;
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container, /* remove after update to react-dates v16 */
+.CalendarDay__default {
+  border: 1px solid transparent;
+}
+
+.CalendarDay_container:hover, /* remove after update to react-dates v16 */
+.CalendarDay__default:hover {
+  background-color: #e4e7e7;
+  border: 1px solid #e4e7e7;
+}
+
+.CalendarDay__blocked_calendar {
+  border: 1px solid #cacccd;
+}
+
+.CalendarDay__blocked_calendar.CalendarDay__hovered_span {
+  background-color: #ff8080;
+  border: 1px solid #ff8080;
+}
+
+.CalendarDay__blocked_out_of_range,
+.CalendarDay__blocked_out_of_range:active,
+.CalendarDay__blocked_out_of_range:hover {
+  color: rgb(0, 0, 0, .1);
+  border: 1px solid transparent;
+}
+
+.CalendarDay__hovered_span,
+.CalendarDay__hovered_span:hover,
+.CalendarDay__selected_span,
+.CalendarDay__selected_span:active,
+.CalendarDay__selected_span:hover {
+  background-color: #9bbbdd;
+  border: 1px solid #9bbbdd;
+  color: #000;
+}
+
+.CalendarDay__selected,
+.CalendarDay__selected_start,
+.CalendarDay__selected:active,
+.CalendarDay__selected:hover {
+  background-color: #0654ab;
+  border: 1px solid #0654ab;
+  color: #fff;
+}
+
+.DayPickerNavigation_leftButton__horizontal,
+.DayPickerNavigation_leftButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>');
+}
+
+.DayPickerNavigation_rightButton__horizontal,
+.DayPickerNavigation_rightButton__horizontal:active {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>');
+}
+
+.DayPickerNavigation_button__horizontal,
+.DayPickerNavigation_button__horizontal:hover,
+.DayPickerNavigation_button__horizontal:active {
+  border: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 55% 50%;
+  height: 30px;
+  width: 26px;
+  background-size: 13px 20px;
+}
+
+.DayPickerNavigation_svg__horizontal {
+  display: none;
+}
+
+.DateInput_fangShape {
+  fill: #000;
+}
+
+.DayPickerKeyboardShortcuts_show,
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #0654ab;
+  border-radius: 50%;
+  color: #0654ab;
+  width: 22px;
+  height: 22px;
+  margin: 10px;
+}
+
+.DayPickerKeyboardShortcuts_show:hover {
+  border: 2px solid #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_show:hover .DayPickerKeyboardShortcuts_showSpan {
+  color: #9bbbdd;
+}
+
+.DayPickerKeyboardShortcuts_showSpan {
+  position: static;
+  color: #0654ab;
+  font-weight: bold;
+}
+
+/* Show a blue dot on highlighted days */
+.CalendarDay__highlighted_calendar,
+.CalendarDay__highlighted_calendar:hover {
+  background-image: radial-gradient(circle at 50% 82%, #0654ab 0px, #0654ab 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__selected.CalendarDay__highlighted_calendar {
+  background-image: radial-gradient(circle at 50% 82%, #fff 0px, #fff 2px, transparent 3px, transparent 100%);
+}
+
+.CalendarDay__blocked_out_of_range.CalendarDay__highlighted_calendar::after {
+  background-image: radial-gradient(circle at 50% 82%, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 2px, transparent 3px, transparent 100%);
+}
+
+.i-amphtml-amp-date-picker-info {
+  display: block;
+  padding: 10px;
+}
+
+/**
+ * TODO(cvializ): Fix bug where date picker renders when not visible and cannot measure height.
+ * TODO(cvializ): Fix bug where date picker size adjusts one month behind where it should. (preact vs react difference).
+ * Developers who change day-size will need to adjust this value manually in their styles until the above are resolved.
+ */
+.DayPicker_transitionContainer {
+  min-height: 354px;
+}
+
+[data-date-tooltip] {
+  position: relative;
+}
+
+[data-date-tooltip]::before,
+[data-date-tooltip]::after {
+  pointer-events: none;
+  outline: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+}
+
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:hover::after {
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+
+[data-date-tooltip]::before {
+  content: "";
+  width: 0;
+  height: 0;
+  line-height: 0;
+  border: 5px solid transparent;
+  border-top: 5px solid #000;
+  border-bottom: 0px;
+  overflow: hidden;
+}
+
+[data-date-tooltip]::after {
+  content: attr(data-date-tooltip);
+  width: 85px;
+  margin-bottom: 5px;
+  letter-spacing: normal;
+  text-align: center;
+  text-decoration: none;
+  word-spacing: normal;
+  word-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
+  font-weight: normal;
+  font-size: 14px;
+  padding: 6px;
+  min-height: 18px;
+  color: #e9e6e6;
+  background-color: #222;
+  border-radius: 3px;
+}
+
+/* Allow keyboard focus to trigger tooltip */
+.CalendarDay_button:focus [data-date-tooltip]::before,
+.CalendarDay_button:focus [data-date-tooltip]::after,
+/* Allow mouse hover to trigger tooltip */
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:hover::after {
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+  opacity: 1;
 }

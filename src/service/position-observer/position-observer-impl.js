@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilderForDoc} from '../../service';
-import {Services} from '../../services';
-import {dev} from '../../log';
-import {debounce} from '../../utils/rate-limit';
 import {
-  PositionObserverWorker,
-  /* eslint no-unused-vars: 0 */ PositionObserverFidelity,
+  PositionObserverFidelity, // eslint-disable-line no-unused-vars
+  PositionObserverWorker, // eslint-disable-line no-unused-vars
 } from './position-observer-worker';
+import {Services} from '../../services';
+import {debounce} from '../../utils/rate-limit';
+import {dev} from '../../log';
+import {registerServiceBuilderForDoc} from '../../service';
 
 /** @const @private */
 const TAG = 'POSITION_OBSERVER';

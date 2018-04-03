@@ -197,7 +197,7 @@ describe('BindValidator', () => {
       expect(val.isResultValid(
           'AMP-IMG',
           'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
     });
 
     it('should support <amp-list>', () => {
@@ -206,6 +206,7 @@ describe('BindValidator', () => {
     });
 
     it('should support <amp-selector>', () => {
+      expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
     });
 

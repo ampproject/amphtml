@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
+import {
+  KeyframesDef,
+  KeyframesOrFilterFnDef,
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 import {PRESETS} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {
-  StoryAnimationDef,
-  StoryAnimationDimsDef,
-  KeyframesOrFilterFnDef,
-  KeyframesDef,
-  StoryAnimationPresetDef,
-} from './animation-types';
-import {timeStrToMillis} from './utils';
+import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
 const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
@@ -143,16 +143,16 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
-      const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
+      const targetRect = unscaledClientRect(this.target_);
+      const pageRect = unscaledClientRect(this.page_);
 
       return /** @type {!StoryAnimationDimsDef} */ ({
-        pageWidth: pageBoundingRect.width,
-        pageHeight: pageBoundingRect.height,
-        targetWidth: targetBoundingRect.width,
-        targetHeight: targetBoundingRect.height,
-        targetX: targetBoundingRect.left - pageBoundingRect.left,
-        targetY: targetBoundingRect.top - pageBoundingRect.top,
+        pageWidth: pageRect.width,
+        pageHeight: pageRect.height,
+        targetWidth: targetRect.width,
+        targetHeight: targetRect.height,
+        targetX: targetRect.left - pageRect.left,
+        targetY: targetRect.top - pageRect.top,
       });
     });
   }
@@ -497,7 +497,7 @@ export class AnimationManager {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-          scopedQuerySelector(this.root_, `#${dependencyId}`),
+          this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
           `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
               `'${el.tagName}' is set to the invalid value ` +
               `'${dependencyId}'. No children of parenting 'amp-story-page' ` +

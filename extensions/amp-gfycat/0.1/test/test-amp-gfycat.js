@@ -16,8 +16,8 @@
  */
 
 import '../amp-gfycat';
-import {listenOncePromise} from '../../../../src/event-helper';
 import {VideoEvents} from '../../../../src/video-interface';
+import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin('amp-gfycat', {
   amp: {
@@ -36,6 +36,12 @@ describes.realWin('amp-gfycat', {
     gfycat.setAttribute('data-gfyid', gfyId);
     gfycat.setAttribute('width', 640);
     gfycat.setAttribute('height', 640);
+    if (opt_params && opt_params.withAlt) {
+      gfycat.setAttribute('alt', 'test alt label');
+    }
+    if (opt_params && opt_params.withAria) {
+      gfycat.setAttribute('aria-label', 'test aria label');
+    }
     if (opt_params && opt_params.responsive) {
       gfycat.setAttribute('layout', 'responsive');
     }
@@ -66,7 +72,6 @@ describes.realWin('amp-gfycat', {
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
-
   it('noautoplay', () => {
     return getGfycat('LeanMediocreBeardeddragon', {
       noautoplay: true,
@@ -106,5 +111,26 @@ describes.realWin('amp-gfycat', {
   it('requires data-gfyid', () => {
     return getGfycat('').should.eventually.be.rejectedWith(
         /The data-gfyid attribute is required for/);
+  });
+
+  it('renders placeholder with an alt', () => {
+    return getGfycat('LeanMediocreBeardeddragon', {
+      withAlt: true,
+    }).then(gfycat => {
+      const placeHolder = gfycat.querySelector('amp-img');
+      expect(placeHolder).to.not.be.null;
+      expect(placeHolder.getAttribute('alt')).to.equal(
+          'Loading gif test alt label');
+    });
+  });
+  it('renders placeholder with an aria-label', () => {
+    return getGfycat('LeanMediocreBeardeddragon', {
+      withAria: true,
+    }).then(gfycat => {
+      const placeHolder = gfycat.querySelector('amp-img');
+      expect(placeHolder).to.not.be.null;
+      expect(placeHolder.getAttribute('alt')).to.equal(
+          'Loading gif test aria label');
+    });
   });
 });

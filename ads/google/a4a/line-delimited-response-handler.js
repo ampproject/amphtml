@@ -21,7 +21,7 @@ import {tryParseJson} from '../../../src/json';
   * Uses streaming where possible otherwise falls back to text.
   * @param {!Window} win
   * @param {!../../../src/service/xhr-impl.FetchResponse} response
-  * @param {!function(string, boolean)} lineCallback
+  * @param {function(string, boolean)} lineCallback
   * @private
   */
 export function lineDelimitedStreamer(win, response, lineCallback) {
@@ -65,17 +65,21 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
 /**
   * Given each line, groups such that the first is JSON parsed and second
   * html unescaped.
-  * @param {!function(string, !Object<string, *>, boolean)} callback
+  * @param {function(string, !Object<string, *>, boolean)} callback
   * @private
   */
 export function metaJsonCreativeGrouper(callback) {
   let first;
   return function(line, done) {
     if (first) {
-      callback(
-          unescapeLineDelimitedHtml_(line),
-          /** @type {!Object<string, *>} */(tryParseJson(first) || {}),
-          done);
+      const metadata =
+          /** @type {!Object<string, *>} */(tryParseJson(first) || {});
+      const lowerCasedMetadata =
+          Object.keys(metadata).reduce((newObj, key) => {
+            newObj[key.toLowerCase()] = metadata[key];
+            return newObj;
+          }, {});
+      callback(unescapeLineDelimitedHtml_(line), lowerCasedMetadata, done);
       first = null;
     } else {
       first = line;

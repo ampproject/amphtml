@@ -15,15 +15,15 @@
  */
 
 import '../../src/polyfills';
+import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
@@ -57,15 +57,16 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
-    id: 'ad-type-custom',
-    name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
-  },
-  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
+  },
+  {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
   },
   {
     id: 'amp-access-server',
@@ -105,12 +106,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-gwd-animation',
-    name: 'AMP GWD Animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/9949',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -140,7 +135,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-viewer',
+    id: 'amp-lightbox-gallery',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
@@ -150,21 +145,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
   {
     id: 'ios-embed-wrapper',
@@ -191,11 +175,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -217,18 +196,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'amp-fx-parallax',
-    name: 'Amp extension for a parallax effect',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
-    spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
-    id: 'slidescroll-disable-css-snap',
-    name: 'Slidescroll disable css snap',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
-    spec: 'https://github.com/ampproject/amphtml/issues/7670',
-  },
-  {
     id: '3p-use-ampcontext',
     name: 'Use AmpContext for window.context messaging',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
@@ -243,10 +210,6 @@ const EXPERIMENTS = [
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
-  },
-  {
-    id: 'amp-ima-video',
-    name: 'IMA-integrated Video Player',
   },
   {
     id: 'user-error-reporting',
@@ -270,22 +233,60 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
-    id: 'amp-story-auto-fullscreen',
-    name: 'Enables full-screen mode on first page transition',
-    spec: 'https://github.com/ampproject/amphtml/issues/11974',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11975',
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
   {
     id: 'amp-date-picker',
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
+  {
+    id: 'inline-styles',
+    name: 'Enables the usage of inline styles for non fixed elements',
+    spec: 'https://github.com/ampproject/amphtml/issues/11881',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+  },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'amp-document-recommendations',
+    name: 'Docment level recommendations and infinte scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
+  },
+  {
+    id: 'inabox-rov',
+    name: 'Extensions layout independent of viewport location if inabox.',
+  },
+  {
+    id: 'amp-live-list-sorting',
+    name: 'Allows "newest last" insertion algorithm to be used',
+    spec: 'https://github.com/ampproject/amphtml/issues/5396',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
+  },
+  {
+    id: 'amp-consent',
+    name: 'Enables the amp-consent extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'video-service',
+    name: 'Enables new implementation of unified Video Interface services.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13674',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
+  },
+  {
+    id: 'iframe-messaging',
+    name: 'Enables "postMessage" action on amp-iframe.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9074',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
 ];
 

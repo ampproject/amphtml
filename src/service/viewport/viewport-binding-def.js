@@ -52,6 +52,12 @@ export class ViewportBindingDef {
   requiresFixedLayerTransfer() {}
 
   /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {}
+
+  /**
    * Register a callback for scroll events.
    * @param {function()} unusedCallback
    */
@@ -166,4 +172,10 @@ export class ViewportBindingDef {
    * @return {Promise<null>|Promise<!../../layout-rect.LayoutRectDef>}
    */
   getRootClientRectAsync() {}
+
+  /**
+   * Returns the element considered the root scroller for this binding.
+   * @return {!Element}
+   */
+  getScrollingElement() {}
 }

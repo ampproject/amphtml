@@ -22,17 +22,12 @@
 
 import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  forceExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {forceExperimentBranch} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
@@ -49,7 +44,7 @@ export const URL_EXPERIMENT_MAPPING = {
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {

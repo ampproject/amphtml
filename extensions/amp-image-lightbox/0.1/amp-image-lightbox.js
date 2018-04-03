@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as dom from '../../../src/dom';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {
@@ -25,9 +28,10 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -35,11 +39,7 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
 
 const TAG = 'amp-image-lightbox';
 
@@ -58,6 +58,8 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 /** @private @const {!../../../src/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
+/** @private @const {number} */
+const DEFAULT_MAX_SCALE = 2;
 
 /**
  * This class is responsible providing all operations necessary for viewing
@@ -69,7 +71,7 @@ export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {function(T, number=):Promise<T>} loadPromise
    * @template T
    */
   constructor(lightbox, win, loadPromise) {
@@ -122,7 +124,7 @@ export class ImageViewer {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
 
     /** @private {number} */
     this.startX_ = 0;
@@ -259,16 +261,21 @@ export class ImageViewer {
   measure() {
     this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
-
-    const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-        this.viewerBox_.height / this.sourceHeight_);
-    let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-    let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+    let height = Math.min(
+        this.viewerBox_.width / sourceAspectRatio,
+        this.viewerBox_.height
+    );
+    let width = Math.min(
+        this.viewerBox_.height * sourceAspectRatio,
+        this.viewerBox_.width
+    );
 
     // TODO(dvoytenko): This is to reduce very small expansions that often
     // look like a stutter. To be evaluated if this is still the right
     // idea.
-    if (width - this.sourceWidth_ <= 16) {
+    if (Math.abs(width - this.sourceWidth_) <= 16
+        && Math.abs(height - this.sourceHeight_) <= 16) {
       width = this.sourceWidth_;
       height = this.sourceHeight_;
     }
@@ -285,6 +292,14 @@ export class ImageViewer {
       width: st.px(this.imageBox_.width),
       height: st.px(this.imageBox_.height),
     });
+
+    // If aspect ratio is off by too much, adjust max scale
+    const viewerBoxRatio = this.viewerBox_.width / this.viewerBox_.height;
+    const maxScale = Math.max(
+        viewerBoxRatio / sourceAspectRatio,
+        sourceAspectRatio / viewerBoxRatio
+    );
+    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = 1;
@@ -307,7 +322,7 @@ export class ImageViewer {
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
+    const src = this.srcset_.select(width, this.lightbox_.getDpr());
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -785,7 +800,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.buildLightbox_();
 
-    const source = invocation.source;
+    const source = invocation.caller;
     user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
@@ -890,11 +905,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    if (!caption) {
-      const figure = dom.closestByTag(sourceElement, 'figure');
-      if (figure) {
-        caption = dom.elementByTag(figure, 'figcaption');
-      }
+    const figure = dom.closestByTag(sourceElement, 'figure');
+    if (figure) {
+      caption = dom.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".

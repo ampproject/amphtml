@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as lolex from 'lolex';
 
 
 describes.realWin('AccessServerAdapter', {amp: true}, env => {
@@ -33,7 +33,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
     win = env.win;
     document = win.document;
     ampdoc = env.ampdoc;
-    clock = lolex.install();
+    clock = lolex.install({target: win});
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -232,8 +232,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         });
       });
 
-      // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-      it.skip('should time out XHR fetch', () => {
+      it('should time out XHR fetch', () => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(

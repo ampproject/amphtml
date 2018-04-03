@@ -15,13 +15,14 @@
  */
 
 import {Observable} from '../../observable';
-import {layoutRectLtwh} from '../../layout-rect';
-import {dev} from '../../log';
-import {whenDocumentReady} from '../../document-ready';
 import {Services} from '../../services';
-import {px, setStyle} from '../../style';
-import {waitForBody} from '../../dom';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {dev} from '../../log';
+import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
+import {px, setImportantStyles} from '../../style';
+import {waitForBody} from '../../dom';
+import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
 
@@ -42,6 +43,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
     const topClasses = this.win.document.documentElement.className;
     this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
@@ -65,6 +67,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     // Setup UI.
     /** @private {boolean} */
@@ -142,6 +147,11 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  supportsPositionFixed() {
+    return true;
+  }
+
+  /** @override */
   onScroll(callback) {
     this.scrollObservable_.add(callback);
   }
@@ -153,7 +163,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
+    setImportantStyles(this.wrapper_, {
+      'padding-top': px(paddingTop),
+    });
   }
 
   /** @override */
@@ -172,11 +184,13 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   disableScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.add('i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
   }
 
@@ -230,13 +244,17 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const b = el./*OK*/getBoundingClientRect();
+    if (this.useLayers_) {
+      return layoutRectLtwh(b.left, b.top, b.width, b.height);
+    }
+
     const scrollTop = opt_scrollTop != undefined
       ? opt_scrollTop
       : this.getScrollTop();
     const scrollLeft = opt_scrollLeft != undefined
       ? opt_scrollLeft
       : this.getScrollLeft();
-    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -274,5 +292,10 @@ export class ViewportBindingIosEmbedWrapper_ {
     if (opt_event) {
       this.scrollObservable_.fire();
     }
+  }
+
+  /** @override */
+  getScrollingElement() {
+    return this.wrapper_;
   }
 }

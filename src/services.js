@@ -15,12 +15,12 @@
  */
 
 import {
+  getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceOrNull,
-  getExistingServiceForDocInEmbedScope,
-  getAmpdoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -29,7 +29,15 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
+/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+export let SubscriptionService;
+
 export class Services {
+  /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
   /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -39,6 +47,17 @@ export class Services {
     return (/** @type {!Promise<
         !../extensions/amp-access/0.1/amp-access.AccessService>} */ (
         getElementServiceForDoc(nodeOrDoc, 'access', 'amp-access')));
+  }
+
+  /**
+   * Returns a promise for the Subscriptions service.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<!SubscriptionService>}
+   */
+  static subscriptionsServiceForDoc(nodeOrDoc) {
+    return (/** @type {!Promise<SubscriptionService>} */ (
+      getElementServiceForDoc(nodeOrDoc, 'subscriptions',
+          'amp-subscriptions')));
   }
 
   /**
@@ -151,6 +170,15 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/navigation.Navigation}
+   */
+  static navigationForDoc(nodeOrDoc) {
+    return /** @type {!./service/navigation.Navigation} */ (
+      getServiceForDoc(nodeOrDoc, 'navigation'));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -201,15 +229,15 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
-  };
+  }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
+   * @return {!./service/layers-impl.LayoutLayers}
    */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+  static layersForDoc(nodeOrDoc) {
+    return /** @type {!./service/layers-impl.LayoutLayers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
   }
 
   /**
@@ -261,15 +289,60 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService>}
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<
-         * ?../extensions/amp-story/0.1/variable-service.AmpStoryVariableService
-         * >} */ (
-        getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
-            true)));
+    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
+          true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreService(win) {
+    return getService(win, 'story-store');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationService(win) {
+    return getService(win, 'localization');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
+   */
+  static viewerIntegrationVariableServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
+      (getElementServiceIfAvailable(win, 'viewer-integration-variable',
+          'amp-viewer-integration', true)));
   }
 
   /**
@@ -330,6 +403,18 @@ export class Services {
   }
 
   /**
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
+  }
+
+  /**
    * Returns a promise for the experiment variants or a promise for null if it is
    * not available on the current page.
    * @param {!Window} win
@@ -342,10 +427,10 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoManager}
+   * @return {!./service/video-manager-impl.VideoService}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoManager} */ (
+    return /** @type {!./service/video-manager-impl.VideoService} */ (
       getServiceForDoc(nodeOrDoc, 'video-manager'));
   }
 

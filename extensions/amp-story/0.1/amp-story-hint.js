@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import {renderAsElement} from './simple-template';
-import {dict} from '../../../src/utils/object';
+import {CSS} from '../../../build/amp-story-hint-0.1.css';
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
+import {StateProperty} from './amp-story-store-service';
+import {createShadowRootWithStyle} from './utils';
+import {dict} from '../../../src/utils/object';
+import {renderAsElement} from './simple-template';
 
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({'class': 'i-amphtml-story-hint-container i-amphtml-hidden'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-hint-container ' +
+        'i-amphtml-story-system-reset i-amphtml-hidden'}),
   children: [
     {
       tag: 'div',
@@ -35,15 +41,25 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
               children: [
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({'class':
+                          'i-amphtml-story-hint-tap-button-icon'}),
+                    },
+                  ],
                 },
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                  attrs: dict({'class':
+                      'i-amphtml-story-hint-tap-button-text'}),
+                  localizedStringId:
+                      LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL,
                 },
               ],
             },
@@ -56,16 +72,25 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
               children: [
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({'class':
+                          'i-amphtml-story-hint-tap-button-icon'}),
+                    },
+                  ],
                 },
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-                  text: 'Next page',
+                  attrs: dict({'class':
+                      'i-amphtml-story-hint-tap-button-text'}),
+                  localizedStringId:
+                      LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL,
                 },
               ],
             },
@@ -85,17 +110,23 @@ const FIRST_PAGE_OVERLAY_CLASS = 'show-first-page-overlay';
 /** @type {number} */
 const NAVIGATION_OVERLAY_TIMEOUT = 3000;
 
+/** @type {number} */
+const FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT = 275;
+
 /**
  * User Hint Layer for <amp-story>.
  */
 export class AmpStoryHint {
-
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl Element where to append the component
    */
-  constructor(win) {
+  constructor(win, parentEl) {
     /** @private {!Window} */
     this.win_ = win;
+
+    /** @private {boolean} Whether the component is built. */
+    this.isBuilt_ = false;
 
     /** @private {!Document} */
     this.document_ = this.win_.document;
@@ -111,32 +142,65 @@ export class AmpStoryHint {
 
     /** @private {?(number|string)} */
     this.hintTimeout_ = null;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win_);
+
+    /** @private @const {!Element} */
+    this.parentEl_ = parentEl;
   }
 
   /**
    * Builds the hint layer DOM.
-   * @return {!Element}
    */
-  buildHintContainer() {
+  build() {
+    if (this.isBuilt()) {
+      return;
+    }
+
+    this.isBuilt_ = true;
+
+    const root = this.document_.createElement('div');
     this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
-    return this.hintContainer_;
+    createShadowRootWithStyle(root, this.hintContainer_, CSS);
+
+    this.vsync_.mutate(() => {
+      this.parentEl_.appendChild(root);
+    });
   }
 
   /**
-   * Shows the given hint
+   * Whether the component is built.
+   * @return {boolean}
+   */
+  isBuilt() {
+    return this.isBuilt_;
+  }
+
+  /**
+   * Shows the given hint, only if not desktop.
+   * @param {string} hintClass
+   * @private
    */
   showHint_(hintClass) {
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+      return;
+    }
+
+    this.build();
+
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.toggle(NAVIGATION_OVERLAY_CLASS,
           hintClass == NAVIGATION_OVERLAY_CLASS);
-
       this.hintContainer_.classList.toggle(FIRST_PAGE_OVERLAY_CLASS,
           hintClass == FIRST_PAGE_OVERLAY_CLASS);
-
       this.hintContainer_.classList.remove('i-amphtml-hidden');
+
+      const hideTimeout = hintClass == NAVIGATION_OVERLAY_CLASS
+        ? NAVIGATION_OVERLAY_TIMEOUT : FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT;
+      this.hideAfterTimeout(hideTimeout);
     });
 
-    this.hideAfterTimeout();
   }
 
   /**
@@ -153,10 +217,13 @@ export class AmpStoryHint {
     this.showHint_(FIRST_PAGE_OVERLAY_CLASS);
   }
 
-  /** @visibleForTesting */
-  hideAfterTimeout() {
+  /**
+   * Hides the overlay after a given time
+   * @param {number} timeout
+   */
+  hideAfterTimeout(timeout) {
     this.hintTimeout_ = this.timer_.delay(
-        () => this.hideInternal_(), NAVIGATION_OVERLAY_TIMEOUT);
+        () => this.hideInternal_(), timeout);
   }
 
   /**
@@ -173,6 +240,10 @@ export class AmpStoryHint {
 
   /** @private */
   hideInternal_() {
+    if (!this.isBuilt()) {
+      return;
+    }
+
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.add('i-amphtml-hidden');
     });

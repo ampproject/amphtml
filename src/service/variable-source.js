@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
+import {loadPromise} from '../event-helper';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;
@@ -24,7 +24,7 @@ let ResolverReturnDef;
 export let SyncResolverDef;
 
 /** @typedef {function(...*):!Promise<ResolverReturnDef>} */
-let AsyncResolverDef;
+export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
@@ -42,14 +42,9 @@ let ReplacementDef;
  * @return {!Promise<ResolverReturnDef>}
  */
 export function getTimingDataAsync(win, startEvent, endEvent) {
-  const metric = getTimingDataSync(win, startEvent, endEvent);
-  if (metric === '') {
-    // Metric is not yet available. Retry after a delay.
-    return loadPromise(win).then(() => {
-      return getTimingDataSync(win, startEvent, endEvent);
-    });
-  }
-  return Promise.resolve(metric);
+  return loadPromise(win).then(() => {
+    return getTimingDataSync(win, startEvent, endEvent);
+  });
 }
 
 /**
@@ -75,11 +70,9 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     ? timingInfo[startEvent]
     : timingInfo[endEvent] - timingInfo[startEvent];
 
-  if (!isFiniteNumber(metric)) {
+  if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
     return;
-  } else if (metric < 0) {;
-    return '';
   } else {
     return metric;
   }
@@ -109,15 +102,26 @@ export function getNavigationData(win, attribute) {
  * and override initialize() to add more supported variables.
  */
 export class VariableSource {
-  constructor() {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @protected @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
+
+    /** @private {!RegExp|undefined} */
+    this.replacementExprV2_ = undefined;
 
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
 
     /** @private {boolean} */
     this.initialized_ = false;
+
+    this.getUrlMacroWhitelist_();
   }
 
   /**
@@ -165,6 +169,7 @@ export class VariableSource {
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
     this.replacementExpr_ = undefined;
+    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -184,6 +189,7 @@ export class VariableSource {
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
     this.replacementExpr_ = undefined;
+    this.replacementExprV2_ = undefined;
     return this;
   }
 
@@ -202,9 +208,9 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @return {!RegExp}
+   * @param {boolean=} isV2 flag to ignore capture of args
    */
-  getExpr(opt_bindings) {
+  getExpr(opt_bindings, isV2) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -217,20 +223,36 @@ export class VariableSource {
           allKeys.push(key);
         }
       });
-      return this.buildExpr_(allKeys);
+      return this.buildExpr_(allKeys, isV2);
     }
-    if (!this.replacementExpr_) {
-      this.replacementExpr_ = this.buildExpr_(Object.keys(this.replacements_));
+    if (!this.replacementExpr_ && !isV2) {
+      this.replacementExpr_ = this.buildExpr_(
+          Object.keys(this.replacements_));
     }
-    return this.replacementExpr_;
+    // sometimes the v1 expand will be called before the v2
+    // so we need to cache both versions
+    if (!this.replacementExprV2_ && isV2) {
+      this.replacementExprV2_ = this.buildExpr_(
+          Object.keys(this.replacements_), isV2);
+    }
+
+    return isV2 ? this.replacementExprV2_ :
+      this.replacementExpr_;
   }
 
   /**
    * @param {!Array<string>} keys
+   * @param {boolean=} isV2 flag to ignore capture of args
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys) {
+  buildExpr_(keys, isV2) {
+    // If a whitelist is present, the keys must belong to the whitelist.
+    // We filter the keys one last time to ensure no unwhitelisted key is
+    // allowed.
+    if (this.getUrlMacroWhitelist_()) {
+      keys = keys.filter(key => this.getUrlMacroWhitelist_().includes(key));
+    }
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);
@@ -242,7 +264,55 @@ export class VariableSource {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
-    return new RegExp('\\$?(' + all + ')' +
-        '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?', 'g');
+    let regexStr = '\\$?(' + all + ')';
+    // ignore the capturing of arguments in new parser
+    if (!isV2) {
+      regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
+    }
+    return new RegExp(regexStr, 'g');
+  }
+
+  /**
+   * @return {?Array<string>} The whitelist of allowed AMP variables. (if provided in
+   *     a meta tag).
+   * @private
+   */
+  getUrlMacroWhitelist_() {
+    if (this.variableWhitelist_) {
+      return this.variableWhitelist_;
+    }
+
+    const head = this.ampdoc.getRootNode().head;
+    if (!head) {
+      return null;
+    }
+
+    // A meta[name="amp-allowed-url-macros"] tag, if present,
+    // contains, in its content attribute, a whitelist of variable substitution.
+    const meta =
+      head.querySelector('meta[name="amp-allowed-url-macros"]');
+    if (!meta) {
+      return null;
+    }
+
+    /**
+     * The whitelist of variables allowed for variable substitution.
+     * @private {?Array<string>}
+     */
+    this.variableWhitelist_ = meta.getAttribute('content').split(',')
+        .map(variable => variable.trim());
+    return this.variableWhitelist_;
+  }
+
+  /**
+   * Returns `true` if a variable whitelist is *not* present or the present
+   * whitelist contains the given variable name.
+   * @param {string} varName
+   * @return {boolean}
+   * @private
+   */
+  isWhitelisted_(varName) {
+    return !this.getUrlMacroWhitelist_() ||
+      this.getUrlMacroWhitelist_().includes(varName);
   }
 }

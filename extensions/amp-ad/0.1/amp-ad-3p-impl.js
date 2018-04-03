@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
-import {
-  is3pThrottled,
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-} from './concurrent-load';
-import {getAdCid} from '../../../src/ad-cid';
-import {preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed, getAdContainer}
-  from '../../../src/ad-helper';
-import {adConfig} from '../../../ads/_config';
-import {
-  googleLifecycleReporterFactory,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {user, dev} from '../../../src/log';
-import {getIframe} from '../../../src/3p-frame';
-import {setupA2AListener} from './a2a-listener';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {clamp} from '../../../src/utils/math';
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {toWin} from '../../../src/types';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+import {LayoutPriority} from '../../../src/layout';
+import {adConfig} from '../../../ads/_config';
+import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
+import {dev, user} from '../../../src/log';
+import {getAdCid} from '../../../src/ad-cid';
+import {getAdContainer, isAdPositionAllowed}
+  from '../../../src/ad-helper';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from './concurrent-load';
+import {getIframe} from '../../../src/3p-frame';
+import {
+  googleLifecycleReporterFactory,
+} from '../../../ads/google/a4a/google-data-reporter';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {moveLayoutRect} from '../../../src/layout-rect';
+import {preloadBootstrap} from '../../../src/3p-frame';
+import {toWin} from '../../../src/types';
 
-/** @const {!string} Tag name for 3P AD implementation. */
+/** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 /** @const {number} */
@@ -121,11 +121,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   renderOutsideViewport() {
@@ -168,8 +168,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
-
-    setupA2AListener(this.win);
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 

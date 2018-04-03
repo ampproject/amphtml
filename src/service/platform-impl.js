@@ -119,6 +119,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current platform matches a bot user agent.
+   * @return {boolean}
+   */
+  isBot() {
+    return /bot/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */
@@ -195,7 +203,7 @@ export class Platform {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-};
+}
 
 
 /**
@@ -203,4 +211,4 @@ export class Platform {
  */
 export function installPlatformService(window) {
   return registerServiceBuilder(window, 'platform', Platform);
-};
+}

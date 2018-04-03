@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AnalyticsTrigger} from '../analytics';
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
+import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
-import {VariableService} from '../variable-service';
+import {PaginationButtons} from '../pagination-buttons';
 
 
 const NOOP = () => {};
@@ -26,6 +27,7 @@ const IDENTITY_FN = x => x;
 
 describes.realWin('amp-story', {
   amp: {
+    runtimeOn: true,
     extensions: ['amp-story'],
   },
 }, env => {
@@ -48,6 +50,7 @@ describes.realWin('amp-story', {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
       page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+      page.getImpl = () => Promise.resolve(new AmpStoryPage(page));
       container.appendChild(page);
       return page;
     });
@@ -62,16 +65,12 @@ describes.realWin('amp-story', {
     return eventObj;
   }
 
-  function stubViewportSize(width, height) {
-    sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-      ({width, height}));
-  }
-
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
@@ -83,130 +82,81 @@ describes.realWin('amp-story', {
     element.remove();
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should build', () => {
-    const firstPageId = 'first-page-foo';
+  it('should build with the expected number of pages', () => {
+    const pagesCount = 2;
+    createPages(story.element, pagesCount, ['cover', 'page-1']);
 
-    const systemLayerRootMock = {};
-
-    const updateActivePageState =
-        sandbox.stub(element.implementation_.navigationState_,
-            'updateActivePage',
-            NOOP);
-
-    const installNavigationStateConsumer =
-        sandbox.stub(element.implementation_.navigationState_,
-            'installConsumer');
-
-    createPages(element, 5, [firstPageId]);
-    const appendChild = sandbox.stub(element, 'appendChild').callsFake(NOOP);
-
-    element.build();
-
-    expect(appendChild).to.have.been.calledWithExactly(systemLayerRootMock);
-    expect(updateActivePageState).to.have.been.calledWith(0, firstPageId);
-    expect(updateActivePageState).to.have.been.calledOnce;
-    expect(installNavigationStateConsumer).to.have.been.calledWith(
-        sandbox.match(consumer => consumer instanceof VariableService));
-    expect(installNavigationStateConsumer).to.have.been.calledWith(
-        sandbox.match(consumer => consumer instanceof AnalyticsTrigger));
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.getPageCount()).to.equal(pagesCount);
+        });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should enter fullscreen when switching pages', () => {
-    const requestFullScreen = sandbox.spy();
-    const systemLayerSetInFullScreen = sandbox.stub(
-        element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
+  it('should activate the first page when built', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
 
-    appendEmptyPage(element, /* opt_active */ true);
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, requestFullScreen, NOOP);
-    stubViewportSize(320, 480); // "mobile" as long as both dimensions <= 1024px
+    return story.layoutCallback()
+        .then(() => {
+          // Getting all the AmpStoryPage objets.
+          const pageElements =
+              story.element.getElementsByTagName('amp-story-page');
+          const pages = Array.from(pageElements).map(el => el.getImpl());
 
-    element.implementation_.switchTo_(win.document.createElement('div'));
-
-    expect(requestFullScreen).to.be.calledOnce;
-    expect(systemLayerSetInFullScreen)
-        .to.have.been.calledWith(/* inFullScreen */ true);
+          return Promise.all(pages);
+        })
+        .then(pages => {
+          // Only the first page should be active.
+          for (let i = 0; i < pages.length; i++) {
+            i === 0 ?
+              expect(pages[i].isActive()).to.be.true :
+              expect(pages[i].isActive()).to.be.false;
+          }
+        });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should not enter fullscreen when switching if auto is disabled',
-      () => {
-        const enterFullScreen = sandbox.stub(
-            element.implementation_, 'enterFullScreen_', NOOP);
+  it('should update the navigation state when built', () => {
+    const firstPageId = 'cover';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const updateActivePageStub =
+        sandbox.stub(story.navigationState_, 'updateActivePage');
 
-        appendEmptyPage(element, /* opt_active */ true);
-        stubViewportSize(320, 480); // "mobile" as long as both dimensions <= 1024px
-
-        element.implementation_.setAutoFullScreen(false);
-        element.implementation_.switchTo_(win.document.createElement('div'));
-
-        expect(enterFullScreen).to.not.have.been.called;
-      });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should not enter fullscreen when switching if on "desktop"', () => {
-    const enterFullScreen = sandbox.stub(
-        element.implementation_, 'enterFullScreen_', NOOP);
-
-    appendEmptyPage(element, /* opt_active */ true);
-    stubViewportSize(1200, 1200); // "desktop" as long as one dimension > 1024px
-
-    element.implementation_.switchTo_(win.document.createElement('div'));
-
-    expect(enterFullScreen).to.not.have.been.called;
+    return story.layoutCallback()
+        .then(() => {
+          expect(updateActivePageStub)
+              .to.have.been.calledWith(0, pageCount, firstPageId);
+        });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should exit fullscreen when switching to the bookend page', () => {
-    const exitFullScreen = sandbox.spy();
-    const systemLayerSetInFullScreen = sandbox.stub(
-        element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
+  it('should preload the bookend if navigating to the last page', () => {
+    createPages(story.element, 1, ['cover']);
 
-    appendEmptyPage(element);
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, NOOP, exitFullScreen);
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
-    element.build();
-    element.implementation_.buildBookend_();
-    element.implementation_.showBookend_();
-
-    expect(exitFullScreen).to.be.calledOnce;
-    expect(systemLayerSetInFullScreen)
-        .to.have.been.calledWith(/* inFullScreen */ false);
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildBookendStub).to.have.been.calledOnce;
+          expect(loadBookendStub).to.have.been.calledOnce;
+        });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should disable auto fullscreen when exiting explicitly', () => {
-    const setAutoFullScreenSpy = sandbox.spy(
-        element.implementation_, 'setAutoFullScreen');
+  it('should not preload the bookend if not on the last page', () => {
+    createPages(story.element, 2, ['cover']);
 
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, NOOP, NOOP);
+    const buildBookendStub = sandbox.stub(story.bookend_, 'build');
+    const loadBookendStub =
+        sandbox.stub(story.bookend_, 'loadConfig').resolves({});
 
-    element.implementation_.exitFullScreen_(/* opt_explicitUserAction */ true);
-
-    expect(setAutoFullScreenSpy)
-        .to.have.been.calledWith(/* isEnabled */ false);
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildBookendStub).to.not.have.been.called;
+          expect(loadBookendStub).to.not.have.been.called;
+        });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should exit fullscreen when EXIT_FULLSCREEN is triggered', () => {
-    /* eslint-disable no-unused-vars no-undef */
-    const exitFullScreenStub = sandbox.stub(
-        element.implementation_, 'exitFullScreen_', NOOP);
-
-    createPages(element, 5);
-    element.build();
-
-    element.dispatchEvent(new Event(EventType.EXIT_FULLSCREEN));
-
-    expect(exitFullScreenStub)
-        .to.have.been.calledWith(/* opt_explicitUserAction */ true);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(
         element.implementation_, 'hideBookend_', NOOP);
@@ -220,16 +170,7 @@ describes.realWin('amp-story', {
     expect(hideBookendStub).to.have.been.calledOnce;
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should return a valid page count', () => {
-    const count = 5;
-
-    createPages(element, count);
-
-    expect(element.implementation_.getPageCount()).to.equal(count);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should return a valid page index', () => {
     const count = 5;
 
@@ -240,19 +181,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should return all pages', () => {
-    const pages = createPages(element, 5);
-
-    const result = element.implementation_.getPages();
-
-    expect(result.length).to.equal(pages.length);
-
-    pages.forEach(page =>
-      expect(Array.prototype.includes.call(result, page)).to.be.true);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should update progress bar when switching pages', () => {
     const impl = element.implementation_;
     const count = 10;
@@ -274,7 +203,7 @@ describes.realWin('amp-story', {
     expect(updateProgressBarStub).to.have.been.calledWith(index, count - 1);
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should pause/resume pages when switching pages', () => {
     const impl = element.implementation_;
     const pages = createPages(element, 5);
@@ -292,7 +221,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 
@@ -328,40 +257,73 @@ describes.realWin('amp-story', {
         .to.be.equal('hidden');
   });
 
-  it('adds event listener for buttons', () => {
-    story.buildButtons_();
-    const nextStub = sandbox.stub(story, 'next_');
-    const prevStub = sandbox.stub(story, 'previous_');
-    story.nextButtonContainer_.dispatchEvent(new Event('click'));
-    story.prevButtonContainer_.dispatchEvent(new Event('click'));
-    expect(nextStub).calledOnce;
-    expect(prevStub).calledOnce;
+  it('builds and attaches pagination buttons ', () => {
+    const paginationButtonsStub = {
+      attach: sandbox.spy(),
+      onNavigationStateChange: sandbox.spy(),
+    };
+    sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
+    story.buildPaginationButtonsForTesting();
+    expect(paginationButtonsStub.attach).to.have.been.calledWith(story.element);
   });
 
-  it('toggles `i-amphtml-story-landscape` based on height and width', () => {
-    story.element.style.width = '11px';
-    story.element.style.height = '10px';
-    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
-    story.vsync_ = {
-      run: (task, state) => {
-        if (task.measure) {
-          task.measure(state);
-        }
-        if (task.mutate) {
-          task.mutate(state);
-        }
-      },
-    };
-    story.onResize();
-    expect(isDesktopStub).to.be.calledOnce;
-    expect(story.element.classList.contains('i-amphtml-story-landscape'))
-        .to.be.true;
-    story.element.style.width = '10px';
-    story.element.style.height = '11px';
-    story.onResize();
-    expect(isDesktopStub).to.be.calledTwice;
-    expect(story.element.classList.contains('i-amphtml-story-landscape'))
-        .to.be.false;
+  it.skip('toggles `i-amphtml-story-landscape` based on height and width',
+      () => {
+        story.element.style.width = '11px';
+        story.element.style.height = '10px';
+        const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+        story.vsync_ = {
+          run: (task, state) => {
+            if (task.measure) {
+              task.measure(state);
+            }
+            if (task.mutate) {
+              task.mutate(state);
+            }
+          },
+        };
+        story.onResize();
+        expect(isDesktopStub).to.be.calledOnce;
+        expect(story.element.classList.contains('i-amphtml-story-landscape'))
+            .to.be.true;
+        story.element.style.width = '10px';
+        story.element.style.height = '11px';
+        story.onResize();
+        expect(isDesktopStub).to.be.calledTwice;
+        expect(story.element.classList.contains('i-amphtml-story-landscape'))
+            .to.be.false;
+      });
+
+  it('should update page id in store', () => {
+    const firstPageId = 'page-one';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const dispatchStub =
+        sandbox.stub(story.storeService_, 'dispatch');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(dispatchStub)
+              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+        });
+  });
+
+  it('should update page id in browser history', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'page-zero';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.have.been.calledWith(
+              {ampStoryPageId: firstPageId},
+              '',
+          );
+        });
   });
 });
 

@@ -16,8 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+const log = require('fancy-log');
 const nodemon = require('nodemon');
 
 const host = argv.host || 'localhost';
@@ -33,13 +34,13 @@ function serve() {
   // Get the serve mode
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
-    util.log(util.colors.green('Serving minified js'));
+    log(colors.green('Serving minified js'));
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
-    util.log(util.colors.green('Serving current prod js'));
+    log(colors.green('Serving current prod js'));
   } else {
     process.env.SERVE_MODE = 'default';
-    util.log(util.colors.green('Serving unminified js'));
+    log(colors.green('Serving unminified js'));
   }
 
   nodemon({
@@ -58,15 +59,9 @@ function serve() {
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
     },
     stdout: !quiet,
-  })
-      .once('quit', function() {
-        util.log(util.colors.green('Shutting down server'));
-      });
-  if (!quiet) {
-    util.log(util.colors.yellow('Run `gulp build` then go to '
-        + getHost() + '/examples/article.amp.html'
-    ));
-  }
+  }).once('quit', function() {
+    log(colors.green('Shutting down server'));
+  });
 }
 
 process.on('SIGINT', function() {
@@ -93,3 +88,4 @@ function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
 
+exports.serve = serve;

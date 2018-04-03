@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
+import '../amp-sidebar';
+import * as lolex from 'lolex';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import '../amp-sidebar';
-import * as lolex from 'lolex';
 
 
 describes.realWin('amp-sidebar 0.1 version', {
@@ -69,7 +69,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     if (options.closeText) {
       ampSidebar.setAttribute('data-close-button-aria-label',
           options.closeText);
-    };
+    }
     ampSidebar.setAttribute('id', 'sidebar1');
     ampSidebar.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(ampSidebar);
@@ -133,7 +133,7 @@ describes.realWin('amp-sidebar 0.1 version', {
   describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
-        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+        assert(sidebarElement.classList.contains('i-amphtml-overlay'));
       });
     });
 
@@ -622,42 +622,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         );
         sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
-      });
-    });
-
-    // Accessibility
-    // TODO(cathyxz, 12479)
-    it.skip('should return focus to opening element after close', () => {
-      return getAmpSidebar().then(sidebarElement => {
-        const impl = sidebarElement.implementation_;
-        impl.vsync_ = {
-          mutate(callback) {
-            callback();
-          },
-        };
-        impl.getHistory_ = function() {
-          return {
-            push() {
-              return Promise.resolve(11);
-            },
-            pop() {
-              return Promise.resolve(11);
-            },
-          };
-        };
-        clock = lolex.install(
-            {target: impl.win, toFake: ['Date', 'setTimeout']});
-
-        const openerElement = doc.createElement('button');
-        const focusSpy = sandbox.spy(openerElement, 'focus');
-
-        impl.open_({source: openerElement});
-        expect(impl.openerElement_).to.equal(openerElement);
-
-        impl.close_();
-        clock.tick(600);
-
-        expect(focusSpy).to.have.been.called;
       });
     });
   });
