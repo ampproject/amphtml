@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
 
 /**
- * @typedef {{
- *   pageIndex: string,
- *   pageId: number,
- * }}
+ * @typedef {!Object<string, *>}
  */
 export let StoryVariableDef;
+
+
+/** @enum {string} */
+const Variable = {
+  STORY_PAGE_ID: 'storyPageId',
+  STORY_PAGE_INDEX: 'storyPageIndex',
+  STORY_PAGE_COUNT: 'storyPageCount',
+  STORY_IS_MUTED: 'storyIsMuted',
+  STORY_PROGRESS: 'storyProgress',
+};
+
 
 /**
  * Variable service for amp-story.
@@ -32,8 +39,11 @@ export class AmpStoryVariableService {
   constructor() {
     /** @private {!StoryVariableDef} */
     this.variables_ = {
-      pageIndex: '',
-      pageId: 0,
+      [Variable.STORY_PAGE_INDEX]: null,
+      [Variable.STORY_PAGE_ID]: null,
+      [Variable.STORY_PAGE_COUNT]: null,
+      [Variable.STORY_PROGRESS]: null,
+      [Variable.STORY_IS_MUTED]: null,
     };
 
     /** @private {boolean} */
@@ -43,23 +53,30 @@ export class AmpStoryVariableService {
   /**
    * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
    */
-  onStateChange(stateChangeEvent) {
+  onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        const variables = this.variables_;
-        this.isInitialized_ = true;
-        variables.pageIndex = pageIndex;
-        variables.pageId = pageId;
+        const {pageIndex, pageId, storyProgress, totalPages} =
+            stateChangeEvent.value;
+        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+        this.variables_[Variable.STORY_PAGE_ID] = pageId;
+        this.variables_[Variable.STORY_PROGRESS] = storyProgress;
+        this.variables_[Variable.STORY_PAGE_COUNT] = totalPages;
         break;
     }
+  }
+
+  /**
+   * @param {boolean} isMuted
+   */
+  onMutedStateChange(isMuted) {
+    this.variables_[Variable.STORY_IS_MUTED] = isMuted;
   }
 
   /**
    * @return {!StoryVariableDef}
    */
   get() {
-    dev().assert(this.isInitialized_);
     // TODO(newmius): You should probably Object.freeze this in development.
     return this.variables_;
   }

@@ -187,6 +187,9 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
 
+    /** @private {!AmpStoryAnalytics} */
+    this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
+
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
@@ -293,11 +296,10 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
     }
 
-    this.navigationState_.observe(stateChangeEvent =>
-      (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
-
-    this.navigationState_.observe(stateChangeEvent =>
-      this.variableService_.onStateChange(stateChangeEvent));
+    this.navigationState_.observe(stateChangeEvent => {
+      this.variableService_.onNavigationStateChange(stateChangeEvent);
+      this.analytics_.onNavigationStateChange(stateChangeEvent);
+    });
   }
 
 
@@ -338,7 +340,14 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+      this.variableService_.onMutedStateChange(isMuted);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      // We do not want to trigger an analytics event for the initialization of
+      // the muted state.
+      this.analytics_.onMutedStateChange(isMuted);
+    }, false /** callToInitialize */);
 
     this.storeService_.subscribe(
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
