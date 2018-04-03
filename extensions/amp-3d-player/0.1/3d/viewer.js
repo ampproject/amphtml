@@ -106,6 +106,7 @@ export default function gltfViewer() {
 
   const startViewer = options => {
     const renderer = new THREE.WebGLRenderer(options.renderer);
+    renderer.setPixelRatio(Math.min(options.maxPixelRatio, devicePixelRatio));
 
     const scene = new THREE.Scene();
     scene.add(makeLight());
