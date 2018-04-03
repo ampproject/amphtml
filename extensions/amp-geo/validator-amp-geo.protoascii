@@ -1,0 +1,69 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+# Specific script tags for custom elements and runtime imports.
+tags: {  # amp-geo
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-geo"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    requires_usage: GRANDFATHERED
+    
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-geo>
+  html_format: AMP
+  tag_name: "AMP-GEO"
+  requires_extension: "amp-geo"
+  attr_lists: "extended-amp-global"
+  unique: true
+  child_tags: {
+    first_child_tag_name_oneof: "SCRIPT"
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+tags: {  # amp-geo (json)
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  spec_name: "amp-geo extension .json script"
+  requires_extension: "amp-geo"
+  mandatory_parent: "AMP-GEO"
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-geo"
+}
+
+
