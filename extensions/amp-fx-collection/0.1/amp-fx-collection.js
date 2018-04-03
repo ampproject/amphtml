@@ -19,7 +19,6 @@ import {FxProvider} from './providers/fx-provider';
 import {Presets} from './providers/amp-fx-presets';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
