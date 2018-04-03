@@ -627,10 +627,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
     it('includes adsense package code when present', () => {
       element.setAttribute('data-package', 'package_code');
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            'pwprc=package_code(&|$)'));
-      });
+      return expect(impl.getAdUrl()).to.eventually
+          .match(/pwprc=package_code(&|$)/);
     });
   });
 
