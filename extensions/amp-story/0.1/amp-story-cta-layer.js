@@ -51,7 +51,6 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   }
 
   applyTargetAttribute_(){
-    console.log(this.element);
     // Overwrite or set target attribute to _top in call to action links.
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
