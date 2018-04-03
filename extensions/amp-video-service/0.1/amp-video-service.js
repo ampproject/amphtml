@@ -141,7 +141,7 @@ export class VideoService {
    * @param {!AmpElement} unusedVideo
    * @param {!../../../src/observable.Observable<boolean>} unusedObservable
    */
-  delegateAutoplay(unusedVideo , unusedObservable) {
+  delegateAutoplay(unusedVideo, unusedObservable) {
     warnUnimplemented('Autoplay delegation');
   }
 }
