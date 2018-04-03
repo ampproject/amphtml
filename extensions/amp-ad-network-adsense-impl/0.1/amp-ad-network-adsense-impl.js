@@ -405,8 +405,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
