@@ -165,7 +165,7 @@ describes.realWin('amp-brid-player', {
         'data-partner': '264',
         'data-player': '979',
         'data-video': '13663',
-        'aria-label' : 'great video'
+        'aria-label': 'great video',
       }).then(brid => {
         const img = brid.querySelector('amp-img');
         expect(img).to.not.be.null;

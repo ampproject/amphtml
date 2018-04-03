@@ -30,7 +30,7 @@ describes.realWin('amp-youtube', {
   amp: {
     extensions: ['amp-youtube'],
   },
-}, function (env) {
+}, function(env) {
   this.timeout(5000);
   let win, doc;
   let timer;
@@ -67,11 +67,11 @@ describes.realWin('amp-youtube', {
     }).then(() => yt);
   }
 
-  describe('with data-videoid', function () {
+  describe('with data-videoid', function() {
     runTestsForDatasource(EXAMPLE_VIDEOID);
   });
 
-  describe('with data-live-channelid', function () {
+  describe('with data-live-channelid', function() {
     runTestsForDatasource(EXAMPLE_LIVE_CHANNELID);
   });
 
@@ -254,7 +254,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('adds an img placeholder in prerender mode if source is videoid', () => {
-    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (yt) {
+    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
@@ -290,7 +290,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('loads only sddefault when it exists if source is videoid', () => {
-    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (yt) {
+    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
@@ -312,7 +312,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('loads hqdefault thumbnail source when sddefault fails', () => {
-    return getYt({'data-videoid': 'FAKE'}, true, function (yt) {
+    return getYt({'data-videoid': 'FAKE'}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
