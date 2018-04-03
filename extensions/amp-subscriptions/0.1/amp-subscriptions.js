@@ -324,8 +324,7 @@ export class SubscriptionService {
 
       let entitlement;
       if (entitlementJson) {
-        entitlementJson.raw = authData;
-        entitlement = Entitlement.parseFromJson(entitlementJson);
+        entitlement = Entitlement.parseFromJson(entitlementJson, authData);
       } else {
         entitlement = Entitlement.empty('local');
       }
