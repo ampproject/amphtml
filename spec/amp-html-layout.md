@@ -277,6 +277,13 @@ The following table describes the acceptable parameters, CSS classes, and styles
       <td><code>block</code></td>
     </tr>
     <tr>
+      <td><code>intrinsic</code></td>
+      <td>Yes</td>
+      <td>Yes, based on parent container and aspect ratio of <code>width:height</code>.</td>
+      <td>Yes, <code>i-amphtml-sizer</code>.</td>
+      <td><code>block</code> (behaves like a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element" rel="nofollow">replaced element</a>)</td>
+    </tr>
+    <tr>
       <td><code>nodisplay</code></td>
       <td>No</td>
       <td>No</td>

@@ -177,6 +177,9 @@ data.ws;
 data.host;
 data.s;
 
+// adpicker.js
+data.ph;
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -451,24 +454,16 @@ data.section;
 window.PulsePointHeaderTag;
 
 // rubicon.js
-var rubicontag;
-rubicontag.setFPV;
-rubicontag.setFPI;
-rubicontag.getSlot;
-rubicontag.getAdServerTargeting;
-rubicontag.addKW;
-rubicontag.setUrl;
-rubicontag.setIntegration;
 data.method;
-data.overrideWidth;
 data.width;
-data.overrideHeight;
 data.height;
 data.account;
 data.kw;
 data.visitor;
 data.inventory;
 data.size;
+data.site;
+data.zone;
 data.callback;
 
 // sharethrough.js

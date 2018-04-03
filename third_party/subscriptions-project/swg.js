@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.21-55a6698 */
+ /** Version: 0.1.22.3 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
+
+const CSS = "@media (min-width:480px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important}}\n@-webkit-keyframes swg-notify{0%{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}to{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}}\n@-webkit-keyframes swg-notify-hide{0%{-webkit-transform:translateY(0);transform:translateY(0);opacity:1}to{-webkit-transform:translateY(100%);transform:translateY(100%);opacity:0}}\n/*# sourceURL=/./src/components/dialog.css*/";
 
 
 
@@ -223,72 +225,7 @@ class Callbacks {
 
 
 
-
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
- function assert(shouldBeTrueish, opt_message, var_args) {
-   let firstElement;
-   if (!shouldBeTrueish) {
-     const message = opt_message || 'Assertion failed';
-     const splitMessage = message.split('%s');
-     const first = splitMessage.shift();
-     let formatted = first;
-     const messageArray = [];
-     pushIfNonEmpty(messageArray, first);
-     for (let i = 2; i < arguments.length; i++) {
-       const val = arguments[i];
-       if (val && val.tagName) {
-         firstElement = val;
-       }
-       const nextConstant = splitMessage.shift();
-       messageArray.push(val);
-       pushIfNonEmpty(messageArray, nextConstant.trim());
-       formatted += toString(val) + nextConstant;
-     }
-     const e = new Error(formatted);
-     e.fromAssert = true;
-     e.associatedElement = firstElement;
-     e.messageArray = messageArray;
-     throw e;
-   }
-   return shouldBeTrueish;
- }
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
- function pushIfNonEmpty(array, val) {
-   if (val != '') {
-     array.push(val);
-   }
- }
-
- function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-   if (val && val.nodeType == 1) {
-     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-   }
-   return /** @type {string} */ (val);
- }
+const CSS$1 = "body{padding:0;margin:0}.swg-loading{position:fixed!important;top:40%!important;left:45%!important;-webkit-transform:translate(-40%,-40%)!important;transform:translate(-40%,-40%)!important;z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}.swg-loading>div{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}.swg-loading>div>div{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 
 
@@ -461,10 +398,6 @@ const defaultStyles = {
   'z-index': 'auto',
 };
 
-/** @const {string} */
-const googleFontsUrl =
-    'https://fonts.googleapis.com/css?family=Google+Sans';
-
 /**
  * Default overwritable styles. This is required for responsive dialog.
  * @const {!Object<string, string|number>}
@@ -610,17 +543,193 @@ function resetAllStyles(element) {
 
 
 
-/** @const @enum{string} */
-const styleLinkAttrs = {
-  'rel': 'stylesheet',
-  'type': 'text/css',
-};
+/**
+ * Returns a promise which is resolved after the given duration of animation
+ * @param {!Element} el - Element to be observed.
+ * @param {!Object<string, string|number>} props - properties to be animated.
+ * @param {number} durationMillis - duration of animation.
+ * @param {string} curve - transition function for the animation.
+ * @return {!Promise} Promise which resolves once the animation is done playing.
+ */
+function transition(el, props, durationMillis, curve) {
+  const win = el.ownerDocument.defaultView;
+  const previousTransitionValue = el.style.transition || '';
+  return new Promise(resolve => {
+    win.setTimeout(() => {
+      win.setTimeout(resolve, durationMillis);
+      const tr = `${durationMillis}ms ${curve}`;
+      setImportantStyles(el, Object.assign({
+        'transition': `transform ${tr}, opacity ${tr}`,
+      }, props));
+    });
+  }).then(() => {
+    setImportantStyles(el, {
+      'transition': previousTransitionValue,
+    });
+  });
+}
+
+
+
+
+class Graypane {
+
+  /**
+   * @param {!../model/doc.Doc} doc
+   * @param {number} zIndex
+   */
+  constructor(doc, zIndex) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
+
+    /** @private @const {!Element} */
+    this.fadeBackground_ = this.doc_.getWin().document.createElement(
+        'swg-popup-background');
+    setImportantStyles(this.fadeBackground_, {
+      'z-index': zIndex,
+      'display': 'none',
+      'position': 'fixed',
+      'top': 0,
+      'right': 0,
+      'bottom': 0,
+      'left': 0,
+      'background-color': 'rgba(32, 33, 36, .6)',
+    });
+  }
+
+  /**
+   * @return {!Element}
+   */
+  getElement() {
+    return this.fadeBackground_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isAttached() {
+    return !!this.fadeBackground_.parentNode;
+  }
+
+  /**
+   * Attaches the graypane to the document.
+   */
+  attach() {
+    this.doc_.getBody().appendChild(this.fadeBackground_);
+  }
+
+  /**
+   * Detaches the graypane to the document.
+   */
+  destroy() {
+    this.doc_.getBody().removeChild(this.fadeBackground_);
+  }
+
+  /**
+   * Shows the graypane.
+   * @param {boolean=} animated
+   * @return {!Promise|undefined}
+   */
+  show(animated = true) {
+    setImportantStyles(this.fadeBackground_, {
+      'display': 'block',
+      'opacity': animated ? 0 : 1,
+    });
+    if (animated) {
+      return transition(this.fadeBackground_, {
+        'opacity': 1,
+      }, 300, 'ease-out');
+    }
+  }
+
+  /**
+   * Hides the graypane.
+   * @param {boolean=} animated
+   * @return {!Promise|undefined}
+   */
+  hide(animated = true) {
+    if (animated) {
+      return transition(this.fadeBackground_, {
+        'opacity': 0,
+      }, 300, 'ease-out').then(() => {
+        setImportantStyles(this.fadeBackground_, {'display': 'none'});
+      });
+    }
+    setImportantStyles(this.fadeBackground_, {'display': 'none'});
+  }
+}
+
+
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+ function assert(shouldBeTrueish, opt_message, var_args) {
+   let firstElement;
+   if (!shouldBeTrueish) {
+     const message = opt_message || 'Assertion failed';
+     const splitMessage = message.split('%s');
+     const first = splitMessage.shift();
+     let formatted = first;
+     const messageArray = [];
+     pushIfNonEmpty(messageArray, first);
+     for (let i = 2; i < arguments.length; i++) {
+       const val = arguments[i];
+       if (val && val.tagName) {
+         firstElement = val;
+       }
+       const nextConstant = splitMessage.shift();
+       messageArray.push(val);
+       pushIfNonEmpty(messageArray, nextConstant.trim());
+       formatted += toString(val) + nextConstant;
+     }
+     const e = new Error(formatted);
+     e.fromAssert = true;
+     e.associatedElement = firstElement;
+     e.messageArray = messageArray;
+     throw e;
+   }
+   return shouldBeTrueish;
+ }
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+ function pushIfNonEmpty(array, val) {
+   if (val != '') {
+     array.push(val);
+   }
+ }
+
+ function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+   if (val && val.nodeType == 1) {
+     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+   }
+   return /** @type {string} */ (val);
+ }
+
+
 
 /** @const {string} */
 const styleType = 'text/css';
-
-/** @const {string} */
-const styleExistsQuerySelector = 'link[rel=stylesheet][href]';
 
 
 /**
@@ -697,58 +806,6 @@ function injectStyleSheet(doc, styleText) {
 }
 
 
-/**
- * Injects the font Url in the HEAD of the provided document object.
- * @param {!Document} doc The document object.
- * @param {string} fontUrl The Url of the fonts to be inserted.
- * @return {!Document} The document object.
- */
-function injectFontsLink(doc, fontUrl) {
-
-  // Remove any trailing "/".
-  /** @type {string} */
-  const cleanFontUrl = fontUrl.replace(/\/$/, '');
-
-  if (styleExistsForUrl(doc, cleanFontUrl)) {
-    return doc;
-  }
-
-  const attrs = styleLinkAttrs;
-  attrs.href = cleanFontUrl;
-  const linkElement = createElement(doc, 'link', attrs);
-
-  doc.head.appendChild(linkElement);
-  return doc;
-}
-
-
-/**
- * Checks if existing link rel stylesheet with the same href exists.
- * @param {!Document} doc The document object.
- * @param {string} cleanFontUrl The fonts Url.
- * @return {boolean}
- */
-function styleExistsForUrl(doc, cleanFontUrl) {
-  // Check if existing link rel stylesheet with same href already defined.
-  const nodes = /** @type {!Array<!HTMLLinkElement>} */ (Array.prototype.slice
-      .call(doc.head.querySelectorAll(styleExistsQuerySelector)));
-
-  return nodes.some(link => {
-    return link.href == cleanFontUrl;
-  });
-}
-
-
-/**
- * Returns the BODY element of the document.
- * @param {!Document} doc
- * @return {!Element}
- */
-function getBody(doc) {
-  return /** @type {!Element} */ (doc.body);
-}
-
-
 
 
 /**
@@ -813,35 +870,6 @@ class LoadingView {
     const loadingIndicatorChildContainer = createElement(this.doc_, 'div', {});
     loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
   }
-}
-
-const CSS$1 = "body{padding:0;margin:0}.swg-loading{position:fixed!important;top:40%!important;left:45%!important;-webkit-transform:translate(-40%,-40%)!important;transform:translate(-40%,-40%)!important;z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}.swg-loading>div{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}.swg-loading>div>div{background-image:url('data:image/svg+xml;charset=utf-8;base64,DQo8c3ZnIHZlcnNpb249IjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxMTY2NCIgaGVpZ2h0PSIzNiIgdmlld0JveD0iMCAwIDExNjY0IDM2Ij48ZGVmcz48cGF0aCBpZD0iYSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWRhc2hhcnJheT0iNTguOSIgZD0iTTE4IDUuNUExMi41IDEyLjUgMCAxIDEgNS41IDE4IiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiLz48ZyBpZD0iYiI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3Ni42NiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzYuMzIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzUuODUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTc1LjE0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE3NC4xMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNzIuNzgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTcxLjAxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE2OC43OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNjYuMDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDMyNCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTYyLjczIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE1OS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNTUuMDQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQzMikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTUxLjA1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjE0Ny4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxNDMuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTQwLjU0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1NzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzNy43MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjEyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMzUuMjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTMyLjk4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg2ODQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEzMS4wMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzIwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjkuMjYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDc1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTI3LjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyNi4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODI4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjUuMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODY0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjQuMDEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDkwMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIzLjA0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMi4xOSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMjEuNDMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMDgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEyMC43NyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTA0NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTIwLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTkuNjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDExMTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOS4yNiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTE1MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4Ljg5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMTg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTguNTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExOC4zMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTI2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE4LjEzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMjk2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOTgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzMzIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNy44OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTM2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjgyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDA0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ0MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE3LjcyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNDc2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTcuNDYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE1MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTU0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTE2LjI5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNTg0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMTUuMjkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2MjApIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjExMy45NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTY1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTEyLjE5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNjkyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDkuOTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE3MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjEwNy4yMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTc2NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iMTAzLjk2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSIxMDAuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4MzYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijk2LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxODcyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI5Mi4zNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTkwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iODguNTYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE5NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijg1LjA3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxOTgwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI4MS45MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzkuMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwNTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9Ijc2LjYxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMDg4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3NC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTI0KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI3Mi40NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE2MCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNzAuNzEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxOTYpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Ny43OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjI2OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY1LjQ5IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMzQwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjMuNjgiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2Mi4yNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjQ4NCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuMiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjU1NikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2MjgpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5Ljg1IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNzAwKSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjc3MikiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuMzQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI4NDQpIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48ZyBpZD0iYyI+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjcwLjcxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMTk2KSIgb3BhY2l0eT0iLjA1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjY5LjE2IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyMjMyKSIgb3BhY2l0eT0iLjEiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjcuNzkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIyNjgpIiBvcGFjaXR5PSIuMTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjYuNTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIzMDQpIiBvcGFjaXR5PSIuMiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NS40OSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM0MCkiIG9wYWNpdHk9Ii4yNSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2NC41MyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjM3NikiIG9wYWNpdHk9Ii4zIi8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYzLjY4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDEyKSIgb3BhY2l0eT0iLjM1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYyLjkzIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNDQ4KSIgb3BhY2l0eT0iLjQiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjIuMjciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0ODQpIiBvcGFjaXR5PSIuNDUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjEuNyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjUyMCkiIG9wYWNpdHk9Ii41Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYxLjIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1NTYpIiBvcGFjaXR5PSIuNTUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNjAuNzciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI1OTIpIiBvcGFjaXR5PSIuNiIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI2MC40IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNjI4KSIgb3BhY2l0eT0iLjY1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjYwLjEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI2NjQpIiBvcGFjaXR5PSIuNyIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS44NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjcwMCkiIG9wYWNpdHk9Ii43NSIvPjx1c2UgeGxpbms6aHJlZj0iI2EiIHN0cm9rZS1kYXNob2Zmc2V0PSI1OS42NSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjczNikiIG9wYWNpdHk9Ii44Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI3NzIpIiBvcGFjaXR5PSIuODUiLz48dXNlIHhsaW5rOmhyZWY9IiNhIiBzdHJva2UtZGFzaG9mZnNldD0iNTkuNCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjgwOCkiIG9wYWNpdHk9Ii45Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjM0IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODQ0KSIgb3BhY2l0eT0iLjk1Ii8+PHVzZSB4bGluazpocmVmPSIjYSIgc3Ryb2tlLWRhc2hvZmZzZXQ9IjU5LjMyIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyODgwKSIvPjwvZz48L2RlZnM+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjNDI4NWY0Ii8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjZGI0NDM3Ii8+PHVzZSB4bGluazpocmVmPSIjYiIgc3Ryb2tlPSIjZGI0NDM3IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyOTE2KSIvPjx1c2UgeGxpbms6aHJlZj0iI2MiIHN0cm9rZT0iI2Y0YjQwMCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjkxNikiLz48dXNlIHhsaW5rOmhyZWY9IiNiIiBzdHJva2U9IiNmNGI0MDAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU4MzIpIi8+PHVzZSB4bGluazpocmVmPSIjYyIgc3Ryb2tlPSIjMGY5ZDU4IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODMyKSIvPjx1c2UgeGxpbms6aHJlZj0iI2IiIHN0cm9rZT0iIzBmOWQ1OCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODc0OCkiLz48dXNlIHhsaW5rOmhyZWY9IiNjIiBzdHJva2U9IiM0Mjg1ZjQiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg3NDgpIi8+PC9zdmc+');background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
-
-
-
-/**
- * Returns a promise which is resolved after the given duration of animation
- * @param {!Element} el - Element to be observed.
- * @param {!Object<string, string|number>} props - properties to be animated.
- * @param {number} durationMillis - duration of animation.
- * @param {string} curve - transition function for the animation.
- * @return {!Promise} Promise which resolves once the animation is done playing.
- */
-function transition(el, props, durationMillis, curve) {
-  const win = el.ownerDocument.defaultView;
-  const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
-    win.setTimeout(() => {
-      win.setTimeout(resolve, durationMillis);
-      setImportantStyles(el, Object.assign({
-        'transition': `transform ${durationMillis}ms ${curve}`,
-      }, props));
-    });
-  }).then(() => {
-    setImportantStyles(el, {
-      'transition': previousTransitionValue,
-    });
-  });
 }
 
 
@@ -922,7 +950,7 @@ class FriendlyIframe {
    * @return {!Element}
    */
   getBody() {
-    return getBody(this.getDocument());
+    return /** @type {!Element} */ (this.getDocument().body);
   }
 
   /**
@@ -939,6 +967,7 @@ class FriendlyIframe {
 
 
 
+const Z_INDEX = 2147483647;
 
 /**
  * Default iframe important styles.
@@ -953,7 +982,7 @@ const rootElementImportantStyles = {
   'display': 'block',
   'background-color': 'rgb(255, 255, 255)',
   'position': 'fixed',
-  'z-index': '2147483647',
+  'z-index': Z_INDEX,
   'box-shadow':
       'rgba(60, 64, 67, .3) 0 1px 1px, rgba(60, 64, 67, .15) 0 1px 4px 1px',
   'box-sizing': 'border-box',
@@ -999,24 +1028,21 @@ const PositionAt = {
 class Dialog {
 
   /**
-   * Create a dialog with optionally provided window and override important
-   * styles and position styles.
-   * @param {!Window} win
+   * Create a dialog for the provided doc.
+   * @param {!../model/doc.Doc} doc
    * @param {!Object<string, string|number>=} importantStyles
    * @param {!Object<string, string|number>=} styles
    */
-  constructor(win, importantStyles = {}, styles = {}) {
-
-    this.win_ = win;
-
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = this.win_.document;
+  constructor(doc, importantStyles = {}, styles = {}) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(this.doc_, {'class': 'swg-dialog'});
+    this.iframe_ = new FriendlyIframe(
+        doc.getWin().document, {'class': 'swg-dialog'});
 
-    /** @private @const {!Element} */
-    this.fadeBackground_ = this.doc_.createElement('swg-popup-background');
+    /** @private @const {!Graypane} */
+    this.graypane_ = new Graypane(doc, Z_INDEX - 1);
 
     const modifiedImportantStyles =
         Object.assign({}, rootElementImportantStyles, importantStyles);
@@ -1050,8 +1076,10 @@ class Dialog {
     if (iframe.isConnected()) {
       throw new Error('already opened');
     }
-    // Attach the invisible faded background to be used for some views.
-    this.attachBackground_();
+
+    // Attach.
+    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
+    this.graypane_.attach();
 
     if (animated) {
       this.animate_(() => {
@@ -1064,7 +1092,6 @@ class Dialog {
       });
     }
 
-    this.doc_.body.appendChild(iframe.getElement());  // Fires onload.
     return iframe.whenReady().then(() => {
       this.buildIframe_();
       return this;
@@ -1081,7 +1108,6 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectFontsLink(iframeDoc, googleFontsUrl);
     injectStyleSheet(iframeDoc, CSS$1);
 
     // Add Loading indicator.
@@ -1104,6 +1130,7 @@ class Dialog {
     let animating;
     if (animated) {
       animating = this.animate_(() => {
+        this.graypane_.hide(/* animate */ true);
         return transition(this.getElement(), {
           'transform': 'translateY(100%)',
         }, 300, 'ease-out');
@@ -1112,10 +1139,9 @@ class Dialog {
       animating = Promise.resolve();
     }
     return animating.then(() => {
-      this.doc_.body.removeChild(this.iframe_.getElement());
+      this.doc_.getBody().removeChild(this.iframe_.getElement());
       this.removePaddingToHtml_();
-      // Remove the faded background from the parent document.
-      this.doc_.body.removeChild(this.fadeBackground_);
+      this.graypane_.destroy();
     });
   }
 
@@ -1179,16 +1205,15 @@ class Dialog {
     this.setLoading(true);
     this.getContainer().appendChild(view.getElement());
 
+    // If the current view should fade the parent document.
+    if (view.shouldFadeBody()) {
+      this.graypane_.show(/* animate */ true);
+    }
     return view.init(this).then(() => {
       setImportantStyles(view.getElement(), {
         'opacity': 1,
       });
       this.setLoading(false);
-
-      // If the current view should fade the parent document.
-      if (view.shouldFadeBody()) {
-        this.fadeTheParent_();
-      }
     });
   }
 
@@ -1267,7 +1292,7 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.win_./*OK*/innerHeight * 0.9);
+    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
   }
 
   /**
@@ -1295,8 +1320,7 @@ class Dialog {
   updatePaddingToHtml_(newHeight) {
     if (this.inferPosition_() == PositionAt.BOTTOM) {
       const bottomPadding = newHeight + 20;  // Add some extra padding.
-      const htmlElement = this.doc_.documentElement;
-
+      const htmlElement = this.doc_.getRootElement();
       setImportantStyles(htmlElement, {
         'padding-bottom': `${bottomPadding}px`,
       });
@@ -1308,7 +1332,7 @@ class Dialog {
    * @private`
    */
   removePaddingToHtml_() {
-    this.doc_.documentElement.style.removeProperty('padding-bottom');
+    this.doc_.getRootElement().style.removeProperty('padding-bottom');
   }
 
 
@@ -1353,35 +1377,11 @@ class Dialog {
         return {'bottom': 0};
     }
   }
-
-  /**
-   * Attaches the hidden faded background to the parent document.
-   * @private
-   */
-  attachBackground_() {
-    setImportantStyles(this.fadeBackground_, {
-      'display': 'none',
-      'position': 'fixed',
-      'top': 0,
-      'right': 0,
-      'bottom': 0,
-      'left': 0,
-      'background-color': 'rgba(32, 33, 36, .6)',
-      'z-index': 2147483646,  /** 1 less than SwG dialog */
-    });
-    this.doc_.body.appendChild(this.fadeBackground_);
-  }
-
-  /**
-   * Fades the main page content when a view is rendered and fading is enabled..
-   * @private
-   */
-  fadeTheParent_() {
-    this.fadeBackground_.style.removeProperty('display');
-  }
 }
 
 
+
+const POPUP_Z_INDEX = 2147483647;
 
 
 /**
@@ -1391,17 +1391,33 @@ class Dialog {
 class DialogManager {
 
   /**
-   * @param {!Window} win
+   * @param {!../model/doc.Doc} doc
    */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+  constructor(doc) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
 
     /** @private {?Dialog} */
     this.dialog_ = null;
 
     /** @private {?Promise<!Dialog>} */
     this.openPromise_ = null;
+
+    /** @private @const {!Graypane} */
+    this.popupGraypane_ = new Graypane(doc, POPUP_Z_INDEX);
+
+    /** @private {?Window} */
+    this.popupWin_ = null;
+
+    this.popupGraypane_.getElement().addEventListener('click', () => {
+      if (this.popupWin_) {
+        try {
+          this.popupWin_.focus();
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+    });
   }
 
   /**
@@ -1409,7 +1425,7 @@ class DialogManager {
    */
   openDialog() {
     if (!this.openPromise_) {
-      this.dialog_ = new Dialog(this.win_);
+      this.dialog_ = new Dialog(this.doc_);
       this.openPromise_ = this.dialog_.open();
     }
     return this.openPromise_;
@@ -1449,6 +1465,9 @@ class DialogManager {
     if (this.dialog_) {
       this.close_();
     }
+    if (this.popupGraypane_.isAttached()) {
+      this.popupGraypane_.destroy();
+    }
   }
 
   /** @private */
@@ -1457,6 +1476,170 @@ class DialogManager {
     this.dialog_ = null;
     this.openPromise_ = null;
   }
+
+  /**
+   * @param {?Window|undefined} targetWin
+   */
+  popupOpened(targetWin) {
+    this.popupWin_ = targetWin || null;
+    if (!this.popupGraypane_.isAttached()) {
+      this.popupGraypane_.attach();
+    }
+    this.popupGraypane_.show();
+  }
+
+  /**
+   */
+  popupClosed() {
+    this.popupWin_ = null;
+    try {
+      this.popupGraypane_.hide();
+    } catch (e) {
+      // Ignore.
+    }
+  }
+}
+
+
+
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback when document's state satisfies the stateFn.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, stateFn, callback) {
+  let ready = stateFn(doc);
+  if (ready) {
+    callback(doc);
+  } else {
+    const readyListener = () => {
+      if (stateFn(doc)) {
+        if (!ready) {
+          ready = true;
+          callback(doc);
+        }
+        doc.removeEventListener('readystatechange', readyListener);
+      }
+    };
+    doc.addEventListener('readystatechange', readyListener);
+  }
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+
+
+
+/** @implements {Doc} */
+class GlobalDoc {
+
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = isWin ?
+        /** @type {!Window} */ (winOrDoc) :
+        /** @type {!Window} */ (
+            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin ?
+        /** @type {!Window} */ (winOrDoc).document :
+        /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+}
+
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if ((/** @type {!Window} */ (input)).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
 }
 
 
@@ -1472,8 +1655,9 @@ class Entitlements {
    * @param {string} raw
    * @param {!Array<!Entitlement>} entitlements
    * @param {?string} currentProduct
+   * @param {function(!Entitlements)} ackHandler
    */
-  constructor(service, raw, entitlements, currentProduct) {
+  constructor(service, raw, entitlements, currentProduct, ackHandler) {
     /** @const {string} */
     this.service = service;
     /** @const {string} */
@@ -1483,6 +1667,8 @@ class Entitlements {
 
     /** @private @const {?string} */
     this.product_ = currentProduct;
+    /** @private @const {function(!Entitlements)} */
+    this.ackHandler_ = ackHandler;
   }
 
   /**
@@ -1493,7 +1679,8 @@ class Entitlements {
         this.service,
         this.raw,
         this.entitlements.map(ent => ent.clone()),
-        this.product_);
+        this.product_,
+        this.ackHandler_);
   }
 
   /**
@@ -1556,6 +1743,14 @@ class Entitlements {
       }
     }
     return null;
+  }
+
+  /**
+   * A 3p site should call this method to acknowledge that it "saw" and
+   * "understood" entitlements.
+   */
+  ack() {
+    this.ackHandler_(this);
   }
 }
 
@@ -1835,11 +2030,8 @@ class Toast {
    */
   constructor(deps, src, args) {
 
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!HTMLDocument} */
-    this.doc_ = this.win_.document;
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = deps.doc();
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -1853,7 +2045,10 @@ class Toast {
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ =
         /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes));
+            createElement(
+                this.doc_.getWin().document,
+                'iframe',
+                iframeAttributes));
 
     setImportantStyles(this.iframe_, toastImportantStyles);
     setStyles(this.iframe_, topFriendlyIframePositionStyles);
@@ -1877,7 +2072,7 @@ class Toast {
    * @return {!Promise}
    */
   open() {
-    this.doc_.body.appendChild(this.iframe_);  // Fires onload.
+    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
     return this.buildToast_();
   }
 
@@ -1896,7 +2091,7 @@ class Toast {
                   + 'swg-notify-hide .3s ease-out ' + toastDurationSeconds +
                   's normal forwards',
           });
-          this.win_.setTimeout(() => {
+          this.doc_.getWin().setTimeout(() => {
             this.close();
           }, (toastDurationSeconds + 1) * 1000);
         });
@@ -1906,7 +2101,7 @@ class Toast {
    * Closes the toast.
    */
   close() {
-    this.doc_.body.removeChild(this.iframe_);
+    this.doc_.getBody().removeChild(this.iframe_);
   }
 }
 
@@ -2053,7 +2248,7 @@ const CACHE_KEYS = {
  * @return {string}
  */
 function feOrigin() {
-  return parseUrl('https://subscribe.sandbox.google.com').origin;
+  return parseUrl('https://news.google.com').origin;
 }
 
 
@@ -2062,7 +2257,7 @@ function feOrigin() {
  * @return {string} The complete URL.
  */
 function serviceUrl(url) {
-  return 'https://subscribe.sandbox.google.com/swg/_/api/v1' + url;
+  return 'https://news.google.com/swg/_/api/v1' + url;
 }
 
 
@@ -2072,9 +2267,16 @@ function serviceUrl(url) {
  * @return {string} The complete URL.
  */
 function feUrl(url, prefix = '') {
-  return addQueryParam(
-      'https://subscribe.sandbox.google.com' + prefix + '/swg/_/ui/v1' + url,
-      '_', cacheParam('hr1'));
+  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+}
+
+
+/**
+ * @param {string} url FE URL.
+ * @return {string} The complete URL including cache params.
+ */
+function feCached(url) {
+  return addQueryParam(url, '_', cacheParam('hr1'));
 }
 
 
@@ -2084,7 +2286,7 @@ function feUrl(url, prefix = '') {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.21-55a6698',
+    '_client': 'SwG 0.1.22.3',
   });
 }
 
@@ -2256,14 +2458,13 @@ class EntitlementsManager {
     if (!entitlement) {
       return Promise.resolve();
     }
-
+    // Check if storage bit is set. It's only set by the `Entitlements.ack`
+    // method.
     return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
       if (value == '1') {
         // Already shown;
         return;
       }
-
-      this.setToastShown(true);
       if (entitlement) {
         this.showToast_(entitlement);
       }
@@ -2276,11 +2477,20 @@ class EntitlementsManager {
    */
   showToast_(entitlement) {
     const source = entitlement.source || 'google';
-
     return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
       'publicationId': this.publicationId_,
       'source': source,
     })).open();
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  ack_(entitlements) {
+    if (entitlements.getEntitlementForThis()) {
+      this.setToastShown(true);
+    }
   }
 
   /**
@@ -2293,6 +2503,7 @@ class EntitlementsManager {
         encodeURIComponent(this.publicationId_) +
         '/entitlements');
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      const ackHandler = this.ack_.bind(this);
       const signedData = json['signedEntitlements'];
       if (signedData) {
         const jwt = this.jwtHelper_.decode(signedData);
@@ -2302,7 +2513,8 @@ class EntitlementsManager {
               SERVICE_ID,
               signedData,
               Entitlement.parseListFromJson(entitlementsClaim),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       } else {
         const plainEntitlements = json['entitlements'];
@@ -2311,11 +2523,17 @@ class EntitlementsManager {
               SERVICE_ID,
               '',
               Entitlement.parseListFromJson(plainEntitlements),
-              this.config_.getProductId());
+              this.config_.getProductId(),
+              ackHandler);
         }
       }
       // Empty response.
-      return new Entitlements(SERVICE_ID, '', [], this.config_.getProductId());
+      return new Entitlements(
+          SERVICE_ID,
+          '',
+          [],
+          this.config_.getProductId(),
+          ackHandler);
     });
   }
 }
@@ -2958,6 +3176,9 @@ class LinkbackFlow {
 
     /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
   }
 
   /**
@@ -2965,13 +3186,14 @@ class LinkbackFlow {
    * @return {!Promise}
    */
   start() {
-    this.activityPorts_.open(
+    const opener = this.activityPorts_.open(
         LINK_REQUEST_ID,
         feUrl('/linkbackstart'),
         '_blank',
         feArgs({
           'publicationId': this.pageConfig_.getPublicationId(),
         }), {});
+    this.dialogManager_.popupOpened(opener && opener.targetWin);
     return Promise.resolve();
   }
 }
@@ -2989,6 +3211,7 @@ class LinkCompleteFlow {
     function handler(port) {
       deps.entitlementsManager().blockNextNotification();
       deps.callbacks().triggerLinkProgress();
+      deps.dialogManager().popupClosed();
       const promise = acceptPortResult(
           port,
           feOrigin(),
@@ -3290,11 +3513,43 @@ class PurchaseData {
 
 const PAY_REQUEST_ID = 'swg-pay';
 
+/**
+ * @const {!Object<string, string>}
+ * @package Visible for testing only.
+ */
+const PAY_ORIGIN = {
+  'PRODUCTION': 'https://pay.google.com',
+  'SANDBOX': 'https://pay.sandbox.google.com',
+};
+
+
+/** @return {string} */
+function payOrigin() {
+  return PAY_ORIGIN['PRODUCTION'];
+}
+
+/** @return {string} */
+function payUrl() {
+  return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
+}
+
+/** @return {string} */
+function payDecryptUrl() {
+  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
+}
+
 
 /**
  * The flow to initiate payment process.
  */
 class PayStartFlow {
+
+  /**
+   * @param {!../utils/preconnect.Preconnect} pre
+   */
+  static preconnect(pre) {
+    pre.prefetch(payUrl());
+  }
 
   /**
    * @param {!./deps.DepsDef} deps
@@ -3310,6 +3565,9 @@ class PayStartFlow {
     /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = deps.pageConfig();
 
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
     /** @private @const {string} */
     this.sku_ = sku;
   }
@@ -3320,20 +3578,21 @@ class PayStartFlow {
    */
   start() {
     // TODO(dvoytenko): switch to gpay async client.
-    this.activityPorts_.open(
+    const opener = this.activityPorts_.open(
         PAY_REQUEST_ID,
-        feUrl('/pay'),
+        payUrl(),
         '_blank',
         feArgs({
           'apiVersion': 1,
           'allowedPaymentMethods': ['CARD'],
           'environment': 'PRODUCTION',
-          'playEnvironment': 'AUTOPUSH',
+          'playEnvironment': 'PROD',
           'swg': {
             'publicationId': this.pageConfig_.getPublicationId(),
             'skuId': this.sku_,
           },
         }), {});
+    this.dialogManager_.popupOpened(opener && opener.targetWin);
     return Promise.resolve();
   }
 }
@@ -3349,9 +3608,11 @@ class PayCompleteFlow {
    */
   static configurePending(deps) {
     deps.activities().onResult(PAY_REQUEST_ID, port => {
+      deps.dialogManager().popupClosed();
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise = validatePayResponse(port, flow.complete.bind(flow));
+      const promise = validatePayResponse(
+          deps.win(), port, flow.complete.bind(flow));
       deps.callbacks().triggerSubscribeResponse(promise);
       return promise.then(response => {
         flow.start(response);
@@ -3431,19 +3692,35 @@ class PayCompleteFlow {
 
 
 /**
+  *@param {!Window} win
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {function():!Promise} completeHandler
  * @return {!Promise<!SubscribeResponse>}
  * @package Visible for testing only.
  */
-function validatePayResponse(port, completeHandler) {
+function validatePayResponse(win, port, completeHandler) {
   return acceptPortResult(
       port,
-      feOrigin(),
+      payOrigin(),
       // TODO(dvoytenko): support payload decryption.
       /* requireOriginVerified */ false,
       /* requireSecureChannel */ false)
-      .then(data => parseSubscriptionResponse(data, completeHandler));
+      .then(data => {
+        if (data['redirectEncryptedCallbackData']) {
+          const xhr = new Xhr(win);
+          const url = payDecryptUrl();
+          const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+            method: 'post',
+            headers: {'Accept': 'text/plain, application/json'},
+            credentials: 'include',
+            body: data['redirectEncryptedCallbackData'],
+            mode: 'cors',
+          });
+          return xhr.fetch(url, init).then(response => response.json());
+        }
+        // TODO(dvoytenko): prohibit this branch in case of redirect.
+        return data;
+      }).then(data => parseSubscriptionResponse(data, completeHandler));
 }
 
 
@@ -3523,9 +3800,9 @@ class OffersFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
-
+  constructor(deps, options) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -3547,6 +3824,8 @@ class OffersFlow {
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
           'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
         }),
         /* shouldFadeBody */ true);
   }
@@ -3589,11 +3868,15 @@ class SubscribeOptionFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = deps.activities();
@@ -3608,6 +3891,9 @@ class SubscribeOptionFlow {
         feUrl('/optionsiframe'),
         feArgs({
           'publicationId': deps.pageConfig().getPublicationId(),
+          'productId': deps.pageConfig().getProductId(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
         }),
         /* shouldFadeBody */ false);
   }
@@ -3622,6 +3908,9 @@ class SubscribeOptionFlow {
     });
     this.activityIframeView_.acceptResult().then(result => {
       this.maybeOpenOffersFlow_(result.data);
+    }, reason => {
+      this.dialogManager_.completeView(this.activityIframeView_);
+      throw reason;
     });
     return this.dialogManager_.openView(this.activityIframeView_);
   }
@@ -3632,7 +3921,7 @@ class SubscribeOptionFlow {
    */
   maybeOpenOffersFlow_(data) {
     if (data && data['subscribe']) {
-      new OffersFlow(this.deps_).start();
+      new OffersFlow(this.deps_, this.options_).start();
     }
   }
 }
@@ -3646,11 +3935,15 @@ class AbbrvOfferFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OptionsRequest|undefined} options
    */
-  constructor(deps) {
+  constructor(deps, options) {
 
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OptionsRequest|undefined} */
+    this.options_ = options;
 
     /** @private @const {!Window} */
     this.win_ = deps.win();
@@ -3668,8 +3961,12 @@ class AbbrvOfferFlow {
         feUrl('/abbrvofferiframe'),
         feArgs({
           'publicationId': deps.pageConfig().getPublicationId(),
+          'productId': deps.pageConfig().getProductId(),
+          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+          'list': options && options.list || 'default',
+          'skus': options && options.skus || null,
         }),
-        /* shouldFadeBody */ true);
+        /* shouldFadeBody */ false);
   }
 
   /**
@@ -3686,12 +3983,18 @@ class AbbrvOfferFlow {
         });
         return;
       }
-      // TODO(sohanirao) : Handle the case when user is logged in
     });
     // If result is due to requesting offers, redirect to offers flow
     this.activityIframeView_.acceptResult().then(result => {
       if (result.data['viewOffers']) {
-        new OffersFlow(this.deps_).start();
+        new OffersFlow(this.deps_, this.options_).start();
+        return;
+      }
+      if (result.data['native']) {
+        this.deps_.callbacks().triggerSubscribeRequest();
+        // The flow is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+        return;
       }
     });
 
@@ -3704,70 +4007,65 @@ class AbbrvOfferFlow {
 
 
 
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
 
 
-/**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
+class Preconnect {
 
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+  }
 
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+  /**
+   * @param {string} url
+   */
+  preconnect(url) {
+    this.pre_(url, 'preconnect');
+  }
+
+  /**
+   * @param {string} url
+   */
+  dnsPrefetch(url) {
+    this.pre_(url, 'dns-prefetch');
+  }
+
+  /**
+   * @param {string} url
+   */
+  prefetch(url) {
+    this.pre_(url, 'preconnect prefetch');
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} as
+   */
+  preload(url, as) {
+    this.pre_(url, 'preconnect preload', as);
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} rel
+   * @param {?string=} opt_as
+   * @private
+   */
+  pre_(url, rel, opt_as) {
+    // <link rel="prefetch" href="..." as="">
+    const linkEl = createElement(this.doc_, 'link', {
+      'rel': rel,
+      'href': url,
+    });
+    if (opt_as) {
+      linkEl.setAttribute('as', opt_as);
+    }
+    this.doc_.head.appendChild(linkEl);
   }
 }
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-
 
 
 
@@ -3852,33 +4150,37 @@ function storageKey(key) {
 class ConfiguredRuntime {
 
   /**
-   * @param {!Window} win
+   * @param {!Window|!Document|!Doc} winOrDoc
    * @param {!../model/page-config.PageConfig} config
    * @param {{
    *     fetcher: (!Fetcher|undefined),
    *   }=} opt_integr
    */
-  constructor(win, config, opt_integr) {
+  constructor(winOrDoc, config, opt_integr) {
+    /** @private @const {!Doc} */
+    this.doc_ = resolveDoc(winOrDoc);
+
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = this.doc_.getWin();
 
     /** @private @const {!../model/page-config.PageConfig} */
     this.config_ = config;
 
     /** @private @const {!Promise} */
-    this.documentParsed_ = whenDocumentReady(this.win_.document);
+    this.documentParsed_ = this.doc_.whenReady();
 
     /** @private @const {!Fetcher} */
-    this.fetcher_ = opt_integr && opt_integr.fetcher || new XhrFetcher(win);
+    this.fetcher_ = opt_integr && opt_integr.fetcher ||
+        new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */
     this.storage_ = new Storage(this.win_);
 
     /** @private @const {!DialogManager} */
-    this.dialogManager_ = new DialogManager(win);
+    this.dialogManager_ = new DialogManager(this.doc_);
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts(win);
+    this.activityPorts_ = new ActivityPorts(this.win_);
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -3890,8 +4192,18 @@ class ConfiguredRuntime {
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.config_, this.fetcher_);
 
+    const preconnect = new Preconnect(this.win_.document);
+
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
+    PayStartFlow.preconnect(preconnect);
+
+    injectStyleSheet(this.win_.document, CSS);
+  }
+
+  /** @override */
+  doc() {
+    return this.doc_;
   }
 
   /** @override */
@@ -3966,25 +4278,25 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  showOffers() {
+  showOffers(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new OffersFlow(this);
+      const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
   }
 
   /** @override */
-  showSubscribeOption() {
+  showSubscribeOption(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new SubscribeOptionFlow(this);
+      const flow = new SubscribeOptionFlow(this, opt_options);
       return flow.start();
     });
   }
 
-  /** override */
-  showAbbrvOffer() {
+  /** @override */
+  showAbbrvOffer(opt_options) {
     return this.documentParsed_.then(() => {
-      const flow = new AbbrvOfferFlow(this);
+      const flow = new AbbrvOfferFlow(this, opt_options);
       return flow.start();
     });
   }

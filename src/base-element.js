@@ -15,14 +15,13 @@
  */
 
 import {ActionTrust} from './action-trust';
-import {Layout} from './layout';
+import {Layout, LayoutPriority} from './layout';
 import {Services} from './services';
 import {dev, user} from './log';
-import {getData, listen} from './event-helper';
+import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
 import {isExperimentOn} from './experiments';
-import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -185,11 +184,11 @@ export class BaseElement {
   *
   * The lower the number, the higher the priority.
   *
-  * The default priority for base elements is 0.
+  * The default priority for base elements is LayoutPriority.CONTENT.
   * @return {number}
   */
   getLayoutPriority() {
-    return 0;
+    return LayoutPriority.CONTENT;
   }
 
   /**
@@ -263,6 +262,22 @@ export class BaseElement {
    */
   getLayoutWidth() {
     return this.layoutWidth_;
+  }
+
+  /**
+   * Returns the consent policy id that this element should wait for before
+   * buildCallback.
+   * A `null` value indicates to not be blocked by consent.
+   * Subclasses may override.
+   * @return {?string}
+   */
+  getConsentPolicy() {
+    let policyId = null;
+    if (this.element.hasAttribute('data-block-on-consent')) {
+      policyId =
+          this.element.getAttribute('data-block-on-consent') || 'default';
+    }
+    return policyId;
   }
 
   /**
@@ -704,6 +719,25 @@ export class BaseElement {
   }
 
   /**
+   * Hides or shows the loading indicator. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} state
+   * @public @final
+   */
+  toggleLoading(state) {
+    this.element.toggleLoading(state, {force: true});
+  }
+
+  /**
+   * Returns whether the loading indicator is reused again after the first render.
+   * @return {boolean}
+   * @public
+   */
+  isLoadingReused() {
+    return false;
+  }
+
+  /**
    * Returns an optional overflow element for this custom element.
    * @return {?Element}
    * @public @final
@@ -1020,3 +1054,5 @@ export class BaseElement {
     return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }
+
+

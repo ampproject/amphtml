@@ -57,12 +57,12 @@
     format="DD/MM/YYYY"
     number-of-months="1"
     day-size="50"
-    keep-open-on-date-select
     start-input-selector="#start"
     end-input-selector="#end"
     mode="overlay"
     layout="container"
-    reopen-picker-on-clear-date
+    open-after-clear
+    open-after-select
   >
     <div>
       <input type="tel" placeholder="Start date" id="start" />
@@ -86,7 +86,6 @@
       <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ': )'">: )</span>
     </template>
   </amp-date-picker>
-
   <h2>external <code>src</code></h2>
   <input id="externalSrc" type="tel" placeholder="Pick a date"/>
   <amp-date-picker
@@ -95,7 +94,9 @@
     number-of-months="1"
     mode="static"
     src="date-picker.json"
-    layout="container"
+    layout="fixed-height"
+    first-day-of-week="1"
+    height="360"
     format="DD/MM/YYYY"
     input-selector="#externalSrc"
   >
@@ -143,7 +144,11 @@
         </label>
         <span>Your date</span>
         <input id="date" name="date">
-        <amp-date-picker input-selector="#date"></amp-date-picker>
+        <amp-date-picker
+          layout="fixed-height"
+          height="360"
+          input-selector="#date"
+        ></amp-date-picker>
         <input type="submit" value="Subscribe">
     </fieldset>
 
