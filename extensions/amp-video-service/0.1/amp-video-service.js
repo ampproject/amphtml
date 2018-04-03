@@ -66,15 +66,25 @@ export class VideoService {
 
   /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
+    const {win} = ampdoc;
+
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    this.tick_ = new LazyObservable(() => {
-      const {win} = ampdoc;
-      const timer = Services.timerFor(win);
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
 
-      timer.delay(() => this.tick_.fire(), 1000);
-    });
+    /** @return {!function():void} */
+    this.boundTick_ = () => this.startTicking_();
+
+    /** @return {!../../../src/observable-interface.Observable} */
+    this.tick_ = new LazyObservable(boundTick_);
+  }
+
+  /** @private */
+  startTicking_() {
+    this.tick_.fire();
+    this.timer_.delay(this.boundTick_, 1000);
   }
 
   /** @param {!../../../src/video-interface.VideoInterface} video */
@@ -105,9 +115,7 @@ export class VideoService {
     return element[ENTRY_PROP];
   }
 
-  /**
-   * @return {!../../../src/observable-interface.Observable}
-   */
+  /** @return {!../../../src/observable-interface.Observable} */
   getTick() {
     return this.tick_;
   }
@@ -210,6 +218,10 @@ export class VideoEntry {
 
     element.classList.add('i-amphtml-video-interface');
 
+  }
+
+  /** @private */
+  addEventHandlers_() {
     listen(element, VideoEvents.PAUSE, () => {
       this.isPlaying_ = false;
     });
