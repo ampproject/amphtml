@@ -167,10 +167,8 @@ export class Bind {
     /** @private {Promise} */
     this.setStatePromise_ = null;
 
-    // Expose for testing on dev.
-    if (getMode().development || getMode().localDev) {
-      AMP.printState = this.printState_.bind(this);
-    }
+    // Expose for debugging in the console.
+    AMP.printState = this.printState_.bind(this);
   }
 
   /** @override */
@@ -750,8 +748,10 @@ export class Bind {
     boundProperties.forEach(boundProperty => {
       const {expressionString, previousResult} = boundProperty;
       const newValue = results[expressionString];
+      // Support equality checks for arrays of objects containing arrays.
+      // Useful for rendering amp-list with amp-bind state via [src].
       if (newValue === undefined ||
-          recursiveEquals(newValue, previousResult, /* depth */ 3)) {
+          recursiveEquals(newValue, previousResult, /* depth */ 5)) {
         user().fine(TAG, 'Expression result unchanged or missing: ' +
             `"${expressionString}"`);
       } else {

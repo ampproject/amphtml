@@ -32,10 +32,10 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
+import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -625,7 +625,9 @@ export class Resources {
       // Build failed: remove the resource. No other state changes are
       // needed.
       this.removeResource_(resource);
-      throw error;
+      if (!isBlockedByConsent(error)) {
+        throw error;
+      }
     });
   }
 
@@ -959,6 +961,7 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
         if (measurer) {
@@ -1125,11 +1128,13 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
+      const documentInfo = Services.documentInfoForDoc(this.ampdoc);
       this.viewer_.sendMessage('documentLoaded', dict({
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': documentInfo.linkRels,
+        'metaTags': documentInfo.metaTags,
       }), /* cancelUnsent */true);
 
       this.contentHeight_ = this.viewport_.getContentHeight();

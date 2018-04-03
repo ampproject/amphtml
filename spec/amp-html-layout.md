@@ -121,6 +121,10 @@ Supported values for the `layout` attribute:
       <td>The element and other elements in its parent with layout type <code>flex-item</code> take the parent container's remaining space when the parent is a flexible container (i.e., <code>display: flex</code>). The <code>width</code> and <code>height</code> attributes are not required.</td>
     </tr>
     <tr>
+      <td><code>intrinsic</code></td>
+      <td>The element takes the space available to it and resizes its height automatically to the aspect ratio given by the <code>width</code> and <code>height</code> attributes. This layout works very well for most AMP elements, including <code>amp-img</code>, <code>amp-video</code>, etc.  The available space depends on the parent element and can also be customized using <code>max-width</code> CSS. The <code>width</code> and <code>height</code> attributes must be present.  This layout differs from <code>responsive</code> by having an intrinsic height and width. This is most apparent inside a floated element where a <code>responsive</code> layout will render 0x0 and <code>intrinsic</code> layout will inflate to the smaller of its natural size or any CSS constraint. </td>
+    </tr>
+    <tr>
       <td><code>nodisplay</code></td>
       <td>The element isn't displayed, and takes up zero space on the screen as if its display style was <code>none</code>. This layout can be applied to every AMP element.  It’s assumed that the element can display itself on user action (e.g., <code>amp-lightbox</code>). The <code>width</code> and <code>height</code> attributes are not required.</td>
     </tr>
@@ -271,6 +275,13 @@ The following table describes the acceptable parameters, CSS classes, and styles
       <td>No</td>
       <td>Yes, based on parent container.</td>
       <td><code>block</code></td>
+    </tr>
+    <tr>
+      <td><code>intrinsic</code></td>
+      <td>Yes</td>
+      <td>Yes, based on parent container and aspect ratio of <code>width:height</code>.</td>
+      <td>Yes, <code>i-amphtml-sizer</code>.</td>
+      <td><code>block</code> (behaves like a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element" rel="nofollow">replaced element</a>)</td>
     </tr>
     <tr>
       <td><code>nodisplay</code></td>

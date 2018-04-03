@@ -72,7 +72,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       width: ampAdWidth,
       height: ampAdHeight,
     };
-    const creativeSize = initialSize;
+    const creativeSize = {
+      width: ampAdWidth,
+      height: ampAdHeight,
+    };
     safeframeHost = new SafeframeHostApi(
         doubleclickImpl, false, initialSize, creativeSize);
     doubleclickImpl.upgradeCallback();
@@ -447,7 +450,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('Resizing', () => {
     let safeframeMock;
-    let resizeIframeSpy;
+    let resizeSafeframeSpy;
     let sendResizeResponseSpy;
     let resizeAmpAdAndSafeframeSpy;
     let attemptChangeSizeStub;
@@ -465,8 +468,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeIframeSpy = sandbox.spy(
-          safeframeHost, 'resizeIframe');
+      resizeSafeframeSpy = sandbox.spy(
+          safeframeHost, 'resizeSafeframe');
       sendResizeResponseSpy = sandbox.spy(
           safeframeHost, 'sendResizeResponse');
       resizeAmpAdAndSafeframeSpy = sandbox.spy(
@@ -509,44 +512,104 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * the amp-ad element, it succeeds immediately.
      */
     it('expand_request should succeed if within amp-ad bounds', () => {
+      safeframeHost.slotSize_.width = 500;
+      safeframeHost.slotSize_.height = 500;
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(100, 100);
-      expect(safeframeMock.style.height).to.equal('100px');
-      expect(safeframeMock.style.width).to.equal('100px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
+        expect(safeframeMock.style.height).to.equal('300px');
+        expect(safeframeMock.style.width).to.equal('350px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      });
     });
 
     /**
-     * If the safeframed creative asks to resize within the bounds of
+     * If the safeframed creative asks to resize outside the bounds of
      * the amp-ad element, first we try to resize the amp-ad element by
      * using element.attemptChangeSize. If that succeeds, then we also
      * resize the safeframe.
      */
     it('expand_request should succeed if expanding past amp-ad bounds and' +
        ' does not create reflow', () => {
+      const expandWidthBy = 550;
+      const expandHeightBy = 600;
       // Sneaky hack to do a synchronous mock of attemptChangeSize
       // Resize the ampAd to simulate a success.
       const then = f => {
-        ampAd.style.height = '600px';
-        ampAd.style.width = '600px';
+        ampAd.style.height = '850px';
+        ampAd.style.width = '850px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
-      sendExpandMessage(550,550);
+      sendExpandMessage(expandHeightBy, expandWidthBy);
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(600, 600);
-      expect(safeframeMock.style.height).to.equal('600px');
-      expect(safeframeMock.style.width).to.equal('600px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(850, 850);
+        expect(safeframeMock.style.height).to.equal('850px');
+        expect(safeframeMock.style.width).to.equal('850px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
+    });
+
+    /**
+     * If the safeframed creative asks to resize outside the bounds of
+     * the amp-ad element, first we try to resize the amp-ad element by
+     * using element.attemptChangeSize. If that rejects, we should send
+     * a failure message.
+     */
+    it('resizeAmpAdAndSafeframe should send error on rejection', () => {
+      attemptChangeSizeStub.rejects();
+      safeframeHost.resizeAmpAdAndSafeframe(550, 550, SERVICE.EXPAND_RESPONSE);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
+    });
+
+    /**
+     * If the safeframed creative asks to expand greater than the viewport,
+     * fail gracefully.
+     */
+    it('expand_request fails if expanding larger than viewport', () => {
+      sendExpandMessage(5000, 5000);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
+    });
+
+    /**
+     * If the safeframed creative asks to expand with invalid expand
+     * values, should fail gracefully.
+     */
+    it('expand_request fails if invalid values sent', () => {
+      const expandMessage = {};
+      expandMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+      expandMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+      expandMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.EXPAND_REQUEST;
+      expandMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        'uid': 0.623462509818004,
+        'expand_t': 'text',
+        'expand_r': 'Also text',
+        'expand_b': 50,
+        'expand_l': 0,
+        'push': 'not bool',
+        'sentinel': safeframeHost.sentinel_,
+      });
+      receiveMessage(expandMessage);
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+      });
     });
 
     /**
@@ -556,23 +619,18 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request should fail if expanding past amp-ad bounds and would ' +
        'create reflow', () => {
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // In our mock, we don't do anything to the iframe that would be seen as a
-      // success, thus we are failing the resizing.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
 
       sendExpandMessage(550, 550);
 
-      expect(resizeIframeSpy).to.not.be.called;
-      expect(safeframeMock.height).to.equal('50');
-      expect(safeframeMock.width).to.equal('50');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          false, SERVICE.EXPAND_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.not.be.called;
+        expect(safeframeMock.height).to.equal('50');
+        expect(safeframeMock.width).to.equal('50');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     function sendCollapseMessage() {
@@ -594,22 +652,18 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.style.width = '600px';
       safeframeMock.style.height = 600;
       safeframeMock.style.width = 600;
-      // Sneaky hack to do a synchronous mock of attemptChangeSize
-      // Resize the ampAd to simulate a success.
-      const then = f => {
-        f();
-        return {'catch': f => f()};
-      };
-      attemptChangeSizeStub.returns({then});
+      attemptChangeSizeStub.rejects();
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
 
     it('should collapse safeframe on amp-ad resize success', () => {
@@ -624,18 +678,84 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         ampAd.style.height = '250px';
         ampAd.style.width = '300px';
         f();
-        return {'catch': f => f()};
+        return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
       sendCollapseMessage();
 
-      expect(resizeIframeSpy).to.be.calledOnce;
-      expect(resizeIframeSpy).to.be.calledWith(250, 300);
-      expect(safeframeMock.style.height).to.equal('250px');
-      expect(safeframeMock.style.width).to.equal('300px');
-      expect(sendResizeResponseSpy).to.be.calledWith(
-          true, SERVICE.COLLAPSE_RESPONSE);
-      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(250, 300);
+        expect(safeframeMock.style.height).to.equal('250px');
+        expect(safeframeMock.style.width).to.equal('300px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.COLLAPSE_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
+    });
+
+    it('should send collapse failure message if already collapsed', () => {
+      safeframeHost.isCollapsed_ = true;
+      sendCollapseMessage();
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.COLLAPSE_RESPONSE);
+      });
+    });
+
+    it('should send collapse failure message if not registered', () => {
+      safeframeHost.isCollapsed_ = false;
+      safeframeHost.isRegistered_ = false;
+      sendCollapseMessage();
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            false, SERVICE.COLLAPSE_RESPONSE);
+      });
+    });
+
+    /**
+     * Send a message requesting a shrink.
+     * @param {number} height Pixels to shrink height by.
+     * @param {number} width Pixels to shrink width by.
+     */
+    function sendShrinkMessage(top, bottom, left, right) {
+      const shrinkMessage = {};
+      shrinkMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+      shrinkMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+      shrinkMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.SHRINK_REQUEST;
+      shrinkMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+        'uid': 0.623462509818004,
+        'shrink_t': top,
+        'shrink_r': right,
+        'shrink_b': bottom,
+        'shrink_l': left,
+        'sentinel': safeframeHost.sentinel_,
+      });
+      receiveMessage(shrinkMessage);
+    }
+
+    it('should shrink safeframe on amp-ad resize success', () => {
+      safeframeHost.isCollapsed_ = false;
+      // Sneaky hack to do a synchronous mock of attemptChangeSize
+      // Resize the ampAd to simulate a success.
+      const then = f => {
+        ampAd.style.height = '240px';
+        ampAd.style.width = '290px';
+        f();
+        return {'catch': () => {}};
+      };
+      attemptChangeSizeStub.returns({then});
+      sendShrinkMessage(5, 5, 5, 5);
+
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(240, 290);
+        expect(safeframeMock.style.height).to.equal('240px');
+        expect(safeframeMock.style.width).to.equal('290px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.SHRINK_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+      });
     });
   });
 });

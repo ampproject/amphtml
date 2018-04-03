@@ -117,6 +117,19 @@ Indicates that the option is selectable.  If a value is specified, the contents 
 
 The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
+## Events
+
+Events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="select: my-tab.show"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+
+##### select
+
+`amp-selector` triggers the `select` event when the user selects an option.
+Multi-selectors and single-selectors fire this when selecting or unselecting options.
+Tapping disabled options does not trigger the `select` event.
+
 ## Validation
 
 See [amp-selector rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-selector/validator-amp-selector.protoascii) in the AMP validator specification.

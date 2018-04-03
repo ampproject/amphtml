@@ -5,8 +5,8 @@
   "description": "Fastish HTML",
   "main": "index.js",
   "engines": {
-    "node": ">=6",
-    "yarn": ">=1.0.2"
+    "node": ">=8.10.0",
+    "yarn": ">=1.2.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
@@ -28,7 +28,7 @@
     "babel-polyfill": "6.26.0",
     "document-register-element": "1.5.0",
     "promise-pjs": "1.1.3",
-    "web-activities": "1.5.0",
+    "web-activities": "1.6.0",
     "web-animations-js": "2.3.1"
   },
   "greenkeeper": {
@@ -132,7 +132,7 @@
     "mocha": "5.0.1",
     "moment": "2.21.0",
     "morgan": "1.9.0",
-    "nodemon": "1.15.0",
+    "nodemon": "1.17.2",
     "path": "0.12.7",
     "plugin-error": "0.1.2",
     "postcss": "6.0.18",
@@ -147,7 +147,7 @@
     "request": "2.84.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
-    "sinon": "4.4.5",
+    "sinon": "4.4.6",
     "sinon-chai": "3.0.0",
     "text-table": "0.2.0",
     "through2": "2.0.3",

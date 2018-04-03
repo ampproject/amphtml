@@ -37,7 +37,7 @@ tags: {  # amp-list
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-list>
+tags: {  # <amp-list> with mandatory src attr
   html_format: AMP
   html_format: EXPERIMENTAL
   tag_name: "AMP-LIST"
@@ -45,6 +45,10 @@ tags: {  # <amp-list>
   attrs: { name: "credentials" }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
+  attrs: {
+    name: "reset-on-refresh"
+    value: ""
+  }
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
@@ -60,7 +64,46 @@ tags: {  # <amp-list>
   attrs: { name: "template" }
   # <amp-bind>
   attrs: { name: "[src]" }
-  attrs: { name: "[state]" }
+  attrs: {
+    name: "[state]"
+    deprecation: "[src]"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-list> with mandatory [src] attr
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-LIST"
+  spec_name: "AMP-LIST [SRC]"
+  requires_extension: "amp-list"
+  attrs: { name: "credentials" }
+  attrs: { name: "items" }
+  attrs: { name: "max-items" }
+  attrs: { name: "single-item" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
+  # <amp-bind>
+  attrs: {
+    name: "[src]"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

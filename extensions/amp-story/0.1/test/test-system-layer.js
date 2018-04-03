@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AmpStoryStateService} from '../amp-story-state-service';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
-import {SystemLayer} from '../system-layer';
+import {SystemLayer} from '../amp-story-system-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
@@ -27,11 +27,11 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let systemLayer;
   let progressBarStub;
   let progressBarRoot;
-  let stateService;
 
   beforeEach(() => {
     win = env.win;
 
+    registerServiceBuilder(win, 'story-store', () => ({get: NOOP}));
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
@@ -43,24 +43,22 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
     sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    stateService = new AmpStoryStateService();
-
-    systemLayer = new SystemLayer(win, stateService);
-
     sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
     });
+
+    systemLayer = new SystemLayer(win);
   });
 
   it('should build UI', () => {
-    const addEventHandlers =
-        sandbox.stub(systemLayer, 'addEventHandlers_').callsFake(NOOP);
+    const initializeListeners =
+        sandbox.stub(systemLayer, 'initializeListeners_').callsFake(NOOP);
 
     const root = systemLayer.build();
 
     expect(root).to.not.be.null;
 
-    expect(addEventHandlers).to.have.been.called;
+    expect(initializeListeners).to.have.been.called;
   });
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
@@ -70,7 +68,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
     sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
     sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
-    systemLayer.addEventHandlers_();
+    systemLayer.initializeListeners_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });

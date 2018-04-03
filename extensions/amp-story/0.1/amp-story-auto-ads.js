@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {
-  AmpStoryStateService,
-  StateType,
-} from './amp-story-state-service';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {StateChangeType} from './navigation-state';
+import {StateProperty} from './amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
-import {parseEmbedMode} from './embed-mode';
 import {parseJson} from '../../../src/json';
 
 
@@ -55,6 +51,7 @@ const CTA_TYPES = {
   EXPLORE: 'Explore Now',
   SHOP: 'Shop Now',
   READ: 'Read Now',
+  INSTALL: 'Install Now',
 };
 
 /** @const */
@@ -109,32 +106,35 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
-    /** @private @const {!AmpStoryStateService} */
-    this.stateService_ = new AmpStoryStateService();
+    /** @private {?./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
   /** @override */
   buildCallback() {
-    const embedMode = parseEmbedMode(this.win.location.hash);
-    this.stateService_.initializeEmbedMode(embedMode);
-    if (!this.isAutomaticAdInsertionAllowed_()) {
-      return;
-    }
+    return Services.storyStoreServiceForOrNull(this.win).then(storeService => {
+      dev().assert(storeService, 'Could not retrieve AmpStoryStoreService');
+      this.storeService_ = storeService;
 
-    const ampStoryElement = this.element.parentElement;
-    user().assert(ampStoryElement.tagName === 'AMP-STORY',
-        `<${TAG}> should be child of <amp-story>`);
+      if (!this.isAutomaticAdInsertionAllowed_()) {
+        return;
+      }
 
-    const ampdoc = this.getAmpDoc();
-    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
-        ampdoc, AD_TAG);
-    Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
-        ampdoc, MUSTACHE_TAG);
+      const ampStoryElement = this.element.parentElement;
+      user().assert(ampStoryElement.tagName === 'AMP-STORY',
+          `<${TAG}> should be child of <amp-story>`);
 
-    return ampStoryElement.getImpl().then(impl => {
-      this.ampStory_ = impl;
-      this.navigationState_ = this.ampStory_.getNavigationState();
-      this.navigationState_.observe(this.handleStateChange_.bind(this));
+      const ampdoc = this.getAmpDoc();
+      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+          ampdoc, AD_TAG);
+      Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
+          ampdoc, MUSTACHE_TAG);
+
+      return ampStoryElement.getImpl().then(impl => {
+        this.ampStory_ = impl;
+        this.navigationState_ = this.ampStory_.getNavigationState();
+        this.navigationState_.observe(this.handleStateChange_.bind(this));
+      });
     });
   }
 
@@ -161,10 +161,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   isAutomaticAdInsertionAllowed_() {
-    const allowAutomaticAdInsertion = this.stateService_
-        .getState(StateType.ALLOW_AUTOMATIC_AD_INSERTION);
-
-    return allowAutomaticAdInsertion.getValue();
+    return this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
   }
 
   /**
@@ -269,7 +266,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const attributes = dict({
       'id': `i-amphtml-ad-page-${id}`,
       'ad': '',
-      'distance': '1',
+      'distance': '2',
     });
 
     return createElementWithAttributes(

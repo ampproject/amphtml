@@ -21,6 +21,7 @@ import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
+import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
@@ -284,20 +285,24 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     const preloadSpy = sandbox.spy(analytics, 'preload');
-    analytics.predefinedConfig_['foo'] = {
-      'transport': {
-        'iframe': 'https://www.google.com',
-      },
-      'triggers': {
-        'sample_visibility_trigger': {
-          'on': 'visible',
-          'request': 'sample_visibility_request',
-        },
-      },
-      'requests': {
-        'sample_visibility_request': 'fake-request',
-      },
-    };
+    sandbox.stub(analytics, 'predefinedConfig_').value(
+        {
+          'foo': {
+            'transport': {
+              'iframe': 'https://www.google.com',
+            },
+            'triggers': {
+              'sample_visibility_trigger': {
+                'on': 'visible',
+                'request': 'sample_visibility_request',
+              },
+            },
+            'requests': {
+              'sample_visibility_request': 'fake-request',
+            },
+          },
+        }
+    );
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
@@ -467,6 +472,20 @@ describes.realWin('amp-analytics', {
       expect(sendRequestSpy.calledTwice).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
       expect(sendRequestSpy.args[1][0]).to.equal('b1');
+    });
+  });
+
+  it('should not replace HTML_ATTR outside of amp-ad', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'htmlAttrRequest': 'https://example.com/bar&ids=${htmlAttr(div,id)}',
+      },
+      'triggers': [{'on': 'visible', 'request': 'htmlAttrRequest'}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(decodeURIComponent(sendRequestSpy.args[0][0])).to.equal('https://example.com/bar&ids=HTML_ATTR(div,id)');
     });
   });
 
@@ -1852,12 +1871,14 @@ describes.realWin('amp-analytics', {
     }
 
     it('is 1 for non-inabox', () => {
-      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(1);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
+          LayoutPriority.METADATA);
     });
 
     it('is 0 for inabox', () => {
       env.win.AMP_MODE.runtime = 'inabox';
-      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(0);
+      expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
+          LayoutPriority.CONTENT);
     });
   });
 

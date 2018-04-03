@@ -101,4 +101,9 @@ export class AccessVendorAdapter {
       return vendor.pingback();
     });
   }
+
+  /** @override */
+  postAction() {
+    // TODO(dvoytenko): delegate to vendor adapter.
+  }
 }

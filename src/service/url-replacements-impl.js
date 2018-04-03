@@ -49,6 +49,10 @@ const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @private @const {Object<string, boolean>} */
+const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
+
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
 
@@ -65,7 +69,8 @@ function encodeValue(val) {
 }
 
 /**
- * Returns a function that executes method on a new Date instance.
+ * Returns a function that executes method on a new Date instance. This is a
+ * byte saving hack.
  *
  * @param {string} method
  * @return {!SyncResolverDef}
@@ -75,7 +80,8 @@ function dateMethod(method) {
 }
 
 /**
- * Returns a function that returns property of screen.
+ * Returns a function that returns property of screen. This is a byte saving
+ * hack.
  *
  * @param {!Screen} screen
  * @param {string} property
@@ -83,6 +89,19 @@ function dateMethod(method) {
  */
 function screenProperty(screen, property) {
   return () => screen[property];
+}
+
+/**
+ * Returns a function that executes method on the viewport. This is a byte
+ * saving hack.
+ *
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function viewportMethod(viewport, method) {
+  // Convert to object to allow dynamic access.
+  return () => /** @type {!Object} */(viewport)[method]();
 }
 
 /**
@@ -228,6 +247,17 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
+    // Returns the value of the given field name in the fragment query string.
+    // Second parameter is an optional default value.
+    // For example, if location is 'pub.com/amp.html?x=1#y=2' then
+    // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
+    this.setAsync('FRAGMENT_PARAM',
+        this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+
+    // Returns the first item in the ancestorOrigins array, if available.
+    this.setAsync('ANCESTOR_ORIGIN',
+        this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
+
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -334,23 +364,35 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
+    // Returns the IANA timezone code
+    this.set('TIMEZONE_CODE', () => {
+      let tzCode;
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+
+      return tzCode || '';
+    });
+
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+    this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.set('SCROLL_LEFT', viewportMethod(viewport, 'getScrollLeft'));
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
+    this.set('SCROLL_HEIGHT', viewportMethod(viewport, 'getScrollHeight'));
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
+    this.set('SCROLL_WIDTH', viewportMethod(viewport, 'getScrollWidth'));
 
     // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', () => viewport.getSize().height);
+    this.set('VIEWPORT_HEIGHT', viewportMethod(viewport, 'getHeight'));
 
     // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
+    this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
     const screen = this.ampdoc.win.screen;
@@ -499,7 +541,7 @@ export class GlobalVariableSource extends VariableSource {
           root.getElementById(/** @type {string} */ (id)),
           `Could not find an element with id="${id}" for VIDEO_STATE`);
       return Services.videoManagerForDoc(this.ampdoc)
-          .getVideoAnalyticsDetails(video)
+          .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
 
@@ -633,6 +675,26 @@ export class GlobalVariableSource extends VariableSource {
         return storyVariables[property];
       });
     };
+  }
+
+  /**
+   * Resolves the value via amp-viewer-integration's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getViewerIntegrationValue_(property, name) {
+    return /** @type {!AsyncResolverDef} */ (
+      (param, defaultValue = '') => {
+        const service =
+            Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+        return service.then(viewerIntegrationVariables => {
+          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
+          return viewerIntegrationVariables[property](param, defaultValue);
+        });
+      });
   }
 }
 
@@ -875,7 +937,7 @@ export class UrlReplacements {
     // additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended.
     // #2: If the expansion function is not whitelisted:
-    // addionalUrlParamters will not be expanded,
+    // additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
@@ -971,7 +1033,8 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          replacement = replacement.replace(match, encodeValue(v));
+          replacement = replacement.replace(match,
+              NOENCODE_WHITELIST[match] ? v : encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -986,7 +1049,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return NOENCODE_WHITELIST[match] ? val : encodeValue(val);
     });
 
     if (replacementPromise) {

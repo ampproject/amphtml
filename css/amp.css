@@ -165,6 +165,17 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   position: relative;
 }
 
+.i-amphtml-layout-intrinsic
+{
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+}
+
+.i-amphtml-intrinsic-sizer {
+  max-width: 100%;
+}
+
 .i-amphtml-layout-fixed-height,
 [layout=fixed-height][height]
 {
@@ -233,6 +244,10 @@ i-amphtml-sizer {
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+.i-amphtml-layout-intrinsic .i-amphtml-sizer {
+  max-width: 100%;
 }
 
 .i-amphtml-replaced-content {
@@ -814,7 +829,7 @@ amp-accordion > section[expanded] > :last-child {
  */
 amp-story[standalone], amp-story-page {
   display: block !important;
-  height: 100vh !important;
+  height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;

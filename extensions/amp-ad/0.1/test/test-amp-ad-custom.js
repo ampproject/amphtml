@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
+import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -130,10 +131,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'shadow',
       },
     }, env => {
-      it('should return priority of 1', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(1);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
 
@@ -142,10 +143,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'single',
       },
     }, env => {
-      it('should return priority of 2', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(2);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
   });

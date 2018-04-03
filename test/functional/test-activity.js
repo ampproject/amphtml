@@ -70,6 +70,7 @@ describe('Activity getTotalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},
@@ -272,6 +273,7 @@ describe('Activity getIncrementalEngagedTime', () => {
         style: {
           // required to instantiate Viewport service
           paddingTop: 0,
+          setProperty: () => {},
         },
         classList: {
           add: () => {},

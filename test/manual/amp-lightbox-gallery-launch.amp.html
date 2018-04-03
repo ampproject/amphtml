@@ -37,14 +37,35 @@
   </script>
 
   <h1>Lightbox Carousel Description Test</h1>
-  <amp-carousel height="300"
+  <p>The following images belong to the default lightbox group. </p>
+  <amp-img src="https://picsum.photos/1600/900?image=107"
+    aria-describedby="longest-description"
+    lightbox
     width="400"
+    height="225"
+    alt="a beautiful cat"></amp-img>
+
+  <amp-img src="https://picsum.photos/1600/900?image=108"
+    aria-describedby="medium-description"
+    lightbox
+    width="400"
+    height="225"
+    alt="a beautiful cat"></amp-img>
+
+  <amp-img src="https://picsum.photos/1600/900?image=109"
+    lightbox
+    width="400"
+    height="225"></amp-img>
+
+  <amp-carousel
+    width="400"
+    height="300"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=110"
       width="400"
-      height="300"
+      height="225"
       alt="a beautiful cat"></amp-img>
     <amp-anim
       role="button"
@@ -54,23 +75,23 @@
       src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no" width="400" height="300">
     </amp-anim>
     <figure>
-        <amp-img src="https://images.unsplash.com/photo-1515002246390-7bf7e8f87b54"
+        <amp-img src="https://picsum.photos/1600/900?image=111"
         width="400"
-        height="300"
+        height="225"
         alt="another beautiful cat"></amp-img>
         <figcaption>This is a figure with a figcaption.</figcaption>
     </figure>
-    <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+    <amp-img src="https://picsum.photos/1600/900?image=110"
       width="400"
-      height="300"
+      height="225"
       aria-label="Aria labels are cool."></amp-img>
-    <amp-img src="https://images.unsplash.com/photo-1482066490729-6f26115b60dc"
+    <amp-img src="https://picsum.photos/1600/900?image=112"
       width="400"
-      height="300"
+      height="225"
       aria-describedby="my-aria-describe"></amp-img>
-    <amp-img src="https://images.unsplash.com/photo-1511275539165-cc46b1ee89bf"
+    <amp-img src="https://picsum.photos/1600/900?image=113"
       width="400"
-      height="300"
+      height="225"
       aria-labelledby="my-aria-label"></amp-img>
   </amp-carousel>
 
@@ -84,14 +105,15 @@
     <li>Fixed Height</li>
     <li>Fixed</li>
   </ul>
-  <amp-carousel height="600"
-  width="800"
-  layout="fixed"
-  type="slides"
-  lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+  <amp-carousel
+    width="800"
+    height="450"
+    layout="fixed"
+    type="slides"
+    lightbox>
+    <amp-img src="https://picsum.photos/1600/900?image=114"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
     <amp-video
       src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
@@ -117,22 +139,22 @@
       layout="fill"
       poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
       controls>
-  </amp-video>
-  <amp-video
-    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-    height="204"
-    layout="fixed-height"
-    poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-    controls>
-  </amp-video>
-  <amp-video
-    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-    width="358"
-    height="204"
-    layout="fixed"
-    poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
-    controls>
-  </amp-video>
+    </amp-video>
+    <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      height="204"
+      layout="fixed-height"
+      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+      controls>
+    </amp-video>
+    <amp-video
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="358"
+      height="204"
+      layout="fixed"
+      poster="https://i.ytimg.com/vi/5Yjoe54vzwE/mqdefault.jpg"
+      controls>
+    </amp-video>
   </amp-carousel>
 
   <h2>AMP-YOUTUBE Layout Test</h2>
@@ -144,14 +166,15 @@
     <li>Fixed Height</li>
     <li>Fixed</li>
   </ul>
-  <amp-carousel height="600"
+  <amp-carousel
     width="800"
+    height="600"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=115"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
     <amp-youtube width="480"
       height="270"
@@ -187,14 +210,15 @@
   </amp-carousel>
 
   <h1>Lightbox Carousel Ads Support Test</h1>
-  <amp-carousel height="600"
+  <amp-carousel
     width="800"
+    height="600"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=300"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
     <amp-ad width="300"
       height="250"
@@ -220,15 +244,15 @@
     <li>Fixed Height</li>
     <li>Fixed</li>
   </ul>
-  <amp-carousel 
-    height="600"
+  <amp-carousel
     width="800"
+    height="600"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=115"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
     <amp-instagram data-shortcode="1totVhIFXl"
       width="400"
@@ -259,14 +283,15 @@
     <li>Fixed Height</li>
     <li>Fixed</li>
   </ul>
-  <amp-carousel height="600"
+  <amp-carousel
     width="800"
+    height="600"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=116"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
     <amp-facebook
       lightbox-thumbnail-id="fb-thumbnail-img"
@@ -310,31 +335,31 @@
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=117"
       width="800"
-      height="600"
+      height="450"
       alt="a beautiful cat"></amp-img>
-    <amp-facebook 
+    <amp-facebook
       width="552"
       height="310"
       layout="responsive"
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
     </amp-facebook>
-    <amp-facebook 
+    <amp-facebook
       width="552"
       height="310"
       layout="fill"
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
     </amp-facebook>
-    <amp-facebook 
+    <amp-facebook
       height="310"
       layout="fixed-height"
       data-embed-as="video"
       data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
     </amp-facebook>
-    <amp-facebook 
+    <amp-facebook
       width="552"
       height="310"
       layout="fixed"
@@ -347,9 +372,9 @@
   <h2>Lightbox Group Test</h2>
   <h3>Test 1</h3>
   <p>The following image and youtube video should belong to the same lightbox group. The lightbox group should include a third image from the carousel in Test 3 below. </p>
-  <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+  <amp-img src="https://picsum.photos/1600/900?image=118"
     width="400"
-    height="300"
+    height="225"
     lightbox="group-1"
     alt="a beautiful cat"></amp-img>
   <amp-youtube lightbox="group-1"
@@ -359,35 +384,36 @@
     data-videoid="lBTCB7yLs8Y">
   </amp-youtube>
   <h3>Test 2</h3>
-  <p>The following image should belong to its own lightbox group. </p>
-  <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+  <p>The following image should belong to the default lightbox group. </p>
+  <amp-img src="https://picsum.photos/1600/900?image=119"
     width="400"
-    height="300"
+    height="225"
     lightbox
     aria-label="Aria labels are cool."></amp-img>
   <h3>Test 3</h3>
   <p>In the following carousel, images 2 and 4 should be excluded from the lightbox. Image 4 should belong to the lightbox group in Test 1.</p>
-  <amp-carousel height="300"
+  <amp-carousel
     width="400"
+    height="300"
     layout="fixed"
     type="slides"
     lightbox>
-    <amp-img src="https://images.unsplash.com/photo-1503843778847-2b8bdce2ed3d"
+    <amp-img src="https://picsum.photos/1600/900?image=120"
       width="400"
-      height="300"
+      height="225"
       alt="a beautiful cat"></amp-img>
-    <amp-img src="https://images.unsplash.com/photo-1445499348736-29b6cdfc03b9"
+    <amp-img src="https://picsum.photos/1600/900?image=121"
       width="400"
-      height="300"
+      height="225"
       lightbox-exclude
       aria-label="Aria labels are cool."></amp-img>
-    <amp-img src="https://images.unsplash.com/photo-1482066490729-6f26115b60dc"
+    <amp-img src="https://picsum.photos/1600/900?image=122"
       width="400"
-      height="300"
+      height="225"
       aria-describedby="my-aria-describe"></amp-img>
-    <amp-img src="https://images.unsplash.com/photo-1511275539165-cc46b1ee89bf"
+    <amp-img src="https://picsum.photos/1600/900?image=123"
       width="400"
-      height="300"
+      height="225"
       lightbox="group-1"
       aria-labelledby="my-aria-label"></amp-img>
   </amp-carousel>
@@ -406,6 +432,14 @@
   <div id='my-aria-label' layout="nodisplay">
     This is an aria labelled by a div. <br/>
     I also have a newline.
+  </div>
+  <div id='longest-description' layout="nodisplay">
+    Guess what the actual text of lorem ipsum is?
+    But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?
+    On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.
+  </div>
+  <div id='medium-description' layout="nodisplay">
+    But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?
   </div>
 </body>
 </html>

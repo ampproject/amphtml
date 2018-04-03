@@ -22,15 +22,28 @@ import {
   VideoInterface,
 } from '../../src/video-interface';
 import {Services} from '../../src/services';
+import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
-import {getData, listen, listenOncePromise} from '../../src/event-helper';
+import {getData, listenOncePromise} from '../../src/event-helper';
 import {removeElement} from '../../src/dom';
-import {supportsAutoplay} from '../../src/service/video-manager-impl';
 import {toggleExperiment} from '../../src/experiments';
+
+
+function skipIfAutoplayUnsupported(win) {
+  VideoUtils.resetIsAutoplaySupported();
+
+  return VideoUtils.isAutoplaySupported(win, false).then(isSupported => {
+    if (isSupported) {
+      return;
+    }
+    this.skip();
+  });
+}
+
 
 export function runVideoPlayerIntegrationTests(
   createVideoElementFunc, opt_experiment) {
@@ -119,12 +132,7 @@ export function runVideoPlayerIntegrationTests(
     // scripted test environment.
     before(function() {
       this.timeout(TIMEOUT);
-      // Skip autoplay tests if browser does not support autoplay.
-      return supportsAutoplay(window, false).then(supportsAutoplay => {
-        if (!supportsAutoplay) {
-          this.skip();
-        }
-      });
+      return skipIfAutoplayUnsupported.call(this, window);
     });
 
     afterEach(cleanUp);
@@ -486,12 +494,7 @@ export function runVideoPlayerIntegrationTests(
     // scripted test environment.
     before(function() {
       this.timeout(TIMEOUT);
-      // Skip autoplay tests if browser does not support autoplay.
-      return supportsAutoplay(window, false).then(supportsAutoplay => {
-        if (!supportsAutoplay) {
-          this.skip();
-        }
-      });
+      return skipIfAutoplayUnsupported.call(this, window);
     });
 
     afterEach(cleanUp);
@@ -588,11 +591,7 @@ export function runVideoPlayerIntegrationTests(
     before(function() {
       this.timeout(TIMEOUT);
       // Skip autoplay tests if browser does not support autoplay.
-      return supportsAutoplay(window, false).then(supportsAutoplay => {
-        if (!supportsAutoplay) {
-          this.skip();
-        }
-      });
+      return skipIfAutoplayUnsupported.call(this, window);
     });
 
     afterEach(cleanUp);
@@ -612,45 +611,43 @@ export function runVideoPlayerIntegrationTests(
         })
         .then(() => {
           const video = createVideoElementFunc(fixture);
+          const sizer = fixture.doc.createElement('div');
+
+          const whenVideoRegistered =
+              video.signals().whenSignal(VideoEvents.REGISTERED)
+                  .then(() => ({video, fixture}));
+
           if (options.autoplay) {
             video.setAttribute('autoplay', '');
           }
-
-          video.setAttribute('id', 'myVideo');
-
           if (options.dock) {
             video.setAttribute('dock', '');
           }
-
-          video.style.position = 'absolute';
-          video.style.top = top;
-
+          video.setAttribute('id', 'myVideo');
           video.setAttribute('controls', '');
           video.setAttribute('layout', 'fixed');
           video.setAttribute('width', '300px');
           video.setAttribute('height', '50vh');
 
+          video.style.position = 'absolute';
+          video.style.top = top;
 
-          const sizer = fixture.doc.createElement('div');
           sizer.position = 'relative';
           sizer.style.height = '200vh';
 
-          const builtPromise = new Promise(resolve => {
-            return listen(video, VideoEvents.REGISTERED, () => {
-              resolve({video, fixture});
-            });
-          });
-
-          fixture.doc.body.appendChild(sizer);
-          fixture.doc.body.appendChild(video);
           fixtureGlobal = fixture;
           videoGlobal = video;
 
-          return builtPromise;
+          fixture.doc.body.appendChild(sizer);
+          fixture.doc.body.appendChild(video);
+
+          return whenVideoRegistered;
         });
   }
 
   function cleanUp() {
+    VideoUtils.resetIsAutoplaySupported();
+
     try {
       if (fixtureGlobal) {
         if (opt_experiment) {

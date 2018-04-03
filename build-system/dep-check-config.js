@@ -110,6 +110,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/messaging.js->src/event-helper.js',
+      '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
     ],
   },
@@ -132,6 +133,7 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/google/adsense-amp-auto-ads.js->src/experiments.js',
+      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
@@ -220,15 +222,19 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
           'src/service/url-replacements-impl.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
+          'src/service/notification-ui-manager.js',
+      'extensions/amp-consent/0.1/amp-consent.js->' +
+          'src/service/notification-ui-manager.js',
     ],
   },
   {
@@ -291,25 +297,42 @@ exports.rules = [
     ],
   },
 
+  {
+    mustNotDependOn: [
+      /** DO NOT WHITELIST ANY FILES */
+      'ads/google/deprecated_doubleclick.js',
+      /** DO NOT WHITELIST ANY FILES */
+    ],
+    whitelist: [
+      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
+      '3p/integration.js->ads/google/deprecated_doubleclick.js',
+    ],
+  },
+
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
   // Doubleclick.js will be deleted from the repository at that time.
   // Please see https://github.com/ampproject/amphtml/issues/11834
   // for more information.
+  // Do not add any additional files to this whitelist without express
+  // permission from @bradfrizzell, @keithwrightbos, or @robhazan.
   {
     mustNotDependOn: [
       'ads/google/doubleclick.js',
     ],
     whitelist: [
+      /** DO NOT ADD TO WHITELIST **/
       'ads/ix.js->ads/google/doubleclick.js',
       'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
       'ads/openx.js->ads/google/doubleclick.js',
       'ads/pulsepoint.js->ads/google/doubleclick.js',
       'ads/rubicon.js->ads/google/doubleclick.js',
       'ads/yieldbot.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
       'ads/criteo.js->ads/google/doubleclick.js',
-      '3p/integration.js->ads/google/doubleclick.js',
+      /** DO NOT ADD TO WHITELIST **/
     ],
   },
 ];
