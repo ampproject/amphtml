@@ -45,7 +45,7 @@ export function sendRequest(win, request, transportOptions) {
     return;
   }
   if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(request);
+    Transport.sendRequestUsingImage(request, transportOptions['image']['ignoreWarnings']);
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
@@ -58,8 +58,9 @@ export class Transport {
 
   /**
    * @param {string} request
+   * @param {boolean} ignoreWarnings
    */
-  static sendRequestUsingImage(request) {
+  static sendRequestUsingImage(request, ignoreWarnings) {
     const image = new Image();
     image.src = request;
     image.width = 1;
@@ -67,8 +68,10 @@ export class Transport {
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Response unparseable or failed to send image ' +
-          'request', request);
+      if (!ignoreWarnings) {
+        user().warn(TAG_, 'Response unparseable or failed to send image ' +
+            'request', request);
+      }
     });
   }
 
