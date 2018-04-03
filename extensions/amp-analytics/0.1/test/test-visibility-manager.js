@@ -783,7 +783,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 
   it('should resolve root layout box', () => {
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
-      if (element == embed.host) {
+      if (element == embed.iframe) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
       return null;
