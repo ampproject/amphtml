@@ -506,9 +506,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  kuadio: {
-    renderStartImplemented: true,
-  },
+  kuadio: {},
 
   ligatus: {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
