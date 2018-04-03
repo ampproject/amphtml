@@ -346,7 +346,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildDescriptionBox_() {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
-    this.descriptionBox_.classList.add('standard');
+    this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
@@ -408,7 +408,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.descriptionTextArea_./*OK*/innerText = descText;
 
         // Avoid flickering out if transitioning from a slide with no text
-        this.descriptionBox_.classList.remove('fade-out');
+        this.descriptionBox_.classList.remove('i-amphtml-lbg-fade-out');
         toggle(dev().assertElement(this.descriptionBox_), true);
 
       }).then(() => {
@@ -426,8 +426,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   toggleDescriptionOverflow_() {
     const measureOverflowState = state => {
-      state.isStandard = this.descriptionBox_.classList.contains('standard');
-      state.isOverflown = this.descriptionBox_.classList.contains('overflow');
+      state.isStandard = this.descriptionBox_.classList
+        .contains('i-amphtml-lbg-standard');
+      state.isOverflown = this.descriptionBox_.classList
+        .contains('i-amphtml-lbg-overflow');
 
       // The height of the description without overflow is set to 4 rem.
       // The height of the overflow mask is set to 1 rem. We allow 3 lines
@@ -440,12 +442,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     const mutateOverflowState = state => {
       if (state.isStandard && state.hasOverflow) {
-        this.descriptionBox_.classList.remove('standard');
-        this.descriptionBox_.classList.add('overflow');
+        this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
+        this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
       } else if (state.isOverflown) {
         this.descriptionBox_./*OK*/scrollTop = 0;
-        this.descriptionBox_.classList.remove('overflow');
-        this.descriptionBox_.classList.add('standard');
+        this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
+        this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
       }
     };
 
@@ -544,9 +546,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   showControls_() {
-    this.controlsContainer_.classList.remove('fade-out');
-    this.controlsContainer_.classList.remove('hidden');
-    this.controlsContainer_.classList.add('fade-in');
+    this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-out');
+    this.controlsContainer_.classList.remove('i-amphtml-lbg-hidden');
+    this.controlsContainer_.classList.add('i-amphtml-lbg-fade-in');
 
     if (!this.container_.hasAttribute('gallery-view')) {
       this.updateDescriptionBox_();
@@ -559,8 +561,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   hideControls_() {
-    this.controlsContainer_.classList.remove('fade-in');
-    this.controlsContainer_.classList.add('fade-out');
+    this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
+    this.controlsContainer_.classList.add('i-amphtml-lbg-fade-out');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
   }
 
@@ -670,8 +672,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           opacity: 0,
           display: '',
         });
-        this.controlsContainer_.classList.remove('fade-in');
-        this.controlsContainer_.classList.add('hidden');
+        this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
+        this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
       });
     }).then(() => {
       this.getViewport().enterLightboxMode();
@@ -1095,8 +1097,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       }
       // Toggle description overflow to hidden
       this.descriptionBox_./*OK*/scrollTop = 0;
-      this.descriptionBox_.classList.remove('overflow');
-      this.descriptionBox_.classList.add('standard');
+      this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
+      this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
     }).then(() => this.exit_())
         .then(() => {
           this.getViewport().leaveLightboxMode();
