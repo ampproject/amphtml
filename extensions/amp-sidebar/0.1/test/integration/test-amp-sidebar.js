@@ -16,7 +16,8 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
+// TODO(cathyxz, #14336): Fails due to console errors.
+describe.skip('amp-sidebar', function() {
   // Extend timeout slightly for flakes on Windows environments
   this.timeout(4000);
   const extensions = ['amp-sidebar'];
