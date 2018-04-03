@@ -23,6 +23,7 @@ import {
   URL_EXPERIMENT_MAPPING,
   dfDepRollbackExperiment,
   doubleclickIsA4AEnabled,
+  experimentFeatureEnabled,
 } from '../doubleclick-a4a-config';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {
@@ -43,15 +44,15 @@ describe('doubleclick-a4a-config', () => {
     sandbox = sinon.sandbox.create();
     mockWin = {
       location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
-      document: {
-        querySelector: unused => {return null;},
-      },
       crypto: {
         subtle: true,
         webkitSubtle: true,
       },
     };
-    return createIframePromise().then(i => { testFixture = i; });
+    return createIframePromise().then(i => {
+      testFixture = i;
+      mockWin.document = testFixture.doc;
+    });
   });
   afterEach(() => {
     sandbox.restore();
@@ -370,6 +371,35 @@ describe('doubleclick-a4a-config', () => {
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL)
       ).to.be.true;
+    });
+    describe('SRA', () => {
+      let elem;
+      beforeEach(() => {
+        elem = testFixture.doc.createElement('amp-ad');
+        elem.setAttribute('type', 'doubleclick');
+        testFixture.doc.body.appendChild(elem);
+        mockWin.location = parseUrl(
+            'https://cdn.ampproject.org/some/path/to/content.html?exp=da:8');
+      });
+      it('should select SRA', () => {
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.true;
+      });
+      it('should not select SRA if refresh metatag present', () => {
+        const meta = testFixture.doc.createElement('meta');
+        meta.setAttribute('name', 'amp-ad-enable-refresh');
+        testFixture.doc.head.appendChild(meta);
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.false;
+      });
+      it('should not select SRA if refresh attribute present', () => {
+        elem.setAttribute('data-enable-refresh', 'foo');
+        expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
+        expect(experimentFeatureEnabled(
+            mockWin, DOUBLECLICK_EXPERIMENT_FEATURE.SRA)).to.be.false;
+      });
     });
   });
 });
