@@ -1,15 +1,20 @@
 let nextQueryId = 0;
 
 export const query = (target, tag, queryBody) => {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const queryId = nextQueryId++;
     const waitResponse = e => {
       if (e.data.amp3dViewer &&
           e.data.tag === tag &&
-          e.data.response &&
           e.data.queryId === queryId) {
-        target.removeEventListener('message', waitResponse);
-        resolve(e.data.responseBody);
+        if (e.data.response) {
+          target.removeEventListener('message', waitResponse);
+          resolve(e.data.responseBody);
+        }
+        if (e.data.error) {
+          target.removeEventListener('message', waitResponse);
+          reject(new Error(e.data.errorBody));
+        }
       }
     };
     target.addEventListener('message', waitResponse);
@@ -27,13 +32,24 @@ export const addQueryHandler = (target, tag, fn) => {
         e.data.query &&
         e.data.tag === tag) {
       const {queryBody, queryId} = e.data;
-      send(target, tag, {
-        amp3dViewer: true,
-        response: true,
-        tag,
-        queryId,
-        responseBody: fn(queryBody),
-      }, document.origin);
+      Promise.resolve()
+          .then(() => fn(queryBody))
+          .then(
+              responseBody => {
+                send(target, tag, {
+                  response: true,
+                  queryId,
+                  responseBody,
+                }, document.origin);
+              },
+              errorBody => {
+                send(target, tag, {
+                  error: true,
+                  queryId,
+                  errorBody,
+                });
+              }
+          );
     }
   };
 

@@ -1,6 +1,13 @@
 /* global THREE, AMP_3D_VIEWER_IPC, resolveURL, AnimationLoop */
 
 export default function gltfViewer() {
+  const webglSupported = (() => {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl')
+        || canvas.getContext('experimental-webgl');
+    return gl && gl instanceof WebGLRenderingContext;
+  })();
+
   const notifySignOfLife = () => {
     AMP_3D_VIEWER_IPC.notify(window, 'heartbeat', null);
     const interval = setInterval(() => {
@@ -31,6 +38,9 @@ export default function gltfViewer() {
     };
 
     AMP_3D_VIEWER_IPC.addQueryHandler(window, 'setOptions', options => {
+      if (!webglSupported) {
+        return Promise.reject('webgl is not supported');
+      }
       if (viewer) {
         viewer.animationLoop.stop();
       }
@@ -151,7 +161,7 @@ export default function gltfViewer() {
       animationLoop,
       scene,
       camera,
-      renderer
+      renderer,
     };
 
     loadObject(viewer, options.src);

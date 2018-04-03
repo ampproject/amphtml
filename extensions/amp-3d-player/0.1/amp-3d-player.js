@@ -90,7 +90,6 @@ export class Amp3dPlayer extends AMP.BaseElement {
             const disposeErrorHandler = addQueryHandler(
                 this.viewerWindow_, 'error', text => {
                   disposeAll();
-                  this.toggleFallback(true);
                   reject(new Error(text));
                 });
             const disposeProgressHandler = listen(
@@ -98,6 +97,10 @@ export class Amp3dPlayer extends AMP.BaseElement {
                   console.log(loaded, total);
                 });
           });
+        })
+        .catch(err => {
+          console.error(err);
+          this.toggleFallback(true);
         });
 
     return this.willBeStarted_;
