@@ -204,7 +204,6 @@ class AmpBridPlayer extends AMP.BaseElement {
       placeholder.setAttribute('layout', 'fill');
       placeholder.setAttribute('placeholder', '');
       placeholder.setAttribute('referrerpolicy', 'origin');
-      placeholder.setAttribute('alt', 'loading video');
       if (placeholder.hasAttribute('aria-label')) {
         placeholder.setAttribute('alt',
             'Loading video - ' + placeholder.getAttribute('aria-label')
