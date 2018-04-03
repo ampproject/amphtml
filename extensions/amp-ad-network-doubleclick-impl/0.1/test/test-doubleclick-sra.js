@@ -122,7 +122,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
   describe('#constructSRABlockParameters', () => {
     [true, false].forEach(forceSafeFrame => {
-      it(`should combine for SRA request, forceSafeframe ${force}`, () => {
+      it(`should combine for SRA, forceSafeframe ${forceSafeFrame}`, () => {
         const targeting1 = {
           cookieOptOut: 1,
           categoryExclusions: 'sports',
