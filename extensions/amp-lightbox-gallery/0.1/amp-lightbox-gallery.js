@@ -44,6 +44,11 @@ import {toggle} from '../../../src/style';
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
+const VIDEO_TAGS = {
+  'AMP-YOUTUBE': true,
+  'AMP-VIDEO': true,
+};
+
 /**
  * Set of namespaces that indicate the lightbox controls mode.
  * Lightbox controls include top bar, description box
@@ -1235,6 +1240,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       imgElement.setAttribute('src', thumbnailObj.placeholderSrc);
     }
     element.appendChild(imgElement);
+
+    if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
+      const playButtonSpan = this.win.document.createElement('span');
+      playButtonSpan.classList.add('i-amphtml-lbg-thumbnail-play-icon');
+      const timestampDiv = this.win.document.createElement('div');
+      timestampDiv.classList.add('i-amphtml-lbg-thumbnail-timestamp-container');
+      timestampDiv.appendChild(playButtonSpan);
+      // TODO: append timestamp if exists
+      if (thumbnailObj.timestamp) {
+        timestampDiv.appendChild(
+            this.win.document.createTextNode(thumbnailObj.timestamp));
+        timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+      }
+      element.appendChild(timestampDiv);
+    }
+
     const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;

@@ -212,6 +212,35 @@
   cursor: pointer !important;
 }
 
+.i-amphtml-lbg-thumbnail-timestamp-container {
+  background-color: #292D33;
+  color: #ffffff;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  height: 20px;
+  border-radius: 2px;
+  opacity: 0.8;
+  width: 20px;
+}
+
+.i-amphtml-lbg-thumbnail-timestamp-container.i-amphtml-lbg-has-timestamp {
+  font-size: 12px;
+  padding: 0 5px 0 18px;
+  line-height: 1.8;
+  width: auto;
+}
+
+.i-amphtml-lbg-thumbnail-play-icon {
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-color: #ffffff;
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+}
+
 @media (min-width: 1024px) {
   .i-amphtml-lbg-button {
     width: 40px;
