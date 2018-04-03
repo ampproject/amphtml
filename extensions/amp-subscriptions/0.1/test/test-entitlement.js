@@ -64,6 +64,25 @@ describes.realWin('entitlement', {}, () => {
     expect(entitlement.metering).to.deep.equal(metering);
   });
 
+  it('should be able to parse raw from json', () => {
+    const json = {
+      service,
+      source,
+      products,
+      subscriptionToken,
+      loggedIn,
+      metering,
+      raw: 'rawValue',
+    };
+    const entitlement = Entitlement.parseFromJson(json);
+    expect(entitlement.source).to.be.equal(source);
+    expect(entitlement.products).to.be.equal(products);
+    expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
+    expect(entitlement.raw).to.equal('rawValue');
+    expect(entitlement.loggedIn).to.be.equal(loggedIn);
+    expect(entitlement.metering).to.deep.equal(metering);
+  });
+
   it('should tell if current product is enabled', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, products,

@@ -123,7 +123,7 @@ export class Entitlement {
     if (!json) {
       json = dict();
     }
-    const raw = JSON.stringify(json);
+    const raw = json['raw'] || JSON.stringify(json);
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];

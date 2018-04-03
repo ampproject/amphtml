@@ -326,7 +326,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               expect(resolvedEntitlement.products).to.deep
                   .equal(entitlement.products);
               // raw should be the data which was resolved via sendMessageAwaitResponse.
-              expect(resolvedEntitlement.raw).to.deep.equal(fakeAuthToken);
+              expect(resolvedEntitlement.raw).to
+                  .equal(fakeAuthToken['authorization']);
             });
       });
     });
