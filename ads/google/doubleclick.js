@@ -22,17 +22,29 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function doubleclick(global, data) {
+export function doubleclick(global, data) { debugger;
   try {
     const context = parseJson(global['context']['cachedFrameName_']
     )['attributes']['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
+      const dcdfwld = data['amp-dcdfwld'];
+      if (dcdfwld == 3) {
+        // If dcdfwld == 3, then we are in the experiment AND we're not coming
+        // from a doubleclick tag, so we want to halt immediately. See amp-ad.js
+        // for full semantics of these numbers.
+        return;
+      }
+      appendExperimentId(data, dcdfwld % 2 == 0 ? '21061861' : '21061862');
       return deprecatedDoubleclick(window, data);
     }
   } catch (unused) {}
   dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please ' +
-              'switch to Fast Fetch. See documentation here: ' +
-              'https://github.com/ampproject/amphtml/issues/11834');
+      'switch to Fast Fetch. See documentation here: ' +
+      'https://github.com/ampproject/amphtml/issues/11834');
+}
 
+function appendExperimentId(data, id) {
+  data['experimentId'] = data['experimentId'] ?
+    data['experimentId'] + `,${id}` : id;
 }

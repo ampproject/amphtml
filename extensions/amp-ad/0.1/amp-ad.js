@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 
 
@@ -55,6 +56,8 @@ export class AmpAd extends AMP.BaseElement {
       ? Services.userNotificationManagerForDoc(this.element)
           .then(service => service.get(consentId))
       : Promise.resolve();
+debugger;
+    this.maybeSelectDfdcWhitelistDeprecationExp();
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
@@ -105,6 +108,32 @@ export class AmpAd extends AMP.BaseElement {
         });
       });
     });
+  }
+
+  maybeSelectDfdcWhitelistDeprecationExp() {
+    let isDoubleclickTag = true;
+    switch (this.element.getAttribute('type')) {
+      case 'ix':
+      case 'imonomy':
+      case 'medianet':
+      case 'navegg':
+      case 'openx':
+      case 'pulsepoint':
+      case 'rubicon':
+      case 'yieldbot':
+      case 'criteo':
+        isDoubleclickTag = false;
+    }
+    if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation')) {
+      // Semantics of attribute:
+      // 0: Control and doubleclick tag
+      // 1: Experiment and doubleclick tag
+      // 2: Control and non-doubleclick tag
+      // 3: Experiment and non-doubleclick tag
+      const dcdfwld = (Math.random() < 0.5 ? 0 : 1) +
+          (isDoubleclickTag ? 2 : 0);
+      this.element.setAttribute('data-amp-dcdfwld', dcdfwld);
+    }
   }
 }
 
