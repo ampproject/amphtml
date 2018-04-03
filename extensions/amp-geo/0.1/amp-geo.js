@@ -62,7 +62,7 @@ const COUNTRY_PREFIX = 'amp-iso-country-';
 const BIND_COUNTRY = 'ISOCountry';
 const defaultLen = COUNTRY.length;
 
-class AmpGeo extends AMP.BaseElement {
+export class AmpGeo extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -100,7 +100,7 @@ class AmpGeo extends AMP.BaseElement {
     // one single amp-geo allowed in page.
     const scripts = childElementsByTag(this.element, 'script');
     user().assert(scripts.length == 1,
-        `${TAG} should have (only) one <script> child`);
+        `${TAG} should have exactly one <script> child`);
     const script = scripts[0];
     user().assert(isJsonScriptTag(script),
         `${TAG} consent instance config should be put in a <script>` +
