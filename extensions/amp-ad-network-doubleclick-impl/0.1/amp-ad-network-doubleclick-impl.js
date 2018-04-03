@@ -233,6 +233,15 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => getFirstInstanceValue_(instances,
       instance => instance.buildIdentityParams_()),
+  instances => {
+    let safeframeForced = false;
+    const forceSafeframes = [];
+    instances.forEach(instance => {
+      safeframeForced = safeframeForced || instance.forceSafeframe_;
+      forceSafeframes.push(Number(instance.forceSafeframe_));
+    });
+    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
 ];
 
 
@@ -337,6 +346,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
+
+    /** @private {boolean} whether safeframe forced via tag */
+    this.forceSafeframe_ = false;
+    if ('forceSafeframe' in this.element.dataset) {
+      if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
+        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
+            this.element.dataset['forceSafeframe']);
+      } else {
+        this.forceSafeframe_ = true;
+      }
+    }
   }
 
   /** @override */
@@ -535,14 +555,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
-      'scp': serializeTargeting_(
-          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
-          (this.jsonTargeting_ &&
-            this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
+      'fsf': this.forceSafeframe_ ? '1' : null,
+      'scp': serializeTargeting_(
+          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
+          (this.jsonTargeting_ &&
+            this.jsonTargeting_['categoryExclusions']) || null),
     }, googleBlockParameters(this));
   }
 
@@ -1185,7 +1206,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+    return this.forceSafeframe_ || this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
@@ -1319,6 +1340,7 @@ export function constructSRARequest_(win, doc, instances) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Object<string, *>}
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {
