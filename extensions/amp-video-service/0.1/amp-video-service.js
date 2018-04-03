@@ -78,7 +78,7 @@ export class VideoService {
     this.boundTick_ = () => this.startTicking_();
 
     /** @return {!../../../src/observable-interface.Observable} */
-    this.tick_ = new LazyObservable(boundTick_);
+    this.tick_ = new LazyObservable(this.boundTick_);
   }
 
   /** @private */
@@ -217,7 +217,6 @@ export class VideoEntry {
     this.maybeTriggerTimeUpdate_();
 
     element.classList.add('i-amphtml-video-interface');
-
   }
 
   /** @private */
