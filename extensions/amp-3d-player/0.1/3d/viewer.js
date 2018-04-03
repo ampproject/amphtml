@@ -1,7 +1,8 @@
 /* global THREE, AMP_3D_VIEWER_IPC, resolveURL, AnimationLoop */
 
 export default function gltfViewer() {
-  const notifyReady = () => {
+  const notifySignOfLife = () => {
+    AMP_3D_VIEWER_IPC.notify(window, 'heartbeat', null);
     const interval = setInterval(() => {
       AMP_3D_VIEWER_IPC.notify(window, 'heartbeat', null);
     }, 1000);
@@ -47,7 +48,8 @@ export default function gltfViewer() {
       updateAnimationRun();
     });
 
-    AMP_3D_VIEWER_IPC.addQueryHandler(window, 'ready', notifyReady());
+    const stopNotifying = notifySignOfLife();
+    AMP_3D_VIEWER_IPC.addQueryHandler(window, 'ready', stopNotifying);
   };
 
   const makeLight = () => {
