@@ -16,6 +16,7 @@
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
+import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
@@ -104,7 +105,8 @@ export class SubscriptionService {
    */
   initialize_() {
     if (!this.initialized_) {
-      const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
+      const doc = new DocImpl(this.ampdoc_);
+      const pageConfigResolver = new PageConfigResolver(doc);
       this.initialized_ = Promise.all([
         this.getPlatformConfig_(),
         pageConfigResolver.resolveConfig(),
