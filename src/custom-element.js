@@ -16,6 +16,10 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
+import {
+  CONSENT_POLICY_STATE,
+  getConsentPolicyPromise,
+} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -29,6 +33,7 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
@@ -37,7 +42,6 @@ import {
 import {getMode} from './mode';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
-import {reportError} from './error';
 import {setStyle} from './style';
 import {toWin} from './types';
 
@@ -473,8 +477,20 @@ function createBaseCustomElementClass(win) {
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
-      return this.buildingPromise_ = new Promise(resolve => {
-        resolve(this.implementation_.buildCallback());
+      return this.buildingPromise_ = new Promise((resolve, reject) => {
+        const policyId = this.implementation_.getConsentPolicy();
+        if (!policyId) {
+          resolve(this.implementation_.buildCallback());
+        } else {
+          getConsentPolicyPromise(this.getAmpDoc(), policyId).then(state => {
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
+              // Need to change after support more policy state
+              reject(blockedByConsentError());
+            } else {
+              resolve(this.implementation_.buildCallback());
+            }
+          });
+        }
       }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
@@ -499,7 +515,9 @@ function createBaseCustomElementClass(win) {
       }, reason => {
         this.signals_.rejectSignal(CommonSignals.BUILT,
             /** @type {!Error} */ (reason));
-        reportError(reason, this);
+        if (!isBlockedByConsent(reason)) {
+          reportError(reason, this);
+        }
         throw reason;
       });
     }

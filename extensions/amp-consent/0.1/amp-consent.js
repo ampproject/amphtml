@@ -88,6 +88,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.dialogResolver_ = map();
   }
 
+  getConsentPolicy() {
+    // amp-consent should not be blocked by itself
+    return null;
+  }
+
   buildCallback() {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
@@ -312,6 +317,7 @@ export class AmpConsent extends AMP.BaseElement {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     this.consentConfig_ = consents;
+    this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
 
   /**
