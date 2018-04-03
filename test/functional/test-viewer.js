@@ -1071,32 +1071,46 @@ describe('Viewer', () => {
       });
     });
 
-    function testRootDomain(origin, result) {
-      it('getting root domain for ' + origin, () => {
+    function testHasRoughlySameOrigin(first, second) {
+      it('should find ' + first + ' and ' + second + ' to be roughly the same', () => {
         const viewer = new Viewer(ampdoc);
-        expect(viewer.getRootDomain_(origin)).to.equal(result);
+        expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.true;
       });
     }
 
-    describe('should get root domain from url', () => {
-      testRootDomain('http://google.com', 'google.com');
-      testRootDomain('https://google.com', 'google.com');
-      testRootDomain('https://www.google.com', 'google.com');
-      testRootDomain('https://www.google.net', 'google.net');
-      testRootDomain('https://www.google.co.uk', 'google.co.uk');
-      testRootDomain('https://www.www.google.com', 'google.com');
-      testRootDomain('https://www.www.www.google.com', 'google.com');
-      testRootDomain('https://amp.google.com', 'google.com');
-      testRootDomain('https://www.amp.google.com', 'google.com');
-      testRootDomain('https://amp.www.google.com', 'google.com');
-      testRootDomain('https://mobile.google.com', 'google.com');
-      testRootDomain('https://amp.mobile.google.com', 'google.com');
-      testRootDomain('https://amp.mobile.google.co.uk', 'google.co.uk');
-      testRootDomain('https://www1.www2.www3.google.com', 'google.com');
-      // TODO: eventually, we should obtain the real root domain. Since we're
-      // using pattern matching, we can't reduce these further.
-      testRootDomain('https://www.xyz.google.com', 'xyz.google.com');
-      testRootDomain('https://xyz.www.xyz.google.com', 'xyz.www.xyz.google.com');
+    function testHasRoughlyDifferentOrigin(first, second) {
+      it('should NOT find ' + first + ' and ' + second + ' to be roughly the same', () => {
+        const viewer = new Viewer(ampdoc);
+        expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.false;
+      });
+    }
+
+    describe('should be able to roughly compare origins', () => {
+      testHasRoughlySameOrigin('http://google.com', 'http://google.com');
+      testHasRoughlySameOrigin('https://google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.google.net', 'https://google.net');
+      testHasRoughlySameOrigin('https://www.google.co.uk', 'https://google.co.uk');
+      testHasRoughlySameOrigin('https://www.google.co.uk:80', 'https://google.co.uk:80');
+      testHasRoughlySameOrigin('https://www.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.www.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('http://www.www.www.google.com:1337', 'http://google.com:1337');
+      testHasRoughlySameOrigin('https://amp.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.amp.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.www.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://amp.mobile.google.co.uk', 'https://google.co.uk');
+      testHasRoughlySameOrigin('https://www1.www2.www3.google.com', 'https://google.com');
+      testHasRoughlySameOrigin('https://www.xyz.google.com', 'https://xyz.google.com');
+      testHasRoughlySameOrigin('https://xyz.www.xyz.google.com', 'https://xyz.www.xyz.google.com');
+      testHasRoughlyDifferentOrigin('http://google.com', 'https://google.com');
+      testHasRoughlyDifferentOrigin('https://google.com', 'https://google.net');
+      testHasRoughlyDifferentOrigin('https://www.google.com', 'http://google.com');
+      testHasRoughlyDifferentOrigin('https://google.com:80', 'https://google.com:81');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'https://google.com');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'http://xyz.google.com');
+      testHasRoughlyDifferentOrigin('https://xyz.google.com:80', 'https://xyz.google.com:81');
     });
 
     function test(origin, toBeTrusted, opt_inWebView) {

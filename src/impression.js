@@ -164,7 +164,6 @@ function handleClickUrl(win) {
     return Promise.resolve();
   }
 
-  ////////////////// TODO: set ampshare without this
   if (win.location.hash) {
     // This is typically done using replaceState inside the viewer.
     // If for some reason it failed, get rid of the fragment here to

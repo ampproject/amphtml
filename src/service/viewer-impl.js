@@ -48,7 +48,7 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @const
  * @private {!RegExp}
  */
-const TRIM_DOMAIN_PATTERN_ = /^((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i
+const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -273,11 +273,12 @@ export class Viewer {
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
+    const queryParams = parseQueryString(this.win.location.search);
+
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
      */
-    const queryParams = parseQueryString(this.win.location.search);
     this.isCctEmbedded_ = !this.isIframed_ &&
         queryParams['amp_agsa'] == '1';
 
@@ -541,11 +542,10 @@ export class Viewer {
     if (!this.win.history.replaceState) {
       return;
     }
-    const sourceUrl = getSourceUrl(this.win.location.href);
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
     const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
-    const canonicalSourceUrl = getSourceUrl(canonicalUrl);
-    // Ensure that both origins are related.
-    if (this.getRootDomain_(sourceUrl) == this.getRootDomain_(canonicalSourceUrl)) {
+    const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
+    if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
       const oldFragment = getFragment(this.win.location.href);
       const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
       // Attempt to merge the fragments, if an old fragment was present.
@@ -555,19 +555,21 @@ export class Viewer {
   }
 
   /**
-   * Removes extraneous subdomains from a URL for comparison.
-   * @param {string} url
-   * @return {string} The root domain.
+   * Compares URLs to determine if they match once common subdomains are
+   * removed. Everything else must match.
+   * @param {string} first Origin to compare.
+   * @param {string} second Origin to compare.
+   * @return {boolean} Whether the origins match without subdomains.
    * @private
    */
-  getRootDomain_(url) {
-    let hostname = parseUrl(url).hostname;
-    // TODO: this should compute the root domain, and not just remove common
-    // subdomains.
-    if (hostname.split('.').length > 2) {
-      hostname = hostname.replace(TRIM_DOMAIN_PATTERN_, '');
-    }
-    return hostname;
+  hasRoughlySameOrigin_(first, second) {
+    const trimOrigin = (origin) => {
+      if (origin.split('.').length > 2) {
+        return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
+      }
+      return origin;
+    };
+    return trimOrigin(first) == trimOrigin(second);
   }
 
   /**
