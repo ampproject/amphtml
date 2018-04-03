@@ -32,7 +32,7 @@ branches:
     - /^greenkeeper/.*$/
 env:
   global:
-    - SAUCE_USERNAME="amphtml-travis-sauce"
+    - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
 addons:
   chrome: stable
