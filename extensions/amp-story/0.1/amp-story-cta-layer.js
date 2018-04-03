@@ -43,6 +43,21 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
      */
     return false;
   }
+
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    this.applyTargetAttribute_();
+  }
+
+  applyTargetAttribute_(){
+    console.log(this.element);
+    // Overwrite or set target attribute to _top in call to action links.
+    const ctaLinks = this.element.querySelectorAll('a');
+    for (let i = 0; i < ctaLinks.length; i++) {
+      ctaLinks[i].target = '_blank';
+    }
+  }
 }
 
 AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
