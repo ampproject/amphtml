@@ -57,7 +57,9 @@ export class AmpAd extends AMP.BaseElement {
           .then(service => service.get(consentId))
       : Promise.resolve();
 
-    this.maybeSelectDfdcWhitelistDeprecationExp();
+    // This is required as part of doubleclick's delayed fetch deprecation
+    // effort.
+    this.maybeFlagSelfAsDoubleclickOriginal();
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
@@ -110,7 +112,7 @@ export class AmpAd extends AMP.BaseElement {
     });
   }
 
-  maybeSelectDfdcWhitelistDeprecationExp() {
+  maybeFlagSelfAsDoubleclickOriginal() {
     if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation') &&
         this.element.getAttribute('type') == 'doubleclick') {
       this.element.setAttribute('data-amp-is-dc-origin', 1);
