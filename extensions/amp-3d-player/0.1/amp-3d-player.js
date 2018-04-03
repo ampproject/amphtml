@@ -25,21 +25,30 @@ export class Amp3dPlayer extends AMP.BaseElement {
     /** @private {!Element} */
     this.container_ = null;
 
+    /** @private {!Window} */
+    this.viewerWindow_ = null;
+
     /** @private {!Promise} */
-    this.willLoadIframe_ = new Promise(() => {});
+    this.willBeReady_ = new Promise(() => {});
+
+    /** @private {!Promise} */
+    this.willBeStarted_ = new Promise(() => {});
   }
 
   /** @override */
   buildCallback() {
     this.container_ = makeViewerIframe(this.element);
+
+    this.viewerWindow_ = this.container_.contentWindow;
+    this.willBeReady_ =
+        willReceiveNotification(this.viewerWindow_, 'heartbeat', () => true)
+            .then(() => query(this.viewerWindow_, 'ready'));
     this.applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
   layoutCallback() {
-    const viewerWindow = this.container_.contentWindow;
-    return willReceiveNotification(viewerWindow, 'heartbeat', () => true)
-        .then(() => query(viewerWindow, 'ready'))
+    this.willBeStarted_ = this.willBeReady_
         .then(() => {
           const getOption = (name, fmt, dflt) => {
             return this.element.hasAttribute(name)
@@ -51,7 +60,7 @@ export class Amp3dPlayer extends AMP.BaseElement {
           const string = x => x;
           const number = x => parseFloat(x);
 
-          return query(viewerWindow, 'setOptions', {
+          return query(this.viewerWindow_, 'setOptions', {
             src: getOption('src', string, ''),
             renderer: {
               alpha: getOption('alpha', bool, false),
@@ -65,21 +74,32 @@ export class Amp3dPlayer extends AMP.BaseElement {
             },
           });
         });
+
+    return this.willBeStarted_;
   }
 
   /** @override */
-  viewportCallback(unusedInViewport) {
-    // state.unusedInViewport = unusedInViewport;
+  viewportCallback(inViewport) {
+    this.willBeStarted_
+        .then(
+            () => query(this.viewerWindow_, 'toggleAMPViewport', inViewport)
+        );
   }
 
   /** @override */
-  unlayoutCallback() {
-    // state.layedOut = false;
-    return false;
+  pauseCallback() {
+    this.willBeStarted_
+        .then(
+            () => query(this.viewerWindow_, 'toggleAMPPlay', false)
+        );
   }
 
-  isRelayoutNeeded() {
-    return true;
+  /** @override */
+  resumeCallback() {
+    this.willBeStarted_
+        .then(
+            () => query(this.viewerWindow_, 'toggleAMPPlay', true)
+        );
   }
 
   /** @override */

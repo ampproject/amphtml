@@ -1,4 +1,4 @@
-/* global THREE, AMP_3D_VIEWER_IPC, resolveURL */
+/* global THREE, AMP_3D_VIEWER_IPC, resolveURL, AnimationLoop */
 
 export default function gltfViewer() {
   const notifyReady = () => {
@@ -12,8 +12,39 @@ export default function gltfViewer() {
   };
 
   const init = () => {
+    let viewer = null;
+    let ampPlay = true;
+    let ampInViewport = true;
+    const updateAnimationRun = () => {
+      if (!viewer) {
+        console.warn('command sent to uninitialized viewer');
+        return;
+      }
+
+      if (ampInViewport && ampPlay) {
+        viewer.animationLoop.needsUpdate = true;
+        viewer.animationLoop.run();
+      } else {
+        viewer.animationLoop.stop();
+      }
+    };
+
     AMP_3D_VIEWER_IPC.addQueryHandler(window, 'setOptions', options => {
-      startViewer(options);
+      if (viewer) {
+        viewer.animationLoop.stop();
+      }
+      viewer = startViewer(options);
+      updateAnimationRun();
+    });
+
+    AMP_3D_VIEWER_IPC.addQueryHandler(window, 'toggleAMPViewport', inVp => {
+      ampInViewport = inVp;
+      updateAnimationRun();
+    });
+
+    AMP_3D_VIEWER_IPC.addQueryHandler(window, 'toggleAMPPlay', play => {
+      ampPlay = play;
+      updateAnimationRun();
     });
 
     AMP_3D_VIEWER_IPC.addQueryHandler(window, 'ready', notifyReady());
@@ -50,6 +81,27 @@ export default function gltfViewer() {
     camera.updateMatrixWorld();
   };
 
+  const loadObject = (viewer, src) => {
+    const baseUrl = THREE.LoaderUtils.extractUrlBase(
+        window.parent.location.href
+    );
+    new THREE.GLTFLoader()
+        .load(
+            resolveURL(src, baseUrl),
+            gltfData => {
+              setupCameraForObject(viewer.camera, gltfData.scene);
+              gltfData.scene.children
+                  .slice()
+                  .forEach(child => {
+                    viewer.scene.add(child);
+                  });
+              viewer.animationLoop.needsUpdate = true;
+            },
+            () => {},// todo: progress
+            () => {} // todo: error
+        );
+  };
+
   const startViewer = options => {
     const renderer = new THREE.WebGLRenderer(options.renderer);
 
@@ -63,11 +115,16 @@ export default function gltfViewer() {
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     Object.assign(controls, options.controls);
 
+    controls.addEventListener('change', () => {
+      animationLoop.needsUpdate = true;
+    });
+
     const step = () => {
       controls.update();
       renderer.render(scene, camera);
-      requestAnimationFrame(step);
     };
+
+    const animationLoop = new AnimationLoop([step]);
 
     const updateSize = () => {
       const w = window.innerWidth;
@@ -81,30 +138,17 @@ export default function gltfViewer() {
     window.addEventListener('resize', updateSize);
 
     document.body.appendChild(renderer.domElement);
-
-    const baseUrl = THREE.LoaderUtils.extractUrlBase(
-        window.parent.location.href
-    );
-    const src = resolveURL(options.src, baseUrl);
-
     window.scene = scene;
 
-    new THREE.GLTFLoader()
-        .load(
-            src,
-            gltfData => {
-              setupCameraForObject(camera, gltfData.scene);
-              gltfData.scene.children
-                  .slice()
-                  .forEach(child => {
-                    scene.add(child);
-                  });
-            },
-            () => {},// todo: progress
-            () => {} // todo: error
-        );
+    const viewer = {
+      animationLoop,
+      scene,
+      camera,
+    };
 
-    step();
+    loadObject(viewer, options.src);
+
+    return viewer;
   };
 
   init();

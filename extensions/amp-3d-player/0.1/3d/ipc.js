@@ -91,6 +91,7 @@ export const willReceiveNotification = (target, tag, fn) => {
 
 export const registerGlobalIpcCode =
     'window.AMP_3D_VIEWER_IPC = (function () {' +
+      'var nextQueryId = 0;' +
       'var computeOrigin = function () {' +
         `return ${JSON.stringify(computeOrigin())};` +
       '};' +
