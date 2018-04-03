@@ -168,6 +168,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-user-notification/**/*.js',
       // Needed for VideoService
       'extensions/amp-video-service/**/*.js',
+      // Needed to access ConsentPolicyManager from other extensions
+      'extensions/amp-consent/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
