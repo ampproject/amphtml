@@ -195,12 +195,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return Promise.resolve();
   }
 
+  /**
+   * Builds all controls (top bar and description) and appends them to the
+   * lightbox container
+   * @private
+   */
   buildControls_() {
     this.controlsContainer_ = this.win.document.createElement('div');
     this.controlsContainer_.classList.add('i-amphtml-lbg-controls');
     this.buildDescriptionBox_();
     this.buildTopBar_();
-    this.container_.appendChild(this.controlsContainer_);
+    this.vsync_.mutate(() => {
+      this.container_.appendChild(this.controlsContainer_);
+    });
   }
 
   /**
@@ -389,15 +396,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const mutateOverflowState = state => {
         // We toggle visibility instead of display because we rely on the height
         // of this element to measure 1 rem.
-        if (state.hasOverflow) {
-          st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-            visibility: 'visible',
-          });
-        } else {
-          st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-            visibility: 'hidden',
-          });
-        }
+        st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
+          visibility: state.hasOverflow ? 'visible' : 'hidden',
+        });
       };
 
       this.vsync_.mutatePromise(() => {
