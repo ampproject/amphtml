@@ -22,20 +22,23 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function doubleclick(global, data) { debugger;
+export function doubleclick(global, data) {
   try {
     const context = parseJson(global['context']['cachedFrameName_']
     )['attributes']['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
-      const dcdfwld = data['amp-dcdfwld'];
-      if (dcdfwld == 3) {
-        // If dcdfwld == 3, then we are in the experiment AND we're not coming
-        // from a doubleclick tag, so we want to halt immediately. See amp-ad.js
-        // for full semantics of these numbers.
+      const dcdfwld =
+          context['experimentToggles']['dcdf-whitelist-deprecation'];
+      const isDoubleclickOrigin = data['ampIsDcOrigin'];
+      if (dcdfwld && !isDoubleclickOrigin) {
+        // We are in the experiment AND we're not coming from a doubleclick
+        // tag, so we want to halt immediately.
         return;
+      } else if (dcdfwld) {
+        appendExperimentId(data, Math.random() < 0.5 ?
+          '21061861' : '21061862');
       }
-      appendExperimentId(data, dcdfwld % 2 == 0 ? '21061861' : '21061862');
       return deprecatedDoubleclick(window, data);
     }
   } catch (unused) {}

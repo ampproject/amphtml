@@ -41,5 +41,5 @@
   "rollback-dfd-yieldbot": 1,
   "rollback-dfd-imonomy": 1,
   "rollback-dfd-pulsepoint": 1,
-  "dcdf-whitelist-deprecation": 1
+  "dcdf-whitelist-deprecation": 0.01
 }
