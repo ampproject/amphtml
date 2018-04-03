@@ -21,7 +21,7 @@ export function pixels(global, data) {
       ['origin', 'sid', 'tag'],
       ['clickTracker', 'viewability']
   );
-  data.tag = (data.tag).toLowerCase();
+  data.tag = data.tag.toString().toLowerCase();
   global._pixelsParam = data;
   if (data.tag === 'sync') {
     writeScript(global, 'https://cdn.adsfactor.net/amp/pixels-amp.min.js', () => {
