@@ -19,6 +19,7 @@ import {
   Fetcher,
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
+import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
 import {Entitlement} from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
@@ -70,7 +71,7 @@ export class GoogleSubscriptionsPlatform {
     this.serviceAdapter_ = serviceAdapter;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
-        ampdoc.win,
+        new DocImpl(ampdoc),
         serviceAdapter.getPageConfig(),
         {
           fetcher: new AmpFetcher(ampdoc.win),

@@ -82,6 +82,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(callbacks.loginRequest).to.be.calledOnce;
   });
 
+  it('should scope the runtime to one ampdoc', () => {
+    expect(platform.runtime_.doc_.ampdoc_).to.equal(ampdoc);
+  });
+
   it('should proxy fetch via AMP fetcher', () => {
     const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
       expect(url).to.match(/publication\/example.org/);
