@@ -68,7 +68,8 @@
   z-index: 2147483642;
 }
 
-.i-amphtml-lbg-mask {
+.i-amphtml-lbg-mask,
+.i-amphtml-lbg-gallery {
   background-color: rgba(0,0,0, 1) !important;
   position: absolute !important;
   top: 0 !important;
@@ -79,11 +80,7 @@
 
 .i-amphtml-lbg-gallery {
   display: none;
-  position: absolute !important;
   top: 56px !important; /* Matches height of top-bar */
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
   overflow: auto !important;
 }
 
