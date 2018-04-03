@@ -20,7 +20,7 @@ import {setStyles} from '../../../../src/style';
 
 export const Presets = {
   'parallax': {
-    isFxTypeSupported(win) {
+    isFxTypeSupported(unusedWin) {
       return true;
     },
     userAsserts(element) {
