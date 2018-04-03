@@ -1052,10 +1052,27 @@ describes.fakeWin('Core events', {amp: true}, env => {
 
   it('should trigger tap event on key press if focused element has ' +
      'role=button', () => {
-    expect(window.document.addEventListener).to.have.been.calledWith('keydown');
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
     const element = document.createElement('div');
     element.setAttribute('role', 'button');
+    const event = {
+      target: element,
+      keyCode: KeyCodes.ENTER,
+      preventDefault: sandbox.stub()};
+    handler(event);
+    expect(event.preventDefault).to.have.been.called;
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should trigger tap event on key press if focused element has ' +
+     'role=option', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'option');
     const event = {
       target: element,
       keyCode: KeyCodes.ENTER,

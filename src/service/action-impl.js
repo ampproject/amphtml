@@ -21,13 +21,13 @@ import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
+import {hasOwn, map} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
-import {map} from '../utils/object';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -59,6 +59,32 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
+};
+
+/**
+ * Interactable widgets which should trigger tap events when the user clicks
+ * or activates via the keyboard. Not all are here, e.g. progressbar, tabpanel,
+ * since they are text inputs, readonly, or composite widgets that shouldn't
+ * need to trigger tap events from spacebar or enter on their own.
+ * See https://www.w3.org/TR/wai-aria-1.1/#widget_roles
+ * @const {!Object<boolean>}
+ */
+export const TAPPABLE_ARIA_ROLES = {
+  'button': true,
+  'checkbox': true,
+  'link': true,
+  'listbox': true,
+  'menuitem': true,
+  'menuitemcheckbox': true,
+  'menuitemradio': true,
+  'option': true,
+  'radio': true,
+  'scrollbar': true,
+  'slider': true,
+  'spinbutton': true,
+  'switch': true,
+  'tab': true,
+  'treeitem': true,
 };
 
 /**
@@ -234,8 +260,9 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
         if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
-          if (!event.defaultPrevented &&
-              element.getAttribute('role') == 'button') {
+          const isTapEventRole = hasOwn(TAPPABLE_ARIA_ROLES,
+              element.getAttribute('role').toLowerCase());
+          if (!event.defaultPrevented && isTapEventRole) {
             event.preventDefault();
             this.trigger(element, name, event, ActionTrust.HIGH);
           }
