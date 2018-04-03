@@ -20,6 +20,9 @@ import {setStyles} from '../../../../src/style';
 
 export const Presets = {
   'parallax': {
+    isFxTypeSupported(win) {
+      return true;
+    },
     userAsserts(element) {
       const factorValue = user().assert(
           element.getAttribute('data-parallax-factor'),
