@@ -45,7 +45,8 @@ export function sendRequest(win, request, transportOptions) {
     return;
   }
   if (transportOptions['image']) {
-    Transport.sendRequestUsingImage(request, transportOptions['image']['ignoreWarnings']);
+    Transport.sendRequestUsingImage(
+        request, transportOptions['image']['ignoreWarnings']);
     return;
   }
   user().warn(TAG_, 'Failed to send request', request, transportOptions);
