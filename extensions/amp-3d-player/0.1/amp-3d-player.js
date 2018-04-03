@@ -15,6 +15,7 @@
  */
 import {query, willReceiveNotification} from './3d/ipc';
 import makeViewerIframe from './3d/iframe';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 export class Amp3dPlayer extends AMP.BaseElement {
 
@@ -103,8 +104,8 @@ export class Amp3dPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 }
 
