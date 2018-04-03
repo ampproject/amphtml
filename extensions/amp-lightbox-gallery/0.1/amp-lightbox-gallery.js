@@ -458,6 +458,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }, {});
   }
 
+  nextSlide_() {
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.interactionNext();
+    });
+  }
+
+  prevSlide_() {
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.interactionPrev();
+    });
+  }
+
   /**
    * Builds the top bar containing buttons and appends them to the container.
    * @private
@@ -470,11 +482,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
+    const nextSlide = this.nextSlide_.bind(this);
+    const prevSide = this.prevSlide_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
     this.buildButton_('Gallery', 'i-amphtml-lbg-button-gallery', openGallery);
     this.buildButton_('Content', 'i-amphtml-lbg-button-slide', closeGallery);
+    this.buildButton_('Next', 'i-amphtml-lbg-button-next', nextSlide);
+    this.buildButton_('Prev', 'i-amphtml-lbg-button-prev', prevSlide);
 
     this.controlsContainer_.appendChild(this.topBar_);
   }
