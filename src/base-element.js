@@ -265,6 +265,22 @@ export class BaseElement {
   }
 
   /**
+   * Returns the consent policy id that this element should wait for before
+   * buildCallback.
+   * A `null` value indicates to not be blocked by consent.
+   * Subclasses may override.
+   * @return {?string}
+   */
+  getConsentPolicy() {
+    let policyId = null;
+    if (this.element.hasAttribute('data-block-on-consent')) {
+      policyId =
+          this.element.getAttribute('data-block-on-consent') || 'default';
+    }
+    return policyId;
+  }
+
+  /**
    * Intended to be implemented by subclasses. Tests whether the element
    * supports the specified layout. By default only Layout.NODISPLAY is
    * supported.
