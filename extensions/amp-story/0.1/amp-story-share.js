@@ -181,14 +181,17 @@ export class ShareWidget {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
-    /** @private {?Element} */
+    /** @protected {?Element} */
     this.root_ = null;
 
     /** @private {?Promise<?./localization.LocalizationService>} */
     this.localizationServicePromise_ = null;
+
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestService(this.win_);
   }
 
   /** @param {!Window} win */
@@ -209,6 +212,7 @@ export class ShareWidget {
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
+    this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
 
@@ -287,14 +291,24 @@ export class ShareWidget {
     return ('share' in navigator) && !isChromeWebview;
   }
 
-  /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
-   * @public
-   */
-  // TODO(alanorozco): Set story metadata in share config
-  setProviders(providers) {
+  loadProviders() {
     this.loadRequiredExtensions_();
 
+    this.requestService_.loadBookendConfig().then(config => {
+      const providers = config && config['share-providers'];
+      if (!providers) {
+        return;
+      }
+      this.setProviders_(providers);
+    });
+  }
+
+  /**
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @private
+   */
+  // TODO(alanorozco): Set story metadata in share config
+  setProviders_(providers) {
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',
@@ -353,17 +367,13 @@ export class ShareWidget {
  * Social share widget for story bookend with a scrollable layout.
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
-export class ScrollableShareWidget {
+export class ScrollableShareWidget extends ShareWidget {
   /** @param {!Window} win */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    super(win);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
-
-    /** @private @const {!ShareWidget} */
-    this.mixin_ = ShareWidget.create(win);
 
     /**
      * Container width is being tracked to prevent unnecessary layout
@@ -371,9 +381,6 @@ export class ScrollableShareWidget {
      * @private {?number}
      */
     this.containerWidth_ = null;
-
-    /** @private {?Element} */
-    this.root_ = null;
   }
 
   /** @param {!Window} win */
@@ -386,7 +393,7 @@ export class ScrollableShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    this.root_ = this.mixin_.build(ampdoc);
+    super.build(ampdoc);
 
     this.root_.classList.add(SCROLLABLE_CLASSNAME);
 
@@ -476,11 +483,10 @@ export class ScrollableShareWidget {
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @public
    */
-  setProviders(providers) {
-    this.mixin_.setProviders(providers);
+  loadProviders() {
+    super.loadProviders();
     this.applyButtonPadding_();
   }
 }
