@@ -119,6 +119,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           new AmpAd(ampAdElement).upgradeCallback().then(() => {
             expect(ampAdElement
                 .getAttribute('data-amp-is-in-dcdfwld-experiment')).to.be.ok;
+            expect(ampAdElement.getAttribute('experimentId')).to.be.ok;
           });
         });
       });

@@ -60,7 +60,13 @@ export class AmpAd extends AMP.BaseElement {
 
     // This is required as part of doubleclick's delayed fetch deprecation
     // effort.
-    this.maybeSelectIntoDblckDelayedFetchWhitelistDeprecationExperiment(type);
+    if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation') &&
+        !!['ix', 'imonomy', 'medianet', 'navegg', 'openx', 'pulsepoint',
+        'rubicon', 'yieldbot', 'criteo', 'doubleclick']
+        .find(item => item == type)) {
+      addExperimentIdToElement(this.element,
+          Math.random() < 0.5 ? '21061861' : '21061862');
+    }
 
     return consent.then(() => {
       const isCustom = type === 'custom';
@@ -111,25 +117,12 @@ export class AmpAd extends AMP.BaseElement {
       });
     });
   }
+}
 
-  /** @param {string} type */
-  maybeSelectIntoDblckDelayedFetchWhitelistDeprecationExperiment(type) {
-    switch (type) {
-      case 'ix':
-      case 'imonomy':
-      case 'medianet':
-      case 'navegg':
-      case 'openx':
-      case 'pulsepoint':
-      case 'rubicon':
-      case 'yieldbot':
-      case 'criteo':
-      case 'doubleclick':
-        if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation')) {
-          this.element.setAttribute('data-amp-is-in-dcdfwld-experiment', 1);
-        }
-    }
-  }
+function addExperimentIdToElement(element, id) {
+  let experimentId = element.getAttribute('experimentId') || '';
+  experimentId = experimentId ? experimentId + `,${id}` : id;
+  element.setAttribute('experimentId', experimentId);
 }
 
 AMP.extension('amp-ad', '0.1', AMP => {
