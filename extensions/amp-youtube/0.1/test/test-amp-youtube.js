@@ -30,7 +30,7 @@ describes.realWin('amp-youtube', {
   amp: {
     extensions: ['amp-youtube'],
   },
-}, function(env) {
+}, function (env) {
   this.timeout(5000);
   let win, doc;
   let timer;
@@ -67,11 +67,11 @@ describes.realWin('amp-youtube', {
     }).then(() => yt);
   }
 
-  describe('with data-videoid', function() {
+  describe('with data-videoid', function () {
     runTestsForDatasource(EXAMPLE_VIDEOID);
   });
 
-  describe('with data-live-channelid', function() {
+  describe('with data-live-channelid', function () {
     runTestsForDatasource(EXAMPLE_LIVE_CHANNELID);
   });
 
@@ -254,7 +254,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('adds an img placeholder in prerender mode if source is videoid', () => {
-    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(yt) {
+    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
@@ -264,6 +264,7 @@ describes.realWin('amp-youtube', {
       expect(imgPlaceholder.src).to.be.equal(
           `https://i.ytimg.com/vi/${EXAMPLE_VIDEOID}/sddefault.jpg#404_is_fine`);
       expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(imgPlaceholder.getAttribute('alt')).to.equal('Loading video');
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -273,8 +274,23 @@ describes.realWin('amp-youtube', {
     });
   });
 
+  it('propagates aria-label to img placeholder', () => {
+    return getYt({
+      'data-videoid': EXAMPLE_VIDEOID,
+      'aria-label': 'kind video',
+    }, true, function(yt) {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.be.null;
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder).to.not.be.null;
+      expect(imgPlaceholder.getAttribute('aria-label')).to.equal('kind video');
+      expect(imgPlaceholder.getAttribute('alt'))
+          .to.equal('Loading video - kind video');
+    });
+  });
+
   it('loads only sddefault when it exists if source is videoid', () => {
-    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(yt) {
+    return getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
@@ -296,7 +312,7 @@ describes.realWin('amp-youtube', {
   });
 
   it('loads hqdefault thumbnail source when sddefault fails', () => {
-    return getYt({'data-videoid': 'FAKE'}, true, function(yt) {
+    return getYt({'data-videoid': 'FAKE'}, true, function (yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
