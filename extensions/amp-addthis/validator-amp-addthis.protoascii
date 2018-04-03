@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,27 +15,41 @@
 #
 
 tags: {  # amp-addthis
-  html_format: AMP
-  tag_name: "SCRIPT"
+  attr_lists: "common-extension-attrs"
   extension_spec: {
-    name: "amp-addthis"
     allowed_versions: "0.1"
     allowed_versions: "latest"
+    name: "amp-addthis"
   }
-  attr_lists: "common-extension-attrs"
+  html_format: AMP
+  tag_name: "SCRIPT"
 }
 
 tags: {  # <amp-addthis>
-  html_format: AMP
-  tag_name: "AMP-ADDTHIS"
-  requires_extension: "amp-addthis"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  attr_lists: "extended-amp-global"
   attrs: {
-    name: "data-pub-id"
     mandatory: true
+    name: "data-pub-id"
   }
   attrs: {
-    name: "data-widget-id"
-    mandatory: true
+    name: "data-share-description"
+  }
+  attrs: {
+    name: "data-share-media"
+    value_url: {
+      allow_empty: true
+      allow_relative: true
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "data-share-title"
@@ -45,29 +59,15 @@ tags: {  # <amp-addthis>
     value_url: {
       allow_empty: true
       allow_relative: true
-      allowed_protocol: "https"
       allowed_protocol: "http"
+      allowed_protocol: "https"
     }
   }
   attrs: {
-    name: "data-share-media"
-    value_url: {
-      allow_empty: true
-      allow_relative: true
-      allowed_protocol: "https"
-      allowed_protocol: "http"
-    }
+    mandatory: true
+    name: "data-widget-id"
   }
-  attrs: {
-    name: "data-share-description"
-  }
-  attr_lists: "extended-amp-global"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
+  html_format: AMP
+  requires_extension: "amp-addthis"
+  tag_name: "AMP-ADDTHIS"
 }
