@@ -28,9 +28,9 @@ export function doubleclick(global, data) {
     )['attributes']['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
-      if (data['type'] != 'doubleclick' &&
+      if (data['type'] == 'doubleclick' ||
           !/(^|,)21061862(,|$)/.test(data['experimentId'])) {
-        return deprecatedDoubleclick(window, data);
+        return deprecatedDoubleclick(global, data);
       }
     }
   } catch (unused) {}

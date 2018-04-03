@@ -18,6 +18,7 @@ import {AmpAdCustom} from './amp-ad-custom';
 import {CSS} from '../../../build/amp-ad-0.1.css';
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
+import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
@@ -61,11 +62,11 @@ export class AmpAd extends AMP.BaseElement {
     // This is required as part of doubleclick's delayed fetch deprecation
     // effort.
     if (isExperimentOn(this.win, 'dcdf-whitelist-deprecation') &&
-        !!['ix', 'imonomy', 'medianet', 'navegg', 'openx', 'pulsepoint',
-        'rubicon', 'yieldbot', 'criteo', 'doubleclick']
-        .find(item => item == type)) {
-      addExperimentIdToElement(this.element,
-          Math.random() < 0.5 ? '21061861' : '21061862');
+        ['ix', 'imonomy', 'medianet', 'navegg', 'openx', 'pulsepoint',
+          'rubicon', 'yieldbot', 'criteo', 'doubleclick']
+            .indexOf(type) >= 0) {
+      addExperimentIdToElement(Math.random() < 0.5 ? '21061861' : '21061862',
+          this.element);
     }
 
     return consent.then(() => {
@@ -117,12 +118,6 @@ export class AmpAd extends AMP.BaseElement {
       });
     });
   }
-}
-
-function addExperimentIdToElement(element, id) {
-  let experimentId = element.getAttribute('experimentId') || '';
-  experimentId = experimentId ? experimentId + `,${id}` : id;
-  element.setAttribute('experimentId', experimentId);
 }
 
 AMP.extension('amp-ad', '0.1', AMP => {

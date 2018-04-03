@@ -101,3 +101,36 @@ describes.sandboxed('writeAdScript', {}, env => {
     verifyScript(win, 'glade.js');
   });
 });
+
+describe('doubleclick delayed fetch white list deprecation', () => {
+  let global;
+
+  beforeEach(() => {
+    const cachedFrameName_ = '{"attributes": {"_context": ' +
+      '{"experimentToggles": {"rollback-dfd-doubleclick": true}}}}';
+    global = {
+      context: {
+        cachedFrameName_,
+        // To force some testable action of calling deprecatedDoubleclick
+        clientId: 1234,
+      },
+    };
+  });
+
+  it('should add experiment id', () => {
+    const data = {
+      ampIsInDcdfwldExperiment: true,
+      type: 'doubleclick',
+    };
+    doubleclick(global, data);
+    expect(global.gaGlobal).to.be.ok;
+  });
+  it('should not add experiment id', () => {
+    const data = {
+      ampIsInDcdfwldExperiment: true,
+      type: 'notDoubleclick',
+    };
+    doubleclick(global, data);
+    expect(global.gaGlobal).to.not.be.ok;
+  });
+});
