@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {query, willReceiveNotification} from './3d/ipc';
-import makeViewerIframe from './3d/iframe';
+import {addQueryHandler, listen, query, willReceiveNotification} from './3d/ipc';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import makeViewerIframe from './3d/iframe';
 
 export class Amp3dPlayer extends AMP.BaseElement {
 
@@ -73,6 +73,30 @@ export class Amp3dPlayer extends AMP.BaseElement {
               enableZoom: getOption('enableZoom', bool, true),
               autoRotate: getOption('autoRotate', bool, false),
             },
+          });
+        })
+        .then(() => {
+          return new Promise((resolve, reject) => {
+            const disposeAll = () => {
+              disposeReadyHandler();
+              disposeProgressHandler();
+              disposeErrorHandler();
+            };
+            const disposeReadyHandler = addQueryHandler(
+                this.viewerWindow_, 'loaded', () => {
+                  disposeAll();
+                  resolve();
+                });
+            const disposeErrorHandler = addQueryHandler(
+                this.viewerWindow_, 'error', text => {
+                  disposeAll();
+                  this.toggleFallback(true);
+                  reject(new Error(text));
+                });
+            const disposeProgressHandler = listen(
+                this.viewerWindow_, 'progress', ({loaded, total}) => {
+                  console.log(loaded, total);
+                });
           });
         });
 

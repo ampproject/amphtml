@@ -97,10 +97,16 @@ export default function gltfViewer() {
                   .forEach(child => {
                     viewer.scene.add(child);
                   });
+              document.body.appendChild(viewer.renderer.domElement);
               viewer.animationLoop.needsUpdate = true;
+              AMP_3D_VIEWER_IPC.query(window, 'loaded', null);
             },
-            () => {},// todo: progress
-            () => {} // todo: error
+            ({loaded, total}) => {
+              AMP_3D_VIEWER_IPC.notify(window, 'progress', {loaded, total});
+            },
+            err => {
+              AMP_3D_VIEWER_IPC.query(window, 'error', err.toString());
+            }
         );
   };
 
@@ -139,14 +145,13 @@ export default function gltfViewer() {
 
     updateSize();
     window.addEventListener('resize', updateSize);
-
-    document.body.appendChild(renderer.domElement);
     window.scene = scene;
 
     const viewer = {
       animationLoop,
       scene,
       camera,
+      renderer
     };
 
     loadObject(viewer, options.src);
