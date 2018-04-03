@@ -124,9 +124,8 @@ export class FxElement {
       parseFloat(element.getAttribute('data-margin')) : 0.05;
 
     /** @private {string} */
-    this.easing_ = element.hasAttribute('data-easing') ?
-      convertEasingKeyword(element.getAttribute('data-easing')) :
-      'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
+    this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
+      element.getAttribute('data-easing') : 'ease-in');
 
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?

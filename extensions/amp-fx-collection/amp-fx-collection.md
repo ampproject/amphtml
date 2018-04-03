@@ -89,12 +89,11 @@ This is the duration over which the animation takes places. The default value is
 
 ##### data-easing
 
-This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can also choose from one of the presets available:
+This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
 * “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
 * “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
-* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
-* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
-
+* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00) (default)
+* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
 or specify a `custom-bezier()` input
 
 ##### data-margin
