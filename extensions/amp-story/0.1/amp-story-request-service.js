@@ -31,7 +31,7 @@ export class AmpStoryRequestService {
     /** @private @const {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
 
-    /** @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
+    /** @const @type {function():(!Promise<!JsonObject>|!Promise<null>)} */
     this.loadBookendConfig = once(() => this.loadBookendConfigImpl_());
   }
 
