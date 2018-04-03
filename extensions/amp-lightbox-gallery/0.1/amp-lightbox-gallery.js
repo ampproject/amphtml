@@ -483,7 +483,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
     const nextSlide = this.nextSlide_.bind(this);
-    const prevSide = this.prevSlide_.bind(this);
+    const prevSlide = this.prevSlide_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
