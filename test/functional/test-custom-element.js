@@ -17,6 +17,7 @@
 import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
@@ -525,6 +526,48 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.whenBuilt(); // Should eventually resolve.
       });
     });
+
+    it('should build on consent sufficient', () => {
+      const element = new ElementClass();
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve({
+              whenPolicyResolved: () => {
+                return Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+              },
+            });
+          });
+      sandbox.stub(element.implementation_, 'getConsentPolicy')
+          .callsFake(() => {
+            return 'default';
+          });
+
+      clock.tick(1);
+      container.appendChild(element);
+      return element.whenBuilt();
+    });
+
+    it('should not build on consent insufficient', () => {
+      const element = new ElementClass();
+      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+          .callsFake(() => {
+            return Promise.resolve({
+              whenPolicyResolved: () => {
+                return Promise.resolve(CONSENT_POLICY_STATE.INSUFFICIENT);
+              },
+            });
+          });
+      sandbox.stub(element.implementation_, 'getConsentPolicy')
+          .callsFake(() => {
+            return 'default';
+          });
+
+      clock.tick(1);
+      container.appendChild(element);
+      return expect(element.whenBuilt())
+          .to.be.eventually.rejectedWith(/BLOCK_BY_CONSENT/);
+    });
+
 
     it('should anticipate build errors', () => {
       const element = new ElementClass();
