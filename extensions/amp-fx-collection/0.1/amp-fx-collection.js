@@ -16,6 +16,7 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {FxProvider} from './providers/fx-provider';
+import {Presets} from './providers/amp-fx-presets';
 import {Services} from '../../../src/services';
 import {dev, rethrowAsync, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
@@ -128,10 +129,7 @@ class AmpFxCollection {
 
     // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {
-      if (fxType == FxType.FADE_IN) {
-        user().assert(isExperimentOn(this.ampdoc_.win, 'amp-fx-fade-in'),
-            'amp-fx-fade-in experiment is not turned on.');
-      }
+      Presets[fxType].isFxTypeSupported(this.ampdoc_.win);
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
 

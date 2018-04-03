@@ -120,17 +120,17 @@ export class FxElement {
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
     /** @private {number} */
-    this.margin_ = element.hasAttribute('data-fade-in-margin') ?
-      parseFloat(element.getAttribute('data-fade-in-margin')) : 0.05;
+    this.margin_ = element.hasAttribute('data-margin') ?
+      parseFloat(element.getAttribute('data-margin')) : 0.05;
 
     /** @private {string} */
-    this.easing_ = element.hasAttribute('data-fade-in-easing') ?
-      convertEasingKeyword(element.getAttribute('data-fade-in-easing')) :
+    this.easing_ = element.hasAttribute('data-easing') ?
+      convertEasingKeyword(element.getAttribute('data-easing')) :
       'cubic-bezier(0.00, 0.00, 1.00, 1.00)';
 
     /** @private {string} */
-    this.duration_ = element.hasAttribute('data-fade-in-duration') ?
-      element.getAttribute('data-fade-in-duration') : '1000ms';
+    this.duration_ = element.hasAttribute('data-duration') ?
+      element.getAttribute('data-duration') : '1000ms';
   }
 
   /**
