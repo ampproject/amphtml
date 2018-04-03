@@ -156,17 +156,17 @@
   position: relative !important;
 }
 
-.i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-text {
+.i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow .i-amphtml-lbg-desc-text {
   padding-top: 40px !important;
 }
 
-.i-amphtml-lbg-desc-box.standard .i-amphtml-lbg-desc-mask {
+.i-amphtml-lbg-desc-box.i-amphtml-lbg-standard .i-amphtml-lbg-desc-mask {
   z-index: 1 !important;
   height: 1rem !important;
   background: linear-gradient(transparent, rgba(0,0,0,0.9));
   transition: background-color ease-out 0.5s !important;
 }
-.i-amphtml-lbg-desc-box.overflow .i-amphtml-lbg-desc-mask {
+.i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow .i-amphtml-lbg-desc-mask {
   background-color: rgba(0,0,0,0.4) !important;
   top: 0 !important;
   z-index: 0 !important;

@@ -388,7 +388,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         // The height of the overflow mask is set to 1 rem. We allow 3 lines
         // for the description and consider it to have overflow if more than 3
         // lines of text.
-        state.hasOverflow = this.descriptionBox_./*OK*/scrollHeight
+        state.descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
             - this.descriptionBox_./*OK*/clientHeight
             >= this.descriptionOverflowMask_./*OK*/clientHeight;
       };
@@ -397,7 +397,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         // We toggle visibility instead of display because we rely on the height
         // of this element to measure 1 rem.
         st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-          visibility: state.hasOverflow ? 'visible' : 'hidden',
+          visibility: state.descriptionOverflows ? 'visible' : 'hidden',
         });
       };
 
@@ -427,25 +427,25 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   toggleDescriptionOverflow_() {
     const measureOverflowState = state => {
-      state.isStandard = this.descriptionBox_.classList
-        .contains('i-amphtml-lbg-standard');
-      state.isOverflown = this.descriptionBox_.classList
-        .contains('i-amphtml-lbg-overflow');
+      state.isInStandardMode = this.descriptionBox_.classList
+          .contains('i-amphtml-lbg-standard');
+      state.isInOverflowMode = this.descriptionBox_.classList
+          .contains('i-amphtml-lbg-overflow');
 
       // The height of the description without overflow is set to 4 rem.
       // The height of the overflow mask is set to 1 rem. We allow 3 lines
       // for the description and consider it to have overflow if more than 3
       // lines of text.
-      state.hasOverflow = this.descriptionBox_./*OK*/scrollHeight
+      state.descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
           - this.descriptionBox_./*OK*/clientHeight
           >= this.descriptionOverflowMask_./*OK*/clientHeight;
     };
 
     const mutateOverflowState = state => {
-      if (state.isStandard && state.hasOverflow) {
+      if (state.isInStandardMode && state.descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
-      } else if (state.isOverflown) {
+      } else if (state.isInOverflowMode) {
         this.descriptionBox_./*OK*/scrollTop = 0;
         this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
         this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
