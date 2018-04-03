@@ -184,6 +184,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   // faster.
   loadPriority: 'high',
 });
+declareExtension('amp-viqeo', '0.1', false);
 declareExtension('amp-video', '0.1');
 declareExtension('amp-video-service', '0.1', {
   // `amp-video-service` provides analytics and autoplay for all videos. We need
