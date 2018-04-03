@@ -32,10 +32,6 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     xhrMock = sandbox.mock(requestService.xhr_);
   });
 
-  it('should work', () => {
-    expect(requestService).to.exist;
-  });
-
   it('should not load the bookend config if no attribute is set', () => {
     xhrMock.expects('fetchJson').never();
 
@@ -81,7 +77,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
         })
         .once();
 
-    return requestService.loadBookendConfig().then((config) => {
+    return requestService.loadBookendConfig().then(config => {
       expect(config).to.equal(fetchedConfig);
       xhrMock.verify();
     });
