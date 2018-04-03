@@ -1405,6 +1405,24 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       },
     },
   },
+
+  'oewav2': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?st=${st}' +
+        '&cn=${cn}' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },	
+	
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
