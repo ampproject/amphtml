@@ -305,7 +305,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
