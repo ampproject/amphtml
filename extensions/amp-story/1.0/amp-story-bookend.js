@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
-import {CSS} from '../../../build/amp-story-bookend-0.1.css';
+import {CSS} from '../../../build/amp-story-bookend-1.0.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './amp-story-share';

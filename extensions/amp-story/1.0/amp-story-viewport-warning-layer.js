@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-story-viewport-warning-layer-0.1.css';
+import {CSS} from '../../../build/amp-story-viewport-warning-layer-1.0.css';
 import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';

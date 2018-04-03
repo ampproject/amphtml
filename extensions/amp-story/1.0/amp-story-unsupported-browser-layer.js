@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-story-unsupported-browser-layer-0.1.css';
+import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 import {LocalizedStringId} from './localization';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
