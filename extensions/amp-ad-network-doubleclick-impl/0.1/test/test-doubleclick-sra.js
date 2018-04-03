@@ -121,7 +121,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
   });
 
   describe('#constructSRABlockParameters', () => {
-    [true, false].forEach(force => {
+    [true, false].forEach(forceSafeFrame => {
       it(`should combine for SRA request, forceSafeframe ${force}`, () => {
         const targeting1 = {
           cookieOptOut: 1,
@@ -135,7 +135,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           width: 50,
           'data-slot': '/1234/abc/def',
           'json': JSON.stringify(targeting1),
-          'data-force-safeframe': force ? '1' : '0',
+          'data-force-safeframe': forceSafeFrame ? '1' : '0',
         };
         const element1 =
           createElementWithAttributes(doc, 'amp-ad', config1);
@@ -185,7 +185,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           jar: 'some_jar',
           pucrd: 'some_pucrd',
         };
-        if (force) {
+        if (forceSafeFrame) {
           exp['fsfs'] = '1,0';
         }
         expect(constructSRABlockParameters([impl1, impl2])).to.jsonEqual(exp);

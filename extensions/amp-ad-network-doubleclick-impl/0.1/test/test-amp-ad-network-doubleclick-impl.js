@@ -481,23 +481,23 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     describe('data-force-safeframe', () => {
-      const regexp = /(\?|&)fsf=1(&|$)/;
+      const fsfRegexp = /(\?|&)fsf=1(&|$)/;
       it('handles default', () => expect(
           new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
-          .to.eventually.not.match(regexp));
+          .to.eventually.not.match(fsfRegexp));
 
       it('case insensitive attribute name', () => {
         element.setAttribute('data-FORCE-SafeFraMe', '1');
         return expect(
             new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
-            .to.eventually.match(regexp);
+            .to.eventually.match(fsfRegexp);
       });
 
       ['tRuE', 'true', 'TRUE', '1'].forEach(val => {
         it(`valid attribute: ${val}`, () => {
           element.setAttribute('data-force-safeframe', val);
           return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
-              .to.eventually.match(regexp);
+              .to.eventually.match(fsfRegexp);
         });
       });
 
@@ -506,7 +506,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         it(`invalid attribute: ${val}`, () => {
           element.setAttribute('data-force-safeframe', val);
           return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
-              .to.eventually.not.match(regexp);
+              .to.eventually.not.match(fsfRegexp);
         });
       });
     });
