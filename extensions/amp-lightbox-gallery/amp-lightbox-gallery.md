@@ -116,16 +116,14 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 #### Example: using `lightbox-thumbnail-id` to specify a thumbnail
 
 ```html
-<amp-facebook
-  lightbox
-  lightbox-thumbnail-id="fb-thumbnail-img"
-  width="552"
-  height="303"
+<amp-youtube width="480"
+  height="270"
   layout="responsive"
-  data-href="https://www.facebook.com/zuck/posts/10102593740125791">
-</amp-facebook>
+  data-videoid="lBTCB7yLs8Y"
+  lightbox-thumbnail-id="my-thumbnail-img">
+</amp-youtube>
 
-<amp-img id="fb-thumbnail-img"
+<amp-img id="my-thumbnail-img"
   width="200"
   height="200"
   layout="nodisplay"

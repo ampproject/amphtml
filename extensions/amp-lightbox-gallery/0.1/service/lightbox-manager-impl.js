@@ -18,7 +18,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
-  LIGHTBOX_THUMBNAIL_GIF,
   LIGHTBOX_THUMBNAIL_UNKNOWN,
   LIGHTBOX_THUMBNAIL_VIDEO,
 } from './lightbox-placeholders';
@@ -38,16 +37,12 @@ import {toArray} from '../../../../src/types';
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'AMP-AD': true,
   'AMP-IMG': true,
-  'AMP-ANIM': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
-  'AMP-INSTAGRAM': true,
-  'AMP-FACEBOOK': true,
 };
 
 export const ELIGIBLE_TAP_TAGS = {
   'AMP-IMG': true,
-  'AMP-ANIM': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
@@ -397,8 +392,6 @@ export class LightboxManager {
     switch (type) {
       case 'AMP-AD':
         return LIGHTBOX_THUMBNAIL_AD;
-      case 'AMP-ANIM':
-        return LIGHTBOX_THUMBNAIL_GIF;
       case 'AMP-VIDEO':
       case 'AMP-YOUTUBE':
         return LIGHTBOX_THUMBNAIL_VIDEO;
@@ -432,8 +425,6 @@ export class LightboxManager {
    */
   getUserPlaceholderSrcset_(element) {
     if (element.tagName == 'AMP-IMG') {
-      return srcsetFromElement(element);
-    } else if (element.tagName == 'AMP-ANIM') {
       return srcsetFromElement(element);
     } else if (element.tagName == 'AMP-VIDEO') {
       return this.getThumbnailSrcsetForVideo_(element);
