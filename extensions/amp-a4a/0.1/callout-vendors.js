@@ -66,6 +66,11 @@ export const RTC_VENDORS = {
     macros: ['YB_PSN', 'YB_SLOT'],
     disableKeyAppend: true,
   },
+  salesforcedmp: {
+    url: 'https://cdn.krxd.net/userdata/v2/amp/ORGANIZATION_ID?segments_key=SEGMENTS_KEY&kuid_key=USER_KEY',
+    macros: ['ORGANIZATION_ID', 'SEGMENTS_KEY', 'USER_KEY'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
