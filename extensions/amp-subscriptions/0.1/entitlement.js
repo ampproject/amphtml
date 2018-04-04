@@ -117,13 +117,14 @@ export class Entitlement {
 
   /**
    * @param {?JsonObject} json
+   * @param {?string} rawData
    * @return {!Entitlement}
    */
-  static parseFromJson(json) {
+  static parseFromJson(json, rawData = null) {
     if (!json) {
       json = dict();
     }
-    const raw = JSON.stringify(json);
+    const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];

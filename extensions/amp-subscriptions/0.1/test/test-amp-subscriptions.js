@@ -272,6 +272,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('viewer authorization', () => {
     let responseStub;
+    const fakeAuthToken = {
+      'authorization': 'faketoken',
+    };
     const entitlementData = {source: 'local',
       service: 'local', products, subscriptionToken: 'token'};
     const entitlement = Entitlement.parseFromJson(entitlementData);
@@ -282,9 +285,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.doesViewerProvideAuth_ = true;
       responseStub = sandbox.stub(subscriptionService.viewer_,
           'sendMessageAwaitResponse').callsFake(() =>
-        Promise.resolve({
-          'authorization': 'faketoken',
-        }));
+        Promise.resolve(fakeAuthToken));
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
       sandbox.stub(subscriptionService.jwtHelper_, 'decode')
@@ -320,8 +321,13 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               const resolvedEntitlement =
                   subscriptionService.platformStore_.entitlements_['local'];
               expect(resolvedEntitlement).to.be.not.null;
-              expect(resolvedEntitlement.json()).to.deep.equal(
-                  entitlement.json());
+              expect(resolvedEntitlement.service).to.equal(entitlement.service);
+              expect(resolvedEntitlement.source).to.equal(entitlement.source);
+              expect(resolvedEntitlement.products).to.deep
+                  .equal(entitlement.products);
+              // raw should be the data which was resolved via sendMessageAwaitResponse.
+              expect(resolvedEntitlement.raw).to
+                  .equal(fakeAuthToken['authorization']);
             });
       });
     });
