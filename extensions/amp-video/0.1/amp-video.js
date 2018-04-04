@@ -366,8 +366,7 @@ export class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      insertAfterOrAtStart(dev().assertElement(this.baseNode_),
-          origSource, cachedSource);
+      insertAfterOrAtStart(fragment, origSource, cachedSource);
     });
 
     const tracks = toArray(childElementsByTag(this.element, 'track'));

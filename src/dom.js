@@ -149,7 +149,7 @@ export function copyChildren(from, to) {
 /**
  * Insert the element in the root after the element named after or
  * if that is null at the beginning.
- * @param {!Element|!ShadowRoot} root
+ * @param {!DocumentFragment|!Element|!ShadowRoot} root
  * @param {!Element} element
  * @param {?Node} after
  */
