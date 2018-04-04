@@ -88,11 +88,22 @@ export class ConsentPolicyManager {
   /**
    * Used to wait for policy to resolve;
    * @param {string} policyId
-   * @return {!Promise}
+   * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   whenPolicyResolved(policyId) {
     return this.whenPolicyInstanceReady_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise();
+    });
+  }
+
+  /**
+   *
+   * @param {string} policyId
+   * @return {!Promise<CONSENT_POLICY_STATE>}
+   */
+  getPolicyStatus(policyId) {
+    return this.whenPolicyInstanceReady_(policyId).then(() => {
+      return this.instances_[policyId].getCurrentPolicyStatus();
     });
   }
 
@@ -128,6 +139,8 @@ export class ConsentPolicyInstance {
       this.readyPromiseResolver_ = resolve;
     });
 
+    /** @private {CONSENT_POLICY_STATE} */
+    this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
     this.init_(pendingItems);
   }
 
@@ -170,12 +183,8 @@ export class ConsentPolicyInstance {
 
 
   evaluate_() {
-    // TODO(@zhouyx): Providing real time consent policy state to other components
-    if (!this.readyPromiseResolver_) {
-      return;
-    }
-
     let isSufficient = true;
+
     // Decide to traverse item list every time instead of keeping reject/pending counts
     // Performance should be OK since we expect item list to be small.
     const items = Object.keys(this.itemToConsentState_);
@@ -193,17 +202,28 @@ export class ConsentPolicyInstance {
     const state = isSufficient ?
       CONSENT_POLICY_STATE.SUFFICIENT : CONSENT_POLICY_STATE.INSUFFICIENT;
 
-    this.readyPromiseResolver_(state);
+    this.status_ = state;
 
-    this.readyPromiseResolver_ = null;
+    if (this.readyPromiseResolver_) {
+      this.readyPromiseResolver_(state);
+      this.readyPromiseResolver_ = null;
+    }
   }
 
   /**
    * Return a promise that resolved when policy ready.
    * Note: the promise can be reset if use toggle consent state
-   * @return {!Promise}
+   * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   getReadyPromise() {
     return this.readyPromise_;
+  }
+
+  /**
+   * Returns the current consent policy state
+   * @return {CONSENT_POLICY_STATE}
+   */
+  getCurrentPolicyStatus() {
+    return this.status_;
   }
 }

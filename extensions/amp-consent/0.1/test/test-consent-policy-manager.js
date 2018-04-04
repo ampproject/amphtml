@@ -146,5 +146,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(policyState).to.equal(CONSENT_POLICY_STATE.INSUFFICIENT);
       });
     });
+
+    describe('getCurrentPolicyStatus', () => {
+      it('should return current policy state', function* () {
+        instance = new ConsentPolicyInstance(['ABC']);
+        expect(instance.getCurrentPolicyStatus()).to.equal(
+            CONSENT_ITEM_STATE.UNKNOWN);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
+        expect(instance.getCurrentPolicyStatus()).to.equal(
+            CONSENT_POLICY_STATE.INSUFFICIENT);
+        instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
+        expect(instance.getCurrentPolicyStatus()).to.equal(
+            CONSENT_POLICY_STATE.SUFFICIENT);
+      });
+    });
   });
 });
