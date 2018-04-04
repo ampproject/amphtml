@@ -7,6 +7,15 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+#HTMLElement
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'HTMLElement.style is not allowed'
+  value: 'HTMLElement.style'
+  whitelist: 'src/style.js'
+}
+
 # Strings
 
 requirement: {
