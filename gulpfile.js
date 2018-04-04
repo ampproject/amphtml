@@ -218,8 +218,8 @@ declareExtensionVersionAlias(
 
 // MarfeelK EXTENSIONS
 declareExtension('amp-analytics-multi-page-tracker', '0.1', false);
-declareExtension('amp-shadow-doc-loader', '0.1', true);
-declareExtension('amp-fetch', '0.1', false);
+declareExtension('amp-shadow-doc-loader', '0.1', {hasCss: true});
+declareExtension('amp-fetch', '0.1', {hasCss: false});
 
 /**
  * Extensions to build when `--extensions=minimal_set`.

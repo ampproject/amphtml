@@ -114,7 +114,7 @@ export default class AmpShadowDocLoader extends AMP.BaseElement {
 
   attachAMPDocument_(doc) {
     return new Promise(resolve => {
-      this.deferMutate(() => {
+      this.mutateElement(() => {
         this.removePlaceholder_();
         this.ampDoc_ = AMP.attachShadowDoc(this.element, doc, this.docUrl_,
           { visibilityState: this.getDefaultVisibilityState() });

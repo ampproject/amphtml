@@ -25,7 +25,7 @@ import {urls} from '../config';
  */
 function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
-    return `${location.protocol}//${location.host}/dist`;
+    return `${location.protocol}//${location.host}/`;
   }
   return urls.cdn;
 }
