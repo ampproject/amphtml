@@ -289,7 +289,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.adKey_ = 0;
 
-    // TODO(keithwrightbos) - how can pub enable?
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search) ||
@@ -921,8 +920,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
     if (this.isRefreshing) {
       dev().assert(this.refreshManager_);
