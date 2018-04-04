@@ -59,7 +59,7 @@
     "body-parser": "1.18.2",
     "browserify": "16.1.1",
     "browserify-istanbul": "3.0.1",
-    "bundlesize": "^0.17.0",
+    "bundlesize": "0.17.0",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "cli-highlight": "1.2.3",
