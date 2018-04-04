@@ -160,7 +160,10 @@ export class LocalSubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   activate(renderState) {
-    this.renderer_.render(renderState);
+    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+    this.actions_.build().then(() => {
+      this.renderer_.render(renderState);
+    });
   }
 
   /**
