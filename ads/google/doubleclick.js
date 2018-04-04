@@ -24,12 +24,13 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  */
 export function doubleclick(global, data) {
   try {
-    const context = parseJson(global['context']['cachedFrameName_']
-    )['attributes']['_context'];
+    const cachedFrameName = parseJson(global['context']['cachedFrameName_']);
+    const attributes = cachedFrameName['attributes'];
+    const context = attributes['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
-      if (data['type'] == 'doubleclick' ||
-          !/(^|,)21061862(,|$)/.test(data['experimentId'])) {
+      if (attributes['type'] == 'doubleclick' ||
+          !/(^|,)21061862(,|$)/.test(attributes['experimentId'])) {
         return deprecatedDoubleclick(global, data);
       }
     }
