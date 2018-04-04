@@ -14,7 +14,6 @@ requirement: {
   error_message: 'Use style.js#setStyle or style.js#setStyles'
   value: 'Element.prototype.style'
   whitelist: 'src/style.js'
-  whitelist: 'extensions/amp-story/0.1/test/test-amp-story.js'
 }
 
 # CSSStyleDeclaration
