@@ -409,9 +409,8 @@ export class AmpVideo extends AMP.BaseElement {
    */
   propagateCachedSources_(isLaidOut) {
     const mixin = this.getMixin_(isLaidOut);
-    const fragment = new DocumentFragment();
-
     const sources = toArray(childElementsByTag(this.element, 'source'));
+    const baseElement = mixin.getBaseElement();
 
     // if the `src` of `amp-video` itself is cached, move it to <source>
     if (this.element.hasAttribute('src') && this.isCachedByCDN_(this.element)) {
@@ -427,11 +426,9 @@ export class AmpVideo extends AMP.BaseElement {
     // Origin sources will only be added when document becomes visible.
     sources.forEach(source => {
       if (this.isCachedByCDN_(source)) {
-        fragment.appendChild(source);
+        baseElement.appendChild(source);
       }
     });
-
-    mixin.getBaseElement().appendChild(fragment);
   }
 
   /**
@@ -442,7 +439,6 @@ export class AmpVideo extends AMP.BaseElement {
     const isLaidOut = true;
     const mixin = this.getMixin_(isLaidOut);
     const baseElement = mixin.getBaseElement();
-    const fragment = new DocumentFragment();
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
@@ -457,7 +453,7 @@ export class AmpVideo extends AMP.BaseElement {
       // Cached sources should have been moved from <amp-video> to base node.
       dev().assert(!this.isCachedByCDN_(source));
       assertHttpsUrl(source.getAttribute('src'), source);
-      fragment.appendChild(source);
+      baseElement.appendChild(source);
     });
 
     // To handle cases where cached source may 404 if not primed yet,
@@ -467,15 +463,13 @@ export class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      insertAfterOrAtStart(fragment, origSource, cachedSource);
+      insertAfterOrAtStart(baseElement, origSource, cachedSource);
     });
 
     const tracks = toArray(childElementsByTag(this.element, 'track'));
     tracks.forEach(track => {
-      fragment.appendChild(track);
+      baseElement.appendChild(track);
     });
-
-    baseElement.appendChild(fragment);
   }
 
   /**

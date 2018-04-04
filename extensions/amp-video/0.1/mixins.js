@@ -411,7 +411,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     this.placeholder_ = this.impl.loadPromise(img).then(() => {
       this.impl.getVsync().mutate(() => {
         setImportantStyles(placeholder, {
-          'background': `url(${src}) no-repeat center center`,
+          'background': `url(${posterSrc}) no-repeat center center`,
         });
         this.impl.applyFillContent(placeholder);
         element.appendChild(placeholder);
@@ -435,15 +435,16 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     if (!this.placeholder_) {
       return;
     }
-    this.placeholder_.then(placeholder => getVsync().mutate(() => {
-      if (show) {
-        resetStyles(placeholder, ['display']);
-      } else {
-        this.placeholder_.then(placeholder => getVsync().mutate(() => {
-          setImportantStyles(placeholder, {'display': 'none'});
-        }));
-      }
-    }));
+    this.placeholder_.then(placeholder =>
+      this.impl.getVsync().mutate(() => {
+        if (show) {
+          resetStyles(placeholder, ['display']);
+        } else {
+          this.placeholder_.then(placeholder => getVsync().mutate(() => {
+            setImportantStyles(placeholder, {'display': 'none'});
+          }));
+        }
+      }));
   }
 
   /** @override */
