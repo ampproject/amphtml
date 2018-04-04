@@ -72,10 +72,10 @@ describe('amp-analytics.transport', () => {
     assertCallCounts(0, 0, 1);
   });
 
-  it('falls back to image setting ignoreWarnings to true', () => {
+  it('falls back to image setting suppressWarnings to true', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: false, xhrpost: false, image: {ignoreWarnings: true},
+      beacon: false, xhrpost: false, image: {suppressWarnings: true},
     });
     assertCallCounts(0, 0, 1);
   });
