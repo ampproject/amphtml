@@ -17,6 +17,7 @@ import {MediaPoolEvents} from '../../../extensions/amp-story/0.1/media-pool';
 import {Services} from '../../../src/services';
 import {VideoUtils} from '../../../src/utils/video';
 import {
+  copyChildren,
   createElementWithAttributes,
   fullscreenEnter,
   fullscreenExit,
@@ -36,43 +37,61 @@ import {toArray} from '../../../src/types';
 import {setImportantStyles} from '../../../src/style';
 
 
-/** @interface @package */
-export class AmpVideoMixin {
+/** @package @typedef {PlaybackMixin|IntermediatePropagationMixin} */
+export let AmpVideoMixinDef;
+
+
+/**
+ * @package
+ * @typedef {
+ *  function(new:PlaybackMixin)|function(new:IntermediatePropagationMixin)
+ * }
+ */
+export let AmpVideoMixinConstructorDef;
+
+
+/** @package @abstract */
+export class PlaybackMixin {
+  constructor(impl) {
+    /** @protected @const {!./amp-video.AmpVideo} */
+    this.impl = impl;
+  }
+
   /**
-   * Creates a base node onto which attributes will be propagated.
+   * Creates a base element onto which attributes and children will be
+   * propagated.
    * @return {!Element}
    */
-  createBaseNode() {}
+  getBaseElement() {}
 
   /**
-   * Appends a set of sources to the video element. An `Element` can be passed
-   * for a single source, a `DocumentFragment` for many.
-   * @param {!Node} node
+   * @param {!Array<string>} unusedEventsToForward
+   * @param {function(boolean)} unusedSetMuted
+   * @abstract
    */
-  appendSources(node) {}
-
-  /** Installs event handlers. */
   installEventHandlers(unusedEventsToForward, unusedSetMuted) {}
 
   /**
    * Returns a promise that resolves when the video has started to load.
-   * @return {!Promise<*>}
+   * @return {!Promise}
+   * @abstract
    */
   whenLoadStarts() {}
 
-  /** @return {boolean} */
+  /** @abstract @return {boolean} */
   isVideoSupported() {}
 
-  /** @return {!Promise|undefined} */
+  /** @abstract @return {!Promise|undefined} */
   pause() {}
 
-  /** @return {!Promise|undefined} */
+  /** @abstract @return {!Promise|undefined} */
   play() {}
 
   /**
    * Toggles video's mute state.
    * @param {boolean} unusedMuted
    * @return {!Promise|undefined}
+   * @abstract
    */
   toggleMuted(unusedMuted) {}
 
@@ -80,38 +99,133 @@ export class AmpVideoMixin {
    * Toggles video's controls.
    * @param {boolean} unusedShow
    * @return {!Promise|undefined}
+   * @abstract
    */
   toggleControls(unusedShow) {}
 
-  /** */
+  /** @abstract */
   fullscreenEnter() {}
 
-  /** */
+  /** @abstract */
   fullscreenExit() {}
 
-  /** @return {boolean} */
+  /** @abstract @return {boolean} */
   isFullscreen() {}
 
-  /** @return {number} */
+  /** @abstract @return {number} */
   getCurrentTime() {}
 
-  /** @return {number} */
+  /** @abstract @return {number} */
   getDuration() {}
 
-  /** @return {!Array<!Array<number>>} */
+  /** @abstract @return {!Array<!Array<number>>} */
   getPlayedRanges() {}
+
+  /** @final */
+  isIntermediate() {
+    return false;
+  }
+
+  /** @final */
+  controlsPlayback() {
+    return true;
+  }
 }
 
 
-/** @implements {AmpVideoMixin} */
-export class VideoElementMixin {
-  /**
-   * @param {!./amp-video.AmpVideo} impl
-   */
+export class IntermediatePropagationMixin {
+
+  /** @param {!./amp-video.AmpVideo} impl */
   constructor(impl) {
-    /** @protected @const {!./amp-video.AmpVideo} */
-    // TODO(alanorozco): Make private
-    this.impl = impl;
+    /** @private {?./amp-video.AmpVideo} */
+    this.impl_ = impl;
+
+    /** @private {?Element} */
+    this.dummyElement_ = null;
+
+    /** @private {?Array<string>} */
+    this.eventsToForward_ = null;
+
+    /** @private {?function(boolean)} */
+    this.setMuted_ = null;
+  }
+
+  /** @return {!Element} */
+  getBaseElement() {
+    if (!this.dummyElement_) {
+      const {element} = this.impl_;
+      const {ownerDocument} = element;
+      this.dummyElement_ = ownerDocument.createElement('div');
+    }
+    return this.dummyElement_;
+  }
+
+  /**
+   * @param {!Array<string>} eventsToForward
+   * @param {function(boolean)} setMuted
+   */
+  installEventHandlers(eventsToForward, setMuted) {
+    // Merely keep track to install once state is transfered.
+    this.eventsToForward_ = eventsToForward;
+    this.setMuted_ = setMuted;
+  }
+
+  /** @param {!PlaybackMixin} mixin */
+  transferState(mixin) {
+    const {element} = this.impl_;
+    const {attributes} = this.dummyElement_;
+    const {classList} = this.dummyElement_;
+    const baseNode = mixin.getBaseElement();
+    const fragment =
+        dev().assert(element.ownerDocument).createDocumentFragment();
+
+    copyChildren(this.dummyElement_, baseNode);
+
+    for (var i = 0; i < attributes.length; i++) {
+      const {name, value} = attributes.item(i);
+      baseNode.setAttribute(name, value);
+    }
+
+    for (var i = 0; i < classList.length; i++) {
+      const className = classList.item(i);
+      baseNode.classList.add(className);
+    }
+
+    mixin.installEventHandlers(
+        /** @type {!Array<string>} */ (dev().assert(this.eventsToForward_)),
+        /** @type {function(boolean)} */ (dev().assert(this.setMuted_)));
+
+    baseNode.appendChild(fragment);
+
+    for (var i = 0; i < Things.length; i++) {
+      Things[i]
+    }
+
+    this.impl_ = null; // GC
+    this.dummyElement_ = null; // GC
+    this.eventsToForward_ = null; // GC
+    this.setMuted_ = null; // GC
+
+    return mixin;
+  }
+
+  /** @final */
+  isIntermediate() {
+    return true;
+  }
+
+  /** @final */
+  controlsPlayback() {
+    return false;
+  }
+}
+
+
+export class VideoElementMixin extends PlaybackMixin {
+
+  /** @param {!./amp-video.AmpVideo} impl */
+  constructor(impl) {
+    super(impl);
 
     /** @protected {?HTMLMediaElement} */
     // TODO(alanorozco): Make private
@@ -123,12 +237,15 @@ export class VideoElementMixin {
   }
 
   /** @override */
-  createBaseNode() {
-    const {element} = this.impl;
-    const {ownerDocument} = element;
+  getBaseElement() {
+    if (this.video) {
+      return this.video;
+    }
 
-    this.video =
-        /** @type {!HTMLMediaElement} */ (ownerDocument.createElement('video'));
+    const {element} = this.impl;
+
+    this.video = /** @type {!HTMLMediaElement} */ (
+        dev().assert(element.ownerDocument).createElement('video'));
 
     this.impl.getVsync().mutate(() => {
       element.appendChild(this.video);
@@ -146,11 +263,6 @@ export class VideoElementMixin {
     listen(video, 'volumechange', e => {
       setMuted(video.muted);
     });
-  }
-
-  /** @override */
-  appendSources(fragment) {
-    this.video.appendChild(fragment);
   }
 
   /** @override */
@@ -185,16 +297,12 @@ export class VideoElementMixin {
     this.video.controls = show;
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenEnter() {
     fullscreenEnter(dev().assertElement(this.video));
   }
 
-  /**
-   * @override
-   */
+  /** @override */
   fullscreenExit() {
     fullscreenExit(dev().assertElement(this.video));
   }
@@ -216,12 +324,12 @@ export class VideoElementMixin {
 
   /** @override */
   getPlayedRanges() {
-    return VideoUtils.getPlayedRanges(this.video);
+    return VideoUtils.getPlayedRanges(
+      /** @type {!HTMLMediaElement} */ (dev().assert(this.video)));
   }
 }
 
 
-/** @implements {AmpVideoMixin} */
 // TODO(alanorozco): This mixin should not inherit from `VideoElementMixin`.
 // This is blocked by mediapool control coming from `AmpStoryPage`.
 export class MediaPoolVideoMixin extends VideoElementMixin {
@@ -267,10 +375,11 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
       this.hidePlaceholder();
     });
 
-    listen(element, MediaPoolEvents.DEALLOCATED, mediaInfo => {
+    listen(element, MediaPoolEvents.DEALLOCATED, e => {
+      const {detail} = e;
       this.isAllocated_ = false;
-      this.mediaInfo_ = mediaInfo;
-      debugger;
+      this.mediaInfo_ =
+          /** @type {!../../amp-story/0.1/media-pool.MediaInfoDef} */ detail;
       this.showPlaceholder();
     });
 
@@ -368,25 +477,23 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
   }
 
   /** @override */
-  toggleMuted(muted) {
-    this.mediaPoolPromise_.then(pool =>
-      pool.toggleMuted(muted));
+  toggleMuted(unusedMuted) {
+    // TODO(alanorozco): Implement method in media pool.
   }
 
   /** @override */
   toggleControls(show) {
-    this.mediaPoolPromise_.then(pool =>
-      pool.toggleControls(show));
+    // TODO(alanorozco): Implement method in media pool.
   }
 
   /** @override */
   fullscreenEnter() {
-    // NOOP
+    // TODO(alanorozco): Implement method in media pool.
   }
 
   /** @override */
   fullscreenExit() {
-    // NOOP
+    // TODO(alanorozco): Implement method in media pool.
   }
 
   /** @override */

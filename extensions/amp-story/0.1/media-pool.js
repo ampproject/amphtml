@@ -559,30 +559,46 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
+    const swapIntoDom = new SwapIntoDomTask(domMediaEl, this.vsync_);
+
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
-    return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl, this.vsync_))
-        .then(() => {
-          this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
-          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+    return this.enqueueMediaElementTask_(poolMediaEl, swapIntoDom).then(() => {
+      const updateSources = new UpdateSourcesTask(sources, this.vsync_);
+      const load = new LoadTask();
 
-          this.triggerAllocationEvent_(poolMediaEl, /* isAllocated */ true);
-        }, () => {
-          this.forceDeallocateMediaElement_(poolMediaEl);
-        });
+      this.enqueueMediaElementTask_(poolMediaEl, updateSources).then(() => {
+        // Technically, this event is not triggered strictly on allocation.
+        // From a client's perspective this doesn't matter, and it's better
+        // to trigger the event once the allocated media is in a valid state
+        // (i.e. all sources loaded.)
+        this.triggerAllocationEvent_(poolMediaEl, /* isAllocated */ true);
+      });
+
+      this.enqueueMediaElementTask_(poolMediaEl, load);
+    }, () => {
+      this.forceDeallocateMediaElement_(poolMediaEl);
+    });
   }
 
-  /** @private */
-  triggerAllocationEvent_(/* !Element */ element, /* boolean */ isAllocated) {
+  /**
+   * @param {!Element} element
+   * @param {boolean} isAllocated
+   * @private
+   */
+  triggerAllocationEvent_(element, isAllocated) {
     const {parentNode} = element;
-    const event = createAllocationEvent_(element, isAllocated);
+    const event = this.createAllocationEvent_(element, isAllocated);
     dev().assertElement(parentNode).dispatchEvent(event);
   }
 
-  /** @private @return {!Event} */
-  createAllocationEvent_(/* !Element */ element, /* boolean */ isAllocated) {
+  /**
+   * @param {!Element} element
+   * @param {boolean} isAllocated
+   * @return {!Event}
+   * @private
+   */
+  createAllocationEvent_(element, isAllocated) {
     const win = this.win_;
     if (isAllocated) {
       const type = MediaPoolEvents.ALLOCATED;
@@ -593,8 +609,12 @@ export class MediaPool {
     return createCustomEvent(win, type, detail, {bubbles: true});
   }
 
-  /** @private @return {!MediaInfoDef} */
-  getDeallocationDetail_(/* !Element */ element) {
+  /**
+   * @param {!Element} element
+   * @return {!MediaInfoDef}
+   * @private
+   */
+  getDeallocationDetail_(element) {
     const {currentTime, duration} = element;
     return {currentTime, duration, paused: true};
   }
@@ -1016,58 +1036,34 @@ export class MediaPool {
 
 /** Provides Mediapools. */
 export class MediaPoolService {
-<<<<<<< Updated upstream
-  constructor(/** !../../src/service/ampdoc-impl.AmpDoc */ ampdoc) {
-=======
 
-  /** @param {{../../src/service/ampdoc-impl.AmpDoc}} ampdoc */
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
->>>>>>> Stashed changes
-    /** @private @const {{../../src/service/ampdoc-impl.AmpDoc}} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
   }
 
   /**
-<<<<<<< Updated upstream
    * Traverses up the DOM tree to find a media pool.
+   * @param {!Element} el
    * @return {?MediaPool}
    */
-  poolForOrNull(/* !Element */ el) {
+  poolForOrNull(el) {
+    // This optimization comes from the cache.
+    if (el.classList.contains('i-amphtml-no-media-pool')) {
+      return null;
+    }
     const owner = closest(el, el => !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
     return owner && owner[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
   }
-=======
-   * Gets the pool associated with an element. Traverses up the DOM tree to
-   * find the pool.
-   * @param {!Element} element Element that might be pool-bound.
-   * @return {?MediaPool}
-   */
-  poolForOrNull(element) {
-    const owner = closest(element, el =>
-        !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
-
-    if (!owner) {
-      return null;
-    }
->>>>>>> Stashed changes
 
   /**
    * Traverses up the DOM tree to find a media pool, otherwise fails.
+   * @param {!Element} el
    * @return {!MediaPool}
    */
-  poolFor(/* !Element */ el) {
-    return dev().assert(this.poolForOrNull(el));
-  }
-
-  /**
-   * Gets the pool associated with an element. Traverses up the DOM tree to
-   * find the pool, otherwise fails.
-   * @param {!Element} element Element that is pool-bound.
-   * @return {!MediaPool}
-   */
-  poolFor(element) {
-    return dev().assert(this.poolForOrNull(element),
-        'Element is not bound by a media-pool');
+  poolFor(el) {
+    return /** @type {!MediaPool} */ (dev().assert(this.poolForOrNull(el)));
   }
 }
 
