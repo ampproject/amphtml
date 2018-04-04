@@ -68,6 +68,12 @@ describes.realWin('amp-story', {
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story');
+    // element.getAmpDoc = () => env.ampdoc;
+    // element.getResources = () => {
+    //   return {
+    //     measureMutateElement: () => Promise.resolve(),
+    //   };
+    // };
     win.document.body.appendChild(element);
 
     AmpStory.isBrowserSupported = () => true;

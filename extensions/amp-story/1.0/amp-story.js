@@ -35,7 +35,10 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
@@ -1600,4 +1603,7 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
+  AMP.registerElement('amp-story-page', AmpStoryPage);
+  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
 });
