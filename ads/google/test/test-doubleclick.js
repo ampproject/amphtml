@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sinon from 'sinon';
 import {createServedIframe} from '../../../testing/iframe';
+import {dev} from '../../../src/log';
+import {doubleclick} from '../doubleclick';
 import {writeAdScript} from '../deprecated_doubleclick';
 
 function verifyScript(win, name) {
@@ -99,5 +102,62 @@ describes.sandboxed('writeAdScript', {}, env => {
     const data = {};
     writeAdScript(win, data);
     verifyScript(win, 'glade.js');
+  });
+});
+
+describe('doubleclick delayed fetch white list deprecation', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(dev(), 'error');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should call deprecatedDoubleclick', () => {
+    const cachedFrameName_ = JSON.stringify({
+      attributes: {
+        _context: {
+          experimentToggles: {
+            'rollback-dfd-doubleclick': true,
+          },
+        },
+        type: 'doubleclick',
+      },
+    });
+    const global = {
+      context: {
+        cachedFrameName_,
+        // To force some testable action of calling deprecatedDoubleclick
+        clientId: 1234,
+      },
+    };
+    doubleclick(global, {type: 'doubleclick'});
+    expect(global.gaGlobal).to.be.ok;
+  });
+  it('should not call deprecatedDoubleclick', () => {
+    const cachedFrameName_ = JSON.stringify({
+      attributes: {
+        _context: {
+          experimentToggles: {
+            'rollback-dfd-doubleclick': true,
+          },
+        },
+        type: 'notDoubleclick',
+        experimentId: '21061862',
+      },
+    });
+    const global = {
+      context: {
+        cachedFrameName_,
+        // To force some testable action of calling deprecatedDoubleclick
+        clientId: 1234,
+      },
+    };
+    doubleclick(global, {type: 'doubleclick'});
+    expect(global.gaGlobal).to.not.be.ok;
   });
 });

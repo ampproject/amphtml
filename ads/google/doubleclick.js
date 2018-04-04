@@ -24,11 +24,15 @@ const TAG = 'DOUBLECLICK - DEPRECATED';
  */
 export function doubleclick(global, data) {
   try {
-    const context = parseJson(global['context']['cachedFrameName_']
-    )['attributes']['_context'];
+    const cachedFrameName = parseJson(global['context']['cachedFrameName_']);
+    const attributes = cachedFrameName['attributes'];
+    const context = attributes['_context'];
     // Make this easy to rollback in case of emergency.
     if (context['experimentToggles'][`rollback-dfd-${data.type}`]) {
-      return deprecatedDoubleclick(window, data);
+      if (attributes['type'] == 'doubleclick' ||
+          !/(^|,)21061862(,|$)/.test(attributes['experimentId'])) {
+        return deprecatedDoubleclick(global, data);
+      }
     }
   } catch (unused) {}
   dev().error(TAG, 'The use of doubleclick.js has been deprecated. Please ' +
