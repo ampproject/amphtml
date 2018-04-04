@@ -17,7 +17,7 @@
 import {poll} from '../../../../../testing/iframe';
 
 // TODO(nainar, #14336): Fails due to console errors.
-describe.skip('amp-bodymovin-animation', function() {
+describe.configure().ifNewChrome().run('amp-bodymovin-animation', function() {
   const extensions = ['amp-bodymovin-animation'];
   const bodymovinBody = `
     <amp-bodymovin-animation id="anim"
