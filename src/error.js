@@ -492,7 +492,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['exps'] = exps.join(',');
 
   if (error) {
-    const tagName = error.associatedElement
+    const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u'; // Unknown
     data['el'] = tagName;
