@@ -102,12 +102,12 @@ describe('LazyObservable', () => {
     observable.add(triggerSpy);
     observable.add(triggerSpy);
 
-    expect(installSpy).to.have.been.called(1);
+    expect(installSpy).to.have.been.calledOnce;
 
     observable.fire(1);
 
     // once for every handler
-    expect(triggerSpy.withArgs(1)).to.have.been.called(3).times;
+    expect(triggerSpy.withArgs(1)).to.have.been.calledThrice;
   });
 
   it('should uninstall when removing last element', () => {
@@ -119,7 +119,7 @@ describe('LazyObservable', () => {
     observable.add(noop2);
     observable.add(noop3);
 
-    expect(installSpy).to.have.been.called(1).times;
+    expect(installSpy).to.have.been.calledOnce;
 
     observable.remove(noop1);
 
@@ -131,7 +131,7 @@ describe('LazyObservable', () => {
 
     observable.remove(noop3);
 
-    expect(uninstallSpy).to.have.been.called(1).times;
+    expect(uninstallSpy).to.have.been.calledOnce;
   });
 
   it('should uninstall when removing last element', () => {
@@ -143,10 +143,10 @@ describe('LazyObservable', () => {
     observable.add(noop2);
     observable.add(noop3);
 
-    expect(installSpy).to.have.been.called(1).times;
+    expect(installSpy).to.have.been.calledOnce;
 
     observable.removeAll();
 
-    expect(uninstallSpy).to.have.been.called(1).times;
+    expect(uninstallSpy).to.have.been.calledOnce;
   });
 });
