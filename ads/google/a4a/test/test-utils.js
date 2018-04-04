@@ -577,14 +577,14 @@ describe('Google A4A utils', () => {
           'domain=f\.blah\.com';
     };
 
-    it('should fetch minimal token as expected', () => {
+    it('should ignore response if required fields are missing', () => {
       env.expectFetch(getUrl(), JSON.stringify({newToken: 'abc'}));
       return getIdentityToken(env.win, env.win.document).then(result => {
-        expect(result.token).to.equal('abc');
-        expect(result.jar).to.equal('');
-        expect(result.pucrd).to.equal('');
-        expect(result.freshLifetimeSecs).to.equal(3600);
-        expect(result.validLifetimeSecs).to.equal(86400);
+        expect(result.token).to.not.be.ok;
+        expect(result.jar).to.not.be.ok;
+        expect(result.pucrd).to.not.be.ok;
+        expect(result.freshLifetimeSecs).to.not.be.ok;
+        expect(result.validLifetimeSecs).to.not.be.ok;
         expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
@@ -609,13 +609,17 @@ describe('Google A4A utils', () => {
 
     it('should redirect as expected', () => {
       env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-      env.expectFetch(getUrl('google\.fr'), JSON.stringify({newToken: 'abc'}));
+      env.expectFetch(getUrl('google\.fr'), JSON.stringify({
+        newToken: 'abc',
+        freshLifetimeSecs: '1234',
+        validLifetimeSecs: '5678',
+      }));
       return getIdentityToken(env.win, env.win.document).then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('');
         expect(result.pucrd).to.equal('');
-        expect(result.freshLifetimeSecs).to.equal(3600);
-        expect(result.validLifetimeSecs).to.equal(86400);
+        expect(result.freshLifetimeSecs).to.equal(1234);
+        expect(result.validLifetimeSecs).to.equal(5678);
         expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
@@ -633,7 +637,11 @@ describe('Google A4A utils', () => {
     });
 
     it('should use previous execution', () => {
-      const ident = {newToken: 'foo'};
+      const ident = {
+        newToken: 'foo',
+        freshLifetimeSecs: '1234',
+        validLifetimeSecs: '5678',
+      };
       env.win['goog_identity_prom'] = Promise.resolve(ident);
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual(ident));
