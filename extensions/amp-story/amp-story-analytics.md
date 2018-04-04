@@ -50,11 +50,11 @@ Using `amp-analytics` you can re-assign the `story-page-visible` event to behave
 
 Consult your vendor's documentation for more specific details on how to set this up.
 
-### Mute trigger (`"on": "story-audio-muted")
+### Mute trigger (`"on": "story-audio-muted"`)
 
 The `story-audio-muted` trigger is fired when the user initiates an interaction to mute the audio for the current story.
 
-### Unmute trigger (`"on": "story-audio-unmuted")
+### Unmute trigger (`"on": "story-audio-unmuted"`)
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
 
