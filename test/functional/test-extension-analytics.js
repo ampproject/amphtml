@@ -54,36 +54,41 @@ describes.realWin('extension-analytics', {
       sandbox.restore();
     });
 
-    it('should create analytics element if analytics is installed', () => {
-      const ele = win.document.createElement('div');
-      win.document.body.appendChild(ele);
-      const baseEle = new BaseElement(ele);
-      registerServiceBuilderForDoc(
-          ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-      // Force instantiation
-      getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
-      const config = {
-        'requests': {
-          'pageview': 'https://example.com/analytics',
-        },
-        'triggers': {
-          'trackPageview': {
-            'on': 'visible',
-            'request': 'pageview',
+    [true, false].forEach(disableImmediate => {
+      it('should create analytics element if analytics is installed, ' +
+          `disableImmediate ${disableImmediate}`, () => {
+        const config = {
+          'requests': {
+            'pageview': 'https://example.com/analytics',
           },
-        },
-      };
-      expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
-      expect(insertAnalyticsElement(baseEle.element, config, true)).to.be.ok;
-      return timer.promise(50).then(() => {
-        const analyticsEle = baseEle.element.querySelector('amp-analytics');
-        expect(analyticsEle).to.not.be.null;
-        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
-        expect(analyticsEle.getAttribute('trigger')).to.equal('immediate');
-        const script = (analyticsEle).querySelector('script');
-        expect(script.textContent).to.jsonEqual(JSON.stringify(config));
-        expect(analyticsEle.CONFIG).to.jsonEqual(config);
-        expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+          'triggers': {
+            'trackPageview': {
+              'on': 'visible',
+              'request': 'pageview',
+            },
+          },
+        };
+        const ele = win.document.createElement('div');
+        win.document.body.appendChild(ele);
+        const baseEle = new BaseElement(ele);
+        registerServiceBuilderForDoc(
+            ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
+        // Force instantiation
+        getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
+        expect(baseEle.element.querySelector('amp-analytics')).to.be.null;
+        expect(insertAnalyticsElement(
+            baseEle.element, config, true, disableImmediate)).to.be.ok;
+        return timer.promise(50).then(() => {
+          const analyticsEle = baseEle.element.querySelector('amp-analytics');
+          expect(analyticsEle).to.not.be.null;
+          expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+          expect(analyticsEle.getAttribute('trigger')).to.equal(
+              disableImmediate ? '' : 'immediate');
+          const script = (analyticsEle).querySelector('script');
+          expect(script.textContent).to.jsonEqual(JSON.stringify(config));
+          expect(analyticsEle.CONFIG).to.jsonEqual(config);
+          expect(analyticsEle.getAttribute('sandbox')).to.equal('true');
+        });
       });
     });
   });
@@ -465,5 +470,3 @@ describes.realWin('extension-analytics', {
     });
   });
 });
-
-

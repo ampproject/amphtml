@@ -292,6 +292,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
       'pfx': pfx ? '1' : '0',
+      // Package code (also known as URL group) that was used to
+      // create ad.
+      'pwprc': this.element.getAttribute('data-package'),
     };
 
     const experimentIds = [];
@@ -405,8 +408,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
