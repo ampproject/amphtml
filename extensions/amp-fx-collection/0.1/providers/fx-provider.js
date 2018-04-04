@@ -200,6 +200,13 @@ export class FxElement {
   }
 
   /**
+   * @returns {number}
+   */
+  getMargin() {
+    return this.margin_;
+  }
+
+  /**
    * @returns {string}
    */
   getEasing() {

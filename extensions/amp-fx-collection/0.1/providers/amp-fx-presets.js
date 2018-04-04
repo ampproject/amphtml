@@ -87,7 +87,7 @@ export const Presets = {
       // Outside viewport
       if (!entry.positionRect ||
           entry.positionRect.top >
-            (1 - fxElement.margin_) * fxElement.adjustedViewportHeight_) {
+            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
         return;
       }
 
