@@ -222,9 +222,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
@@ -235,6 +235,10 @@ exports.rules = [
           'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
           'src/service/notification-ui-manager.js',
+      // For autoplay delegation.
+      // TODO(alanorozco, #13674): Use async service.
+      'extensions/amp-story/0.1/amp-story-page.js->' +
+          'src/service/video-manager-impl.js',
     ],
   },
   {

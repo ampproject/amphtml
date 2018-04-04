@@ -33,7 +33,7 @@ import {dict, map} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {setStyle, toggle} from '../../../src/style';
+import {setImportantStyles, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANGER = 'consentPolicyManager';
@@ -86,6 +86,11 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object<string, function()>} */
     this.dialogResolver_ = map();
+  }
+
+  getConsentPolicy() {
+    // amp-consent should not be blocked by itself
+    return null;
   }
 
   buildCallback() {
@@ -155,7 +160,8 @@ export class AmpConsent extends AMP.BaseElement {
 
     // Display the current instance
     this.currentDisplayInstance_ = instanceId;
-    setStyle(this.consentUI_[this.currentDisplayInstance_], 'display', 'block');
+    setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
+        {display: 'block'});
     return new Promise(resolve => {
       this.dialogResolver_[instanceId] = resolve;
     });
@@ -227,7 +233,7 @@ export class AmpConsent extends AMP.BaseElement {
       }
       this.element.classList.add('amp-active');
       this.element.classList.remove('amp-hidden');
-      setStyle(this.revokeUI_, 'display', 'block');
+      setImportantStyles(this.revokeUI_, {display: 'block'});
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
@@ -312,6 +318,7 @@ export class AmpConsent extends AMP.BaseElement {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
     this.consentConfig_ = consents;
+    this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
 
   /**

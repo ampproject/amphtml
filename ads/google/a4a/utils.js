@@ -757,10 +757,8 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
         const token = obj['newToken'];
         const jar = obj['1p_jar'] || '';
         const pucrd = obj['pucrd'] || '';
-        const freshLifetimeSecs =
-            parseInt(obj['freshLifetimeSecs'] || '', 10) || 3600;
-        const validLifetimeSecs =
-            parseInt(obj['validLifetimeSecs'] || '', 10) || 86400;
+        const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
+        const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
         const altDomain = obj['altDomain'];
         const fetchTimeMs = Date.now() - startTime;
         if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {

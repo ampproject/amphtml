@@ -33,6 +33,7 @@ import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
 import {PageScalingService} from './page-scaling';
+import {Services} from '../../../src/services';
 import {
   closestBySelector,
   matches,
@@ -42,7 +43,11 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -138,6 +143,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
+    this.ownVideoAutoplay_();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -148,6 +154,25 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+  }
+
+
+  /** @private */
+  ownVideoAutoplay_() {
+    const videos = this.element.querySelectorAll('amp-video');
+    if (videos.length < 1) {
+      return;
+    }
+
+    // This service gets installed by all video instances.
+    // Executions of `installVideoManagerForDoc` following the first are NOOPs,
+    // so this only takes care of a race condition when the service has not yet
+    // been installed.
+    installVideoManagerForDoc(this.getAmpDoc());
+
+    toArray(videos).forEach(el => {
+      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
+    });
   }
 
 
