@@ -77,7 +77,7 @@ export const Presets = {
         return;
       }
       const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFlogat(margin) < 1,
+      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
           'data-margin must be a number and be between 0 and 1 for: %s',
           element);
     },
