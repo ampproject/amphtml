@@ -77,7 +77,7 @@ export class VideoService {
     /** @return {!function():void} */
     this.boundTick_ = () => this.startTicking_();
 
-    /** @return {!../../../src/observable-interface.Observable} */
+    /** @return {!../../../src/observable.ObservableInterface<void>} */
     this.tick_ = new LazyObservable(this.boundTick_);
   }
 
@@ -115,7 +115,7 @@ export class VideoService {
     return element[ENTRY_PROP];
   }
 
-  /** @return {!../../../src/observable-interface.Observable} */
+  /** @return {!../../../src/observable.Observable} */
   getTick() {
     return this.tick_;
   }
@@ -139,7 +139,8 @@ export class VideoService {
 
   /**
    * @param {!AmpElement} unusedVideo
-   * @param {!../../../src/observable.Observable<boolean>} unusedObservable
+   * @param {!../../../src/observable.ObservableInterface<boolean>}
+   *   unusedObservable
    */
   delegateAutoplay(unusedVideo, unusedObservable) {
     warnUnimplemented('Autoplay delegation');
