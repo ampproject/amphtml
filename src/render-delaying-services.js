@@ -40,7 +40,6 @@ const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
   'amp-story': 'amp-story[standalone]',
-  'geo': 'amp-geo',
 };
 
 /**
