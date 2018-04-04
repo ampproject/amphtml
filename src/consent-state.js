@@ -33,7 +33,7 @@ export const CONSENT_POLICY_STATE = {
  * @param {string} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyPromise(ampdoc, policyId) {
+export function getConsentPolicyState(ampdoc, policyId) {
   return Services.consentPolicyServiceForDocOrNull(ampdoc)
       .then(consentPolicy => {
         if (!consentPolicy) {
@@ -44,24 +44,4 @@ export function getConsentPolicyPromise(ampdoc, policyId) {
       });
 }
 
-/**
- * Returns a promise with the real time consent policy state value.
- * This is the sync version of #getConsentPolicyPromise method.
- * #getConsentPolicyPromise wait for consent policy to resolve
- * #getCurrentConsentPolicy returns the real time consent policy status
- * Note should consider using `getConsentPolicyPromise`
- * to avoid pulling policy status everytime.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {string} policyId
- * @return {!Promise<?CONSENT_POLICY_STATE>}
- */
-export function getCurrentConsentPolicy(ampdoc, policyId) {
-  return Services.consentPolicyServiceForDocOrNull(ampdoc)
-      .then(consentPolicy => {
-        if (!consentPolicy) {
-          return null;
-        }
-        return consentPolicy.getPolicyStatus(
-            /** @type {string} */ (policyId));
-      });
-}
+

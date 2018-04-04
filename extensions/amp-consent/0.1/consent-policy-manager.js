@@ -92,18 +92,9 @@ export class ConsentPolicyManager {
    */
   whenPolicyResolved(policyId) {
     return this.whenPolicyInstanceReady_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise();
-    });
-  }
-
-  /**
-   *
-   * @param {string} policyId
-   * @return {!Promise<CONSENT_POLICY_STATE>}
-   */
-  getPolicyStatus(policyId) {
-    return this.whenPolicyInstanceReady_(policyId).then(() => {
-      return this.instances_[policyId].getCurrentPolicyStatus();
+      return this.instances_[policyId].getReadyPromise().then(() => {
+        return this.instances_[policyId].getCurrentPolicyStatus();
+      });
     });
   }
 
@@ -131,10 +122,10 @@ export class ConsentPolicyInstance {
     /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
     this.itemToConsentState_ = map();
 
-    /** @private {?function(CONSENT_POLICY_STATE)} */
+    /** @private {?function()} */
     this.readyPromiseResolver_ = null;
 
-    /** @private {!Promise<CONSENT_POLICY_STATE>} */
+    /** @private {!Promise} */
     this.readyPromise_ = new Promise(resolve => {
       this.readyPromiseResolver_ = resolve;
     });
@@ -205,7 +196,7 @@ export class ConsentPolicyInstance {
     this.status_ = state;
 
     if (this.readyPromiseResolver_) {
-      this.readyPromiseResolver_(state);
+      this.readyPromiseResolver_();
       this.readyPromiseResolver_ = null;
     }
   }
@@ -213,7 +204,7 @@ export class ConsentPolicyInstance {
   /**
    * Return a promise that resolved when policy ready.
    * Note: the promise can be reset if use toggle consent state
-   * @return {!Promise<CONSENT_POLICY_STATE>}
+   * @return {!Promise}
    */
   getReadyPromise() {
     return this.readyPromise_;

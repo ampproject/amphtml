@@ -118,18 +118,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     describe('getReadyPromise', () => {
       it('promise should resolve when all consents are gathered', function* () {
         instance = new ConsentPolicyInstance(['ABC']);
-        let policyState = null;
-        instance.getReadyPromise().then(state => policyState = state);
+        let ready = false;
+        instance.getReadyPromise().then(() => ready = true);
         yield macroTask();
-        expect(policyState).to.be.null;
+        expect(ready).to.be.false;
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
         yield macroTask();
-        expect(policyState).to.equal(CONSENT_POLICY_STATE.INSUFFICIENT);
+        expect(ready).to.be.true;
+        ready = false;
         instance = new ConsentPolicyInstance(['ABC']);
-        instance.getReadyPromise().then(state => policyState = state);
+        instance.getReadyPromise().then(() => ready = true);
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.GRANTED);
         yield macroTask();
-        expect(policyState).to.equal(CONSENT_POLICY_STATE.SUFFICIENT);
+        expect(ready).to.be.true;
       });
 
       it('promise should resolve when consents are dimissed', function* () {
