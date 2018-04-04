@@ -27,7 +27,8 @@ describes.realWin('amp-story-cta-layer', {
 
   beforeEach(() => {
     win = env.win;
-    const ampStoryCtaLayerEl = win.document.createElement('amp-story-cta-layer');
+    const ampStoryCtaLayerEl =
+      win.document.createElement('amp-story-cta-layer');
     win.document.body.appendChild(ampStoryCtaLayerEl);
     ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
   });
@@ -40,7 +41,7 @@ describes.realWin('amp-story-cta-layer', {
   });
 
   it('should add or overwrite target attribute to links', () => {
-    let ctaLink = win.document.createElement('a');
+    const ctaLink = win.document.createElement('a');
     expect(ctaLink).to.not.have.attribute('target');
 
     ampStoryCtaLayer.element.appendChild(ctaLink);
