@@ -103,7 +103,7 @@ describes.sandboxed('writeAdScript', {}, env => {
 });
 
 describe('doubleclick delayed fetch white list deprecation', () => {
-  it('should add experiment id', () => {
+  it('should call deprecatedDoubleclick', () => {
     const cachedFrameName_ = JSON.stringify({
       attributes: {
         _context: {
@@ -124,7 +124,7 @@ describe('doubleclick delayed fetch white list deprecation', () => {
     doubleclick(global, {type: 'doubleclick'});
     expect(global.gaGlobal).to.be.ok;
   });
-  it('should not add experiment id', () => {
+  it('should not call deprecatedDoubleclick', () => {
     const cachedFrameName_ = JSON.stringify({
       attributes: {
         _context: {
