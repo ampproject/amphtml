@@ -103,34 +103,47 @@ describes.sandboxed('writeAdScript', {}, env => {
 });
 
 describe('doubleclick delayed fetch white list deprecation', () => {
-  let global;
-
-  beforeEach(() => {
-    const cachedFrameName_ = '{"attributes": {"_context": ' +
-      '{"experimentToggles": {"rollback-dfd-doubleclick": true}}}}';
-    global = {
+  it('should add experiment id', () => {
+    const cachedFrameName_ = JSON.stringify({
+      attributes: {
+        _context: {
+          experimentToggles: {
+            'rollback-dfd-doubleclick': true,
+          },
+        },
+        type: 'doubleclick',
+      },
+    });
+    const global = {
       context: {
         cachedFrameName_,
         // To force some testable action of calling deprecatedDoubleclick
         clientId: 1234,
       },
     };
-  });
-
-  it('should add experiment id', () => {
-    const data = {
-      ampIsInDcdfwldExperiment: true,
-      type: 'doubleclick',
-    };
-    doubleclick(global, data);
+    doubleclick(global, {type: 'doubleclick'});
     expect(global.gaGlobal).to.be.ok;
   });
   it('should not add experiment id', () => {
-    const data = {
-      ampIsInDcdfwldExperiment: true,
-      type: 'notDoubleclick',
+    const cachedFrameName_ = JSON.stringify({
+      attributes: {
+        _context: {
+          experimentToggles: {
+            'rollback-dfd-doubleclick': true,
+          },
+        },
+        type: 'notDoubleclick',
+        experimentId: '21061862',
+      },
+    });
+    const global = {
+      context: {
+        cachedFrameName_,
+        // To force some testable action of calling deprecatedDoubleclick
+        clientId: 1234,
+      },
     };
-    doubleclick(global, data);
+    doubleclick(global, {type: 'doubleclick'});
     expect(global.gaGlobal).to.not.be.ok;
   });
 });
