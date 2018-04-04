@@ -321,9 +321,13 @@ export class SubscriptionService {
       } else if (entitlements) { // Not null
         entitlementJson = entitlements;
       }
-      const entitlement = entitlementJson ?
-        Entitlement.parseFromJson(entitlementJson) :
-        Entitlement.empty('local');
+
+      let entitlement;
+      if (entitlementJson) {
+        entitlement = Entitlement.parseFromJson(entitlementJson, authData);
+      } else {
+        entitlement = Entitlement.empty('local');
+      }
       // Viewer authorization is redirected to use local platform instead.
       this.platformStore_.resolveEntitlement('local', entitlement);
     }, reason => {
