@@ -14,26 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
+import {loadPromise} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
-/**
- * @implements {../../../src/video-interface.VideoInterface}
- */
 class AmpViqeo extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?string}  */
-    this.videoId_ = '';
-
-    this.profileId_ = '';
 
     this.playerWrapperElement_ = null;
   }
@@ -54,18 +44,6 @@ class AmpViqeo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoId_ = user().assert(
-        this.element.getAttribute('data-videoId'),
-        'The data-videoId attribute is required for <amp-viqeo> %s',
-        this.element);
-
-    this.profileId_ = user().assert(
-        this.element.getAttribute('data-profileId'),
-        'The data-profileId attribute is required for <amp-viqeo> %s',
-        this.element);
-
-    installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -76,7 +54,16 @@ class AmpViqeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const {videoId_, profileId_} = this;
+    const videoId = user().assert(
+        this.element.getAttribute('data-videoId'),
+        'The data-videoId attribute is required for <amp-viqeo> %s',
+        this.element);
+
+    const profileId = user().assert(
+        this.element.getAttribute('data-profileId'),
+        'The data-profileId attribute is required for <amp-viqeo> %s',
+        this.element);
+
     const kindIsProd = this.element.getAttribute('data-kind') !== 'stage';
 
     const iframeStyle = this.element.getAttribute('data-iframe-style')
@@ -117,8 +104,8 @@ class AmpViqeo extends AMP.BaseElement {
     setStyle(mark, 'width', '100%');
     setStyle(mark, 'height', '0');
     setStyle(mark, 'paddingBottom', '100%');
-    mark.setAttribute('data-vnd', videoId_);
-    mark.setAttribute('data-profile', profileId_);
+    mark.setAttribute('data-vnd', videoId);
+    mark.setAttribute('data-profile', profileId);
     mark.classList.add('viqeo-embed');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
@@ -127,111 +114,19 @@ class AmpViqeo extends AMP.BaseElement {
     iframe.setAttribute('style', iframeStyle);
     iframe.setAttribute('frameBorder', '0');
     iframe.setAttribute('allowFullScreen', '');
-    iframe.src = `${viqeoPlayerUrl}/?vid=${videoId_}`;
+    iframe.src = `${viqeoPlayerUrl}/?vid=${videoId}`;
 
     mark.appendChild(iframe);
 
     const wrapper = this.element.ownerDocument.createElement('div');
-    setStyle(wrapper, 'position', 'absolute');
-    setStyle(wrapper, 'top', '0');
-    setStyle(wrapper, 'left', '0');
     wrapper.appendChild(mark);
 
     this.element.appendChild(wrapper);
     this.applyFillContent(wrapper);
 
-    this.playerWrapperElement_ = wrapper;
-    return Promise.resolve();
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.playerWrapperElement_) {
-      removeElement(this.playerWrapperElement_);
-      this.playerWrapperElement_ = null;
-    }
-    return true;
-  }
-
-  /** @override */
-  pauseCallback() {
-    this.pause();
-  }
-
-  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
-
-  /**
-   * @override
-   */
-  supportsPlatform() {
-    return true;
-  }
-
-  /** @override */
-  isInteractive() {
-    return true;
-  }
-
-  /** @override */
-  play() {}
-
-  /** @override */
-  pause() {}
-
-  /** @override */
-  mute() {}
-
-  /** @override */
-  unmute() {}
-
-  /** @override */
-  showControls() {
-    // Not supported.
-  }
-
-  /** @override */
-  hideControls() {
-    // Not supported.
-  }
-
-  /** @override */
-  fullscreenEnter() {}
-
-  /** @override */
-  fullscreenExit() {}
-
-  /** @override */
-  isFullscreen() {}
-
-  /** @override */
-  getMetadata() {
-    // Not implemented
-  }
-
-  /** @override */
-  preimplementsMediaSessionAPI() {
-    return false;
-  }
-
-  /** @override */
-  getCurrentTime() {
-    // Not supported.
-    return 0;
-  }
-
-  /** @override */
-  getDuration() {
-    // Not supported.
-    return 1;
-  }
-
-  /** @override */
-  getPlayedRanges() {
-    // Not supported.
-    return [];
+    return loadPromise(iframe);
   }
 }
-
 
 AMP.extension('amp-viqeo', '0.1', AMP => {
   AMP.registerElement('amp-viqeo', AmpViqeo);
