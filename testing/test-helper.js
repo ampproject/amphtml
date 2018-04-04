@@ -105,6 +105,52 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
+/**
+ * Expects the function call to generate console error messages.
+ *
+ * The expectedErrorMessages parameter is a list of strings or RegExp objects
+ * to match against the output of each call to console.error.
+ *
+ * e.g.:
+ * expectConsoleError(() => {
+ *   console.error('This is the first error');
+ *   console.warn('Warns and logs are not caught');
+ *   console.error('This is the second error');
+ * }, ['This is the first error', /second/]);
+ *
+ * @param {!Function} func
+ * @param {!Array<string, !RegExp>} expectedErrorMessages
+ */
+export function expectConsoleError(func, expectedErrorMessages) {
+  let callIndex = 0;
+  console.error.callsFake((...messages) => {
+    // On every call to console.error assert that there are still expected
+    // error messages left, and assert that the message matches the one
+    // that was expected for this call.
+    if (callIndex >= expectedErrorMessages.length) {
+      throw new Error(`Console.error was called ${callIndex + 1} times.` +
+          `Expected it to be called ${expectedErrorMessages.length} times.`);
+    }
+    const errorMessage = messages.join(' ');
+    const expectedErrorMessage = expectedErrorMessages[callIndex];
+    if (expectedErrorMessage instanceof RegExp) {
+      expect(errorMessage).to.match(expectedErrorMessage);
+    } else {
+      expect(errorMessage).to.equal(expectedErrorMessage);
+    }
+    callIndex++;
+  });
+
+  // Call the function that is expected to cause the error messages.
+  func();
+  expect(console.error).to.be.callCount(expectedErrorMessages.length);
+
+  // Restore the stubbed code for console.error(...) in _init_tests.js.
+  console.error.callsFake((...messages) => {
+    throw new Error(messages.join(' '));
+  });
+}
+
 /////////////////
 // Request Bank
 // A server side temporary request storage which is useful for testing
