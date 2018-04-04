@@ -73,12 +73,12 @@ export const Presets = {
           'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-fade-in-margin')) {
+      if (!element.hasAttribute('data-margin')) {
         return;
       }
-      const margin = element.getAttribute('data-fade-in-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-fade-in-margin must be a number and be between 0 and 1 for: %s',
+      const margin = element.getAttribute('data-margin');
+      user().assert(parseFloat(margin) >= 0 && parseFlogat(margin) < 1,
+          'data-margin must be a number and be between 0 and 1 for: %s',
           element);
     },
     update(entry) {
