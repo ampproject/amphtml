@@ -273,14 +273,12 @@ export class Viewer {
         || this.isWebviewEmbedded_
         || !ampdoc.isSingleDoc());
 
-    const queryParams = parseQueryString(this.win.location.search);
-
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = !this.isIframed_ &&
-        queryParams['amp_agsa'] == '1';
+        parseQueryString(this.win.location.search)['amp_agsa'] === '1';
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
