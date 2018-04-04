@@ -24,7 +24,18 @@ describes.realWin('amp-geo', {
   },
 }, env => {
 
+  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","ISOCountryGroups":["nafta","unknown"],"nafta":true,"unknown":true}</script></amp-state>'; // eslint-disable-line
+
   const config = {
+    ISOCountryGroups: {
+      nafta: ['ca', 'mx', 'us', 'unknown'],
+      unknown: ['unknown'],
+      anz: ['au', 'nz'],
+    },
+  };
+
+  const configWithState = {
+    AmpBind: true,
     ISOCountryGroups: {
       nafta: ['ca', 'mx', 'us', 'unknown'],
       unknown: ['unknown'],
@@ -53,9 +64,8 @@ describes.realWin('amp-geo', {
   }
 
   function expectBodyHasClass(klasses, expected) {
-    const bodyKlasses = doc.body.className.split(' ');
     for (const k in klasses) {
-      expect(bodyKlasses.includes(klasses[k]))
+      expect(doc.body.classList.contains(klasses[k]))
           .to.equal(expected);
     }
   }
@@ -104,31 +114,88 @@ describes.realWin('amp-geo', {
       expect(geo.ISOCountry).to.equal('unknown');
       expectBodyHasClass([
         'amp-iso-country-unknown',
-        'nafta',
+        'amp-geo-group-nafta',
       ], true);
       expectBodyHasClass([
         'amp-iso-country-nz',
-        'anz',
+        'amp-geo-group-anz',
       ], false);
+    });
+  });
+
+  it('should insert an amp-state if enabled', () => {
+    addConfigElement('script', 'application/json', JSON.stringify(configWithState));
+    geo.buildCallback();
+
+    return Services.geoForOrNull(win).then(() => {
+      expect(win.document.getElementById('ampGeo').outerHTML)
+          .to.equal(expectedState);
+    });
+  });
+
+  it('should not insert an amp-state by default', () => {
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForOrNull(win).then(() => {
+      expect(win.document.getElementById('ampGeo'))
+          .to.equal(null);
     });
   });
 
   it('should allow hash to override geo in test', () => {
     win.location.hash = '#amp-geo=nz';
     addConfigElement('script');
-
     geo.buildCallback();
 
     return Services.geoForOrNull(win).then(geo => {
       expect(geo.ISOCountry).to.equal('nz');
       expectBodyHasClass([
         'amp-iso-country-nz',
-        'anz',
+        'amp-geo-group-anz',
       ], true);
       expectBodyHasClass([
         'amp-iso-country-unknown',
-        'nafta',
+        'amp-geo-group-nafta',
       ], false);
     });
   });
+
+  it('should respect pre-rendered geo tags', () => {
+    addConfigElement('script');
+    doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
+    geo.buildCallback();
+
+    return Services.geoForOrNull(win).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
+  it('should allow hash to override pre-rendered geo in test', () => {
+    win.location.hash = '#amp-geo=nz';
+    doc.body.classList.add('amp-iso-country-mx', 'amp-geo-group-nafta');
+    addConfigElement('script');
+    geo.buildCallback();
+
+    return Services.geoForOrNull(win).then(geo => {
+      expect(geo.ISOCountry).to.equal('nz');
+      expectBodyHasClass([
+        'amp-iso-country-nz',
+        'amp-geo-group-anz',
+      ], true);
+      expectBodyHasClass([
+        'amp-iso-country-unknown',
+        'amp-geo-group-nafta',
+      ], false);
+    });
+  });
+
 });
