@@ -122,7 +122,7 @@ export function assertScreenReaderElement(element) {
  * @param {!Array<string, !RegExp>} expectedErrorMessages list of expected
  * messages to match against the output of calling console.error
  */
-export function expectConsoleError(func, expectedErrorMessages) {
+export function expectConsoleErrors(func, expectedErrorMessages) {
   let callIndex = 0;
   console.error.callsFake((...messages) => {
     // On every call to console.error assert that there are still expected
