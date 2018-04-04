@@ -72,6 +72,14 @@ describe('amp-analytics.transport', () => {
     assertCallCounts(0, 0, 1);
   });
 
+  it('falls back to image setting ignoreWarnings to true', () => {
+    setupStubs(true, true);
+    sendRequest(window, 'https://example.com/test', {
+      beacon: false, xhrpost: false, image: {ignoreWarnings: true},
+    });
+    assertCallCounts(0, 0, 1);
+  });
+
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
