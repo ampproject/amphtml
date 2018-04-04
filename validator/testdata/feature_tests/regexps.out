@@ -101,10 +101,12 @@ feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/css/brands.css" rel="stylesheet">
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css" rel="stylesheet">
+>>   ^~~~~~~~~
+    feature_tests/regexps.html:84:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/solid.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |    <link href="https://pro.fontawesome.com/releases/v5.0.8/css/fontawesome.css" rel="stylesheet">
 |    <link href="https://pro.fontawesome.com/releases/v5.0.8/css/regular.css" rel="stylesheet">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:84:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/solid.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+    feature_tests/regexps.html:86:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://pro.fontawesome.com/releases/v5.0.8/css/regular.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |    <!-- invalid -->
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
 >>   ^~~~~~~~~
