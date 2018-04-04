@@ -118,8 +118,9 @@ export function assertScreenReaderElement(element) {
  *   console.error('This is the second error');
  * }, ['This is the first error', /second/]);
  *
- * @param {!Function} func
- * @param {!Array<string, !RegExp>} expectedErrorMessages
+ * @param {function()} func Code to be tested
+ * @param {!Array<string, !RegExp>} expectedErrorMessages list of expected
+ * messages to match against the output of calling console.error
  */
 export function expectConsoleError(func, expectedErrorMessages) {
   let callIndex = 0;
