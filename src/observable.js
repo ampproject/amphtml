@@ -50,7 +50,7 @@ export class ObservableInterface {
 /**
  * This class helps to manage observers. Observers can be added, removed or
  * fired through and instance of this class.
- * @implements ObservableInterface
+ * @implements {ObservableInterface}
  * @template TYPE
  */
 export class Observable {
@@ -115,12 +115,12 @@ export class Observable {
 /**
  * Runs a given constructor when first observed (i.e. observable on-demand).
  * Optionally unlistens when no longer observed.
- * @implements ObservableInterface
+ * @implements {ObservableInterface}
  * @template TYPE
  */
 export class LazyObservable {
   /**
-   * @param {function():!UnlistenDef} ctor
+   * @param {function()|function():!UnlistenDef} ctor
    */
   constructor(ctor) {
     /** @private @const {function():!UnlistenDef} */
@@ -129,7 +129,7 @@ export class LazyObservable {
     /** @private @const {!Observable<TYPE>} */
     this.observable_ = new Observable();
 
-    /** @private {function():!UnlistenDef} */
+    /** @private {function()|function():!UnlistenDef} */
     this.instantiate_ = this.createInstantiateFn_();
 
     /** @private {boolean} */

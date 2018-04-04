@@ -23,9 +23,9 @@
 
 import {ActionTrust} from '../../../src/action-trust';
 import {LazyObservable} from '../../../src/observable';
-import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {TimeUpdateEvent} from './video-behaviors';
+import {VideoEvents} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 
@@ -74,10 +74,10 @@ export class VideoService {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @return {!function():void} */
+    /** @private @const {function()} */
     this.boundTick_ = () => this.startTicking_();
 
-    /** @return {!../../../src/observable.ObservableInterface<void>} */
+    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
     this.tick_ = new LazyObservable(this.boundTick_);
   }
 
@@ -92,7 +92,7 @@ export class VideoService {
     const {element} = video;
 
     if (this.getEntryOrNull(element)) {
-      return dev().assert(this.getEntryOrNull_(element));
+      return dev().assert(this.getEntryOrNull(element));
     }
 
     if (!video.supportsPlatform()) {
@@ -115,7 +115,7 @@ export class VideoService {
     return element[ENTRY_PROP];
   }
 
-  /** @return {!../../../src/observable.Observable} */
+  /** @return {!../../../src/observable.ObservableInterface<void>} */
   getTick() {
     return this.tick_;
   }
@@ -135,6 +135,7 @@ export class VideoService {
    */
   getAnalyticsDetails(unusedVideo) {
     warnUnimplemented('Video analytics');
+    return Promise.resolve();
   }
 
   /**
@@ -154,7 +155,7 @@ export class VideoEntry {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../../src/video-interface.VideoInterface} video
-   * @param {!../../../src/observable.ObservableInterface} tick
+   * @param {!../../../src/observable.ObservableInterface<void>} tick
    */
   // Observables injected for testability.
   constructor(ampdoc, video, tick) {
@@ -165,18 +166,18 @@ export class VideoEntry {
     /** @private @const{!../../../src/video-interface.VideoInterface} */
     this.video_ = video;
 
-    /**
-     * @visibleForTesting
-     * @const {!../../../src/observable.ObservableInterface<void>}
-     */
-    this.playbackTick = new LazyObservable(() => {
-      tick.add(() => {
-        if (!this.isPlaying_) {
-          return;
-        }
-        this.playbackTick.fire();
-      });
-    });
+    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
+    this.tick_ = tick;
+
+    // These functions are bound (instead of being arrow functions) so that
+    // they reference the prototype of the class, which is only created once.
+
+    /** @private @const {!function():void} */
+    this.boundOnTick_ = VideoEntry.prototype.onTick_.bind(this);
+
+    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
+    this.playbackTick_ =
+        new LazyObservable(VideoEntry.prototype.addTickHandler_.bind(this));
 
     /** @private {boolean} */
     this.isPlaying_ = false;
@@ -189,6 +190,19 @@ export class VideoEntry {
    */
   static create(ampdoc, videoService, video) {
     return new VideoEntry(ampdoc, video, videoService.getTick());
+  }
+
+  /** @private */
+  addTickHandler_() {
+    this.tick_.add(this.boundOnTick_);
+  }
+
+  /** @private */
+  onTick_() {
+    if (!this.isPlaying_) {
+      return;
+    }
+    this.playbackTick_.fire();
   }
 
   /** */
@@ -205,23 +219,27 @@ export class VideoEntry {
     element.whenBuilt().then(() => this.onBuilt_());
   }
 
-  /** @return {!../../../src/observable.ObservableInterface} */
+  /** @return {!../../../src/observable.ObservableInterface<void>} */
   getPlaybackTick() {
-    return this.playbackTick;
+    return this.playbackTick_;
   }
 
   /** @private */
   onBuilt_() {
     const {element} = this.video_;
 
-    this.registerCommonActions_();
-    this.maybeTriggerTimeUpdate_();
+    this.registerCommonActions();
+    this.maybeTriggerTimeUpdate();
+
+    this.addEventHandlers_();
 
     element.classList.add('i-amphtml-video-interface');
   }
 
   /** @private */
   addEventHandlers_() {
+    const {element} = this.video_;
+
     listen(element, VideoEvents.PAUSE, () => {
       this.isPlaying_ = false;
     });
@@ -234,9 +252,9 @@ export class VideoEntry {
   /**
    * Register common actions such as play, pause, etc... so they can be called
    * using AMP Actions, e.g.: `<button on="tap:myVideo.play">`.
-   * @private
+   * @visibleForTesting
    */
-  registerCommonActions_() {
+  registerCommonActions() {
     const video = this.video_;
 
     // Only require ActionTrust.LOW for video actions to defer to platform
@@ -253,9 +271,9 @@ export class VideoEntry {
   /**
    * Triggers a timeUpdate event every second if required.
    * See {@see TimeUpdateEvent} for details.
-   * @private
+   * @visibleForTesting
    */
-  maybeTriggerTimeUpdate_() {
+  maybeTriggerTimeUpdate() {
     const {element} = this.video_;
 
     if (!TimeUpdateEvent.shouldBeTriggeredOn(element)) {
@@ -266,7 +284,9 @@ export class VideoEntry {
     const video = this.video_;
     const playbackTick = this.getPlaybackTick();
 
-    playbackTick.add(TimeUpdateEvent.trigger.bind(null, win, video));
+    playbackTick.add(() => {
+      TimeUpdateEvent.trigger(win, video);
+    });
   }
 }
 

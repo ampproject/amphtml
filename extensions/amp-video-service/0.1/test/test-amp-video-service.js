@@ -20,11 +20,11 @@
  * It's invalid to include this extension in a document as a `<script>` tag, as
  * it gets automatically inserted by the runtime when required.
  */
-import * as sinon from 'sinon';
-import {TimeUpdateEvent} from '../video-behaviors';
-import {VideoEvents} from '../../../../src/video-interface';
-import {VideoEntry} from '../amp-video-service';
 
+import {Observable} from '../../../../src/observable';
+import {TimeUpdateEvent} from '../video-behaviors';
+import {VideoEntry} from '../amp-video-service';
+import {VideoEvents} from '../../../../src/video-interface';
 
 describes.fakeWin('VideoEntry', {
   amp: {
@@ -32,7 +32,6 @@ describes.fakeWin('VideoEntry', {
   },
 }, env => {
   let sandbox;
-  let service;
   let video;
   let element;
 
@@ -47,17 +46,17 @@ describes.fakeWin('VideoEntry', {
     element.signals = () => signals;
 
     video = {element};
-  })
+  });
 
-  it('should receive class name and trigger events on install', () => {
+  it('should add classname to element and trigger events on install', () => {
     const expectedClass = 'i-amphtml-video-interface';
     const expectedSignal = VideoEvents.REGISTERED;
     const expectedEvent = VideoEvents.REGISTERED;
 
     const entry = new VideoEntry(env.ampdoc, video, /* tick */ null);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
-    sandbox.stub(entry, 'registerCommonActions_');
+    sandbox.stub(entry, 'maybeTriggerTimeUpdate');
+    sandbox.stub(entry, 'registerCommonActions');
 
     expect(element).to.not.have.class(expectedClass);
     expect(element.signals().signal).to.not.have.been.called;
@@ -68,24 +67,61 @@ describes.fakeWin('VideoEntry', {
     return element.whenBuilt().then(() => {
       expect(element).to.have.class(expectedClass);
       expect(element.signals().signal).to.have.been.calledWith(expectedSignal);
-      expect(element.dispatchCustomEvent).to.have.been.calledWith(expectedEvent);
+      expect(element.dispatchCustomEvent)
+          .to.have.been.calledWith(expectedEvent);
     });
   });
 
-  it('should register common actions', () => {
+  it('should register common actions on install', () => {
     const entry = new VideoEntry(env.ampdoc, video, /* tick */ null);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
+    sandbox.stub(entry, 'maybeTriggerTimeUpdate');
 
     video.registerAction = sandbox.spy();
 
-    entry.install(video);
+    entry.install();
 
     return element.whenBuilt().then(() => {
       expect(video.registerAction).to.have.been.calledWith('play');
       expect(video.registerAction).to.have.been.calledWith('pause');
       expect(video.registerAction).to.have.been.calledWith('mute');
       expect(video.registerAction).to.have.been.calledWith('unmute');
+    });
+  });
+
+  it('should not trigger `timeUpdate` based on `on` attribute', () => {
+    const tick = new Observable();
+    const trigger = sandbox.stub(TimeUpdateEvent, 'trigger');
+    const entry = new VideoEntry(env.ampdoc, video, tick);
+
+    sandbox.stub(entry, 'registerCommonActions');
+
+    video.registerAction = sandbox.spy();
+
+    entry.install();
+
+    return element.whenBuilt().then(() => {
+      tick.fire();
+      expect(trigger).to.not.have.been.called;
+    });
+  });
+
+  it.skip('should trigger `timeUpdate` based on `on` attribute', () => {
+    // wip
+    const tick = new Observable();
+    const trigger = sandbox.spy(TimeUpdateEvent, 'trigger');
+    const entry = new VideoEntry(env.ampdoc, video, tick);
+
+    sandbox.stub(entry, 'registerCommonActions');
+
+    element.setAttribute('on', 'timeUpdate:blah');
+
+    entry.install();
+    element.dispatchEvent(new CustomEvent(VideoEvents.PLAYING));
+
+    return element.whenBuilt().then(() => {
+      tick.fire();
+      expect(trigger).to.have.been.calledOnce;
     });
   });
 });
