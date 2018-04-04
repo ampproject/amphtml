@@ -600,6 +600,7 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
+      command.checkBundleSize(/* compiled */ false);
       command.runVisualDiffTests();
     }
     command.runPresubmitTests();
