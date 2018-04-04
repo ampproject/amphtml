@@ -24,11 +24,10 @@ describes.realWin('amp-story-cta-layer', {
 }, env => {
   let win;
   let ampStoryCtaLayer;
-  let ampStoryCtaLayerEl;
 
   beforeEach(() => {
     win = env.win;
-    ampStoryCtaLayerEl = win.document.createElement('amp-story-cta-layer');
+    const ampStoryCtaLayerEl = win.document.createElement('amp-story-cta-layer');
     win.document.body.appendChild(ampStoryCtaLayerEl);
     ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
   });
@@ -36,21 +35,19 @@ describes.realWin('amp-story-cta-layer', {
   it('should build the cta layer', () => {
     ampStoryCtaLayer.buildCallback();
     return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(
-        ampStoryCtaLayer.element.classList.contains('i-amphtml-story-layer'))
-          .to.be.true;
+      expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
     });
   });
 
   it('should add or overwrite target attribute to links', () => {
     let ctaLink = win.document.createElement('a');
-    expect(ctaLink.hasAttribute('target')).to.be.false;
+    expect(ctaLink).to.not.have.attribute('target');
 
     ampStoryCtaLayer.element.appendChild(ctaLink);
     ampStoryCtaLayer.buildCallback();
 
     return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(ctaLink.hasAttribute('target')).to.be.true;
+      expect(ctaLink).to.have.attribute('target');
       expect(ctaLink.getAttribute('target')).to.equal('_blank');
     });
   });
