@@ -636,6 +636,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
             regexp => expect(url).to.match(regexp));
       });
     });
+
+    it('includes adsense package code when present', () => {
+      element.setAttribute('data-package', 'package_code');
+      return expect(impl.getAdUrl()).to.eventually
+          .match(/pwprc=package_code(&|$)/);
+    });
   });
 
   describe('#unlayoutCallback', () => {
