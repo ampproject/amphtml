@@ -206,6 +206,19 @@
           </p>
         </header>
 
+        <div>
+        Revoke consent ABC and DEF
+        <button class="button" on="tap:ABC.revoke(consentId=ABC),ABC.revoke(consentId=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.revoke(consentId=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.revoke(consentId=DEF)" role="button">Manage</button>
+      </div>
+
         <div class="author">
           <div class="byline">
             <p>
