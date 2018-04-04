@@ -345,7 +345,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
-    // If the `src` of `amp-video` itself is NOT cached, set it on video
+    // If the `src` of `amp-video` itself is NOT cached, set it on base node.
     if (this.element.hasAttribute('src') &&
         !this.isCachedByCDN_(this.element)) {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
@@ -353,7 +353,7 @@ export class AmpVideo extends AMP.BaseElement {
     }
 
     sources.forEach(source => {
-      // Cached sources should have been moved from <amp-video> to <video>.
+      // Cached sources should have been moved from <amp-video> to base node.
       dev().assert(!this.isCachedByCDN_(source));
       assertHttpsUrl(source.getAttribute('src'), source);
       fragment.appendChild(source);
