@@ -268,10 +268,8 @@ sinon.sandbox.create = function(config) {
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
-  consoleSandbox = sinon.sandbox.create();
-  consoleSandbox.stub(console, 'error').callsFake((...messages) => {
-    throw new Error(messages.join(' '));
-  });
+  consoleSandbox = sinon.mock(console);
+  consoleSandbox.expects('error').never();
 });
 
 function beforeTest() {
@@ -292,7 +290,7 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
-  consoleSandbox.restore();
+  consoleSandbox.verify();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
