@@ -824,74 +824,6 @@ export class MediaPool {
         });
   }
 
-  // /**
-  //  * @param {!HTMLMediaElement} domMediaEl
-  //  * @param {boolean} muted
-  //  * @return {!Promise} Resolved when muted/unmuted successfully
-  //  */
-  // toggleMuted(domMediaEl, muted) {
-  //   const mediaType = this.getMediaType_(domMediaEl);
-  //   const poolMediaEl =
-  //       this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
-
-  //   if (!poolMediaEl) {
-  //     return Promise.resolve();
-  //   }
-
-  //   return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
-  //       .then(() => {
-  //         if (rewindToBeginning) {
-  //           this.enqueueMediaElementTask_(
-  //               /** @type {!HTMLMediaElement} */ (poolMediaEl),
-  //               new MuteTask(muted));
-  //         }
-  //       });
-  // }
-
-
-  // /**
-  //  * @param {!HTMLMediaElement} domMediaEl
-  //  * @param {boolean} controls
-  //  * @return {!Promise} Resolved when controls toggled successfully
-  //  */
-  // toggleControls(domMediaEl, controls) {
-  //   const mediaType = this.getMediaType_(domMediaEl);
-  //   const poolMediaEl =
-  //       this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
-
-  //   if (!poolMediaEl) {
-  //     return Promise.resolve();
-  //   }
-
-  //   return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
-  //       .then(() => {
-  //         if (rewindToBeginning) {
-  //           this.enqueueMediaElementTask_(
-  //               /** @type {!HTMLMediaElement} */ (poolMediaEl),
-  //               new ToggleControlsTask(muted, controls));
-  //         }
-  //       });
-  // }
-
-  withAllocated(domMediaEl, tasks) {
-  toggleControls(domMediaEl, controls) {
-    const mediaType = this.getMediaType_(domMediaEl);
-    const poolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
-
-    if (!poolMediaEl) {
-      return Promise.resolve();
-    }
-
-    return this.enqueueMediaElementTask_(poolMediaEl, tasks.shift())
-        .then(result =>
-          tasks.length < 1 ?
-            this.enqueueMediaElementTask_(poolMediaEl, tasks.shift()) :
-            null
-        })
-  }
-
-
   /**
    * Rewinds a specified media element in the DOM to 0.
    * @param {!HTMLMediaElement} domMediaEl The media element to be rewound.
@@ -1084,12 +1016,19 @@ export class MediaPool {
 
 /** Provides Mediapools. */
 export class MediaPoolService {
+<<<<<<< Updated upstream
   constructor(/** !../../src/service/ampdoc-impl.AmpDoc */ ampdoc) {
+=======
+
+  /** @param {{../../src/service/ampdoc-impl.AmpDoc}} ampdoc */
+  constructor(ampdoc) {
+>>>>>>> Stashed changes
     /** @private @const {{../../src/service/ampdoc-impl.AmpDoc}} */
     this.ampdoc_ = ampdoc;
   }
 
   /**
+<<<<<<< Updated upstream
    * Traverses up the DOM tree to find a media pool.
    * @return {?MediaPool}
    */
@@ -1097,6 +1036,20 @@ export class MediaPoolService {
     const owner = closest(el, el => !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
     return owner && owner[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
   }
+=======
+   * Gets the pool associated with an element. Traverses up the DOM tree to
+   * find the pool.
+   * @param {!Element} element Element that might be pool-bound.
+   * @return {?MediaPool}
+   */
+  poolForOrNull(element) {
+    const owner = closest(element, el =>
+        !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
+
+    if (!owner) {
+      return null;
+    }
+>>>>>>> Stashed changes
 
   /**
    * Traverses up the DOM tree to find a media pool, otherwise fails.
@@ -1104,6 +1057,17 @@ export class MediaPoolService {
    */
   poolFor(/* !Element */ el) {
     return dev().assert(this.poolForOrNull(el));
+  }
+
+  /**
+   * Gets the pool associated with an element. Traverses up the DOM tree to
+   * find the pool, otherwise fails.
+   * @param {!Element} element Element that is pool-bound.
+   * @return {!MediaPool}
+   */
+  poolFor(element) {
+    return dev().assert(this.poolForOrNull(element),
+        'Element is not bound by a media-pool');
   }
 }
 
