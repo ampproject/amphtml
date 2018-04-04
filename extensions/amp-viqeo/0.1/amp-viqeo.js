@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -124,7 +123,7 @@ class AmpViqeo extends AMP.BaseElement {
     this.element.appendChild(wrapper);
     this.applyFillContent(wrapper);
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 }
 
