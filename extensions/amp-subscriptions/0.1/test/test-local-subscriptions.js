@@ -29,6 +29,20 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
   };
+  const service = 'sample-service';
+  const source = 'sample-source';
+  const products = ['scenic-2017.appspot.com:news',
+    'scenic-2017.appspot.com:product2'];
+  const subscriptionToken = 'token';
+  const loggedIn = true;
+  const json = {
+    service,
+    source,
+    products,
+    subscriptionToken,
+    loggedIn,
+  };
+  const entitlement = Entitlement.parseFromJson(json);
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -123,27 +137,15 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate();
-      expect(renderStub).to.be.calledOnce;
+      localSubscriptionPlatform.activate({entitlement});
+      return localSubscriptionPlatform.actions_.build().then(() => {
+        expect(renderStub).to.be.calledOnce;
+      });
     });
   });
 
   describe('pingback', () => {
     it('should call `sendSignal` to the pingback signal', () => {
-      const service = 'sample-service';
-      const source = 'sample-source';
-      const products = ['scenic-2017.appspot.com:news',
-        'scenic-2017.appspot.com:product2'];
-      const subscriptionToken = 'token';
-      const loggedIn = true;
-      const json = {
-        service,
-        source,
-        products,
-        subscriptionToken,
-        loggedIn,
-      };
-      const entitlement = Entitlement.parseFromJson(json);
       const urlBuildStub =
           sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
               .callsFake(() => Promise.resolve(pingbackUrl));
