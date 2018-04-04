@@ -24,6 +24,7 @@ import {
   LightboxManager,
   LightboxThumbnailDataDef,
   LightboxedCarouselMetadataDef,
+  VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -43,11 +44,6 @@ import {toggle} from '../../../src/style';
 /** @const */
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
-
-const VIDEO_TAGS = {
-  'AMP-YOUTUBE': true,
-  'AMP-VIDEO': true,
-};
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -1222,6 +1218,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
+  // TODO: figure out if there are utilities for this.
+
+  to2Digits_(i) {
+    return i < 10 ? '0' + i : i;
+  }
+
+  toTimestampString_(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const hh = this.to2Digits_(h);
+    const mm = this.to2Digits_(m);
+    const ss = this.to2Digits_(s);
+    return hh + ':' + mm + ':' + ss;
+  }
+
   /**
    * Create an element inside gallery from the thumbnail info from manager.
    * @param {!LightboxThumbnailDataDef} thumbnailObj
@@ -1247,11 +1259,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const timestampDiv = this.win.document.createElement('div');
       timestampDiv.classList.add('i-amphtml-lbg-thumbnail-timestamp-container');
       timestampDiv.appendChild(playButtonSpan);
-      // TODO: append timestamp if exists
-      if (thumbnailObj.timestamp) {
-        timestampDiv.appendChild(
-            this.win.document.createTextNode(thumbnailObj.timestamp));
-        timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+      if (thumbnailObj.timestampPromise) {
+        thumbnailObj.timestampPromise.then(ts => {
+          if (!isNaN(ts)) {
+            const timestamp = this.toTimestampString_(ts);
+            timestampDiv.appendChild(
+                this.win.document.createTextNode(timestamp));
+            timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+          }
+        });
       }
       element.appendChild(timestampDiv);
     }

@@ -45,6 +45,11 @@ export const ELIGIBLE_TAP_TAGS = {
   'AMP-IMG': true,
 };
 
+export const VIDEO_TAGS = {
+  'AMP-YOUTUBE': true,
+  'AMP-VIDEO': true,
+};
+
 const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAG = 'AMP-CAROUSEL';
 const FIGURE_TAG = 'FIGURE';
@@ -53,7 +58,8 @@ const SLIDE_SELECTOR = '.amp-carousel-slide';
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
  *  placeholderSrc: string,
- *  element: !Element
+ *  element: !Element,
+ *  timestampPromise: ?Promise<number>
  * }} */
 export let LightboxThumbnailDataDef;
 
@@ -364,8 +370,17 @@ export class LightboxManager {
     return null;
   }
 
+  getVideoTimestamp_(element) {
+    if (VIDEO_TAGS[element.tagName]) {
+      return element.getImpl().then(videoPlayer => {
+        return videoPlayer.getDuration();
+      });
+    } else {
+      return null;
+    }
+  }
+
   /**
-   * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
    * @param {string} lightboxGroupId
@@ -377,6 +392,7 @@ export class LightboxManager {
           srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
           placeholderSrc: this.getPlaceholderForElementType_(element),
           element,
+          timestampPromise: this.getVideoTimestamp_(element),
         }));
   }
 
