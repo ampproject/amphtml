@@ -17,7 +17,7 @@ import {Services} from '../../../src/services';
 import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setStyle, setImportantStyles} from '../../../src/style';
+import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
 import {unscaledClientRect} from './utils';
