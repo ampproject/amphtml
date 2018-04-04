@@ -123,6 +123,8 @@ export class LocalSubscriptionPlatformRenderer {
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
           candidate.setAttribute('i-amphtml-subs-display', '');
+        } else {
+          candidate.removeAttribute('i-amphtml-subs-display', '');
         }
       }
       return rootNode;

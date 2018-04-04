@@ -25,6 +25,7 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
@@ -73,6 +74,10 @@ export class SubscriptionService {
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
+
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ =
+        new SubscriptionAnalytics(this.configElement_);
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
@@ -130,7 +135,8 @@ export class SubscriptionService {
           new LocalSubscriptionPlatform(
               this.ampdoc_,
               serviceConfig,
-              this.serviceAdapter_
+              this.serviceAdapter_,
+              this.subscriptionAnalytics_,
           )
       );
     }

@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 export class SubscriptionAnalytics {
 
+  constructor(element) {
+    this.element_ = element;
+  }
+
   /**
-   * @param {string} unusedType
+   *
+   * @param {string} eventType
+   * @param {Object<string, string>=} opt_vars
    */
-  event(unusedType) {
+  event(eventType, opt_vars) {
     // TODO(dvoytenko): implement.
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
   }
 }
