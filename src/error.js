@@ -15,32 +15,37 @@
  */
 
 
-import {getMode} from './mode';
+import {AmpEvents} from './amp-events';
+import {Services} from './services';
+import {
+  USER_ERROR_SENTINEL,
+  dev,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
+  isUserErrorMessage,
+} from './log';
+import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
+import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';
-import {
-  USER_ERROR_SENTINEL,
-  isUserErrorMessage,
-  isUserErrorEmbed,
-  duplicateErrorIfNecessary,
-  dev,
-} from './log';
 import {isProxyOrigin} from './url';
-import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
-import {urls} from './config';
-import {AmpEvents} from './amp-events';
 import {triggerAnalyticsEvent} from './analytics';
-import {isExperimentOn} from './experiments';
-import {Services} from './services';
+import {urls} from './config';
 
 /**
  * @const {string}
  */
 const CANCELLED = 'CANCELLED';
+
+/**
+ * @const {string}
+ */
+const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
 
 
 /**
@@ -65,6 +70,21 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 let accumulatedErrorMessages = self.AMPErrors || [];
 // Use a true global, to avoid multi-module inclusion issues.
 self.AMPErrors = accumulatedErrorMessages;
+
+/**
+ * Pushes element into array, keeping at most the most recent limit elements
+ *
+ * @param {!Array<T>} array
+ * @param {T} element
+ * @param {number} limit
+ * @template T
+ */
+function pushLimit(array, element, limit) {
+  if (array.length >= limit) {
+    array.splice(0, array.length - limit + 1);
+  }
+  array.push(element);
+}
 
 /**
  * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
@@ -220,6 +240,32 @@ export function isCancellation(errorOrMessage) {
 }
 
 /**
+ * Returns an error for component blocked by consent
+ * @return {!Error}
+ */
+export function blockedByConsentError() {
+  return new Error(BLOCK_BY_CONSENT);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isBlockedByConsent(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
+  }
+  return false;
+}
+
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
@@ -266,12 +312,56 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
+    // Report the error to viewer if it has the capability. The data passed
+    // to the viewer is exactly the same as the data passed to the server
+    // below.
+    maybeReportErrorToViewer(this, data);
     reportingBackoff(() => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
     });
   }
+}
+
+/**
+ * Passes the given error data to the viewer if the following criteria is met:
+ * - The viewer is a trusted viewer
+ * - The viewer has the `errorReporter` capability
+ * - The AMP doc is in single doc mode
+ * - The AMP doc is opted-in for error interception (`<html>` tag has the
+ *   `report-errors-to-viewer` attribute)
+ *
+ * @param {!Window} win
+ * @param {!JsonObject} data Data from `getErrorReportData`.
+ * @return {!Promise<boolean>} `Promise<True>` if the error was sent to the
+ *     viewer, `Promise<False>` otherwise.
+ * @visibleForTesting
+ */
+export function maybeReportErrorToViewer(win, data) {
+  const ampdocService = Services.ampdocServiceFor(win);
+  if (!ampdocService.isSingleDoc()) {
+    return Promise.resolve(false);
+  }
+  const ampdocSingle = ampdocService.getAmpDoc();
+  const htmlElement = ampdocSingle.getRootNode().documentElement;
+  const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
+  if (!docOptedIn) {
+    return Promise.resolve(false);
+  }
+
+  const viewer = Services.viewerForDoc(ampdocSingle);
+  if (!viewer.hasCapability('errorReporter')) {
+    return Promise.resolve(false);
+  }
+
+  return viewer.isTrustedViewer().then(viewerTrusted => {
+    if (!viewerTrusted) {
+      return false;
+    }
+    viewer.sendMessage('error', data);
+    return true;
+  });
 }
 
 /**
@@ -402,7 +492,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['exps'] = exps.join(',');
 
   if (error) {
-    const tagName = error && error.associatedElement
+    const tagName = error.associatedElement
       ? error.associatedElement.tagName
       : 'u'; // Unknown
     data['el'] = tagName;
@@ -425,7 +515,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
-  accumulatedErrorMessages.push(message);
+  pushLimit(accumulatedErrorMessages, message, 25);
 
   return data;
 }

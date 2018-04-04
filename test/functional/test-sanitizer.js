@@ -17,9 +17,11 @@
 import {
   resolveUrlAttr,
   rewriteAttributeValue,
+  rewriteAttributesForElement,
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describe('sanitizeHtml', () => {
@@ -48,12 +50,10 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<template></template>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<link>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<meta>c')).to.be.equal('ac');
   });
@@ -77,9 +77,20 @@ describe('sanitizeHtml', () => {
         'a<a on="tap">b</a>');
   });
 
+  it('should output "data-, aria-, and role" attributes', () => {
+    expect(
+        sanitizeHtml('<a data-foo="bar" aria-label="bar" role="button">b</a>'))
+        .to.be.equal('<a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
   it('should output "href" attribute', () => {
     expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
         'a<a href="http://acme.com/" target="_top">b</a>');
+  });
+
+  it('should output "rel" attribute', () => {
+    expect(sanitizeHtml('a<a href="http://acme.com/" rel="amphtml">b</a>')).to.be.equal(
+        'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
   });
 
   it('should default target to _top with href', () => {
@@ -187,7 +198,7 @@ describe('sanitizeHtml', () => {
         .equal('<p>hello</p>');
   });
 
-  it('should NOT output security-sensitive amp-bind attributes', () => {
+  it('should NOT output security-sensitive binding attributes', () => {
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
@@ -210,6 +221,67 @@ describe('sanitizeHtml', () => {
         'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
         'a<a target="_top">b</a>');
+  });
+
+  it('should NOT rewrite values of binding attributes', () => {
+    // Should not change "foo.bar" but should add target="_top".
+    expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
+        .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+  });
+
+  it('should allow amp-subscriptions attributes', () => {
+    expect(sanitizeHtml('<div subscriptions-action="login">link</div>'))
+        .to.equal('<div subscriptions-action="login">link</div>');
+    expect(sanitizeHtml('<div subscriptions-section="actions">link</div>'))
+        .to.equal('<div subscriptions-section="actions">link</div>');
+    expect(sanitizeHtml('<div subscriptions-actions="">link</div>'))
+        .to.equal('<div subscriptions-actions="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-display="">link</div>'))
+        .to.equal('<div subscriptions-display="">link</div>');
+    expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
+        .to.equal('<div subscriptions-dialog="">link</div>');
+  });
+});
+
+
+describe('rewriteAttributesForElement', () => {
+  let location = 'https://pub.com/';
+
+  it('should not modify `target` on publisher origin', () => {
+    const element = document.createElement('a');
+    element.setAttribute('href', '#hash');
+
+    rewriteAttributesForElement(element, 'href', 'https://not.hash/', location);
+
+    expect(element.getAttribute('href')).to.equal('https://not.hash/');
+    expect(element.hasAttribute('target')).to.equal(false);
+  });
+
+  describe('on CDN origin', () => {
+    beforeEach(() => {
+      location = 'https://cdn.ampproject.org';
+    });
+
+    it('should set `target` when rewrite <a> from hash to non-hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', '#hash');
+
+      rewriteAttributesForElement(
+          element, 'href', 'https://not.hash/', location);
+
+      expect(element.getAttribute('href')).to.equal('https://not.hash/');
+      expect(element.getAttribute('target')).to.equal('_top');
+    });
+
+    it('should remove `target` when rewrite <a> from non-hash to hash', () => {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'https://not.hash/');
+
+      rewriteAttributesForElement(element, 'href', '#hash', location);
+
+      expect(element.getAttribute('href')).to.equal('#hash');
+      expect(element.hasAttribute('target')).to.equal(false);
+    });
   });
 });
 
@@ -295,13 +367,13 @@ describe('resolveUrlAttr', () => {
     expect(resolveUrlAttr('amp-img', 'srcset',
         '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x');
     expect(resolveUrlAttr('amp-img', 'srcset',
         'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
         'https://cdn.ampproject.org/c/acme.org/doc1'))
-        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x, ' +
-            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x, ' +
+            'https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x');
   });
 
   it('should NOT rewrite image http(s) src when not on proxy', () => {
@@ -345,8 +417,40 @@ describe('sanitizeFormattingHtml', () => {
         .to.be.equal('<b>abc</b>');
   });
 
-  it('should compentsate for broken markup', () => {
+  it('should compensate for broken markup', () => {
     expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
+  });
+
+  describe('should sanitize `style` attribute', () => {
+    before(() => {
+      toggleExperiment(self, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+    });
+
+    after(() => {
+      toggleExperiment(self, 'inline-styles', false,
+          /* opt_transientExperiment */ true);
+    });
+
+    it('should allow valid styles',() => {
+      expect(sanitizeHtml('<div style="color:blue">Test</div>'))
+          .to.equal('<div style="color:blue">Test</div>');
+    });
+
+    it('should ignore styles containing `!important`',() => {
+      expect(sanitizeHtml('<div style="color:blue!important">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:fixed`', () => {
+      expect(sanitizeHtml('<div style="position:fixed">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:sticky`', () => {
+      expect(sanitizeHtml('<div style="position:sticky">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
   });
 });

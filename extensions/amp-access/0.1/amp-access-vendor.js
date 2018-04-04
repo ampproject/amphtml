@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
 import './access-vendor';
+import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
@@ -26,7 +26,7 @@ const TAG = 'amp-access-vendor';
  * interface and delivered via a separate extension. The vendor implementation
  * mainly requires two method: `authorize` and `pingback`. The actual
  * extension is registered via `registerVendor` method.
- * @implements {./amp-access.AccessTypeAdapterDef}
+ * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessVendorAdapter {
 
@@ -57,20 +57,21 @@ export class AccessVendorAdapter {
     });
   }
 
+  /** @return {string} */
+  getVendorName() {
+    return this.vendorName_;
+  }
+
   /** @override */
   getConfig() {
     return this.vendorConfig_;
   }
 
   /**
-   * @param {string} name
    * @param {!./access-vendor.AccessVendor} vendor
    */
-  registerVendor(name, vendor) {
+  registerVendor(vendor) {
     user().assert(this.vendorResolve_, 'Vendor has already been registered');
-    user().assert(name == this.vendorName_,
-        'Vendor "%s" doesn\'t match the configured vendor "%s"',
-        name, this.vendorName_);
     this.vendorResolve_(vendor);
     this.vendorResolve_ = null;
   }
@@ -99,5 +100,10 @@ export class AccessVendorAdapter {
     return this.vendorPromise_.then(vendor => {
       return vendor.pingback();
     });
+  }
+
+  /** @override */
+  postAction() {
+    // TODO(dvoytenko): delegate to vendor adapter.
   }
 }

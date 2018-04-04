@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
-import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -56,9 +56,9 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     // Gfycat iframe
     this.preconnect.url('https://gfycat.com', opt_onLayout);
@@ -90,13 +90,23 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     const videoid = dev().assertString(this.videoid_);
-
+    this.propagateAttributes(['alt', 'aria-label'], placeholder);
     placeholder.setAttribute('src',
         'https://thumbs.gfycat.com/' +
         encodeURIComponent(videoid) + '-poster.jpg');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('alt',
+          'Loading gif ' + this.element.getAttribute('aria-label')
+      );
+    } else if (this.element.hasAttribute('alt')) {
+      placeholder.setAttribute('alt',
+          'Loading gif ' + this.element.getAttribute('alt'));
+    } else {
+      placeholder.setAttribute('alt', 'Loading gif');
+    }
     this.applyFillContent(placeholder);
 
     return placeholder;

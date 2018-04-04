@@ -1,0 +1,152 @@
+<!--
+  ## Introduction
+
+  [amp-selector](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-selector) lets the user choose from a list of options. The contents of the options isn't limited to just text.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-selector</title>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-selector/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the amp-selector component.
+  -->
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<style amp-custom>
+amp-selector, button {
+  margin: 1rem;
+}
+amp-selector:not([disabled]) amp-img[option][selected]:not([disabled]) {
+  outline-color: #b60845;
+  outline-width: 2px;
+}
+/* disables build-in browser highlights */
+amp-selector *:focus {
+  outline: none;
+}
+amp-selector[disabled],
+amp-selector [disabled] {
+  opacity: 0.5;
+}
+.divider {
+  border-right: 2px solid #333;
+  height: 40px;
+}
+amp-selector.radio-selector {
+  list-style: none;
+}
+amp-selector.radio-selector [option][selected] {
+  outline: none;
+}
+amp-selector.radio-selector [option] {
+  display: flex;
+  align-items: center;
+}
+amp-selector.radio-selector [option]:before {
+  transition: background 0.25s ease-in-out;
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin: 8px;
+  border-radius: 100%;
+  border: solid 1px black;
+}
+amp-selector.radio-selector [option][selected]:before {
+  text-align: center;
+  content: "✓";
+  color: white;
+  background: black;
+}
+</style>
+</head>
+<body>
+
+  <!-- ## Single Select -->
+  <!--
+  `amp-selector` defaults to single selection. The `option` is required for all selectable elements, for example, the divider in the following sample cannot be selected.
+  -->
+  <amp-selector layout="container">
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_sea_300x199.jpg"  width="60" height="40" option="1"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_desert_300x200.jpg" width="60" height="40" option="2"></amp-img>
+    <div class="divider inline-block mx1"></div>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_ship_300x200.jpg" width="60" height="40" option="3"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_village_300x200.jpg" width="60" height="40" option="4"></amp-img>
+  </amp-selector>
+
+  <!-- ## Multi Select -->
+  <!--
+  Add the attribute `multiple` to enable multi selection.
+  -->
+  <amp-selector layout="container" multiple>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_sea_300x199.jpg"  width="60" height="40" option="1"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_desert_300x200.jpg" width="60" height="40" option="2"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_ship_300x200.jpg" width="60" height="40" option="3"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_village_300x200.jpg" width="60" height="40" option="4"></amp-img>
+  </amp-selector>
+
+  <!-- ## Attributes -->
+  <!--
+  The following attributes are supported for select elements:
+
+  * `disabled`: disable an element.
+  * `selected`: pre-select an element.
+  -->
+  <amp-selector layout="container" multiple>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_sea_300x199.jpg"  width="60" height="40" option="1"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_desert_300x200.jpg" width="60" height="40" option="2" selected></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_ship_300x200.jpg" width="60" height="40" option="3"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_village_300x200.jpg" width="60" height="40" option="4" disabled></amp-img>
+  </amp-selector>
+
+  <!-- ## Disabled -->
+  <!--
+  Add the attribute `disabled` to disable the whole selector.
+  -->
+  <amp-selector layout="container" disabled>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_sea_300x199.jpg"  width="60" height="40"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_desert_300x200.jpg" width="60" height="40"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_ship_300x200.jpg" width="60" height="40"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_village_300x200.jpg" width="60" height="40"></amp-img>
+  </amp-selector>
+
+  <!-- ## Actions -->
+  <!--
+  The `clear` action may be used to clear all selections of an `amp-selector`.
+  -->
+  <div>
+    <button on="tap:clearActionDemoSelector.clear"
+            class="ampstart-btn ampstart-btn-secondary caps m1">
+            Clear Selection</button>
+    <amp-selector id="clearActionDemoSelector" layout="container" class="m1" multiple>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_sea_300x199.jpg"  width="60" height="40" option="1"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_desert_300x200.jpg" width="60" height="40" option="2"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_ship_300x200.jpg" width="60" height="40" option="3" selected></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/landscape_village_300x200.jpg" width="60" height="40" option="4"></amp-img>
+    </amp-selector>
+  </div>
+
+  <!-- ## Forms -->
+  <!--
+Inside a form, `amp-selector` behaves like a radio-button/checkbox group and submits the selected value(s) against the name of the amp-selector. Here we've styled an amp-selector to function like a radio list. Using `amp-selector` for this has the advantage that bindings using [`amp-bind`](/examples/visual-tests/amp-by-example/components/amp-bind/) are easier to implement.
+  -->
+<form action="#" method="get" target="_top">
+  <amp-selector class="radio-selector" layout="container" name="my-selector">
+    <div option="a">Option A</div>
+    <div option="b">Option B</div>
+    <div option="c">Option C</div>
+  </amp-selector>
+  <input type="submit"
+         value="Select"
+         class="ampstart-btn ampstart-btn-secondary caps m1">
+</form>
+
+</body>
+</html>

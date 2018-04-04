@@ -15,13 +15,13 @@
  */
 'use strict';
 const BBPromise = require('bluebird');
-const yaml = require('yamljs');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const intercept = require('gulp-intercept');
-const path = require('path');
+const log = require('fancy-log');
 const minimist = require('minimist');
-const util = require('gulp-util');
+const path = require('path');
+const yaml = require('yamljs');
 
 const argv = minimist(process.argv.slice(2));
 
@@ -94,11 +94,11 @@ function generate(root, target, writeToDisk) {
       .on('end', function() {
         if (writeToDisk) {
           fs.removeSync(target);
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
+          const codeowners = buildCodeownersFile(dirs);
           fs.writeFileSync(target, codeowners);
         } else {
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
-          util.log(codeowners);
+          const codeowners = buildCodeownersFile(dirs);
+          log(codeowners);
         }
       });
 }

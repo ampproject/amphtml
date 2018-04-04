@@ -20,88 +20,88 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-  DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
-  experimentFeatureEnabled,
-  DOUBLECLICK_EXPERIMENT_FEATURE,
-  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-} from './doubleclick-a4a-config';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {
-  googleAdUrl,
-  truncAndTimeUrl,
-  googleBlockParameters,
-  googlePageParameters,
-  isCdnProxy,
-  isReportingEnabled,
   AmpAnalyticsConfigDef,
+  QQID_HEADER,
+  ValidAdContainerTypes,
+  addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
-  groupAmpAdsByType,
-  addCsiSignalsToAmpAnalyticsConfig,
-  QQID_HEADER,
   getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-  maybeAppendErrorParameter,
   getIdentityToken,
+  googleAdUrl,
+  googleBlockParameters,
+  googlePageParameters,
+  groupAmpAdsByType,
+  isCdnProxy,
+  isReportingEnabled,
+  maybeAppendErrorParameter,
+  truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
+  experimentFeatureEnabled,
+} from './doubleclick-a4a-config';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '../../amp-a4a/0.1/refresh-manager';
+import {SafeframeHostApi} from './safeframe-host';
+import {Services} from '../../../src/services';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {deepMerge, dict} from '../../../src/utils/object';
+import {dev, user} from '../../../src/log';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {
-  lineDelimitedStreamer,
-  metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '../../amp-ad/0.1/concurrent-load';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installAnchorClickInterceptor,
 } from '../../../src/anchor-click-interceptor';
-import {stringHash32} from '../../../src/string';
-import {removeElement, createElementWithAttributes} from '../../../src/dom';
-import {getData} from '../../../src/event-helper';
-import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isObject} from '../../../src/types';
-import {Services} from '../../../src/services';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles} from '../../../src/style';
-import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
-import {VisibilityState} from '../../../src/visibility-state';
 import {
-  isExperimentOn,
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {
-  getRefreshManager,
-  RefreshManager,
-  DATA_ATTR_NAME,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {
-  addExperimentIdToElement,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
-import '../../amp-a4a/0.1/real-time-config-manager';
+import {isSecureUrl, parseQueryString} from '../../../src/url';
+import {
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
+} from '../../../ads/google/a4a/line-delimited-response-handler';
+import {setStyles} from '../../../src/style';
+import {stringHash32} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -110,11 +110,8 @@ const TAG = 'amp-ad-network-doubleclick-impl';
 const DOUBLECLICK_BASE_URL =
     'https://securepubads.g.doubleclick.net/gampad/ads';
 
-/** @private @enum {number} */
-const RTC_ATI_ENUM = {
-  RTC_SUCCESS: 2,
-  RTC_FAILURE: 3,
-};
+/** @const {string} */
+const RTC_SUCCESS = '2';
 
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
@@ -144,10 +141,17 @@ let sraRequests = null;
       slotId: string,
       slotIndex: string,
     }} */
-let TroubleshootData;
+let TroubleshootDataDef;
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
+
+
+/**
+ * @typedef
+ * {({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)}
+ */
+let LayoutRectOrDimsDef;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -231,51 +235,6 @@ const BLOCK_SRA_COMBINERS_ = [
       instance => instance.buildIdentityParams_()),
 ];
 
-/**
- * Used to manage messages for different fluid ad slots.
- *
- * Maps a sentinel value to an object consisting of the impl to which that
- * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
- */
-const fluidListeners = {};
-
-/**
- * @param {!Event} event
- * @private
- */
-function fluidMessageListener_(event) {
-  const data = tryParseJson(getData(event));
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
-    return;
-  }
-  if (data['e']) {
-    // This is a request to establish a postmessaging connection.
-    const listener = fluidListeners[data['e']];
-    if (!listener) {
-      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
-      return;
-    }
-    if (!listener.connectionEstablished) {
-      listener.instance.connectFluidMessagingChannel();
-      listener.connectionEstablished = true;
-    }
-    return;
-  }
-  const payload = tryParseJson(data['p']);
-  if (!payload || !payload['sentinel']) {
-    return;
-  }
-  const listener = fluidListeners[payload['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
-    return;
-  }
-  if (data['s'] != 'creative_geometry_update') {
-    return;
-  }
-  listener.instance.receiveMessageForFluid_(payload);
-}
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -287,7 +246,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super(element);
 
     /**
-     * @type {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
+     * @type
+     * {!../../../ads/google/a4a/performance.GoogleAdLifecycleReporter}
      */
     this.lifecycleReporter_ = this.lifecycleReporter_ ||
         this.initLifecycleReporter();
@@ -305,7 +265,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
+    /** @private {?LayoutRectOrDimsDef} */
     this.initialSize_ = null;
 
     /** @private {?{width: number, height: number}} */
@@ -363,8 +323,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.preloadSafeframe_ = true;
 
-    /** @private {!TroubleshootData} */
-    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
+    /** @private {!TroubleshootDataDef} */
+    this.troubleshootData_ = /** @type {!TroubleshootDataDef} */ ({});
 
     /**
      * @private {?boolean} whether preferential rendered AMP creative, null
@@ -374,17 +334,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {?./safeframe-host.SafeframeHostApi} */
+    this.safeframeApi_ = null;
   }
 
   /** @override */
   idleRenderOutsideViewport() {
-    const vpRange =
-        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
     // Disable if publisher has indicated a non-default loading strategy.
-    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
+    if (this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
+    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
+    let vpRange = parseInt(expVal, 10);
+    if (expVal && isNaN(vpRange)) {
+      // holdback branch sends non-numeric value.
+      return false;
+    }
+    vpRange = vpRange || 12;
     this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource().whenWithinRenderOutsideViewport().then(
+        () => this.isIdleRender_ = false);
     return vpRange;
   }
 
@@ -396,16 +371,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    /**
-     * isValidElement used to also check that we are in a valid A4A environment,
-     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
-     * which is always called as part of the upgrade path from an amp-ad element
-     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
-     * that it has been verified.
-     */
-    return this.isAmpAdElement() &&
-      // Ensure not within remote.html iframe.
-      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    return this.isAmpAdElement();
   }
 
   /** @override */
@@ -438,7 +404,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
     experimentInfoMap[sfPreloadExpName] = {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
@@ -462,7 +429,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+          /** @type {!Object<string,
+          !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -483,26 +451,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
-  }
-
-  /**
-   * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} payload
-   * @private
-   */
-  receiveMessageForFluid_(payload) {
-    let newHeight;
-    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.forceCollapse();
-      return;
-    }
-    this.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
-          // TODO(levitzky) Add more error handling here
-          this.forceCollapse();
-        });
   }
 
   /** @override */
@@ -634,7 +582,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
-        .catch(err => {
+        .catch(() => {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
@@ -644,8 +592,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.identityToken = results[1];
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                  this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), this.getPageParameters_()));
+                  this.getBlockParameters_(), this.buildIdentityParams_(),
+                  this.getPageParameters_(), rtcParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -678,16 +626,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const ard = [];
     let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
-      // Only want to send errors for requests we actually sent.
-      if (rtcResponse.error &&
-          rtcResponse.error != RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE &&
-          rtcResponse.error != RTC_ERROR_ENUM.NETWORK_FAILURE &&
-          rtcResponse.error != RTC_ERROR_ENUM.TIMEOUT) {
-        return;
-      }
       artc.push(rtcResponse.rtcTime);
-      ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
-        RTC_ATI_ENUM.RTC_FAILURE);
+      ati.push(rtcResponse.error || RTC_SUCCESS);
       ard.push(rtcResponse.callout);
       if (rtcResponse.response) {
         if (rtcResponse.response['targeting']) {
@@ -721,11 +661,49 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /** @override */
+  getCustomRealTimeConfigMacros_() {
+    /**
+     * This whitelist allow attributes on the amp-ad element to be used as
+     * macros for constructing the RTC URL. Add attributes here, in lowercase,
+     * to make them available.
+     */
+    const whitelist = {
+      'height': true,
+      'width': true,
+      'data-slot': true,
+      'data-multi-size': true,
+      'data-multi-size-validation': true,
+      'data-override-width': true,
+      'data-override-height': true,
+    };
+    return {
+      PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      HREF: () => this.win.location.href,
+      TGT: () =>
+        JSON.stringify(
+            (tryParseJson(
+                this.element.getAttribute('json')) || {})['targeting']),
+      ADCID: opt_timeout => getOrCreateAdCid(
+          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga',
+          parseInt(opt_timeout, 10)),
+      ATTR: name => {
+        if (!whitelist[name.toLowerCase()]) {
+          dev().warn('TAG', `Invalid attribute ${name}`);
+        } else {
+          return this.element.getAttribute(name);
+        }
+      },
+      CANONICAL_URL: () =>
+        Services.documentInfoForDoc(this.element).canonicalUrl,
+    };
+  }
+
   /**
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
    * @param {!Object<string, string>} response
-   * @param {!string} callout
+   * @param {string} callout
    * @return {!Object<string, string>}
    * @private
    */
@@ -761,11 +739,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval) {
-      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
-    }
-
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
@@ -834,27 +807,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.registerListenerForFluid_();
-      }
-      return super.layoutCallback();
-    };
+  renderNonAmpCreative() {
+    // If render idle with throttling, impose one second render delay for
+    // non-AMP creatives.  This is not done in the scheduler to ensure as many
+    // slots as possible are marked for layout given scheduler imposes 5 seconds
+    // past previous execution.
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-        this.isIdleRender_) {
-      return this.isVerifiedAmpCreativePromise().then(verified => {
-        // Control concurrent loading of non-AMP creatives executed via
-        // idleRenderOutsideViewport as doing so within
-        // idleRenderOutsideViewport would impose at least 5 second delay due to
-        // scheduler constraints.
-        const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
-        return throttleFn();
-      });
+          this.isIdleRender_) {
+      if (is3pThrottled(this.win)) {
+        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+      } else {
+        incrementLoadingAds(this.win);
+        return super.renderNonAmpCreative(true);
+      }
     }
-    return registerFluidAndExec();
+    return super.renderNonAmpCreative();
   }
 
   /** @override  */
@@ -878,38 +845,22 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
     }
-    const superResult = super.unlayoutCallback();
-    this.maybeRemoveListenerForFluid();
-    return superResult;
+    this.destroySafeFrameApi_();
+    return super.unlayoutCallback();
   }
 
-  /**
-   * Postmessages an initial message to the fluid creative.
-   * @visibleForTesting
-   */
-  connectFluidMessagingChannel() {
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
+  /** @visibleForTesting */
+  cleanupAfterTest() {
+    this.destroySafeFrameApi_();
   }
 
-  /**
-   * Fires a delayed impression and notifies the Fluid creative that its
-   * container has been resized.
-   * @private
-   */
-  onFluidResize_() {
-    if (this.fluidImpressionUrl_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
+  /** @private */
+  destroySafeFrameApi_() {
+    if (!this.safeframeApi_) {
+      return;
     }
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
+    this.safeframeApi_.destroy();
+    this.safeframeApi_ = null;
   }
 
   /** @override */
@@ -1030,7 +981,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if ((this.isFluid_ && width && height) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1151,20 +1102,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   (creative, headersObj, done) => {
                     checkStillCurrent();
                     // Force safeframe rendering method.
-                    headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                    headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
+                        XORIGIN_MODE.SAFEFRAME;
                     // Construct pseudo fetch response to be passed down the A4A
                     // promise chain for this block.
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
-                    get: name => headersObj[name],
-                    has: name => !!headersObj[name],
+                    get: name => headersObj[name.toLowerCase()],
+                    has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => utf8Encode(creative),
+                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.
@@ -1250,73 +1202,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdditionalContextMetadata() {
-    const attributes = dict({});
-    if (this.isFluid_) {
-      attributes['uid'] = 1;
-      attributes['hostPeerName'] = this.win.location.origin;
-      // The initial geometry isn't used for anything important, but it is
-      // expected, so we pass this string with all zero values.
-      attributes['initialGeometry'] = JSON.stringify(
-          dict({
-            'windowCoords_t': 0,
-            'windowCoords_r': 0,
-            'windowCoords_b': 0,
-            'windowCoords_l': 0,
-            'frameCoords_t': 0,
-            'frameCoords_r': 0,
-            'frameCoords_b': 0,
-            'frameCoords_l': 0,
-            'styleZIndex': 'auto',
-            'allowedExpansion_t': 0,
-            'allowedExpansion_r': 0,
-            'allowedExpansion_b': 0,
-            'allowedExpansion_l': 0,
-            'xInView': 0,
-            'yInView': 0,
-          }));
-      attributes['permissions'] = JSON.stringify(
-          dict({
-            'expandByOverlay': false,
-            'expandByPush': false,
-            'readCookie': false,
-            'writeCookie': false,
-          }));
-      attributes['metadata'] = JSON.stringify(
-          dict({
-            'shared': {
-              'sf_ver': this.safeframeVersion,
-              'ck_on': 1,
-              'flash_ver': '26.0.0',
-            },
-          }));
-      attributes['reportCreativeGeometry'] = true;
-      attributes['isDifferentSourceWindow'] = false;
-      attributes['sentinel'] = this.sentinel;
-    }
-    return attributes;
-  }
-
-  /** @private  */
-  registerListenerForFluid_() {
-    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
-      instance: this,
-      connectionEstablished: false,
-    };
-    if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', fluidMessageListener_, false);
-    }
-  }
-
-  /** @visibleForTesting */
-  maybeRemoveListenerForFluid() {
-    if (!this.isFluid_) {
+  getAdditionalContextMetadata(isSafeFrame = false) {
+    if (!this.isFluid_ && !isSafeFrame) {
       return;
     }
-    delete fluidListeners[this.sentinel];
-    if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', fluidMessageListener_);
-    }
+    const creativeSize = this.getCreativeSize();
+    dev().assert(creativeSize, 'this.getCreativeSize returned null');
+    this.safeframeApi_ = this.safeframeApi_ ||
+        new SafeframeHostApi(
+            this, this.isFluid_, this.initialSize_,
+            /** @type {{height, width}} */(creativeSize),
+            this.fluidImpressionUrl_);
+
+    return this.safeframeApi_.getSafeframeNameAttr();
   }
 
   /**
@@ -1459,7 +1357,7 @@ function serializeItem_(key, value) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
- * @param {!function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @param {function(AmpAdNetworkDoubleclickImpl):?T} extractFn
  * @return {?T} value of first instance with non-null/undefined value or null
  *    if none can be found
  * @template T

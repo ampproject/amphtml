@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
-import {registerServiceBuilder, getService} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
-import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -298,8 +298,8 @@ export class Vsync {
   runAnim(contextNode, task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate_(contextNode)) {
-      dev().warn('VSYNC', 'Did not schedule a vsync request, because doc' +
-          'ument was invisible');
+      dev().warn('VSYNC', 'Did not schedule a vsync request, because' +
+          ' document was invisible');
       return false;
     }
     this.run(task, opt_state);

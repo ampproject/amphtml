@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {setStyles} from '../../../../src/style';
+import * as adHelper from '../../../../src/ad-helper';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {BaseElement} from '../../../../src/base-element';
-import * as adHelper from '../../../../src/ad-helper';
+import {setStyles} from '../../../../src/style';
 
 describes.realWin('amp-ad-ui handler', {
   amp: {
@@ -78,7 +78,7 @@ describes.realWin('amp-ad-ui handler', {
           () => {
             return Promise.reject();
           });
-      sandbox.stub(uiHandler.baseInstance_, 'deferMutate').callsFake(
+      sandbox.stub(uiHandler.baseInstance_, 'mutateElement').callsFake(
           callback => {
             callback();
             resolve();
@@ -101,7 +101,7 @@ describes.realWin('amp-ad-ui handler', {
       sandbox.stub(adImpl, 'attemptCollapse').callsFake(() => {
         return Promise.reject();
       });
-      sandbox.stub(adImpl, 'deferMutate').callsFake(callback => {
+      sandbox.stub(adImpl, 'mutateElement').callsFake(callback => {
         callback();
         resolve();
       });

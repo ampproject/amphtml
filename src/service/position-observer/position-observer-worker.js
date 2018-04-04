@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {
-  layoutRectEquals,
-  layoutRectsOverlap,
-  layoutRectsRelativePos,
-  layoutRectLtwh,
-} from '../../layout-rect';
 import {Services} from '../../services';
 import {dev} from '../../log';
+import {
+  layoutRectEquals,
+  layoutRectLtwh,
+  layoutRectsOverlap,
+  layoutRectsRelativePos,
+} from '../../layout-rect';
 
 /** @enum {number} */
 export const PositionObserverFidelity = {
@@ -50,13 +50,13 @@ export class PositionObserverWorker {
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
    * @param {!PositionObserverFidelity} fidelity
-   * @param {!function(?PositionInViewportEntryDef)} handler
+   * @param {function(?PositionInViewportEntryDef)} handler
    */
   constructor(ampdoc, element, fidelity, handler) {
     /** @const {!Element} */
     this.element = element;
 
-    /** @const {!function(?PositionInViewportEntryDef)} */
+    /** @const {function(?PositionInViewportEntryDef)} */
     this.handler_ = handler;
 
     /** @type {!PositionObserverFidelity} */

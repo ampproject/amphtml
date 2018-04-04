@@ -16,6 +16,8 @@
 
 tags: {  # amp-timeago
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-timeago"
@@ -26,6 +28,8 @@ tags: {  # amp-timeago
 }
 tags: {  # <amp-timeago>
   html_format: AMP
+  html_format: AMP4EMAIL
+  html_format: EXPERIMENTAL
   tag_name: "AMP-TIMEAGO"
   requires_extension: "amp-timeago"
   attrs: {

@@ -27,10 +27,6 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
@@ -40,7 +36,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-ima-video/">Annotated code example for amp-ima-video</a></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
   </tr>
 </table>
 

@@ -19,7 +19,6 @@
 
 const assert = require('assert');
 const es = require('event-stream');
-const gutil = require('gulp-util');
 const File = require('vinyl');
 const fs = require('fs');
 const gulpAmpHtmlValidator = require('../');
@@ -120,7 +119,7 @@ describe('gulp-amphtml-validator', function() {
       format.end();
       format.once('finish', function() {
         assert.equal(logger.logged, 'AMP Validation results:\n\n' +
-          INVALID_FILE + ': \u001b[31mFAIL\u001b[39m\n' + INVALID_FILE + 
+          INVALID_FILE + ': \u001b[31mFAIL\u001b[39m\n' + INVALID_FILE +
           ':24:4 ' + '\u001b[31merrorMessage\u001b[39m (see specUrl)');
         done();
       });

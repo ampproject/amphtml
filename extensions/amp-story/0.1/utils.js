@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {closestBySelector} from '../../../src/dom';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {user} from '../../../src/log';
 
 /**
@@ -51,4 +53,56 @@ export function hasTapAction(el) {
   // service race conditions. This is good enough for our use case.
   return el.hasAttribute('on') &&
       !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+}
+
+
+/**
+ * Calculates a client rect without applying scaling transformations.
+ * @note Must be run in a vsync measure context.
+ * @param {!Element} el
+ * @return {!ClientRect}
+ */
+export function unscaledClientRect(el) {
+  const {width, height, left, top} = el./*OK*/getBoundingClientRect();
+
+  const scaleFactorX = width == 0 ? 1 : width / el./*OK*/offsetWidth;
+  const scaleFactorY = height == 0 ? 1 : height / el./*OK*/offsetHeight;
+
+  return /** @type {!ClientRect} */ ({
+    left: left / scaleFactorX,
+    top: top / scaleFactorY,
+    width: width / scaleFactorX,
+    height: height / scaleFactorY,
+  });
+}
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+export function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
+}
+
+
+/**
+ * Creates a shadow root for the provided container, and appends the element
+ * along with its CSS.
+ * @param  {!Element} container
+ * @param  {!Element} element
+ * @param  {string} css
+ * @return {!ShadowRoot}
+ */
+export function createShadowRootWithStyle(container, element, css) {
+  const shadowRoot = createShadowRoot(container);
+
+  const style = self.document.createElement('style');
+  style./*OK*/textContent = css;
+
+  shadowRoot.appendChild(style);
+  shadowRoot.appendChild(element);
+
+  return shadowRoot;
 }

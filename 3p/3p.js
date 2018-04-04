@@ -149,7 +149,7 @@ export function validateSrcPrefix(prefix, src) {
     prefix = [prefix];
   }
   if (src !== undefined) {
-    for (let p = 0; p <= prefix.length; p++) {
+    for (let p = 0; p < prefix.length; p++) {
       const protocolIndex = src.indexOf(prefix[p]);
       if (protocolIndex == 0) {
         return;
@@ -244,21 +244,12 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
 
 /**
  * Throws an exception if data does not contains exactly one field
- * mentioned in the alternativeField array.
+ * mentioned in the alternativeFields array.
  * @param {!Object} data
  * @param {!Array<string>} alternativeFields
  */
 function validateExactlyOne(data, alternativeFields) {
-  let countFileds = 0;
-
-  for (let i = 0; i < alternativeFields.length; i++) {
-    const field = alternativeFields[i];
-    if (data[field]) {
-      countFileds += 1;
-    }
-  }
-
-  user().assert(countFileds === 1,
+  user().assert(alternativeFields.filter(field => data[field]).length === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));

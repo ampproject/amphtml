@@ -28,10 +28,7 @@ tags: {  # <amp-gwd-animation>
   html_format: AMP4ADS
   tag_name: "AMP-GWD-ANIMATION"
   requires_extension: "amp-gwd-animation"
-  attrs: {
-    name: "timeline-event-prefix"
-    value: ""
-  }
+  attrs: { name: "timeline-event-prefix" }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY

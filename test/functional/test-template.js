@@ -19,8 +19,8 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {Services} from '../../src/services';
+import {resetServiceForTesting} from '../../src/service';
 
 describes.fakeWin('Template', {}, env => {
   let templates;
@@ -85,13 +85,6 @@ describes.fakeWin('Template', {}, env => {
       registerExtendedTemplate(win, templateElement.getAttribute('type'),
           TemplateImpl);
     }).to.throw(/Duplicate template type/);
-  });
-
-  it('should fail render if template is not declared', () => {
-    const templateElement = createTemplateElement();
-    expect(() => {
-      templates.renderTemplate(templateElement, {value: 0});
-    }).to.throw(/Template must be declared/);
   });
 
   it('should block render until template registered', () => {
@@ -159,6 +152,7 @@ describes.fakeWin('Template', {}, env => {
 
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
           expect(res.textContent).to.equal('abc1');
@@ -173,6 +167,7 @@ describes.fakeWin('Template', {}, env => {
 
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
     }).to.throw(/Template element must be a "template" tag/);
@@ -193,6 +188,7 @@ describes.fakeWin('Template', {}, env => {
 
   it('should fail when template not found', () => {
     const parentElement = doc.createElement('div');
+    doc.body.appendChild(parentElement);
     expect(() => {
       templates.findAndRenderTemplate(parentElement, {value: 0});
     }).to.throw(/Template not found/);
@@ -205,6 +201,7 @@ describes.fakeWin('Template', {}, env => {
 
   it('should detect if a template is present in a container', () => {
     const parentElement = doc.createElement('div');
+    doc.body.appendChild(parentElement);
     expect(templates.hasTemplate(parentElement)).to.be.false;
 
     parentElement.setAttribute('template', 'notemplate' + Math.random());
@@ -233,24 +230,7 @@ describes.fakeWin('Template', {}, env => {
 
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
-    return templates.findAndRenderTemplateArray(parentElement,
-        [{value: 1}, {value: 2}]).then(res => {
-      expect(res).to.have.length.of(2);
-      expect(res[0].textContent).to.equal('abc1');
-      expect(res[1].textContent).to.equal('abc2');
-    });
-  });
-
-  it('should discover and render template for an array', () => {
-    const templateElement = createTemplateElement();
-    const type = templateElement.getAttribute('type');
-    const id = type + Math.random();
-    templateElement.setAttribute('id', id);
-    doc.body.appendChild(templateElement);
-    registerExtendedTemplate(win, type, TemplateImpl);
-
-    const parentElement = doc.createElement('div');
-    parentElement.setAttribute('template', id);
+    doc.body.appendChild(parentElement);
     return templates.findAndRenderTemplateArray(parentElement,
         [{value: 1}, {value: 2}]).then(res => {
       expect(res).to.have.length.of(2);

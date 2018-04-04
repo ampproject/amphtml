@@ -52,6 +52,12 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 
 The URL of the comments page. For example, `http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html`.
 
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well.
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
 ##### data-numposts (optional)
 
 The number of comments to show.  For details, see the [Facebook comments documentation](https://developers.facebook.com/docs/plugins/comments).

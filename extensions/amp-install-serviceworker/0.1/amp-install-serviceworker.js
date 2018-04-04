@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
   getSourceOrigin,
@@ -24,11 +25,10 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {toggle} from '../../../src/style';
 import {setStyle} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -100,7 +100,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
       Services.timerFor(this.win).delay(() => {
-        this.deferMutate(this.insertIframe_.bind(this));
+        this.mutateElement(this.insertIframe_.bind(this));
       }, 10000);
     });
   }
@@ -177,7 +177,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const whenVisible =
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
     return Promise.all([whenReady, whenVisible]).then(() => {
-      this.deferMutate(() => this.preloadShell_(shellUrl));
+      this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
 

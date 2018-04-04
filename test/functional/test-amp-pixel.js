@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {VariableSource} from '../../src/service/variable-source';
 import {
   installUrlReplacementsForEmbed,
 } from '../../src/service/url-replacements-impl';
-import {VariableSource} from '../../src/service/variable-source';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -147,7 +147,7 @@ describes.realWin('amp-pixel in embed', {
 
   class TestVariableSource extends VariableSource {
     constructor() {
-      super();
+      super(env.ampdoc);
     }
     initialize() {
       this.set('TEST', () => 'value1');

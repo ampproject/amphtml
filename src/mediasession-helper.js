@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from './json';
-import {isProtocolValid} from './url';
-import {isObject, isArray} from './types';
 import {dev, user} from './log';
+import {isArray, isObject} from './types';
+import {isProtocolValid} from './url';
+import {tryParseJson} from './json';
 
 /**
  * @typedef {{
@@ -103,7 +103,7 @@ export function parseSchemaImage(doc) {
   } else {
     return;
   }
-};
+}
 
 /**
  * Parses the og:image if it exists and returns it
@@ -117,7 +117,7 @@ export function parseOgImage(doc) {
   } else {
     return;
   }
-};
+}
 
 /**
  * Parses the website's Favicon and returns it
@@ -148,4 +148,4 @@ function validateMetadata(metadata) {
       }
     });
   }
-};
+}

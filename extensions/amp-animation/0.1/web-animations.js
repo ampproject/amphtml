@@ -16,15 +16,6 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
-import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {extractKeyframes} from './keyframes-extractor';
-import {getMode} from '../../../src/mode';
-import {getVendorJsPropertyName, computedStyle} from '../../../src/style';
-import {isArray, isObject, toArray} from '../../../src/types';
-import {map} from '../../../src/utils/object';
-import {parseCss} from './css-expr';
 import {
   WebAnimationDef,
   WebAnimationPlayState,
@@ -40,7 +31,16 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
+import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
+import {closestBySelector, matches} from '../../../src/dom';
+import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
+import {dev, user} from '../../../src/log';
+import {extractKeyframes} from './keyframes-extractor';
+import {getMode} from '../../../src/mode';
+import {isArray, isObject, toArray} from '../../../src/types';
+import {map} from '../../../src/utils/object';
+import {parseCss} from './css-expr';
 
 
 /** @const {string} */
@@ -162,7 +162,9 @@ export class WebAnimationRunner {
     dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
-      player.pause();
+      if (player.playState == WebAnimationPlayState.RUNNING) {
+        player.pause();
+      }
     });
   }
 
@@ -170,13 +172,18 @@ export class WebAnimationRunner {
    */
   resume() {
     dev().assert(this.players_);
-    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+    const oldRunnerPlayState = this.playState_;
+    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
-    this.runningCount_ = this.players_.length;
+    this.runningCount_ = 0;
     this.players_.forEach(player => {
-      player.play();
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
+        player.play();
+        this.runningCount_++;
+      }
     });
   }
 
@@ -251,7 +258,7 @@ export class WebAnimationRunner {
   }
 
   /**
-   * @return {!number} total duration in milliseconds.
+   * @return {number} total duration in milliseconds.
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {

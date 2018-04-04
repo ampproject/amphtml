@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -23,13 +24,12 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
+import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {
@@ -703,13 +703,14 @@ describe('friendly-iframe-embed', () => {
     const winW = 600;
     const winH = 800;
 
-    const vsyncMock = {
-      measure: fn => fn(),
-    };
-
     const resourcesMock = {
-      mutateElement: (unusedEl, fn) => {
-        fn();
+      measureMutateElement: (unusedEl, measure, mutate) => {
+        if (measure) {
+          measure();
+        }
+        if (mutate) {
+          mutate();
+        }
         return Promise.resolve();
       },
     };
@@ -739,15 +740,12 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       }, Promise.resolve());
 
-      sandbox.stub(fie, 'getVsync').callsFake(() => vsyncMock);
       sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
       sandbox.stub(fie, 'win').callsFake(win);
     });
 
     it('should resize body and fixed container when entering', function* () {
       const bodyElementMock = document.createElement('div');
-
-      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
       sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
@@ -769,16 +767,10 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.equal('0px');
       expect(iframe.style.width).to.equal('100vw');
       expect(iframe.style.height).to.equal('100vh');
-
-      // ensuring that the resource scheduler knows about the iframe change
-      expect(mutateElementSpy)
-          .to.have.been.calledWith(iframe, sinon.match.any);
     });
 
     it('should reset body and fixed container when leaving', function* () {
       const bodyElementMock = document.createElement('div');
-
-      const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
       sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
@@ -800,10 +792,6 @@ describe('friendly-iframe-embed', () => {
       expect(iframe.style.bottom).to.be.empty;
       expect(iframe.style.width).to.be.empty;
       expect(iframe.style.height).to.be.empty;
-
-      // ensuring that the resource scheduler knows about the iframe change
-      expect(mutateElementSpy)
-          .to.have.been.calledWith(iframe, sinon.match.any);
     });
   });
 });

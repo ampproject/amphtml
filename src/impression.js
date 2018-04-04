@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {dev, user} from './log';
-import {isExperimentOn} from './experiments';
 import {Services} from './services';
 import {
-  isProxyOrigin,
-  parseUrl,
-  parseQueryString,
   addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+  parseUrl,
 } from './url';
+import {dev, user} from './log';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 
 const TIMEOUT_VALUE = 8000;
 

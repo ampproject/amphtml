@@ -21,6 +21,9 @@
 
 const childProcess = require('child_process');
 
+const shellCmd = (process.platform == 'win32') ? 'cmd' : '/bin/sh';
+const shellFlag = (process.platform == 'win32') ? '/C' : '-c';
+
 /**
  * Spawns the given command in a child process with the given options.
  *
@@ -29,19 +32,27 @@ const childProcess = require('child_process');
  * @return {<Object>} Process info.
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
+  return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
 }
 
 /**
- * Executes the provided command, and prints a message if the command fails.
+ * Executes the provided command, returning the process object.
  *
  * @param {string} cmd Command line to execute.
+ * @return {<Object>} Process info.
  */
 exports.exec = function(cmd) {
-  const p = spawnProcess(cmd, {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log('\nCommand failed: ' + cmd);
-  }
+  return spawnProcess(cmd, {'stdio': 'inherit'});
+};
+
+/**
+ * Executes the provided shell script in an asynchronous process.
+ *
+ * @param {string} script
+ * @param {<Object>} options
+ */
+exports.execScriptAsync = function(script, options) {
+  return childProcess.spawn('sh', ['-c', script], options);
 };
 
 /**
@@ -52,7 +63,6 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.error('\nCommand failed: ' + cmd);
     process.exit(p.status);
   }
 };
