@@ -74,6 +74,17 @@ describe('3p', () => {
   });
 
   describe('validateData', () => {
+    let sandbox;
+    let clock;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      clock = sandbox.useFakeTimers();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
 
     it('should check mandatory fields', () => {
       validateData({

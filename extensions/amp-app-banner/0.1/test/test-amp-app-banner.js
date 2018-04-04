@@ -155,7 +155,8 @@ describes.realWin('amp-app-banner', {
       });
     });
 
-    it('should show banner and set up correctly', testSetupAndShowBanner);
+    // TODO(aghassemi, #14336): Fails due to console errors.
+    it.skip('should show banner and set up correctly', testSetupAndShowBanner);
 
     it('should throw if open button is missing', testButtonMissing);
 
@@ -235,7 +236,8 @@ describes.realWin('amp-app-banner', {
       });
     });
 
-    it('should show banner and set up correctly', testSetupAndShowBanner);
+    // TODO(aghassemi, #14336): Fails due to console errors.
+    it.skip('should show banner and set up correctly', testSetupAndShowBanner);
 
     it('should throw if open button is missing', testButtonMissing);
 

@@ -40,6 +40,9 @@ import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
+// Used to surface console errors as mocha test failures.
+let consoleSandbox;
+
 // All exposed describes.
 global.describes = describes;
 
@@ -265,6 +268,10 @@ sinon.sandbox.create = function(config) {
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
+  consoleSandbox = sinon.sandbox.create();
+  consoleSandbox.stub(console, 'error').callsFake((...messages) => {
+    throw new Error(messages.join(' '));
+  });
 });
 
 function beforeTest() {
@@ -285,6 +292,7 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
+  consoleSandbox.restore();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
