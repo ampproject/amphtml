@@ -16,7 +16,6 @@
 
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
-@import './amp-story-hint.css';
 @import './amp-story-ads.css';
 @import './amp-story-share.css';
 
@@ -163,6 +162,21 @@ amp-story:not([desktop]) >
   position: absolute !important;
   background: rgba(117, 117, 117, 0.3) !important;
   z-index: 2 !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+amp-video::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 amp-story-cta-layer, amp-story-grid-layer {
@@ -503,69 +517,6 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   white-space: nowrap !important;
-}
-
-amp-story[standalone] .i-amphtml-story-no-rotation-overlay,
-.i-amphtml-story-unsupported-browser-overlay {
-  position: fixed !important;
-  z-index: 200000!important;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 700 !important;
-  line-height: 1.5;
-  padding: 32px;
-  background-color: #000 !important;
-  top:0 !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-no-rotation-overlay {
-  display: none !important;
-}
-
-amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-overlay,
-.i-amphtml-story-unsupported-browser-overlay {
-  display: flex !important;
-}
-
-amp-story .i-amphtml-story-no-rotation-overlay,
-amp-story .i-amphtml-story-unsupported-browser-overlay {
-  color: #fff!important;
-}
-
-amp-story .i-amphtml-rotate-icon,
-amp-story .i-amphtml-desktop-size-icon,
-amp-story .i-amphtml-gear-icon {
-  background-repeat: no-repeat!important;
-  background-position: center center!important;
-  border-radius: 50%!important;
-  background-color: #fff!important;
-  padding: 16px!important;
-  height: 24px!important;
-  width: 24px!important;
-  margin: 16px auto!important;
-}
-
-amp-story .i-amphtml-rotate-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>')!important;
-}
-
-amp-story .i-amphtml-gear-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 20 20" fill="#000000"><path fill="none" d="M0 0h20v20H0V0z"/><path d="M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78L12 2.34c-.03-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>')!important;
-}
-
-amp-story .i-amphtml-desktop-size-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M12.01 5.5L10 8h4l-1.99-2.5zM18 10v4l2.5-1.99L18 10zM6 10l-2.5 2.01L6 14v-4zm8 6h-4l2.01 2.5L14 16zm7-13H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>')!important;
-}
-
-amp-story .i-amphtml-story-overlay-text {
-  color: #fff !important;
-  font-weight: 700 !important;
 }
 
 .i-amphtml-story-button-container {

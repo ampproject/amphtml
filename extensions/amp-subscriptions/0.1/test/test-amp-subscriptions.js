@@ -34,6 +34,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let element;
   let pageConfig;
   let subscriptionService;
+  let configResolver;
+
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
 
@@ -65,7 +67,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
-        .callsFake(() => Promise.resolve(pageConfig));
+        .callsFake(function() {
+          configResolver = this;
+          return Promise.resolve(pageConfig);
+        });
     sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
   });
@@ -96,6 +101,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   it('should discover page configuration', () => {
     return subscriptionService.initialize_().then(() => {
       expect(subscriptionService.pageConfig_).to.equal(pageConfig);
+    });
+  });
+
+  it('should search ampdoc-scoped config', () => {
+    return subscriptionService.initialize_().then(() => {
+      expect(configResolver.doc_.ampdoc_).to.equal(ampdoc);
     });
   });
 
@@ -261,6 +272,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('viewer authorization', () => {
     let responseStub;
+    const fakeAuthToken = {
+      'authorization': 'faketoken',
+    };
     const entitlementData = {source: 'local',
       service: 'local', products, subscriptionToken: 'token'};
     const entitlement = Entitlement.parseFromJson(entitlementData);
@@ -271,9 +285,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.doesViewerProvideAuth_ = true;
       responseStub = sandbox.stub(subscriptionService.viewer_,
           'sendMessageAwaitResponse').callsFake(() =>
-        Promise.resolve({
-          'authorization': 'faketoken',
-        }));
+        Promise.resolve(fakeAuthToken));
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
       sandbox.stub(subscriptionService.jwtHelper_, 'decode')
@@ -309,8 +321,13 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
               const resolvedEntitlement =
                   subscriptionService.platformStore_.entitlements_['local'];
               expect(resolvedEntitlement).to.be.not.null;
-              expect(resolvedEntitlement.json()).to.deep.equal(
-                  entitlement.json());
+              expect(resolvedEntitlement.service).to.equal(entitlement.service);
+              expect(resolvedEntitlement.source).to.equal(entitlement.source);
+              expect(resolvedEntitlement.products).to.deep
+                  .equal(entitlement.products);
+              // raw should be the data which was resolved via sendMessageAwaitResponse.
+              expect(resolvedEntitlement.raw).to
+                  .equal(fakeAuthToken['authorization']);
             });
       });
     });

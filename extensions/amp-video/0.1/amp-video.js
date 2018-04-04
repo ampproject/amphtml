@@ -219,11 +219,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
 
-    // amp-story coordinates playback based on page activation, as opposed to
-    // visibility.
-    // TODO(alanorozco, #12712): amp-story should coordinate resumeCallback.
-    Services.videoManagerForDoc(this.element).register(this,
-        /* manageAutoplay */ !this.isStoryVideo_);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */

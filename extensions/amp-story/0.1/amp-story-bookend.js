@@ -42,10 +42,6 @@ import {throttle} from '../../../src/utils/rate-limit';
 export let BookendConfigDef;
 
 
-/** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
-
-
 /**
  * Scroll amount required for full-bleed in px.
  * @private @const {number}
@@ -209,9 +205,9 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 export class Bookend {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the bookend
+   * @param {!Element} parentEl Element where to append the bookend
    */
-  constructor(win, storyElement) {
+  constructor(win, parentEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -239,6 +235,9 @@ export class Bookend {
      */
     this.bookendEl_ = null;
 
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestService(this.win_);
+
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
@@ -246,7 +245,7 @@ export class Bookend {
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -269,7 +268,7 @@ export class Bookend {
 
     this.replayButton_ = this.buildReplayButton_();
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -277,7 +276,7 @@ export class Bookend {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      this.storyElement_.appendChild(this.getRoot());
+      this.parentEl_.appendChild(this.getRoot());
     });
   }
 
@@ -365,7 +364,7 @@ export class Bookend {
       return Promise.resolve(this.config_);
     }
 
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
+    return this.requestService_.loadBookendConfig()
         .then(response => {
           if (!response) {
             return null;
@@ -388,31 +387,6 @@ export class Bookend {
         .catch(e => {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
-        });
-  }
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
-
-    const ampdoc = getAmpdoc(this.storyElement_);
-
-    return Services.urlReplacementsForDoc(ampdoc)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
-          return response.json();
         });
   }
 
@@ -510,11 +484,6 @@ export class Bookend {
     this.assertBuilt_();
     this.isConfigRendered_ = true;
 
-    if (bookendConfig.shareProviders) {
-      this.shareWidget_.setProviders(
-          dev().assert(bookendConfig.shareProviders));
-    }
-
     this.setRelatedArticles_(bookendConfig.relatedArticles);
   }
 
@@ -569,7 +538,7 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_() {
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {

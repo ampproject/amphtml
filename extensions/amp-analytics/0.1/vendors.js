@@ -246,12 +246,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  'bg': {
-    'transport': {
-      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
-    },
-  },
-
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
@@ -2064,3 +2058,21 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+/**
+ * Vendors who have IAB viewability certification may use iframe transport
+ * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
+ * put only the specification of the iframe location in the object below,
+ * and put everything else (requests, triggers, etc.) in the object above.
+ * @const {!JsonObject}
+ */
+export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+    },
+  },
+});
+
+// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
+Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);
