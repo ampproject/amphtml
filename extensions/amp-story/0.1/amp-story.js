@@ -118,9 +118,6 @@ const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 /** @private @const {string} */
 const AD_SHOWING_ATTR = 'ad-showing';
 
-/** @private @const {string} */
-const AD_PAGE_ID_PREFIX = 'i-amphtml-ad-page';
-
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -939,9 +936,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   setHistoryStatePageId_(pageId) {
     // Never save ad pages to history as they are unique to each visit.
-    if (pageId.slice(0, AD_PAGE_ID_PREFIX.length) === AD_PAGE_ID_PREFIX) {
+    const page = this.getPageById(pageId);
+    if (page.isAd()) {
       return;
     }
+
     const history = this.win.history;
     if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
