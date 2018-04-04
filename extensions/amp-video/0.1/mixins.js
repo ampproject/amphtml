@@ -197,10 +197,6 @@ export class IntermediatePropagationMixin {
 
     baseNode.appendChild(fragment);
 
-    for (var i = 0; i < Things.length; i++) {
-      Things[i]
-    }
-
     this.impl_ = null; // GC
     this.dummyElement_ = null; // GC
     this.eventsToForward_ = null; // GC
