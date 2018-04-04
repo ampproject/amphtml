@@ -31,7 +31,7 @@ describes.realWin('amp-viqeo', {
   function getViqeo(viqeoProfileId, viqeoId, opt_params) {
     const viqeo = doc.createElement('amp-viqeo');
     viqeo.setAttribute('data-profileId', viqeoProfileId);
-    viqeo.setAttribute('data-viqeoId', viqeoId);
+    viqeo.setAttribute('data-videoId', viqeoId);
     viqeo.setAttribute('width', 640);
     viqeo.setAttribute('height', 360);
     if (opt_params && opt_params.responsive) {
@@ -43,21 +43,12 @@ describes.realWin('amp-viqeo', {
     }).then(() => viqeo);
   }
 
-  // it('renders', () => {
-  //   return getViqeo(184, 'b51b70cdbb06248f4438', {responsive: true})
-  //       .then(viqeo => {
-  //         const viqeoSlot = viqeo.querySelector('.viqeo-slot');
-  //         expect(viqeoSlot).to.not.be.null;
-  //         expect(viqeoSlot.tagName).to.equal('DIV');
-  //       });
-  // });
-  //
-  it('requires data-viqeoId', () => {
+  it('requires data-videoId', () => {
     return getViqeo(184, '').should.eventually.be.rejectedWith(
         /The data-videoId attribute is required for/);
   });
 
-  it('requires data-viqeoId', () => {
+  it('requires data-profileId', () => {
     return getViqeo('', 'b51b70cdbb06248f4438')
         .should.eventually.be.rejectedWith(
             /The data-profileId attribute is required for/);
