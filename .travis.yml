@@ -22,7 +22,7 @@ before_script:
 script: node build-system/pr-check.js
 after_script:
   - ./node_modules/.bin/greenkeeper-lockfile-upload
-  - build-system/stop_sauce_connect.sh
+  - build-system/sauce_connect/stop_sauce_connect.sh
 branches:
   only:
     - master
@@ -32,7 +32,7 @@ branches:
     - /^greenkeeper/.*$/
 env:
   global:
-    - SAUCE_USERNAME="amphtml-travis-sauce"
+    - SAUCE_USERNAME="amphtml"
     - NPM_CONFIG_PROGRESS="false"
 addons:
   chrome: stable

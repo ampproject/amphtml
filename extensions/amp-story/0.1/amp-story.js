@@ -36,6 +36,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -183,9 +184,17 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_ = new AmpStoryStoreService(this.win);
     registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
 
+    /** @private @const {!AmpStoryRequestService} */
+    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
+    registerServiceBuilder(
+        this.win, 'story-request', () => this.requestService_);
+
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
+
+    /** @private {!AmpStoryAnalytics} */
+    this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -293,11 +302,10 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
     }
 
-    this.navigationState_.observe(stateChangeEvent =>
-      (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
-
-    this.navigationState_.observe(stateChangeEvent =>
-      this.variableService_.onStateChange(stateChangeEvent));
+    this.navigationState_.observe(stateChangeEvent => {
+      this.variableService_.onNavigationStateChange(stateChangeEvent);
+      this.analytics_.onNavigationStateChange(stateChangeEvent);
+    });
   }
 
 
@@ -325,7 +333,6 @@ export class AmpStory extends AMP.BaseElement {
     this.updateAudioIcon_();
   }
 
-
   /** @private */
   initializeListeners_() {
     this.element.addEventListener(EventType.NEXT_PAGE, () => {
@@ -338,7 +345,14 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+      this.variableService_.onMutedStateChange(isMuted);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      // We do not want to trigger an analytics event for the initialization of
+      // the muted state.
+      this.analytics_.onMutedStateChange(isMuted);
+    }, false /** callToInitialize */);
 
     this.storeService_.subscribe(
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
@@ -527,12 +541,6 @@ export class AmpStory extends AMP.BaseElement {
     container.insertBefore(
         this.shareWidget_.build(this.getAmpDoc()),
         shareLabelEl);
-
-    this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
-      if (bookendConfig !== null) {
-        this.shareWidget_.setProviders(bookendConfig.shareProviders);
-      }
-    });
 
     return container;
   }

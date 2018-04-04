@@ -34,6 +34,11 @@ export let SubscriptionService;
 
 export class Services {
   /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
+  /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
@@ -300,7 +305,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
@@ -309,6 +314,14 @@ export class Services {
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestService(win) {
+    return getService(win, 'story-request');
   }
 
   /**
@@ -395,6 +408,18 @@ export class Services {
     return (/** @type {!Promise<!../extensions/amp-user-notification/0.1/amp-user-notification.UserNotificationManager>} */
       (getElementServiceForDoc(nodeOrDoc, 'userNotificationManager',
           'amp-user-notification')));
+  }
+
+  /**
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
   }
 
   /**
