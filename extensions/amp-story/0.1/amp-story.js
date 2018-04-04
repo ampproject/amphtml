@@ -36,6 +36,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -183,6 +184,11 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_ = new AmpStoryStoreService(this.win);
     registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
 
+    /** @private @const {!AmpStoryRequestService} */
+    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
+    registerServiceBuilder(
+        this.win, 'story-request', () => this.requestService_);
+
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
@@ -326,7 +332,6 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
   }
-
 
   /** @private */
   initializeListeners_() {
@@ -536,12 +541,6 @@ export class AmpStory extends AMP.BaseElement {
     container.insertBefore(
         this.shareWidget_.build(this.getAmpDoc()),
         shareLabelEl);
-
-    this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
-      if (bookendConfig !== null) {
-        this.shareWidget_.setProviders(bookendConfig.shareProviders);
-      }
-    });
 
     return container;
   }
