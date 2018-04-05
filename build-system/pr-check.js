@@ -379,11 +379,6 @@ const command = {
   buildValidator: function() {
     timedExecOrDie('gulp validator');
   },
-  checkBundleSize: function(compiled) {
-    const file = compiled ? './dist/v0.js' : './dist/amp.js';
-    const size = compiled ? '75kB' : '333kB';
-    timedExecOrDie(`npx bundlesize -f "${file}" -s "${size}"`);
-  },
 };
 
 function runAllCommands() {
@@ -392,7 +387,6 @@ function runAllCommands() {
     command.testBuildSystem();
     command.cleanBuild();
     command.buildRuntime();
-    command.checkBundleSize(/* compiled */ false);
     command.runVisualDiffTests(/* opt_mode */ 'master');
     command.runLintCheck();
     command.runJsonCheck();
@@ -406,7 +400,6 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.checkBundleSize(/* compiled */ true);
     command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
@@ -427,7 +420,6 @@ function runAllCommandsLocally() {
   }
 
   // These tests need a build.
-  command.checkBundleSize(/* compiled */ false);
   command.runPresubmitTests();
   command.runVisualDiffTests();
   command.runUnitTests();
@@ -599,7 +591,6 @@ function main() {
         buildTargets.has('VISUAL_DIFF')) {
       command.cleanBuild();
       command.buildRuntime();
-      command.checkBundleSize(/* compiled */ false);
       command.runVisualDiffTests();
     }
     command.runPresubmitTests();

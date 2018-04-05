@@ -27,6 +27,7 @@ const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+const exec = require('./build-system/exec').exec;
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
@@ -797,7 +798,25 @@ function performBuild(watch) {
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
       compile(watch),
     ]);
+  }).then(() => {
+
   });
+}
+
+/**
+ * @param {boolean} compiled
+ */
+function checkBinarySize(compiled) {
+  const file = compiled ? './dist/v0.js' : './dist/amp.js';
+  const size = compiled ? '75.1kB' : '332.3kB';
+  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
+  log(green('Running ') + cyan(cmd) + green('...\n'));
+  const p = exec(cmd);
+  if (p.status != 0) {
+    log(cyan('bundlesize: ') + red('The main bundle (amp.js/v0.js) has ' +
+        'exceeded its size cap.') + ' This is part of a new effort to reduce ' +
+        'bundle size (see #14392). Please contact @choumx if this blocks you.');
+  }
 }
 
 /**
@@ -815,7 +834,9 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  return performBuild()
+      .then(() => checkBinarySize(/* compiled */ false))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -867,7 +888,9 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
-      }).then(() => exitCtrlcHandler(handlerProcess));
+      })
+      .then(() => checkBinarySize(/* compiled */ true))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
