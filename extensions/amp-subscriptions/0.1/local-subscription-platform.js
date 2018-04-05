@@ -35,7 +35,7 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
-   * @param {!./analytics} subscriptionAnalytics
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
   constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
     /** @const */
@@ -71,7 +71,7 @@ export class LocalSubscriptionPlatform {
     /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
-    /** @private {!SubscriptionAnalytics} */
+    /** @private {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = subscriptionAnalytics;
 
     user().assert(this.serviceConfig_['actions'],

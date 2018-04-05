@@ -136,7 +136,7 @@ export class SubscriptionService {
               this.ampdoc_,
               serviceConfig,
               this.serviceAdapter_,
-              this.subscriptionAnalytics_,
+              this.subscriptionAnalytics_
           )
       );
     }
@@ -178,6 +178,7 @@ export class SubscriptionService {
 
       this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
           subscriptionPlatform);
+      this.subscriptionAnalytics_.event('subscriptions-platform-registered');
 
       this.fetchEntitlements_(subscriptionPlatform);
     });
@@ -212,6 +213,7 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
+    this.subscriptionAnalytics_.event('subscriptions-entitlement-resolved');
   }
 
   /**
@@ -249,7 +251,7 @@ export class SubscriptionService {
    */
   start() {
     this.initialize_().then(() => {
-
+      this.subscriptionAnalytics_.event('subscriptions-started');
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
@@ -387,6 +389,7 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
+      this.subscriptionAnalytics_.event('subscriptions-platform-activated');
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
@@ -422,6 +425,7 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
+      this.subscriptionAnalytics_.event('subscriptions-platform-re-authorized');
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
@@ -436,7 +440,7 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
-
+    this.subscriptionAnalytics_.event('subscriptions-action-delegated');
     return localPlatform.executeAction(action);
   }
 }
