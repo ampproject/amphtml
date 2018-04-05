@@ -17,8 +17,6 @@
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-geo
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-geo"
@@ -44,8 +42,6 @@ tags: {  # <amp-geo>
 }
 tags: {  # amp-geo (json)
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
   tag_name: "SCRIPT"
   spec_name: "amp-geo extension .json script"
   requires_extension: "amp-geo"

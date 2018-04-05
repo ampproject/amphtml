@@ -121,7 +121,7 @@ export class AmpGeo extends AMP.BaseElement {
     // First see if we've been pre-rendered with a country, if so set it
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
-    if (preRenderMatch && !isProxyOrigin()) {
+    if (preRenderMatch && !isProxyOrigin(doc.location)) {
       this.mode_ = mode.GEO_PRERENDER;
       /** @private {string} */
       this.country_ = preRenderMatch[1];

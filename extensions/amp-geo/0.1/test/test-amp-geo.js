@@ -24,7 +24,8 @@ describes.realWin('amp-geo', {
   },
 }, env => {
 
-  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","ISOCountryGroups":["nafta","unknown"],"nafta":true,"unknown":true}</script></amp-state>'; // eslint-disable-line
+  const expectedState = '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>'; // eslint-disable-line  
+
 
   const config = {
     ISOCountryGroups: {
@@ -47,6 +48,7 @@ describes.realWin('amp-geo', {
   let ampdoc;
   let geo;
 
+
   beforeEach(() => {
     win = env.win;
     doc = win.document;
@@ -54,6 +56,11 @@ describes.realWin('amp-geo', {
     const el = doc.createElement('amp-geo');
     el.ampdoc_ = ampdoc;
     geo = new AmpGeo(el);
+  
+  });
+
+  afterEach(() => {
+    console.log(doc.body.outerHTML);
   });
 
   function addConfigElement(opt_elementName, opt_type, opt_textContent) {
@@ -77,34 +84,34 @@ describes.realWin('amp-geo', {
     }).to.not.throw();
   });
 
-  // it('should throw if it has multiple child elements', () => {
-  //   expect(() => {
-  //     addConfigElement('script');
-  //     addConfigElement('script');
-  //     geo.buildCallback();
-  //   }).to.throw(/should have exactly one <script> child​​​/);
-  // });
+  it('should throw if it has multiple child elements', () => {
+    expect(() => {
+      addConfigElement('script');
+      addConfigElement('script');
+      geo.buildCallback();
+    }).to.throw(/should have exactly one <script> child​​​/);
+  });
 
-  // it('should throw if the child element is not a <script> element', () => {
-  //   expect(() => {
-  //     addConfigElement('a');
-  //     geo.buildCallback();
-  //   }).to.throw(/script/);
-  // });
+  it('should throw if the child element is not a <script> element', () => {
+    expect(() => {
+      addConfigElement('a');
+      geo.buildCallback();
+    }).to.throw(/script/);
+  });
 
-  // it('should throw if the child script element is not json typed', () => {
-  //   expect(() => {
-  //     addConfigElement('script', 'wrongtype');
-  //     geo.buildCallback();
-  //   }).to.throw(/application\/json/);
-  // });
+  it('should throw if the child script element is not json typed', () => {
+    expect(() => {
+      addConfigElement('script', 'wrongtype');
+      geo.buildCallback();
+    }).to.throw(/application\/json/);
+  });
 
-  // it('should throw if the child script element has non-JSON content', () => {
-  //   expect(() => {
-  //     addConfigElement('script', 'application/json', '{not json}');
-  //     geo.buildCallback();
-  //   }).to.throw();
-  // });
+  it('should throw if the child script element has non-JSON content', () => {
+    expect(() => {
+      addConfigElement('script', 'application/json', '{not json}');
+      geo.buildCallback();
+    }).to.throw();
+  });
 
   it('should add classes to body element for the geo', () => {
     addConfigElement('script');
@@ -124,7 +131,8 @@ describes.realWin('amp-geo', {
   });
 
   it('should insert an amp-state if enabled', () => {
-    addConfigElement('script', 'application/json', JSON.stringify(configWithState));
+    addConfigElement('script', 'application/json',
+        JSON.stringify(configWithState));
     geo.buildCallback();
 
     return Services.geoForOrNull(win).then(() => {
