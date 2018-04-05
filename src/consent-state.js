@@ -21,8 +21,9 @@ import {Services} from './services';
  * @enum {number}
  */
 export const CONSENT_POLICY_STATE = {
-  SUFFICIENT: 0,
-  INSUFFICIENT: 1,
+  UNKNOWN: 0,
+  SUFFICIENT: 1,
+  INSUFFICIENT: 2,
 };
 
 /**
@@ -32,7 +33,7 @@ export const CONSENT_POLICY_STATE = {
  * @param {string} policyId
  * @return {!Promise<?CONSENT_POLICY_STATE>}
  */
-export function getConsentPolicyPromise(ampdoc, policyId) {
+export function getConsentPolicyState(ampdoc, policyId) {
   return Services.consentPolicyServiceForDocOrNull(ampdoc)
       .then(consentPolicy => {
         if (!consentPolicy) {
@@ -42,3 +43,5 @@ export function getConsentPolicyPromise(ampdoc, policyId) {
             /** @type {string} */ (policyId));
       });
 }
+
+
