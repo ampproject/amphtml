@@ -140,6 +140,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.update(CONSENT_ITEM_STATE.UNKNOWN);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
+        instance.update(CONSENT_ITEM_STATE.DISMISSED);
+        yield macroTask();
+        expect(storageSetSpy).to.not.be.called;
         instance.update(CONSENT_ITEM_STATE.GRANTED);
         yield macroTask();
         expect(storageSetSpy).to.be.calledOnce;
@@ -178,7 +181,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         let value;
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        yield instance.update(CONSENT_ITEM_STATE.DISMISSED);
+        yield instance.get().then(v => value = v);
+        expect(value).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
         storageValue['amp-consent:test'] = true;
+        yield instance.get().then(v => value = v);
+        expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
+        yield instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield instance.get().then(v => value = v);
         expect(value).to.equal(CONSENT_ITEM_STATE.GRANTED);
         yield instance.update(CONSENT_ITEM_STATE.REJECTED);
