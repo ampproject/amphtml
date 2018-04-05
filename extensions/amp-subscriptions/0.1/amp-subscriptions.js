@@ -307,7 +307,7 @@ export class SubscriptionService {
           decodedData['aud'] == sourceOrigin,
           `The mismatching "aud" field: ${decodedData['aud']}`);
       // Expiration time is in seconds.
-      user().assert(decodedData['exp'] > Date.now() / 1000,
+      user().assert(decodedData['exp'] > Math.floor(Date.now() / 1000),
           'Payload is expired');
 
       const entitlements = decodedData['entitlements'];
