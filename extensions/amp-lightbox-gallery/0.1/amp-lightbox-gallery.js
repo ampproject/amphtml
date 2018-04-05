@@ -457,7 +457,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (state.isInStandardMode && state.descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
-        toggle(this.navControls_, false);
+        toggle(dev().assertElement(this.navControls_), false);
       } else if (state.isInOverflowMode) {
         this.clearDescOverflowState_();
       }
@@ -469,25 +469,37 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }, {});
   }
 
+  /**
+   * @private
+   */
   clearDescOverflowState_() {
     this.descriptionBox_./*OK*/scrollTop = 0;
     this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
     this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
-    toggle(this.navControls_, true);
+    toggle(dev().assertElement(this.navControls_), true);
   }
 
+  /**
+   * @private
+   */
   nextSlide_() {
     dev().assert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionNext();
     });
   }
 
+  /**
+   * @private
+   */
   prevSlide_() {
     dev().assert(this.carousel_).getImpl().then(carousel => {
       carousel.interactionPrev();
     });
   }
 
+  /**
+   * @private
+   */
   buildNavControls_() {
     this.navControls_ = this.win.document.createElement('div');
     const nextSlide = this.nextSlide_.bind(this);
@@ -510,7 +522,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
-
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     const closeButton = this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
