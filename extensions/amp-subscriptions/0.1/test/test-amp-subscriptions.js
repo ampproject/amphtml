@@ -270,6 +270,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('viewer authorization', () => {
     let responseStub;
+    let sendAuthTokenStub;
+    let decodeStub;
     const fakeAuthToken = {
       'authorization': 'faketoken',
     };
@@ -286,13 +288,15 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
         Promise.resolve(fakeAuthToken));
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
-      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+      decodeStub = sandbox.stub(subscriptionService.jwtHelper_, 'decode')
           .callsFake(() => {return {
             'aud': getWinOrigin(win),
             // Expiry after 4 minutes.
             'exp': Math.floor(Date.now() / 1000) + 4 * 60,
             'entitlements': [entitlementData],
           };});
+      sendAuthTokenStub = sandbox.stub(subscriptionService,
+          'sendAuthTokenErrorToViewer_');
     });
     it('should not ask for auth if viewer does not have the capability', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
@@ -353,6 +357,24 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           new SubscriptionPlatform());
       return subscriptionService.initialize_().then(() => {
         expect(fetchEntitlementsStub).to.be.called;
+      });
+    });
+
+    it('should send auth rejection message for payload expiration', () => {
+      decodeStub.restore();
+      decodeStub = sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            // Expiry after 4 minutes.
+            'exp': Math.floor(Date.now() / 1000) + 1 * 60,
+            'entitlements': [entitlementData],
+          };});
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        return subscriptionService.viewer_.sendMessageAwaitResponse()
+            .then(() => {
+              expect(sendAuthTokenStub).to.be.calledWith('Payload is expired');
+            });
       });
     });
   });
