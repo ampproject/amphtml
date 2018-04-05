@@ -204,7 +204,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // TODO(gmajoulet): preload it later and only on mobile.
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
-    this.shareMenu_ = new ShareMenu(this.win, this.element);
+    // this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
