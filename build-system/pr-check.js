@@ -29,7 +29,6 @@ const atob = require('atob');
 const colors = require('ansi-colors');
 const exec = require('./exec').exec;
 const execOrDie = require('./exec').execOrDie;
-const fs = require('fs');
 const getStderr = require('./exec').getStderr;
 const getStdout = require('./exec').getStdout;
 const path = require('path');
@@ -382,9 +381,7 @@ const command = {
   },
   checkBundleSize: function(compiled) {
     const file = compiled ? './dist/v0.js' : './dist/amp.js';
-    const size = compiled ? '75kB' : '315kB';
-    // TODO(choumx): Debugging only.
-    console.log(fs.readFileSync(file).toString());
+    const size = compiled ? '75kB' : '333kB';
     timedExecOrDie(`npx bundlesize -f "${file}" -s "${size}"`);
   },
 };
