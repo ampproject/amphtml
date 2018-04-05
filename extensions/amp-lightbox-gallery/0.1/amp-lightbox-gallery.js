@@ -1210,26 +1210,24 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     this.vsync_.mutate(() => {
       thumbnails.forEach(thumbnail => {
-        if (thumbnail.timestampPromise) {
-          thumbnail.timestampPromise.then(ts => {
-            // Many video players (e.g. amp-youtube) that don't support this API
-            // will often return 1. So sometimes we will erroneously show a timestamp
-            // of 1 second instead of no timestamp.
-            if (!ts || isNaN(ts)) {
-              return;
-            }
-            const timestamp = this.toTimestampString_(ts);
-            const thumbnailContainer = dev().assertElement(
-                this.gallery_.childNodes[thumbnail.index]);
-            const timestampDiv = childElementByTag(thumbnailContainer, 'div');
-            if (timestampDiv.childNodes.length > 1) {
-              timestampDiv.removeChild(timestampDiv.childNodes[1]);
-            }
-            timestampDiv.appendChild(
-                this.win.document.createTextNode(timestamp));
-            timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
-          });
-        }
+        thumbnail.timestampPromise.then(ts => {
+          // Many video players (e.g. amp-youtube) that don't support this API
+          // will often return 1. So sometimes we will erroneously show a timestamp
+          // of 1 second instead of no timestamp.
+          if (!ts || isNaN(ts)) {
+            return;
+          }
+          const timestamp = this.toTimestampString_(ts);
+          const thumbnailContainer = dev().assertElement(
+              this.gallery_.childNodes[thumbnail.index]);
+          const timestampDiv = childElementByTag(thumbnailContainer, 'div');
+          if (timestampDiv.childNodes.length > 1) {
+            timestampDiv.removeChild(timestampDiv.childNodes[1]);
+          }
+          timestampDiv.appendChild(
+              this.win.document.createTextNode(timestamp));
+          timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+        });
       });
     });
   }

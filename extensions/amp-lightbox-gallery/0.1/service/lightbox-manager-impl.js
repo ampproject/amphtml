@@ -59,7 +59,7 @@ const SLIDE_SELECTOR = '.amp-carousel-slide';
  *  srcset: ?../../../../src/srcset.Srcset,
  *  placeholderSrc: string,
  *  element: !Element,
- *  timestampPromise: ?Promise<number>
+ *  timestampPromise: !Promise<number>
  * }} */
 export let LightboxThumbnailDataDef;
 
@@ -373,14 +373,13 @@ export class LightboxManager {
   /**
    * Gets the duration of a supported video element
    * @param {!Element} element
-   * @returns {!Promise}
+   * @returns {!Promise<number>}
    * @private
    */
   getVideoTimestamp_(element) {
     return VIDEO_TAGS[element.tagName] ?
-      element.getImpl().then(videoPlayer => {
-        return videoPlayer.getDuration();
-      }) : Promise.resolve();
+      element.getImpl().then(videoPlayer =>  videoPlayer.getDuration())
+      : Promise.resolve();
   }
 
   /**
