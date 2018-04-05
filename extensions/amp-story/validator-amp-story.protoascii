@@ -19,6 +19,7 @@ tags: {  # amp-story
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story"
+    allowed_versions: "0.1"
     allowed_versions: "1.0"
     allowed_versions: "latest"
   }
