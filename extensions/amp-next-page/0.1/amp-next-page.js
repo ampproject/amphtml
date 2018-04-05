@@ -27,7 +27,11 @@ import {
   childElementsByTag,
   isJsonScriptTag,
 } from '../../../src/dom';
-import {getServiceForDoc} from '../../../src/service';
+import {
+  getExistingServiceOrNull,
+  getServiceForDoc,
+  registerServiceBuilder,
+} from '../../../src/service';
 import {getSourceOrigin, isProxyOrigin} from '../../../src/url';
 import {
   installPositionObserverServiceForDoc,
@@ -51,8 +55,7 @@ const SEPARATOR_RECOS = 3;
 
 const PRERENDER_VIEWPORT_COUNT = 3;
 
-/** @private {AmpNextPage} */
-let activeInstance_ = null;
+const SERVICE_ID = 'document-recommendations';
 
 /**
  * @typedef {{
@@ -68,11 +71,14 @@ export class AmpNextPage extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    // TODO(emarchiori): Consider using a service instead of singleton.
-    if (activeInstance_) {
-      return;
+    /** @private {boolean} */
+    this.isActive_ = false;
+
+    const service = getExistingServiceOrNull(this.win, SERVICE_ID);
+    if (service !== null) {
+      registerServiceBuilder(this.win, SERVICE_ID, () => this);
+      this.isActive_ = true;
     }
-    activeInstance_ = this;
 
     const ampDoc = this.getAmpDoc();
     installPositionObserverServiceForDoc(ampDoc);
@@ -246,7 +252,7 @@ export class AmpNextPage extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
-    if (activeInstance_ !== this) {
+    if (!this.isActive_) {
       return Promise.resolve();
     }
 
