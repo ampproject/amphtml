@@ -302,10 +302,13 @@ export class SubscriptionService {
             Entitlement.empty('local'));
       }
       const decodedData = this.jwtHelper_.decode(authData);
-      user().assert(decodedData['aud'] == origin ||
-        decodedData['aud'] == sourceOrigin,
-      `The mismatching "aud" field: ${decodedData['aud']}`);
-      user().assert(decodedData['exp'] > Date.now(), 'Payload is expired');
+      user().assert(
+          decodedData['aud'] == origin ||
+          decodedData['aud'] == sourceOrigin,
+          `The mismatching "aud" field: ${decodedData['aud']}`);
+      // Expiration time is in seconds.
+      user().assert(decodedData['exp'] > Date.now() / 1000,
+          'Payload is expired');
 
       const entitlements = decodedData['entitlements'];
       let entitlementJson;

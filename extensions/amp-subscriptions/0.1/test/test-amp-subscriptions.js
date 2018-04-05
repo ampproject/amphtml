@@ -291,7 +291,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       sandbox.stub(subscriptionService.jwtHelper_, 'decode')
           .callsFake(() => {return {
             'aud': getWinOrigin(win),
-            'exp': Date.now() + 4000 * 60, // expiry after 4 minutes
+            'exp': Date.now() / 1000 + 4000 * 60, // expiry after 4 minutes
             'entitlements': [entitlementData],
           };});
     });
