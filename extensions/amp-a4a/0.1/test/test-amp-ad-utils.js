@@ -17,7 +17,7 @@
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdMetadata} from '../amp-ad-utils';
 
-describe('CryptographicValidator', () => {
+describe('getAmpAdMetadata', () => {
 
   it('should parse metadata successfully', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserialized);
