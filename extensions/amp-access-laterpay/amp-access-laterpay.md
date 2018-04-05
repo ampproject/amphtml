@@ -32,7 +32,7 @@ limitations under the License.
         <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
       </div>
       <div>
-        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js">&lt;/script></code>
+        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.2.js">&lt;/script></code>
       </div>
     </td>
   </tr>
