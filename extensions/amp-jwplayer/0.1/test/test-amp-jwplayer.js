@@ -110,9 +110,22 @@ describes.realWin('amp-jwplayer', {
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
       });
     });
-
+    it('should propagate aria-label to placeholder', () => {
+      return getjwplayer({
+        'data-media-id': 'Wferorsv',
+        'data-player-id': 'sDZEo0ea',
+        'aria-label': 'interesting video',
+      }).then(jwp => {
+        const img = jwp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.getAttribute('aria-label')).to.equal('interesting video');
+        expect(img.getAttribute('alt'))
+            .to.equal('Loading video - interesting video');
+      });
+    });
     it('should not create a placeholder for playlists', () => {
       return getjwplayer({
         'data-playlist-id': 'Wferorsv',

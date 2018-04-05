@@ -105,6 +105,21 @@ describes.realWin('amp-kaltura-player', {
         expect(img.getAttribute('layout')).to.equal('fill');
         expect(img.hasAttribute('placeholder')).to.be.true;
         expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(img.getAttribute('alt')).to.equal('Loading video');
+      });
+    });
+    it('should propagate aria label to placeholder image', () => {
+      return getKaltura({
+        'data-partner': '1281471',
+        'data-entryid': '1_3ts1ms9c',
+        'data-uiconf': '33502051',
+        'aria-label': 'great video',
+      }).then(kp => {
+        const img = kp.querySelector('amp-img');
+        expect(img).to.not.be.null;
+        expect(img.hasAttribute('placeholder')).to.be.true;
+        expect(img.getAttribute('aria-label')).to.equal('great video');
+        expect(img.getAttribute('alt')).to.equal('Loading video - great video');
       });
     });
   });
