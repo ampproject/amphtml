@@ -135,16 +135,16 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       it('promise should resolve when consents are dimissed', function* () {
         instance = new ConsentPolicyInstance(['ABC']);
-        let policyState = null;
-        instance.getReadyPromise().then(state => policyState = state);
+        let ready = false;
+        instance.getReadyPromise().then(() => ready = true);
         yield macroTask();
-        expect(policyState).to.be.null;
+        expect(ready).to.be.false;
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.UNKNOWN);
         yield macroTask();
-        expect(policyState).to.be.null;
+        expect(ready).to.be.false;
         instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.DISMISSED);
         yield macroTask();
-        expect(policyState).to.equal(CONSENT_POLICY_STATE.INSUFFICIENT);
+        expect(ready).to.be.true;
       });
     });
 
