@@ -1176,6 +1176,7 @@ describe('amp-a4a', () => {
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
         }
+        a4a.promiseErrorHandler_ = () => {};
         if (opt_failAmpRender) {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
               Promise.reject('amp render failure'));
@@ -1225,12 +1226,10 @@ describe('amp-a4a', () => {
     it('#layoutCallback not valid AMP', () => {
       return executeLayoutCallbackTest(false);
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('#layoutCallback AMP render fail, recover non-AMP', () => {
+    it('#layoutCallback AMP render fail, recover non-AMP', () => {
       return executeLayoutCallbackTest(true, true);
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should run end-to-end in the presence of an XHR error', () => {
+    it('should run end-to-end in the presence of an XHR error', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1260,8 +1259,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should use adUrl from onNetworkFailure', () => {
+    it('should use adUrl from onNetworkFailure', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1294,9 +1292,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should not execute frame GET if disabled via ' +
-        'onNetworkFailure', () => {
+    it('should not execute frame GET if disabled via onNetworkFailure', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1305,6 +1301,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.promiseErrorHandler_ = () => {};
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'onNetworkFailure')
             .withArgs(sinon.match(val =>
@@ -1320,9 +1317,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should handle XHR error when resolves before ' +
-        'layoutCallback', () => {
+    it('should handle XHR error when resolves before layoutCallback', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1343,8 +1338,7 @@ describe('amp-a4a', () => {
         }));
       });
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should handle XHR error when resolves after ' +
+    it('should handle XHR error when resolves after ' +
         'layoutCallback', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
@@ -1376,11 +1370,19 @@ describe('amp-a4a', () => {
     [
       {
         name: '204',
-        fn: () => adResponse.status = 204,
+        fn: () => {
+          adResponse.status = 204;
+          // Response constructor requires null body for non 200 responses.
+          adResponse.body = null;
+        },
       },
       {
         name: '500',
-        fn: () => adResponse.status = 500,
+        fn: () => {
+          adResponse.status = 500;
+          // Response constructor requires null body for non 200 responses.
+          adResponse.body = null;
+        },
       },
       {
         name: 'empty body',
