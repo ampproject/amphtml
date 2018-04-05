@@ -35,8 +35,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let pageConfig;
   let subscriptionService;
   let configResolver;
-  let resolveConfigStub;
-  let platformConfigStub;
 
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
@@ -68,13 +66,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
-    resolveConfigStub = sandbox.stub(
-        PageConfigResolver.prototype, 'resolveConfig')
+    sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(function() {
           configResolver = this;
           return Promise.resolve(pageConfig);
         });
-    platformConfigStub = sandbox.stub(subscriptionService, 'getPlatformConfig_')
+    sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
   });
 

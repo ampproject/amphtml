@@ -16,8 +16,7 @@
 
 import {UrlBuilder} from '../url-builder';
 
-
-describes.skip(() => realWin('UrlBuilder', {amp: true}, env => {
+describes.realWin('UrlBuilder', {amp: true}, env => {
   let ampdoc;
   let readerIdPromise;
   let urlBuilder;
@@ -82,4 +81,4 @@ describes.skip(() => realWin('UrlBuilder', {amp: true}, env => {
       });
     });
   });
-}));
+});
