@@ -77,10 +77,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should call `initialize_` on start', () => {
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    expect(() => {
-      subscriptionService.start();
-      expect(initializeStub).to.be.calledOnce;
-    }).to.throw;
+    expect(subscriptionService.start()).to.throw;
+    expect(initializeStub).to.be.calledOnce;
   });
 
   it('should setup store and page on start', () => {
