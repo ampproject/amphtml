@@ -46,7 +46,7 @@ export class CryptographicValidator extends Validator {
    */
   createOutput_(verificationSucceeded, bytes) {
     const creativeData = {
-      creativeMetadata: this.getAmpAdMetadata_(utf8Decode(bytes)),
+      creativeMetadata: getAmpAdMetadata(utf8Decode(bytes)),
     };
     return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
       type: verificationSucceeded ?
@@ -72,18 +72,10 @@ export class CryptographicValidator extends Validator {
             // TODO(@taymonbeal, #9274): differentiate between these
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
-              user().error(TAG, 'Signature verification failed');
+              user().error(TAG,
+                  `Signature verification failed with status ${status}.`);
               return this.createOutput_(false, unvalidatedBytes);
           }
         });
-  }
-
-  /**
-   * @param {string} creative
-   * @return {?./amp-ad-type-defs.CreativeMetaDataDef}
-   * @visibleForTesting
-   */
-  getAmpAdMetadata_(creative) {
-    return getAmpAdMetadata(creative);
   }
 }

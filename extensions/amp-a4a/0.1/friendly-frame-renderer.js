@@ -27,9 +27,11 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 
-/** @typedef {{
-      creativeMetaData: ./amp-ad-type-defs.CreativeMetaDataDef,
-    }} */
+/**
+ * @typedef {{
+ *   creativeMetaData: ./amp-ad-type-defs.CreativeMetaDataDef,
+ * }}
+ */
 export let CreativeData;
 
 /**

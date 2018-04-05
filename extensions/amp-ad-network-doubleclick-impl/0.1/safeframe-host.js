@@ -665,7 +665,7 @@ export class SafeframeHostApi {
    * @param {!JsonObject} payload
    * @private
    */
-  handleFluidMessage_(payload) {
+  handleFluidMessage_(payload) { debugger;
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
@@ -685,7 +685,7 @@ export class SafeframeHostApi {
    * container has been resized.
    * @private
    */
-  onFluidResize_() {
+  onFluidResize_() { debugger;
     if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
           this.fluidImpressionUrl_);
