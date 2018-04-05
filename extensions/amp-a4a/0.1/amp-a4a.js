@@ -1251,7 +1251,7 @@ export class AmpA4A extends AMP.BaseElement {
         .fetch(adUrl, xhrInit)
         .catch(error => {
           if (error.response && error.response.status > 200) {
-            // Invalid server response code to we should collapse.
+            // Invalid server response code so we should collapse.
             return null;
           }
           // If an error occurs, let the ad be rendered via iframe after delay.
