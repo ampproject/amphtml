@@ -399,8 +399,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
 
     img.src = posterSrc;
 
-    this.placeholder_ = impl.loadPromise(img).then(() => {
-      impl.getVsync().mutate(() => {
+    this.placeholder_ = impl.loadPromise(img).then(() =>
+      impl.getVsync().mutatePromise(() => {
         setImportantStyles(placeholder, {
           'background-image': `url(${posterSrc})`,
           'background-size': 'cover',
@@ -408,9 +408,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
         });
         impl.applyFillContent(placeholder);
         element.appendChild(placeholder);
-      });
-      return placeholder;
-    });
+        return placeholder;
+      }));
 
     return this.placeholder_;
   }
