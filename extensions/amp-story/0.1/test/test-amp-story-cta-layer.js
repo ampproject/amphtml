@@ -53,4 +53,14 @@ describes.realWin('amp-story-cta-layer', {
     });
   });
 
+  it('should not add target attribute to other elements', () => {
+    const elem = win.document.createElement('span');
+    ampStoryCtaLayer.element.appendChild(elem);
+    ampStoryCtaLayer.buildCallback();
+
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(elem).to.not.have.attribute('target');
+    });
+  });
+
 });
