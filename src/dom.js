@@ -649,6 +649,24 @@ export function iterateCursor(iterable, cb) {
 }
 
 /**
+ * Map over an array-like. This uses a similar approact as `iterateCursor`.
+ * However it also pre-allocates the Array to eke out slightly more performance.
+ * Test cases: http://jsbench.github.io/#1f0f0ac3a7c49d483a1009d3473788fe
+ * @param {!IArrayLike<T>} iterable
+ * @param {function(T, number)} cb
+ * @param {number=} opt_size
+ * @template T
+ */
+export function mapCursor(iterable, cb, opt_size = 100) {
+  const array = new Array(opt_size);
+  for (let i = 0, value; (value = iterable[i]) !== undefined; i++) {
+    array[i] = cb(value, i);
+  }
+  array.length = iterable.length;
+  return array;
+}
+
+/**
  * This method wraps around window's open method. It first tries to execute
  * `open` call with the provided target and if it fails, it retries the call
  * with the `_top` target. This is necessary given that in some embedding
