@@ -407,7 +407,7 @@ class AmpYoutube extends AMP.BaseElement {
       // the object-fit: cover.
       'visibility': 'hidden',
     });
-
+    this.propagateAttributes(['aria-label'], imgPlaceholder);
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
@@ -415,7 +415,13 @@ class AmpYoutube extends AMP.BaseElement {
         encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
+    if (imgPlaceholder.hasAttribute('aria-label')) {
+      imgPlaceholder.setAttribute('alt',
+          'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
+      );
+    } else {
+      imgPlaceholder.setAttribute('alt', 'Loading video');
+    }
     this.applyFillContent(imgPlaceholder);
     this.element.appendChild(imgPlaceholder);
 

@@ -108,7 +108,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
-
+    this.propagateAttributes(['aria-label'], placeholder);
     placeholder.setAttribute('src',
         'https://www.springboardplatform.com/storage/' +
         encodeURIComponent(this.domain_) + '/snapshots/' +
@@ -122,6 +122,13 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     placeholder.setAttribute('layout', 'fill');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute('alt',
+          'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
     return placeholder;
   }
 }
