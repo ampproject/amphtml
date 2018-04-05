@@ -277,7 +277,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.element.ownerDocument.createElement('div');
-        container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = this.win.document.createElement('amp-image-viewer');
         imageViewer.setAttribute('layout', 'fill');
         clonedNode.removeAttribute('class');
@@ -405,7 +404,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         // of this element to measure 1 rem.
         st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
           visibility: state.descriptionOverflows || state.isInOverflowMode
-              ? 'visible' : 'hidden',
+            ? 'visible' : 'hidden',
         });
 
         if (state.isInOverflowMode) {
@@ -504,8 +503,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.navControls_ = this.win.document.createElement('div');
     const nextSlide = this.nextSlide_.bind(this);
     const prevSlide = this.prevSlide_.bind(this);
-    const nextButton = this.buildButton_('Next', 'i-amphtml-lbg-button-next', nextSlide);
-    const prevButton = this.buildButton_('Prev', 'i-amphtml-lbg-button-prev', prevSlide);
+    const nextButton = this.buildButton_('Next',
+        'i-amphtml-lbg-button-next', nextSlide);
+    const prevButton = this.buildButton_('Prev',
+        'i-amphtml-lbg-button-prev', prevSlide);
     this.navControls_.appendChild(nextButton);
     this.navControls_.appendChild(prevButton);
     this.controlsContainer_.appendChild(this.navControls_);
@@ -524,9 +525,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    const closeButton = this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
-    const openGalleryButton = this.buildButton_('Gallery', 'i-amphtml-lbg-button-gallery', openGallery);
-    const closeGalleryButton = this.buildButton_('Content', 'i-amphtml-lbg-button-slide', closeGallery);
+    const closeButton = this.buildButton_('Close',
+        'i-amphtml-lbg-button-close', close);
+    const openGalleryButton = this.buildButton_('Gallery',
+        'i-amphtml-lbg-button-gallery', openGallery);
+    const closeGalleryButton = this.buildButton_('Content',
+        'i-amphtml-lbg-button-slide', closeGallery);
 
     this.topBar_.appendChild(closeButton);
     this.topBar_.appendChild(openGalleryButton);
