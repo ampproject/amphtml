@@ -798,8 +798,6 @@ function performBuild(watch) {
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
       compile(watch),
     ]);
-  }).then(() => {
-
   });
 }
 
@@ -813,9 +811,9 @@ function checkBinarySize(compiled) {
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
   if (p.status != 0) {
-    log(cyan('bundlesize: ') + red('The main bundle (amp.js/v0.js) has ' +
-        'exceeded its size cap.') + ' This is part of a new effort to reduce ' +
-        'bundle size (see #14392). Please contact @choumx if this blocks you.');
+    log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
+        'exceeded its size cap. This is part of a new effort to reduce ' +
+        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
   }
 }
 
