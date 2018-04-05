@@ -302,13 +302,14 @@ export class SubscriptionService {
             Entitlement.empty('local'));
       }
       const decodedData = this.jwtHelper_.decode(authData);
-      user().assert(
-          decodedData['aud'] == origin ||
-          decodedData['aud'] == sourceOrigin,
-          `The mismatching "aud" field: ${decodedData['aud']}`);
-      // Expiration time is in seconds.
-      user().assert(decodedData['exp'] > Math.floor(Date.now() / 1000),
-          'Payload is expired');
+
+      if (decodedData['aud'] != origin || decodedData['aud'] == sourceOrigin) {
+        this.sendAuthTokenErrorToViewer_(
+            `The mismatching "aud" field: ${decodedData['aud']}`);
+      } else if (decodedData['exp'] > Math.floor(Date.now() / 1000)) {
+        // Expiration time is in seconds.
+        this.sendAuthTokenErrorToViewer_('Payload is expired');
+      }
 
       const entitlements = decodedData['entitlements'];
       let entitlementJson;
@@ -336,6 +337,17 @@ export class SubscriptionService {
     }, reason => {
       throw user().createError('Viewer authorization failed', reason);
     });
+  }
+
+  /**
+   * Logs error and sends message to viewer
+   * @param {string} error
+   */
+  sendAuthTokenErrorToViewer_(error) {
+    this.viewer_.sendMessageAwaitResponse('auth-rejected', dict({
+      'reason': error,
+    }));
+    user().error(error);
   }
 
   /**
