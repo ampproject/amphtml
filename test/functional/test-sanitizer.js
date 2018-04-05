@@ -403,6 +403,22 @@ describe('sanitizeFormattingHtml', () => {
         '<b>ab<br>c</b>');
     expect(sanitizeFormattingHtml('<b>a<i>b</i>c</b>')).to.be.equal(
         '<b>a<i>b</i>c</b>');
+    const headingsMarkup =
+        '<h1>a</h1><h2>b</h2><h3>c</h3><h4>d</h4><h5>d</h5><h6>e</h6>';
+    expect(sanitizeFormattingHtml(headingsMarkup))
+        .to.be.equal(headingsMarkup);
+    const markupWithClassAttribute = '<h1 class="some-class">heading</h1>';
+    expect(sanitizeFormattingHtml(markupWithClassAttribute))
+        .to.be.equal(markupWithClassAttribute);
+    const markupWithClassesAttribute =
+        '<h1 class="some-class another">heading</h1>';
+    expect(sanitizeFormattingHtml(markupWithClassesAttribute))
+        .to.be.equal(markupWithClassesAttribute);
+    expect(sanitizeFormattingHtml('<h1 class="valid-class" hidden>test</h1>'))
+        .to.be.equal('<h1 class="valid-class">test</h1>');
+    const markupParagraph = '<p class="valid-class">paragraph</p>';
+    expect(sanitizeFormattingHtml(markupParagraph))
+        .to.be.equal(markupParagraph);
   });
 
   it('should NOT output non-whitelisted markup', () => {

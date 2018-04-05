@@ -86,6 +86,12 @@ const WHITELISTED_FORMAT_TAGS = [
   'code',
   'del',
   'em',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
   'i',
   'ins',
   'mark',
@@ -97,6 +103,20 @@ const WHITELISTED_FORMAT_TAGS = [
   'sup',
   'time',
   'u',
+];
+
+/** @const {!Array<string>} */
+const WHITELISTED_TAGS = [
+  'a',
+  'caption',
+  'colgroup',
+  'p',
+  'table',
+  'tbody',
+  'td',
+  'thead',
+  'tfoot',
+  'tr',
 ];
 
 /** @const {!Array<string>} */
@@ -333,38 +353,56 @@ export function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes the provided formatting HTML. Only the most basic inline tags are
- * allowed, such as <b>, <i>, etc.
+ * Sanitizes the provided HTML, input to mustache templates.
  *
  * @param {string} html
  * @return {string}
  */
 export function sanitizeFormattingHtml(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, attribs) {
-        if (tagName == 'template') {
-          for (let i = 0; i < attribs.length; i += 2) {
-            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-              return {
-                tagName,
-                attribs: ['type', 'amp-mustache'],
-              };
-            }
+  /**
+   * Tag policy for handling what is valid html in templates.
+   * @type {!Function}
+   */
+  const tagPolicy = function(tagName, attribs) {
+    if (tagName == 'template') {
+      for (let i = 0; i < attribs.length; i += 2) {
+        if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+          return {
+            tagName,
+            attribs: ['type', 'amp-mustache'],
+          };
+        }
+      }
+    }
+    const isWhitelistedFormatTag = WHITELISTED_FORMAT_TAGS.includes(tagName);
+    const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
+    if (!isWhitelistedFormatTag && !isWhitelistedTag) {
+      return null;
+    }
+    let attributes = [];
+    if (attribs) {
+      if (isWhitelistedFormatTag) {
+        for (let i = 0; i < attribs.length; i += 2) {
+          if (attribs[i] == 'class') {
+            attributes = attribs.slice(i, i + 2);
+            break;
           }
         }
-        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
-          return null;
-        }
-        return {
-          tagName,
-          attribs: [],
-        };
+      } else if (isWhitelistedTag) {
+        attributes = attribs;
       }
-  );
+    }
+    return {
+      tagName,
+      attribs: attributes,
+    };
+  };
+
+  return htmlSanitizer.sanitizeWithPolicy(html, tagPolicy);
 }
 
 /**
- * Whether the attribute/value are valid.
+ * Whether the attribute/value is valid.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
