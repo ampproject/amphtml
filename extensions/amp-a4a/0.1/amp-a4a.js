@@ -92,6 +92,9 @@ const TAG = 'amp-a4a';
 /** @type {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
+/** @type {string} */
+export const NETWORK_FAILURE = 'NETWORK_FAILURE';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
@@ -805,8 +808,9 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
-          if (error == NO_CONTENT_RESPONSE) {
-            return {
+          switch (error) {
+            case NETWORK_FAILURE: return null;
+            case NO_CONTENT_RESPONSE: return {
               minifiedCreative: '',
               customElementExtensions: [],
               customStylesheets: [],
@@ -1025,9 +1029,8 @@ export class AmpA4A extends AMP.BaseElement {
             checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
-            user().error(TAG, this.element.getAttribute('type'),
+            user().warn(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
-            this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative();
           });
     }).catch(error => {
@@ -1247,6 +1250,10 @@ export class AmpA4A extends AMP.BaseElement {
     return Services.xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(error => {
+          if (error.response && error.response.status > 200) {
+            // Invalid server response code to we should collapse.
+            return null;
+          }
           // If an error occurs, let the ad be rendered via iframe after delay.
           // TODO(taymonbeal): Figure out a more sophisticated test for deciding
           // whether to retry with an iframe after an ad request failure or just
@@ -1263,6 +1270,7 @@ export class AmpA4A extends AMP.BaseElement {
             this.resetAdUrl();
           } else {
             this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;
+            return Promise.reject(NETWORK_FAILURE);
           }
           return null;
         });
