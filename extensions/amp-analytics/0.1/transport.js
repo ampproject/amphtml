@@ -47,7 +47,7 @@ export function sendRequest(win, request, transportOptions) {
   const image = transportOptions['image'];
   if (image) {
     const suppressWarnings = (typeof image == 'object' &&
-                              image['suppressWarnings']);
+        image['suppressWarnings']);
     Transport.sendRequestUsingImage(request, suppressWarnings);
     return;
   }
