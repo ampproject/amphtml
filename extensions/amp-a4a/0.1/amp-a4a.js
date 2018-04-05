@@ -93,7 +93,7 @@ const TAG = 'amp-a4a';
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /** @type {string} */
-export const NETWORK_FAILURE = 'NETWORK_FAILURE';
+export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
