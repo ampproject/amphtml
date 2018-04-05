@@ -75,11 +75,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
         .callsFake(() => Promise.resolve(serviceConfig));
   });
 
-
   it('should call `initialize_` on start', () => {
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    subscriptionService.start();
-
+    expect(subscriptionService.start()).to.throw;
     expect(initializeStub).to.be.calledOnce;
   });
 
