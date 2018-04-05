@@ -1,0 +1,48 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-share.css';
+
+.i-amphtml-story-share-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4) !important;
+  z-index: 100001 !important;
+  transform: translate3d(0, 100vh, 0);
+}
+
+.i-amphtml-story-share-menu-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+.i-amphtml-story-share-menu-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;
+  background: rgba(0, 0, 0, 0.9) !important;
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-share-menu-visible .i-amphtml-story-share-menu-container {
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}

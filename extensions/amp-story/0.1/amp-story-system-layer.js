@@ -36,6 +36,9 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
+/** @private @const {string} */
+const SHARE_CLASS = 'i-amphtml-story-share-control';
+
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -46,6 +49,13 @@ const TEMPLATE = {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
         {
           tag: 'div',
           attrs: dict({
@@ -175,6 +185,8 @@ export class SystemLayer {
         this.onMuteAudioClick_();
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_();
+      } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
+        this.onShareClick_();
       }
     });
 
@@ -270,6 +282,15 @@ export class SystemLayer {
    */
   onUnmuteAudioClick_() {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+  }
+
+  /**
+   * Handles click events on the share button and toggles the share menu.
+   * @private
+   */
+  onShareClick_() {
+    const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
+    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
   }
 
   /**

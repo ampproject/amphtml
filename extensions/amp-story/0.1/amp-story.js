@@ -60,6 +60,7 @@ import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
+import {ShareMenu} from './amp-story-share-menu';
 import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
@@ -201,6 +202,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
+
+    /** @private @const {!ShareMenu} */
+    this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
