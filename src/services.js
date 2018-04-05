@@ -318,6 +318,14 @@ export class Services {
 
   /**
    * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestService(win) {
+    return getService(win, 'story-request');
+  }
+
+  /**
+   * @param {!Window} win
    * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {

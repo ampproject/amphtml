@@ -25,6 +25,7 @@
  * </code>
  */
 import './amp-story-auto-ads';
+import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {
@@ -36,6 +37,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -118,7 +120,6 @@ const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 /** @private @const {string} */
 const AD_SHOWING_ATTR = 'ad-showing';
 
-
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -182,6 +183,11 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
     registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+
+    /** @private @const {!AmpStoryRequestService} */
+    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
+    registerServiceBuilder(
+        this.win, 'story-request', () => this.requestService_);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -326,7 +332,6 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
   }
-
 
   /** @private */
   initializeListeners_() {
@@ -536,12 +541,6 @@ export class AmpStory extends AMP.BaseElement {
     container.insertBefore(
         this.shareWidget_.build(this.getAmpDoc()),
         shareLabelEl);
-
-    this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
-      if (bookendConfig !== null) {
-        this.shareWidget_.setProviders(bookendConfig.shareProviders);
-      }
-    });
 
     return container;
   }
@@ -936,6 +935,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   setHistoryStatePageId_(pageId) {
+    // Never save ad pages to history as they are unique to each visit.
+    const page = this.getPageById(pageId);
+    if (page.isAd()) {
+      return;
+    }
+
     const history = this.win.history;
     if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
