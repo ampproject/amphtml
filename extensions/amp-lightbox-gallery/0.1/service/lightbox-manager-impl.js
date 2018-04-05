@@ -370,14 +370,17 @@ export class LightboxManager {
     return null;
   }
 
+  /**
+   * Gets the duration of a supported video element
+   * @param {!Element} element
+   * @returns {!Promise}
+   * @private
+   */
   getVideoTimestamp_(element) {
-    if (VIDEO_TAGS[element.tagName]) {
-      return element.getImpl().then(videoPlayer => {
+    return VIDEO_TAGS[element.tagName] ?
+      element.getImpl().then(videoPlayer => {
         return videoPlayer.getDuration();
-      });
-    } else {
-      return null;
-    }
+      }) : Promise.resolve();
   }
 
   /**
