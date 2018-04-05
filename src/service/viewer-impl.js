@@ -265,6 +265,7 @@ export class Viewer {
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
+     * TODO remove after merging https://github.com/ampproject/amphtml/pull/14224.
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = this.win.location.search.indexOf('amp_agsa=1') != -1;
@@ -507,6 +508,7 @@ export class Viewer {
 
   /**
    * Whether the document is using Chrome Custom Tabs.
+   * TODO remove after merging https://github.com/ampproject/amphtml/pull/14224.
    * @return {boolean}
    */
   isCctEmbedded() {
