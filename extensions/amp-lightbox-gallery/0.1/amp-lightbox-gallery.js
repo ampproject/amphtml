@@ -31,13 +31,20 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
-import {childElementByTag, closest, elementByTag, escapeCssSelectorIdent} from '../../../src/dom';
+import {
+  childElementByTag,
+  closest,
+  closestBySelector,
+  elementByTag,
+  escapeCssSelectorIdent,
+} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {toArray} from '../../../src/types';
 import {toggle} from '../../../src/style';
 
 /** @const */
@@ -758,16 +765,43 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   shouldExit_() {
-    const element = this.getCurrentElement_().sourceElement;
-    return this.shouldAnimate_(element)
+    const target = this.getCurrentElement_().sourceElement;
+    if (!this.transitionTargetIsInViewport_(target)) {
+      return Promise.resolve(false);
+    }
+    return this.shouldAnimate_(target)
         .then(shouldAnimate => {
-          const transitionBackToSource = element == this.sourceElement_;
-          const belongsToCarousel =
-            this.manager_.hasCarousel(this.currentLightboxGroupId_);
-          return shouldAnimate && (transitionBackToSource || belongsToCarousel);
+          return shouldAnimate;
         });
   }
 
+  /**
+   *
+   * @param {!Element} target
+   * @returns {boolean}
+   * @private
+   */
+  transitionTargetIsInViewport_(target) {
+    if (target == this.sourceElement_) {
+      return true;
+    }
+    if (target.isInViewport()) {
+      return true;
+    }
+    // Note that `<amp-carousel>` type='carousel' does not support goToSlide
+    const parentCarousel = closestBySelector(target,
+        'amp-carousel[type="slides"]');
+    if (parentCarousel && parentCarousel.isInViewport()) {
+      // Figure out which slide to transition to via a complete hack
+      const targetSlide = closestBySelector(target, 'div.i-amphtml-slide-item');
+      const targetSlideIndex = toArray(targetSlide.parentNode.children)
+          .indexOf(targetSlide);
+      dev().assert(parentCarousel).getImpl()
+          .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
+      return true;
+    }
+    return false;
+  }
   /**
    * Animates image from current location to its target location in the
    * lightbox.
@@ -1039,31 +1073,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * If the current lightbox is bound to a carousel, then sync the carousel
-   * to the current lightbox slide before closing lightbox.
-   * @private
-   */
-  maybeSyncSourceCarousel_() {
-    if (this.manager_.hasCarousel(this.currentLightboxGroupId_)) {
-      const lightboxCarouselMetadata = this.manager_
-          .getCarouselMetadataForLightboxGroup(this.currentLightboxGroupId_);
-
-      let returnSlideIndex = this.currentElemId_;
-
-      lightboxCarouselMetadata.excludedIndexes.some(i => {
-        if (i <= returnSlideIndex) {
-          returnSlideIndex++;
-        } else {
-          return true;
-        }
-      });
-
-      dev().assert(lightboxCarouselMetadata.sourceCarousel).getImpl()
-          .then(carousel => carousel.showSlideWhenReady(returnSlideIndex));
-    }
-  }
-
-  /**
    * Closes the lightbox-gallery
    * @return {!Promise}
    * @private
@@ -1076,8 +1085,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.isActive_ = false;
 
     this.cleanupEventListeners_();
-
-    this.maybeSyncSourceCarousel_();
 
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundOnKeyDown_);
