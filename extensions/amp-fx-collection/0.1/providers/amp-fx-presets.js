@@ -108,4 +108,65 @@ export const Presets = {
       });
     },
   },
+  'fade-in-scroll': {
+    isFxTypeSupported(win) {
+      user().assert(isExperimentOn(win, 'amp-fx-fade-in-scroll'),
+          'amp-fx-fade-in-scroll experiment is not turned on.');
+    },
+    userAsserts(element) {
+      if (!element.hasAttribute('data-margin') &&
+        !element.hasAttribute('data-margin-end')) {
+        return;
+      }
+      const margin = element.getAttribute('data-margin');
+      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
+          'data-margin must be a number and be between 0 and 1 for: %s',
+          element);
+      const marginEnd = element.getAttribute('data-margin-end');
+      user().assert(parseFloat(marginEnd) >= 0 && parseFloat(marginEnd) < 1,
+          'data-margin-end must be a number and be between 0 and 1 for: %s',
+          element);
+
+      user().assert(parseFloat(marginEnd) > parseFloat(margin),
+          'data-margin-end must be greater than data-margin for: %s',
+          element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport or margins
+      if (!entry.positionRect ||
+          (entry.positionRect.top >
+            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_)) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // Translate the element offset pixels.
+      const top = entry.positionRect.top;
+      const marginDelta = fxElement.getMarginEnd() - fxElement.getMargin();
+      // Offset is how much extra to move the element which is position within
+      // viewport times adjusted factor.
+      const offset = 1 * (fxElement.adjustedViewportHeight_ - top -
+        (fxElement.getMargin() * fxElement.adjustedViewportHeight_)) /
+        (marginDelta * fxElement.adjustedViewportHeight_);
+      fxElement.setOffset(offset);
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(fxElement.getElement(),
+          function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
+          });
+    },
+  },
 };
