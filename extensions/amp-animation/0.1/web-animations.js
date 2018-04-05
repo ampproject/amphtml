@@ -41,7 +41,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
-import {setStyle} from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 
 
 /** @const {string} */
@@ -127,7 +127,7 @@ export class WebAnimationRunner {
       // Apply vars.
       if (request.vars) {
         for (const k in request.vars) {
-          setStyle(request.target, k, String(request.vars[k]));
+          setImportantStyles(request.target, {[k]: String(request.vars[k])});
         }
       }
 
