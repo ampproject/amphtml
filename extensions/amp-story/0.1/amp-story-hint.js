@@ -178,12 +178,14 @@ export class AmpStoryHint {
   }
 
   /**
-   * Shows the given hint, only if not desktop.
+   * Shows the given hint.
    * @param {string} hintClass
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+    // Don't show the swiping hint on desktop, or when the share menu is on.
+    if (this.storeService_.get(StateProperty.DESKTOP_STATE) ||
+        this.storeService_.get(StateProperty.SHARE_MENU_STATE)) {
       return;
     }
 
