@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- .amp-carousel-button {
+amp-lightbox-gallery .amp-carousel-button {
   display: none;
  }
 
