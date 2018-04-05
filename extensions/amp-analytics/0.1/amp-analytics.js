@@ -57,31 +57,6 @@ const WHITELIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.HIDDEN,
 ];
 
-/**
- * How long to stop reporting resource timing after (for the sake of
- * throttling).
- * @const {number}
- */
-const RESOURCE_TIMING_MAX_REPORT_TIME_MSEC = 30 * 1000;
-
-/**
- * The time at which this script executed.
- * @const {number}
- */
-const scriptExecutionTime = Date.now();
-
-/**
- * @param {!Window} win
- * @return {number} A timestamp relative to navigationStart with sub-millisecond
- *     precision if the navigation timing API is supported (so the value is no
- *     necessarily an integer). If the nav timing API is not supported, this
- *     timing will be approximated.
- */
-function performanceTimestamp(win) {
-  return win.performance && win.performance.now
-    ? win.performance.now() : Date.now() - scriptExecutionTime;
-}
-
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -141,6 +116,13 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
+
+    /**
+     * Maximum time (since epoch) to report resource timing metrics.
+     * We stop reporting after 1 minute.
+     * @private @const {number}
+     */
+    this.maxResourceTimingReportingTime_ = Date.now() + 60 * 1000;
   }
 
   /** @override */
@@ -711,16 +693,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const lastTime = resourceTimingSpec['responseAfter'] || 0;
-      if (!resourceTimingSpec['done'] ||
-          lastTime < RESOURCE_TIMING_MAX_REPORT_TIME_MSEC) {
-        resourceTimingSpec['responseAfter'] =
-            Math.max(performanceTimestamp(this.win), lastTime);
-
+      // Check if we're done reporting resource timing metrics before binding
+      // before binding the resource timing variable.
+      if (!resourceTimingSpec['done'] &&
+          Date.now() < this.maxResourceTimingReportingTime_) {
         const binding = 'RESOURCE_TIMING';
         const analyticsVar = 'resourceTiming';
         dynamicBindings[binding] =
-            serializeResourceTiming(this.win, resourceTimingSpec, lastTime);
+            serializeResourceTiming(this.win, resourceTimingSpec);
         expansionOptions.vars[analyticsVar] = binding;
       }
     }

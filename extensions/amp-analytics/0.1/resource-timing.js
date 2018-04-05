@@ -74,6 +74,18 @@ function yieldThread(fn) {
 }
 
 /**
+ * @param {!Window} win
+ * @return {number} A timestamp relative to navigationStart with sub-millisecond
+ *     precision if the navigation timing API is supported (so the value is no
+ *     necessarily an integer). If the nav timing API is not supported, this
+ *     will return 0.
+ */
+function performanceTimestamp(win) {
+  return win.performance && win.performance.now
+    ? win.performance.now() : 0;
+}
+
+/**
  * Checks whether the given object is a valid resource timing spec.
  * @param {!JsonObject} spec
  * @return {boolean}
@@ -94,6 +106,12 @@ function validateResourceTimingSpec(spec) {
     user().warn(
         'ANALYTICS',
         'resource timing variables only supports bases between 2 and 36');
+    return false;
+  }
+  if (spec['responseAfter'] != null &&
+      typeof spec['responseAfter'] != 'number') {
+    user().warn(
+        'ANALYTICS', 'resourceTimingSpec["responseAfter"] must be a number');
     return false;
   }
   return true;
@@ -254,23 +272,28 @@ function serialize(entries, resourceTimingSpec, win) {
  * Serializes resource timing entries according to the resource timing spec.
  * @param {!Window} win
  * @param {!JsonObject} resourceTimingSpec
- * @param {number} responseAfter A timestamp (relative to navigationStart) for
- *   filtering resource timing entries. Only entries that have fully downloaded
- *   after this time will be included.
  * @return {!Promise<string>}
  */
-export function serializeResourceTiming(
-  win, resourceTimingSpec, responseAfter) {
-  if (!validateResourceTimingSpec(resourceTimingSpec)) {
+export function serializeResourceTiming(win, resourceTimingSpec) {
+  if (resourceTimingSpec['done'] ||
+      !validateResourceTimingSpec(resourceTimingSpec)) {
+    resourceTimingSpec['done'] = true;
     return Promise.resolve('');
   }
   let entries = getResourceTimingEntries(win);
   if (entries.length >= RESOURCE_TIMING_BUFFER_SIZE) {
-    // We've exceeded the maximum buffer size so no additional metrics need to
-    // be reported.
+    // We've exceeded the maximum buffer size so no additional metrics will be
+    // reported for this resourceTimingSpec.
     resourceTimingSpec['done'] = true;
   }
 
+  const responseAfter = resourceTimingSpec['responseAfter'] || 0;
+  // Update responseAfter for next time to avoid reporting the same resource
+  // multiple times.
+  resourceTimingSpec['responseAfter'] =
+      Math.max(responseAfter, performanceTimestamp(win));
+
+  // Filter resources that are too early.
   entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
   if (!entries.length) {
     return Promise.resolve('');
