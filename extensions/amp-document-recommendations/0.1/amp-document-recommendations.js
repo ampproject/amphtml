@@ -136,16 +136,18 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   /**
    * Append recommendation links to articles, starting from a given
    * one.
-   * @param {number} from
+   * @param {number} nextRecommendation Index of the next unseen recommendation
+   *     to use as the first recommendation in the list.
    */
-  appendArticleLinks_(from) {
+  appendArticleLinks_(nextRecommendation) {
     const doc = this.win.document;
-    let article = from;
+    const currentArticle = nextRecommendation - 1;
+    let article = nextRecommendation;
 
     const recommendations = doc.createElement('div');
 
     while (article < this.config_.recommendations.length &&
-           article - from < SEPARATOR_RECOS) {
+           article - nextRecommendation < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
@@ -175,7 +177,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.element.appendChild(recommendations);
     this.positionObserver_.observe(recommendations,
         PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(from - 1, position));
+        position => this.positionUpdate_(currentArticle, position));
   }
 
   /**
