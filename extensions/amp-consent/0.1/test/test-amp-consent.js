@@ -65,7 +65,6 @@ describes.realWin('amp-consent', {
           return Promise.resolve(storageValue[name]);
         },
         set: (name, value) => {
-          console.log('set', name, value);
           storageValue[name] = value;
           return Promise.resolve();
         },

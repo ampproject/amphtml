@@ -175,7 +175,7 @@ export class ConsentPolicyInstance {
       return;
     }
 
-    let isReject = false;
+    let isSufficient = true;
     // Decide to traverse item list every time instead of keeping reject/pending counts
     // Performance should be OK since we expect item list to be small.
     const items = Object.keys(this.itemToConsentState_);
@@ -187,11 +187,11 @@ export class ConsentPolicyInstance {
 
       if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED ||
           this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
-        isReject = true;
+        isSufficient = false;
       }
     }
-    const state = isReject ?
-      CONSENT_POLICY_STATE.INSUFFICIENT : CONSENT_POLICY_STATE.SUFFICIENT;
+    const state = isSufficient ?
+      CONSENT_POLICY_STATE.SUFFICIENT : CONSENT_POLICY_STATE.INSUFFICIENT;
 
     this.readyPromiseResolver_(state);
 
