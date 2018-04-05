@@ -35,6 +35,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let pageConfig;
   let subscriptionService;
   let configResolver;
+  let resolveConfigStub;
+  let platformConfigStub;
 
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
@@ -66,21 +68,22 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
-    sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
+    resolveConfigStub = sandbox.stub(
+        PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(function() {
           configResolver = this;
           return Promise.resolve(pageConfig);
         });
-    sandbox.stub(subscriptionService, 'getPlatformConfig_')
+    platformConfigStub = sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
   });
 
-
   it('should call `initialize_` on start', () => {
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    subscriptionService.start();
-
-    expect(initializeStub).to.be.calledOnce;
+    expect(() => {
+      subscriptionService.start();
+      expect(initializeStub).to.be.calledOnce;
+    }).to.throw;
   });
 
   it('should setup store and page on start', () => {
