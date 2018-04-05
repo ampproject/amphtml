@@ -265,12 +265,33 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(function() {
-  this.timeout(BEFORE_AFTER_TIMEOUT);
-  beforeTest();
+function mockConsoleError() {
   consoleSandbox = sinon.sandbox.create();
   this.consoleMock = consoleSandbox.mock(console);
   this.consoleMock.expects('error').never();
+}
+
+function checkForUnexpectedConsoleErrors() {
+  try {
+    this.consoleMock.verify();
+  } catch (e) {
+    const helpMessage =
+        'Your test resulted in an unexpected call to console.error.\n' +
+        '⤷ If the error is real, fix the code that generated it.\n' +
+        '⤷ If the error is expected:\n' +
+        '  ⤷ Call "this.consoleMock.expects(\'error\').withArgs' +
+            '(\'<message>\')" before the code containing the error.\n' +
+        '  ⤷ Call "this.consoleMock.expects(\'error\').never()" ' +
+            'after the code containing the error.\n';
+    throw new Error(e.message + '\n\n' + helpMessage);
+  }
+  consoleSandbox.restore();
+}
+
+beforeEach(function() {
+  this.timeout(BEFORE_AFTER_TIMEOUT);
+  beforeTest();
+  mockConsoleError();
 });
 
 function beforeTest() {
@@ -291,20 +312,7 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
-  try {
-    this.consoleMock.verify();
-  } catch (e) {
-    const helpMessage =
-        'Your test resulted in an unexpected call to console.error.\n' +
-        '⤷ If the error is real, fix the code that generated it.\n' +
-        '⤷ If the error is expected:\n' +
-        '  ⤷ Call "this.consoleMock.expects(\'error\').withArgs' +
-            '(\'<message>\')" before the code containing the error.\n' +
-        '  ⤷ Call "this.consoleMock.expects(\'error\').never()" ' +
-            'after the code containing the error.\n';
-    throw new Error(e.message + '\n\n' + helpMessage);
-  }
-  consoleSandbox.restore();
+  checkForUnexpectedConsoleErrors();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
