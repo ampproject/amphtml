@@ -20,6 +20,7 @@ import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
+import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {renderAsElement} from './simple-template';
@@ -106,7 +107,8 @@ export class ShareMenu {
     this.vsync_.run({
       measure: () => {
         this.innerContainerEl_ =
-            this.element_.querySelector(`.${SHARE_WIDGET_CONTAINER_CLASS}`);
+            this.element_
+                ./*OK*/querySelector(`.${SHARE_WIDGET_CONTAINER_CLASS}`);
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
@@ -131,7 +133,8 @@ export class ShareMenu {
       this.onShareMenuStateUpdate_(isOpen);
     });
 
-    this.element_.addEventListener('click', event => this.onMenuClick_(event));
+    this.element_.addEventListener(
+        'click', event => this.onShareMenuClick_(event));
   }
 
   /**
@@ -148,8 +151,8 @@ export class ShareMenu {
    * Handles click events and maybe closes the menu.
    * @param  {!Event} event
    */
-  onMenuClick_(event) {
-    const el = event.target;
+  onShareMenuClick_(event) {
+    const el = dev().assertElement(event.target);
     // Closes the menu if click happened outside of the menu main container.
     if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
       this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
