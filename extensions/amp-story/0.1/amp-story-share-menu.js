@@ -82,9 +82,6 @@ export class ShareMenu {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
-
-    this.build();
-    this.initializeListeners_();
   }
 
   /**
@@ -103,6 +100,8 @@ export class ShareMenu {
     createShadowRootWithStyle(root, this.element_, CSS);
 
     const ampdoc = getAmpdoc(this.parentEl_);
+
+    this.initializeListeners_();
 
     this.vsync_.run({
       measure: () => {

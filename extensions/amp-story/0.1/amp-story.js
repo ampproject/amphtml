@@ -203,9 +203,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
 
-    // TODO(gmajoulet): preload it later and only on mobile.
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
-    // this.shareMenu_ = new ShareMenu(this.win, this.element);
+    this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -576,7 +575,8 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_())
-        .then(() => new ShareMenu(this.win, this.element));
+        // TODO(gmajoulet): preload only on mobile.
+        .then(() => this.shareMenu_.build());
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
