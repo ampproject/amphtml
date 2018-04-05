@@ -30,7 +30,8 @@
     "sandbox": true,
     "context": false,
     "global": false,
-    "describes": true
+    "describes": true,
+    "expectError": false
   },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
