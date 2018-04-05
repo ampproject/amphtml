@@ -1258,18 +1258,19 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
-  // TODO: are there utilities for this? if not where should they go?
-  to2Digits_(i) {
-    return i < 10 ? '0' + i : i;
-  }
-
+  /**
+   * Converts seconds to a timestamp formatted string.
+   * @param {number} seconds
+   * @returns {string}
+   * @private
+   */
   toTimestampString_(seconds) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
-    const hh = this.to2Digits_(h);
-    const mm = this.to2Digits_(m);
-    const ss = this.to2Digits_(s);
+    const hh = h.toString().padStart(2, '0');
+    const mm = m.toString().padStart(2, '0');
+    const ss = s.toString().padStart(2, '0');
     return hh + ':' + mm + ':' + ss;
   }
 
