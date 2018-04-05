@@ -53,13 +53,6 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
             'class': UNMUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -68,6 +61,13 @@ const TEMPLATE = {
           attrs: dict({
             'role': 'button',
             'class': MUTE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
         {
