@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * amp-lUSTQLTz0csodkt327ZRHm30PG-6sJOuZwTh-PPmzqRMGZrTCRBMJ8Pfdw8f_UGC
+ * amp-lUSTQLTz0csodkt327ZRHm30PG-6sJOuZwTh-PPmzqRMGZrTCRBMJ8Pfdw8f_UGC
  */
 
 import {Services} from '../services';
@@ -58,21 +60,15 @@ export class CacheCidApi {
     this.publisherCidPromise_ = null;
 
     /** @private {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc_.win_);
+    this.timer_ = Services.timerFor(this.ampdoc_.win);
   }
 
   /**
-   * Resolves to true if Viewer is trusted and supports CID API.
-   * @returns {!Promise<boolean>}
+   * Returns true if the page is embedded in CCT and is served by a proxy.
+   * @returns {boolean}
    */
   isSupported() {
-    if (!this.viewer_.isCctEmbedded()) {
-      return Promise.resolve(false);
-    }
-    if (!this.viewer_.isProxyOrigin()) {
-      return Promise.resolve(false);
-    }
-    return this.viewer_.isTrustedViewer(); // TODO maybe true?
+    return this.isCctEmbedded() && this.viewer_.isProxyOrigin();
   }
 
   /**
@@ -108,34 +104,37 @@ export class CacheCidApi {
    */
   fetchCid_(url) {
     const payload = dict({
-      'publisherOrigin': getSourceOrigin(this.ampdoc.win.location),
+      'publisherOrigin': getSourceOrigin(this.ampdoc_.win.location),
     });
 
     // Make the XHR request to the cache endpoint.
     return this.timer_.timeoutPromise(
         TIMEOUT,
-        Services.xhrFor(this.win_).fetchJson(url, {
+        Services.xhrFor(this.ampdoc_.win).fetchJson(url, {
           method: 'POST',
           ampCors: false,
           credentials: 'include',
           mode: 'cors',
           body: payload,
         }).then(res => {
-	  const response = res.json();
-	  if (response['optOut']) {
-	    return null;
-	  }
-	  const cid = response['publisherClientId'];
-          if (!cid && response['alternateUrl']) {
-            // If an alternate url is provided, try again with the alternate url
-            // The client is still responsible for appending API keys to the URL.
-            const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
-            return this.fetchCid_(dev().assertString(alt))
-                .then(altRes => {
-                  return altRes.json()['publisherClientId'] || null;
-                });
-	  }
-          return cid;
+	  return res.json().then(response => {
+	    if (response['optOut']) {
+	      return null;
+	    }
+	    const cid = response['publisherClientId'];
+            if (!cid && response['alternateUrl']) {
+              // If an alternate url is provided, try again with the alternate url
+              // The client is still responsible for appending API keys to the URL.
+              const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
+              return this.fetchCid_(dev().assertString(alt))
+                  .then(altRes => {
+                    return altRes.json().then(altResponse => {
+		      return altResponse['publisherClientId'] || null;
+		    });
+                  });
+	    }
+            return cid;
+	  });
         }).catch(e => {
           if (e && e.response) {
             e.response.json().then(res => {
@@ -159,7 +158,7 @@ export class CacheCidApi {
       return Promise.resolve(null);
     }
     const text = publisherCid + ';' + scope;
-    return Services.cryptoFor(this.ampdoc.win).sha384Base64(text).then(enc => {
+    return Services.cryptoFor(this.ampdoc_.win).sha384Base64(text).then(enc => {
       return 'amp-' + enc;
     });
   }

@@ -22,6 +22,7 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
+import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
@@ -93,6 +94,11 @@ export class Cid {
      * @private {!Object<string, !Promise<string>>}
      */
     this.externalCidCache_ = Object.create(null);
+
+    /**
+     * @private {!CacheCidApi}
+     */
+    this.cacheCidApi_ = new CacheCidApi(ampdoc);
 
     /**
      * @private {!ViewerCidApi}
@@ -191,6 +197,9 @@ export class Cid {
         });
       }
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+    }
+    if (this.cacheCidApi_.isSupported()) {
+      return this.cacheCidApi_.getScopedCid(scope);
     }
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {
