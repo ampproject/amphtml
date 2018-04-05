@@ -213,7 +213,9 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
-    this.subscriptionAnalytics_.event('subscriptions-entitlement-resolved');
+    this.subscriptionAnalytics_.event('subscriptions-entitlement-resolved', {
+      'platform-id': serviceId,
+    });
   }
 
   /**
@@ -392,7 +394,9 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
-      this.subscriptionAnalytics_.event('subscriptions-platform-activated');
+      this.subscriptionAnalytics_.event('subscriptions-platform-activated', {
+        'platform-id': selectedPlatform.getServiceId(),
+      });
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
@@ -428,7 +432,12 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
-      this.subscriptionAnalytics_.event('subscriptions-platform-re-authorized');
+      this.subscriptionAnalytics_.event(
+          'subscriptions-platform-re-authorized',
+          {
+            'platform-id': subscriptionPlatform.getServiceId(),
+          }
+      );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
@@ -443,7 +452,10 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
-    this.subscriptionAnalytics_.event('subscriptions-action-delegated');
+    this.subscriptionAnalytics_.event('subscriptions-action-delegated',
+        {
+          action,
+        });
     return localPlatform.executeAction(action);
   }
 }
