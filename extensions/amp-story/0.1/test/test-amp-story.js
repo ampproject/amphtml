@@ -325,6 +325,24 @@ describes.realWin('amp-story', {
           );
         });
   });
+
+  it('should NOT update page id in browser history if ad', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'i-amphtml-ad-page-1';
+    const pageCount = 2;
+    const pages = createPages(story.element, pageCount,
+        [firstPageId, 'page-1']);
+    const firstPage = pages[0];
+    firstPage.setAttribute('ad', '');
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.not.have.been.called;
+        });
+  });
 });
 
 
