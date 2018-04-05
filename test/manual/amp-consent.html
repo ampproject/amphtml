@@ -208,15 +208,15 @@
 
         <div>
         Revoke consent ABC and DEF
-        <button class="button" on="tap:ABC.showConsentPrompt(consentId=ABC),ABC.showConsentPrompt(consentId=DEF)" role="button">Manage</button>
+        <button class="button" on="tap:ABC.prompt(consentId=ABC),ABC.prompt(consentId=DEF)" role="button">Manage</button>
       </div>
        <div>
         Revoke error consent doesn't exsit
-        <button class="button" on="tap:ABC.showConsentPrompt(consentId=ABCd)" role="button">Manage</button>
+        <button class="button" on="tap:ABC.prompt(consentId=ABCd)" role="button">Manage</button>
       </div>
       <div>
         Only revoke DEF
-        <button class="button" on="tap:ABC.showConsentPrompt(consentId=DEF)" role="button">Manage</button>
+        <button class="button" on="tap:ABC.prompt(consentId=DEF)" role="button">Manage</button>
       </div>
 
         <div class="author">

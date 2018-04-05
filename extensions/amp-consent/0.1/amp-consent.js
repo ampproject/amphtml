@@ -102,7 +102,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Display consent UI.
    * @param {string} consentId
    */
-  handleRevoke_(consentId) {
+  handlePostPrompt_(consentId) {
     user().assert(consentId, 'revoke must specify a consent instance id');
     user().assert(this.consentConfig_[consentId],
         `consent with id ${consentId} not found`);
@@ -146,7 +146,6 @@ export class AmpConsent extends AMP.BaseElement {
     Promise.all([consentStateManagerPromise, notificationUiManagerPromise])
         .then(() => {
           this.init_();
-          this.enableInteractions_();
         });
   }
 
@@ -158,10 +157,10 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
-    this.registerAction('showConsentPrompt', invocation => {
+    this.registerAction('prompt', invocation => {
       const args = invocation.args;
-      const consentId = args && args['consentId'];
-      this.handleRevoke_(consentId);
+      const consentId = args && args['consent'];
+      this.handlePostPrompt_(consentId);
     });
   }
 
@@ -175,13 +174,13 @@ export class AmpConsent extends AMP.BaseElement {
 
     if (this.consentUIPendingMap_[instanceId]) {
       // Already pending to be shown. Do nothing.
-      // TODO(@zhouyx): Need to fix this
-      // We still need to show management UI even consent not required.
       return;
     }
 
     if (!this.consentUIRequired_[instanceId]) {
       // If consent not required.
+      // TODO(@zhouyx): Need to fix this
+      // We still need to show management UI even consent not required.
       return;
     }
 
@@ -303,6 +302,8 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-active');
       toggle(this.revokeUI_, false);
     });
+
+    this.enableInteractions_();
   }
 
   /**
@@ -425,6 +426,10 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
+            // TODO(@zhouyx):
+            // 1. Race condition on consent state change between
+            // schedule to display and display. Add one more check before display
+            // 2. Should not schedule display with DISMISSED UNKNOWN state
             this.scheduleDisplay_(instanceId);
           }
         });
