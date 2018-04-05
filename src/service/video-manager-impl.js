@@ -807,10 +807,12 @@ class VideoEntry {
     }
 
     if (!this.metadata_.title) {
-      const title = this.video.element.getAttribute('title')
-                    || this.video.element.getAttribute('aria-label')
-                    || this.internalElement_.getAttribute('title')
-                    || this.internalElement_.getAttribute('aria-label')
+      const {element} = this.video;
+      const internalEl = this.internalElement_;
+      const title = element.getAttribute('title')
+                    || element.getAttribute('aria-label')
+                    || internalEl && internalEl.getAttribute('title')
+                    || internalEl && internalEl.getAttribute('aria-label')
                     || doc.title;
       if (title) {
         this.metadata_.title = title;

@@ -13,7 +13,10 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-import {MediaPoolEvents} from '../../../extensions/amp-story/0.1/media-pool';
+import {
+  EMPTY_MEDIA_INFO,
+  MediaPoolEvents,
+} from '../../../extensions/amp-story/0.1/media-pool';
 import {Services} from '../../../src/services';
 import {VideoUtils} from '../../../src/utils/video';
 import {
@@ -21,20 +24,12 @@ import {
   createElementWithAttributes,
   fullscreenEnter,
   fullscreenExit,
-  insertAfterOrAtStart,
   isFullscreenElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
-import {setImportantStyles} from '../../../src/style';
+import {resetStyles, setImportantStyles} from '../../../src/style';
 
 
 /** @package @typedef {PlaybackMixin|IntermediatePropagationMixin} */
@@ -181,12 +176,12 @@ export class IntermediatePropagationMixin {
 
     copyChildren(this.dummyElement_, baseNode);
 
-    for (var i = 0; i < attributes.length; i++) {
+    for (let i = 0; i < attributes.length; i++) {
       const {name, value} = attributes.item(i);
       baseNode.setAttribute(name, value);
     }
 
-    for (var i = 0; i < classList.length; i++) {
+    for (let i = 0; i < classList.length; i++) {
       const className = classList.item(i);
       baseNode.classList.add(className);
     }
@@ -241,7 +236,7 @@ export class VideoElementMixin extends PlaybackMixin {
     const {element} = this.impl;
 
     this.video = /** @type {!HTMLMediaElement} */ (
-        dev().assert(element.ownerDocument).createElement('video'));
+      dev().assert(element.ownerDocument).createElement('video'));
 
     this.impl.getVsync().mutate(() => {
       element.appendChild(this.video);
@@ -256,7 +251,7 @@ export class VideoElementMixin extends PlaybackMixin {
 
     this.impl.forwardEvents(eventsToForward, video);
 
-    listen(video, 'volumechange', e => {
+    listen(video, 'volumechange', () => {
       setMuted(video.muted);
     });
   }
@@ -321,7 +316,7 @@ export class VideoElementMixin extends PlaybackMixin {
   /** @override */
   getPlayedRanges() {
     return VideoUtils.getPlayedRanges(
-      /** @type {!HTMLMediaElement} */ (dev().assert(this.video)));
+        /** @type {!HTMLMediaElement} */ (dev().assert(this.video)));
   }
 }
 
@@ -344,8 +339,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     this.mediaPool_ = null;
 
     /** @private {?../../amp-story/0.1/media-pool.MediaInfoDef} */
-    this.mediaInfo_ =
-        {duration: 0, currentTime: 0, paused: true, playedRanges: []};
+    this.mediaInfo_ = EMPTY_MEDIA_INFO;
 
     /** @private @const {!Promise<!../../amp-story/0.1/media-pool.MediaPool>} */
     this.mediaPoolPromise_ = Services.mediaPoolFor(impl.element).then(pool => {
@@ -375,7 +369,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
       const {detail} = e;
       this.isAllocated_ = false;
       this.mediaInfo_ =
-          /** @type {!../../amp-story/0.1/media-pool.MediaInfoDef} */ detail;
+        /** @type {!../../amp-story/0.1/media-pool.MediaInfoDef} */ (detail);
       this.showPlaceholder();
     });
 
@@ -385,21 +379,18 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     });
   }
 
-  /** @private */
-  isEnabled() {
-    return this.isAllocated_;
-  }
-
   /** @visibleForTesting */
   showPlaceholder() {
     if (this.placeholder_) {
-      this.togglePlaceholder_(/* show */ false);
+      this.togglePlaceholder_(/* show */ true);
       return this.placeholder_;
     }
+
     const {element} = this.impl;
     const posterSrc = dev().assertString(element.getAttribute('poster'));
 
     const img = new Image();
+    const {impl} = this;
     const {win} = this.impl;
 
     const placeholder = createElementWithAttributes(win.document, 'div', dict({
@@ -408,12 +399,14 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
 
     img.src = posterSrc;
 
-    this.placeholder_ = this.impl.loadPromise(img).then(() => {
-      this.impl.getVsync().mutate(() => {
+    this.placeholder_ = impl.loadPromise(img).then(() => {
+      impl.getVsync().mutate(() => {
         setImportantStyles(placeholder, {
-          'background': `url(${posterSrc}) no-repeat center center`,
+          'background-image': `url(${posterSrc})`,
+          'background-size': 'cover',
+          'pointer-events': 'none',
         });
-        this.impl.applyFillContent(placeholder);
+        impl.applyFillContent(placeholder);
         element.appendChild(placeholder);
       });
       return placeholder;
@@ -435,15 +428,18 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     if (!this.placeholder_) {
       return;
     }
+    const {impl} = this;
+
     this.placeholder_.then(placeholder =>
-      this.impl.getVsync().mutate(() => {
+      impl.getVsync().mutate(() => {
         if (show) {
           resetStyles(placeholder, ['display']);
-        } else {
-          this.placeholder_.then(placeholder => getVsync().mutate(() => {
+          return;
+        }
+        this.placeholder_.then(placeholder =>
+          impl.getVsync().mutate(() => {
             setImportantStyles(placeholder, {'display': 'none'});
           }));
-        }
       }));
   }
 
@@ -454,7 +450,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
       // one signal available for `layoutCallback`.
       return this.showPlaceholder();
     }
-    return this.impl.loadPromise(this.video);
+    const {impl, video} = this;
+    return impl.loadPromise(video);
   }
 
   /** @override */
@@ -479,7 +476,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
   }
 
   /** @override */
-  toggleControls(show) {
+  toggleControls(unusedShow) {
     // TODO(alanorozco): Implement method in media pool.
   }
 
@@ -517,10 +514,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
    * @param {string} property
    * @private
    */
-  // TODO(alanorozco): This seems like logic that belongs in mediapool. Expose
-  // a synchronous method.
   getMediaInfo_(property) {
-    if (!this.isAllocated_) {
+    if (!this.isAllocated_ || !this.mediaPool_) {
       return this.mediaInfo_[property];
     }
     const video =

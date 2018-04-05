@@ -25,7 +25,6 @@ import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
 import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {
-  childElementByTag,
   childElementsByTag,
   closestByTag,
   elementByTag,
@@ -37,7 +36,6 @@ import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 
 
@@ -125,7 +123,7 @@ export class AmpVideo extends AMP.BaseElement {
 
     if (this.mixin_ &&
         (this.mixin_.isIntermediate() && !isLaidOut ||
-        (this.mixin_.controlsPlayback() && isLaidOut))) {
+        this.mixin_.controlsPlayback())) {
       return this.assertMixin_();
     }
 

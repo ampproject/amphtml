@@ -30,10 +30,11 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
+import {VideoUtils} from '../../../src/utils/video';
+import {closest, isConnectedNode} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {closest, isConnectedNode} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {registerServiceBuilderForDoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
@@ -83,6 +84,7 @@ const NON_BUBBLING_EVENTS = [
 
 
 /**
+ * @struct
  * @typedef {{
  *   duration: number,
  *   currentTime: number,
@@ -91,6 +93,15 @@ const NON_BUBBLING_EVENTS = [
  * }}
  */
 export let MediaInfoDef;
+
+
+/** @const {!MediaInfoDef} */
+export const EMPTY_MEDIA_INFO = {
+  duration: 0,
+  currentTime: 0,
+  paused: true,
+  playedRanges: [],
+};
 
 
 /**
@@ -986,19 +997,19 @@ export class MediaPool {
 
 
   /**
-   * @param {!HTMLMediaElement} mediaEl
+   * @param {!HTMLMediaElement} domMediaEl
    * @param {string} property
    * @return T
    * @template T
    */
-  getMediaInfo(mediaEl, property) {
+  getMediaInfo(domMediaEl, property) {
     const mediaType = this.getMediaType_(domMediaEl);
     const poolMediaEl =
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     dev().assert(poolMediaEl);
 
-    switch(property) {
+    switch (property) {
       case 'currentTime': return poolMediaEl.currentTime;
       case 'duration': return poolMediaEl.duration;
       case 'paused': return poolMediaEl.paused;
@@ -1015,11 +1026,10 @@ export class MediaPool {
    */
   static for(root) {
     const element = root.getElement();
-    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
-    const hasInstanceAllocated = existingId && instances[existingId];
+    const existingInstance = MediaPool.forElementOrNull(element);
 
-    if (hasInstanceAllocated) {
-      return instances[existingId];
+    if (existingInstance) {
+      return existingInstance;
     }
 
     const newId = String(nextInstanceId++);
@@ -1030,6 +1040,11 @@ export class MediaPool {
         element => root.getElementDistance(element));
 
     return instances[newId];
+  }
+
+  static forElementOrNull(element) {
+    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+    return existingId && instances[existingId] || null;
   }
 }
 
@@ -1054,7 +1069,7 @@ export class MediaPoolService {
       return null;
     }
     const owner = closest(el, el => !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
-    return owner && owner[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+    return owner && MediaPool.forElementOrNull(owner);
   }
 
   /**

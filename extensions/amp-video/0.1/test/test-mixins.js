@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpVideo} from '../amp-video';
+import {MediaPoolVideoMixin, VideoElementMixin} from '../mixins';
 import {Services} from '../../../../src/services';
-import {VideoElementMixin, MediaPoolVideoMixin} from '../mixins';
 
 
 describes.fakeWin('amp-video mixins', {}, env => {
@@ -57,7 +56,6 @@ describes.fakeWin('amp-video mixins', {}, env => {
 
   describe('MediaPoolVideoMixin', () => {
     let pool;
-    let hlsStub;
 
     beforeEach(() => {
       pool = {
@@ -81,10 +79,10 @@ describes.fakeWin('amp-video mixins', {}, env => {
       const mixin = new MediaPoolVideoMixin(videoImpl);
 
       return Promise.resolve()
-        .then(() => mixin.play())
-        .then(() => expect(pool.play).to.have.been.calledOnce)
-        .then(() => mixin.pause())
-        .then(() => expect(pool.pause).to.have.been.calledOnce);
+          .then(() => mixin.play())
+          .then(() => expect(pool.play).to.have.been.calledOnce)
+          .then(() => mixin.pause())
+          .then(() => expect(pool.pause).to.have.been.calledOnce);
     });
   });
 });
