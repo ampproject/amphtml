@@ -184,10 +184,17 @@
               "DEF": []
             }
           }
-        }
+        },
+        "postPromptUI": "postPromptUI"
       }</script>
       <div id="ui1">
         Please Accept to load image.
+        <button on="tap:ABC.accept" role="button">Accept</button>
+        <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
         <button on="tap:ABC.accept" role="button">Accept</button>
         <button on="tap:ABC.reject" role="button">Reject</button>
         <button on="tap:ABC.dismiss" role="button">Dismiss</button>

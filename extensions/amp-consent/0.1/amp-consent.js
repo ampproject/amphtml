@@ -87,7 +87,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.currentDisplayInstance_ = null;
 
     /** @private {?Element} */
-    this.revokeUI_ = null;
+    this.postPromptUI_ = null;
 
     /** @private {!Object<string, function()>} */
     this.dialogResolver_ = map();
@@ -294,22 +294,34 @@ export class AmpConsent extends AMP.BaseElement {
         // TODO: Handle errors
       });
     }
+    console.log(this.postPromptUI_);
     this.notificationUiManager_.onQueueEmpty(() => {
-      if (!this.revokeUI_) {
+      console.log(this.postPromptUI_);
+      if (!this.postPromptUI_) {
         return;
+      }
+      if (!this.uiInit_) {
+        this.uiInit_ = true;
+        toggle(this.element, true);
+        this.getViewport().addToFixedLayer(this.element);
       }
       this.element.classList.add('amp-active');
       this.element.classList.remove('amp-hidden');
-      setImportantStyles(this.revokeUI_, {display: 'block'});
+      setImportantStyles(this.postPromptUI_, {display: 'block'});
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.revokeUI_) {
+      if (!this.postPromptUI_) {
         return;
+      }
+      if (!this.uiInit_) {
+        this.uiInit_ = true;
+        toggle(this.element, true);
+        this.getViewport().addToFixedLayer(this.element);
       }
       this.element.classList.add('amp-hidden');
       this.element.classList.remove('amp-active');
-      toggle(this.revokeUI_, false);
+      toggle(this.postPromptUI_, false);
     });
 
     this.enableInteractions_();
@@ -399,6 +411,10 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentConfig_ = consents;
+    if (config['postPromptUI']) {
+      this.postPromptUI_ = this.getAmpDoc().getElementById(
+          config['postPromptUI']);
+    }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
 
@@ -437,11 +453,6 @@ export class AmpConsent extends AMP.BaseElement {
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
     const element = this.getAmpDoc().getElementById(promptUI);
     this.consentUI_[instanceId] = element;
-
-    if (!this.revokeUI_ && this.consentConfig_[instanceId]['revokeUI']) {
-      this.revokeUI_ = this.getAmpDoc().getElementById(
-          this.consentConfig_[instanceId]['revokeUI']);
-    }
 
     // Get current consent state
     this.consentStateManager_.getConsentInstanceState(instanceId)
