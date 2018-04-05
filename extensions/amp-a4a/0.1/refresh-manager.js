@@ -221,13 +221,14 @@ export class RefreshManager {
    * Returns an IntersectionObserver configured to the given threshold, creating
    * one if one does not yet exist.
    *
-   * @param {(string|number)} threshold
+   * @param {number} threshold
    * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
    */
   getIntersectionObserverWithThreshold_(threshold) {
-    threshold = String(threshold);
-    return observers[threshold] ||
-        (observers[threshold] = 'IntersectionObserver' in this.win_
+    debugger;
+    const thresholdString = String(threshold);
+    return observers[thresholdString] ||
+        ((observers[thresholdString] = 'IntersectionObserver' in this.win_ && false)
           ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
           : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
   }
@@ -239,8 +240,8 @@ export class RefreshManager {
    *
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
-  ioCallback_(entries) {
-    entries.forEach(entry => {
+  ioCallback_(entries) { debugger;
+    entries.forEach(entry => { debugger;
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       dev().assert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -308,13 +309,13 @@ export class RefreshManager {
    */
   startRefreshTimer_() {
     return new Promise(resolve => {
-      this.refreshTimeoutId_ = this.timer_.delay(() => {
+      this.refreshTimeoutId_ = this.timer_.delay(() => { debugger;
         this.state_ = RefreshLifecycleState.INITIAL;
         this.getIntersectionObserverWithThreshold_(
             this.config_.visiblePercentageMin).unobserve(this.element_);
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
-      }, /** @type {number} */ (this.refreshInterval_));
+      }, /** @type {number} */ (2000));
     });
   }
 
