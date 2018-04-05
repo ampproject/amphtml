@@ -19,14 +19,22 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
+import {convertEasingKeyword} from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
-import {setStyle} from '../../../../src/style';
+import {setStyles} from '../../../../src/style';
 
-const propertyAnimated = {
-  'parallax': 'transform',
+const installStyles = {
+  'parallax': {
+    'will-change': 'transform',
+  },
+  'fade-in': {
+    'will-change': 'opacity',
+    'opacity': 0,
+
+  },
 };
 
 /**
@@ -62,7 +70,7 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    setStyle(element, 'will-change', propertyAnimated[this.fxType_]);
+    setStyles(element, installStyles[this.fxType_]);
     const parallaxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.fxType_);
@@ -110,6 +118,18 @@ export class FxElement {
 
     /** @private {number} */
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
+
+    /** @private {number} */
+    this.margin_ = element.hasAttribute('data-margin') ?
+      parseFloat(element.getAttribute('data-margin')) : 0.05;
+
+    /** @private {string} */
+    this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
+      element.getAttribute('data-easing') : 'ease-in');
+
+    /** @private {string} */
+    this.duration_ = element.hasAttribute('data-duration') ?
+      element.getAttribute('data-duration') : '1000ms';
   }
 
   /**
@@ -170,6 +190,27 @@ export class FxElement {
    */
   getFactor() {
     return this.factor_;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getDuration() {
+    return this.duration_;
+  }
+
+  /**
+   * @returns {number}
+   */
+  getMargin() {
+    return this.margin_;
+  }
+
+  /**
+   * @returns {string}
+   */
+  getEasing() {
+    return this.easing_;
   }
 
   /**
