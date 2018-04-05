@@ -378,7 +378,7 @@ export class LightboxManager {
    */
   getVideoTimestamp_(element) {
     return VIDEO_TAGS[element.tagName] ?
-      element.getImpl().then(videoPlayer =>  videoPlayer.getDuration())
+      element.getImpl().then(videoPlayer => videoPlayer.getDuration())
       : Promise.resolve();
   }
 

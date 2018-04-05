@@ -44,6 +44,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {secondsToTimestampString} from '../../../src/string';
 import {toggle} from '../../../src/style';
 
 /** @const */
@@ -1217,7 +1218,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (!ts || isNaN(ts)) {
             return;
           }
-          const timestamp = this.toTimestampString_(ts);
+          const timestamp = secondsToTimestampString(ts);
           const thumbnailContainer = dev().assertElement(
               this.gallery_.childNodes[thumbnail.index]);
           const timestampDiv = childElementByTag(thumbnailContainer, 'div');
@@ -1256,21 +1257,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
-  /**
-   * Converts seconds to a timestamp formatted string.
-   * @param {number} seconds
-   * @returns {string}
-   * @private
-   */
-  toTimestampString_(seconds) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    const hh = h.toString().padStart(2, '0');
-    const mm = m.toString().padStart(2, '0');
-    const ss = s.toString().padStart(2, '0');
-    return hh + ':' + mm + ':' + ss;
-  }
+
 
   /**
    * Create an element inside gallery from the thumbnail info from manager.
@@ -1302,7 +1289,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           // Many video players (e.g. amp-youtube) that don't support this API
           // will often return 1. This is problematic for error checking.
           if (!isNaN(ts)) {
-            const timestamp = this.toTimestampString_(ts);
+            const timestamp = secondsToTimestampString(ts);
             timestampDiv.appendChild(
                 this.win.document.createTextNode(timestamp));
             timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
