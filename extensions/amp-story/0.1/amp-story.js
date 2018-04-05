@@ -202,7 +202,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
 
-    /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
+    /** @private @const {!ShareMenu} */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
