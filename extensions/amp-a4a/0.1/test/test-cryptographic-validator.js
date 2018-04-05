@@ -35,12 +35,13 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   const headers = {'Content-Type': 'application/jwk-set+json'};
   let sandbox;
+  let userErrorStub;
   let validator;
 
   beforeEach(() => {
     validator = new CryptographicValidator();
     sandbox = sinon.sandbox.create();
-    sandbox.stub(user(), 'error');
+    userErrorStub = sandbox.stub(user(), 'error');
   });
 
   afterEach(() => {
@@ -86,6 +87,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
               validatorOutput.creativeData.creativeMetadata;
           expect(creativeMetadata.minifiedCreative).to.equal(
               data.minifiedCreative);
+          expect(userErrorStub).to.be.calledOnce;
         });
   });
 });
