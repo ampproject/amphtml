@@ -332,7 +332,8 @@ describes.realWin('amp-story', {
     const replaceStub = sandbox.stub(win.history, 'replaceState');
     const firstPageId = 'i-amphtml-ad-page-1';
     const pageCount = 2;
-    const pages = createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const pages = createPages(story.element, pageCount,
+        [firstPageId, 'page-1']);
     const firstPage = pages[0];
     firstPage.setAttribute('ad', '');
 
