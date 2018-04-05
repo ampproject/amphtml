@@ -20,9 +20,8 @@
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  height: 46px !important;
+  height: 56px !important; /* 6px progress bar + 48px icons + 2px margin */
   z-index: 100000 !important;
-  padding: 4px 0 0 !important;
   box-sizing: border-box !important;
   transition: opacity 0.3s !important;
   pointer-events: none !important;
@@ -33,6 +32,7 @@
 }
 
 .i-amphtml-story-system-layer-buttons {
+  margin-top: 8px; /* 6px progress bar + 2px margin */
   float: right !important;
   pointer-events: auto !important;
 }
