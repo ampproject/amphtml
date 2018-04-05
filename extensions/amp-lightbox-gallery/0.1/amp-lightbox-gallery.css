@@ -55,10 +55,15 @@
   mask-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="image" fill="#fff"><path d="M5,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.8954305,21 3,20.1045695 3,19 L3,5 C3,3.8954305 3.8954305,3 5,3 Z M19,15 L19,5 L5,5 L5,13.0000896 L8,10.0003584 L13,15 L16,12 L19,15 Z M15.5,10 C14.6715729,10 14,9.32842712 14,8.5 C14,7.67157288 14.6715729,7 15.5,7 C16.3284271,7 17,7.67157288 17,8.5 C17,9.32842712 16.3284271,10 15.5,10 Z" id="Combined-Shape"></path></g></g></svg>');
 }
 
+.i-amphtml-lbg-button-next, .i-amphtml-lbg-button-prev {
+  top: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
+  filter: drop-shadow(0 0 1px black) !important;
+}
+
 .i-amphtml-lbg-button-next {
-  top: calc(50vh - 18px) !important;
   right: 0 !important;
-  filter: drop-shadow(0 0 1px black);
 }
 
 .i-amphtml-lbg-button-next .i-amphtml-lbg-icon {
@@ -66,9 +71,7 @@
 }
 
 .i-amphtml-lbg-button-prev {
-  top: calc(50vh - 18px) !important;
   left: 0 !important;
-  filter: drop-shadow(0 0 1px black);
 }
 
 .i-amphtml-lbg-button-prev .i-amphtml-lbg-icon {
