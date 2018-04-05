@@ -25,6 +25,7 @@
  * </code>
  */
 import './amp-story-auto-ads';
+import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {
