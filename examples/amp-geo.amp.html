@@ -18,6 +18,7 @@
   </style>
   <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   
 </head>
@@ -28,7 +29,7 @@
         "AmpBind": true,
         "ISOCountryGroups": {
           "nafta": [ "ca", "mx", "us", "unknown" ],
-          "unknown": [ "unknown" ],
+          "waldo": [ "unknown" ],
           "anz": [ "au", "nz" ]
         }
       }
@@ -61,11 +62,32 @@
   <button on="tap:AMP.setState({myCountry: ampGeo.ISOCountry})">Where am I?</button>
   <p [text]="'The country code is: ' + myCountry "></p>
   <p [text]="'Matched country groups: ' + ampGeo.ISOCountryGroups.join(', ') "></p>
- </body>
+
+  <p>There is an amp-pixel variable substitution example here</p>
+  <amp-pixel src="https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=pixel&groups=AMP_GEO()&country=AMP_GEO(ISOCountry)" layout="nodisplay"></amp-pixel>
+  <p>There is an amp-analytics variable substitution example here</p>
+  <amp-analytics>
+    <script type="application/json">
+          {
+            "transport": {"beacon": false, "xhrpost": false},
+            "requests": {
+              "event": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=analytics&groups=${geoGroups}&country=${geoCountry}"
+            },
+            "triggers": {
+              "trackPageview": {
+                "on": "visible",
+                "request": "event",
+                "vars": {
+                  "geoGroups": "${ampGeo()}",
+                  "geoCountry": "${ampGeo(ISOCountry)}"
+                }
+              }
+            }
+          }
+          </script>
+  </amp-analytics>
 
 
-
-
-  
 </body>
+
 </html>

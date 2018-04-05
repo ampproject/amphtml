@@ -46,6 +46,7 @@ import {isProtocolValid} from '../url';
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const GEO_DELIMITER = ','
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
@@ -337,6 +338,18 @@ export class GlobalVariableSource extends VariableSource {
         }
         return experiments.join(EXPERIMENT_DELIMITER);
       }, 'VARIANTS');
+    }));
+
+    // Returns assigned geo value for geoType or all groups.
+    this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
+      return this.getGeo_(geos => {
+        if (geoType) {
+          user().assert(geoType === 'ISOCountry',
+              'The value passed to AMP_GEO() is not valid name:' + geoType);
+          return /** @type {string} */ (geos[geoType] || 'unknown');
+        }
+        return /** @type {string} */ geos.ISOCountryGroups.join(GEO_DELIMITER);
+      }, 'AMP_GEO');
     }));
 
     // Returns incoming share tracking fragment.
@@ -635,6 +648,26 @@ export class GlobalVariableSource extends VariableSource {
           'To use variable %s, amp-experiment should be configured',
           expr);
       return getter(variants);
+    });
+  }
+
+  /**
+   * Resolves the value via geo service.
+   * @param {function(!Object<string, string>):(?string)} getter
+   * @param {string} expr
+   * @return {!Promise<?string>}
+   * @template T
+   * @private
+   */
+  getGeo_(getter, expr) {
+    if (!this.geo) {
+      this.geo = Services.geoForOrNull(this.ampdoc.win);
+    }
+    return this.geo.then(geo => {
+      user().assert(geo,
+          'To use variable %s, amp-geo should be configured',
+          expr);
+      return getter(geo);
     });
   }
 

@@ -77,34 +77,34 @@ describes.realWin('amp-geo', {
     }).to.not.throw();
   });
 
-  it('should throw if it has multiple child elements', () => {
-    expect(() => {
-      addConfigElement('script');
-      addConfigElement('script');
-      geo.buildCallback();
-    }).to.throw(/should have exactly one <script> child​​​/);
-  });
+  // it('should throw if it has multiple child elements', () => {
+  //   expect(() => {
+  //     addConfigElement('script');
+  //     addConfigElement('script');
+  //     geo.buildCallback();
+  //   }).to.throw(/should have exactly one <script> child​​​/);
+  // });
 
-  it('should throw if the child element is not a <script> element', () => {
-    expect(() => {
-      addConfigElement('a');
-      geo.buildCallback();
-    }).to.throw(/script/);
-  });
+  // it('should throw if the child element is not a <script> element', () => {
+  //   expect(() => {
+  //     addConfigElement('a');
+  //     geo.buildCallback();
+  //   }).to.throw(/script/);
+  // });
 
-  it('should throw if the child script element is not json typed', () => {
-    expect(() => {
-      addConfigElement('script', 'wrongtype');
-      geo.buildCallback();
-    }).to.throw(/application\/json/);
-  });
+  // it('should throw if the child script element is not json typed', () => {
+  //   expect(() => {
+  //     addConfigElement('script', 'wrongtype');
+  //     geo.buildCallback();
+  //   }).to.throw(/application\/json/);
+  // });
 
-  it('should throw if the child script element has non-JSON content', () => {
-    expect(() => {
-      addConfigElement('script', 'application/json', '{not json}');
-      geo.buildCallback();
-    }).to.throw();
-  });
+  // it('should throw if the child script element has non-JSON content', () => {
+  //   expect(() => {
+  //     addConfigElement('script', 'application/json', '{not json}');
+  //     geo.buildCallback();
+  //   }).to.throw();
+  // });
 
   it('should add classes to body element for the geo', () => {
     addConfigElement('script');

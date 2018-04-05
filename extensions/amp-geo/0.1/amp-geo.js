@@ -40,6 +40,7 @@ import {childElementsByTag, isJsonScriptTag} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {parseQueryString_} from '../../../src/url-parse-query-string';
 import {registerServiceBuilder} from '../../../src/service';
@@ -61,7 +62,6 @@ const COUNTRY = 'AMP_ISO_COUNTRY';
 const COUNTRY_PREFIX = 'amp-iso-country-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
-const BIND_COUNTRY = 'ISOCountry';
 const GEO_ID = 'ampGeo';
 const defaultLen = COUNTRY.length;
 
@@ -121,7 +121,7 @@ export class AmpGeo extends AMP.BaseElement {
     // First see if we've been pre-rendered with a country, if so set it
     const preRenderMatch = doc.body.className.match(PRE_RENDER_REGEX);
 
-    if (preRenderMatch) {
+    if (preRenderMatch && !isProxyOrigin()) {
       this.mode_ = mode.GEO_PRERENDER;
       /** @private {string} */
       this.country_ = preRenderMatch[1];
@@ -169,6 +169,7 @@ export class AmpGeo extends AMP.BaseElement {
             isArray(config.ISOCountryGroups[groups[i]]),
             '<amp-geo> ISOCountryGroups[' + groups[i] + '] must be an array'
         );
+        const x= config.ISOCountryGroups[groups[i]];
         if (config.ISOCountryGroups[groups[i]].includes(this.country_)) {
           this.matchedGroups_.push(groups[i]);
         }
@@ -217,14 +218,14 @@ export class AmpGeo extends AMP.BaseElement {
           self.clearPreRender_(doc);
           // Intentionally fall through.
         case mode.GEO_HOT_PATCH:
-          // Build the AMP State, add  classes
-          states[BIND_COUNTRY] = self.country_;
-          states.ISOCountryGroups = self.matchedGroups_;
+          // Build the AMP State, add classes
+          states.ISOCountry = self.country_;
           for (const group in self.matchedGroups_) {
             doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
             states[self.matchedGroups_[group]] = true;
           }
           doc.body.classList.add(COUNTRY_PREFIX + this.country_);
+          states.ISOCountryGroups = self.matchedGroups_;
 
           // Add the AMP state to the doc
           const state = doc.createElement('amp-state');
