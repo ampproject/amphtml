@@ -79,6 +79,9 @@ describes.realWin('amp-playbuzz', {
     if (params && typeof params.displayComments === 'boolean') {
       ins.setAttribute('data-comments', params.displayComments);
     }
+    if (params && params.arialabel) {
+      ins.setAttribute('aria-label', params.arialabel);
+    }
     doc.body.appendChild(ins);
     return ins.build().then(() => {
       if (opt_beforeLayoutCallback) {
@@ -156,8 +159,11 @@ describes.realWin('amp-playbuzz', {
       const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
       expect(placeholder.style.display).to.be.equal('');
+      expect(placeholder.getAttribute('aria-label'))
+          .to.equal('Loading interactive element');
     }).then(ins => {
       const placeholder = ins.querySelector('[placeholder]');
+
       const iframe = ins.querySelector('iframe');
       ins.getVsync = () => {
         return {
@@ -171,7 +177,16 @@ describes.realWin('amp-playbuzz', {
       });
     });
   });
+  it('propagates aria label to placeholder', () => {
+    const src = createItemSrc().withUrl('https://www.playbuzz.com/bob/bobs-life');
+    return getIns(src, {'arialabel': 'captivating quiz'}, true, ins => {
+      // console.log(ins);
+      const placeholder = ins.querySelector('[placeholder]');
+      expect(placeholder.getAttribute('aria-label'))
+          .to.equal('Loading - captivating quiz');
 
+    });
+  });
   it('requires item attribute', () => {
     const src = createItemSrc().withUrl('');
     expect(getIns(src)).to.be.rejectedWith(

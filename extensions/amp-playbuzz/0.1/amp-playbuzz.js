@@ -138,6 +138,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
+    if (this)
+    {this.propagateAttributes(['aria-label'], placeholder);}
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('aria-label', 'Loading - '
+          + this.element.getAttribute('aria-label'));
+    } else {
+      placeholder.setAttribute('aria-label', 'Loading interactive element');
+    }
     placeholder.setAttribute('placeholder', '');
     placeholder.appendChild(this.createPlaybuzzLoader_());
     return placeholder;
