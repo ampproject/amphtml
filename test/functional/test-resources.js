@@ -2127,7 +2127,7 @@ describe('Resources changeSize', () => {
       expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222);
     });
 
-    it('should change size when above the vp and adjust scrolling', () => {
+    it.skip('should change size when above the vp and adjust scrolling', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('getScrollTop').returns(1777).once();
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
