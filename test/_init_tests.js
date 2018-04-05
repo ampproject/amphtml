@@ -269,7 +269,7 @@ function mockConsoleError() {
   consoleSandbox = sinon.sandbox.create();
   this.consoleMock = consoleSandbox.mock(console);
   this.consoleMock.expects('error').never();
-  this.expectError = function(func, message) {
+  this.expectAssertFails = function(func, message) {
     this.consoleMock.expects('error').once();
     expect(func).to.throw(message);
   };

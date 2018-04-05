@@ -31,7 +31,7 @@
     "context": false,
     "global": false,
     "describes": true,
-    "expectError": false
+    "expectAssertFails": false
   },
   "rules": {
     "amphtml-internal/closure-type-primitives": 2,
