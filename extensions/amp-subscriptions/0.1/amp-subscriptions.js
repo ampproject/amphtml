@@ -341,13 +341,13 @@ export class SubscriptionService {
 
   /**
    * Logs error and sends message to viewer
-   * @param {string} error
+   * @param {string} errorString
    */
-  sendAuthTokenErrorToViewer_(error) {
-    this.viewer_.sendMessageAwaitResponse('auth-rejected', dict({
-      'reason': error,
+  sendAuthTokenErrorToViewer_(errorString) {
+    this.viewer_.sendMessage('auth-rejected', dict({
+      'reason': errorString,
     }));
-    user().error(error);
+    user().error(TAG, errorString);
   }
 
   /**
