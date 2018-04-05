@@ -158,7 +158,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
     this.registerAction('dismiss',
         () => this.handleAction_(ACTION_TYPE.DISMISS));
-    this.registerAction('revoke', invocation => {
+    this.registerAction('showConsentPrompt', invocation => {
       const args = invocation.args;
       const consentId = args && args['consentId'];
       this.handleRevoke_(consentId);
