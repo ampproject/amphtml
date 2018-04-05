@@ -1,0 +1,5 @@
+class ArticleComponent {
+  build() {
+
+  }
+}

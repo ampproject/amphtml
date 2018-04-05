@@ -28,7 +28,7 @@ import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
-import {relatedArticlesFromJson} from './related-articles';
+import {relatedArticlesFromJson, componentsFromJson} from './bookend/component-builder';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -370,11 +370,17 @@ export class Bookend {
             return null;
           }
 
-          this.config_ = {
-            shareProviders: response['share-providers'],
-            relatedArticles:
-                relatedArticlesFromJson(response['related-articles']),
-          };
+          if(response['bookend-version'] == 2.0){
+            this.config = {
+              components: componentsFromJson(response['components']),
+            }
+          } else { // Prepare for the new API. Remove when previous version is deprecated.
+            this.config_ = {
+              shareProviders: response['share-providers'],
+              relatedArticles:
+                  relatedArticlesFromJson(response['related-articles']),
+            };
+          }
 
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
