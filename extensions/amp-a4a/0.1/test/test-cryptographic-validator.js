@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AdResponseType, ValidatorResult} from '../amp-ad-type-defs';
 import {
   CryptographicValidator,
@@ -21,6 +22,7 @@ import {
 } from '../cryptographic-validator';
 import {VerificationStatus} from '../signature-verifier';
 import {data} from './testdata/valid_css_at_rules_amp.reserialized';
+import {user} from '../../../../src/log';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
 const realWinConfig = {
@@ -32,10 +34,17 @@ const realWinConfig = {
 describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   const headers = {'Content-Type': 'application/jwk-set+json'};
+  let sandbox;
   let validator;
 
   beforeEach(() => {
     validator = new CryptographicValidator();
+    sandbox = sinon.sandbox.create();
+    sandbox.stub(user(), 'error');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should have AMP validator result', () => {
