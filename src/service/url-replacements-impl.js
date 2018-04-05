@@ -46,7 +46,7 @@ import {isProtocolValid} from '../url';
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
-const GEO_DELIMITER = ','
+const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
@@ -348,7 +348,7 @@ export class GlobalVariableSource extends VariableSource {
               'The value passed to AMP_GEO() is not valid name:' + geoType);
           return /** @type {string} */ (geos[geoType] || 'unknown');
         }
-        return /** @type {string} */ geos.ISOCountryGroups.join(GEO_DELIMITER);
+        return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
       }, 'AMP_GEO');
     }));
 
@@ -653,22 +653,20 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via geo service.
-   * @param {function(!Object<string, string>):(?string)} getter
+   * @param {function(Object<string, string>)} getter
    * @param {string} expr
-   * @return {!Promise<?string>}
+   * @return {!Promise<Object<string,string>>}
    * @template T
    * @private
    */
   getGeo_(getter, expr) {
-    if (!this.geo) {
-      this.geo = Services.geoForOrNull(this.ampdoc.win);
-    }
-    return this.geo.then(geo => {
-      user().assert(geo,
-          'To use variable %s, amp-geo should be configured',
-          expr);
-      return getter(geo);
-    });
+    return Services.geoForOrNull(this.ampdoc.win)
+        .then(geo => {
+          user().assert(geo,
+              'To use variable %s, amp-geo should be configured',
+              expr);
+          return getter(geo);
+        });
   }
 
   /**

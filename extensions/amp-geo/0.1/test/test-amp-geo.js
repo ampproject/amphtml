@@ -56,11 +56,10 @@ describes.realWin('amp-geo', {
     const el = doc.createElement('amp-geo');
     el.ampdoc_ = ampdoc;
     geo = new AmpGeo(el);
-  
   });
 
   afterEach(() => {
-    console.log(doc.body.outerHTML);
+    delete win.AMP_MODE.geoOverride;
   });
 
   function addConfigElement(opt_elementName, opt_type, opt_textContent) {
@@ -82,35 +81,6 @@ describes.realWin('amp-geo', {
       addConfigElement('script');
       geo.buildCallback();
     }).to.not.throw();
-  });
-
-  it('should throw if it has multiple child elements', () => {
-    expect(() => {
-      addConfigElement('script');
-      addConfigElement('script');
-      geo.buildCallback();
-    }).to.throw(/should have exactly one <script> child​​​/);
-  });
-
-  it('should throw if the child element is not a <script> element', () => {
-    expect(() => {
-      addConfigElement('a');
-      geo.buildCallback();
-    }).to.throw(/script/);
-  });
-
-  it('should throw if the child script element is not json typed', () => {
-    expect(() => {
-      addConfigElement('script', 'wrongtype');
-      geo.buildCallback();
-    }).to.throw(/application\/json/);
-  });
-
-  it('should throw if the child script element has non-JSON content', () => {
-    expect(() => {
-      addConfigElement('script', 'application/json', '{not json}');
-      geo.buildCallback();
-    }).to.throw();
   });
 
   it('should add classes to body element for the geo', () => {
@@ -152,7 +122,7 @@ describes.realWin('amp-geo', {
   });
 
   it('should allow hash to override geo in test', () => {
-    win.location.hash = '#amp-geo=nz';
+    win.AMP_MODE.geoOverride = 'nz';
     addConfigElement('script');
     geo.buildCallback();
 
@@ -188,7 +158,7 @@ describes.realWin('amp-geo', {
   });
 
   it('should allow hash to override pre-rendered geo in test', () => {
-    win.location.hash = '#amp-geo=nz';
+    win.AMP_MODE.geoOverride = 'nz';
     doc.body.classList.add('amp-iso-country-mx', 'amp-geo-group-nafta');
     addConfigElement('script');
     geo.buildCallback();
@@ -206,4 +176,32 @@ describes.realWin('amp-geo', {
     });
   });
 
+  it('should throw if it has multiple child elements', () => {
+    expect(() => {
+      addConfigElement('script');
+      addConfigElement('script');
+      geo.buildCallback();
+    }).to.throw(/should have exactly one <script> child​​​/);
+  });
+
+  it('should throw if the child element is not a <script> element', () => {
+    expect(() => {
+      addConfigElement('a');
+      geo.buildCallback();
+    }).to.throw(/script/);
+  });
+
+  it('should throw if the child script element is not json typed', () => {
+    expect(() => {
+      addConfigElement('script', 'wrongtype');
+      geo.buildCallback();
+    }).to.throw(/application\/json/);
+  });
+
+  it('should throw if the child script element has non-JSON content', () => {
+    expect(() => {
+      addConfigElement('script', 'application/json', '{not json}');
+      geo.buildCallback();
+    }).to.throw();
+  });
 });

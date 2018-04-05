@@ -426,10 +426,10 @@ export class Services {
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
    * @param {!Window} win
-   * @return {!Promise<?Object>}
+   * @return {!Promise<?Object<string,string>>}
    */
   static geoForOrNull(win) {
-    return (/** @type {!Promise<?Object>} */
+    return (/** @type {!Promise<?Object<string,string>>} */
       (getElementServiceIfAvailable(win, 'geo', 'amp-geo', true)));
   }
 

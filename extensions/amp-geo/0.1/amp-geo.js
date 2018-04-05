@@ -42,7 +42,6 @@ import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {parseQueryString_} from '../../../src/url-parse-query-string';
 import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 import {waitForBodyPromise} from '../../../src/dom';
@@ -51,14 +50,14 @@ import {waitForBodyPromise} from '../../../src/dom';
 /** @const */
 const TAG = 'amp-geo';
 /**
- * COUNTRY is a special const the magic string AMP_ISO_COUNTRY
+ * COUNTRY is a special const the magic string AMP_ISO_COUNTRY_HOTPATCH
  * is replaced at serving time with the two letter country code or
  * error value padded to length to avoid breaking .map files.  We
  * then trim it and store is as this.country_
  *
  * So don't change the magic string!
  */
-const COUNTRY = 'AMP_ISO_COUNTRY';
+const COUNTRY = 'AMP_ISO_COUNTRY_HOTPATCH';
 const COUNTRY_PREFIX = 'amp-iso-country-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
@@ -81,8 +80,10 @@ export class AmpGeo extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {integer} */
+    /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
+    /** @private {string} */
+    this.country_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
     /** @Private {} */
@@ -106,7 +107,7 @@ export class AmpGeo extends AMP.BaseElement {
         'tag with type= "application/json"');
     const config = parseJson(script.textContent);
 
-    /** @private @const {!Promise<!Object<string, (string|bool)>>} */
+    /** @private @const {!Promise<!Object<string, (string|boolean)>>} */
     const geo = this.addToBody_(config);
 
     registerServiceBuilder(this.win, 'geo', function() {
@@ -137,16 +138,12 @@ export class AmpGeo extends AMP.BaseElement {
     }
 
     // Are we in debug override?
-    const hashQuery = parseQueryString_(
-    // location.originalHash is set by the viewer when it removes the fragment
-    // from the URL.
-        this.win.location.originalHash || this.win.location.hash);
-
-    // Allow override by hash
-    if (hashQuery['amp-geo'] &&
-      (isCanary(this.win) || getMode(this.win).localDev)) {
+    // match to \w+ to prevent xss vector
+    if (getMode(this.win).geoOverride &&
+      (isCanary(this.win) || getMode(this.win).localDev) &&
+      getMode(this.win).geoOverride.match(/\w+/)) {
       this.mode_ = mode.GEO_OVERRIDE;
-      this.country_ = hashQuery['amp-geo'] ;
+      this.country_ = getMode(this.win).geoOverride ;
     }
   }
   /**
@@ -169,8 +166,7 @@ export class AmpGeo extends AMP.BaseElement {
             isArray(config.ISOCountryGroups[groups[i]]),
             '<amp-geo> ISOCountryGroups[' + groups[i] + '] must be an array'
         );
-        const x= config.ISOCountryGroups[groups[i]];
-        if (config.ISOCountryGroups[groups[i]].includes(this.country_)) {
+        if (config.ISOCountryGroups[groups[i]].indexOf(this.country_) >= 0) {
           this.matchedGroups_.push(groups[i]);
         }
       }
@@ -199,11 +195,12 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<Object<string, (string | bool)>>} service response
+   * @return {!Promise<!Object<string, (string | boolean)>>} service response
    * @private
    */
   addToBody_(config) {
     const doc = this.win.document;
+    /** @private {Object} */
     const states = {};
     const self = this;
 
@@ -220,7 +217,8 @@ export class AmpGeo extends AMP.BaseElement {
         case mode.GEO_HOT_PATCH:
           // Build the AMP State, add classes
           states.ISOCountry = self.country_;
-          for (const group in self.matchedGroups_) {
+
+          for (let group = 0; group < self.matchedGroups_.length; group++) {
             doc.body.classList.add(GROUP_PREFIX + self.matchedGroups_[group]);
             states[self.matchedGroups_[group]] = true;
           }
@@ -229,8 +227,8 @@ export class AmpGeo extends AMP.BaseElement {
 
           // Add the AMP state to the doc
           const state = doc.createElement('amp-state');
-          state.innerHTML = '<script type="application/json">' +
-          JSON.stringify(states) + '</script>';
+          state./*OK*/innerHTML = '<script type="application/json">' +
+          JSON.stringify(/** @type {!JsonObject} */(states)) + '</script>';
           state.id = GEO_ID;
 
           // Only include amp state if user requests it to avoid validator issue
