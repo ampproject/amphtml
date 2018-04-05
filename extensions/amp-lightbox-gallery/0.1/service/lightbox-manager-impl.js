@@ -410,11 +410,11 @@ export class LightboxManager {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
       const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
-      user().assert(thumbnailImage.tagName == 'AMP-IMG');
-      return srcsetFromElement(thumbnailImage);
-    } else {
-      return this.getUserPlaceholderSrcset_(element);
+      if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
+        return srcsetFromElement(thumbnailImage);
+      }
     }
+    return this.getUserPlaceholderSrcset_(element);
   }
 
   /**
