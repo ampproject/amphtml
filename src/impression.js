@@ -238,6 +238,7 @@ function applyResponse(win, response) {
     const url = parseUrl(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
+    // TODO: Avoid overwriting the fragment parameter.
     win.history.replaceState(null, '', newHref);
     viewer.maybeUpdateFragmentForCct();
   }
