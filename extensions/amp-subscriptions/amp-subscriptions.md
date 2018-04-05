@@ -148,6 +148,9 @@ The key is the `services` property that contains an array of service configurati
 
 Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
 
+If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
+
+
 ### The "local" service configuration
 
 The "local" service is configured as following:
