@@ -16,7 +16,6 @@
 
 import {UrlBuilder} from '../url-builder';
 
-
 describes.realWin('UrlBuilder', {amp: true}, env => {
   let ampdoc;
   let readerIdPromise;
