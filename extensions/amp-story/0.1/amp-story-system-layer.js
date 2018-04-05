@@ -157,6 +157,10 @@ export class SystemLayer {
       this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
     }
 
+    if (Services.platformFor(this.win_).isIos()) {
+      this.systemLayerEl_.setAttribute('ios', '');
+    }
+
     return this.getRoot();
   }
 
