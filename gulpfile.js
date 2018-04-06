@@ -153,6 +153,7 @@ declareExtension('amp-story', '0.1', {
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
     'amp-story-share',
+    'amp-story-share-menu',
     'amp-story-system-layer',
   ],
 });
