@@ -310,6 +310,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     let responseStub;
     let sendAuthTokenStub;
     let fetchEntitlementsStub;
+    let decodeStub;
     const fakeAuthToken = {
       'authorization': 'faketoken',
     };
@@ -327,12 +328,14 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           .callsFake(() => Promise.resolve());
       sendAuthTokenStub = sandbox.stub(subscriptionService,
           'sendAuthTokenErrorToViewer_');
-      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
-          .callsFake(() => {return {
-            'aud': getWinOrigin(win),
-            'exp': (Date.now() / 1000) + 10,
-            'entitlements': [entitlementData],
-          };});
+      decodeStub = sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+          .callsFake(() => {
+            return {
+              'aud': getWinOrigin(win),
+              'exp': (Date.now() / 1000) + 10,
+              'entitlements': [entitlementData],
+            };
+          });
       fetchEntitlementsStub = sandbox.stub(subscriptionService,
           'fetchEntitlements_');
     });
@@ -389,11 +392,11 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       const reason = 'Payload is expired';
       sandbox.stub(subscriptionService, 'verifyAuthToken_').callsFake(
           () => Promise.reject(reason));
-      return subscriptionService.initialize_().then(() => {
-        return subscriptionService.viewer_.sendMessageAwaitResponse().then(() => {
-          expect(sendAuthTokenStub).to.be.calledWith(reason);
-        });
-      });
+      subscriptionService.delegateAuthToViewer_();
+      return subscriptionService.viewer_.sendMessageAwaitResponse()
+          .catch(() => {
+            expect(sendAuthTokenStub).to.be.calledWith(reason);
+          });
     });
   });
 

@@ -312,7 +312,7 @@ export class SubscriptionService {
         // Viewer authorization is redirected to use local platform instead.
         this.platformStore_.resolveEntitlement('local', entitlement);
       }).catch(reason => {
-        this.sendAuthTokenErrorToViewer_(String(reason));
+        this.sendAuthTokenErrorToViewer_(reason.message);
         throw reason;
       });
 
