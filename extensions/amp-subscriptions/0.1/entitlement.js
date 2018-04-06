@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {dict} from '../../../src/utils/object';
+import { dev } from '../../../src/log';
 
 /** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
 export let MeteringData;
@@ -101,6 +102,7 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
+    dev().assert(this.product_, 'Current Product is not set');
     return this.product_ ? this.enables(this.product_) : false;
   }
 

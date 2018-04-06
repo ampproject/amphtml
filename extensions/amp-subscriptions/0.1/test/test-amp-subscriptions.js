@@ -35,7 +35,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let pageConfig;
   let subscriptionService;
   let configResolver;
-
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
 
@@ -76,13 +75,17 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   it('should call `initialize_` on start', () => {
-    const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    expect(subscriptionService.start()).to.throw;
+    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+    const initializeStub = sandbox.stub(subscriptionService, 'initialize_')
+        .callsFake(() => Promise.resolve());
+    subscriptionService.pageConfig_ = pageConfig;
+    subscriptionService.platformConfig_ = serviceConfig;
+    subscriptionService.start();
     expect(initializeStub).to.be.calledOnce;
   });
 
   it('should setup store and page on start', () => {
-
+    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
     const renderLoadingStub =
         sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
@@ -126,7 +129,11 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
+    const factoryStub = sandbox.stub().callsFake(() =>
+      new SubscriptionPlatform());
+    subscriptionService.platformStore_ = new PlatformStore(
+        [serviceData.serviceId]);
+    subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
     return subscriptionService.initialize_().then(() => {
       expect(factoryStub).to.be.calledOnce;
@@ -165,6 +172,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
