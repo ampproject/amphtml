@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {ACTION_TYPE, AmpConsent} from '../amp-consent';
+import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
+import {MULTI_CONSENT_EXPERIMENT} from '../../../../src/consent-state';
 import {macroTask} from '../../../../testing/yield';
+
 import {
   registerServiceBuilder,
   resetServiceForTesting,
@@ -38,7 +40,9 @@ describes.realWin('amp-consent', {
   beforeEach(() => {
     doc = env.win.document;
     win = env.win;
-    toggleExperiment(win, 'amp-consent', true);
+    toggleExperiment(win, AMP_CONSENT_EXPERIMENT, true);
+    toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
+
     storageValue = {};
     jsonMockResponses = {
       'response1': '{"consentRequired": true, "prompt": true}',
