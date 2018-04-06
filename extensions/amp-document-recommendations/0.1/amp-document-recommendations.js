@@ -31,6 +31,7 @@ import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
@@ -230,12 +231,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
 
-            const css = 'body > *[i-amphtml-fixedid] { display: none; }';
-            const head = amp.ampdoc.getHeadNode();
-            const style = doc.createElement('style');
-            style.type = 'text/css';
-            style.appendChild(doc.createTextNode(css));
-            head.appendChild(style);
+            installStylesForDoc(amp.ampdoc, CSS, () => {}, false, TAG);
+            const body = amp.ampdoc.getBody();
+            body.classList.add('i-amphtml-recommended-document');
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
