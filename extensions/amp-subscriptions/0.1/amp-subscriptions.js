@@ -26,14 +26,13 @@ import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
 import {SubscriptionPlatform} from './subscription-platform';
+import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
-import { ViewerSubscriptionPlatform } from './viewer-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscriptions';

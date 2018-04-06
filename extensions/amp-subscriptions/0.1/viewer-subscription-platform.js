@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlement';
+import {JwtHelper} from '../../amp-access/0.1/jwt';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import { Services } from '../../../src/services';
-import { Entitlement } from './entitlement';
-import { dict } from '../../../src/utils/object';
-import { getWinOrigin, getSourceOrigin } from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 /**
  * This implements the methods to interact with viewer subscription platform.
  *
@@ -55,6 +56,9 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /** @override */
