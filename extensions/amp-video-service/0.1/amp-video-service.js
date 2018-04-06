@@ -74,11 +74,8 @@ export class VideoService {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {function()} */
-    this.boundTick_ = () => this.startTicking_();
-
-    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
-    this.tick_ = new LazyObservable(this.boundTick_);
+    /** @private {?../../../src/observable.Observable<void>} */
+    this.tick_ = null;
   }
 
   /** @private */
@@ -116,8 +113,13 @@ export class VideoService {
   }
 
   /** @return {!../../../src/observable.ObservableInterface<void>} */
-  getTick() {
-    return this.tick_;
+  onTick(handler) {
+    this.tick_ = this.tick_ || new Observable();
+    this.tick_.add(handler);
+
+    if (this.tick_.getHandlerCount() == 1) {
+      this.startTicking_();
+    }
   }
 
   /**
@@ -154,11 +156,10 @@ export class VideoEntry {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!VideoService} videoService
    * @param {!../../../src/video-interface.VideoInterface} video
-   * @param {!../../../src/observable.ObservableInterface<void>} tick
    */
-  // Observables injected for testability.
-  constructor(ampdoc, video, tick) {
+  constructor(ampdoc, videoService, video) {
 
     /** @private @const{!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -167,17 +168,7 @@ export class VideoEntry {
     this.video_ = video;
 
     /** @private @const {!../../../src/observable.ObservableInterface<void>} */
-    this.tick_ = tick;
-
-    // These functions are bound (instead of being arrow functions) so that
-    // they reference the prototype of the class, which is only created once.
-
-    /** @private @const {!function():void} */
-    this.boundOnTick_ = VideoEntry.prototype.onTick_.bind(this);
-
-    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
-    this.playbackTick_ =
-        new LazyObservable(VideoEntry.prototype.addTickHandler_.bind(this));
+    this.service_ = videoService;
 
     /** @private {boolean} */
     this.isPlaying_ = false;
@@ -189,20 +180,17 @@ export class VideoEntry {
    * @param {!../../../src/video-interface.VideoInterface} video
    */
   static create(ampdoc, videoService, video) {
-    return new VideoEntry(ampdoc, video, videoService.getTick());
+    return new VideoEntry(ampdoc, videoService, video);
   }
 
   /** @private */
-  addTickHandler_() {
-    this.tick_.add(this.boundOnTick_);
-  }
-
-  /** @private */
-  onTick_() {
-    if (!this.isPlaying_) {
-      return;
-    }
-    this.playbackTick_.fire();
+  onPlaybackTick(handler) {
+    this.service_.onTick(() => {
+      if (!this.isPlaying_) {
+        return;
+      }
+      handler();
+    });
   }
 
   /** */
@@ -282,9 +270,8 @@ export class VideoEntry {
 
     const {win} = this.ampdoc_;
     const video = this.video_;
-    const playbackTick = this.getPlaybackTick();
 
-    playbackTick.add(() => {
+    this.onPlaybackTick(() => {
       TimeUpdateEvent.trigger(win, video);
     });
   }

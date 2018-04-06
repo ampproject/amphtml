@@ -30,7 +30,7 @@ const TAG = 'amp-video-service';
  * as an action trigger.
  * @private @const {!RegExp}
  */
-const TIME_UPDATE_ACTION_RE = /timeUpdate/g;
+const TIME_UPDATE_ACTION_RE = /(^|;\s*)timeUpdate:/g;
 
 
 /** @package */

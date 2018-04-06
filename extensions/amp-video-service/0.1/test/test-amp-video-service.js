@@ -53,7 +53,7 @@ describes.fakeWin('VideoEntry', {
     const expectedSignal = VideoEvents.REGISTERED;
     const expectedEvent = VideoEvents.REGISTERED;
 
-    const entry = new VideoEntry(env.ampdoc, video, /* tick */ null);
+    const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
     sandbox.stub(entry, 'maybeTriggerTimeUpdate');
     sandbox.stub(entry, 'registerCommonActions');
@@ -73,7 +73,7 @@ describes.fakeWin('VideoEntry', {
   });
 
   it('should register common actions on install', () => {
-    const entry = new VideoEntry(env.ampdoc, video, /* tick */ null);
+    const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
     sandbox.stub(entry, 'maybeTriggerTimeUpdate');
 
@@ -89,39 +89,38 @@ describes.fakeWin('VideoEntry', {
     });
   });
 
-  it('should not trigger `timeUpdate` based on `on` attribute', () => {
-    const tick = new Observable();
-    const trigger = sandbox.stub(TimeUpdateEvent, 'trigger');
-    const entry = new VideoEntry(env.ampdoc, video, tick);
+  [
+    ['should not', false, ''],
+    ['should', true, 'timeUpdate:blah'],
+  ].forEach(test => {
+    const [shouldOrNot, triggerShouldHaveBeenCalled, on] = test;
 
-    sandbox.stub(entry, 'registerCommonActions');
+    it(`${shouldOrNot} trigger \`timeUpdate\``, () => {
+      element.setAttribute('on', on);
 
-    video.registerAction = sandbox.spy();
+      const tick = new Observable();
+      const trigger = sandbox.stub(TimeUpdateEvent, 'trigger');
+      const service = {
+        onTick: sandbox.stub().callsFake(tick.add.bind(tick)),
+      };
+      const entry = new VideoEntry(env.ampdoc, service, video);
 
-    entry.install();
+      sandbox.stub(entry, 'registerCommonActions');
 
-    return element.whenBuilt().then(() => {
-      tick.fire();
-      expect(trigger).to.not.have.been.called;
-    });
-  });
+      entry.install();
+      entry.isPlaying_ = true;
 
-  it.skip('should trigger `timeUpdate` based on `on` attribute', () => {
-    // wip
-    const tick = new Observable();
-    const trigger = sandbox.spy(TimeUpdateEvent, 'trigger');
-    const entry = new VideoEntry(env.ampdoc, video, tick);
+      return element.whenBuilt().then(() => {
+        tick.fire();
 
-    sandbox.stub(entry, 'registerCommonActions');
-
-    element.setAttribute('on', 'timeUpdate:blah');
-
-    entry.install();
-    element.dispatchEvent(new CustomEvent(VideoEvents.PLAYING));
-
-    return element.whenBuilt().then(() => {
-      tick.fire();
-      expect(trigger).to.have.been.calledOnce;
+        if (triggerShouldHaveBeenCalled) {
+          expect(service.onTick).to.have.been.calledOnce;
+          expect(trigger).to.have.been.calledOnce;
+        } else {
+          expect(service.onTick).to.not.have.been.called;
+          expect(trigger).to.not.have.been.called;
+        }
+      });
     });
   });
 });
