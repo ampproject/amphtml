@@ -77,7 +77,8 @@ export default function gltfViewer() {
 
   const center = new THREE.Vector3();
   const size = new THREE.Vector3();
-  const setupCameraForObject = (camera, object) => {
+  const setupCameraForObject = (viewer, object) => {
+    const camera = viewer.camera;
     const bbox = new THREE.Box3();
     bbox.setFromObject(object);
     bbox.getCenter(center);
@@ -86,11 +87,13 @@ export default function gltfViewer() {
     const sizeLength = size.length();
     camera.far = sizeLength * 50;
     camera.near = sizeLength * .01;
-    camera.position.copy(bbox.max).multiplyScalar(2);
+    camera.position.lerpVectors(center, bbox.max, 2);
     camera.lookAt(center);
 
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
+
+    viewer.controls.target.copy(center);
   };
 
   const loadObject = (viewer, src) => {
@@ -101,7 +104,8 @@ export default function gltfViewer() {
         .load(
             resolveURL(src, baseUrl),
             gltfData => {
-              setupCameraForObject(viewer.camera, gltfData.scene);
+              setupCameraForObject(viewer, gltfData.scene);
+              viewer.gltfData = gltfData;
               gltfData.scene.children
                   .slice()
                   .forEach(child => {
@@ -155,16 +159,17 @@ export default function gltfViewer() {
 
     updateSize();
     window.addEventListener('resize', updateSize);
-    window.scene = scene;
 
     const viewer = {
       animationLoop,
       scene,
       camera,
       renderer,
+      controls,
     };
 
     loadObject(viewer, options.src);
+    window.viewer = viewer;
 
     return viewer;
   };
