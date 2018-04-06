@@ -147,6 +147,44 @@ describes.realWin('amp-facebook', {
     expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
   });
 
+  it('retains fb-video element with `data-embed-as=\'video\'`', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      embedAs: 'video',
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-video')).to.be.true;
+  });
+
+  it('retains fb-video element with `data-embed-as=\'post\'`', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      embedAs: 'post',
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-post')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-post')).to.be.true;
+  });
+
   it('check that fb-page element correctly sets `data-adapt-container-width` ' +
     'attribute to \'true\'', () => {
     const div = doc.createElement('div');
