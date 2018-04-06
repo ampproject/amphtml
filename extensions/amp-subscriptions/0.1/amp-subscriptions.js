@@ -311,6 +311,7 @@ export class SubscriptionService {
         this.platformStore_.resolveEntitlement('local', entitlement);
       }).catch(reason => {
         this.sendAuthTokenErrorToViewer_(String(reason));
+        throw reason;
       });
 
     }, reason => {
@@ -370,12 +371,12 @@ export class SubscriptionService {
   /**
    * Logs error and sends message to viewer
    * @param {string} errorString
+   * @private
    */
   sendAuthTokenErrorToViewer_(errorString) {
     this.viewer_.sendMessage('auth-rejected', dict({
       'reason': errorString,
     }));
-    user().error(TAG, errorString);
   }
 
   /**

@@ -166,7 +166,7 @@ attr_lists: {
     name: "src"
     value_url: {
       allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
+      allow_relative: false
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
