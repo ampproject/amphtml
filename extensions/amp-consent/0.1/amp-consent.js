@@ -289,39 +289,16 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(instanceId);
       this.getConsentRemote_(instanceId).then(response => {
         this.parseConsentResponse_(instanceId, response);
-        this.handleUI_(instanceId);
+        this.handlePromptUI_(instanceId);
       }).catch(unusedError => {
         // TODO: Handle errors
       });
     }
-    console.log(this.postPromptUI_);
-    this.notificationUiManager_.onQueueEmpty(() => {
-      console.log(this.postPromptUI_);
-      if (!this.postPromptUI_) {
-        return;
-      }
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-        this.getViewport().addToFixedLayer(this.element);
-      }
-      this.element.classList.add('amp-active');
-      this.element.classList.remove('amp-hidden');
-      setImportantStyles(this.postPromptUI_, {display: 'block'});
-    });
 
-    this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.postPromptUI_) {
-        return;
-      }
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-        this.getViewport().addToFixedLayer(this.element);
-      }
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      toggle(this.postPromptUI_, false);
+    // TODO(@zhouyx): Use setTimeout to make sure we handle postPromptUI
+    // after all prompt UI registerd. Make handle PromptUI a promise instead.
+    this.win.setTimeout(() => {
+      this.handlePostPromptUI_();
     });
 
     this.enableInteractions_();
@@ -441,10 +418,10 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Handle UI.
+   * Handle Prompt UI.
    * @param {string} instanceId
    */
-  handleUI_(instanceId) {
+  handlePromptUI_(instanceId) {
     // Prompt UI based on other UI on display and promptList for the instance.
     if (!this.consentUIRequired_[instanceId]) {
       return;
@@ -465,6 +442,34 @@ export class AmpConsent extends AMP.BaseElement {
             this.scheduleDisplay_(instanceId);
           }
         });
+  }
+
+  /**
+   * Handles the display of postPromptUI
+   */
+  handlePostPromptUI_() {
+    this.notificationUiManager_.onQueueEmpty(() => {
+      if (!this.postPromptUI_) {
+        return;
+      }
+      if (!this.uiInit_) {
+        this.uiInit_ = true;
+        toggle(this.element, true);
+        this.getViewport().addToFixedLayer(this.element);
+      }
+      this.element.classList.add('amp-active');
+      this.element.classList.remove('amp-hidden');
+      setImportantStyles(this.postPromptUI_, {display: 'block'});
+    });
+
+    this.notificationUiManager_.onQueueNotEmpty(() => {
+      if (!this.postPromptUI_) {
+        return;
+      }
+      this.element.classList.add('amp-hidden');
+      this.element.classList.remove('amp-active');
+      toggle(this.postPromptUI_, false);
+    });
   }
 }
 
