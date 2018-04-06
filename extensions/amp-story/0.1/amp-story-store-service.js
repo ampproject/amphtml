@@ -35,6 +35,7 @@ const TAG = 'amp-story';
  *    hasaudiostate: boolean,
  *    landscapestate: boolean,
  *    mutedstate: boolean,
+ *    sharemenustate: boolean,
  *    supportedbrowserstate: boolean,
  *    currentpageid: string,
  * }}
@@ -57,6 +58,7 @@ export const StateProperty = {
   HAS_AUDIO_STATE: 'hasaudiostate',
   LANDSCAPE_STATE: 'landscapestate',
   MUTED_STATE: 'mutedstate',
+  SHARE_MENU_STATE: 'sharemenustate',
   SUPPORTED_BROWSER_STATE: 'supportedbrowserstate',
   CURRENT_PAGE_ID: 'currentpageid',
 };
@@ -69,7 +71,8 @@ export const Action = {
   TOGGLE_HAS_AUDIO: 'togglehasaudio',
   TOGGLE_LANDSCAPE: 'togglelandscape',
   TOGGLE_MUTED: 'togglemuted',
-  TOGGLE_SUPPORTED_BROWSER: 'supportedbrowserstate',
+  TOGGLE_SHARE_MENU: 'togglesharemenu',
+  TOGGLE_SUPPORTED_BROWSER: 'togglesupportedbrowser',
   CHANGE_PAGE: 'changepage',
 };
 
@@ -122,6 +125,9 @@ const actions = (state, action, data) => {
             [StateProperty.MUTED_STATE]: true,
             [StateProperty.SUPPORTED_BROWSER_STATE]: false,
           }));
+    case Action.TOGGLE_SHARE_MENU:
+      return /** @type {!State} */ (Object.assign(
+          {}, state, {[StateProperty.SHARE_MENU_STATE]: !!data}));
     case Action.CHANGE_PAGE:
       return /** @type {!State} */ (Object.assign(
           {}, state, {[StateProperty.CURRENT_PAGE_ID]: data}));
@@ -219,6 +225,7 @@ export class AmpStoryStoreService {
       [StateProperty.HAS_AUDIO_STATE]: false,
       [StateProperty.LANDSCAPE_STATE]: false,
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.CURRENT_PAGE_ID]: '',
     });
