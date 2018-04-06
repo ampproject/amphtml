@@ -27,6 +27,7 @@ const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+const exec = require('./build-system/exec').exec;
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
@@ -802,6 +803,26 @@ function performBuild(watch) {
 }
 
 /**
+ * @param {boolean} compiled
+ */
+function checkBinarySize(compiled) {
+  const file = compiled ? './dist/v0.js' : './dist/amp.js';
+  const size = compiled ? '76.1kB' : '332.3kB';
+  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
+  log(green('Running ') + cyan(cmd) + green('...\n'));
+  const p = exec(cmd);
+  if (p.status != 0) {
+    log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
+        'exceeded its size cap. This is part of a new effort to reduce ' +
+        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+    // Terminate Travis builds on failure.
+    if (process.env.TRAVIS) {
+      process.exit(p.status);
+    }
+  }
+}
+
+/**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -816,7 +837,9 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  return performBuild()
+      .then(() => checkBinarySize(/* compiled */ false))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -868,7 +891,9 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
-      }).then(() => exitCtrlcHandler(handlerProcess));
+      })
+      .then(() => checkBinarySize(/* compiled */ true))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1097,19 +1122,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const browsers = [];
-  if (process.env.TRAVIS) {
-    browsers.push('last 2 versions', 'safari >= 9');
-  } else {
-    browsers.push('Last 4 Chrome versions');
-  }
-
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babel, {
         presets: [
           ['env', {
             targets: {
-              browsers,
+              browsers: ['last 2 versions', 'safari >= 9'],
             },
           }],
         ],
