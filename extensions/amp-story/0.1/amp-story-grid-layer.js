@@ -45,6 +45,25 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 };
 
 /**
+ * A list of animation panning names.
+ * @private @const {!Array<string>}
+ */
+const PANNING_ANIMATIONS = [
+  'pan-up',
+  'pan-down',
+  'pan-right',
+  'pan-left'
+];
+
+/**
+ * A mapping of animation names to CSS class names.
+ * @private @const {!Object<string, string>}
+ */
+const ANIMATION_CLASS_NAMES = {
+  'pan': 'i-amphtml-story-grid-template-pan-animation',
+};
+
+/**
  * Converts the keys of the SUPPORTED_CSS_GRID_ATTRIBUTES object above into a
  * selector for the specified attributes.
  * (e.g. [align-content], [align-items], ...)
@@ -89,6 +108,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
+    this.setAnimationSpecificCssStyles_();
   }
 
 
@@ -128,6 +148,35 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     });
   }
 
+  /**
+   * To prevent the grid layer "fill" template CSS class to interfere with the 
+   * pan animation calculations by changing the first element's dimensions, we 
+   * remove the grid layer "fill" CSS class, and replace it with a custom pan
+   * CSS class.
+   * @private
+   */
+  setAnimationSpecificCssStyles_() {
+    const firstChild = this.element.firstElementChild;
+
+    const fillClass = TEMPLATE_CLASS_NAMES['fill'];
+    if (this.element.classList.contains(fillClass) &&
+        firstChild && 
+        this.containsPanAnimation_(firstChild)) {
+        this.element.classList.remove(fillClass);
+        this.element.classList.add(ANIMATION_CLASS_NAMES['pan']);
+    }
+  }
+
+  /**
+   * Checks if the first child of the grid layer contains a pan animation.
+   * @param {!Element} element First child of the grid layer.
+   * @return {boolean}
+   * @private
+   */
+  containsPanAnimation_(element) {
+    return PANNING_ANIMATIONS.includes(element.attributes['animate-in'] && 
+      element.attributes['animate-in'].value);
+  }
 
   /**
    * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
