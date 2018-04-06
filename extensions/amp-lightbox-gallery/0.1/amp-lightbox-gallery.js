@@ -792,12 +792,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const parentCarousel = closestBySelector(target,
         'amp-carousel[type="slides"]');
     if (parentCarousel && parentCarousel.isInViewport()) {
-      // Figure out which slide to transition to via a complete hack
-      const targetSlide = closestBySelector(target, 'div.i-amphtml-slide-item');
-      const targetSlideIndex = toArray(targetSlide.parentNode.children)
-          .indexOf(targetSlide);
-      dev().assert(parentCarousel).getImpl()
-          .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
       return true;
     }
     return false;
@@ -1073,6 +1067,26 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * If the currently lightbox-ed element is bound to a carousel, then sync
+   *  the carousel so that it is showing the currently lightbox-ed element.
+   * @private
+   */
+  maybeSyncSourceCarousel_() {
+    const target = this.getCurrentElement_().sourceElement;
+    // TODO(#13011): change to a tag selector after `<amp-carousel>`
+    // type='carousel' starts supporting goToSlide.
+    const parentCarousel = closestBySelector(target,
+        'amp-carousel[type="slides"]');
+    if (parentCarousel) {
+      const targetSlide = closestBySelector(target, 'div.i-amphtml-slide-item');
+      const targetSlideIndex = toArray(targetSlide.parentNode.children)
+          .indexOf(targetSlide);
+      dev().assert(parentCarousel).getImpl()
+          .then(carousel => carousel.showSlideWhenReady(targetSlideIndex));
+    }
+  }
+
+  /**
    * Closes the lightbox-gallery
    * @return {!Promise}
    * @private
@@ -1081,6 +1095,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.isActive_) {
       return Promise.resolve();
     }
+
+    this.maybeSyncSourceCarousel_();
 
     this.isActive_ = false;
 
