@@ -24,7 +24,6 @@ amp-lightbox-gallery .amp-carousel-button {
   display: block !important;
   background-repeat: no-repeat !important;
   background-position: center center !important;
-  background-color: #ffffff !important;
 }
 
 .i-amphtml-lbg-button-close {
@@ -33,7 +32,7 @@ amp-lightbox-gallery .amp-carousel-button {
 }
 
 .i-amphtml-lbg-button-close .i-amphtml-lbg-icon {
-  mask-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="close" fill="#fff" fill-rule="nonzero"><path d="M18.295,5.705 L18.295,5.705 C17.9056393,5.31563925 17.2743607,5.31563925 16.885,5.705 L12,10.59 L7.115,5.705 C6.72563925,5.31563925 6.09436075,5.31563925 5.705,5.705 L5.705,5.705 C5.31563925,6.09436075 5.31563925,6.72563925 5.705,7.115 L10.59,12 L5.705,16.885 C5.31563925,17.2743607 5.31563925,17.9056393 5.705,18.295 L5.705,18.295 C6.09436075,18.6843607 6.72563925,18.6843607 7.115,18.295 L12,13.41 L16.885,18.295 C17.2743607,18.6843607 17.9056393,18.6843607 18.295,18.295 L18.295,18.295 C18.6843607,17.9056393 18.6843607,17.2743607 18.295,16.885 L13.41,12 L18.295,7.115 C18.6843607,6.72563925 18.6843607,6.09436075 18.295,5.705 Z" id="Shape"></path></g></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="close" fill="#fff" fill-rule="nonzero"><path d="M18.295,5.705 L18.295,5.705 C17.9056393,5.31563925 17.2743607,5.31563925 16.885,5.705 L12,10.59 L7.115,5.705 C6.72563925,5.31563925 6.09436075,5.31563925 5.705,5.705 L5.705,5.705 C5.31563925,6.09436075 5.31563925,6.72563925 5.705,7.115 L10.59,12 L5.705,16.885 C5.31563925,17.2743607 5.31563925,17.9056393 5.705,18.295 L5.705,18.295 C6.09436075,18.6843607 6.72563925,18.6843607 7.115,18.295 L12,13.41 L16.885,18.295 C17.2743607,18.6843607 17.9056393,18.6843607 18.295,18.295 L18.295,18.295 C18.6843607,17.9056393 18.6843607,17.2743607 18.295,16.885 L13.41,12 L18.295,7.115 C18.6843607,6.72563925 18.6843607,6.09436075 18.295,5.705 Z" id="Shape"></path></g></g></svg>');
 }
 
 .i-amphtml-lbg-button-gallery {
@@ -42,7 +41,7 @@ amp-lightbox-gallery .amp-carousel-button {
 }
 
 .i-amphtml-lbg-button-gallery .i-amphtml-lbg-icon {
-  mask-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="grid" fill="#fff"><path d="M4,3 L8,3 C8.55228475,3 9,3.44771525 9,4 L9,10 C9,10.5522847 8.55228475,11 8,11 L4,11 C3.44771525,11 3,10.5522847 3,10 L3,4 C3,3.44771525 3.44771525,3 4,3 Z M12,3 L20,3 C20.5522847,3 21,3.44771525 21,4 L21,10 C21,10.5522847 20.5522847,11 20,11 L12,11 C11.4477153,11 11,10.5522847 11,10 L11,4 C11,3.44771525 11.4477153,3 12,3 Z M4,13 L12,13 C12.5522847,13 13,13.4477153 13,14 L13,20 C13,20.5522847 12.5522847,21 12,21 L4,21 C3.44771525,21 3,20.5522847 3,20 L3,14 C3,13.4477153 3.44771525,13 4,13 Z M16,13 L20,13 C20.5522847,13 21,13.4477153 21,14 L21,20 C21,20.5522847 20.5522847,21 20,21 L16,21 C15.4477153,21 15,20.5522847 15,20 L15,14 C15,13.4477153 15.4477153,13 16,13 Z" id="Combined-Shape"></path></g></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="grid" fill="#fff"><path d="M4,3 L8,3 C8.55228475,3 9,3.44771525 9,4 L9,10 C9,10.5522847 8.55228475,11 8,11 L4,11 C3.44771525,11 3,10.5522847 3,10 L3,4 C3,3.44771525 3.44771525,3 4,3 Z M12,3 L20,3 C20.5522847,3 21,3.44771525 21,4 L21,10 C21,10.5522847 20.5522847,11 20,11 L12,11 C11.4477153,11 11,10.5522847 11,10 L11,4 C11,3.44771525 11.4477153,3 12,3 Z M4,13 L12,13 C12.5522847,13 13,13.4477153 13,14 L13,20 C13,20.5522847 12.5522847,21 12,21 L4,21 C3.44771525,21 3,20.5522847 3,20 L3,14 C3,13.4477153 3.44771525,13 4,13 Z M16,13 L20,13 C20.5522847,13 21,13.4477153 21,14 L21,20 C21,20.5522847 20.5522847,21 20,21 L16,21 C15.4477153,21 15,20.5522847 15,20 L15,14 C15,13.4477153 15.4477153,13 16,13 Z" id="Combined-Shape"></path></g></g></svg>');
 }
 
 .i-amphtml-lbg-button-slide {
@@ -52,7 +51,7 @@ amp-lightbox-gallery .amp-carousel-button {
 }
 
 .i-amphtml-lbg-button-slide .i-amphtml-lbg-icon {
-  mask-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="image" fill="#fff"><path d="M5,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.8954305,21 3,20.1045695 3,19 L3,5 C3,3.8954305 3.8954305,3 5,3 Z M19,15 L19,5 L5,5 L5,13.0000896 L8,10.0003584 L13,15 L16,12 L19,15 Z M15.5,10 C14.6715729,10 14,9.32842712 14,8.5 C14,7.67157288 14.6715729,7 15.5,7 C16.3284271,7 17,7.67157288 17,8.5 C17,9.32842712 16.3284271,10 15.5,10 Z" id="Combined-Shape"></path></g></g></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="image" fill="#fff"><path d="M5,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.8954305,21 3,20.1045695 3,19 L3,5 C3,3.8954305 3.8954305,3 5,3 Z M19,15 L19,5 L5,5 L5,13.0000896 L8,10.0003584 L13,15 L16,12 L19,15 Z M15.5,10 C14.6715729,10 14,9.32842712 14,8.5 C14,7.67157288 14.6715729,7 15.5,7 C16.3284271,7 17,7.67157288 17,8.5 C17,9.32842712 16.3284271,10 15.5,10 Z" id="Combined-Shape"></path></g></g></svg>');
 }
 
 .i-amphtml-lbg-button-next, .i-amphtml-lbg-button-prev {
@@ -228,6 +227,34 @@ amp-lightbox-gallery .amp-carousel-button {
   top: 0 !important;
   object-fit: cover !important;
   cursor: pointer !important;
+}
+
+.i-amphtml-lbg-thumbnail-timestamp-container {
+  background-color: #292D33;
+  color: #ffffff;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  height: 20px;
+  border-radius: 2px;
+  opacity: 0.8;
+  width: 20px;
+}
+
+.i-amphtml-lbg-thumbnail-timestamp-container.i-amphtml-lbg-has-timestamp {
+  font-size: 12px;
+  padding: 0 5px 0 18px;
+  line-height: 1.3rem;
+  width: auto;
+}
+
+.i-amphtml-lbg-thumbnail-play-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ffffff"><path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
 }
 
 @media (min-width: 1024px) {
