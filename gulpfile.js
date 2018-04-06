@@ -806,7 +806,7 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '75.1kB' : '332.3kB';
+  const size = compiled ? '76.1kB' : '332.3kB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
@@ -814,6 +814,7 @@ function checkBinarySize(compiled) {
     log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
         'exceeded its size cap. This is part of a new effort to reduce ' +
         'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+    process.exit(p.status);
   }
 }
 
