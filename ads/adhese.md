@@ -16,15 +16,14 @@ limitations under the License.
 
 # Adhese
 
-Adhese adserver.
-More information about us can be found on our [website](https://www.adhese.com).
+Serves ads from [Adhese]((https://www.adhese.com).
 
 ## Example
 
 ### Basic setup
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="adhese"
     data-location="_sdk_amp_"
     data-position=""
@@ -37,7 +36,7 @@ More information about us can be found on our [website](https://www.adhese.com).
 ### With additional parameters
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="adhese"
     data-location="_sdk_amp_"
     data-position=""
@@ -51,9 +50,9 @@ More information about us can be found on our [website](https://www.adhese.com).
 
 ## Configuration
 
-See ad network documentation or contact Adhese support.
+For details on the configuration semantics, see the [Adhese website](https://www.adhese.com) or contact Adhese support.
 
-Required parameters:
+### Required parameters
 
 - `data-account`
 - `data-request_type`
@@ -61,6 +60,8 @@ Required parameters:
 - `data-position`
 - `data-format`
 
-Optional parameter supported via 'json' attribute:
+### Optional parameter 
 
-- 'targeting'
+The following optional parameter is supported via the 'json' attribute:
+
+- `targeting`

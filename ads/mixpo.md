@@ -18,11 +18,11 @@ limitations under the License.
 
 ## Example
 
-```
+```html
 <amp-ad width="300" height="250"
-    type = "mixpo"
-    data-guid = "b0caf856-fd92-4adb-aaec-e91948c9ffc8"
-    data-subdomain = "www">
+    type="mixpo"
+    data-guid="b0caf856-fd92-4adb-aaec-e91948c9ffc8"
+    data-subdomain="www">
 </amp-ad>
 ```
 
@@ -32,18 +32,18 @@ For configuration and implementation details, please contact [Mixpo support](sup
 
 Required Attributes:
 
-- data-guid
-- data-subdomain
+- `data-guid`
+- `data-subdomain`
 
 Additional Supported Attributes:
 
-- data-embedv
-- data-clicktag
-- data-customtarget
-- data-dynclickthrough
-- data-viewtracking
-- data-customcss
-- data-local
-- data-enablemraid
-- data-jsplayer
-- data-loader
+- `data-embedv`
+- `data-clicktag`
+- `data-customtarget`
+- `data-dynclickthrough`
+- `data-viewtracking`
+- `data-customcss`
+- `data-local`
+- `data-enablemraid`
+- `data-jsplayer`
+- `data-loader`

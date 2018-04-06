@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Adocean
+# AdOcean
 
-Please visit our website (http://www.adocean-global.com) for more details
 ## Example
 
 ```html
@@ -29,15 +28,17 @@ Please visit our website (http://www.adocean-global.com) for more details
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, see [AdOcean documentation](http://www.adocean-global.com).
 
-- `data-ao-id` - Adunit unique id
-- `data-ao-emitter` - adserver hostname
+### Required parameters 
 
-__Optional:__
+- `data-ao-id` - Ad unit unique id
+- `data-ao-emitter` - Ad server hostname
+
+### Optional parameters 
 
 - `data-ao-mode` - sync|buffered - processing mode
 - `data-ao-preview` - livepreview configuration id
-- `data-ao-keys` - additional configuration see adserver documentation
-- `data-ao-vars` - additional configuration see adserver documentation
-- `data-ao-clusters` - additional configuration see adserver documentation
+- `data-ao-keys` - additional configuration, see adserver documentation
+- `data-ao-vars` - additional configuration, see adserver documentation
+- `data-ao-clusters` - additional configuration,see adserver documentation

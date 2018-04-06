@@ -42,15 +42,15 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](http://faq.revcontent.com/support/solutions/5000137293).
+For semantics of configuration, please see [Revcontent's documentation](http://faq.revcontent.com/support/solutions/5000137293).
 
 Supported parameters:
 
-- data-id
-- data-wrapper
-- data-endpoint
-- data-ssl
-- data-testing
+- `data-id`
+- `data-wrapper`
+- `data-endpoint`
+- `data-ssl`
+- `data-testing`
 
 ## Auto-sizing of Ads
 

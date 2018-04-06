@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=168
+<amp-ad width="300" height="168"
     type="yieldmo"
     data-ymid="1349317029731662884">
 </amp-ad>
@@ -27,7 +27,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please [contact Yieldmo](https://yieldmo.com/#contact).
+For semantics configuration, please [contact Yieldmo](https://yieldmo.com/#contact).
 
 Supported parameters:
 
