@@ -119,7 +119,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService.doesViewerProvideAuth_ = true;
     subscriptionService.start();
     return subscriptionService.initialize_().then(() => {
-      expect(authFlowStub).to.be.calledOnce;
+      expect(authFlowStub.withArgs(false)).to.be.calledOnce;
       expect(delegateStub).to.be.calledOnce;
     });
   });
@@ -224,6 +224,18 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
+    });
+
+    it('should not call selectAndActivatePlatform based on param', () => {
+      subscriptionService.platformStore_ = new PlatformStore(products);
+      const getGrantStatusStub =
+          sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
+              .callsFake(() => Promise.resolve());
+      const selectAndActivateStub =
+          sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+      subscriptionService.startAuthorizationFlow_(false);
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.not.be.called;
     });
   });
 
