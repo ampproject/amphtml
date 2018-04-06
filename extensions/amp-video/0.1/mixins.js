@@ -167,14 +167,15 @@ export class IntermediatePropagationMixin {
 
   /** @param {!PlaybackMixin} mixin */
   transferState(mixin) {
+    const dummyElement = dev().assertElement(this.dummyElement_);
     const {element} = this.impl_;
-    const {attributes} = this.dummyElement_;
-    const {classList} = this.dummyElement_;
+    const {attributes} = dummyElement;
+    const {classList} = dummyElement;
     const baseNode = mixin.getBaseElement();
     const fragment =
         dev().assert(element.ownerDocument).createDocumentFragment();
 
-    copyChildren(this.dummyElement_, baseNode);
+    copyChildren(dummyElement, baseNode);
 
     for (let i = 0; i < attributes.length; i++) {
       const {name, value} = attributes.item(i);
@@ -373,9 +374,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
       this.showPlaceholder();
     });
 
-    listen(element, 'volumechange', e => {
-      const {muted} = e;
-      setMuted(muted);
+    listen(element, 'volumechange', () => {
+      setMuted(this.getMediaInfo_('muted'));
     });
   }
 

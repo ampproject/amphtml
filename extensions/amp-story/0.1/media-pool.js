@@ -61,7 +61,7 @@ export const MediaPoolEvents = {
  * can listen to these events without access to the underlying media element.
  * @private @const {!Array<string>}
  */
-const NON_BUBBLING_EVENTS = [
+const EVENTS_TO_FORWARD = [
   'canplay',
   'canplaythrough',
   'durationchange',
@@ -307,47 +307,28 @@ export class MediaPool {
    */
   bubbleEvents_(mediaEl) {
     // TODO(alanorozco): Keep track of unlisteners for disposal.
-    const onNonBubblingEvent = this.onNonBubblingEvent_.bind(this, mediaEl);
-    NON_BUBBLING_EVENTS.forEach(type =>
-      listen(mediaEl, type, onNonBubblingEvent.bind(this, type)));
-  }
-
-  /**
-   * @param {!HTMLMediaElement} mediaEl
-   * @param {string} type
-   * @param {!Event} event
-   * @private
-   */
-  onNonBubblingEvent_(mediaEl, type, event) {
-    if (event.bubbles) {
-      // In case of platform differences.
-      return;
-    }
-    const {parentNode} = mediaEl;
-    if (!parentNode) {
-      // Detached, can't bubble.
-      return;
-    }
-    if (type == 'volumechange') {
-      const {muted} = mediaEl;
-      this.bubbleEvent_(mediaEl, type, event, /* detail */ {muted});
-      return;
-    }
-    this.bubbleEvent_(mediaEl, type, event);
+    const forwardEvent = this.forwardEvent_.bind(this, mediaEl);
+    EVENTS_TO_FORWARD.forEach(type =>
+      listen(mediaEl, type, forwardEvent.bind(this, type)));
   }
 
   /**
    * @param {!HTMLMediaElement} mediaEl
    * @param {string} type
    * @param {!Event} sourceEvent
-   * @param {?Object=} detail
    * @private
    */
-  bubbleEvent_(mediaEl, type, sourceEvent, detail = null) {
+  forwardEvent_(mediaEl, type, sourceEvent) {
+    if (sourceEvent.bubbles) {
+      // In case of platform differences.
+      return;
+    }
+    if (!mediaEl.parentNode) {
+      return;
+    }
     const {parentNode} = mediaEl;
-    const composedDetail = Object.assign({}, sourceEvent, detail || undefined);
-    const event =
-        createCustomEvent(this.win_, type, composedDetail, {bubbles: true});
+    const detail = Object.assign({}, sourceEvent.detail);
+    const event = createCustomEvent(this.win_, type, detail, {bubbles: true});
     parentNode.dispatchEvent(event);
   }
 
@@ -575,18 +556,16 @@ export class MediaPool {
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl, swapIntoDom).then(() => {
-      const updateSources = new UpdateSourcesTask(sources, this.vsync_);
-      const load = new LoadTask();
+      this.enqueueMediaElementTask_(poolMediaEl,
+          new UpdateSourcesTask(sources, this.vsync_));
 
-      this.enqueueMediaElementTask_(poolMediaEl, updateSources).then(() => {
+      this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
         // Technically, this event is not triggered strictly on allocation.
         // From a client's perspective this doesn't matter, and it's better
         // to trigger the event once the allocated media is in a valid state
         // (i.e. all sources loaded.)
         this.triggerAllocationEvent_(poolMediaEl, /* isAllocated */ true);
       });
-
-      this.enqueueMediaElementTask_(poolMediaEl, load);
     }, () => {
       this.forceDeallocateMediaElement_(poolMediaEl);
     });
@@ -1013,7 +992,10 @@ export class MediaPool {
       case 'currentTime': return poolMediaEl.currentTime;
       case 'duration': return poolMediaEl.duration;
       case 'paused': return poolMediaEl.paused;
-      case 'playedRanges': return VideoUtils.getPlayedRanges(poolMediaEl);
+      case 'muted': return poolMediaEl.muted;
+      case 'playedRanges':
+        return VideoUtils.getPlayedRanges(
+            /** @type {!HTMLMediaElement} */ (poolMediaEl));
     }
 
     dev().error('MEDIA-POOL', 'Unknown media info property', property);
@@ -1029,7 +1011,7 @@ export class MediaPool {
     const existingInstance = MediaPool.forElementOrNull(element);
 
     if (existingInstance) {
-      return existingInstance;
+      return dev().assert(existingInstance);
     }
 
     const newId = String(nextInstanceId++);
@@ -1042,6 +1024,10 @@ export class MediaPool {
     return instances[newId];
   }
 
+  /**
+   * @param {!Element} element
+   * @return {?MediaPool}
+   */
   static forElementOrNull(element) {
     const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
     return existingId && instances[existingId] || null;

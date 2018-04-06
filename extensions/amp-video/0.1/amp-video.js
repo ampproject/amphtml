@@ -558,7 +558,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).play();
+    this.playbackMixin_.play();
   }
 
   /** @override */
@@ -566,7 +566,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).pause();
+    this.playbackMixin_.pause();
   }
 
   /** @override */
@@ -574,7 +574,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).toggleMuted(true);
+    this.playbackMixin_.toggleMuted(true);
   }
 
   /** @override */
@@ -582,7 +582,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).toggleMuted(false);
+    this.playbackMixin_.toggleMuted(false);
   }
 
   /** @override */
@@ -590,7 +590,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).toggleControls(true);
+    this.playbackMixin_.toggleControls(true);
   }
 
   /** @override */
@@ -598,7 +598,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).toggleControls(false);
+    this.playbackMixin_.toggleControls(false);
   }
 
   /** @override */
@@ -606,7 +606,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).fullscreenEnter();
+    this.playbackMixin_.fullscreenEnter();
   }
 
   /** @override */
@@ -614,7 +614,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return;
     }
-    dev().assert(this.playbackMixin_).fullscreenExit();
+    this.playbackMixin_.fullscreenExit();
   }
 
   /** @override */
@@ -622,7 +622,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return false;
     }
-    return dev().assert(this.playbackMixin_).isFullscreen();
+    return this.playbackMixin_.isFullscreen();
   }
 
   /** @override */
@@ -635,7 +635,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return 0;
     }
-    return dev().assert(this.playbackMixin_).getCurrentTime();
+    return this.playbackMixin_.getCurrentTime();
   }
 
   /** @override */
@@ -643,7 +643,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return 0;
     }
-    return dev().assert(this.playbackMixin_).getDuration();
+    return this.playbackMixin_.getDuration();
   }
 
   /** @override */
@@ -651,7 +651,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.playbackMixin_ === null) {
       return [];
     }
-    return dev().assert(this.playbackMixin_).getPlayedRanges();
+    return this.playbackMixin_.getPlayedRanges();
   }
 }
 
