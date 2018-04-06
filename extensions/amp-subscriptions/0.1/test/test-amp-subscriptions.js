@@ -41,12 +41,11 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   const serviceConfig = {
     services: [
       {
-        authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
+        authorizationUrl: 'https://lipsum.com/authorize',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
-        pingbackUrl: 'https://lipsum.com/pingback',
       },
       {
         serviceId: 'google.subscription',
@@ -193,6 +192,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       });
     });
     it('should call selectPlatform with preferViewerSupport config', done => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
