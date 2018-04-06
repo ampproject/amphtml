@@ -575,7 +575,7 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_())
-        // TODO(gmajoulet): preload only on mobile.
+        // TODO(gmajoulet): only preload the share menu on mobile.
         .then(() => this.shareMenu_.build());
 
     // Do not block the layout callback on the completion of these promises, as
