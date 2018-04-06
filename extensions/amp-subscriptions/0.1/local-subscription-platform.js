@@ -183,7 +183,7 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    this.urlBuilder_.buildUrl(this.authorizationUrl_, false).then(fetchUrl => {
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_, false).then(fetchUrl => {
       return this.xhr_
           .fetchJson(fetchUrl, {
             credentials: 'include',
