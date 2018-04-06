@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 597
+spec_file_revision: 598
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1155,7 +1155,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       allowed_declarations: "stress"
       allowed_declarations: "table-layout"
       allowed_declarations: "text-align"
-      allowed_declarations: "text-combine-upwrite"
+      allowed_declarations: "text-combine-upright"
       allowed_declarations: "text-decoration"
       allowed_declarations: "text-decoration-color"
       allowed_declarations: "text-decoration-line"
