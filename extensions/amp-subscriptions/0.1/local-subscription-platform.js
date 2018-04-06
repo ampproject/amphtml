@@ -183,18 +183,15 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.urlBuilder_.buildUrl(this.authorizationUrl_, false).then(fetchUrl => {
-      return this.xhr_
-          .fetchJson(fetchUrl, {
-            credentials: 'include',
-          })
-          .then(res => res.json())
-          .then(resJson => {
-            const entitlement = Entitlement.parseFromJson(resJson);
-            this.entitlement_ = entitlement;
-            return entitlement;
-          });
-    });
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_, false)
+        .then(fetchUrl =>
+          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+              .then(res => res.json())
+              .then(resJson => {
+                const entitlement = Entitlement.parseFromJson(resJson);
+                this.entitlement_ = entitlement;
+                return entitlement;
+              }));
   }
 
   /** @override */
