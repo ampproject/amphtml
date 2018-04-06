@@ -292,6 +292,7 @@ export class SubscriptionService {
         'Product id is null'
     ));
     this.platformStore_ = new PlatformStore(serviceIds);
+    // TODO: Implement viewer authentication class
     this.platformConfig_['services'].forEach(service => {
       this.initializeLocalPlatforms_(service);
     });
