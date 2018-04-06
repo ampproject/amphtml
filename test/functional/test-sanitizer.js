@@ -18,8 +18,8 @@ import {
   resolveUrlAttr,
   rewriteAttributeValue,
   rewriteAttributesForElement,
-  sanitizeFormattingHtml,
   sanitizeHtml,
+  sanitizeTextFormattingAndTagHtml,
 } from '../../src/sanitizer';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -391,49 +391,60 @@ describe('resolveUrlAttr', () => {
 });
 
 
-describe('sanitizeFormattingHtml', () => {
+describe('sanitizeTextFormattingAndTagHtml', () => {
 
   it('should output basic text', () => {
-    expect(sanitizeFormattingHtml('abc')).to.be.equal('abc');
+    expect(sanitizeTextFormattingAndTagHtml('abc')).to.be.equal('abc');
   });
 
   it('should output valid markup', () => {
-    expect(sanitizeFormattingHtml('<b>abc</b>')).to.be.equal('<b>abc</b>');
-    expect(sanitizeFormattingHtml('<b>ab<br>c</b>')).to.be.equal(
+    expect(sanitizeTextFormattingAndTagHtml('<b>abc</b>'))
+        .to.be.equal('<b>abc</b>');
+    expect(sanitizeTextFormattingAndTagHtml('<b>ab<br>c</b>')).to.be.equal(
         '<b>ab<br>c</b>');
-    expect(sanitizeFormattingHtml('<b>a<i>b</i>c</b>')).to.be.equal(
+    expect(sanitizeTextFormattingAndTagHtml('<b>a<i>b</i>c</b>')).to.be.equal(
         '<b>a<i>b</i>c</b>');
     const headingsMarkup =
         '<h1>a</h1><h2>b</h2><h3>c</h3><h4>d</h4><h5>d</h5><h6>e</h6>';
-    expect(sanitizeFormattingHtml(headingsMarkup))
+    expect(sanitizeTextFormattingAndTagHtml(headingsMarkup))
         .to.be.equal(headingsMarkup);
     const markupWithClassAttribute = '<h1 class="some-class">heading</h1>';
-    expect(sanitizeFormattingHtml(markupWithClassAttribute))
+    expect(sanitizeTextFormattingAndTagHtml(markupWithClassAttribute))
         .to.be.equal(markupWithClassAttribute);
     const markupWithClassesAttribute =
         '<h1 class="some-class another">heading</h1>';
-    expect(sanitizeFormattingHtml(markupWithClassesAttribute))
+    expect(sanitizeTextFormattingAndTagHtml(markupWithClassesAttribute))
         .to.be.equal(markupWithClassesAttribute);
-    expect(sanitizeFormattingHtml('<h1 class="valid-class" hidden>test</h1>'))
-        .to.be.equal('<h1 class="valid-class">test</h1>');
     const markupParagraph = '<p class="valid-class">paragraph</p>';
-    expect(sanitizeFormattingHtml(markupParagraph))
+    expect(sanitizeTextFormattingAndTagHtml(markupParagraph))
         .to.be.equal(markupParagraph);
   });
 
   it('should NOT output non-whitelisted markup', () => {
-    expect(sanitizeFormattingHtml('a<div>b</div>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<style>b</style>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<img>c')).to.be.equal('ac');
+    expect(sanitizeTextFormattingAndTagHtml('a<div>b</div>c'))
+        .to.be.equal('ac');
+    expect(sanitizeTextFormattingAndTagHtml('a<style>b</style>c'))
+        .to.be.equal('ac');
+    expect(sanitizeTextFormattingAndTagHtml('a<img>c'))
+        .to.be.equal('ac');
   });
 
-  it('should NOT output attributes', () => {
-    expect(sanitizeFormattingHtml('<b color=red style="color: red">abc</b>'))
-        .to.be.equal('<b>abc</b>');
+  it('should NOT output style attributes', () => {
+    expect(sanitizeTextFormattingAndTagHtml(
+        '<b color=red style="color: red">abc</b>'))
+        .to.be.equal('<b color="red">abc</b>');
+  });
+
+  it('should output style attributes if inline styles enabled', () => {
+    toggleExperiment(self, 'inline-styles', true,
+        /* opt_transientExperiment */ true);
+    expect(sanitizeTextFormattingAndTagHtml(
+        '<b style="color: red">abc</b>'))
+        .to.be.equal('<b style="color: red">abc</b>');
   });
 
   it('should compensate for broken markup', () => {
-    expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
+    expect(sanitizeTextFormattingAndTagHtml('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
   });
 
