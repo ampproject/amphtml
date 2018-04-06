@@ -22,12 +22,16 @@ import {
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {assertConfig} from './config';
+import {
+  childElementsByAttr,
+  childElementsByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {isExperimentOn} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -81,6 +85,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     /** @private {number} */
     this.nextArticle_ = 0;
 
+    /** @private {Element} */
+    this.separator_ = null;
+
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampDoc);
 
@@ -91,7 +98,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     /** @private @const {!Array<!DocumentRef>} */
-    this.documentRefs_ = [{
+    this.documentRef_ = [{
       ampUrl: this.win.document.location.href,
       amp: {title: this.win.document.title},
     }];
@@ -119,6 +126,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   appendNextArticle_() {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
+      if (this.separator_) {
+        const separatorClone = this.separator_.cloneNode(true);
+        separatorClone.removeAttribute('separator');
+        this.element.appendChild(separatorClone);
+      }
+
       const next = this.config_.recommendations[this.nextArticle_];
       const documentRef = {ampUrl: next.ampUrl, amp: null};
       this.documentRefs_.push(documentRef);
@@ -226,14 +239,13 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     // TODO(peterjosling): Read config from another source.
 
-    const children = this.element.children;
-    user().assert(children.length == 1,
-        'The tag should contain exactly one <script> child.');
-    const scriptElement = children[0];
+    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
+    user().assert(scriptElements.length == 1,
+        'The tag should contain only one <script> child.');
+    const scriptElement = scriptElements[0];
     user().assert(isJsonScriptTag(scriptElement),
         'The amp-document-recommendations config should ' +
             'be inside a <script> tag with type="application/json"');
-
     const configJson = tryParseJson(scriptElement.textContent, error => {
       throw user().createError(
           'failed to parse content discovery script', error);
@@ -242,6 +254,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     const docInfo = Services.documentInfoForDoc(this.element);
     const host = parseUrl(docInfo.sourceUrl).host;
     this.config_ = assertConfig(configJson, host);
+
+    const separatorElements = childElementsByAttr(this.element, 'separator');
+    user().assert(separatorElements.length <= 1,
+        'The tag should contain at most one <div separator> child.');
+
+    if (separatorElements.length == 1) {
+      this.separator_ = separatorElements[0];
+    }
 
     this.mutateElement(() => {
       this.element.appendChild(this.createDivider_());
