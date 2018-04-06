@@ -45,6 +45,8 @@ tags: {  # <amp-state> (json)
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
+    max_bytes: 100000
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind#state"
     blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
