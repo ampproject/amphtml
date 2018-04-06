@@ -231,7 +231,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
 
-            installStylesForDoc(amp.ampdoc, CSS, () => {}, false, TAG);
+            installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
             const body = amp.ampdoc.getBody();
             body.classList.add('i-amphtml-recommended-document');
           } catch (e) {
