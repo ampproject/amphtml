@@ -126,12 +126,6 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   appendNextArticle_() {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
-      if (this.separator_) {
-        const separatorClone = this.separator_.cloneNode(true);
-        separatorClone.removeAttribute('separator');
-        this.element.appendChild(separatorClone);
-      }
-
       const next = this.config_.recommendations[this.nextArticle_];
       const documentRef = {ampUrl: next.ampUrl, amp: null};
       this.documentRefs_.push(documentRef);
@@ -208,6 +202,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
           try {
             amp =
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+
+            if (this.separator_) {
+              const separatorClone = this.separator_.cloneNode(true);
+              separatorClone.removeAttribute('separator');
+              this.element.appendChild(separatorClone);
+            }
 
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
