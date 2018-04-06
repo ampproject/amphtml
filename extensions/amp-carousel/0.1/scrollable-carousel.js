@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
@@ -79,6 +80,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 
+    this.registerAction('goToSlide', invocation => {
+      const args = invocation.args;
+      if (args) {
+        this.goToSlide_(args['index']);
+      }
+    }, ActionTrust.HIGH);
+
     if (this.useLayers_) {
       this.declareLayer(this.container_);
     }
@@ -125,6 +133,43 @@ export class AmpScrollableCarousel extends BaseCarousel {
       });
     }
   }
+
+  /**
+   * Scrolls to the slide at the given slide index.
+   * @param {*} value
+   * @private
+   */
+  goToSlide_(value) {
+    const index = parseInt(value, 10);
+    const noOfSlides = this.cells_.length;
+
+    if (!isFinite(index) || index < 0 || index >= noOfSlides) {
+      this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      return;
+    }
+    const newPos = this.getPosForSlideIndex_(index);
+    const oldPos = this.pos_;
+
+    /** @const {!TransitionDef<number>} */
+    const interpolate = numeric(oldPos, newPos);
+    const duration = 200;
+    const curve = 'ease-in-out';
+    Animation.animate(this.element, pos => {
+      this.container_./*OK*/scrollLeft = interpolate(pos);
+    }, duration, curve).thenAlways(() => {
+      this.commitSwitch_(newPos);
+    });
+  }
+
+  /**
+   * Calculates the target scroll position for the given slide index.
+   * @param {number} index
+   */
+  getPosForSlideIndex_(index) {
+    const cell = this.cells_[index];
+    return cell./*OK*/offsetLeft;
+  }
+
 
   /**
    * Handles scroll on the carousel container.
