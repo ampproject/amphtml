@@ -102,7 +102,9 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    dev().assert(this.product_, 'Current Product is not set');
+    if (!this.product_) {
+      dev().warn('Current Product is not set');
+    }
     return this.product_ ? this.enables(this.product_) : false;
   }
 
