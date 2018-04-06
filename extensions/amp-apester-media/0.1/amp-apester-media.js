@@ -396,7 +396,13 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.element.ownerDocument.createElement('div');
-    placeholder.setAttribute('placeholder', '');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('aria-label', 'Loading - '
+          + this.element.getAttribute('aria-label'));
+    } else {
+      placeholder.setAttribute('aria-label', 'Loading video');
+    }
+    placeholder.setAttribute('placeholder','');
     placeholder.setAttribute('layout', 'fill');
     placeholder.className = 'amp-apester-loader';
     placeholder.appendChild(this.constructLoaderStructure_());
