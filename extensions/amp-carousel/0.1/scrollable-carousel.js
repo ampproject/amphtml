@@ -166,8 +166,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @param {number} index
    */
   getPosForSlideIndex_(index) {
-    const cell = this.cells_[index];
-    return cell./*OK*/offsetLeft;
+    const containerWidth = this.element./*OK*/offsetWidth;
+    const targetPosition = this.cells_[index]./*OK*/offsetLeft;
+    const targetWidth = this.cells_[index]./*OK*/offsetWidth;
+    return targetPosition - (containerWidth - targetWidth) / 2;
   }
 
 
