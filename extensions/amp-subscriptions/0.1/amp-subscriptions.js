@@ -249,7 +249,9 @@ export class SubscriptionService {
       user().assert(this.pageConfig_, 'Page config is null');
 
       if (this.doesViewerProvideAuth_) {
-        return this.delegateAuthToViewer_();
+        this.delegateAuthToViewer_();
+        this.startAuthorizationFlow_(false);
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
@@ -290,6 +292,10 @@ export class SubscriptionService {
         'Product id is null'
     ));
     this.platformStore_ = new PlatformStore(serviceIds);
+    // TODO: Implement viewer authentication class
+    this.platformConfig_['services'].forEach(service => {
+      this.initializeLocalPlatforms_(service);
+    });
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
       'productId': currentProductId,
@@ -302,10 +308,11 @@ export class SubscriptionService {
       }
 
       return this.verifyAuthToken_(authData).then(entitlement => {
+        entitlement.setCurrentProduct(currentProductId);
         // Viewer authorization is redirected to use local platform instead.
         this.platformStore_.resolveEntitlement('local', entitlement);
       }).catch(reason => {
-        this.sendAuthTokenErrorToViewer_(String(reason));
+        this.sendAuthTokenErrorToViewer_(reason.message);
         throw reason;
       });
 
@@ -384,13 +391,16 @@ export class SubscriptionService {
 
   /**
    * Unblock document based on grant state and selected platform
+   * @param {boolean=} doPlatformSelection
    * @private
    */
-  startAuthorizationFlow_() {
+  startAuthorizationFlow_(doPlatformSelection = true) {
     this.platformStore_.getGrantStatus()
         .then(grantState => {this.processGrantState_(grantState);});
 
-    this.selectAndActivatePlatform_();
+    if (doPlatformSelection) {
+      this.selectAndActivatePlatform_();
+    }
   }
 
   /** @private */
