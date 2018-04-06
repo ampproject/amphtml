@@ -111,21 +111,21 @@ describes.realWin('amp-date-picker', {
   describe('getFormattedDate_', () => {
     it('should render dates in the default format', () => {
       const {picker} = createDatePicker({locale: 'en'});
-      const date = moment('2018-01-01');
+      const date = moment('2018-01-01 08Z');
       const formattedDate = picker.getFormattedDate_(date);
       expect(formattedDate).to.equal('2018-01-01');
     });
 
     it('should always render Unix epoch seconds in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'X'});
-      const date = moment('2018-01-01');
+      const date = moment('2018-01-01 08Z');
       const formattedDate = picker.getFormattedDate_(date);
       expect(formattedDate).to.equal('1514793600');
     });
 
     it('should always render Unix epoch millis in english digits', () => {
       const {picker} = createDatePicker({locale: 'en', format: 'x'});
-      const date = moment('2018-01-01');
+      const date = moment('2018-01-01 08Z');
       const formattedDate = picker.getFormattedDate_(date);
       expect(formattedDate).to.equal('1514793600000');
     });
