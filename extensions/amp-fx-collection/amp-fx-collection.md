@@ -42,8 +42,8 @@ limitations under the License.
 The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently, only the `parallax` effect is supported. More effects such as `fade-in`, `slide-in`
-are planned to be supported soon.
+Currently, the `parallax` and `fade-in` effects are supported.
+More effects such as `slide-in` are planned to be supported soon.
 
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
 
@@ -77,6 +77,37 @@ In this example, as the user scrolls the page, the h1 element scrolls faster rel
 <h1 amp-fx="parallax" data-parallax-factor="1.5">
   A title that moves faster than other content.
 </h1>
+```
+
+### fade-in (experimental)
+
+The `fade-in` effect allows an element to fade in once the element being targetted is visible in the viewport.
+
+##### data-duration
+
+This is the duration over which the animation takes places. The default value is `1000ms`.
+
+##### data-easing
+
+This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
+* “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
+* “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
+* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00) (default)
+* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+or specify a `custom-bezier()` input
+
+##### data-margin
+
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `5%`
+
+#### Example: Main image fade in
+
+In this case the image in fades in over a duration of 1500ms.
+
+```html
+  <div amp-fx="fade-in" data-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
 ```
 
 

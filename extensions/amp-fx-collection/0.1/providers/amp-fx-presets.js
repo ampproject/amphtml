@@ -15,10 +15,14 @@
  */
 
 import {dev, user} from '../../../../src/log';
+import {isExperimentOn} from '../../../../src/experiments';
 import {setStyles} from '../../../../src/style';
 
 export const Presets = {
   'parallax': {
+    isFxTypeSupported(unusedWin) {
+      return true;
+    },
     userAsserts(element) {
       const factorValue = user().assert(
           element.getAttribute('data-parallax-factor'),
@@ -47,17 +51,61 @@ export const Presets = {
       const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
-      if (!fxElement.isMutateScheduled()) {
-        fxElement.setIsMutateScheduled(true);
-        fxElement.getResources().mutateElement(fxElement.getElement(),
-            function() {
-              fxElement.setIsMutateScheduled(false);
-              // Translate the element offset pixels.
-              setStyles(fxElement.getElement(),
-                  {transform:
-                    `translateY(${fxElement.getOffset().toFixed(0)}px)`});
-            });
+      if (fxElement.isMutateScheduled()) {
+        return;
       }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.getResources().mutateElement(fxElement.getElement(),
+          function() {
+            fxElement.setIsMutateScheduled(false);
+            // Translate the element offset pixels.
+            setStyles(fxElement.getElement(),
+                {transform:
+                  `translateY(${fxElement.getOffset().toFixed(0)}px)`});
+          });
+    },
+  },
+  'fade-in': {
+    isFxTypeSupported(win) {
+      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
+          'amp-fx-fade-in experiment is not turned on.');
+    },
+    userAsserts(element) {
+      if (!element.hasAttribute('data-margin')) {
+        return;
+      }
+      const margin = element.getAttribute('data-margin');
+      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
+          'data-margin must be a number and be between 0 and 1 for: %s',
+          element);
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top >
+            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+        fxElement.setIsMutateScheduled(false);
+        // Translate the element offset pixels.
+        setStyles(fxElement.getElement(), {
+          'transition-duration': fxElement.getDuration(),
+          'transition-timing-function': fxElement.getEasing(),
+          'opacity': 1,
+        });
+      });
     },
   },
 };

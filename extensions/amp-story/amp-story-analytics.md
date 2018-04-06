@@ -50,18 +50,37 @@ Using `amp-analytics` you can re-assign the `story-page-visible` event to behave
 
 Consult your vendor's documentation for more specific details on how to set this up.
 
+### Mute trigger (`"on": "story-audio-muted"`)
+
+The `story-audio-muted` trigger is fired when the user initiates an interaction to mute the audio for the current story.
+
+### Unmute trigger (`"on": "story-audio-unmuted"`)
+
+The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
 
 ## Story variables
 
 AMP story contributes the following URL substitutions:
 
-### STORY_PAGE_ID
+### `storyPageId`
 
 The unique ID for an AMP story page, as provided by the `id` attribute of the current `amp-story-page`.
 
-### STORY_PAGE_INDEX
+### `storyPageIndex`
 
 A zero-based index value for an AMP story page determined by its ordering within `amp-story`.
+
+### `storyPageCount`
+
+The total number of pages available to the user in the story.
+
+### `storyProgress`
+
+The user's progress through the story, as a decimal in the range [0...1].  This represents how many pages the user has passed; for example, if the user is currently looking at the second page of ten, the progress will be reported as 0.1 (as the user has not yet finished the second page).
+
+### `storyIsMuted`
+
+A boolean representing whether the story was muted when the accompanying trigger was fired.
 
 ### Additional Vars
 
