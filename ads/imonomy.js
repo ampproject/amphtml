@@ -14,119 +14,86 @@
  * limitations under the License.
  */
 
-import {doubleclick} from '../ads/google/doubleclick';
-import {loadScript, writeScript} from '../3p/3p';
 
-const DEFAULT_TIMEOUT = 500; // ms
-const EVENT_SUCCESS = 0;
-const EVENT_TIMEOUT = 1;
-const EVENT_ERROR = 2;
-const EVENT_BADTAG = 3;
-const imonomyData = ['pid', 'subId', 'timeout'];
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function imonomy(global, data) {
-  if (!('slot' in data)) {
-    global.CasaleArgs = data;
-    writeScript(global, `//tag.imonomy.com/${data.pid}/indexJTag.js`);
-  } else { //DFP ad request call
-    let calledDoubleclick = false;
-    data.timeout = isNaN(data.timeout) ? DEFAULT_TIMEOUT : data.timeout;
-    const timer = setTimeout(() => {
-      callDoubleclick(EVENT_TIMEOUT);
-    }, data.timeout);
-    const callDoubleclick = function(code) {
-      if (calledDoubleclick) { return; }
-      calledDoubleclick = true;
-      clearTimeout(timer);
-      reportStats(data, code);
-      prepareData(data);
-      doubleclick(global, data);
-    };
+  validateData(data, ['extraParams', 'pid', 'slot', 'subId'], []);
+  let additionParams = {
+    random: Math.floor(89999999 * Math.random() + 10000000),
+    millis: Date.now(),
+    loc: encodeURIComponent(window.context.location.href)};
+  additionParams = Object.assign(
+      {}, additionParams, imonomyPageParameters(global));
 
-    if (typeof data.pid === 'undefined' || isNaN(data.pid)) {
-      callDoubleclick(EVENT_BADTAG);
-      return;
-    }
+  const imonomyUrl = `//tag.imonomy.com/amp/${data.pid}/amp.js?
+  ${serialize(data)}&${serialize(additionParams)}`;
 
-    global.IndexArgs = {
-      ampCallback: callDoubleclick,
-      ampSuccess: EVENT_SUCCESS,
-      ampError: EVENT_ERROR,
-    };
-
-    loadScript(
-        global, `//tag.imonomy.com/amp/${data.pid}/amp.js`, () => {
-          global.context.renderStart();
-        }, () => {
-          global.context.noContentAvailable();
-        });
-  }
+  loadScript(global, imonomyUrl, function() {
+    const div = global.document.createElement('div');
+    div.id = 'imonomy_ad';
+    div.innerHTML = window.imonomyContent;
+    global.document.getElementById('c').appendChild(div);
+  });
 }
 
-function prepareData(data) {
-  for (const attr in data) {
-    if (data.hasOwnProperty(attr) && imonomyData.indexOf(attr) >= 0) {
-      delete data[attr];
+function serialize(obj) {
+  const str = [];
+  for (const p in obj) {
+    if (obj.hasOwnProperty(p)) {
+
+      str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
     }
   }
-  data.targeting = data.targeting || {};
-  data.targeting['IMONOMY_AMP'] = '1';
+  return str.join('&');
 }
 
-function reportStats(data, code) {
-  try {
-    if (code == EVENT_BADTAG) { return; }
-    const xhttp = new XMLHttpRequest();
-    xhttp.withCredentials = true;
-    let unitFormat = '';
-    let pageLocation = '';
-    if (typeof window.context.location.href !== 'undefined') {
-      pageLocation = encodeURIComponent(window.context.location.href);
-    }
-    const subId = data.subId,
-        pid = data.pid,
-        trackId = 'AMP',
-        notFirst = true,
-        cid = '',
-        abLabel = '',
-        rand = Math.random();
-    if (!isNaN(data.width) && !isNaN(data.height)) {
-      unitFormat = `${data.width}x${data.height}`;
-    }
-    const uid = '',
-        isLocked = false,
-        isTrackable = false,
-        isClient = false,
-        tier = 0;
-    const baseUrl = '//srv.imonomy.com/internal/reporter';
-    let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&`;
-    unitCodeUrl = unitCodeUrl + `format=${unitFormat}&ai=`;
-    unitCodeUrl = unitCodeUrl + `${trackId}&ctxu=${pageLocation}&`;
-    unitCodeUrl = unitCodeUrl + `fb=${notFirst}&`;
-    unitCodeUrl = unitCodeUrl + `cid=${cid} &ab=${abLabel}&cbs=${rand}`;
-    if (uid) {
-      unitCodeUrl = unitCodeUrl + `&uid=${uid}`;
-    }
-    if (isLocked) {
-      unitCodeUrl = unitCodeUrl + `&is_locked=${isLocked}`;
-    }
-    if (isTrackable) {
-      unitCodeUrl = unitCodeUrl + `&istrk=${isTrackable}`;
-    }
-    if (isClient) {
-      unitCodeUrl = unitCodeUrl + `&is_client=${isClient}`;
-      if (tier) {
-        unitCodeUrl = unitCodeUrl + `&tier=${tier}`;
-      }
-    }
 
-    xhttp.open('GET', unitCodeUrl, true);
-    xhttp.setRequestHeader('Content-Type', 'application/json');
-    xhttp.send();
-
-  } catch (e) {}
+/**
+ * @param {!Window} win
+ * @return {!Promise<!Object<string,null|number|string>>}
+ */
+export function imonomyPageParameters(win) {
+  const screen = win.screen;
+  const visibilityState = null;
+  return {
+    'is_amp': '3',
+    'amp_v': '$internalRuntimeVersion$',
+    'd_imp': '1',
+    'dt': win.context.startTime,
+    'biw': this.innerWidth,
+    'bih': this.innerHeight,
+    'u_aw': screen ? screen.availWidth : null,
+    'u_ah': screen ? screen.availHeight : null,
+    'u_cd': screen ? screen.colorDepth : null,
+    'u_w': screen ? screen.width : null,
+    'u_h': screen ? screen.height : null,
+    'u_tz': -new Date().getTimezoneOffset(),
+    'isw': win != win.top ? win.visualViewport.width : null,
+    'ish': win != win.top ? win.visualViewport.height : null,
+    'vis': visibilityStateCodes[visibilityState] || '0',
+    'scr_x': win.visualViewport.offsetLeft,
+    'scr_y': win.visualViewport.offsetTop,
+    'debug_experiment_id':
+        (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+    'url': win.context.location.href.slice(0,1300),
+    'top': win.context.location.hostname,
+    'loc': win.context.location.href.slice(0,1300),
+    'ref': win.context.referrer || null,
+  };
 }
+
+/**
+ * See `VisibilityState` enum.
+ * @const {!Object<string, string>}
+ */
+const visibilityStateCodes = {
+  'visible': '1',
+  'hidden': '2',
+  'prerender': '3',
+  'unloaded': '5',
+};
