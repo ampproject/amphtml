@@ -87,6 +87,7 @@ describe('cid', () => {
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+	search: 'f=0',
       },
       crypto: {
         getRandomValues: array => {
@@ -150,6 +151,7 @@ describe('cid', () => {
     sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -726,6 +728,7 @@ describes.realWin('cid', {amp: true}, env => {
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
