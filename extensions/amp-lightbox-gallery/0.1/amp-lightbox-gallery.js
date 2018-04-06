@@ -1284,18 +1284,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const timestampDiv = this.win.document.createElement('div');
       timestampDiv.classList.add('i-amphtml-lbg-thumbnail-timestamp-container');
       timestampDiv.appendChild(playButtonSpan);
-      if (thumbnailObj.timestampPromise) {
-        thumbnailObj.timestampPromise.then(ts => {
-          // Many video players (e.g. amp-youtube) that don't support this API
-          // will often return 1. This is problematic for error checking.
-          if (!isNaN(ts)) {
-            const timestamp = secondsToTimestampString(ts);
-            timestampDiv.appendChild(
-                this.win.document.createTextNode(timestamp));
-            timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
-          }
-        });
-      }
+      thumbnailObj.timestampPromise.then(ts => {
+        // Many video players (e.g. amp-youtube) that don't support this API
+        // will often return 1. This will sometimes result in erroneous values of
+        // 1 second for video players that don't support getDuration.
+        if (!ts || isNaN(ts)) {
+          return;
+        }
+        const timestamp = secondsToTimestampString(ts);
+        timestampDiv.appendChild(
+            this.win.document.createTextNode(timestamp));
+        timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+      });
       element.appendChild(timestampDiv);
     }
 
