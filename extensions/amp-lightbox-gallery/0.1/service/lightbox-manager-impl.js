@@ -29,8 +29,8 @@ import {
   iterateCursor,
 } from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
-import {hasOwn, map} from '../../../../src/utils/object';
 import {isExperimentOn} from '../../../../src/experiments';
+import {map} from '../../../../src/utils/object';
 import {srcsetFromElement, srcsetFromSrc} from '../../../../src/srcset';
 import {toArray} from '../../../../src/types';
 
@@ -62,12 +62,6 @@ const SLIDE_SELECTOR = '.amp-carousel-slide';
  *  timestampPromise: !Promise<number>
  * }} */
 export let LightboxThumbnailDataDef;
-
-/** @typedef {{
- *  sourceCarousel: !Element,
- *  excludedIndexes: !Array<number>
- * }} */
-let LightboxedCarouselMetadataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -117,12 +111,6 @@ export class LightboxManager {
      */
     this.seen_ = [];
 
-    /**
-     * If the lightbox group is a carousel, this object contains a
-     * mapping of the lightbox group id to the carousel element.
-     * @private {!Object<string, !LightboxedCarouselMetadataDef>}
-     */
-    this.lightboxSourceCarousels_ = map();
   }
 
   /**
@@ -139,28 +127,6 @@ export class LightboxManager {
       this.scanPromise_ = this.scanLightboxables_();
     });
     return this.scanPromise_;
-  }
-
-  /**
-   * Returns a reference to the source carousel of the lightbox
-   * group if one exists.
-   * @param {string} lightboxGroupId
-   * @return {!LightboxedCarouselMetadataDef|null}
-   */
-  getCarouselMetadataForLightboxGroup(lightboxGroupId) {
-    if (hasOwn(this.lightboxSourceCarousels_, lightboxGroupId)) {
-      return this.lightboxSourceCarousels_[lightboxGroupId];
-    }
-    return null;
-  }
-
-  /**
-   * Returns true if the lightboxGroupId belongs to an amp carousel
-   * @param {string} lightboxGroupId
-   * @return {boolean}
-   */
-  hasCarousel(lightboxGroupId) {
-    return hasOwn(this.lightboxSourceCarousels_, lightboxGroupId);
   }
 
   /**
@@ -215,23 +181,12 @@ export class LightboxManager {
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
     'carousel' + (carousel.getAttribute('id') || this.counter_++);
-    if (carousel.getAttribute('type') == 'slides') {
-      this.lightboxSourceCarousels_[lightboxGroupId] = map({
-        'sourceCarousel': carousel,
-        'excludedIndexes': [],
-      });
-      // TODO (#13011): scroll carousel needs to support goToSlide
-      // before we can use it for lightbox, so they currently don't count.
-    }
     this.getSlidesFromCarousel_(carousel).then(slides => {
-      slides.forEach((slide, index) => {
+      slides.forEach(slide => {
         const shouldExcludeSlide = slide.hasAttribute('lightbox-exclude')
             || (slide.hasAttribute('lightbox')
                 && slide.getAttribute('lightbox') !== lightboxGroupId);
-        if (shouldExcludeSlide) {
-          this.lightboxSourceCarousels_[lightboxGroupId]
-              .excludedIndexes.push(index);
-        } else {
+        if (!shouldExcludeSlide) {
           slide.setAttribute('lightbox', lightboxGroupId);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
@@ -428,11 +383,11 @@ export class LightboxManager {
     if (element.hasAttribute('lightbox-thumbnail-id')) {
       const thumbnailId = element.getAttribute('lightbox-thumbnail-id');
       const thumbnailImage = element.ownerDocument.getElementById(thumbnailId);
-      user().assert(thumbnailImage.tagName == 'AMP-IMG');
-      return srcsetFromElement(thumbnailImage);
-    } else {
-      return this.getUserPlaceholderSrcset_(element);
+      if (thumbnailImage && thumbnailImage.tagName == 'AMP-IMG') {
+        return srcsetFromElement(thumbnailImage);
+      }
     }
+    return this.getUserPlaceholderSrcset_(element);
   }
 
   /**
