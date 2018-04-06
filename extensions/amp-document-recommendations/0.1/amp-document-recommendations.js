@@ -229,6 +229,13 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
+
+            const css = 'body > *[i-amphtml-fixedid] { display: none; }';
+            const head = amp.ampdoc.getHeadNode();
+            const style = doc.createElement('style');
+            style.type = 'text/css';
+            style.appendChild(doc.createTextNode(css));
+            head.appendChild(style);
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
@@ -356,8 +363,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.activeDocumentRef_ = documentRef;
 
     // TODO(peterjosling): Send request to viewer with title/URL
-    // TODO(emarchiori): Hide position fixed elements of inactive
-    // documents and update approriately.
+    // TODO(emarchiori): Trigger analtyics event when active
+    // document changes.
+    // TODO(emarchiori): Consider updating position fixed elements.
   }
 
   /**
