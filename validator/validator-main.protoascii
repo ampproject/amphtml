@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 595
+spec_file_revision: 599
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1155,7 +1155,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       allowed_declarations: "stress"
       allowed_declarations: "table-layout"
       allowed_declarations: "text-align"
-      allowed_declarations: "text-combine-upwrite"
+      allowed_declarations: "text-combine-upright"
       allowed_declarations: "text-decoration"
       allowed_declarations: "text-decoration-color"
       allowed_declarations: "text-decoration-line"
@@ -3049,26 +3049,6 @@ tags: {
   attr_lists: "svg-style-attr"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-filter-primitive-attributes"
-  attr_lists: "svg-presentation-attributes"
-  spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
-}
-# HTML inside SVG, esp. to allow amp-img.
-# See https://github.com/ampproject/amphtml/issues/717
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  html_format: EXPERIMENTAL
-  tag_name: "FOREIGNOBJECT"
-  mandatory_ancestor: "SVG"
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "height" }
-  attrs: { name: "transform" }
-  attrs: { name: "width" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attr_lists: "svg-style-attr"
-  attr_lists: "svg-conditional-processing-attributes"
-  attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
