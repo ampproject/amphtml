@@ -292,6 +292,9 @@ export class SubscriptionService {
         'Product id is null'
     ));
     this.platformStore_ = new PlatformStore(serviceIds);
+    this.platformConfig_['services'].forEach(service => {
+      this.initializeLocalPlatforms_(service);
+    });
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
       'productId': currentProductId,
