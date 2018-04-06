@@ -96,15 +96,15 @@ describes.fakeWin('VideoEntry', {
       assert(onTick, trigger) {
         expect(onTick).to.not.have.been.called;
         expect(trigger).to.not.have.been.called;
-      }
-    ],
+      },
+    },
     {
       triggers: true,
       on: 'timeUpdate:blah',
       assert(onTick, trigger) {
         expect(onTick).to.have.been.calledOnce;
         expect(trigger).to.have.been.calledOnce;
-      }
+      },
     },
   ].forEach(testCase => {
     const {triggers, on, assert} = testCase;
@@ -127,7 +127,7 @@ describes.fakeWin('VideoEntry', {
 
       return element.whenBuilt().then(() => {
         tick.fire();
-        assert();
+        assert(service.onTick, trigger);
       });
     });
   });
