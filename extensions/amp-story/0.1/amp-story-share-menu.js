@@ -27,7 +27,7 @@ import {renderAsElement} from './simple-template';
 
 
 /** @const {string} Class to toggle the share menu. */
-const SHARE_MENU_VISIBLE = 'i-amphtml-story-share-menu-visible';
+export const SHARE_MENU_VISIBLE = 'i-amphtml-story-share-menu-visible';
 
 /** @const {string} Class for the share widget component container. */
 const SHARE_WIDGET_CONTAINER_CLASS = 'i-amphtml-story-share-menu-container';
