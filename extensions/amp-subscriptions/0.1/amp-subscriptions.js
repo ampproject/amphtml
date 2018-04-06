@@ -280,16 +280,15 @@ export class SubscriptionService {
    */
   delegateAuthToViewer_() {
     const serviceIds = ['local'];
-    const currentProductId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
     const publicationId = /** @type {string} */ (user().assert(
         this.pageConfig_.getPublicationId(),
         'Publication id is null'
     ));
     const origin = getWinOrigin(this.ampdoc_.win);
-    const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
+    const currentProductId = /** @type {string} */ (user().assert(
+        this.pageConfig_.getProductId(),
+        'Product id is null'
+    ));
     this.platformStore_ = new PlatformStore(serviceIds);
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
@@ -301,14 +300,42 @@ export class SubscriptionService {
         return this.platformStore_.resolveEntitlement('local',
             Entitlement.empty('local'));
       }
-      const decodedData = this.jwtHelper_.decode(authData);
-      user().assert(
-          decodedData['aud'] == origin ||
-          decodedData['aud'] == sourceOrigin,
-          `The mismatching "aud" field: ${decodedData['aud']}`);
-      // Expiration time is in seconds.
-      user().assert(decodedData['exp'] > Math.floor(Date.now() / 1000),
-          'Payload is expired');
+
+      return this.verifyAuthToken_(authData).then(entitlement => {
+        // Viewer authorization is redirected to use local platform instead.
+        this.platformStore_.resolveEntitlement('local', entitlement);
+      }).catch(reason => {
+        this.sendAuthTokenErrorToViewer_(String(reason));
+        throw reason;
+      });
+
+    }, reason => {
+      throw user().createError('Viewer authorization failed', reason);
+    });
+  }
+
+  /**
+   * Logs error and sends message to viewer
+   * @param {string} token
+   * @return {!Promise<!Entitlement>}
+   * @private
+   */
+  verifyAuthToken_(token) {
+    return new Promise(resolve => {
+      const origin = getWinOrigin(this.ampdoc_.win);
+      const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
+      const decodedData = this.jwtHelper_.decode(token);
+      const currentProductId = /** @type {string} */ (user().assert(
+          this.pageConfig_.getProductId(),
+          'Product id is null'
+      ));
+      if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
+        throw user().createError(
+            `The mismatching "aud" field: ${decodedData['aud']}`);
+      }
+      if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
+        throw user().createError('Payload is expired');
+      }
 
       const entitlements = decodedData['entitlements'];
       let entitlementJson;
@@ -327,15 +354,24 @@ export class SubscriptionService {
 
       let entitlement;
       if (entitlementJson) {
-        entitlement = Entitlement.parseFromJson(entitlementJson, authData);
+        entitlement = Entitlement.parseFromJson(entitlementJson, token);
       } else {
         entitlement = Entitlement.empty('local');
       }
-      // Viewer authorization is redirected to use local platform instead.
-      this.platformStore_.resolveEntitlement('local', entitlement);
-    }, reason => {
-      throw user().createError('Viewer authorization failed', reason);
+      entitlement.service = 'local';
+      resolve(entitlement);
     });
+  }
+
+  /**
+   * Logs error and sends message to viewer
+   * @param {string} errorString
+   * @private
+   */
+  sendAuthTokenErrorToViewer_(errorString) {
+    this.viewer_.sendMessage('auth-rejected', dict({
+      'reason': errorString,
+    }));
   }
 
   /**
