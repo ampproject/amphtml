@@ -397,7 +397,9 @@ export class SubscriptionService {
     this.platformStore_.getGrantStatus()
         .then(grantState => {this.processGrantState_(grantState);});
 
-    doPlatformSelection && this.selectAndActivatePlatform_();
+    if (doPlatformSelection) {
+      this.selectAndActivatePlatform_();
+    }
   }
 
   /** @private */
