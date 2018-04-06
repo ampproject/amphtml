@@ -107,7 +107,7 @@ export class AmpGeo extends AMP.BaseElement {
         'tag with type= "application/json"');
     const config = parseJson(script.textContent);
 
-    /** @private @const {!Promise<!Object<string, (string|boolean)>>} */
+    /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
     const geo = this.addToBody_(config);
 
     registerServiceBuilder(this.win, 'geo', function() {
@@ -195,7 +195,7 @@ export class AmpGeo extends AMP.BaseElement {
   /**
    * Adds the given country groups to HTML element as classes
    * @param {Object} config
-   * @return {!Promise<!Object<string, (string | boolean)>>} service response
+   * @return {!Promise<!Object<string, (string|Array<string>)>>} service response
    * @private
    */
   addToBody_(config) {
