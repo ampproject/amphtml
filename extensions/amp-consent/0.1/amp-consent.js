@@ -87,11 +87,27 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object<string, function()>} */
     this.dialogResolver_ = map();
+
+    /** @private {!Object<string, boolean>} */
+    this.consentUIPendingMap_ = map();
   }
 
   getConsentPolicy() {
     // amp-consent should not be blocked by itself
     return null;
+  }
+
+  /**
+   * Handles the revoke action.
+   * Display consent UI.
+   * @param {string} consentId
+   */
+  handlePostPrompt_(consentId) {
+    user().assert(consentId, 'revoke must specify a consent instance id');
+    user().assert(this.consentConfig_[consentId],
+        `consent with id ${consentId} not found`);
+    // toggle the UI for this consent
+    this.scheduleDisplay_(consentId);
   }
 
   buildCallback() {
@@ -101,11 +117,6 @@ export class AmpConsent extends AMP.BaseElement {
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
-
-    this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
-    this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
-    this.registerAction('dismiss',
-        () => this.handleAction_(ACTION_TYPE.DISMISS));
 
     // TODO: Decide what to do with incorrect configuration.
     this.assertAndParseConfig_();
@@ -139,15 +150,55 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Register a list of user action functions
+   */
+  enableInteractions_() {
+    this.registerAction('accept', () => this.handleAction_(ACTION_TYPE.ACCEPT));
+    this.registerAction('reject', () => this.handleAction_(ACTION_TYPE.REJECT));
+    this.registerAction('dismiss',
+        () => this.handleAction_(ACTION_TYPE.DISMISS));
+    this.registerAction('prompt', invocation => {
+      const args = invocation.args;
+      const consentId = args && args['consent'];
+      this.handlePostPrompt_(consentId);
+    });
+  }
+
+  /**
+   * Returns a promise that attempt to show prompt UI for instanceId
+   * @param {string} instanceId
+   */
+  scheduleDisplay_(instanceId) {
+    dev().assert(this.notificationUiManager_,
+        'notification ui manager not found');
+
+    if (this.consentUIPendingMap_[instanceId]) {
+      // Already pending to be shown. Do nothing.
+      return;
+    }
+
+    if (!this.consentUIRequired_[instanceId]) {
+      // If consent not required.
+      // TODO(@zhouyx): Need to fix this
+      // We still need to show management UI even consent not required.
+      return;
+    }
+
+    if (!this.consentUI_[instanceId]) {
+      // If consent UI not found. Do nothing.
+      return;
+    }
+
+    this.consentUIPendingMap_[instanceId] = true;
+    this.notificationUiManager_.registerUI(this.show_.bind(this, instanceId));
+  }
+
+  /**
    * To show prompt UI for instanceId
    * @param {string} instanceId
    * @return {!Promise}
    */
   show_(instanceId) {
-    if (!this.consentUIRequired_[instanceId] || !this.consentUI_[instanceId]) {
-      return Promise.resolve();
-    }
-
     dev().assert(!this.currentDisplayInstance_,
         'Other consent instance on display');
 
@@ -187,6 +238,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.dialogResolver_[this.currentDisplayInstance_]();
       this.dialogResolver_[this.currentDisplayInstance_] = null;
     }
+    this.consentUIPendingMap_[this.currentDisplayInstance_] = false;
     this.currentDisplayInstance_ = null;
   }
 
@@ -250,6 +302,8 @@ export class AmpConsent extends AMP.BaseElement {
       this.element.classList.remove('amp-active');
       toggle(this.revokeUI_, false);
     });
+
+    this.enableInteractions_();
   }
 
   /**
@@ -372,9 +426,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
-
-            this.notificationUiManager_.registerUI(
-                this.show_.bind(this, instanceId));
+            // TODO(@zhouyx):
+            // 1. Race condition on consent state change between
+            // schedule to display and display. Add one more check before display
+            // 2. Should not schedule display with DISMISSED UNKNOWN state
+            this.scheduleDisplay_(instanceId);
           }
         });
   }

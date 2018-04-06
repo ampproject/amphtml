@@ -105,7 +105,8 @@ describes.realWin('amp-consent', {
             defaultConfig['consents']);
       });
 
-      it('assert valid config', () => {
+      it.skip('assert valid config', () => {
+        // TODO(@zhouyx): Unskip/remove this test that check for error throwing
         // Check script type equals to application/json
         scriptElement.textContent = JSON.stringify(defaultConfig);
         consentElement.appendChild(scriptElement);
@@ -278,6 +279,23 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
           /No consent is displaying/);
+    });
+
+    describe('schedule display', () => {
+      it('should check for pending consent UI', function* () {
+        ampConsent.buildCallback();
+        yield macroTask();
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+        ampConsent.scheduleDisplay_('ABC');
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+        ampConsent.hide_();
+        yield macroTask();
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
+        ampConsent.scheduleDisplay_('GH');
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
+        ampConsent.scheduleDisplay_('ABC');
+        expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+      });
     });
   });
 });
