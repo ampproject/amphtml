@@ -44,7 +44,6 @@ import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {secondsToTimestampString} from '../../../src/string';
 import {toggle} from '../../../src/style';
 
 /** @const */
@@ -1218,7 +1217,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (!ts || isNaN(ts)) {
             return;
           }
-          const timestamp = secondsToTimestampString(ts);
+          const timestamp = this.secondsToTimestampString_(ts);
           const thumbnailContainer = dev().assertElement(
               this.gallery_.childNodes[thumbnail.index]);
           const timestampDiv = childElementByTag(thumbnailContainer, 'div');
@@ -1257,7 +1256,38 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Pads the beginning of a string with a substring to a target length.
+   * @param {string} s
+   * @param {number} targetLength
+   * @param {string} padString
+   */
+  padStart_(s, targetLength, padString) {
+    if (s.length >= targetLength) {
+      return s;
+    }
+    targetLength = targetLength - s.length;
+    let padding = padString;
+    while (targetLength > padding.length) {
+      padding += padString;
+    }
+    return padding.slice(0, targetLength) + s;
+  }
 
+  /**
+   * Converts seconds to a timestamp formatted string.
+   * @param {number} seconds
+   * @returns {string}
+   */
+  secondsToTimestampString_(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const hh = this.padStart_(h.toString(), 2, '0');
+    const mm = this.padStart_(m.toString(), 2, '0');
+    const ss = this.padStart_(s.toString(), 2, '0');
+    return hh + ':' + mm + ':' + ss;
+  }
 
   /**
    * Create an element inside gallery from the thumbnail info from manager.
@@ -1291,7 +1321,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         if (!ts || isNaN(ts)) {
           return;
         }
-        const timestamp = secondsToTimestampString(ts);
+        const timestamp = this.secondsToTimestampString_(ts);
         timestampDiv.appendChild(
             this.win.document.createTextNode(timestamp));
         timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');

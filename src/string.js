@@ -127,36 +127,3 @@ export function stringHash32(str) {
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
 }
-
-/**
- * Pads the beginning of a string with a substring to a target length.
- * @param {string} s
- * @param {number} targetLength
- * @param {string} padString
- */
-export function padStart(s, targetLength, padString) {
-  if (s.length >= targetLength) {
-    return s;
-  }
-  targetLength = targetLength - s.length;
-  let padding = padString;
-  while (targetLength > padding.length) {
-    padding += padString;
-  }
-  return padding.slice(0, targetLength) + s;
-}
-
-/**
- * Converts seconds to a timestamp formatted string.
- * @param {number} seconds
- * @returns {string}
- */
-export function secondsToTimestampString(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  const hh = padStart(h.toString(), 2, '0');
-  const mm = padStart(m.toString(), 2, '0');
-  const ss = padStart(s.toString(), 2, '0');
-  return hh + ':' + mm + ':' + ss;
-}
