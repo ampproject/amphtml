@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
+import {RefreshIntersectionObserverWrapper} from './refresh-intersection-observer-wrapper';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 
@@ -228,9 +228,10 @@ export class RefreshManager {
     debugger;
     const thresholdString = String(threshold);
     return observers[thresholdString] ||
-        ((observers[thresholdString] = 'IntersectionObserver' in this.win_ && false)
+        (observers[thresholdString] = ('IntersectionObserver' in this.win_ && false)
           ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+          : new RefreshIntersectionObserverWrapper(
+              this.ioCallback_, this.a4a_, {threshold}));
   }
 
   /**
