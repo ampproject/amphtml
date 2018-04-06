@@ -24,6 +24,7 @@ import {
   LightboxManager,
   LightboxThumbnailDataDef,
   LightboxedCarouselMetadataDef,
+  VIDEO_TAGS,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -31,7 +32,12 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
-import {childElementByTag, closest, elementByTag, escapeCssSelectorIdent} from '../../../src/dom';
+import {
+  childElementByTag,
+  closest,
+  elementByTag,
+  escapeCssSelectorIdent,
+} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
@@ -1246,6 +1252,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         }]`);
     if (this.gallery_) {
       this.gallery_.classList.remove('i-amphtml-lbg-gallery-hidden');
+      this.updateVideoThumbnails_();
     } else {
       // Build gallery
       this.gallery_ = this.win.document.createElement('div');
@@ -1253,8 +1260,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
 
-      // Initialize thumbnails
-      this.updateThumbnails_();
+      this.initializeThumbnails_();
 
       this.vsync_.mutate(() => {
         this.container_.appendChild(this.gallery_);
@@ -1263,11 +1269,44 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Update thumbnails displayed in lightbox gallery.
+   * Update timestamps for all videos in gallery thumbnails.
+   * @private
+   */
+  updateVideoThumbnails_() {
+    const thumbnails = this.manager_.getThumbnails(this.currentLightboxGroupId_)
+        .map((thumbnail, index) => Object.assign({index}, thumbnail))
+        .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
+
+    this.vsync_.mutate(() => {
+      thumbnails.forEach(thumbnail => {
+        thumbnail.timestampPromise.then(ts => {
+          // Many video players (e.g. amp-youtube) that don't support this API
+          // will often return 1. So sometimes we will erroneously show a timestamp
+          // of 1 second instead of no timestamp.
+          if (!ts || isNaN(ts)) {
+            return;
+          }
+          const timestamp = this.secondsToTimestampString_(ts);
+          const thumbnailContainer = dev().assertElement(
+              this.gallery_.childNodes[thumbnail.index]);
+          const timestampDiv = childElementByTag(thumbnailContainer, 'div');
+          if (timestampDiv.childNodes.length > 1) {
+            timestampDiv.removeChild(timestampDiv.childNodes[1]);
+          }
+          timestampDiv.appendChild(
+              this.win.document.createTextNode(timestamp));
+          timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+        });
+      });
+    });
+  }
+
+  /**
+   * Create thumbnails displayed in lightbox gallery.
    * This function only supports initialization now.
    * @private
    */
-  updateThumbnails_() {
+  initializeThumbnails_() {
     const thumbnails = [];
     this.manager_.getThumbnails(this.currentLightboxGroupId_)
         .forEach(thumbnail => {
@@ -1284,6 +1323,39 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.gallery_.appendChild(thumbnailElement);
       });
     });
+  }
+
+  /**
+   * Pads the beginning of a string with a substring to a target length.
+   * @param {string} s
+   * @param {number} targetLength
+   * @param {string} padString
+   */
+  padStart_(s, targetLength, padString) {
+    if (s.length >= targetLength) {
+      return s;
+    }
+    targetLength = targetLength - s.length;
+    let padding = padString;
+    while (targetLength > padding.length) {
+      padding += padString;
+    }
+    return padding.slice(0, targetLength) + s;
+  }
+
+  /**
+   * Converts seconds to a timestamp formatted string.
+   * @param {number} seconds
+   * @returns {string}
+   */
+  secondsToTimestampString_(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const hh = this.padStart_(h.toString(), 2, '0');
+    const mm = this.padStart_(m.toString(), 2, '0');
+    const ss = this.padStart_(s.toString(), 2, '0');
+    return hh + ':' + mm + ':' + ss;
   }
 
   /**
@@ -1304,6 +1376,28 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       imgElement.setAttribute('src', thumbnailObj.placeholderSrc);
     }
     element.appendChild(imgElement);
+
+    if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
+      const playButtonSpan = this.win.document.createElement('span');
+      playButtonSpan.classList.add('i-amphtml-lbg-thumbnail-play-icon');
+      const timestampDiv = this.win.document.createElement('div');
+      timestampDiv.classList.add('i-amphtml-lbg-thumbnail-timestamp-container');
+      timestampDiv.appendChild(playButtonSpan);
+      thumbnailObj.timestampPromise.then(ts => {
+        // Many video players (e.g. amp-youtube) that don't support this API
+        // will often return 1. This will sometimes result in erroneous values of
+        // 1 second for video players that don't support getDuration.
+        if (!ts || isNaN(ts)) {
+          return;
+        }
+        const timestamp = this.secondsToTimestampString_(ts);
+        timestampDiv.appendChild(
+            this.win.document.createTextNode(timestamp));
+        timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
+      });
+      element.appendChild(timestampDiv);
+    }
+
     const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
