@@ -108,6 +108,22 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     });
   });
 
+  it('should start auth flow for short circuiting', () => {
+    const authFlowStub = sandbox.stub(subscriptionService,
+        'startAuthorizationFlow_');
+    const delegateStub = sandbox.stub(subscriptionService,
+        'delegateAuthToViewer_');
+    sandbox.stub(subscriptionService, 'initialize_')
+        .callsFake(() => Promise.resolve());
+    subscriptionService.pageConfig_ = pageConfig;
+    subscriptionService.doesViewerProvideAuth_ = true;
+    subscriptionService.start();
+    return subscriptionService.initialize_().then(() => {
+      expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+      expect(delegateStub).to.be.calledOnce;
+    });
+  });
+
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
     const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
@@ -208,6 +224,18 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
+    });
+
+    it('should not call selectAndActivatePlatform based on param', () => {
+      subscriptionService.platformStore_ = new PlatformStore(products);
+      const getGrantStatusStub =
+          sandbox.stub(subscriptionService.platformStore_, 'getGrantStatus')
+              .callsFake(() => Promise.resolve());
+      const selectAndActivateStub =
+          sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+      subscriptionService.startAuthorizationFlow_(false);
+      expect(getGrantStatusStub).to.be.calledOnce;
+      expect(selectAndActivateStub).to.not.be.called;
     });
   });
 
