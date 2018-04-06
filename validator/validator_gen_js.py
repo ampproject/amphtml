@@ -858,7 +858,6 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
   if generate_proto_only:
     for name in all_names:
       out.Line("goog.provide('%s');" % name)
-    out.Line("goog.require('amp.validator.LIGHT');")
   if generate_spec_only:
     for name in all_names:
       out.Line("goog.require('%s');" % name)
