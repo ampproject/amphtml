@@ -17,49 +17,51 @@
 tags: {  # amp-3d-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-3d-player extension .js script"
-  satisfies: "amp-3d-player extension .js script"
-  requires: "amp-3d-player"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-3d-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-3d-player"
+    allowed_versions: "0.1"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-3d-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-3d-player-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-3d-player"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-3d-player>
   html_format: AMP
   tag_name: "AMP-3D-PLAYER"
-  satisfies: "amp-3d-player"
-  requires: "amp-3d-player extension .js script"
+  requires_extension: "amp-3d-player"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "https"
+      allowed_protocol: "http"
+    }
+  }
+  attrs: {
+    name: "alpha"
+    value_regex: "[+-](\d*\.)?\d+"
+  }
+  attrs: {
+    name: "antialiasing"
+    value_regex: "(true|false)"
+  }
+  attrs: {
+    name: "maxPixelRatio"
+    value_regex: "[+-](\d*\.)?\d+"
+  }
+  attrs: {
+    name: "enableZoom"
+    value_regex: "(true|false)"
+  }
+  attrs: {
+    name: "autoRotate"
+    value_regex: "(true|false)"
   }
 }
