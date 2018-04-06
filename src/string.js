@@ -137,14 +137,13 @@ export function stringHash32(str) {
 export function padStart(s, targetLength, padString) {
   if (s.length >= targetLength) {
     return s;
-  } else {
-    targetLength = targetLength - s.length;
-    let padding = padString;
-    while (targetLength > padding.length) {
-      padding += padString;
-    }
-    return padding.slice(0, targetLength) + s;
   }
+  targetLength = targetLength - s.length;
+  let padding = padString;
+  while (targetLength > padding.length) {
+    padding += padString;
+  }
+  return padding.slice(0, targetLength) + s;
 }
 
 /**
