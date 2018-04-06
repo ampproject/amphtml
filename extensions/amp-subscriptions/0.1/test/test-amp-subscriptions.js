@@ -28,7 +28,7 @@ import {getWinOrigin} from '../../../../src/url';
 import {setTimeout} from 'timers';
 
 
-describes.realWin('amp-subscriptions', {amp: true}, env => {
+describes.fakeWin('amp-subscriptions', {amp: true}, env => {
   let win;
   let ampdoc;
   let element;
@@ -71,17 +71,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
         });
     sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
-    sandbox.stub(subscriptionService.viewerTracker_, 'scheduleView')
-        .callsFake(() => Promise.resolve());
   });
 
   it('should call `initialize_` on start', () => {
-    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
-    const initializeStub = sandbox.stub(subscriptionService, 'initialize_')
-        .callsFake(() => Promise.resolve());
-    subscriptionService.pageConfig_ = pageConfig;
-    subscriptionService.platformConfig_ = serviceConfig;
-    subscriptionService.start();
+    const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
+    const service = subscriptionService.start();
+    sandbox.stub(service, 'fetchEntitlements_');
     expect(initializeStub).to.be.calledOnce;
   });
 
@@ -130,12 +125,21 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factoryStub = sandbox.stub().callsFake(() =>
-      new SubscriptionPlatform());
+    const platform = new SubscriptionPlatform();
+    const entitlementData = {source: 'local',
+      service: 'local', products, subscriptionToken: 'token'};
+    const entitlement = Entitlement.parseFromJson(entitlementData);
+    const factoryStub = sandbox.stub().callsFake(() => platform);
+
     subscriptionService.platformStore_ = new PlatformStore(
         [serviceData.serviceId]);
+
+    platform.getEntitlements = () => Promise.resolve(entitlement);
+    platform.getServiceId = () => 'local';
+
     subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
+
     return subscriptionService.initialize_().then(() => {
       expect(factoryStub).to.be.calledOnce;
       expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
