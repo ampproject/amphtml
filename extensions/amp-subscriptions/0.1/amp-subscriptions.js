@@ -304,7 +304,9 @@ export class SubscriptionService {
       return this.verifyAuthToken_(authData).then(entitlement => {
         // Viewer authorization is redirected to use local platform instead.
         this.platformStore_.resolveEntitlement('local', entitlement);
-      }).catch(reason => this.sendAuthTokenErrorToViewer_(reason));
+      }).catch(reason => {
+        this.sendAuthTokenErrorToViewer_(String(reason));
+      });
 
     }, reason => {
       throw user().createError('Viewer authorization failed', reason);
@@ -314,46 +316,50 @@ export class SubscriptionService {
   /**
    * Logs error and sends message to viewer
    * @param {string} token
-   * @returns {!Promise<!Entitlement>}
+   * @return {!Promise<!Entitlement>}
+   * @private
    */
   verifyAuthToken_(token) {
-    const origin = getWinOrigin(this.ampdoc_.win);
-    const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
-    const decodedData = this.jwtHelper_.decode(token);
-    const currentProductId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getProductId(),
-        'Product id is null'
-    ));
-    if (decodedData['aud'] != origin || decodedData['aud'] == sourceOrigin) {
-      return Promise.reject(
-          `The mismatching "aud" field: ${decodedData['aud']}`);
-    } else if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
-      // Expiration time is in seconds.
-      return Promise.reject('Payload is expired');
-    }
-    const entitlements = decodedData['entitlements'];
-    let entitlementJson;
-    if (Array.isArray(entitlements)) {
-      for (let index = 0; index < entitlements.length; index++) {
-        const entitlementObject =
-            Entitlement.parseFromJson(entitlements[index]);
-        if (entitlementObject.enables(currentProductId)) {
-          entitlementJson = entitlements[index];
-          break;
-        }
+    return new Promise(resolve => {
+      const origin = getWinOrigin(this.ampdoc_.win);
+      const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
+      const decodedData = this.jwtHelper_.decode(token);
+      const currentProductId = /** @type {string} */ (user().assert(
+          this.pageConfig_.getProductId(),
+          'Product id is null'
+      ));
+      if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
+        throw user().createError(
+            `The mismatching "aud" field: ${decodedData['aud']}`);
       }
-    } else if (entitlements) { // Not null
-      entitlementJson = entitlements;
-    }
+      if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
+        throw user().createError('Payload is expired');
+      }
 
-    let entitlement;
-    if (entitlementJson) {
-      entitlement = Entitlement.parseFromJson(entitlementJson, token);
-    } else {
-      entitlement = Entitlement.empty('local');
-    }
-    entitlement.service = 'local';
-    return Promise.resolve(entitlement);
+      const entitlements = decodedData['entitlements'];
+      let entitlementJson;
+      if (Array.isArray(entitlements)) {
+        for (let index = 0; index < entitlements.length; index++) {
+          const entitlementObject =
+              Entitlement.parseFromJson(entitlements[index]);
+          if (entitlementObject.enables(currentProductId)) {
+            entitlementJson = entitlements[index];
+            break;
+          }
+        }
+      } else if (entitlements) { // Not null
+        entitlementJson = entitlements;
+      }
+
+      let entitlement;
+      if (entitlementJson) {
+        entitlement = Entitlement.parseFromJson(entitlementJson, token);
+      } else {
+        entitlement = Entitlement.empty('local');
+      }
+      entitlement.service = 'local';
+      resolve(entitlement);
+    });
   }
 
   /**
@@ -364,7 +370,7 @@ export class SubscriptionService {
     this.viewer_.sendMessage('auth-rejected', dict({
       'reason': errorString,
     }));
-    //user().error(TAG, errorString);
+    user().error(TAG, errorString);
   }
 
   /**

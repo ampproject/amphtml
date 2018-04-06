@@ -364,24 +364,24 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       sandbox.stub(subscriptionService.jwtHelper_, 'decode')
           .callsFake(() => {return {
             'aud': getWinOrigin(win),
-            'exp': Date.now(),
+            'exp': (Date.now() / 1000) - 10,
             'entitlements': [entitlementData],
           };});
       return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
-        expect(reason).to.be.equals('Payload is expired');
+        expect(reason.message).to.be.equal('Payload is expired​​​');
       });
     });
 
     it('should reject promise for audience mismatch', () => {
       sandbox.stub(subscriptionService.jwtHelper_, 'decode')
           .callsFake(() => {return {
-            'aud': 'radom origin',
+            'aud': 'random origin',
             'exp': Math.floor(Date.now() / 1000) + 5 * 60,
             'entitlements': [entitlementData],
           };});
       return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
-        expect(reason).to.be.equals(
-            'The mismatching "aud" field: radom origin');
+        expect(reason.message).to.be.equals(
+            'The mismatching "aud" field: random origin​​​');
       });
     });
 
