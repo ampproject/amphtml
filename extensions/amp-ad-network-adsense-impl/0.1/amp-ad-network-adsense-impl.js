@@ -172,7 +172,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     if (this.isResponsive_()) {
       if (!this.element.hasAttribute('data-full-width')) {
-        user().error(TAG,
+        user().warn(TAG,
             'Responsive AdSense ad units require the attribute ' +
             'data-full-width.');
         return false;
@@ -181,14 +181,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const height = this.element.getAttribute('height');
       const width = this.element.getAttribute('width');
       if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
-        user().error(TAG,
+        user().warn(TAG,
             `Specified height ${height} in <amp-ad> tag is not equal to the ` +
             `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
             'responsive AdSense ad units.');
         return false;
       }
       if (width != '100vw') {
-        user().error(TAG,
+        user().warn(TAG,
             `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
             'Width must be 100vw.');
         return false;
