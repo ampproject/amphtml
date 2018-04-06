@@ -317,6 +317,8 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'src/service/resources-impl.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
