@@ -42,7 +42,10 @@ export const addQueryHandler = (target, tag, fn) => {
                   responseBody,
                 }, document.origin);
               },
-              errorBody => {
+              error => {
+                const errorBody = (error instanceof Error)
+                  ? error.message + '\n' + error.stack
+                  : error.toString();
                 send(target, tag, {
                   error: true,
                   queryId,
