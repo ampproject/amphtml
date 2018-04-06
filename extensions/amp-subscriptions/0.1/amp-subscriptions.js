@@ -249,7 +249,9 @@ export class SubscriptionService {
       user().assert(this.pageConfig_, 'Page config is null');
 
       if (this.doesViewerProvideAuth_) {
-        return this.delegateAuthToViewer_();
+        this.delegateAuthToViewer_();
+        this.startAuthorizationFlow_();
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
