@@ -127,6 +127,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.controlsContainer_ = null;
 
     /** @private {?Element} */
+    this.navControls_ = null;
+
+    /** @private {?Element} */
     this.carousel_ = null;
 
     /** @private {?Element} */
@@ -205,6 +208,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.controlsContainer_.classList.add('i-amphtml-lbg-controls');
     this.buildDescriptionBox_();
     this.buildTopBar_();
+    this.buildNavControls_();
     this.vsync_.mutate(() => {
       this.container_.appendChild(this.controlsContainer_);
     });
@@ -273,7 +277,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
         const container = this.element.ownerDocument.createElement('div');
-        container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = this.win.document.createElement('amp-image-viewer');
         imageViewer.setAttribute('layout', 'fill');
         clonedNode.removeAttribute('class');
@@ -391,14 +394,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         state.descriptionOverflows = this.descriptionBox_./*OK*/scrollHeight
             - this.descriptionBox_./*OK*/clientHeight
             >= this.descriptionOverflowMask_./*OK*/clientHeight;
+
+        state.isInOverflowMode = this.descriptionBox_.classList
+            .contains('i-amphtml-lbg-overflow');
       };
 
       const mutateOverflowState = state => {
         // We toggle visibility instead of display because we rely on the height
         // of this element to measure 1 rem.
         st.setStyles(dev().assertElement(this.descriptionOverflowMask_), {
-          visibility: state.descriptionOverflows ? 'visible' : 'hidden',
+          visibility: state.descriptionOverflows || state.isInOverflowMode
+            ? 'visible' : 'hidden',
         });
+
+        if (state.isInOverflowMode) {
+          this.clearDescOverflowState_();
+        }
       };
 
       this.vsync_.mutatePromise(() => {
@@ -445,10 +456,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       if (state.isInStandardMode && state.descriptionOverflows) {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
+        toggle(dev().assertElement(this.navControls_), false);
       } else if (state.isInOverflowMode) {
-        this.descriptionBox_./*OK*/scrollTop = 0;
-        this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
-        this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
+        this.clearDescOverflowState_();
       }
     };
 
@@ -458,6 +468,49 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }, {});
   }
 
+  /**
+   * @private
+   */
+  clearDescOverflowState_() {
+    this.descriptionBox_./*OK*/scrollTop = 0;
+    this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
+    this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
+    toggle(dev().assertElement(this.navControls_), true);
+  }
+
+  /**
+   * @private
+   */
+  nextSlide_() {
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.interactionNext();
+    });
+  }
+
+  /**
+   * @private
+   */
+  prevSlide_() {
+    dev().assert(this.carousel_).getImpl().then(carousel => {
+      carousel.interactionPrev();
+    });
+  }
+
+  /**
+   * @private
+   */
+  buildNavControls_() {
+    this.navControls_ = this.win.document.createElement('div');
+    const nextSlide = this.nextSlide_.bind(this);
+    const prevSlide = this.prevSlide_.bind(this);
+    const nextButton = this.buildButton_('Next',
+        'i-amphtml-lbg-button-next', nextSlide);
+    const prevButton = this.buildButton_('Prev',
+        'i-amphtml-lbg-button-prev', prevSlide);
+    this.navControls_.appendChild(nextButton);
+    this.navControls_.appendChild(prevButton);
+    this.controlsContainer_.appendChild(this.navControls_);
+  }
   /**
    * Builds the top bar containing buttons and appends them to the container.
    * @private
@@ -472,9 +525,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Close', 'i-amphtml-lbg-button-close', close);
-    this.buildButton_('Gallery', 'i-amphtml-lbg-button-gallery', openGallery);
-    this.buildButton_('Content', 'i-amphtml-lbg-button-slide', closeGallery);
+    const closeButton = this.buildButton_('Close',
+        'i-amphtml-lbg-button-close', close);
+    const openGalleryButton = this.buildButton_('Gallery',
+        'i-amphtml-lbg-button-gallery', openGallery);
+    const closeGalleryButton = this.buildButton_('Content',
+        'i-amphtml-lbg-button-slide', closeGallery);
+
+    this.topBar_.appendChild(closeButton);
+    this.topBar_.appendChild(openGalleryButton);
+    this.topBar_.appendChild(closeGalleryButton);
 
     this.controlsContainer_.appendChild(this.topBar_);
   }
@@ -503,8 +563,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       event.stopPropagation();
       event.preventDefault();
     });
-
-    this.topBar_.appendChild(button);
+    return button;
   }
 
   /**
@@ -1096,10 +1155,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.gallery_.classList.add('i-amphtml-lbg-gallery-hidden');
         this.gallery_ = null;
       }
-      // Toggle description overflow to hidden
-      this.descriptionBox_./*OK*/scrollTop = 0;
-      this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
-      this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
+      this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
           this.getViewport().leaveLightboxMode();
@@ -1157,9 +1213,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (!this.gallery_) {
       this.findOrBuildGallery_();
     }
-    this.container_.setAttribute('gallery-view', '');
-    toggle(dev().assertElement(this.carousel_), false);
-    toggle(dev().assertElement(this.descriptionBox_), false);
+    this.vsync_.mutate(() => {
+      this.container_.setAttribute('gallery-view', '');
+      toggle(dev().assertElement(this.navControls_), false);
+      toggle(dev().assertElement(this.carousel_), false);
+      toggle(dev().assertElement(this.descriptionBox_), false);
+    });
   }
 
   /**
@@ -1167,10 +1226,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   closeGallery_() {
-    this.container_.removeAttribute('gallery-view');
-    toggle(dev().assertElement(this.carousel_), true);
-    this.updateDescriptionBox_();
-    toggle(dev().assertElement(this.descriptionBox_), true);
+    this.vsync_.mutate(() => {
+      this.container_.removeAttribute('gallery-view');
+      toggle(dev().assertElement(this.navControls_), true);
+      toggle(dev().assertElement(this.carousel_), true);
+      this.updateDescriptionBox_();
+      toggle(dev().assertElement(this.descriptionBox_), true);
+    });
   }
 
   /**
@@ -1245,7 +1307,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
-      this.updateDescriptionBox_();
       dev().assert(this.carousel_).getImpl()
           .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
       this.updateDescriptionBox_();
