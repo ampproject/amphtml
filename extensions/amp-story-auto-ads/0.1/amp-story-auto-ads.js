@@ -74,10 +74,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?./amp-story.AmpStory} */
+    /** @private {?../../amp-story/0.1/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?./navigation-state.NavigationState} */
+    /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
     /** @private {number} */
@@ -107,7 +107,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
-    /** @private {?./amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
