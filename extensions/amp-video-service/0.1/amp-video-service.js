@@ -22,7 +22,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
-import {LazyObservable} from '../../../src/observable';
+import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {TimeUpdateEvent} from './video-behaviors';
 import {VideoEvents} from '../../../src/video-interface';
@@ -112,7 +112,7 @@ export class VideoService {
     return element[ENTRY_PROP];
   }
 
-  /** @return {!../../../src/observable.ObservableInterface<void>} */
+  /** @param {function()} handler */
   onTick(handler) {
     this.tick_ = this.tick_ || new Observable();
     this.tick_.add(handler);
@@ -142,8 +142,7 @@ export class VideoService {
 
   /**
    * @param {!AmpElement} unusedVideo
-   * @param {!../../../src/observable.ObservableInterface<boolean>}
-   *   unusedObservable
+   * @param {!Observable<boolean>} unusedObservable
    */
   delegateAutoplay(unusedVideo, unusedObservable) {
     warnUnimplemented('Autoplay delegation');
@@ -164,14 +163,14 @@ export class VideoEntry {
     /** @private @const{!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    /** @private @const {!VideoService} */
+    this.service_ = videoService;
+
     /** @private @const{!../../../src/video-interface.VideoInterface} */
     this.video_ = video;
 
-    /** @private @const {!../../../src/observable.ObservableInterface<void>} */
-    this.service_ = videoService;
-
-    /** @private {boolean} */
-    this.isPlaying_ = false;
+    /** @visibleForTesting {boolean} */
+    this.isPlaying = false;
   }
 
   /**
@@ -183,10 +182,10 @@ export class VideoEntry {
     return new VideoEntry(ampdoc, videoService, video);
   }
 
-  /** @private */
+  /** @param {function()} handler */
   onPlaybackTick(handler) {
     this.service_.onTick(() => {
-      if (!this.isPlaying_) {
+      if (!this.isPlaying) {
         return;
       }
       handler();
@@ -207,11 +206,6 @@ export class VideoEntry {
     element.whenBuilt().then(() => this.onBuilt_());
   }
 
-  /** @return {!../../../src/observable.ObservableInterface<void>} */
-  getPlaybackTick() {
-    return this.playbackTick_;
-  }
-
   /** @private */
   onBuilt_() {
     const {element} = this.video_;
@@ -229,11 +223,11 @@ export class VideoEntry {
     const {element} = this.video_;
 
     listen(element, VideoEvents.PAUSE, () => {
-      this.isPlaying_ = false;
+      this.isPlaying = false;
     });
 
     listen(element, VideoEvents.PLAYING, () => {
-      this.isPlaying_ = true;
+      this.isPlaying = true;
     });
   }
 

@@ -90,12 +90,27 @@ describes.fakeWin('VideoEntry', {
   });
 
   [
-    ['should not', false, ''],
-    ['should', true, 'timeUpdate:blah'],
-  ].forEach(test => {
-    const [shouldOrNot, triggerShouldHaveBeenCalled, on] = test;
+    {
+      triggers: false,
+      on: '',
+      assert(onTick, trigger) {
+        expect(onTick).to.not.have.been.called;
+        expect(trigger).to.not.have.been.called;
+      }
+    ],
+    {
+      triggers: true,
+      on: 'timeUpdate:blah',
+      assert(onTick, trigger) {
+        expect(onTick).to.have.been.calledOnce;
+        expect(trigger).to.have.been.calledOnce;
+      }
+    },
+  ].forEach(testCase => {
+    const {triggers, on, assert} = testCase;
+    const shouldOrNot = 'should' + (!triggers ? ' not' : '');
 
-    it(`${shouldOrNot} trigger \`timeUpdate\``, () => {
+    it(`${shouldOrNot} trigger \`timeUpdate\` based on \`on\` attr`, () => {
       element.setAttribute('on', on);
 
       const tick = new Observable();
@@ -108,18 +123,11 @@ describes.fakeWin('VideoEntry', {
       sandbox.stub(entry, 'registerCommonActions');
 
       entry.install();
-      entry.isPlaying_ = true;
+      entry.isPlaying = true;
 
       return element.whenBuilt().then(() => {
         tick.fire();
-
-        if (triggerShouldHaveBeenCalled) {
-          expect(service.onTick).to.have.been.calledOnce;
-          expect(trigger).to.have.been.calledOnce;
-        } else {
-          expect(service.onTick).to.not.have.been.called;
-          expect(trigger).to.not.have.been.called;
-        }
+        assert();
       });
     });
   });
