@@ -655,7 +655,7 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via geo service.
    * @param {function(Object<string, string>)} getter
    * @param {string} expr
-   * @return {!Promise<Object<string,string>>}
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
    * @template T
    * @private
    */
