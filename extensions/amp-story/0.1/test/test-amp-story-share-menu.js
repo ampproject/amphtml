@@ -17,7 +17,7 @@
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {ScrollableShareWidget} from '../amp-story-share';
 import {Services} from '../../../../src/services';
-import {SHARE_MENU_VISIBLE, ShareMenu} from '../amp-story-share-menu';
+import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -94,7 +94,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
-    expect(shareMenu.element_).to.have.class(SHARE_MENU_VISIBLE);
+    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
 
   it('should hide the share menu on click on the overlay', () => {
@@ -103,7 +103,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     shareMenu.element_.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).not.to.have.class(SHARE_MENU_VISIBLE);
+    expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
   });
 
   it('should not hide the share menu on click on the widget container', () => {
@@ -112,6 +112,6 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
     shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
 
-    expect(shareMenu.element_).to.have.class(SHARE_MENU_VISIBLE);
+    expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
   });
 });

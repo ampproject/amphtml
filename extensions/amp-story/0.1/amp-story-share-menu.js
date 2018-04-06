@@ -27,7 +27,7 @@ import {renderAsElement} from './simple-template';
 
 
 /** @const {string} Class to toggle the share menu. */
-export const SHARE_MENU_VISIBLE = 'i-amphtml-story-share-menu-visible';
+export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
 /** @const {string} Class for the share widget component container. */
 const SHARE_WIDGET_CONTAINER_CLASS = 'i-amphtml-story-share-menu-container';
@@ -142,7 +142,7 @@ export class ShareMenu {
    */
   onShareMenuStateUpdate_(isOpen) {
     this.vsync_.mutate(() => {
-      this.element_.classList.toggle(SHARE_MENU_VISIBLE, isOpen);
+      this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
     });
   }
 
