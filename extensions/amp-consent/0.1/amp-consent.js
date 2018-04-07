@@ -16,7 +16,10 @@
 
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {ConsentPolicyManager} from './consent-policy-manager';
+import {
+  ConsentPolicyManager,
+  MULTI_CONSENT_EXPERIMENT,
+} from './consent-policy-manager';
 import {Layout} from '../../../src/layout';
 import {
   NOTIFICATION_UI_MANAGER,
@@ -37,8 +40,9 @@ import {setImportantStyles, toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANGER = 'consentPolicyManager';
-const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 const TAG = 'amp-consent';
+
+export const AMP_CONSENT_EXPERIMENT = 'amp-consent';
 
 /**
  * @enum {number}
@@ -90,6 +94,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {!Object<string, boolean>} */
     this.consentUIPendingMap_ = map();
+
+    /** @private {boolean} */
+    this.isMultiSupported_ = false;
   }
 
   getConsentPolicy() {
@@ -114,6 +121,8 @@ export class AmpConsent extends AMP.BaseElement {
     if (!isExperimentOn(this.win, AMP_CONSENT_EXPERIMENT)) {
       return;
     }
+
+    this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
@@ -377,6 +386,18 @@ export class AmpConsent extends AMP.BaseElement {
     const config = parseJson(script.textContent);
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
+
+    if (!this.isMultiSupported_) {
+      // Assert single consent instance
+      user().assert(Object.keys(consents).length <= 1,
+          `${TAG}: only single consent instance is supported`);
+      if (config['policy']) {
+        // Ignore policy setting, and only have default policy.
+        user().warn(TAG, 'policy is not supported, and will be ignored');
+        delete config['policy'];
+      }
+    }
+
     this.consentConfig_ = consents;
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
