@@ -1369,6 +1369,12 @@ export class AmpA4A extends AMP.BaseElement {
             'allowtransparency': '',
             'scrolling': 'no',
           })));
+    if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
+      // Block synchronous XHR in ad. These are very rare, but super bad for UX
+      // as they block the UI thread for the arbitrary amount of time until the
+      // request completes.
+      iframe.setAttribute('allow', 'sync-xhr \'none\';');
+    }
     this.applyFillContent(this.iframe);
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
