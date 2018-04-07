@@ -16,12 +16,15 @@
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 
+export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
+
 
 export class ConsentPolicyManager {
   constructor(ampdoc) {
@@ -91,6 +94,14 @@ export class ConsentPolicyManager {
    * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   whenPolicyResolved(policyId) {
+    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+      // If customized policy is not supported
+      if (policyId != 'default') {
+        user().error(TAG, 'can not find policy, do not set value to ' +
+            'data-block-on-consent');
+        return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
+      }
+    }
     return this.whenPolicyInstanceReady_(policyId).then(() => {
       return this.instances_[policyId].getReadyPromise().then(() => {
         return this.instances_[policyId].getCurrentPolicyStatus();
