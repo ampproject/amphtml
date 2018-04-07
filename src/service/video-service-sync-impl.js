@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {VideoEvents} from '../video-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -100,4 +101,5 @@ export class VideoServiceSync {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
   }
+
 }
