@@ -32,8 +32,10 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
 import {MediaPool} from './media-pool';
+import {Observable} from '../../../src/observable';
 import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
+import {VideoFeatures} from '../../amp-video-service/0.1/amp-video-service';
 import {
   closestBySelector,
   matches,
@@ -46,6 +48,7 @@ import {getMode} from '../../../src/mode';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
@@ -121,8 +124,19 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
+
+    /** @private {?Observable<boolean>} */
+    this.activationObservable_ = null;
   }
 
+  /**
+   * @param {!Window} win
+   * @return {boolean}
+   */
+  static isUsingVideoService(win) {
+    // TODO(alanorozco, #13955) Clean up.
+    return isExperimentOn(win, 'video-service');
+  }
 
   /*
    * @return {?./animation.AnimationManager}
@@ -143,7 +157,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.ownVideoAutoplay_();
+    this.configureVideo_();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
@@ -158,7 +172,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /** @private */
-  ownVideoAutoplay_() {
+  configureVideo_() {
     const videos = this.element.querySelectorAll('amp-video');
     if (videos.length < 1) {
       return;
@@ -170,11 +184,32 @@ export class AmpStoryPage extends AMP.BaseElement {
     // been installed.
     installVideoManagerForDoc(this.getAmpDoc());
 
-    toArray(videos).forEach(el => {
-      Services.videoManagerForDoc(this.element).delegateAutoplay(el);
-    });
-  }
+    const videoService = Services.videoManagerForDoc(this.element);
+    const observableAvailable = this.activationObservable_ !== null;
 
+    if (!observableAvailable &&
+        // TODO(alanorozco, #13955): Clean up.
+        AmpStoryPage.isUsingVideoService(this.win)) {
+      this.activationObservable_ = new Observable();
+    }
+
+    toArray(videos).forEach(el => {
+      // TODO(alanorozco): Move to mixin. Blocked by #14316.
+      videoService.disable(el,
+          VideoFeatures.ACTIONS,
+          VideoFeatures.MEDIA_SESSION);
+
+      videoService.delegateAutoplay(el,
+          this.activationObservable_ || undefined);
+    });
+
+    // Fire event if page is already active.
+    if (!observableAvailable &&
+        this.activationObservable_ &&
+        this.isActive()) {
+      this.activationObservable_.fire(true);
+    }
+  }
 
   /** @private */
   initializeMediaPool_() {
@@ -460,6 +495,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {boolean} isActive
    */
   setActive(isActive) {
+    if (this.activationObservable_) {
+      this.activationObservable_.fire(isActive);
+    }
+
     if (isActive) {
       this.element.setAttribute('active', '');
       this.beforeVisible();

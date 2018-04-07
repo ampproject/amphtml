@@ -28,6 +28,13 @@ import {dev} from '../../../src/log';
 const TAG = 'amp-video-service';
 
 
+/** @enum {number} */
+export const VideoFeatures = {
+  ACTIONS: 0,
+  MEDIA_SESSION: 1,
+};
+
+
 /**
  * Manages all AMP video players that implement the common Video API
  * {@see ../src/video-interface.VideoInterface}.

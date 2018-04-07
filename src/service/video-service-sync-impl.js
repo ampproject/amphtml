@@ -15,6 +15,10 @@
  */
 
 import {Services} from '../services';
+import {
+  VideoEvents,
+  VideoFeatures, // eslint-disable-line no-unused-vars
+} from '../video-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -99,5 +103,11 @@ export class VideoServiceSync {
   getAnalyticsDetails(video) {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
+  }
+
+  /** @override */
+  disable(element, ...varFeatures) {
+    dev().assert(!element.signals().get(VideoEvents.REGISTERED));
+    element['__AMP_DISABLED__'] = varFeatures;
   }
 }
