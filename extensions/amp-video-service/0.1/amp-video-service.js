@@ -22,11 +22,14 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
+import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {TimeUpdateEvent} from './video-behaviors';
 import {VideoEvents} from '../../../src/video-interface';
+import {closestBySelector} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 
 
@@ -198,15 +201,20 @@ export class VideoEntry {
   /** */
   install() {
     const {element} = this.video_;
+    const signals = element.signals();
 
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
-    element.signals().signal(VideoEvents.REGISTERED);
+    signals.signal(VideoEvents.REGISTERED);
 
-    element.whenBuilt().then(() => this.onBuilt_());
+    element.whenBuilt()
+        .then(() => this.onBuilt_());
+
+    signals.whenSignal(CommonSignals.LOAD_START)
+        .then(() => this.onLoadStart_());
   }
 
   /** @private */
@@ -214,11 +222,14 @@ export class VideoEntry {
     const {element} = this.video_;
 
     this.registerCommonActions();
-    this.maybeTriggerTimeUpdate();
-
     this.addEventHandlers_();
 
     element.classList.add('i-amphtml-video-interface');
+  }
+
+  /** @private */
+  onLoadStart_() {
+    this.maybeTriggerTimeUpdate();
   }
 
   /** @private */
@@ -254,22 +265,37 @@ export class VideoEntry {
   }
 
   /**
-   * Triggers a timeUpdate event every second if required.
-   * See {@see TimeUpdateEvent} for details.
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions if
+   * required.
+   * Frequency of this event is controlled by VideoService.onTick() and is
+   * every second for now.
    * @visibleForTesting
    */
   maybeTriggerTimeUpdate() {
     const {element} = this.video_;
 
-    if (!TimeUpdateEvent.shouldBeTriggeredOn(element)) {
+    if (!closestBySelector(element, '[on*="timeUpdate:"]')) {
       return;
     }
 
-    const {win} = this.ampdoc_;
-    const video = this.video_;
-
     this.onPlaybackTick(() => {
-      TimeUpdateEvent.trigger(win, video);
+      const video = this.video_;
+      const time = video.getCurrentTime();
+      const duration = video.getDuration();
+
+      if (!isFiniteNumber(time) ||
+          !isFiniteNumber(duration) ||
+          duration <= 0) {
+        return;
+      }
+
+      const {win} = this.ampdoc_;
+      const {element} = this.video_;
+      const actions = Services.actionServiceForDoc(this.ampdoc_);
+      const name = 'timeUpdate';
+      const percent = time / duration;
+      const event = createCustomEvent(win, `${TAG}.${name}`, {time, percent});
+      actions.trigger(element, name, event, ActionTrust.LOW);
     });
   }
 }

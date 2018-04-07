@@ -21,10 +21,12 @@
  * it gets automatically inserted by the runtime when required.
  */
 
+import * as sinon from 'sinon';
 import {Observable} from '../../../../src/observable';
-import {TimeUpdateEvent} from '../video-behaviors';
+import {Services} from '../../../../src/services';
 import {VideoEntry} from '../amp-video-service';
 import {VideoEvents} from '../../../../src/video-interface';
+
 
 describes.fakeWin('VideoEntry', {
   amp: {
@@ -34,9 +36,15 @@ describes.fakeWin('VideoEntry', {
   let sandbox;
   let video;
   let element;
+  let signals;
 
   beforeEach(() => {
-    const signals = {signal: env.sandbox.spy()};
+    signals = {
+      signal: env.sandbox.spy(),
+      whenSignal() {
+        return Promise.resolve();
+      },
+    };
 
     sandbox = env.sandbox;
     element = env.win.document.createElement('div');
@@ -91,43 +99,54 @@ describes.fakeWin('VideoEntry', {
 
   [
     {
-      triggers: false,
       on: '',
-      assert(onTick, trigger) {
-        expect(onTick).to.not.have.been.called;
-        expect(trigger).to.not.have.been.called;
-      },
+      triggers: false,
     },
     {
-      triggers: true,
       on: 'timeUpdate:blah',
-      assert(onTick, trigger) {
-        expect(onTick).to.have.been.calledOnce;
-        expect(trigger).to.have.been.calledOnce;
-      },
+      triggers: true,
     },
   ].forEach(testCase => {
-    const {triggers, on, assert} = testCase;
+    const {triggers, on} = testCase;
     const shouldOrNot = 'should' + (!triggers ? ' not' : '');
 
     it(`${shouldOrNot} trigger \`timeUpdate\` based on \`on\` attr`, () => {
       element.setAttribute('on', on);
 
       const tick = new Observable();
-      const trigger = sandbox.stub(TimeUpdateEvent, 'trigger');
-      const service = {
+
+      const actionService = {
+        trigger: sandbox.spy(),
+      };
+
+      sandbox.stub(Services, 'actionServiceForDoc').returns(actionService);
+      const videoService = {
         onTick: sandbox.stub().callsFake(tick.add.bind(tick)),
       };
-      const entry = new VideoEntry(env.ampdoc, service, video);
+      const entry = new VideoEntry(env.ampdoc, videoService, video);
 
       sandbox.stub(entry, 'registerCommonActions');
 
       entry.install();
       entry.isPlaying = true;
 
+      video.getCurrentTime = sandbox.stub().returns(1);
+      video.getDuration = sandbox.stub().returns(2);
+
       return element.whenBuilt().then(() => {
         tick.fire();
-        assert(service.onTick, trigger);
+
+        if (triggers) {
+          const {any} = sinon.match;
+          const triggerWithArgs =
+              actionService.trigger.withArgs(element, 'timeUpdate', any, any);
+
+          expect(videoService.onTick).to.have.been.calledOnce;
+          expect(triggerWithArgs).to.have.been.calledOnce;
+        } else {
+          expect(videoService.onTick).to.not.have.been.called;
+          expect(actionService.trigger).to.not.have.been.called;
+        }
       });
     });
   });
