@@ -15,10 +15,7 @@
  */
 
 import {Services} from '../services';
-import {
-  VideoEvents,
-  VideoFeatures, // eslint-disable-line no-unused-vars
-} from '../video-interface';
+import {VideoEvents} from '../video-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -108,6 +105,7 @@ export class VideoServiceSync {
   /** @override */
   disable(element, ...varFeatures) {
     dev().assert(!element.signals().get(VideoEvents.REGISTERED));
-    element['__AMP_DISABLED__'] = varFeatures;
+    const disabled = '__AMP_DISABLED__';
+    element[disabled] = (element[disabled] || []).concat(varFeatures);
   }
 }
