@@ -30,6 +30,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
+      'ampGeo': 'AMP_GEO',
       'ampVersion': 'AMP_VERSION',
       'ancestorOrigin': 'ANCESTOR_ORIGIN',
       'authdata': 'AUTHDATA',
