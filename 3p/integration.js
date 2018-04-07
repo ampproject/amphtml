@@ -161,6 +161,7 @@ import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
+import {kuadio} from '../ads/kuadio';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -214,6 +215,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
+import {uas} from '../ads/uas';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -245,6 +247,7 @@ const AMP_EMBED_ALLOWED = {
   bringhub: true,
   dable: true,
   engageya: true,
+  kuadio: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -360,6 +363,7 @@ register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
+register('kuadio', kuadio);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
@@ -417,6 +421,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);

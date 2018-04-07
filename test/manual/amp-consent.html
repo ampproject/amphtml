@@ -190,6 +190,7 @@
         Please Accept to load image.
         <button on="tap:ABC.accept" role="button">Accept</button>
         <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
       </div>
     </amp-consent>
     <article>
@@ -204,6 +205,19 @@
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
           </p>
         </header>
+
+        <div>
+        Revoke consent ABC and DEF
+        <button class="button" on="tap:ABC.prompt(consentId=ABC),ABC.prompt(consentId=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.prompt(consentId=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.prompt(consentId=DEF)" role="button">Manage</button>
+      </div>
 
         <div class="author">
           <div class="byline">
