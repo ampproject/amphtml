@@ -76,6 +76,9 @@ export class VideoService {
 
     /** @private {?../../../src/observable.Observable<void>} */
     this.tick_ = null;
+
+    /** @private @const {function()} */
+    this.boundTick_ = () => this.startTicking_();
   }
 
   /** @private */
