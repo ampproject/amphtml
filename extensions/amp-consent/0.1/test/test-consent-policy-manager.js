@@ -15,13 +15,11 @@
  */
 
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
-import {
-  CONSENT_POLICY_STATE,
-  MULTI_CONSENT_EXPERIMENT,
-} from '../../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
+  MULTI_CONSENT_EXPERIMENT,
 } from '../consent-policy-manager';
 import {macroTask} from '../../../../testing/yield';
 import {

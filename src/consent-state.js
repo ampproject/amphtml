@@ -16,8 +16,6 @@
 
 import {Services} from './services';
 
-export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
-
 /**
  * Possible consent policy state to proceed with.
  * @enum {number}

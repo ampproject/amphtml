@@ -16,9 +16,11 @@
 
 import {CONSENT_ITEM_STATE, ConsentStateManager} from './consent-state-manager';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {ConsentPolicyManager} from './consent-policy-manager';
+import {
+  ConsentPolicyManager,
+  MULTI_CONSENT_EXPERIMENT,
+} from './consent-policy-manager';
 import {Layout} from '../../../src/layout';
-import {MULTI_CONSENT_EXPERIMENT} from '../../../src/consent-state';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -94,7 +96,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentUIPendingMap_ = map();
 
     /** @private {boolean} */
-    this.isSupportMulti_ = false;
+    this.isMultiSupported_ = false;
   }
 
   getConsentPolicy() {
@@ -120,7 +122,7 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
-    this.isSupportMulti_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
+    this.isMultiSupported_ = isExperimentOn(this.win, MULTI_CONSENT_EXPERIMENT);
 
     user().assert(this.element.getAttribute('id'),
         'amp-consent should have an id');
@@ -385,7 +387,7 @@ export class AmpConsent extends AMP.BaseElement {
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
 
-    if (!this.isSupportMulti_) {
+    if (!this.isMultiSupported_) {
       // Assert single consent instance
       user().assert(Object.keys(consents).length <= 1,
           `${TAG}: only single consent instance is supported`);

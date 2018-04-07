@@ -15,16 +15,13 @@
  */
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
-import {
-  CONSENT_POLICY_STATE,
-  MULTI_CONSENT_EXPERIMENT,
-} from '../../../src/consent-state';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 
-
+export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
