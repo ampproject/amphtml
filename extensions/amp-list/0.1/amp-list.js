@@ -88,6 +88,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Store this in buildCallback() because `this.element` sometimes 
+    // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
     
     this.container_ = this.win.document.createElement('div');
