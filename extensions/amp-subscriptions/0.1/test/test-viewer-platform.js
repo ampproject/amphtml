@@ -71,19 +71,16 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       + ' viewer', () => {
       const verifyStub = sandbox.stub(viewerPlatform, 'verifyAuthToken_')
           .callsFake(() => Promise.resolve(entitlement));
-      viewerPlatform.getEntitlements();
-      return viewerPlatform.viewer_.sendMessageAwaitResponse()
-          .then(() => {
-            expect(verifyStub).to.be.calledWith('faketoken');
-          });
+      return viewerPlatform.getEntitlements().then(() => {
+        expect(verifyStub).to.be.calledWith('faketoken');
+      });
     });
 
     it('should send auth rejection message for rejected verification', () => {
       const reason = 'Payload is expired';
       sandbox.stub(viewerPlatform, 'verifyAuthToken_').callsFake(
-          () => Promise.reject(reason));
-      viewerPlatform.getEntitlements();
-      return viewerPlatform.viewer_.sendMessageAwaitResponse().catch(() => {
+          () => Promise.reject(new Error(reason)));
+      return viewerPlatform.getEntitlements().catch(() => {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
       });
     });
