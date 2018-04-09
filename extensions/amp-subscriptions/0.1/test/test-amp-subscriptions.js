@@ -28,7 +28,7 @@ import {getWinOrigin} from '../../../../src/url';
 import {setTimeout} from 'timers';
 
 
-describes.fakeWin('amp-subscriptions', {amp: true}, env => {
+describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   let win;
   let ampdoc;
   let element;
