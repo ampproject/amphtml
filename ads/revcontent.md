@@ -42,7 +42,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [Revcontent's documentation](http://faq.revcontent.com/support/solutions/5000137293).
+For semantics of configuration, please see [Revcontent's documentation](https://faq.revcontent.com/).
 
 Supported parameters:
 
