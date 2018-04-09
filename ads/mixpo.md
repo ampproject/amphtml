@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration and implementation details, please contact [Mixpo support](support@mixpo.com).
+For configuration and implementation details, please contact Mixpo support: `support@mixpo.com`.
 
 Required Attributes:
 
