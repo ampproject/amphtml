@@ -90,4 +90,22 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
           expect(userErrorStub).to.be.calledOnce;
         });
   });
+
+  it('should have non-AMP validator result due to bad metadata', () => {
+    env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
+      verify: () => Promise.resolve(VerificationStatus.UNVERIFIED),
+    };
+    return validator.validate(
+        {win: env.win}, utf8Encode(data.reserializedInvalidOffset), headers)
+        .then(validatorOutput => {
+          expect(validatorOutput).to.be.ok;
+          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+          expect(validatorOutput.adResponseType).to.equal(
+              AdResponseType.CRYPTO);
+          expect(validatorOutput.creativeData).to.be.ok;
+          expect(validatorOutput.creativeData.creativeMetadata).to.not.be.ok;
+
+          expect(userErrorStub).to.be.calledOnce;
+        });
+  });
 });

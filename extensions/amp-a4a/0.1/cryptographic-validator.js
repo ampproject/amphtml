@@ -34,6 +34,7 @@ const TAG = 'amp-ad-render';
 export class CryptographicValidator extends Validator {
   /** @param {!Window} win */
   getSignatureVerifier_(win) {
+    // TODO(levitzky) extract this into a service registered to ampdoc.
     return win[SIGNATURE_VERIFIER_PROPERTY_NAME] ||
         (win[SIGNATURE_VERIFIER_PROPERTY_NAME] =
          new SignatureVerifier(win, signingServerURLs));
@@ -49,7 +50,7 @@ export class CryptographicValidator extends Validator {
       creativeMetadata: getAmpAdMetadata(utf8Decode(bytes)),
     };
     return /** @type {!./amp-ad-type-defs.ValidatorOutput} */ ({
-      type: verificationSucceeded ?
+      type: verificationSucceeded && !!creativeData.creativeMetadata ?
         ValidatorResult.AMP : ValidatorResult.NON_AMP,
       adResponseType: AdResponseType.CRYPTO,
       creativeData,
