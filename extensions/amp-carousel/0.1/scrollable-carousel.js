@@ -149,23 +149,28 @@ export class AmpScrollableCarousel extends BaseCarousel {
     }
 
     const oldPos = this.pos_;
-    this.measureElement(() => this.getPosForSlideIndex_(index))
-        .then(newPos => {
-          this.mutateElement(() => {
-            if (newPos == oldPos) {
-              return;
-            }
-            /** @const {!TransitionDef<number>} */
-            const interpolate = numeric(oldPos, newPos);
-            const duration = 200;
-            const curve = 'ease-in-out';
-            Animation.animate(this.element, pos => {
-              this.container_./*OK*/scrollLeft = interpolate(pos);
-            }, duration, curve).thenAlways(() => {
-              this.commitSwitch_(newPos);
-            });
-          });
-        });
+    let newPos = oldPos;
+
+    const measureNewPosition = () => {
+      newPos = this.getPosForSlideIndex_(index);
+    };
+
+    const mutateNewPosition = () => {
+      if (newPos == oldPos) {
+        return;
+      }
+      /** @const {!TransitionDef<number>} */
+      const interpolate = numeric(oldPos, newPos);
+      const duration = 200;
+      const curve = 'ease-in-out';
+      Animation.animate(this.element, pos => {
+        this.container_./*OK*/scrollLeft = interpolate(pos);
+      }, duration, curve).thenAlways(() => {
+        this.commitSwitch_(newPos);
+      });
+    };
+
+    this.measureMutateElement(measureNewPosition, mutateNewPosition);
   }
 
   /**
