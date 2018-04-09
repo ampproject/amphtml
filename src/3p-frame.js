@@ -128,7 +128,6 @@ export function getIframe(
     // request completes.
     iframe.setAttribute('allow', 'sync-xhr \'none\';');
   }
-  iframe.setAttribute('allow', 'sync-xhr \'none\';');
   iframe.setAttribute('data-amp-3p-sentinel',
       attributes['_context']['sentinel']);
   return iframe;

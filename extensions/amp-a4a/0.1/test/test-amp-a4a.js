@@ -58,6 +58,7 @@ import {data as testFragments} from './testdata/test_fragments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -608,6 +609,25 @@ describe('amp-a4a', () => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
               false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('shouldn\'t set feature policy for sync-xhr with exp off-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
+        });
+      });
+
+      it('should set feature policy for sync-xhr with exp on-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
         });
       });
     });
