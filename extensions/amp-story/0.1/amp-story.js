@@ -24,7 +24,6 @@
  * </amp-story>
  * </code>
  */
-import './amp-story-auto-ads';
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
@@ -60,6 +59,7 @@ import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
+import {ShareMenu} from './amp-story-share-menu';
 import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
@@ -201,6 +201,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
+
+    /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
+    this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -570,7 +573,9 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(initialPageId))
-        .then(() => this.preloadPagesByDistance_());
+        .then(() => this.preloadPagesByDistance_())
+        // TODO(gmajoulet): only preload the share menu on mobile.
+        .then(() => this.shareMenu_.build());
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).

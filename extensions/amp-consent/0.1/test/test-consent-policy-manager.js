@@ -19,12 +19,14 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
+  MULTI_CONSENT_EXPERIMENT,
 } from '../consent-policy-manager';
 import {macroTask} from '../../../../testing/yield';
 import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('ConsentStateManager', {amp: 1}, env => {
   let win;
@@ -34,6 +36,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     consentManagerOnChangeSpy = sandbox.spy();
+    toggleExperiment(win, MULTI_CONSENT_EXPERIMENT, true);
 
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
