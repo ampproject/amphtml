@@ -31,7 +31,7 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent, isRTL, mapCursor} from '../../../src/dom';
+import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
@@ -900,13 +900,24 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   parseElementTemplates_(templates) {
-    return mapCursor(templates, template => {
-      const dates = template.getAttribute('dates').split(DATE_SEPARATOR);
-      return {
-        dates: new DatesList(dates),
-        template,
-      };
-    });
+    const parsed = [];
+    iterateCursor(templates,
+        template => parsed.push(this.parseElementTemplate_(template)));
+    return parsed;
+  }
+
+  /**
+   * Parse a date picker template element.
+   * @param {!Element} template
+   * @return {!DateTemplateMapDef}
+   * @private
+   */
+  parseElementTemplate_(template) {
+    const dates = template.getAttribute('dates').split(DATE_SEPARATOR);
+    return {
+      dates: new DatesList(dates),
+      template,
+    };
   }
 
   /**
