@@ -279,6 +279,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js', // eslint-disable-line max-len
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
     ],
@@ -317,6 +318,7 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage

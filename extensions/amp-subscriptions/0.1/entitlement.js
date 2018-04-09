@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
