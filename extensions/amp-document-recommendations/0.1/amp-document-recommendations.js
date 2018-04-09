@@ -127,7 +127,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
       Services.xhrFor(this.win)
-          .fetchDocument(next.ampUrl)
+          .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => this.attachShadowDoc_(doc), () => {})
           .then(amp => documentRef.amp = amp);
     }
