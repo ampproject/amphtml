@@ -123,6 +123,8 @@ An explicit size of the image, which is used by the AMP runtime to determine the
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
+Note that the usage of the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) common attribute is not recommended with `<amp-img>`, as its effects can be created with more refined control by using the `srcset`, `sizes`, and `heights` attributes instead.
+
 
 ## Styling
 

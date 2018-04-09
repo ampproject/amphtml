@@ -66,7 +66,7 @@ module.exports = {
     suppressSkipped: true,
     suppressFailed: false,
     suppressErrorSummary: true,
-    maxLogLines: 10,
+    maxLogLines: 20,
   },
 
   mochaReporter: {
