@@ -309,7 +309,7 @@ The results will be merged with the value set on the amp-ad element, and the res
 
 _Note: the ordering of items is not guaranteed._
 
-This resulting object will then be sent on the **scp **parameter of the ad request, as
+This resulting object will then be sent on the **scp** parameter of the ad request, as
 
 
 ```
