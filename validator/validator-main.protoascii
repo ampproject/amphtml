@@ -3243,7 +3243,7 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go|interact-and-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3335,6 +3335,7 @@ tags {  # <form method=POST ...>
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(as-you-go|"
+        "interact-and-submit|"
         "show-all-on-submit|"
         "show-first-on-submit)"
   }
