@@ -49,6 +49,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {boolean} */
     this.useLayers_ = false;
+
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
   }
 
   /** @override */
@@ -59,6 +62,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /** @override */
   buildCarousel() {
     this.cells_ = this.getRealChildren();
+    this.vsync_ = this.getVsync();
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
@@ -83,7 +87,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.registerAction('goToSlide', invocation => {
       const args = invocation.args;
       if (args) {
-        this.goToSlide_(args['index']);
+        const index = parseInt(args['index'], 10);
+        this.goToSlide_(index);
       }
     }, ActionTrust.HIGH);
 
@@ -136,29 +141,42 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /**
    * Scrolls to the slide at the given slide index.
-   * @param {*} value
+   * @param {number} index
    * @private
    */
-  goToSlide_(value) {
-    const index = parseInt(value, 10);
+  goToSlide_(index) {
     const noOfSlides = this.cells_.length;
 
     if (!isFinite(index) || index < 0 || index >= noOfSlides) {
-      this.user().error(TAG, 'Invalid [slide] value: %s', value);
-      return;
+      this.user().error(TAG, 'Invalid [slide] value: %s', index);
+      return Promise.resolve();
     }
-    const newPos = this.getPosForSlideIndex_(index);
+
     const oldPos = this.pos_;
 
-    /** @const {!TransitionDef<number>} */
-    const interpolate = numeric(oldPos, newPos);
-    const duration = 200;
-    const curve = 'ease-in-out';
-    Animation.animate(this.element, pos => {
-      this.container_./*OK*/scrollLeft = interpolate(pos);
-    }, duration, curve).thenAlways(() => {
-      this.commitSwitch_(newPos);
-    });
+    const measureSlidePosition = state => {
+      state.newPos = this.getPosForSlideIndex_(index);
+    };
+
+    const mutateSlidePosition = state => {
+      if (state.newPos == oldPos) {
+        return;
+      }
+      /** @const {!TransitionDef<number>} */
+      const interpolate = numeric(oldPos, state.newPos);
+      const duration = 200;
+      const curve = 'ease-in-out';
+      Animation.animate(this.element, pos => {
+        this.container_./*OK*/scrollLeft = interpolate(pos);
+      }, duration, curve).thenAlways(() => {
+        this.commitSwitch_(state.newPos);
+      });
+    };
+
+    this.vsync_.run({
+      measure: measureSlidePosition,
+      mutate: mutateSlidePosition,
+    }, {});
   }
 
   /**
@@ -171,7 +189,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const targetWidth = this.cells_[index]./*OK*/offsetWidth;
     return targetPosition - (containerWidth - targetWidth) / 2;
   }
-
 
   /**
    * Handles scroll on the carousel container.
