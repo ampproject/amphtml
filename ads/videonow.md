@@ -32,4 +32,4 @@ For semantics of configuration, please contact [Videonow](http://videonow.ru/htm
 
 Supported parameters:
 
-- data-pid
+- `data-pid`

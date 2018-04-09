@@ -16,19 +16,21 @@ limitations under the License.
 
 # Mediavine
 
-## Examples
+## Example
 
 ```html
-  <amp-ad width=300 height=250
-      type="mediavine"
-      data-site="amp-project">
-  </amp-ad>
+<amp-ad width="300" height="250"
+    type="mediavine"
+    data-site="amp-project">
+</amp-ad>
 ```
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, please contact [Mediavine](http://www.mediavine.com).
 
-`data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
+### Required parameters
+
+* `data-site` - The site's unique name this ad will be served on. This is the same name from your Mediavine script wrapper.
 
 Each site must be approved and signed up with [Mediavine](http://www.mediavine.com) prior to launch. The site name will be the same as name in the Mediavine script wrapper. The site name `amp-project` can be used for testing and will serve placeholder ads.
