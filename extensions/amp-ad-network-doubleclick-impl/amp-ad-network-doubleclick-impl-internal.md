@@ -130,6 +130,7 @@ Supported via `json` attribute:
   - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
   - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
 - `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
+See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
 - `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
