@@ -71,7 +71,10 @@ export class AmpList extends AMP.BaseElement {
      */
     this.layoutCompleted_ = false;
 
-    /** @const @private {?string} */
+    /**
+     * The `src` attribute's initial value.
+     * @private {?string}
+     */
     this.initialSrc_ = null;
 
     this.registerAction('refresh', () => {
