@@ -1556,7 +1556,7 @@ describe('amp-a4a', () => {
   });
 
   describe('#preconnectCallback', () => {
-    it('validate adsense', () => {
+    it('validate', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -1567,16 +1567,9 @@ describe('amp-a4a', () => {
         a4a.preconnectCallback(false);
         return Promise.resolve().then(() => {
           const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-          expect(preconnects).to.have.lengthOf(3);
-          // SafeFrame origin.
-          expect(preconnects[0]).to.have.property(
-              'href', 'https://tpc.googlesyndication.com/');
-          // NameFrame origin (in testing mode).  Use a substring match here to
-          // be agnostic about localhost server port.
-          expect(preconnects[1]).to.have.property('href')
-              .that.has.string('http://ads.localhost');
+          expect(preconnects).to.have.lengthOf(1);
           // AdSense origin.
-          expect(preconnects[2]).to.have.property(
+          expect(preconnects[0]).to.have.property(
               'href', 'https://googleads.g.doubleclick.net/');
         });
       });

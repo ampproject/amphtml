@@ -46,6 +46,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
+import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -1496,6 +1497,26 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           return impl.renderNonAmpCreative().then(() => {
             expect(Date.now() - startTime).to.be.at.most(50);
           });
+        });
+      });
+
+      describe('#preconnect', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          doc.body.appendChild(element);
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should preload nameframe', () => {
+          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
+          expect(impl.getPreconnectUrls()).to.deep.equal(
+              ['https://securepubads.g.doubleclick.net/']);
+          expect(preloadSpy).to.be.calledOnce;
+          expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
       });
     });

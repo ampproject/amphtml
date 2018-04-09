@@ -1195,12 +1195,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
   }
 
+  /** @override */
   getPreconnectUrls() {
-    const urls = ['https://partner.googleadservices.com'];
     if (this.preloadSafeframe_) {
-      urls.push(SAFEFRAME_ORIGIN);
+      this.preconnect.preload(this.getSafeframePath());
     }
-    return urls;
+    return ['https://securepubads.g.doubleclick.net/'];
   }
 
   /** @override */
