@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
@@ -25,6 +26,44 @@ import {
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
 
+/**
+ * A list of panning animation names.
+ * @private @const {!Array<string>}
+ */
+const PANNING_ANIMATION_NAMES = [
+  'pan-up',
+  'pan-down',
+  'pan-right',
+  'pan-left',
+];
+
+/**
+ * A mapping of animation names to CSS class names.
+ * @private @const {!Object<string, string>}
+ */
+const ANIMATION_CSS_CLASS_NAMES = {
+  'pan': 'i-amphtml-story-grid-template-with-pan-animation',
+};
+
+/**
+ * Perform style-specific operations for presets.
+ * @param {!Element} el
+ * @param {string} presetName
+ */
+export function setStyleForPreset(el, presetName) {
+  const pan = 'pan';
+  const fillTemplate = 'fill';
+
+  // For panning and zooming animations.
+  if (PANNING_ANIMATION_NAMES.includes(presetName)) {
+    const parent = el.parentElement;
+    if (parent.classList.contains(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
+      parent.classList.remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate]);
+    }
+    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[pan]);
+  }
+}
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */
 // First keyframe will always be considered offset: 0 and will be applied to the
@@ -240,7 +279,6 @@ export const PRESETS = {
         dimensions.targetWidth *= scalingFactor;
         dimensions.targetHeight *= scalingFactor;
       }
-
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 

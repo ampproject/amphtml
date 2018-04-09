@@ -45,25 +45,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 };
 
 /**
- * A list of animation panning names.
- * @private @const {!Array<string>}
- */
-const PANNING_ANIMATIONS = [
-  'pan-up',
-  'pan-down',
-  'pan-right',
-  'pan-left'
-];
-
-/**
- * A mapping of animation names to CSS class names.
- * @private @const {!Object<string, string>}
- */
-const ANIMATION_CLASS_NAMES = {
-  'pan': 'i-amphtml-story-grid-template-pan-animation',
-};
-
-/**
  * Converts the keys of the SUPPORTED_CSS_GRID_ATTRIBUTES object above into a
  * selector for the specified attributes.
  * (e.g. [align-content], [align-items], ...)
@@ -82,9 +63,9 @@ const TEMPLATE_ATTRIBUTE_NAME = 'template';
 
 /**
  * A mapping of template attribute values to CSS class names.
- * @private @const {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
-const TEMPLATE_CLASS_NAMES = {
+export const GRID_LAYER_TEMPLATE_CLASS_NAMES = {
   'fill': 'i-amphtml-story-grid-template-fill',
   'vertical': 'i-amphtml-story-grid-template-vertical',
   'horizontal': 'i-amphtml-story-grid-template-horizontal',
@@ -108,7 +89,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.setAnimationSpecificCssStyles_();
   }
 
 
@@ -128,7 +108,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   applyTemplateClassName_() {
     if (this.element.hasAttribute(TEMPLATE_ATTRIBUTE_NAME)) {
       const templateName = this.element.getAttribute(TEMPLATE_ATTRIBUTE_NAME);
-      const templateClassName = TEMPLATE_CLASS_NAMES[templateName];
+      const templateClassName = GRID_LAYER_TEMPLATE_CLASS_NAMES[templateName];
       this.element.classList.add(templateClassName);
     }
   }
@@ -146,36 +126,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
     });
-  }
-
-  /**
-   * To prevent the grid layer "fill" template CSS class to interfere with the 
-   * pan animation calculations by changing the first element's dimensions, we 
-   * remove the grid layer "fill" CSS class, and replace it with a custom pan
-   * CSS class.
-   * @private
-   */
-  setAnimationSpecificCssStyles_() {
-    const firstChild = this.element.firstElementChild;
-
-    const fillClass = TEMPLATE_CLASS_NAMES['fill'];
-    if (this.element.classList.contains(fillClass) &&
-        firstChild && 
-        this.containsPanAnimation_(firstChild)) {
-        this.element.classList.remove(fillClass);
-        this.element.classList.add(ANIMATION_CLASS_NAMES['pan']);
-    }
-  }
-
-  /**
-   * Checks if the first child of the grid layer contains a pan animation.
-   * @param {!Element} element First child of the grid layer.
-   * @return {boolean}
-   * @private
-   */
-  containsPanAnimation_(element) {
-    return PANNING_ANIMATIONS.includes(element.attributes['animate-in'] && 
-      element.attributes['animate-in'].value);
   }
 
   /**
