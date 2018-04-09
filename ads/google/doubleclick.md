@@ -16,4 +16,4 @@ limitations under the License.
 
 # Doubleclick
 
-Support for DoubleClick Delayed Fetch has been deprecated as of March 29, 2018. Please upgrade to Fast Fetch when possible. Visit the <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md">DoubleClick Fast Fetch documentation page</a> for more details.
+Support for DoubleClick Delayed Fetch has been deprecated as of March 29, 2018. Please upgrade to Fast Fetch. Visit the <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md">DoubleClick Fast Fetch documentation page</a> for more details.
