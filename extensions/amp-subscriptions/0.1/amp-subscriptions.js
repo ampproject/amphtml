@@ -300,7 +300,9 @@ export class SubscriptionService {
             this.serviceAdapter_
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform.getEntitlements(publicationId, currentProductId, origin)
+        viewerPlatform.setMessageDetails(publicationId, currentProductId,
+            origin);
+        viewerPlatform.getEntitlements()
             .then(entitlement => {
               entitlement.setCurrentProduct(currentProductId);
               // Viewer authorization is redirected to use local platform instead.

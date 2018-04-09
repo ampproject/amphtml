@@ -50,7 +50,7 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @const @private {!PageConfig} */
+    /** @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
@@ -91,7 +91,7 @@ export class LocalSubscriptionPlatform {
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog());
 
-    /** @private {?Entitlement}*/
+    /** {?Entitlement}*/
     this.entitlement_ = null;
 
     /** @private @const {boolean} */

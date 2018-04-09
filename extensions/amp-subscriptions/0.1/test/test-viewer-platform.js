@@ -1,6 +1,9 @@
-import { ViewerSubscriptionPlatform } from "../viewer-subscription-platform";
-import { ServiceAdapter } from "../service-adapter";
-import { PageConfig } from "../../../../third_party/subscriptions-project/config";
+import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
+import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../service-adapter';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {getWinOrigin} from '../../../../src/url';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -18,34 +21,123 @@ import { PageConfig } from "../../../../third_party/subscriptions-project/config
  * limitations under the License.
  */
 
-describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
+describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   let ampdoc, win;
-  let viewerSubscriptionPlatform;
-  let serviceAdapter;
+  let viewerPlatform;
+  let serviceAdapter, sendAuthTokenStub;
+  const publicationId = 'publicationId';
+  const currentProductId = 'example.org:basic';
+  const origin = 'origin';
+  const entitlementData = {source: 'local', raw: 'raw',
+    service: 'local', products: [currentProductId], subscriptionToken: 'token'};
+  const entitlement = new Entitlement(entitlementData);
+  entitlement.setCurrentProduct(currentProductId);
+  const fakeAuthToken = {
+    'authorization': 'faketoken',
+  };
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
+  const actionMap = {
+    'subscribe': 'https://lipsum.com/subscribe',
+    'login': 'https://lipsum.com/login',
+  };
   const serviceConfig = {
-    'services': [
-      {
-        'serviceId': 'local',
-        'authorizationUrl': authUrl,
-        'pingbackUrl': pingbackUrl,
-      },
-    ],
+    'serviceId': 'local',
+    'authorizationUrl': authUrl,
+    'pingbackUrl': pingbackUrl,
+    'actions': actionMap,
   };
 
   beforeEach(() => {
-    win = env.win;
     ampdoc = env.ampdoc;
+    win = env.win;
     serviceAdapter = new ServiceAdapter(null);
     sandbox.stub(serviceAdapter, 'getPageConfig')
-        .callsFake(() => new PageConfig('example.org:basic', true));
-    viewerSubscriptionPlatform = new ViewerSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
+        .callsFake(() => new PageConfig(currentProductId, true));
+    sandbox.stub(serviceAdapter, 'getDialog')
+        .callsFake(() => new Dialog(ampdoc));
+    viewerPlatform = new ViewerSubscriptionPlatform(
+        ampdoc, serviceConfig, serviceAdapter);
+    sandbox.stub(viewerPlatform.viewer_,
+        'sendMessageAwaitResponse').callsFake(() =>
+      Promise.resolve(fakeAuthToken));
+    sendAuthTokenStub = sandbox.stub(viewerPlatform,
+        'sendAuthTokenErrorToViewer_');
+    viewerPlatform.setMessageDetails(publicationId, currentProductId, origin);
   });
 
-  it('should return serviceId as local', () => {
-    expect(viewerSubscriptionPlatform.getServiceId()).to.be.equals('local');
+  describe('getEntitlements', () => {
+    it('should call verify with the entitlement given from the'
+      + ' viewer', () => {
+      const verifyStub = sandbox.stub(viewerPlatform, 'verifyAuthToken_')
+          .callsFake(() => Promise.resolve(entitlement));
+      viewerPlatform.getEntitlements();
+      return viewerPlatform.viewer_.sendMessageAwaitResponse()
+          .then(() => {
+            expect(verifyStub).to.be.calledWith('faketoken');
+          });
+    });
+
+    it('should send auth rejection message for rejected verification', () => {
+      const reason = 'Payload is expired';
+      sandbox.stub(viewerPlatform, 'verifyAuthToken_').callsFake(
+          () => Promise.reject(reason));
+      viewerPlatform.getEntitlements();
+      return viewerPlatform.viewer_.sendMessageAwaitResponse().catch(() => {
+        expect(sendAuthTokenStub).to.be.calledWith(reason);
+      });
+    });
+  });
+
+  describe('verifyAuthToken_', () => {
+    const entitlement = Entitlement.parseFromJson(entitlementData);
+    entitlement.service = 'local';
+
+    it('should reject promise for expired payload', () => {
+      sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': (Date.now() / 1000) - 10,
+            'entitlements': [entitlementData],
+          };});
+      return viewerPlatform.verifyAuthToken_('faketoken').catch(reason => {
+        expect(reason.message).to.be.equal('Payload is expired​​​');
+      });
+    });
+
+    it('should reject promise for audience mismatch', () => {
+      sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': 'random origin',
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'entitlements': [entitlementData],
+          };});
+      return viewerPlatform.verifyAuthToken_('faketoken').catch(reason => {
+        expect(reason.message).to.be.equals(
+            'The mismatching "aud" field: random origin​​​');
+      });
+    });
+
+    it('should resolve promise with entitlement', () => {
+      sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'entitlements': [entitlementData],
+          };});
+      return viewerPlatform.verifyAuthToken_('faketoken').then(
+          resolvedEntitlement => {
+            expect(resolvedEntitlement).to.be.not.undefined;
+            expect(resolvedEntitlement.service).to.equal(
+                entitlementData.service);
+            expect(resolvedEntitlement.source).to.equal(entitlementData.source);
+            expect(resolvedEntitlement.products).to.deep
+                .equal(entitlementData.products);
+            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            expect(resolvedEntitlement.raw).to
+                .equal('faketoken');
+          });
+    });
   });
 
 });

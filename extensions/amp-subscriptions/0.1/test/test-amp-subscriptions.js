@@ -24,7 +24,7 @@ import {PlatformStore} from '../platform-store';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
-import {getWinOrigin} from '../../../../src/url';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {setTimeout} from 'timers';
 
 
@@ -297,49 +297,32 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   describe('viewer authorization', () => {
-    let responseStub;
-    let sendAuthTokenStub;
-    const fakeAuthToken = {
-      'authorization': 'faketoken',
-    };
-
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
-      responseStub = sandbox.stub(subscriptionService.viewer_,
-          'sendMessageAwaitResponse').callsFake(() =>
-        Promise.resolve(fakeAuthToken));
       sandbox.stub(subscriptionService, 'initialize_')
           .callsFake(() => Promise.resolve());
-      sendAuthTokenStub = sandbox.stub(subscriptionService,
-          'sendAuthTokenErrorToViewer_');
+      sandbox.stub(subscriptionService.viewer_, 'sendMessageAwaitResponse')
+          .callsFake(() => Promise.resolve());
     });
-    it('should not ask for auth if viewer does not have the capability', () => {
+    it('should put LocalSubscriptionPlatform in platformstore, '
+        + 'if viewer does not have auth capability', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
-        expect(responseStub).to.be.not.called;
+        expect(subscriptionService.platformStore_.getLocalPlatform()).to.be
+            .instanceOf(LocalSubscriptionPlatform);
       });
     });
 
-    it('should ask for auth if viewer has the capability', () => {
+    it('should put ViewerSubscriptionPlatform in platformstore, '
+        + 'if viewer does have auth capability', () => {
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
-        expect(responseStub).to.be.calledOnce;
-        expect(subscriptionService.platformStore_.serviceIds_)
-            .to.deep.equal(['local']);
+        expect(subscriptionService.platformStore_.getLocalPlatform()).to.be
+            .instanceOf(ViewerSubscriptionPlatform);
       });
-    });
-
-    it('should call verify with the entitlement given from the'
-        + ' viewer', () => {
-      const verifyStub = sandbox.stub(subscriptionService, 'verifyAuthToken_');
-      subscriptionService.delegateAuthToViewer_();
-      return subscriptionService.viewer_.sendMessageAwaitResponse()
-          .then(() => {
-            expect(verifyStub).to.be.calledWith('faketoken');
-          });
     });
 
     it('should not fetch entitlements for any platform other than '
@@ -361,76 +344,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.registerPlatform('google.subscription',
-          new SubscriptionPlatform());
+          () => new SubscriptionPlatform());
       return subscriptionService.initialize_().then(() => {
         expect(fetchEntitlementsStub).to.be.called;
       });
-    });
-
-    it('should send auth rejection message for rejected verification', () => {
-      const reason = 'Payload is expired';
-      sandbox.stub(subscriptionService, 'verifyAuthToken_').callsFake(
-          () => Promise.reject(reason));
-      subscriptionService.delegateAuthToViewer_();
-      subscriptionService.viewer_.sendMessageAwaitResponse().then(() => {
-        expect(sendAuthTokenStub).to.be.calledWith(reason);
-      });
-    });
-  });
-
-  describe('verifyAuthToken_', () => {
-    const entitlementData = {source: 'local',
-      service: 'local', products, subscriptionToken: 'token'};
-    const entitlement = Entitlement.parseFromJson(entitlementData);
-    entitlement.service = 'local';
-
-    beforeEach(() => {
-      subscriptionService.pageConfig_ = pageConfig;
-    });
-
-    it('should reject promise for expired payload', () => {
-      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
-          .callsFake(() => {return {
-            'aud': getWinOrigin(win),
-            'exp': (Date.now() / 1000) - 10,
-            'entitlements': [entitlementData],
-          };});
-      return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
-        expect(reason.message).to.be.equal('Payload is expired​​​');
-      });
-    });
-
-    it('should reject promise for audience mismatch', () => {
-      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
-          .callsFake(() => {return {
-            'aud': 'random origin',
-            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-            'entitlements': [entitlementData],
-          };});
-      return subscriptionService.verifyAuthToken_('faketoken').catch(reason => {
-        expect(reason.message).to.be.equals(
-            'The mismatching "aud" field: random origin​​​');
-      });
-    });
-
-    it('should resolve promise with entitlement', () => {
-      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
-          .callsFake(() => {return {
-            'aud': getWinOrigin(win),
-            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-            'entitlements': [entitlementData],
-          };});
-      return subscriptionService.verifyAuthToken_('faketoken').then(
-          resolvedEntitlement => {
-            expect(resolvedEntitlement).to.be.not.undefined;
-            expect(resolvedEntitlement.service).to.equal(entitlement.service);
-            expect(resolvedEntitlement.source).to.equal(entitlement.source);
-            expect(resolvedEntitlement.products).to.deep
-                .equal(entitlement.products);
-            // raw should be the data which was resolved via sendMessageAwaitResponse.
-            expect(resolvedEntitlement.raw).to
-                .equal('faketoken');
-          });
     });
   });
 });

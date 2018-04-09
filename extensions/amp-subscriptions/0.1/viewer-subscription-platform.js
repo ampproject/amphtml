@@ -16,6 +16,7 @@
 
 import {Entitlement} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
+import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -25,7 +26,7 @@ import {getSourceOrigin, getWinOrigin} from '../../../src/url';
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
-export class ViewerSubscriptionPlatform {
+export class ViewerSubscriptionPlatform extends LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -33,63 +34,60 @@ export class ViewerSubscriptionPlatform {
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
-    /** @const */
-    this.ampdoc_ = ampdoc;
+    super(ampdoc, platformConfig, serviceAdapter);
 
-    /** @const @private {!JsonObject} */
-    this.serviceConfig_ = platformConfig;
-
-    /** @private @const {!./service-adapter.ServiceAdapter} */
-    this.serviceAdapter_ = serviceAdapter;
-
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
-
-    /** @private @const {?string} */
-    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
+    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
-  }
 
-  /** @override */
-  getServiceId() {
-    return 'local';
+    /** @private {?string} */
+    this.publicationId_ = null;
+
+    /** @private {?string} */
+    this.currentProductId_ = null;
+
+    /** @private {?string} */
+    this.origin_ = null;
   }
 
   /**
-   * Returns entitlement from the viewer
+   * Set details to send mesage to viewer;
    * @param {string} publicationId
    * @param {string} currentProductId
    * @param {string} origin
-   * @returns {!Promise<!Entitlement>}
    */
-  getEntitlements(publicationId, currentProductId, origin) {
+  setMessageDetails(publicationId, currentProductId, origin) {
+    this.publicationId_ = publicationId;
+    this.currentProductId_ = currentProductId;
+    this.origin_ = origin;
+  }
+
+  /** @override */
+  getEntitlements() {
+    dev().assert(this.publicationId_, 'Publication id is missing');
+    dev().assert(this.currentProductId_, 'Publication id is missing');
+    dev().assert(this.origin_, 'Publication id is missing');
+
     return this.viewer_.sendMessageAwaitResponse('auth', dict({
-      'publicationId': publicationId,
-      'productId': currentProductId,
-      'origin': origin,
+      'publicationId': this.publicationId_,
+      'productId': this.currentProductId_,
+      'origin': this.origin_,
     })).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
       if (!authData) {
         return Entitlement.empty('local');
       }
-
       return this.verifyAuthToken_(authData).then(entitlement => {
         return entitlement;
-      }).catch(reason => {
-        this.sendAuthTokenErrorToViewer_(reason.message);
-        throw reason;
       });
+    }).then(entitlement => {
+      this.entitlement_ = entitlement;
+      return entitlement;
+    }).catch(reason => {
+      this.sendAuthTokenErrorToViewer_(reason.message);
+      throw reason;
     });
   }
 
@@ -117,26 +115,20 @@ export class ViewerSubscriptionPlatform {
       }
 
       const entitlements = decodedData['entitlements'];
-      let entitlementJson;
+      let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
           const entitlementObject =
-              Entitlement.parseFromJson(entitlements[index]);
+              Entitlement.parseFromJson(entitlements[index], token);
           if (entitlementObject.enables(currentProductId)) {
-            entitlementJson = entitlements[index];
+            entitlement = entitlementObject;
             break;
           }
         }
       } else if (entitlements) { // Not null
-        entitlementJson = entitlements;
+        entitlement = Entitlement.parseFromJson(entitlements, token);
       }
 
-      let entitlement;
-      if (entitlementJson) {
-        entitlement = Entitlement.parseFromJson(entitlementJson, token);
-      } else {
-        entitlement = Entitlement.empty('local');
-      }
       entitlement.service = 'local';
       resolve(entitlement);
     });
@@ -156,37 +148,5 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   activate() {
     user().error('This platform should not be activated');
-  }
-
-  /** @override */
-  isPingbackEnabled() {
-    return !!this.pingbackUrl_;
-  }
-
-  /** @override */
-  pingback(selectedEntitlement) {
-    if (!this.isPingbackEnabled) {
-      return;
-    }
-    const pingbackUrl = /** @type {string} */ (dev().assert(this.pingbackUrl_,
-        'pingbackUrl is null'));
-
-    const promise = this.urlBuilder_.buildUrl(pingbackUrl,
-        /* useAuthData */ true);
-    return promise.then(url => {
-      return this.xhr_.sendSignal(url, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        body: selectedEntitlement.raw,
-      });
-    });
-  }
-
-  /** @override */
-  supportsCurrentViewer() {
-    return false;
   }
 }
