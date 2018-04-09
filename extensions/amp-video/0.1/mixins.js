@@ -330,6 +330,8 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
   constructor(impl) {
     super(impl);
 
+    const {element} = impl;
+
     /** @private {?Promise<!Element>} */
     this.placeholder_ = null;
 
@@ -337,16 +339,14 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
     this.isAllocated_ = false;
 
     /** @private {?../../amp-story/0.1/media-pool.MediaPool} */
-    this.mediaPool_ = null;
+    this.pool_ = null;
 
     /** @private {?../../amp-story/0.1/media-pool.MediaInfoDef} */
     this.mediaInfo_ = EMPTY_MEDIA_INFO;
 
     /** @private @const {!Promise<!../../amp-story/0.1/media-pool.MediaPool>} */
-    this.mediaPoolPromise_ = Services.mediaPoolFor(impl.element).then(pool => {
-      this.mediaPool_ = pool;
-      return pool;
-    });
+    this.poolPromise_ = Services.mediaPoolFor(element).then(service =>
+      (this.pool_ = service.poolFor(element)));
   }
 
   /** @override */
@@ -457,7 +457,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
   play() {
     const video =
         /** @type {!HTMLMediaElement} */ (dev().assertElement(this.video));
-    return this.mediaPoolPromise_.then(mediaPool =>
+    return this.poolPromise_.then(mediaPool =>
       mediaPool.play(video));
   }
 
@@ -465,7 +465,7 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
   pause() {
     const video =
         /** @type {!HTMLMediaElement} */ (dev().assertElement(this.video));
-    return this.mediaPoolPromise_.then(mediaPool =>
+    return this.poolPromise_.then(mediaPool =>
       mediaPool.pause(video));
   }
 
@@ -514,11 +514,11 @@ export class MediaPoolVideoMixin extends VideoElementMixin {
    * @private
    */
   getMediaInfo_(property) {
-    if (!this.isAllocated_ || !this.mediaPool_) {
+    if (!this.isAllocated_ || !this.pool_) {
       return this.mediaInfo_[property];
     }
     const video =
         /** @type {!HTMLMediaElement} */ (dev().assertElement(this.video));
-    return this.mediaPool_.getMediaInfo(video, property);
+    return this.pool_.getMediaInfo(video, property);
   }
 }

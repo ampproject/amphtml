@@ -242,11 +242,12 @@ export class Services {
 
   /**
    * @param {!Node} node
-   * @return {!Promise<!../extensions/amp-story/0.1/media-pool.MediaPool>}
+   * @return {!Promise<!../extensions/amp-story/0.1/media-pool.MediaPoolService>}
    */
   static mediaPoolFor(node) {
-    return getElementServiceForDoc(node, 'mediapool', 'amp-story')
-        .then(service => service.poolFor(node));
+    return (
+      /** @type {!Promise<!../extensions/amp-story/0.1/media-pool.MediaPoolService>} */
+      (getElementServiceForDoc(node, 'mediapool', 'amp-story')));
   }
 
   /**
