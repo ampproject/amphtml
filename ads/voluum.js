@@ -51,6 +51,11 @@ VLM.prototype.appendIntersect = function(o) {
   }
 };
 
+/**
+ * 
+ * @param {Object} data
+ * @constructor
+ */
 function VLM(data) {
   this.framework = 'amp';
   this.publisher = data.publisher;
