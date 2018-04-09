@@ -30,6 +30,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
 import {user} from '../../../src/log';
@@ -95,6 +96,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       ampUrl: this.win.document.location.href,
       amp: {title: this.win.document.title},
     }];
+
+    /** @private {!DocumentRef} */
+    this.activeDocumentRef_ = this.documentRefs_[0];
   }
 
   /** @override */
@@ -143,6 +147,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     const doc = this.win.document;
     const currentArticle = nextRecommendation - 1;
     let article = nextRecommendation;
+    let currentAmpUrl = '';
+    if (nextRecommendation > 0) {
+      currentAmpUrl = this.documentRefs_[currentArticle].ampUrl;
+    }
 
     const recommendations = doc.createElement('div');
 
@@ -154,6 +162,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       const articleHolder = doc.createElement('button');
       articleHolder.classList.add('i-amphtml-reco-holder-article');
       articleHolder.addEventListener('click', () => {
+        this.triggerAnalyticsEvent_(
+            'amp-document-recommendations-click', next.ampUrl, currentAmpUrl);
         this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
       });
 
@@ -273,9 +283,15 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
 
     if (position.relativePos === 'top') {
-      this.setActiveDocument_(this.documentRefs_[i + 1]);
+      const documentRef = this.documentRefs_[i + 1];
+      this.triggerAnalyticsEvent_('amp-document-recommendations-scroll',
+          documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
+      this.setActiveDocument_(documentRef);
     } else if (position.relativePos === 'bottom') {
-      this.setActiveDocument_(this.documentRefs_[i]);
+      const documentRef = this.documentRefs_[i];
+      this.triggerAnalyticsEvent_('amp-document-recommendations-scroll-back',
+          documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
+      this.setActiveDocument_(documentRef);
     }
   }
 
@@ -292,11 +308,24 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       this.win.history.replaceState({}, amp.title, url.pathname);
     }
 
+    this.activeDocumentRef_ = documentRef;
+
     // TODO(peterjosling): Send request to viewer with title/URL
-    // TODO(emarchiori): Trigger analtyics event when active
-    // document changes.
     // TODO(emarchiori): Hide position fixed elements of inactive
     // documents and update approriately.
+  }
+
+  /**
+   * Wrapper around {@code triggerAnalyticsEvent}.
+   * @param {string} eventType
+   * @param {string} toURL The new url after the event.
+   * @param {string=} fromURL The old URL before the event.
+   */
+  triggerAnalyticsEvent_(eventType, toURL, fromURL) {
+    fromURL = fromURL || '';
+
+    const vars = {toURL, fromURL};
+    triggerAnalyticsEvent(this.element, eventType, vars);
   }
 }
 
