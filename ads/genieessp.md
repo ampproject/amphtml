@@ -30,7 +30,7 @@ Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more informatio
 
 ## Configuration
 
-For semantics of configuration, please see Geniee SSP documentation or [contact Geniee SSP](http://en.geniee.co.jp/contact.html).
+For semantics of configuration, please see Geniee SSP documentation or [contact Geniee SSP](http://en.geniee.co.jp/inquiry/).
 
 Supported parameters:
 
