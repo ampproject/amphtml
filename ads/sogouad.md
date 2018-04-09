@@ -40,14 +40,17 @@ limitations under the License.
 
 ## Configuration
 
+
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+
 Responsive mode:
 
-- `data-slot` slot id of sogou ads
-- `data-w` always be 20
-- `data-h` slot's height info from sogou ads
+- `data-slot`: slot id of Sogou ads
+- `data-w`: always be 20
+- `data-h`: slot's height info from Sogou ads
 
 Fixed-height mode:
 
-- `data-slot` slot id of sogou ads
-- `data-w` always be 100%
-- `data-h` slot's height info from sogou ads
+- `data-slot`: slot id of Sogou ads
+- `data-w`: always be 100%
+- `data-h` slot's height info from Sogou ads

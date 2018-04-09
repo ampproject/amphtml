@@ -19,10 +19,8 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-  type="nativo"
-  height="150"
-  width="350">
+<amp-ad width="350" height="150"
+  type="nativo">
 </amp-ad>
 ```
 
@@ -30,4 +28,7 @@ limitations under the License.
 
 For semantics of configuration, please [contact Nativo](http://www.nativo.net/#contact-us).
 
-- data-premium: (optional) Will switch to premium
+
+### Optional parameters
+
+- `data-premium`: Switches to premium.

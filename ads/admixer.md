@@ -28,11 +28,13 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see Admixer [documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
+For configuration semantics, see [Admixer documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
 
-__Required:__
+### Required parameters 
+
 - `data-zone`
 
-__Optional:__
+### Optional parameters 
+
 - `data-sizes`
 

@@ -16,7 +16,8 @@ limitations under the License.
 
 # Admanmedia 
 
-Please visit our web (http://www.admanmedia.com) for more details
+Please visit [www.admanmedia.com](http://www.admanmedia.com) for more details.
+
 ## Example
 
 ```html
@@ -28,6 +29,8 @@ Please visit our web (http://www.admanmedia.com) for more details
 
 ## Configuration
 
-__Required:__
+For details on the configuration semantics, see [Admanmedia documentation](http://www.admanmedia.com).
 
-- `data-id` - Adunit unique id
+### Required parameters 
+
+- `data-id` - Ad unit unique id
