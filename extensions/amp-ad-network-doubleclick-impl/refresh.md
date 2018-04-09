@@ -25,7 +25,7 @@ Refresh may be enabled across all eligible slots for a set of opted-in network o
 
 `<meta name="amp-ad-refresh" content="network1=refresh_interval1,network2=refresh_interval2,...">`
 
-Where `refresh_interval` is the time, in seconds, in between refresh cycles. This value must be numeric and no less than 30. Individual slots may be opted-out of refresh by adding `data-enable-refresh=false` to the slot.
+Where `refresh_interval` is the time, in seconds, in between refresh cycles. This value must be a number greater than or equal to 30. Individual slots may be opted-out of refresh by adding `data-enable-refresh=false` to the slot.
 
 <strong>Note:</strong> Regardless of what `refresh_interval` is set to, the refresh interval will not begin until the current slot is viewable (has had 50% of its pixels on screen for a continuous second).
 
@@ -38,7 +38,7 @@ An individual slot is eligible to be refreshed if it is configured as:
  ...
  data-enable-refresh=refresh_interval>
 ```
-If `refresh_interval` is set to false, then this slot will not be refresh-enabled, even if page-level configurations are set.
+`refresh_interval` must be a number greater than or equal to 30, or false. If `refresh_interval` is set to false, then this slot will not be refresh-enabled, even if page-level configurations are set. Otherwise, if `refresh_interval` is a numeric value, then it will represent the time, in seconds, between refresh events.
 
 #### SRA Compatibility
 
