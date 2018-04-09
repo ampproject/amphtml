@@ -5,8 +5,8 @@ import declareOrbitControls from './orbit';
 import gltfLoader from './gltfLoader';
 import gltfViewer from './viewer';
 
-export default function makeViewerIframe(parent) {
-  const iframe = document.createElement('iframe');
+export default function makeViewerIframe(win, parent) {
+  const iframe = win.document.createElement('iframe');
   const code = [
     `<script>${registerGlobalIpcCode}</script>`,
     '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js"></script>',
@@ -16,11 +16,26 @@ export default function makeViewerIframe(parent) {
     `<script>(${gltfLoader.toString()})()</script>`,
     `<script>(${gltfViewer.toString()})()</script>`,
     '<style>body{margin:0;padding:0;}canvas{display:block}</style>',
+    '<body></body>',
   ].join('\n');
 
-  parent.appendChild(iframe);
-  iframe.contentDocument.write(code);
-  iframe.contentDocument.write('<body />');
+  const blob = new Blob([code], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
 
-  return iframe;
+  iframe.setAttribute('src', url);
+
+  parent.appendChild(iframe);
+
+  let released = false;
+  return {
+    iframe,
+    release: () => {
+      if (released) {
+        return;
+      }
+      parent.removeChild(iframe);
+      URL.revokeObjectURL(url);
+      released = true;
+    }
+  };
 }

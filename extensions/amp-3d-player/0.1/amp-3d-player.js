@@ -34,11 +34,21 @@ export class Amp3dPlayer extends AMP.BaseElement {
 
     /** @private {!Promise} */
     this.willBeStarted_ = new Promise(() => {});
+
+    /** @private {!Function} */
+    this.releaseIframe_ = () => {};
+  }
+
+  unlayoutCallback() {
+    this.releaseIframe_();
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = makeViewerIframe(this.element);
+    const {iframe, release} = makeViewerIframe(this.win, this.element);
+    this.container_ = iframe;
+
+    this.releaseIframe_ = release;
 
     this.viewerWindow_ = this.container_.contentWindow;
     this.willBeReady_ =

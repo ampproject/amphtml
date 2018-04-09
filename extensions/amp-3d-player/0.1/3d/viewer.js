@@ -100,9 +100,19 @@ export default function gltfViewer() {
     const baseUrl = THREE.LoaderUtils.extractUrlBase(
         window.parent.location.href
     );
+
+    const resolvedUrl = resolveURL(src, baseUrl);
+
+    if (resolvedUrl === '') {
+      setTimeout(() => {
+        AMP_3D_VIEWER_IPC.query(window, 'error', 'invalid url');
+      }, 0);
+      return;
+    }
+
     new THREE.GLTFLoader()
         .load(
-            resolveURL(src, baseUrl),
+            resolvedUrl,
             gltfData => {
               setupCameraForObject(viewer, gltfData.scene);
               viewer.gltfData = gltfData;

@@ -40,7 +40,7 @@ export const addQueryHandler = (target, tag, fn) => {
                   response: true,
                   queryId,
                   responseBody,
-                }, document.origin);
+                }, '*');
               },
               error => {
                 const errorBody = (error instanceof Error)
