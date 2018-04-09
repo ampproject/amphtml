@@ -16,6 +16,15 @@
 
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
+export const SubscriptionAnalyticsEvents = {
+  PLATFORM_ACTIVATED: 'subscriptions-platform-activated',
+  PLATFORM_REGISTERED: 'subscriptions-platform-registered',
+  PLATFORM_REAUTHORIZED: 'subscriptions-platform-re-authorized',
+  ACTION_DELEGATED: 'subscriptions-action-delegated',
+  ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
+  STARTED: 'subscriptions-started',
+};
+
 export class SubscriptionAnalytics {
 
   constructor(element) {

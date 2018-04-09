@@ -25,7 +25,7 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics} from './analytics';
+import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
@@ -178,8 +178,8 @@ export class SubscriptionService {
 
       this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
           subscriptionPlatform);
-      this.subscriptionAnalytics_.event('subscriptions-platform-registered');
-
+      this.subscriptionAnalytics_.event(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED);
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -213,9 +213,12 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
-    this.subscriptionAnalytics_.event('subscriptions-entitlement-resolved', {
-      'platform-id': serviceId,
-    });
+    this.subscriptionAnalytics_.event(
+        SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
+        {
+          'platform-id': serviceId,
+        }
+    );
   }
 
   /**
@@ -253,7 +256,7 @@ export class SubscriptionService {
    */
   start() {
     this.initialize_().then(() => {
-      this.subscriptionAnalytics_.event('subscriptions-started');
+      this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
@@ -440,9 +443,12 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
-      this.subscriptionAnalytics_.event('subscriptions-platform-activated', {
-        'platform-id': selectedPlatform.getServiceId(),
-      });
+      this.subscriptionAnalytics_.event(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          {
+            'platform-id': selectedPlatform.getServiceId(),
+          }
+      );
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
@@ -479,7 +485,7 @@ export class SubscriptionService {
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.event(
-          'subscriptions-platform-re-authorized',
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
           {
             'platform-id': subscriptionPlatform.getServiceId(),
           }
@@ -498,10 +504,12 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
-    this.subscriptionAnalytics_.event('subscriptions-action-delegated',
+    this.subscriptionAnalytics_.event(
+        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
         {
           action,
-        });
+        }
+    );
     return localPlatform.executeAction(action);
   }
 }
