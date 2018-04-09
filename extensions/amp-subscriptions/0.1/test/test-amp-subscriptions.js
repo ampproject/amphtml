@@ -314,7 +314,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     let responseStub;
     let sendAuthTokenStub;
     let fetchEntitlementsStub;
-    let decodeStub;
     const fakeAuthToken = {
       'authorization': 'faketoken',
     };
@@ -332,7 +331,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .callsFake(() => Promise.resolve());
       sendAuthTokenStub = sandbox.stub(subscriptionService,
           'sendAuthTokenErrorToViewer_');
-      decodeStub = sandbox.stub(subscriptionService.jwtHelper_, 'decode')
+      sandbox.stub(subscriptionService.jwtHelper_, 'decode')
           .callsFake(() => {
             return {
               'aud': getWinOrigin(win),
