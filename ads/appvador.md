@@ -27,12 +27,14 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please contact [AppVador](http://www.appvador.com/).
+For configuration semantics, contact [AppVador](http://www.appvador.com/).
 
-### Required Parameters:
-- data-id
+### Required Parameters
 
-### Optional parameters:
-- data-options
-- data-js-type
-- data-custom-script-src
+- `data-id`
+
+### Optional parameters
+
+- `data-options`
+- `data-js-type`
+- `data-custom-script-src`

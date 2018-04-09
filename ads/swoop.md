@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=auto height=125
+<amp-ad width="auto" height="125"
         type="swoop"
         layout="fixed-height"
         data-layout="fixed-height"
@@ -33,9 +33,9 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
-Required parameters:
+### Required parameters
 
 - `layout`: AMP layout style, should match the `layout` attribute of the `amp-ad` tag
 - `publisher`: Publisher ID

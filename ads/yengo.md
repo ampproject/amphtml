@@ -23,12 +23,12 @@ limitations under the License.
     type="yengo"
     data-block-id="152431">
 </amp-ad>
-
 ```
 
 ## Configuration
 
-For more information, please [see FAQ](http://www.yengo.com/text/faqs?publishers).
+For more information, please [see Yengo's FAQ](http://www.yengo.com/text/faqs?publishers).
 
-Required parameters:
-- data-block-id
+### Required parameters
+
+- `data-block-id`

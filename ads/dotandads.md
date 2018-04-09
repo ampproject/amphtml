@@ -16,11 +16,12 @@ limitations under the License.
 
 # DotAndAds
 
-## Example
+## Examples
 
-300x250 box: 
+#### 300x250 box
+
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="dotandads"
     data-sp="300x250-u"
     data-mpo="ampTest"
@@ -28,9 +29,10 @@ limitations under the License.
 </amp-ad>
 ```
 
-980x250 masthead: 
+#### 980x250 masthead
+
 ```html
-<amp-ad width=980 height=250
+<amp-ad width="980" height="250"
     type="dotandads" 
     data-sp='sn-u' 
     data-cid="11" 
@@ -41,11 +43,11 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
 
-- sp: sizepos (the ad size and position code)
-- mpo: multipoint (an extraction parameter based on site)
-- mpt: mediapoint tag (the box where the ad will be shown)
-- cid: customer id
+- `sp`: sizepos (the ad size and position code)
+- `mpo`: multipoint (an extraction parameter based on site)
+- `mpt`: mediapoint tag (the box where the ad will be shown)
+- `cid`: customer id

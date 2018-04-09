@@ -24,15 +24,15 @@ limitations under the License.
     data-ws="17342"
     data-s="300x250"
     data-host="talos.adman.gr">
-  </amp-ad>
+</amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see Adman [documentation](http://www.adman.gr/docs).
+For details on the configuration semantics, please see [Adman documentation](http://www.adman.gr/docs).
 
-__Required:__
+### Required parameters 
 
-- `data-ws` - Adunit unique id
-- `data-s` - Adunit size
+- `data-ws` - Ad unit unique id
+- `data-s` - Ad unit size
 - `data-host` - SSL enabled Adman service domain

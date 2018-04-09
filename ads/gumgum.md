@@ -19,8 +19,9 @@ limitations under the License.
 ## Example
 
 ### Slot Ad
+
 ```html
-<amp-ad width=300 height=100
+<amp-ad width="300" height="100"
   type="gumgum"
   data-zone="ggumtest"
   data-slot="3883">
@@ -29,11 +30,9 @@ limitations under the License.
 
 ## Configuration
 
-For parameters, configuration or any question please contact [GumGum](http://gumgum.com/contact/).
+For parameters, configuration or any questions, contact [GumGum](http://gumgum.com/contact/).
 
-Supported parameters:
+### Required parameters
 
-__Required:__
-
-- `data-zone` GumGum Zone ID
-- `data-slot` GumGum Slot Ad ID
+- `data-zone`: GumGum Zone ID
+- `data-slot`: GumGum Slot Ad ID

@@ -34,11 +34,14 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://www.pubexchange.com/dashboard/developer/update_modules).
+For semantics of configuration, please see [PubExchange's documentation](https://www.pubexchange.com/dashboard/developer/update_modules).
 
-Supported parameters:
+### Required parameters
 
-- data-publication *(**mandatory**)* - Shortcode identifying publication provided by PubExchange account manager
-- data-module-id *(**mandatory**)* - Shortcode identifying module provided by PubExchange account manager
-- data-module-num *(**mandatory**)* - ID identifying module provided by PubExchange account manager
-- data-test *(optional)* - Pass the parameter with the "true" value to test the PubExchange module
+- `data-publication`: Shortcode identifying publication provided by PubExchange account manager
+- `data-module-id`: Shortcode identifying module provided by PubExchange account manager
+- `data-module-num`: ID identifying module provided by PubExchange account manager
+
+### Optional parameters
+
+- `data-test`: Pass the parameter with the "true" value to test the PubExchange module

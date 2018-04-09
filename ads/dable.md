@@ -21,22 +21,22 @@ limitations under the License.
 ### Basic
 
 ```html
-  <amp-embed width="500" height="200"
-             type="dable"
-             data-widget-id="jobgqR7W"
-             data-item-id="testitem">
-  </amp-embed>
+<amp-embed width="500" height="200"
+     type="dable"
+     data-widget-id="jobgqR7W"
+     data-item-id="testitem">
+</amp-embed>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://admin.dable.io
+For configuration details and to generate your tags, please contact https://admin.dable.io.
 
-Required parameters:
+### Required parameters
 
-- data-widget-id
+- `data-widget-id`
 
-Optional parameters:
+### Optional parameters
 
-- data-item-id
-- data-service-name
+- `data-item-id`
+- `data-service-name`

@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="industrybrains"
     data-width="300"
     data-height="250"
@@ -29,10 +29,10 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://www.industrybrains.com/doc/publisher-solutions).
+For configuration semantics, see [Industrybrains documentation](https://www.industrybrains.com/doc/publisher-solutions).
 
 Supported parameters:
 
-- data-cid
-- data-width
-- data-height
+- `data-cid`
+- `data-width`
+- `data-height`

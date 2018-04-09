@@ -74,7 +74,6 @@ If you have questions, please feel free to reach out to your Media.net contact.
 * `data-misc` - Accepts a json value & used to send additional data
 
 
-
 ### Media.net Header Bidder
 
 **Mandatory Parameters**

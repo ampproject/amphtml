@@ -22,7 +22,8 @@ on how to get required ad tag or placement keys.
 ## Examples
 
 ### Fixed size
-Uses fixed size by given ```width``` and ```height```.
+
+Uses fixed size by the given `width` and `height`.
 
 ```html
 <amp-ad type="aduptech"
@@ -36,7 +37,9 @@ Uses fixed size by given ```width``` and ```height```.
 ```
 
 ### Filled size
+
 Uses available space of parent html container.
+
 ```html
 <style amp-custom>
     #aduptech-container {
@@ -56,7 +59,8 @@ Uses available space of parent html container.
 ```
 
 ### Fixed height
-Uses available width and given ```height```.
+
+Uses available width and the given `height`.
 
 ```html
 <amp-ad type="aduptech"
@@ -69,7 +73,8 @@ Uses available width and given ```height```.
 ```
 
 ### Responsive
-Uses available space but respecting aspect ratio by given ```width``` and ```height``` (for example 10:3).
+
+Uses available space but respecting aspect ratio by given `width` and `height` (for example 10:3).
 
 ```html
 <amp-ad type="aduptech"
@@ -84,14 +89,16 @@ Uses available space but respecting aspect ratio by given ```width``` and ```hei
 
 ## Configuration
 
-##### Required parameters
+### Required parameters
+
 * ```data-placementkey```
 
-##### Optional parameters
+### Optional parameters
+
 * ```data-query```
 * ```data-mincpc```
 * ```data-adtest```
 
 ## Design/Layout
-Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher
-to create your own placement.
+
+Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher to create your own placement.
