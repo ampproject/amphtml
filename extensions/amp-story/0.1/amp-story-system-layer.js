@@ -70,13 +70,6 @@ const TEMPLATE = {
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
       ],
     },
   ],

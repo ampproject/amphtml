@@ -59,7 +59,7 @@
   margin-bottom: 12px !important;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 410px) {
   .i-amphtml-story-share-item {
     display: flex !important;
     justify-content: center !important;
@@ -69,12 +69,21 @@
   }
 }
 
-@media (min-width: 420px) and (max-width: 720px) {
+@media (min-width: 410px) and (max-width: 500px) {
   .i-amphtml-story-share-item {
     display: flex !important;
     justify-content: center !important;
     padding: 0 !important;
     width: 20% !important;
+  }
+}
+
+@media (min-width: 500px) and (max-width: 720px) {
+  .i-amphtml-story-share-item {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    width: 16.66% !important;
   }
 }
 
