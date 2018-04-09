@@ -466,7 +466,7 @@ describe('Google A4A utils', () => {
       });
     });
 
-    it('should not include bc when sandbox not supported', function() {
+    it('should have correct bc value when sandbox not supported', function() {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
