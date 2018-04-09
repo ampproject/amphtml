@@ -862,7 +862,7 @@ export class AmpA4A extends AMP.BaseElement {
             // TODO(@taymonbeal, #9274): differentiate between these
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
-              user().warn(
+              user().error(
                   TAG, this.element.getAttribute('type'),
                   'Signature verification failed');
               return null;
@@ -989,7 +989,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
       if (this.shouldInitializePromiseChain_()) {
-        dev().warn(TAG, 'Null promise in layoutCallback');
+        dev().error(TAG, 'Null promise in layoutCallback');
       }
       return Promise.resolve();
     }
@@ -1181,7 +1181,7 @@ export class AmpA4A extends AMP.BaseElement {
     const match = /^([0-9]+)x([0-9]+)$/.exec(headerValue);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
-      user().warn(TAG, `Invalid size header: ${headerValue}`);
+      user().error(TAG, `Invalid size header: ${headerValue}`);
       return null;
     }
     return /** @type {?SizeInfoDef} */ (
@@ -1405,7 +1405,7 @@ export class AmpA4A extends AMP.BaseElement {
           'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
         });
       }).catch(err => {
-        dev().warn(TAG, this.element.getAttribute('type'),
+        dev().error(TAG, this.element.getAttribute('type'),
             'getTimingDataAsync for renderFriendlyEnd failed: ', err);
       });
       protectFunctionWrapper(this.onCreativeRender, this, err => {
@@ -1453,7 +1453,7 @@ export class AmpA4A extends AMP.BaseElement {
     const frameLoadPromise =
         this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
-      dev().warn(TAG, this.element.getAttribute('type'),
+      dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
     })(null);
     return frameLoadPromise;
