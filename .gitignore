@@ -23,3 +23,5 @@ package-lock.json
 *.swo
 yarn-error.log
 PERCY_BUILD_ID
+chromedriver.log
+sc-*-linux*

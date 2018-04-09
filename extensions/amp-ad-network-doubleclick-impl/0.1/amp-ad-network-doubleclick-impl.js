@@ -45,7 +45,6 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  setNameframeExperimentConfigs,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {
@@ -234,6 +233,15 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => getFirstInstanceValue_(instances,
       instance => instance.buildIdentityParams_()),
+  instances => {
+    let safeframeForced = false;
+    const forceSafeframes = [];
+    instances.forEach(instance => {
+      safeframeForced = safeframeForced || instance.forceSafeframe_;
+      forceSafeframes.push(Number(instance.forceSafeframe_));
+    });
+    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
 ];
 
 
@@ -281,7 +289,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.adKey_ = 0;
 
-    // TODO(keithwrightbos) - how can pub enable?
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search) ||
@@ -336,19 +343,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
-    this.nameframeExperimentConfig_ = {
-      instantLoad: false,
-      writeInBody: false,
-    };
-
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
-  }
 
-  /** @visibleForTesting */
-  getNameFrameExperimentConfig() {
-    return this.nameframeExperimentConfig_;
+    /** @private {boolean} whether safeframe forced via tag */
+    this.forceSafeframe_ = false;
+    if ('forceSafeframe' in this.element.dataset) {
+      if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
+        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
+            this.element.dataset['forceSafeframe']);
+      } else {
+        this.forceSafeframe_ = true;
+      }
+    }
   }
 
   /** @override */
@@ -383,16 +390,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    /**
-     * isValidElement used to also check that we are in a valid A4A environment,
-     * however this is not necessary as that is checked by doubleclickIsA4AEnabled,
-     * which is always called as part of the upgrade path from an amp-ad element
-     * to an amp-ad-doubleclick element. Thus, if we are an amp-ad, we can be sure
-     * that it has been verified.
-     */
-    return this.isAmpAdElement() &&
-      // Ensure not within remote.html iframe.
-      !this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    return this.isAmpAdElement();
   }
 
   /** @override */
@@ -556,14 +554,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
-      'scp': serializeTargeting_(
-          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
-          (this.jsonTargeting_ &&
-            this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
+      'fsf': this.forceSafeframe_ ? '1' : null,
+      'scp': serializeTargeting_(
+          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
+          (this.jsonTargeting_ &&
+            this.jsonTargeting_['categoryExclusions']) || null),
     }, googleBlockParameters(this));
   }
 
@@ -613,8 +612,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.identityToken = results[1];
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                  this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), this.getPageParameters_()));
+                  this.getBlockParameters_(), this.buildIdentityParams_(),
+                  this.getPageParameters_(), rtcParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -760,10 +759,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-
-    setNameframeExperimentConfigs(responseHeaders,
-        this.nameframeExperimentConfig_);
-
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
@@ -925,8 +920,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
     if (this.isRefreshing) {
       dev().assert(this.refreshManager_);
@@ -1006,7 +1002,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if (this.isFluid_ ||
+    if ((this.isFluid_ && width && height) ||
         (width != pWidth || height != pHeight) &&
         (width <= pWidth && height <= pHeight)) {
       this.attemptChangeSize(height, width).catch(() => {});
@@ -1209,7 +1205,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+    return this.forceSafeframe_ || this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
@@ -1231,10 +1227,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.isFluid_ && !isSafeFrame) {
       return;
     }
-
+    const creativeSize = this.getCreativeSize();
+    dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
+            this, this.isFluid_, this.initialSize_,
+            /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();
@@ -1341,6 +1339,7 @@ export function constructSRARequest_(win, doc, instances) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Object<string, *>}
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {

@@ -1,0 +1,193 @@
+#
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-date-picker"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=static]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "single"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=single][mode=overlay]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    mandatory: true
+    value_casei: "overlay"
+  }
+  attrs: {
+    name: "type"
+    value_casei: "single"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-single-type-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=static]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    value_casei: "static"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "range"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "amp-date-picker-static-mode-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+
+tags: {
+  html_format: AMP
+  tag_name: "AMP-DATE-PICKER"
+  spec_name: "amp-date-picker[type=range][mode=overlay]"
+  requires_extension: "amp-date-picker"
+  attrs: {
+    name: "mode"
+    mandatory: true
+    value_casei: "overlay"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "range"
+  }
+  attr_lists: "amp-date-picker-common-attributes"
+  attr_lists: "amp-date-picker-range-type-attributes"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: NODISPLAY
+  }
+}
+
+attr_lists: {
+  name: "amp-date-picker-common-attributes"
+  attrs: {
+    name: "allow-blocked-ranges"
+    value: ""
+  }
+  attrs: { name: "blocked" }
+  attrs: {
+    name: "day-size"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "first-day-of-week"
+    value_regex: "[0-6]"
+  }
+  attrs: { name: "format" }
+  attrs: { name: "highlighted" }
+  attrs: { name: "locale" }
+  attrs: { name: "max" }
+  attrs: { name: "min" }
+  attrs: { name: "month-format" }
+  attrs: {
+    name: "number-of-months"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "open-after-clear"
+    value: ""
+  }
+  attrs: {
+    name: "open-after-select"
+    value: ""
+  }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "week-day-format" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-range-type-attributes"
+  attrs: { name: "end-input-selector" }
+  attrs: { name: "start-input-selector" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-single-type-attributes"
+  attrs: { name: "input-selector" }
+}
+
+attr_lists: {
+  name: "amp-date-picker-static-mode-attributes"
+  attrs: {
+    name: "fullscreen"
+    value: ""
+  }
+}

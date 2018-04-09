@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {Toast} from './toast';
 import {
@@ -20,7 +21,7 @@ import {
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, user} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
+import {dict, map} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -32,13 +33,19 @@ import {throttle} from '../../../src/utils/rate-limit';
  * Maps share provider type to visible name.
  * If the name only needs to be capitalized (e.g. `facebook` to `Facebook`) it
  * does not need to be included here.
- * @const {!JsonObject}
+ * @const {!Object<string, !LocalizedStringId>}
  */
-const SHARE_PROVIDER_NAME = dict({
-  'gplus': 'Google+',
-  'linkedin': 'LinkedIn',
-  'system': 'More',
-  'whatsapp': 'WhatsApp',
+const SHARE_PROVIDER_LOCALIZED_STRING_ID = map({
+  'system': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM,
+  'email': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL,
+  'facebook': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK,
+  'linkedin': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN,
+  'pinterest': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST,
+  'gplus': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS,
+  'tumblr': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR,
+  'twitter': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER,
+  'whatsapp': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP,
+  'sms': LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS,
 });
 
 
@@ -86,7 +93,7 @@ const LINK_SHARE_ITEM_TEMPLATE = {
     'class':
         'i-amphtml-story-share-icon i-amphtml-story-share-icon-link',
   }),
-  text: 'Get Link', // TODO(alanorozco): i18n
+  localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK,
 };
 
 
@@ -118,6 +125,10 @@ function buildProviderParams(opt_params) {
  * @return {!Node}
  */
 function buildProvider(doc, shareType, opt_params) {
+  const shareProviderLocalizedStringId = dev().assert(
+      SHARE_PROVIDER_LOCALIZED_STRING_ID[shareType],
+      `No localized string to display name for share type ${shareType}.`);
+
   return renderSimpleTemplate(doc,
       /** @type {!Array<!./simple-template.ElementDef>} */ ([
         {
@@ -130,7 +141,7 @@ function buildProvider(doc, shareType, opt_params) {
                 'type': shareType,
               }),
               buildProviderParams(opt_params))),
-          text: SHARE_PROVIDER_NAME[shareType] || shareType,
+          localizedStringId: shareProviderLocalizedStringId,
         },
       ]));
 }
@@ -148,12 +159,13 @@ function buildCopySuccessfulToast(doc, url) {
     children: [
       {
         tag: 'div',
-        text: 'Link copied!', // TODO(alanorozco): i18n
+        localizedStringId:
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-copy-url'}),
-        text: url,
+        unlocalizedString: url,
       },
     ],
   }));
@@ -169,11 +181,17 @@ export class ShareWidget {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
-    /** @private @const {!Window} */
-    this.win_ = win;
+    /** @protected @const {!Window} */
+    this.win = win;
 
-    /** @private {?Element} */
-    this.root_ = null;
+    /** @protected {?Element} */
+    this.root = null;
+
+    /** @private {?Promise<?./localization.LocalizationService>} */
+    this.localizationServicePromise_ = null;
+
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestService(this.win);
   }
 
   /** @param {!Window} win */
@@ -186,26 +204,29 @@ export class ShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    dev().assert(!this.root_, 'Already built.');
+    dev().assert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
+    this.localizationServicePromise_ =
+        Services.localizationServiceForOrNull(this.win);
 
-    this.root_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.root = renderAsElement(this.win.document, TEMPLATE);
 
+    this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
 
-    return this.root_;
+    return this.root;
   }
 
   /** @private */
   maybeAddLinkShareButton_() {
-    if (!isCopyingToClipboardSupported(this.win_.document)) {
+    if (!isCopyingToClipboardSupported(this.win.document)) {
       return;
     }
 
     const linkShareButton =
-        renderAsElement(this.win_.document, LINK_SHARE_ITEM_TEMPLATE);
+        renderAsElement(this.win.document, LINK_SHARE_ITEM_TEMPLATE);
 
     this.add_(linkShareButton);
 
@@ -223,12 +244,18 @@ export class ShareWidget {
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
           dev().assert(this.ampdoc_))).canonicalUrl;
 
-    if (!copyTextToClipboard(this.win_, url)) {
-      Toast.show(this.win_, 'Could not copy link to clipboard :(');
+    if (!copyTextToClipboard(this.win, url)) {
+      this.localizationServicePromise_.then(localizationService => {
+        dev().assert(localizationService,
+            'Could not retrieve LocalizationService.');
+        const failureString = localizationService.getLocalizedString(
+            LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT);
+        Toast.show(this.win, failureString);
+      });
       return;
     }
 
-    Toast.show(this.win_, buildCopySuccessfulToast(this.win_.document, url));
+    Toast.show(this.win, buildCopySuccessfulToast(this.win.document, url));
   }
 
   /** @private */
@@ -239,12 +266,12 @@ export class ShareWidget {
       return;
     }
 
-    const container = dev().assertElement(this.root_).querySelector(
+    const container = dev().assertElement(this.root).querySelector(
         '.i-amphtml-story-share-system');
 
     this.loadRequiredExtensions_();
 
-    container.appendChild(buildProvider(this.win_.document, 'system'));
+    container.appendChild(buildProvider(this.win.document, 'system'));
   }
 
   /** @private */
@@ -255,7 +282,7 @@ export class ShareWidget {
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
           dev().assert(this.ampdoc_)));
 
-    const platform = Services.platformFor(this.win_);
+    const platform = Services.platformFor(this.win);
 
     // Chrome exports navigator.share in WebView but does not implement it.
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
@@ -265,13 +292,27 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
-   * @public
+   * Loads and applies the share providers configured by the publisher.
+   * @protected
    */
-  // TODO(alanorozco): Set story metadata in share config
-  setProviders(providers) {
+  loadProviders() {
     this.loadRequiredExtensions_();
 
+    this.requestService_.loadBookendConfig().then(config => {
+      const providers = config && config['share-providers'];
+      if (!providers) {
+        return;
+      }
+      this.setProviders_(providers);
+    });
+  }
+
+  /**
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @private
+   */
+  // TODO(alanorozco): Set story metadata in share config
+  setProviders_(providers) {
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',
@@ -282,14 +323,14 @@ export class ShareWidget {
       }
 
       if (isObject(providers[type])) {
-        this.add_(buildProvider(this.win_.document, type,
+        this.add_(buildProvider(this.win.document, type,
             /** @type {!JsonObject} */ (providers[type])));
         return;
       }
 
       // Bookend config API requires real boolean, not just truthy
       if (providers[type] === true) {
-        this.add_(buildProvider(this.win_.document, type));
+        this.add_(buildProvider(this.win.document, type));
         return;
       }
 
@@ -305,7 +346,7 @@ export class ShareWidget {
     const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
       dev().assert(this.ampdoc_));
 
-    Services.extensionsFor(this.win_)
+    Services.extensionsFor(this.win)
         .installExtensionForDoc(ampdoc, 'amp-social-share');
   }
 
@@ -314,8 +355,8 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = dev().assert(this.root_).firstElementChild;
-    const item = renderAsElement(this.win_.document, SHARE_ITEM_TEMPLATE);
+    const list = dev().assert(this.root).firstElementChild;
+    const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
 
@@ -330,17 +371,13 @@ export class ShareWidget {
  * Social share widget for story bookend with a scrollable layout.
  * This class is coupled to the DOM structure for ShareWidget, but that's ok.
  */
-export class ScrollableShareWidget {
+export class ScrollableShareWidget extends ShareWidget {
   /** @param {!Window} win */
   constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
+    super(win);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
-
-    /** @private @const {!ShareWidget} */
-    this.mixin_ = ShareWidget.create(win);
 
     /**
      * Container width is being tracked to prevent unnecessary layout
@@ -348,9 +385,6 @@ export class ScrollableShareWidget {
      * @private {?number}
      */
     this.containerWidth_ = null;
-
-    /** @private {?Element} */
-    this.root_ = null;
   }
 
   /** @param {!Window} win */
@@ -363,15 +397,15 @@ export class ScrollableShareWidget {
    * @return {!Element}
    */
   build(ampdoc) {
-    this.root_ = this.mixin_.build(ampdoc);
+    super.build(ampdoc);
 
-    this.root_.classList.add(SCROLLABLE_CLASSNAME);
+    this.root.classList.add(SCROLLABLE_CLASSNAME);
 
     Services.viewportForDoc(ampdoc).onResize(
         // we don't require a lot of smoothness here, so we throttle
-        throttle(this.win_, () => this.applyButtonPadding_(), 100));
+        throttle(this.win, () => this.applyButtonPadding_(), 100));
 
-    return this.root_;
+    return this.root;
   }
 
   /**
@@ -388,7 +422,7 @@ export class ScrollableShareWidget {
 
     this.vsync_.run({
       measure: state => {
-        const containerWidth = this.root_./*OK*/clientWidth;
+        const containerWidth = this.root./*OK*/clientWidth;
 
         if (containerWidth == this.containerWidth_) {
           // Don't recalculate if width has not changed (i.e. onscreen keyboard)
@@ -398,7 +432,7 @@ export class ScrollableShareWidget {
 
         const icon = dev().assert(items[0].firstElementChild);
 
-        const leftMargin = icon./*OK*/offsetLeft - this.root_./*OK*/offsetLeft;
+        const leftMargin = icon./*OK*/offsetLeft - this.root./*OK*/offsetLeft;
         const iconWidth = icon./*OK*/offsetWidth;
 
         // Total width that the buttons will occupy with minimum padding.
@@ -448,16 +482,16 @@ export class ScrollableShareWidget {
    */
   getVisibleItems_() {
     return Array.prototype.filter.call(
-        dev().assertElement(this.root_).querySelectorAll('li'),
+        dev().assertElement(this.root).querySelectorAll('li'),
         el => !!el.firstElementChild);
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
-   * @public
+   * Loads and applies the share providers configured by the publisher.
+   * @protected
    */
-  setProviders(providers) {
-    this.mixin_.setProviders(providers);
+  loadProviders() {
+    super.loadProviders();
     this.applyButtonPadding_();
   }
 }

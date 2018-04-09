@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
@@ -292,6 +293,56 @@ describes.realWin('amp-story', {
         expect(story.element.classList.contains('i-amphtml-story-landscape'))
             .to.be.false;
       });
+
+  it('should update page id in store', () => {
+    const firstPageId = 'page-one';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+    const dispatchStub =
+        sandbox.stub(story.storeService_, 'dispatch');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(dispatchStub)
+              .to.have.been.calledWith(Action.CHANGE_PAGE, firstPageId);
+        });
+  });
+
+  it('should update page id in browser history', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'page-zero';
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.have.been.calledWith(
+              {ampStoryPageId: firstPageId},
+              '',
+          );
+        });
+  });
+
+  it('should NOT update page id in browser history if ad', () => {
+    // Have to stub this because tests run in iframe and you can't write
+    // history from another domain (about:srcdoc)
+    const replaceStub = sandbox.stub(win.history, 'replaceState');
+    const firstPageId = 'i-amphtml-ad-page-1';
+    const pageCount = 2;
+    const pages = createPages(story.element, pageCount,
+        [firstPageId, 'page-1']);
+    const firstPage = pages[0];
+    firstPage.setAttribute('ad', '');
+
+    story.buildCallback();
+    return story.layoutCallback()
+        .then(() => {
+          return expect(replaceStub).to.not.have.been.called;
+        });
+  });
 });
 
 

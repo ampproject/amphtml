@@ -15,14 +15,14 @@
  */
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
-import {SystemLayer} from '../system-layer';
+import {SystemLayer} from '../amp-story-system-layer';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
 const NOOP = () => {};
 
 
-describes.fakeWin('amp-story system layer', {}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, env => {
   let win;
   let systemLayer;
   let progressBarStub;
@@ -43,22 +43,22 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
     sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    systemLayer = new SystemLayer(win);
-
     sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
     });
+
+    systemLayer = new SystemLayer(win);
   });
 
   it('should build UI', () => {
-    const addEventHandlers =
-        sandbox.stub(systemLayer, 'addEventHandlers_').callsFake(NOOP);
+    const initializeListeners =
+        sandbox.stub(systemLayer, 'initializeListeners_').callsFake(NOOP);
 
     const root = systemLayer.build();
 
     expect(root).to.not.be.null;
 
-    expect(addEventHandlers).to.have.been.called;
+    expect(initializeListeners).to.have.been.called;
   });
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
@@ -68,7 +68,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
     sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
     sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
-    systemLayer.addEventHandlers_();
+    systemLayer.initializeListeners_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });

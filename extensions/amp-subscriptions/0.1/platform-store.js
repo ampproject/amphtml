@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
+/** @const */
+const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
@@ -47,6 +51,8 @@ export class PlatformStore {
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
+    /** @private {!Array<string>} */
+    this.failedPlatforms_ = [];
   }
 
   /**
@@ -112,8 +118,11 @@ export class PlatformStore {
     if (entitlement) {
       entitlement.service = serviceId;
     }
-
     this.entitlements_[serviceId] = entitlement;
+    // Remove this serviceId as a failed platform now
+    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
+      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    }
     // Call all onChange callbacks.
     this.onChangeCallbacks_.fire({serviceId, entitlement});
   }
@@ -216,13 +225,14 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
+   * @param {boolean} preferViewerSupport
    * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
-  selectPlatform() {
+  selectPlatform(preferViewerSupport) {
 
     return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicablePlatform_();
+      return this.selectApplicablePlatform_(preferViewerSupport);
     });
   }
 
@@ -245,10 +255,11 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
+   * @param {boolean} preferViewerSupport
    * @returns {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
-  selectApplicablePlatform_() {
+  selectApplicablePlatform_(preferViewerSupport) {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
@@ -268,7 +279,7 @@ export class PlatformStore {
       }
 
       // If supports the current viewer, gains weight 9
-      if (platform.supportsCurrentViewer()) {
+      if (preferViewerSupport && platform.supportsCurrentViewer()) {
         weight += 9;
       }
 
@@ -296,5 +307,21 @@ export class PlatformStore {
     }
 
     return localPlatform;
+  }
+
+  /**
+   * Records a platform failure and logs error if all platforms have failed.
+   * @param {string} serviceId
+   */
+  reportPlatformFailure(serviceId) {
+    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+      const entitlement = Entitlement.empty(serviceId);
+      this.resolveEntitlement(serviceId, entitlement);
+      this.failedPlatforms_.push(serviceId);
+    }
+
+    if (this.failedPlatforms_.length == this.serviceIds_.length) {
+      user().error(TAG, 'All platforms have failed to resolve');
+    }
   }
 }
