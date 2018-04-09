@@ -35,11 +35,6 @@ tags: {  # <amp-story>
   # requirement to be expressed on the <amp-story> children, however.
   requires: "amp-story-page"
   attrs: {
-    name: "standalone"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
     name: "bookend-config-src"
     value_url: {
       allowed_protocol: "http"
@@ -54,16 +49,7 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
-    name: "title"
-    mandatory: true
-  }
-  attrs: {
-    name: "publisher"
-    mandatory: true
-  }
-  attrs: {
-    name: "publisher-logo-src"
-    mandatory: true
+    name: "poster-landscape-src"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -85,11 +71,25 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
-    name: "poster-landscape-src"
+    name: "publisher"
+    mandatory: true
+  }
+  attrs: {
+    name: "publisher-logo-src"
+    mandatory: true
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+  }
+  attrs: {
+    name: "standalone"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "title"
+    mandatory: true
   }
   siblings_disallowed: true
   child_tags: {
@@ -110,11 +110,6 @@ tags: {  # <amp-story> without metadata (deprecated)
   mandatory_parent: "BODY"
   requires: "amp-story-page"
   attrs: {
-    name: "standalone"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
     name: "bookend-config-src"
     value_url: {
       allowed_protocol: "http"
@@ -127,6 +122,11 @@ tags: {  # <amp-story> without metadata (deprecated)
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
+  }
+  attrs: {
+    name: "standalone"
+    mandatory: true
+    value: ""
   }
   siblings_disallowed: true
   child_tags: {
