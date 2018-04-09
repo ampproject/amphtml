@@ -16,7 +16,7 @@ limitations under the License.
 
 # iBILLBOARD AdServer
 
-Please visit the [ibillboard website](https://www.ibillboard.com/) for more information.
+Please visit the [ibillboard website](http://www.ibillboard.com) for more information.
 
 ## Example
 
@@ -32,7 +32,7 @@ Please visit the [ibillboard website](https://www.ibillboard.com/) for more info
 
 ## Configuration
 
-For details on the configuration semantics, visit the [ibillboard website](https://www.ibillboard.com/).
+For details on the configuration semantics, visit the [ibillboard website](http://www.ibillboard.com/).
 
 ### Supported parameters
 
