@@ -23,7 +23,6 @@ import {findIndex} from '../utils/array';
 import {
   getFragment,
   getSourceOrigin,
-  getSourceUrl,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -48,7 +47,8 @@ const VIEWER_ORIGIN_TIMEOUT_ = 1000;
  * @const
  * @private {!RegExp}
  */
-const TRIM_ORIGIN_PATTERN_ = /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i
+const TRIM_ORIGIN_PATTERN_ =
+  /^(https?:\/\/)((www[0-9]*|web|ftp|wap|home|mobile|amp)\.)+/i;
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -433,7 +433,7 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
-  
+
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
     this.maybeUpdateFragmentForCct();
@@ -561,7 +561,7 @@ export class Viewer {
    * @private
    */
   hasRoughlySameOrigin_(first, second) {
-    const trimOrigin = (origin) => {
+    const trimOrigin = origin => {
       if (origin.split('.').length > 2) {
         return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
       }

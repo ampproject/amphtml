@@ -191,7 +191,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
-  it('should restore fragment within custom tab when click param is present', () => {
+  it('should restore fragment within custom tab with click param', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
@@ -1072,14 +1072,14 @@ describe('Viewer', () => {
     });
 
     function testHasRoughlySameOrigin(first, second) {
-      it('should find ' + first + ' and ' + second + ' to be roughly the same', () => {
+      it('should find ' + first + ' and ' + second + ' to match', () => {
         const viewer = new Viewer(ampdoc);
         expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.true;
       });
     }
 
     function testHasRoughlyDifferentOrigin(first, second) {
-      it('should NOT find ' + first + ' and ' + second + ' to be roughly the same', () => {
+      it('should NOT find ' + first + ' and ' + second + ' to match', () => {
         const viewer = new Viewer(ampdoc);
         expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.false;
       });
