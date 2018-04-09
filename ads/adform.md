@@ -47,7 +47,7 @@ limitations under the License.
 
 ## Configuration
 
-Please refer to [Adform Help Center](https://www.adform.com/passport/) for more
+Please refer to [Adform Help Center](https://www.adform.com) for more
 information on how to get required ad tag or placement IDs. 
 
 ### Supported parameters
