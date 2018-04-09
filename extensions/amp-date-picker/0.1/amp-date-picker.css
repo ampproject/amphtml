@@ -24,14 +24,22 @@ amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container {
   z-index: 10;
 }
 
-amp-date-picker[fullscreen] .i-amphtml-date-picker-container,
-amp-date-picker[with-full-screen-portal],
-amp-date-picker[with-full-screen-portal] .i-amphtml-date-picker-container {
+amp-date-picker[fullscreen] .i-amphtml-date-picker-container {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+/**
+ * Remove duplicate calendar view in Chrome for overlay pickers.
+ * To avoid being too opinionated about date inputs in general,
+ * publishers who make static date pickers with `input[type="date"]`
+ * can add a rule like this themselves.
+ */
+ amp-date-picker input::-webkit-calendar-picker-indicator {
+  display: none;
 }
 
 .amp-date-picker-calendar-container * {
