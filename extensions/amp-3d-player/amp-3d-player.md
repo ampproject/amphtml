@@ -62,15 +62,16 @@ Path to gltf file
 See through free space on canvas, by default free space is filled with black
 
 ##### antialiasing (optional, default="false")
-Turn on/off antialiasing. Impacts performance.
+Turn on/off antialiasing
 
 ##### maxPixelRatio (optional, default=window.devicePixelRatio): number 
+Set upper limit for pixelRatio render option
 
 ##### autoRotate (optional, default="false"): boolean
 Automatically rotate camera around model's center
 
 ##### enableZoom (optional, default="true"): boolean
-Turn on/off zoom mouse/touch controls
+Turn on/off zoom
 
 
 ## Validation
