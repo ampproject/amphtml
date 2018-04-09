@@ -49,9 +49,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {boolean} */
     this.useLayers_ = false;
-
-    /** @private {?../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = null;
   }
 
   /** @override */
@@ -62,7 +59,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
   /** @override */
   buildCarousel() {
     this.cells_ = this.getRealChildren();
-    this.vsync_ = this.getVsync();
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
@@ -90,7 +86,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
         const index = parseInt(args['index'], 10);
         this.goToSlide_(index);
       }
-    }, ActionTrust.HIGH);
+    }, ActionTrust.LOW);
 
     if (this.useLayers_) {
       this.declareLayer(this.container_);
@@ -153,30 +149,23 @@ export class AmpScrollableCarousel extends BaseCarousel {
     }
 
     const oldPos = this.pos_;
-
-    const measureSlidePosition = state => {
-      state.newPos = this.getPosForSlideIndex_(index);
-    };
-
-    const mutateSlidePosition = state => {
-      if (state.newPos == oldPos) {
-        return;
-      }
-      /** @const {!TransitionDef<number>} */
-      const interpolate = numeric(oldPos, state.newPos);
-      const duration = 200;
-      const curve = 'ease-in-out';
-      Animation.animate(this.element, pos => {
-        this.container_./*OK*/scrollLeft = interpolate(pos);
-      }, duration, curve).thenAlways(() => {
-        this.commitSwitch_(state.newPos);
-      });
-    };
-
-    this.vsync_.run({
-      measure: measureSlidePosition,
-      mutate: mutateSlidePosition,
-    }, {});
+    this.measureElement(() => this.getPosForSlideIndex_(index))
+        .then(newPos => {
+          this.mutateElement(() => {
+            if (newPos == oldPos) {
+              return;
+            }
+            /** @const {!TransitionDef<number>} */
+            const interpolate = numeric(oldPos, newPos);
+            const duration = 200;
+            const curve = 'ease-in-out';
+            Animation.animate(this.element, pos => {
+              this.container_./*OK*/scrollLeft = interpolate(pos);
+            }, duration, curve).thenAlways(() => {
+              this.commitSwitch_(newPos);
+            });
+          });
+        });
   }
 
   /**
