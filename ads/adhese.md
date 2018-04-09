@@ -16,7 +16,7 @@ limitations under the License.
 
 # Adhese
 
-Serves ads from [Adhese]((https://www.adhese.com).
+Serves ads from [Adhese](https://www.adhese.com).
 
 ## Example
 
