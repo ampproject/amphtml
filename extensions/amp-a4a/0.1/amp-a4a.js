@@ -1521,7 +1521,7 @@ export class AmpA4A extends AMP.BaseElement {
         default:
           // Shouldn't be able to get here, but...  Because of the assert, above,
           // we can only get here in non-dev mode, so give user feedback.
-          user().warn('A4A', 'A4A received unrecognized cross-domain name'
+          user().error('A4A', 'A4A received unrecognized cross-domain name'
               + ' attribute iframe rendering mode request: %s.  Unable to'
               + ' render a creative for'
               + ' slot %s.', method, this.element.getAttribute('id'));
