@@ -212,11 +212,6 @@ The following message keys can be translated or customized, but be aware that th
     <th>Default value</th>
   </tr>
   <tr>
-    <td><code>premiumContentTitle</code></td>
-    <td>The Premium Content purchase option allows the user to buy just the currently shown article for the specified price. The title for this option cannot be specified in the Connector UI but it can be customized here.</td>
-    <td>'Buy only this article'</td>
-  </tr>
-  <tr>
     <td><code>payLaterButton</code></td>
     <td>Text shown in the purchase button for options that can be paid later.</td>
     <td>'Buy Now, Pay Later'</td>

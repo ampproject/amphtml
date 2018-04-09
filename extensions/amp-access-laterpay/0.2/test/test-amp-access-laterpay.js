@@ -30,6 +30,7 @@ describes.fakeWin('LaterpayVendor', {
   let articleTitle;
   let laterpayConfig;
   let vendor;
+  let priceData;
 
   beforeEach(() => {
     win = env.win;
@@ -51,6 +52,12 @@ describes.fakeWin('LaterpayVendor', {
     accessService = {
       ampdoc,
       getSource: () => accessSource,
+    };
+
+    priceData = {
+      price: 123,
+      currency: 'EUR',
+      'payment_model': 'pay_later',
     };
 
     accessSourceMock = sandbox.mock(accessSource);
@@ -153,7 +160,11 @@ describes.fakeWin('LaterpayVendor', {
             response: {
               status: 402,
               json() {
-                return Promise.resolve({access: false});
+                return Promise.resolve({'purchase_options': [
+                  {'sales_model': 'single_purchase'},
+                  {'sales_model': 'timepass'},
+                  {'sales_model': 'subscription'},
+                ]});
               },
             },
           }))
@@ -161,6 +172,9 @@ describes.fakeWin('LaterpayVendor', {
       emptyContainerStub.returns(Promise.resolve());
       return vendor.authorize().then(err => {
         expect(err.access).to.be.false;
+        expect(vendor.purchaseOptions_.singlePurchases).to.have.lengthOf(1);
+        expect(vendor.purchaseOptions_.timepasses).to.have.lengthOf(1);
+        expect(vendor.purchaseOptions_.subscriptions).to.have.lengthOf(1);
       });
     });
 
@@ -168,21 +182,25 @@ describes.fakeWin('LaterpayVendor', {
 
   describe('create purchase overlay', () => {
     let container;
+
     beforeEach(() => {
       container = document.createElement('div');
       container.id = TAG + '-dialog';
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        subscriptions: [
-          {price: {}},
-        ],
-        timepasses: [
-          {price: {}},
-        ],
+        'identify_url': 'http://id.url',
+      };
+      vendor.purchaseOptions_ = {
+        singlePurchases: [{
+          price: priceData,
+        }],
+        timepasses: [{
+          price: priceData,
+        }],
+        subscriptions: [{
+          price: priceData,
+        }],
       };
       vendor.renderPurchaseOverlay_();
     });
@@ -199,6 +217,11 @@ describes.fakeWin('LaterpayVendor', {
       expect(container.querySelector('ul').childNodes.length).to.equal(3);
     });
 
+    it('renders identify url link', () => {
+      expect(container.querySelector('p > a').href).to
+          .match(/^http\:\/\/id\.url/);
+    });
+
   });
 
   describe('purchase option selection', () => {
@@ -209,15 +232,18 @@ describes.fakeWin('LaterpayVendor', {
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        subscriptions: [
-          {price: {}},
-        ],
-        timepasses: [
-          {price: {}},
-        ],
+        'identify_url': 'http://id.url',
+      };
+      vendor.purchaseOptions_ = {
+        singlePurchases: [{
+          price: priceData,
+        }],
+        timepasses: [{
+          price: priceData,
+        }],
+        subscriptions: [{
+          price: priceData,
+        }],
       };
       vendor.renderPurchaseOverlay_();
       const ev = new Event('change');
@@ -244,16 +270,18 @@ describes.fakeWin('LaterpayVendor', {
       document.body.appendChild(container);
       vendor.i18n_ = {};
       vendor.purchaseConfig_ = {
-        premiumcontent: {
-          price: {},
-        },
-        subscriptions: [
-          {price: {}},
-        ],
-        timepasses: [
-          {price: {}},
-        ],
-        apl: 'http://apllink',
+        'identify_url': 'http://id.url',
+      };
+      vendor.purchaseOptions_ = {
+        singlePurchases: [{
+          price: priceData,
+        }],
+        timepasses: [{
+          price: priceData,
+        }],
+        subscriptions: [{
+          price: priceData,
+        }],
       };
       vendor.renderPurchaseOverlay_();
     });
