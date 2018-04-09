@@ -422,8 +422,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const iframeBox = {
         top: 300,
         left: 200,
-        bottom: 1000,
-        right: 500,
+        bottom: 900,
+        right: 350,
         width: 300,
         height: 700,
       };
@@ -435,8 +435,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
         'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
         'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
-        'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
-        'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
+        'allowedExpansion_r': 150, 'allowedExpansion_b': 100,
+        'allowedExpansion_t': 300, 'allowedExpansion_l': 200, 'yInView': 1,
         'xInView': 1,
       };
       const safeframeGeometryUpdate = safeframeHost.formatGeom_(

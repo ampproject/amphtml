@@ -379,11 +379,11 @@ export class SafeframeHostApi {
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
       'allowedExpansion_r': viewportSize.width -
-          iframeBox.width,
+          iframeBox.right,
       'allowedExpansion_b': viewportSize.height -
-          iframeBox.height,
-      'allowedExpansion_t': 0,
-      'allowedExpansion_l': 0,
+          iframeBox.bottom,
+      'allowedExpansion_t': iframeBox.top,
+      'allowedExpansion_l': iframeBox.left,
       'yInView': this.getPercInView(viewportSize.height,
           iframeBox.top, iframeBox.bottom),
       'xInView': this.getPercInView(viewportSize.width,
