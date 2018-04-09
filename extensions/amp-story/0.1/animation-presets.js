@@ -55,7 +55,7 @@ export function setStyleForPreset(el, presetName) {
   const fillTemplate = 'fill';
 
   // For panning and zooming animations.
-  if (PANNING_ANIMATION_NAMES.includes(presetName)) {
+  if (PANNING_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
     if (parent.classList.contains(
         GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
