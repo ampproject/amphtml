@@ -251,6 +251,13 @@ describes.realWin('amp-consent', {
       consentElement.appendChild(scriptElement);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
+      sandbox.stub(ampConsent.vsync_, 'mutatePromise').callsFake(fn => {
+        fn();
+        return Promise.resolve();
+      });
+      sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
+        fn();
+      });
     });
 
     it('update current displaying consent', function* () {
@@ -259,6 +266,9 @@ describes.realWin('amp-consent', {
       updateConsentInstanceStateSpy =
           sandbox.spy(ampConsent.consentStateManager_,
               'updateConsentInstanceState');
+      yield macroTask();
+      yield macroTask();
+      yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
           'ABC', CONSENT_ITEM_STATE.GRANTED);

@@ -213,7 +213,6 @@ export class AmpConsent extends AMP.BaseElement {
   show_(instanceId) {
     dev().assert(!this.currentDisplayInstance_,
         'Other consent instance on display');
-
     return this.vsync_.mutatePromise(() => {
       if (!this.uiInit_) {
         this.uiInit_ = true;
@@ -226,7 +225,6 @@ export class AmpConsent extends AMP.BaseElement {
 
       // Display the current instance
       this.currentDisplayInstance_ = instanceId;
-      console.log('toggle block');
       setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
           {display: 'block'});
     }).then(() => {
@@ -468,7 +466,8 @@ export class AmpConsent extends AMP.BaseElement {
         }
         this.element.classList.add('amp-active');
         this.element.classList.remove('amp-hidden');
-        setImportantStyles(this.postPromptUI_, {display: 'block'});
+        setImportantStyles(dev().assertElement(this.postPromptUI_),
+            {display: 'block'});
       });
     });
 
@@ -479,7 +478,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.classList.add('amp-hidden');
         this.element.classList.remove('amp-active');
-        toggle(this.postPromptUI_, false);
+        toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });
   }
