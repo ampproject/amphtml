@@ -230,6 +230,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
         const visibilityState = Services.viewerForDoc(nodeOrDoc)
             .getVisibilityState();
         const art = getBinaryTypeNumericalCode(getBinaryType(win));
+        const browserCapabilities = getBrowserCapabilitiesBitmap(win);
         return {
           'is_amp': AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP,
           'amp_v': '$internalRuntimeVersion$',
@@ -253,6 +254,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
+          'bc': browserCapabilities || null,
           'debug_experiment_id':
               (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
@@ -826,4 +828,40 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
       }
     });
   }
+}
+
+/**
+ * Enum for browser capabilities. NOTE: Since JS is 32-bit, do not add anymore
+ * than 32 capabilities to this enum.
+ * @enum {number}
+ */
+const Capability = {
+  SVG_SUPPORTED: 1 << 0,
+  SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
+  SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
+};
+
+/**
+ * Returns a bitmap representing what features are supported by this browser.
+ * @param {!Window} win
+ * @return {number}
+ */
+function getBrowserCapabilitiesBitmap(win) {
+  let browserCapabilities = 0;
+  const doc = win.document;
+  if (win.SVGElement && doc.createElementNS) {
+    browserCapabilities |= Capability.SVG_SUPPORTED;
+  }
+  const iframeEl = doc.createElement('iframe');
+  const supportsSandboxFlag = flagToCheck => iframeEl.sandbox &&
+      iframeEl.sandbox.supports && iframeEl.sandbox.supports(flagToCheck);
+  if (supportsSandboxFlag('allow-top-navigation-by-user-activation')) {
+    browserCapabilities |=
+      Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+  }
+  if (supportsSandboxFlag('allow-popups-to-escape-sandbox')) {
+    browserCapabilities |=
+      Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+  }
+  return browserCapabilities;
 }
