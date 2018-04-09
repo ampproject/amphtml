@@ -439,7 +439,7 @@ describe('Google A4A utils', () => {
       });
     });
 
-    it('should include browser capabilities', function() {
+    it('should have correct bc value when everything supported', function() {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -461,6 +461,61 @@ describe('Google A4A utils', () => {
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
             expect(url1).to.match(/[&?]bc=7[&$]/);
+          });
+        });
+      });
+    });
+
+    it('should not include bc when sandbox not supported', function() {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: undefined,
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.match(/[&?]bc=1[&$]/);
+          });
+        });
+      });
+    });
+
+    it('should not include bc when nothing supported', function() {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.SVGElement = undefined;
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => false,
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.not.match(/[&?]bc=/);
           });
         });
       });
