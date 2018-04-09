@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For configuration and implementation details, please [contact Flite Support](http://support.flite.com/).
+For configuration and implementation details, please [contact Flite Support](http://www.flite.com/).
 
 Supported parameters:
 
