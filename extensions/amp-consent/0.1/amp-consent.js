@@ -97,6 +97,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isMultiSupported_ = false;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = this.getVsync();
   }
 
   getConsentPolicy() {
@@ -211,22 +214,25 @@ export class AmpConsent extends AMP.BaseElement {
     dev().assert(!this.currentDisplayInstance_,
         'Other consent instance on display');
 
+    return this.vsync_.mutatePromise(() => {
+      if (!this.uiInit_) {
+        this.uiInit_ = true;
+        toggle(this.element, true);
+        this.getViewport().addToFixedLayer(this.element);
+      }
 
-    if (!this.uiInit_) {
-      this.uiInit_ = true;
-      toggle(this.element, true);
-      this.getViewport().addToFixedLayer(this.element);
-    }
+      this.element.classList.remove('amp-hidden');
+      this.element.classList.add('amp-active');
 
-    this.element.classList.remove('amp-hidden');
-    this.element.classList.add('amp-active');
-
-    // Display the current instance
-    this.currentDisplayInstance_ = instanceId;
-    setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
-        {display: 'block'});
-    return new Promise(resolve => {
-      this.dialogResolver_[instanceId] = resolve;
+      // Display the current instance
+      this.currentDisplayInstance_ = instanceId;
+      console.log('toggle block');
+      setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
+          {display: 'block'});
+    }).then(() => {
+      return new Promise(resolve => {
+        this.dialogResolver_[instanceId] = resolve;
+      });
     });
   }
 
@@ -234,15 +240,17 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    this.element.classList.add('amp-hidden');
-    this.element.classList.remove('amp-active');
-    // Do not remove from fixed layer because of invoke button
-    // this.getViewport().removeFromFixedLayer(this.element);
-    dev().assert(this.currentDisplayInstance_
-        && this.consentUI_[this.currentDisplayInstance_],
-    'no consent UI to hide');
+    this.vsync_.mutate(() => {
+      this.element.classList.add('amp-hidden');
+      this.element.classList.remove('amp-active');
+      // Do not remove from fixed layer because of invoke button
+      // this.getViewport().removeFromFixedLayer(this.element);
+      dev().assert(this.currentDisplayInstance_
+          && this.consentUI_[this.currentDisplayInstance_],
+      'no consent UI to hide');
 
-    toggle(this.consentUI_[this.currentDisplayInstance_], false);
+      toggle(this.consentUI_[this.currentDisplayInstance_], false);
+    });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
       this.dialogResolver_[this.currentDisplayInstance_] = null;
@@ -452,23 +460,27 @@ export class AmpConsent extends AMP.BaseElement {
       if (!this.postPromptUI_) {
         return;
       }
-      if (!this.uiInit_) {
-        this.uiInit_ = true;
-        toggle(this.element, true);
-        this.getViewport().addToFixedLayer(this.element);
-      }
-      this.element.classList.add('amp-active');
-      this.element.classList.remove('amp-hidden');
-      setImportantStyles(this.postPromptUI_, {display: 'block'});
+      this.vsync_.mutate(() => {
+        if (!this.uiInit_) {
+          this.uiInit_ = true;
+          toggle(this.element, true);
+          this.getViewport().addToFixedLayer(this.element);
+        }
+        this.element.classList.add('amp-active');
+        this.element.classList.remove('amp-hidden');
+        setImportantStyles(this.postPromptUI_, {display: 'block'});
+      });
     });
 
     this.notificationUiManager_.onQueueNotEmpty(() => {
       if (!this.postPromptUI_) {
         return;
       }
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      toggle(this.postPromptUI_, false);
+      this.vsync_.mutate(() => {
+        this.element.classList.add('amp-hidden');
+        this.element.classList.remove('amp-active');
+        toggle(this.postPromptUI_, false);
+      });
     });
   }
 }
