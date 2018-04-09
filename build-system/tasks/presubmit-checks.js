@@ -279,6 +279,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js', // eslint-disable-line max-len
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
     ],
