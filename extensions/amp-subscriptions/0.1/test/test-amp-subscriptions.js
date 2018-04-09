@@ -26,6 +26,7 @@ import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {getWinOrigin} from '../../../../src/url';
 import {setTimeout} from 'timers';
+import { SubscriptionAnalyticsEvents } from '../analytics';
 
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
@@ -35,6 +36,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let pageConfig;
   let subscriptionService;
   let configResolver;
+  let analyticsEventStub;
 
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
@@ -73,6 +75,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
         });
     sandbox.stub(subscriptionService, 'getPlatformConfig_')
         .callsFake(() => Promise.resolve(serviceConfig));
+    analyticsEventStub = sandbox.stub(
+        subscriptionService.subscriptionAnalytics_,
+        'event'
+    );
   });
 
   it('should call `initialize_` on start', () => {
@@ -126,13 +132,17 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
-    subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
-    return subscriptionService.initialize_().then(() => {
+    const factoryStub = sandbox.stub().callsFake(() =>
+      new SubscriptionPlatform());
+    subscriptionService.platformStore_ = new PlatformStore(['local']);
+    return subscriptionService.registerPlatform(
+        serviceData.serviceId, factoryStub).then(() => {
       expect(factoryStub).to.be.calledOnce;
       expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
       expect(factoryStub.getCall(0).args[1]).to.be.equal(
           subscriptionService.serviceAdapter_);
+      expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED);
     });
   });
 
@@ -292,6 +302,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       return subscriptionService.fetchEntitlements_(platform).then(() => {
         expect(resolveStub).to.be.calledOnce;
         expect(resolveStub.getCall(0).args[1]).to.deep.equal(entitlement);
+        expect(analyticsEventStub).to.be.calledWith(
+            SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
+            {
+              'platform-id': 'local',
+            }
+        );
       });
     });
   });
