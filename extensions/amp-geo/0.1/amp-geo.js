@@ -141,7 +141,7 @@ export class AmpGeo extends AMP.BaseElement {
     // match to \w+ to prevent xss vector
     if (getMode(this.win).geoOverride &&
       (isCanary(this.win) || getMode(this.win).localDev) &&
-      getMode(this.win).geoOverride.match(/\w+/)) {
+      getMode(this.win).geoOverride.match(/^\w+$/)) {
       this.mode_ = mode.GEO_OVERRIDE;
       this.country_ = getMode(this.win).geoOverride ;
     }
