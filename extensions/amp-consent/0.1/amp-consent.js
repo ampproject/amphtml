@@ -78,7 +78,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.policyConfig_ = dict();
 
     /** @private {!Object} */
-    this.consentUIRequired_ = map();
+    this.consentRequired_ = map();
 
     /** @private {boolean} */
     this.uiInit_ = false;
@@ -188,13 +188,6 @@ export class AmpConsent extends AMP.BaseElement {
 
     if (this.consentUIPendingMap_[instanceId]) {
       // Already pending to be shown. Do nothing.
-      return;
-    }
-
-    if (!this.consentUIRequired_[instanceId]) {
-      // If consent not required.
-      // TODO(@zhouyx): Need to fix this
-      // We still need to show management UI even consent not required.
       return;
     }
 
@@ -417,12 +410,10 @@ export class AmpConsent extends AMP.BaseElement {
   parseConsentResponse_(instanceId, response) {
     if (!response || !response['promptIfUnknown']) {
       //Do not need to block.
-      this.consentUIRequired_[instanceId] = false;
-      this.consentStateManager_.ignoreConsentInstance(instanceId);
-      return;
+      this.consentRequired_[instanceId] = false;
     } else {
       // TODO: Check for current consent state and decide if UI is required.
-      this.consentUIRequired_[instanceId] = true;
+      this.consentRequired_[instanceId] = true;
     }
   }
 
@@ -431,10 +422,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} instanceId
    */
   handlePromptUI_(instanceId) {
-    // Prompt UI based on other UI on display and promptList for the instance.
-    if (!this.consentUIRequired_[instanceId]) {
-      return;
-    }
 
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
     const element = this.getAmpDoc().getElementById(promptUI);
@@ -444,6 +431,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
+            if (!this.consentRequired_[instanceId]) {
+              this.consentStateManager_.updateConsentInstanceState(
+                  instanceId, CONSENT_ITEM_STATE.IGNORED);
+              return;
+            }
             // TODO(@zhouyx):
             // 1. Race condition on consent state change between
             // schedule to display and display. Add one more check before display
