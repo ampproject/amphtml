@@ -29,6 +29,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-bodymovin-animation/">amp-bodymovin-animation example</a>.</td>
+  </tr>
 </table>
 
 [TOC]
@@ -60,9 +64,17 @@ The path to the exported Bodymovin animation object. Must be `https` protocol.
 
 Indicates whether the animation should be looping or not.  By default, this attribute is set to `true`. Values for this attribute can be: `true`, `false`, or a number value. If a number is specified, the animation loops that number of times.
 
+##### noautoplay (optional)
+
+By default, an animation autoplays. If this attribute is added the video waits for an action to start playing.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Actions
+
+Please see [AMP Action Documentation](https://www.ampproject.org/docs/reference/amp-actions-and-events#amp-bodymovin-animation) for the actions available on `amp-bodymovin-animation` component.
 
 ## Validation
 

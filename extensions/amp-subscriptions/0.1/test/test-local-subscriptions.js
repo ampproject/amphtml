@@ -20,7 +20,7 @@ import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 
-describes.realWin('local-subscriptions', {amp: true}, env => {
+describes.fakeWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
@@ -29,7 +29,21 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
   };
-  const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
+  const service = 'sample-service';
+  const source = 'sample-source';
+  const products = ['scenic-2017.appspot.com:news',
+    'scenic-2017.appspot.com:product2'];
+  const subscriptionToken = 'token';
+  const loggedIn = true;
+  const json = {
+    service,
+    source,
+    products,
+    subscriptionToken,
+    loggedIn,
+  };
+  const entitlement = Entitlement.parseFromJson(json);
+  const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
     'services': [
@@ -53,16 +67,6 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
         serviceConfig.services[0], serviceAdapter);
   });
 
-  it('should fetch the entitlements on getEntitlements', () => {
-    const initializeStub =
-        sandbox.spy(localSubscriptionPlatform.xhr_, 'fetchJson');
-    localSubscriptionPlatform.getEntitlements();
-    expect(initializeStub).to.be.calledOnce;
-    expect(initializeStub.getCall(0).args[0]).to.be.equals(authUrl);
-    expect(initializeStub.getCall(0).args[1].credentials)
-        .to.be.equals('include');
-  });
-
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     const domStub = sandbox.stub(localSubscriptionPlatform.rootNode_,
         'addEventListener');
@@ -71,6 +75,29 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     expect(domStub).calledOnce;
     expect(domStub.getCall(0).args[0])
         .to.be.equals('click');
+  });
+
+  it('should fetch the entitlements on getEntitlements', () => {
+    const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    return localSubscriptionPlatform.getEntitlements().then(() => {
+      expect(fetchStub).to.be.calledOnce;
+      expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
+      expect(fetchStub.getCall(0).args[1].credentials)
+          .to.be.equals('include');
+    });
+  });
+
+  it('should buildUrl before fetchingAuth', () => {
+    const builtUrl = 'builtUrl';
+    const urlBuildingStub = sandbox.stub(localSubscriptionPlatform.urlBuilder_,
+        'buildUrl').callsFake(() => Promise.resolve(builtUrl));
+    const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_,'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    return localSubscriptionPlatform.getEntitlements().then(() => {
+      expect(urlBuildingStub).to.be.calledWith(authUrl, false);
+      expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
+    });
   });
 
   describe('validateActionMap', () => {
@@ -123,27 +150,15 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
     it('should call renderer\'s render method', () => {
       const renderStub =
         sandbox.stub(localSubscriptionPlatform.renderer_, 'render');
-      localSubscriptionPlatform.activate();
-      expect(renderStub).to.be.calledOnce;
+      localSubscriptionPlatform.activate({entitlement});
+      return localSubscriptionPlatform.actions_.build().then(() => {
+        expect(renderStub).to.be.calledOnce;
+      });
     });
   });
 
   describe('pingback', () => {
     it('should call `sendSignal` to the pingback signal', () => {
-      const service = 'sample-service';
-      const source = 'sample-source';
-      const products = ['scenic-2017.appspot.com:news',
-        'scenic-2017.appspot.com:product2'];
-      const subscriptionToken = 'token';
-      const loggedIn = true;
-      const json = {
-        service,
-        source,
-        products,
-        subscriptionToken,
-        loggedIn,
-      };
-      const entitlement = Entitlement.parseFromJson(json);
       const urlBuildStub =
           sandbox.stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
               .callsFake(() => Promise.resolve(pingbackUrl));

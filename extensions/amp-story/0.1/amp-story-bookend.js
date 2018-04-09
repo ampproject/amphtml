@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {CSS} from '../../../build/amp-story-bookend-0.1.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ScrollableShareWidget} from './share';
+import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
+import {createShadowRootWithStyle} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -38,10 +40,6 @@ import {throttle} from '../../../src/utils/rate-limit';
  * }}
  */
 export let BookendConfigDef;
-
-
-/** @private @const {string} */
-const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 
 /**
@@ -110,12 +108,12 @@ function buildArticleTemplate(articleData) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: articleData.title,
+        unlocalizedString: articleData.title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: articleData.domainName,
+        unlocalizedString: articleData.domainName,
       },
     ],
   });
@@ -148,7 +146,7 @@ function buildArticlesContainerTemplate(articleSets) {
       template.push({
         tag: 'h3',
         attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
-        text: articleSet.heading,
+        unlocalizedString: articleSet.heading,
       });
     }
     template.push({
@@ -186,12 +184,12 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
-        text: title,
+        unlocalizedString: title,
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-meta'}),
-        text: domainName,
+        unlocalizedString: domainName,
       },
     ],
   });
@@ -207,23 +205,38 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
 export class Bookend {
   /**
    * @param {!Window} win
-   * @param {!Element} storyElement Element where to append the bookend
+   * @param {!Element} parentEl Element where to append the bookend
    */
-  constructor(win, storyElement) {
+  constructor(win, parentEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {?./bookend.BookendConfigDef|undefined} */
+    /** @private {?./amp-story-bookend.BookendConfigDef|undefined} */
     this.config_;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
 
+    /** @private {boolean} */
+    this.isConfigRendered_ = false;
+
     /** @private {?Element} */
     this.replayButton_ = null;
 
-    /** @private {?Element} */
+    /**
+     * Root element containing a shadow DOM root.
+     * @private {?Element}
+     */
     this.root_ = null;
+
+    /**
+     * Actual bookend.
+     * @private {?Element}
+     */
+    this.bookendEl_ = null;
+
+    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = Services.storyRequestService(this.win_);
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
@@ -232,7 +245,7 @@ export class Bookend {
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
-    this.storyElement_ = storyElement;
+    this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -248,11 +261,14 @@ export class Bookend {
 
     this.isBuilt_ = true;
 
-    this.root_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+    this.root_ = this.win_.document.createElement('div');
+    this.bookendEl_ = renderAsElement(this.win_.document, ROOT_TEMPLATE);
+
+    createShadowRootWithStyle(this.root_, this.bookendEl_, CSS);
 
     this.replayButton_ = this.buildReplayButton_();
 
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
 
     const innerContainer = this.getInnerContainer_();
     innerContainer.appendChild(this.replayButton_);
@@ -260,7 +276,7 @@ export class Bookend {
     this.initializeListeners_();
 
     this.vsync_.mutate(() => {
-      this.storyElement_.appendChild(this.getRoot());
+      this.parentEl_.appendChild(this.getRoot());
     });
   }
 
@@ -268,7 +284,8 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.root_.addEventListener('click', event => this.maybeClose_(event));
+    this.getShadowRoot()
+        .addEventListener('click', event => this.maybeClose_(event));
     this.replayButton_.addEventListener(
         'click', event => this.onReplayButtonClick_(event));
 
@@ -287,8 +304,13 @@ export class Bookend {
       }
     });
 
-    this.storeService_.subscribe(
-        StateProperty.BOOKEND_STATE, isActive => this.toggle_(isActive));
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.onBookendStateUpdate_(isActive);
+    });
+
+    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
+      this.onDesktopStateUpdate_(isDesktop);
+    }, true /** callToInitialize */);
   }
 
   /**
@@ -310,21 +332,39 @@ export class Bookend {
   }
 
   /**
+   * Reacts to bookend state updates.
+   * @param {boolean} isActive
+   * @private
+   */
+  onBookendStateUpdate_(isActive) {
+    this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to desktop state updates.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  onDesktopStateUpdate_(isDesktop) {
+    this.toggleDesktopAttribute_(isDesktop);
+  }
+
+  /**
    * Retrieves the publisher bookend configuration. Applying the configuration
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<?./bookend.BookendConfigDef>}
+   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
       if (applyConfig && this.config_) {
-        this.setConfig(this.config_);
+        this.setConfig_(this.config_);
       }
       return Promise.resolve(this.config_);
     }
 
-    return this.loadJsonFromAttribute_(BOOKEND_CONFIG_ATTRIBUTE_NAME)
+    return this.requestService_.loadBookendConfig()
         .then(response => {
           if (!response) {
             return null;
@@ -339,7 +379,7 @@ export class Bookend {
           // Allows the config to be fetched before the component is built, for
           // cases like getting the share providers on desktop.
           if (applyConfig) {
-            this.setConfig(this.config_);
+            this.setConfig_(this.config_);
           }
 
           return this.config_;
@@ -347,31 +387,6 @@ export class Bookend {
         .catch(e => {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
-        });
-  }
-
-  /**
-   * @param {string} attributeName
-   * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
-   */
-  loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
-      return Promise.resolve(null);
-    }
-
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
-    const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
-
-    const ampdoc = getAmpdoc(this.storyElement_);
-
-    return Services.urlReplacementsForDoc(ampdoc)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win_).fetchJson(url, opts))
-        .then(response => {
-          user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
-          return response.json();
         });
   }
 
@@ -416,7 +431,7 @@ export class Bookend {
             this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
       },
       mutate: state => {
-        this.getRoot().classList.toggle(
+        this.getShadowRoot().classList.toggle(
             FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
       },
     }, {});
@@ -428,7 +443,20 @@ export class Bookend {
    */
   toggle_(show) {
     this.vsync_.mutate(() => {
-      this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+      this.getShadowRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+    });
+  }
+
+  /**
+   * Toggles the bookend desktop UI.
+   * @param {boolean} isDesktop
+   * @private
+   */
+  toggleDesktopAttribute_(isDesktop) {
+    this.vsync_.mutate(() => {
+      isDesktop ?
+        this.getShadowRoot().setAttribute('desktop', '') :
+        this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -446,14 +474,15 @@ export class Bookend {
 
   /**
    * @param {!BookendConfigDef} bookendConfig
+   * @private
    */
-  setConfig(bookendConfig) {
-    this.assertBuilt_();
-
-    if (bookendConfig.shareProviders) {
-      this.shareWidget_.setProviders(
-          dev().assert(bookendConfig.shareProviders));
+  setConfig_(bookendConfig) {
+    if (this.isConfigRendered_) {
+      return;
     }
+
+    this.assertBuilt_();
+    this.isConfigRendered_ = true;
 
     this.setRelatedArticles_(bookendConfig.relatedArticles);
   }
@@ -476,6 +505,12 @@ export class Bookend {
     return dev().assertElement(this.root_);
   }
 
+  /** @return {!Element} */
+  getShadowRoot() {
+    this.assertBuilt_();
+    return dev().assertElement(this.bookendEl_);
+  }
+
   /**
    * Gets container for bookend content.
    * @return {!Element}
@@ -491,7 +526,7 @@ export class Bookend {
    * @private
    */
   getOverflowContainer_() {
-    return dev().assertElement(this.getRoot().firstElementChild);
+    return dev().assertElement(this.getShadowRoot().firstElementChild);
   }
 
   /**
@@ -503,7 +538,7 @@ export class Bookend {
    * @private
    */
   getStoryMetadata_() {
-    const ampdoc = getAmpdoc(this.storyElement_);
+    const ampdoc = getAmpdoc(this.parentEl_);
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {

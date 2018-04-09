@@ -160,7 +160,10 @@ export class LocalSubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   activate(renderState) {
-    this.renderer_.render(renderState);
+    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+    this.actions_.build().then(() => {
+      this.renderer_.render(renderState);
+    });
   }
 
   /**
@@ -180,16 +183,16 @@ export class LocalSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.xhr_
-        .fetchJson(this.authorizationUrl_, {
-          credentials: 'include',
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          const entitlement = Entitlement.parseFromJson(resJson);
-          this.entitlement_ = entitlement;
-          return entitlement;
-        });
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_,
+        /* useAuthData */ false)
+        .then(fetchUrl =>
+          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+              .then(res => res.json())
+              .then(resJson => {
+                const entitlement = Entitlement.parseFromJson(resJson);
+                this.entitlement_ = entitlement;
+                return entitlement;
+              }));
   }
 
   /** @override */

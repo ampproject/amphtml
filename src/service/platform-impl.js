@@ -119,6 +119,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current platform matches a bot user agent.
+   * @return {boolean}
+   */
+  isBot() {
+    return /bot/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Returns the major version of the browser.
    * @return {number}
    */

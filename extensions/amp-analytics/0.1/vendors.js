@@ -30,7 +30,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
+      'ampGeo': 'AMP_GEO',
       'ampVersion': 'AMP_VERSION',
+      'ancestorOrigin': 'ANCESTOR_ORIGIN',
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -50,7 +52,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'externalReferrer': 'EXTERNAL_REFERRER',
       'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
       'firstViewportReady': 'FIRST_VIEWPORT_READY',
+      'fragmentParam': 'FRAGMENT_PARAM',
       'makeBodyVisible': 'MAKE_BODY_VISIBLE',
+      'htmlAttr': 'HTML_ATTR',
       'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
@@ -76,6 +80,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
+      'timezoneCode': 'TIMEZONE_CODE',
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'userAgent': 'USER_AGENT',
@@ -239,12 +244,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
-    },
-  },
-
-  'bg': {
-    'transport': {
-      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
     },
   },
 
@@ -2060,3 +2059,21 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+/**
+ * Vendors who have IAB viewability certification may use iframe transport
+ * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
+ * put only the specification of the iframe location in the object below,
+ * and put everything else (requests, triggers, etc.) in the object above.
+ * @const {!JsonObject}
+ */
+export const ANALYTICS_IFRAME_TRANSPORT_CONFIG = /** @type {!JsonObject} */ ({
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
+    },
+  },
+});
+
+// Merge ANALYTICS_IFRAME_TRANSPORT_CONFIG into ANALYTICS_CONFIG
+Object.assign(ANALYTICS_CONFIG, ANALYTICS_IFRAME_TRANSPORT_CONFIG);

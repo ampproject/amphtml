@@ -63,6 +63,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
+  },
+  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -233,28 +239,22 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
     id: 'amp-date-picker',
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
   {
+    id: 'inline-styles',
+    name: 'Enables the usage of inline styles for non fixed elements',
+    spec: 'https://github.com/ampproject/amphtml/issues/11881',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13595',
+  },
+  {
     id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
-    id: 'disable-amp-story-hls',
-    name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
-    spec: 'https://github.com/ampproject/amphtml/issues/12965',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
   {
     id: 'amp-document-recommendations',
@@ -275,6 +275,24 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'video-service',
+    name: 'Enables new implementation of unified Video Interface services.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13674',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
+  },
+  {
+    id: 'iframe-messaging',
+    name: 'Enables "postMessage" action on amp-iframe.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9074',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
+  {
+    id: 'amp-fx-fade-in',
+    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
 ];
 
