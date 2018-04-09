@@ -52,7 +52,7 @@ VLM.prototype.appendIntersect = function(o) {
 };
 
 /**
- * 
+ *
  * @param {Object} data
  * @constructor
  */
