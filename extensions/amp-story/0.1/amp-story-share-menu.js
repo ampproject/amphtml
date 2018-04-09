@@ -16,8 +16,8 @@
 
 import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
-import {ShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
+import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
