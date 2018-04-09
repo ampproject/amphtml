@@ -39,6 +39,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
@@ -46,6 +47,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
@@ -53,6 +55,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
@@ -61,6 +64,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
@@ -68,6 +72,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
@@ -80,6 +85,7 @@ tags: {  # <amp-story>
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
+      allow_relative: false
     }
   }
   attrs: {
