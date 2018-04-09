@@ -131,7 +131,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!IntersectionObserverPolyfill)>}
+ * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverWrapper)>}
  */
 const observers = {};
 
@@ -222,13 +222,13 @@ export class RefreshManager {
    * one if one does not yet exist.
    *
    * @param {number} threshold
-   * @return {(!IntersectionObserver|!IntersectionObserverPolyfill)}
+   * @return {(!IntersectionObserver|!RefreshIntersectionObserverWrapper)}
    */
   getIntersectionObserverWithThreshold_(threshold) {
-    debugger;
+
     const thresholdString = String(threshold);
     return observers[thresholdString] ||
-        (observers[thresholdString] = ('IntersectionObserver' in this.win_ && false)
+        (observers[thresholdString] = 'IntersectionObserver' in this.win_
           ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
           : new RefreshIntersectionObserverWrapper(
               this.ioCallback_, this.a4a_, {threshold}));
@@ -241,8 +241,8 @@ export class RefreshManager {
    *
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
-  ioCallback_(entries) { debugger;
-    entries.forEach(entry => { debugger;
+  ioCallback_(entries) {
+    entries.forEach(entry => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       dev().assert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -310,7 +310,7 @@ export class RefreshManager {
    */
   startRefreshTimer_() {
     return new Promise(resolve => {
-      this.refreshTimeoutId_ = this.timer_.delay(() => { debugger;
+      this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
         this.getIntersectionObserverWithThreshold_(
             this.config_.visiblePercentageMin).unobserve(this.element_);

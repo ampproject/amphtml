@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {DATA_MANAGER_ID_NAME} from './refresh-manager';
 import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {dev} from '../../../src/log';
 
@@ -22,7 +21,7 @@ export class RefreshIntersectionObserverWrapper {
   /**
    * A thin wrapper class to allow the IntersectionObserverPolyfill to work with
    * refresh.
-   * @param {function(?Array<!IntersectionObserverEntry>)} callback
+   * @param {function(!Array<!IntersectionObserverEntry>)} callback
    * @param {!AMP.BaseElement} baseElement
    * @param {Object} config
    */
@@ -42,30 +41,35 @@ export class RefreshIntersectionObserverWrapper {
     this.viewport_ = baseElement.getViewport();
   }
 
+  /**
+   * Begin observing the given element.
+   * @param {!Element} element
+   */
   observe(element) {
-    const refreshId = element.getAttribute(DATA_MANAGER_ID_NAME);
+    const refreshId = element.getAttribute('data-amp-ad-refresh-id');
     dev().assert(refreshId, 'observe invoked on element without refresh id');
 
-    const viewportCallback = element.viewportCallback.bind(element);
-    this.viewportCallbacks_[refreshId] = viewportCallback;
+    if (!this.viewportCallbacks_[refreshId]) {
+      const viewportCallback = element.viewportCallback.bind(element);
+      this.viewportCallbacks_[refreshId] = viewportCallback;
+      element.viewportCallback = inViewport => {
+        this.intersectionObserver_.tick(this.viewport_.getRect());
+        viewportCallback(inViewport);
+      };
+    }
 
-    // We need to call tick to update current host viewport state, otherwise we
-    // might get into a situation where observe is called with the viewport
-    // state indicating that it's in the viewport when it's not.
-    this.intersectionObserver_.tick(this.viewport_.getRect());
     this.intersectionObserver_.observe(element);
-    element.viewportCallback = inViewport => {
-      this.intersectionObserver_.tick(this.viewport_.getRect());
-      viewportCallback(inViewport);
-    };
   }
 
+  /**
+   * Cease observing the given element.
+   * @param {!Element} element
+   */
   unobserve(element) {
-    const refreshId = element.getAttribute(DATA_MANAGER_ID_NAME);
-    dev().assert(refreshId, 'unobserve invoked on element without refresh id');
-
-    element.viewportCallback = this.viewportCallbacks_[refreshId];
-    delete this.viewportCallbacks_[refreshId];
+    // We need to call 'tick' to update current host viewport state, otherwise
+    // the next time we call 'observe', the viewport state might be stale, and
+    // indicate that the element is in the viewport when it's not.
+    this.intersectionObserver_.tick(this.viewport_.getRect());
     this.intersectionObserver_.unobserve(element);
   }
 }
