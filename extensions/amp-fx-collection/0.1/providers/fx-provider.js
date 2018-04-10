@@ -33,7 +33,9 @@ const installStyles = {
   'fade-in': {
     'will-change': 'opacity',
     'opacity': 0,
-
+  },
+  'fly-in-bottom': {
+    'will-change': 'transform',
   },
 };
 
