@@ -321,7 +321,7 @@ export class RefreshManager {
           return;
         }
         this.state_ = RefreshLifecycleState.INITIAL;
-        this.stopObserving_();
+        this.stopObserving();
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
       }, /** @type {number} */ (this.refreshInterval_));
@@ -346,19 +346,10 @@ export class RefreshManager {
 
   /**
    * Stops the intersection observer from observing the element.
-   * @private
    */
-  stopObserving_() {
+  stopObserving() {
     this.getIntersectionObserverWithThreshold_(
             this.config_.visiblePercentageMin).unobserve(this.element_);
-  }
-
-  /**
-   * Halts all operation.
-   */
-  stop() {
-    this.isActive_ = false;
-    this.stopObserving_();
   }
 }
 
