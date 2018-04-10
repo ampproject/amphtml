@@ -46,7 +46,7 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"consentRequired": true, "prompt": true}',
+      'response1': '{"promptIfUnknown": true, "prompt": true}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -170,7 +170,7 @@ describes.realWin('amp-consent', {
       ampConsent.buildCallback();
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {
-        'consentRequired': true,
+        'promptIfUnknown': true,
         'prompt': true,
       });
     });
