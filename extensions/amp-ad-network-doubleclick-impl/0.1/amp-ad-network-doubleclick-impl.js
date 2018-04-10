@@ -1194,6 +1194,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
+    // Note that this getter actually changes state by preloading safeframe.
+    // Plan to cleanup this API as part of generate amp-a4a modularization
+    // refactor.
     if (this.preloadSafeframe_) {
       this.preconnect.preload(this.getSafeframePath());
     }
