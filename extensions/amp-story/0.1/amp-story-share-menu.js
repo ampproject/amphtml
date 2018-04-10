@@ -16,8 +16,8 @@
 
 import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
-import {ScrollableShareWidget} from './amp-story-share';
 import {Services} from '../../../src/services';
+import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -71,8 +71,8 @@ export class ShareMenu {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win_);
 
-    /** @private @const {!ScrollableShareWidget} */
-    this.shareWidget_ = ScrollableShareWidget.create(this.win_);
+    /** @private @const {!ShareWidget} */
+    this.shareWidget_ = ShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
