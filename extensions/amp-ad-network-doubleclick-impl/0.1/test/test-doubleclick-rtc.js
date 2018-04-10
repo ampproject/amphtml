@@ -296,6 +296,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
+      env.win.document.referrer = 'https://www.google.com/';
       const docInfo = Services.documentInfoForDoc(element);
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
@@ -304,6 +305,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
+      expect(customMacros.REFERRER()).to.equal(env.win.document.referrer);
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
