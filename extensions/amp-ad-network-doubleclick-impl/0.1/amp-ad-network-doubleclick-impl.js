@@ -93,6 +93,7 @@ import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {isObject} from '../../../src/types';
 import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -228,9 +229,9 @@ const BLOCK_SRA_COMBINERS_ = [
       if (currEids) {
         currEids.split(',').forEach(eid => eids[eid] = 1);
       }
-      const deid = /(?:^|,)deid=(\d+)/i.exec(instance.win.location.hash);
+      const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
       if (deid) {
-        eids[deid[0]] = 1;
+        eids[deid[1]] = 1;
       }
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
@@ -1131,6 +1132,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               const slotCallback = metaJsonCreativeGrouper(
                   (creative, headersObj, done) => {
                     checkStillCurrent();
+                    const headerNames = Object.keys(headersObj);
+                    if (headerNames.length == 1 && isObject(headerNames[0])) {
+                      // TODO(keithwrightbos) - fix upstream so response does
+                      // not improperly place headers under key.
+                      headersObj =
+                        /** @type {!Object} */(headersObj)[headerNames[0]];
+                      headersObj = Object.keys(headersObj).reduce(
+                          (newObj, key) => {
+                            newObj[key.toLowerCase()] = headersObj[key];
+                            return newObj;
+                          }, {});
+                    }
                     // Force safeframe rendering method.
                     headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
                         XORIGIN_MODE.SAFEFRAME;
@@ -1139,7 +1152,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
-                    get: name => headersObj[name.toLowerCase()],
+                    get: name => {
+                      // TODO(keithwrightbos) - fix upstream so response writes
+                      // all metadata values as strings.
+                      let header = headersObj[name.toLowerCase()];
+                      if (header && typeof header != 'string') {
+                        header = JSON.stringify(header);
+                      }
+                      return header;
+                    },
                     has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
