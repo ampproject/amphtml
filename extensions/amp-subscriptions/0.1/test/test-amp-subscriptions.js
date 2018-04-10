@@ -74,10 +74,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   it('should call `initialize_` on start', () => {
+    const localPlatformStub =
+      sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    const service = subscriptionService.start();
-    sandbox.stub(service, 'fetchEntitlements_');
+    subscriptionService.start();
     expect(initializeStub).to.be.calledOnce;
+    return subscriptionService.initialize_().then(() => {
+      expect(localPlatformStub).to.be.called;
+    });
   });
 
   it('should setup store and page on start', () => {

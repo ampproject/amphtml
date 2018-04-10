@@ -257,16 +257,11 @@ describes.realWin('Platform store', {}, () => {
   });
 
   describe('reportPlatformFailure_', () => {
-    let errorSpy;
-    beforeEach(() => {
-      errorSpy = sandbox.spy(user(), 'error');
-    });
 
-    // TODO(prateekbh, #14336): Fails due to console errors.
-    it.skip('should report fatal error if all platforms fail', () => {
+    it('should report fatal error if all platforms fail', () => {
       platformStore.reportPlatformFailure('service1');
-      platformStore.reportPlatformFailure('service2');
-      expect(errorSpy).to.be.calledOnce;
+      expect(() => platformStore.reportPlatformFailure('service2'))
+          .to.throw(/All platforms have failed to resolve/);
     });
   });
 
