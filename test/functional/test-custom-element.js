@@ -1782,8 +1782,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => true);
       element.toggleLoading(false, {cleanup: true});
 
-      expect(vsyncTasks).to.have.length.of(1);
-      vsyncTasks.shift()();
       expect(element.loadingContainer_).to.not.be.null;
       expect(element.loadingElement_).to.not.be.null;
     });
