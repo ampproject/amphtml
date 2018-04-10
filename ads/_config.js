@@ -144,7 +144,7 @@ export const adConfig = {
   adpicker: {
     renderStartImplemented: true,
   },
-
+  
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
     renderStartImplemented: true,
@@ -879,6 +879,10 @@ export const adConfig = {
 
   widespace: {},
 
+  wpmedia: {
+    prefetch: 'https://std.wpcdn.pl/wpjslib/amp/wpjslib-amp-debug.js',
+  },
+  
   xlift: {
     prefetch: 'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
     renderStartImplemented: true,
