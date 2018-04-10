@@ -460,8 +460,7 @@ describe.skip('reportErrorToServer', () => {
     expect(data.s).to.be.undefined;
   });
 
-  // TODO(#14350): unskip flaky test
-  it.skip('should report experiments', () => {
+  it.should('should report experiments', () => {
     resetExperimentTogglesForTesting(window);
     toggleExperiment(window, 'test-exp', true);
     // Toggle on then off, so it's stored
@@ -470,7 +469,11 @@ describe.skip('reportErrorToServer', () => {
     const e = user().createError('123');
     const data = getErrorReportData(undefined, undefined, undefined, undefined,
         e, true);
-    expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
+    if (data.exps.indexOf('inabox-rov=1') == -1) {
+      expect(data.exps).to.equal('test-exp=1,disabled-exp=0');
+    } else {
+      expect(data.exps).to.equal('inabox-rov=1,test-exp=1,disabled-exp=0');
+    }
   });
 
   describe('detectNonAmpJs', () => {
