@@ -34,6 +34,10 @@ const installStyles = {
     'will-change': 'opacity',
     'opacity': 0,
   },
+  'fade-in-scroll': {
+    'will-change': 'opacity',
+    'opacity': 0,
+  },
   'fly-in-bottom': {
     'will-change': 'transform',
   },
@@ -125,6 +129,10 @@ export class FxElement {
     this.margin_ = element.hasAttribute('data-margin') ?
       parseFloat(element.getAttribute('data-margin')) : 0.05;
 
+    /** @private {number} */
+    this.marginEnd_ = element.hasAttribute('data-margin-end') ?
+      parseFloat(element.getAttribute('data-margin-end')) : 0.45;
+
     /** @private {string} */
     this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
       element.getAttribute('data-easing') : 'ease-in');
@@ -206,6 +214,13 @@ export class FxElement {
    */
   getMargin() {
     return this.margin_;
+  }
+
+  /**
+   * @returns {number}
+   */
+  getMarginEnd() {
+    return this.marginEnd_;
   }
 
   /**

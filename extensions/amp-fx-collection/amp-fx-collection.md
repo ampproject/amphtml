@@ -110,6 +110,27 @@ In this case the image in fades in over a duration of 1500ms.
   </div>
 ```
 
+### fade-in-scroll (experimental)
+
+The `fade-in-scroll` effect allows you to change the opacity of an element as it scrolls within the viewport. This creates a scroll dependent fade animation.
+
+##### data-margin (optional)
+
+This parameter determines when to start the animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `X%`
+
+##### data-margin-end (optional)
+
+This parameter determines when to stop the animation. The value specified in `<percent>` dictates that the animation should have finished when the specified amount of the element being targetted is visible. The default value is `X%`
+
+#### Example: Main image fade in
+
+In this case the image in fades in over a duration of 1500ms.
+
+```html
+  <div amp-fx="fade-in" data-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
 
 ## Validation
 
