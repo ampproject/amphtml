@@ -128,9 +128,6 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
-
 /** @private {?Promise} */
 let sraRequests = null;
 
