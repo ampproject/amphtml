@@ -46,6 +46,9 @@ export class RefreshIntersectionObserverWrapper {
    * @param {!Element} element
    */
   observe(element) {
+    // The attribute name is exported in refresh-manager.js as
+    // DATA_MANAGER_ID_NAME, but unfortunately, it can't be imported without
+    // creating a cyclical dependency.
     const refreshId = element.getAttribute('data-amp-ad-refresh-id');
     dev().assert(refreshId, 'observe invoked on element without refresh id');
 
