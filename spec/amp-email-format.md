@@ -87,7 +87,6 @@ The following is a proposed list of AMP components that are supported in AMP ema
 | `<amp-img>` [[Example](https://ampbyexample.com/components/amp-img/)] | An AMP component that replaces `<img>`.<br><br>**Note:** Binding to `[src]` is not allowed. |
 | `<amp-anim>` [[Example](https://ampbyexample.com/components/amp-anim/)] | Embeds GIF files.<br><br>**Note:** Binding to `[src]` is not allowed. |
 
-
 ## CSS requirements
 
 ### Specifying CSS in an AMP document
@@ -229,12 +228,15 @@ The following is a fictional email that shows interactivity features by using [`
 </body>
 </html>
 ```
-
 # Adding AMP to existing emails
 
 Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This MIME tree contains the message body and any attachments to the email.
 
 Embedding AMP within an email is simple, add a new MIME part with a content type of `text/x-amp-html` as a descendant of `multipart/alternative`. It should live alongside the existing `text/html` or `text/plain` parts. This ensures that the email message works on all clients.
+
+<figure class="centered-fig">
+  <img alt="AMPHTML Email MIME Parts Diagram" src="./img/amp-email-mime-parts.png" />
+</figure>
 
 It is important to note that the `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise. See the following example:
 
@@ -269,7 +271,6 @@ Hello World in AMP!
 </html>
 --001a114634ac3555ae05525685ae--
 ```
-
 
 # Replying/forwarding semantics
 
