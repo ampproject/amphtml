@@ -85,6 +85,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
     expect(subscriptionService.start()).to.throw;
     expect(initializeStub).to.be.calledOnce;
+    return subscriptionService.initialize_().then(() => {
+      expect(analyticsEventStub).to.be.calledWith(
+          SubscriptionAnalyticsEvents.STARTED);
+    });
   });
 
   it('should setup store and page on start', () => {
@@ -174,10 +178,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   describe('selectAndActivatePlatform_', () => {
-    it('should wait for grantStatus and selectPlatform promise', done => {
+    it('should wait for grantStatus and selectPlatform promise', () => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
-      subscriptionService.initialize_().then(() => {
+      return subscriptionService.initialize_().then(() => {
         resolveRequiredPromises(subscriptionService);
         const localPlatform =
             subscriptionService.platformStore_.getLocalPlatform();
@@ -185,24 +189,28 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
             subscriptionService.platformStore_.selectPlatform;
         const activateStub = sandbox.stub(localPlatform, 'activate');
         expect(localPlatform).to.be.not.null;
-        subscriptionService.selectAndActivatePlatform_().then(() => {
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
           expect(selectPlatformStub).to.be.calledWith(true);
-          done();
+          expect(analyticsEventStub).to.be.calledWith(
+              SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+              {
+                'platform-id': 'local',
+              }
+          );
         });
       });
     });
-    it('should call selectPlatform with preferViewerSupport config', done => {
+    it('should call selectPlatform with preferViewerSupport config', () => {
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
-      subscriptionService.initialize_().then(() => {
+      return subscriptionService.initialize_().then(() => {
         resolveRequiredPromises(subscriptionService);
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
-        subscriptionService.selectAndActivatePlatform_().then(() => {
+        return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(selectPlatformStub).to.be.calledWith(false);
-          done();
         });
       });
     });
