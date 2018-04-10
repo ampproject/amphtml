@@ -196,7 +196,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
+      instance.parameterSize_).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -227,6 +227,10 @@ const BLOCK_SRA_COMBINERS_ = [
       const currEids = instance.element.getAttribute('data-experiment-id');
       if (currEids) {
         currEids.split(',').forEach(eid => eids[eid] = 1);
+      }
+      const deid = /(^|,)deid=(\d+)/i.exec(instance.win.location.hash);
+      if (deid) {
+        eids[deid[0]] = 1;
       }
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
@@ -276,6 +280,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?LayoutRectOrDimsDef} */
     this.initialSize_ = null;
+
+    /** @private {?string} */
+    this.parameterSize_ = null;
 
     /** @private {?{width: number, height: number}} */
     this.returnedSize_ = null;
@@ -516,31 +523,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = this.isFluid_ ?
-      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
-    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
-    if (multiSizeDataStr) {
-      if (this.element.getAttribute('layout') == 'responsive') {
-        // TODO(levitzky) Define the behavior and remove this warning.
-        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Proceed with caution.');
-      }
-      const multiSizeValidation = this.element
-          .getAttribute('data-multi-size-validation') || 'true';
-      // The following call will check all specified multi-size dimensions,
-      // verify that they meet all requirements, and then return all the valid
-      // dimensions in an array.
-      const dimensions = getMultiSizeDimensions(
-          multiSizeDataStr,
-          this.initialSize_.width,
-          this.initialSize_.height,
-          multiSizeValidation == 'true',
-          this.isFluid_);
-      sizeStr += '|' + dimensions
-          .map(dimension => dimension.join('x'))
-          .join('|');
-    }
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
@@ -549,7 +532,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'co': this.jsonTargeting_ &&
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
-      'sz': sizeStr,
+      'sz': this.parameterSize_,
       'output': 'html',
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
@@ -584,6 +567,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
+    this.parameterSize_ = this.isFluid_ ?
+      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      if (this.element.getAttribute('layout') == 'responsive') {
+        // TODO(levitzky) Define the behavior and remove this warning.
+        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
+            'currently not well defined. Proceed with caution.');
+      }
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr,
+          this.initialSize_.width,
+          this.initialSize_.height,
+          multiSizeValidation == 'true',
+          this.isFluid_);
+      this.parameterSize_ += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
+    }
   }
 
   /** @override */
@@ -814,6 +821,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.jsonTargeting_ = null;
     this.isAmpCreative_ = null;
     this.isIdleRender_ = false;
+    this.parameterSize_ = null;
+    this.returnedSize_ = null;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
