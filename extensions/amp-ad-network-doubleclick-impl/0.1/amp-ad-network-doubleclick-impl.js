@@ -700,6 +700,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
+      REFERRER: () => this.win.document.referrer,
       TGT: () =>
         JSON.stringify(
             (tryParseJson(
