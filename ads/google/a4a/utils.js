@@ -540,7 +540,6 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     return null;
   }
   try {
-    console.log('parse', responseHeaders.get(AMP_ANALYTICS_HEADER));
     const analyticsConfig =
         parseJson(responseHeaders.get(AMP_ANALYTICS_HEADER));
     dev().assert(Array.isArray(analyticsConfig['url']));
