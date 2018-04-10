@@ -22,29 +22,31 @@ import {
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {assertConfig} from './config';
+import {
+  childElementsByAttr,
+  childElementsByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {isExperimentOn} from '../../../src/experiments';
-import {isJsonScriptTag} from '../../../src/dom';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 import {user} from '../../../src/log';
 
-/** @const */
 const TAG = 'amp-document-recommendations';
 
-/** @const */
 const MAX_ARTICLES = 2;
 
-/**
- * @const
- * TODO(emarchiori): Make this a configurable parameter.
- */
+// TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
+
+const PRERENDER_VIEWPORT_COUNT = 3;
 
 /** @private {AmpDocumentRecommendations} */
 let activeInstance_ = null;
@@ -81,8 +83,17 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     /** @private {number} */
     this.nextArticle_ = 0;
 
+    /** @private {Element} */
+    this.separator_ = null;
+
+    /** @private {boolean} */
+    this.documentQueued_ = false;
+
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampDoc);
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampDoc);
 
     /**
      * @private @const
@@ -127,9 +138,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
       Services.xhrFor(this.win)
-          .fetchDocument(next.ampUrl)
+          .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => this.attachShadowDoc_(doc), () => {})
-          .then(amp => documentRef.amp = amp);
+          .then(amp => {
+            documentRef.amp = amp;
+            this.documentQueued_ = false;
+          });
     }
   }
 
@@ -196,13 +210,15 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             amp =
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
+            if (this.separator_) {
+              const separatorClone = this.separator_.cloneNode(true);
+              separatorClone.removeAttribute('separator');
+              this.element.appendChild(separatorClone);
+            }
+
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
-
-            if (this.nextArticle_ < this.config_.recommendations.length) {
-              this.appendNextArticle_();
-            }
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
@@ -226,14 +242,13 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     // TODO(peterjosling): Read config from another source.
 
-    const children = this.element.children;
-    user().assert(children.length == 1,
-        'The tag should contain exactly one <script> child.');
-    const scriptElement = children[0];
+    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
+    user().assert(scriptElements.length == 1,
+        `${TAG} should contain only one <script> child.`);
+    const scriptElement = scriptElements[0];
     user().assert(isJsonScriptTag(scriptElement),
-        'The amp-document-recommendations config should ' +
+        `${TAG} config should ` +
             'be inside a <script> tag with type="application/json"');
-
     const configJson = tryParseJson(scriptElement.textContent, error => {
       throw user().createError(
           'failed to parse content discovery script', error);
@@ -243,18 +258,48 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     const host = parseUrl(docInfo.sourceUrl).host;
     this.config_ = assertConfig(configJson, host);
 
+    const separatorElements = childElementsByAttr(this.element, 'separator');
+    user().assert(separatorElements.length <= 1,
+        `${TAG} should contain at most one <div separator> child`);
+
+    if (separatorElements.length == 1) {
+      this.separator_ = separatorElements[0];
+    }
+
     this.mutateElement(() => {
       this.element.appendChild(this.createDivider_());
       this.appendArticleLinks_(this.nextArticle_ + 1);
     });
+
+    this.viewport_.onScroll(() => this.scrollHandler_());
+    this.viewport_.onResize(() => this.scrollHandler_());
   }
 
-  /** @override */
-  layoutCallback() {
-    // TODO(emarchiori): Decide when to append the next article
-    // based on PositionObserver.
-    this.appendNextArticle_();
-    return Promise.resolve();
+  /**
+   * Handles scroll events from the viewport and appends the next document when
+   * the user comes within {@code PRERENDER_VIEWPORT_COUNT} viewports of the
+   * end.
+   * @private
+   */
+  scrollHandler_() {
+    if (this.documentQueued_) {
+      return;
+    }
+
+    const viewportSize = this.viewport_.getSize();
+    const viewportBox =
+        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+    this.viewport_.getClientRectAsync(this.element).then(elementBox => {
+      if (this.documentQueued_) {
+        return;
+      }
+
+      const prerenderHeight = PRERENDER_VIEWPORT_COUNT * viewportSize.height;
+      if (elementBox.bottom - viewportBox.bottom < prerenderHeight) {
+        this.documentQueued_ = true;
+        this.appendNextArticle_();
+      }
+    });
   }
 
   /**
