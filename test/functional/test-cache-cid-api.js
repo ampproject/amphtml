@@ -19,6 +19,7 @@ import {CacheCidApi} from '../../src/service/cache-cid-api';
 import {mockServiceForDoc, stubService} from '../../testing/test-helper';
 
 const SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
+const API_KEY = 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM';
 const TEST_CID_ =
       'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGClrvvfkCif_N9oYLdZEB976uJDhYgL';
 
@@ -70,15 +71,13 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     });
 
     it('should use client ID API from api if everything great', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       fetchJsonStub.returns(Promise.resolve({
         json: () => { return Promise.resolve({
           publisherClientId: 'publisher-client-id-from-cache',
         });
         },
       }));
-      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid(API_KEY, 'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(TEST_CID_);
         expect(fetchJsonStub)
             .to.be.calledWith(`https://ampcid.google.com/v1/cache:getClientId?key=${SERVICE_KEY_}`,
@@ -94,23 +93,13 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       });
     });
 
-    it('should not use client ID API if no opt in meta tag', () => {
-      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
-        expect(cid).to.equal(null);
-      });
-    });
-
-    it('should not use client ID API if vendor not whitelisted', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+    it('should not use client ID API if no apiKeyProvided', () => {
+      return api.getScopedCid(undefined, 'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
       });
     });
 
     it('should return null if opted out', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       fetchJsonStub.returns(Promise.resolve({
         json: () => {
 	  return Promise.resolve({
@@ -118,7 +107,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
 	  });
         },
       }));
-      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid(API_KEY, 'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
         expect(fetchJsonStub)
             .to.be.calledWith(`https://ampcid.google.com/v1/cache:getClientId?key=${SERVICE_KEY_}`,
@@ -135,8 +124,6 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     });
 
     it('should try alternative url if API provides', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       fetchJsonStub.onCall(0).returns(Promise.resolve({
         json: () => {
           return Promise.resolve({
@@ -151,46 +138,11 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
           });
         },
       }));
-      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid(API_KEY, 'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(TEST_CID_);
         expect(fetchJsonStub.getCall(1).args[0]).to.equal(
             `https://ampcid.google.co.uk/v1/cache:getClientId?key=${SERVICE_KEY_}`);
       });
-    });
-
-  });
-
-  describe('isScopeOptedIn', () => {
-    it('should read predefined clients and custom API keys correctly', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" ' +
-          'content="googleanalytics, ' +
-          'foo = foo-api-key,' +
-          'bar=bar-api-key ,' +
-          'hello=hello-api-key">';
-      expect(api.isScopeOptedIn('AMP_ECID_GOOGLE'))
-          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
-      expect(api.isScopeOptedIn('foo')).to.equal('foo-api-key');
-      expect(api.isScopeOptedIn('bar')).to.equal('bar-api-key');
-      expect(api.isScopeOptedIn('hello')).to.equal('hello-api-key');
-      expect(api.isScopeOptedIn('non-existing')).to.be.undefined;
-    });
-
-    it('should work if meta only contains predefined clients', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      expect(api.isScopeOptedIn('AMP_ECID_GOOGLE'))
-          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
-    });
-
-    it('should work if meta only contains custom scopes', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" ' +
-          'content="' +
-          'foo=foo-api-key,' +
-          'bar=bar-api-key">';
-      expect(api.isScopeOptedIn('foo')).to.equal('foo-api-key');
-      expect(api.isScopeOptedIn('bar')).to.equal('bar-api-key');
     });
   });
 });

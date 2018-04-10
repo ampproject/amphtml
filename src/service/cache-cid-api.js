@@ -19,29 +19,6 @@ import {dev, user} from '../log';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 
-
-/**
- * The name of the Google CID API as it appears in the meta tag to opt-in.
- * @const @private {string}
- */
-const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
-
-/**
- * The mapping from analytics providers to CID scopes.
- * @const @private {Object<string, string>}
- */
-const CID_API_SCOPE_WHITELIST = {
-  'googleanalytics': 'AMP_ECID_GOOGLE',
-};
-
-/**
- * The mapping from analytics providers to their CID API service keys.
- * @const @private {Object<string, string>}
- */
-const API_KEYS = {
-  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
-};
-
 /**
  * The Client ID service key.
  * @const @private {string}
@@ -80,9 +57,6 @@ export class CacheCidApi {
     /** @private {!./viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
-    /** @private {?Object<string, string>} */
-    this.apiKeyMap_ = null;
-
     /** @private {?Promise<?string>} */
     this.publisherCidPromise_ = null;
 
@@ -100,15 +74,15 @@ export class CacheCidApi {
 
   /**
    * Returns scoped CID retrieved from the Viewer.
+   * @param {string|undefined} apiKey
    * @param {string} scope
    * @return {!Promise<string>}
    */
-  getScopedCid(scope) {
+  getScopedCid(apiKey, scope) {
     if (!this.viewer_.isCctEmbedded()) {
       return Promise.resolve(null);
     }
 
-    const apiKey = this.isScopeOptedIn(scope);
     if (!apiKey) {
       return Promise.resolve(null);
     }
@@ -180,51 +154,5 @@ export class CacheCidApi {
     return Services.cryptoFor(this.ampdoc_.win).sha384Base64(text).then(enc => {
       return 'amp-' + enc;
     });
-  }
-
-  /**
-   * Checks if the page has opted in CID API for the given scope.
-   * Returns the API key that should be used, or null if page hasn't opted in.
-   *
-   * @param {string} scope
-   * @return {string|undefined}
-   */
-  isScopeOptedIn(scope) {
-    if (!this.apiKeyMap_) {
-      this.apiKeyMap_ = this.getOptedInScopes_();
-    }
-    return this.apiKeyMap_[scope];
-  }
-
-  /**
-   * Reads meta tags for opted in scopes.  Meta tags will have the form
-   * <meta name="provider-api-name" content="provider-name">
-   * @return {!Object<string, string>}
-   */
-  getOptedInScopes_() {
-    const apiKeyMap = {};
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
-        `meta[name=${GOOGLE_CID_API_META_NAME}]`);
-    if (optInMeta && optInMeta.hasAttribute('content')) {
-      const list = optInMeta.getAttribute('content').split(',');
-      list.forEach(item => {
-        item = item.trim();
-        if (item.indexOf('=') > 0) {
-          const pair = item.split('=');
-          const scope = pair[0].trim();
-          apiKeyMap[scope] = pair[1].trim();
-        } else {
-          const clientName = item;
-          const scope = CID_API_SCOPE_WHITELIST[clientName];
-          if (scope) {
-            apiKeyMap[scope] = API_KEYS[clientName];
-          } else {
-            user().error(TAG_,
-                `Unsupported client for Google CID API: ${clientName}`);
-          }
-        }
-      });
-    }
-    return apiKeyMap;
   }
 }

@@ -57,6 +57,28 @@ const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
 /**
+ * The name of the Google CID API as it appears in the meta tag to opt-in.
+ * @const @private {string}
+ */
+const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
+
+/**
+ * The mapping from analytics providers to CID scopes.
+ * @const @private {Object<string, string>}
+ */
+const CID_API_SCOPE_WHITELIST = {
+  'googleanalytics': 'AMP_ECID_GOOGLE',
+};
+
+/**
+ * The mapping from analytics providers to their CID API service keys.
+ * @const @private {Object<string, string>}
+ */
+const API_KEYS = {
+  'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
+};
+
+/**
  * A base cid string value and the time it was last read / stored.
  * @typedef {{time: time, cid: string}}
  */
@@ -106,6 +128,9 @@ export class Cid {
     this.viewerCidApi_ = new ViewerCidApi(ampdoc);
 
     this.cidApi_ = new GoogleCidApi(ampdoc);
+
+    /** @private {?Object<string, string>} */
+    this.apiKeyMap_ = null;
   }
 
   /**
@@ -181,8 +206,8 @@ export class Cid {
     const scope = getCidStruct.scope;
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
+    const apiKey = this.isScopeOptedIn_(scope);
     if (!isProxyOrigin(url)) {
-      const apiKey = this.viewerCidApi_.isScopeOptedIn(scope);
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
@@ -199,11 +224,11 @@ export class Cid {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
     if (this.cacheCidApi_.isSupported()) {
-      return this.cacheCidApi_.getScopedCid(scope);
+      return this.cacheCidApi_.getScopedCid(apiKey, scope);
     }
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {
-        return this.viewerCidApi_.getScopedCid(scope);
+        return this.viewerCidApi_.getScopedCid(apiKey, scope);
       }
       return getBaseCid(this, persistenceConsent)
           .then(baseCid => {
@@ -211,6 +236,52 @@ export class Cid {
                 baseCid + getProxySourceOrigin(url) + scope);
           });
     });
+  }
+
+  /**
+   * Checks if the page has opted in CID API for the given scope.
+   * Returns the API key that should be used, or null if page hasn't opted in.
+   *
+   * @param {string} scope
+   * @return {string|undefined}
+   */
+  isScopeOptedIn_(scope) {
+    if (!this.apiKeyMap_) {
+      this.apiKeyMap_ = this.getOptedInScopes_();
+    }
+    return this.apiKeyMap_[scope];
+  }
+
+  /**
+   * Reads meta tags for opted in scopes.  Meta tags will have the form
+   * <meta name="provider-api-name" content="provider-name">
+   * @return {!Object<string, string>}
+   */
+  getOptedInScopes_() {
+    const apiKeyMap = {};
+    const optInMeta = this.ampdoc.win.document.head./*OK*/querySelector(
+        `meta[name=${GOOGLE_CID_API_META_NAME}]`);
+    if (optInMeta && optInMeta.hasAttribute('content')) {
+      const list = optInMeta.getAttribute('content').split(',');
+      list.forEach(item => {
+        item = item.trim();
+        if (item.indexOf('=') > 0) {
+          const pair = item.split('=');
+          const scope = pair[0].trim();
+          apiKeyMap[scope] = pair[1].trim();
+        } else {
+          const clientName = item;
+          const scope = CID_API_SCOPE_WHITELIST[clientName];
+          if (scope) {
+            apiKeyMap[scope] = API_KEYS[clientName];
+          } else {
+            user().error(TAG_,
+                `Unsupported client for Google CID API: ${clientName}`);
+          }
+        }
+      });
+    }
+    return apiKeyMap;
   }
 }
 
