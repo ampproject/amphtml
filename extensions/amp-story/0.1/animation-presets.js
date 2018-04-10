@@ -27,10 +27,10 @@ import {
 import {px} from '../../../src/style';
 
 /**
- * A list of animations that take the whole screen.
+ * A list of animations that are full bleed.
  * @private @const {!Array<string>}
  */
-const FULL_SCREEN_ANIMATION_NAMES = [
+const FULL_BLEED_ANIMATION_NAMES = [
   'pan-up',
   'pan-down',
   'pan-right',
@@ -44,7 +44,7 @@ const FULL_SCREEN_ANIMATION_NAMES = [
  * @private @const {!Object<string, string>}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
-  'full-screen': 'i-amphtml-story-grid-template-with-full-screen-animation',
+  'full-bleed': 'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**
@@ -53,17 +53,17 @@ const ANIMATION_CSS_CLASS_NAMES = {
  * @param {string} presetName
  */
 export function setStyleForPreset(el, presetName) {
-  const fullScreen = 'full-screen';
+  const fullBleed = 'full-bleed';
   const fillTemplate = 'fill';
 
-  // For full screen animations.
-  if (FULL_SCREEN_ANIMATION_NAMES.indexOf(presetName) >= 0) {
+  // For full bleed animations.
+  if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
     if (parent.classList.contains(
         GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
       parent.classList.remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate]);
     }
-    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[fullScreen]);
+    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[fullBleed]);
   }
 }
 
