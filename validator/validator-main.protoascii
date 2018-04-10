@@ -3617,7 +3617,7 @@ tags: {
 }
 tags: {
   tag_name: "INPUT"
-  spec_name: "INPUT[type=password]"
+  spec_name: "INPUT [type=password]"
   attrs: {
     name: "type"
     value_casei: "password"
