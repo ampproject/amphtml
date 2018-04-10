@@ -18,7 +18,6 @@ import {Entitlement} from '../entitlement';
 
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
-import {user} from '../../../../src/log';
 
 describes.realWin('Platform store', {}, () => {
   let platformStore;
