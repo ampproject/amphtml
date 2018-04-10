@@ -397,8 +397,6 @@ describe('amp-mustache template', () => {
 
     const result = template.render({
       value: '<b>abc</b><img><div>def</div>'
-          + '<h1>h1</h1><h2>h2</h2><h3>h3</h3><h4>h4</h4><h5>h5</h5>'
-          + '<h6>h6</h6>'
           + '<table class="valid-class">'
           + '<thead><tr><th colspan="2">header</th></tr></thead>'
           + '<tbody><tr><td>'
@@ -407,9 +405,7 @@ describe('amp-mustache template', () => {
           + '</table>',
     });
     expect(result./*OK*/innerHTML).to.equal(
-        'value = <b>abc</b>'
-        + '<h1>h1</h1><h2>h2</h2><h3>h3</h3><h4>h4</h4><h5>h5</h5>'
-        + '<h6>h6</h6>'
+        'value = <b>abc</b><div>def</div>'
         + '<table class="valid-class">'
         + '<thead><tr><th colspan="2">header</th></tr></thead>'
         + '<tbody><tr><td>'
