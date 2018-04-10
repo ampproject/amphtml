@@ -102,14 +102,8 @@ export class ConsentStateManager {
   onConsentStateChange(instanceId, handler) {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-    let unlistener = null;
-    if (this.consentChangeObservables_[instanceId] === null) {
-      // Do not need consent for this instance.
-      handler(CONSENT_ITEM_STATE.GRANTED);
-      return () => {};
-    } else {
-      unlistener = this.consentChangeObservables_[instanceId].add(handler);
-    }
+
+    const unlistener = this.consentChangeObservables_[instanceId].add(handler);
     // Fire first consent instance state.
     this.getConsentInstanceState(instanceId).then(state => {
       handler(state);
