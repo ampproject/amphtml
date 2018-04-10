@@ -20,6 +20,96 @@ AMP is a technology commonly known for developing super fast web pages on mobile
 
 There are [AMP components](https://www.ampproject.org/docs/reference/components) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints. The AMPHTML Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email message.
 
+## FAQ
+
+* What is the official name of this technology?
+
+    * "AMPHTML Email" is the name of this technology.
+
+* Will this allow people to send JavaScript email?
+
+    * No. Valid AMP documents are not permitted to have their own JavaScript.
+
+* I heard that [AMP is going to support JavaScript](https://github.com/ampproject/amphtml/issues/13471). Will this be incorporated into AMPHTML Email?
+
+    *  No. To maintain users’ expectations of security and privacy, we’ll only allow a conservative subset of AMP functionality.
+
+* Are all AMP components supported?
+
+    * No. AMPHTML Email supports a restricted subset of the AMP components in order to ensure user safety in web-based mail clients.
+
+* Which AMP components will be supported?
+
+    * See the [AMP Components](#amp-components) section in the spec below.
+
+* Will the `amp-ad` component be supported?
+
+    * No.
+
+* Will the `amp-analytics` component by supported?
+
+    * No.
+
+* Do AMPHTML Email documents use AMP Caches?
+
+    * No.
+
+* Will this break email as an archival format?
+
+    * No, the spec still requires senders to include a static, HTML version of the email that users can view if they choose.
+
+* Does this make it possible to play videos inside an email?
+
+    * No. Currently, only `amp-image` will be supported.
+
+* Does this mean email senders can track when I open my mail?
+
+    * AMPHTML Emails can track opens just like regular emails today using pixel tracking techniques. Any user-initiated requests for data from external services would also indicate to the sender that the user is interacting with the message. Email clients may offer their users the ability to disable loading of remote images, including any other external requests.
+
+* Does this mean email senders can track when I interact with a carousel?
+
+    * Request for images in the carousel can indicate to the sender that the user is interacting with the message.
+
+* What will happen if I open an AMPHTML Email in an email client without AMPHTML support?
+
+    * The usual HTML content will be rendered. Email clients currently ignore MIME types they don’t understand. For example the [`text/watch-html` MIME type](https://litmus.com/blog/how-to-send-hidden-version-email-apple-watch) gets ignored according to the rules specified in [RFC 1341 7.2.3](https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html) which state:<br><br>*“In general, user agents that compose multipart/alternative entities should place the body parts in increasing order of preference, that is, with the preferred format last. For fancy text, the sending user agent should put the plainest format first and the richest format last. Receiving user agents should pick and display the last format they are capable of displaying.”*
+
+* Will users be able to opt out?
+
+    * Email clients may offer users the ability to disable AMPHTML documents in their email.
+
+* Who else is supporting rendering AMPHTML emails?
+
+    * Currently, Gmail is the first adopter with their [Gmail Developer Preview](https://gsuite.google.com/campaigns/index__amp-for-email.html)  starting with the Web developer preview. We're looking forward to working with other mail providers and clients to have their web and mobile apps support this as well.
+
+* Will this consume more battery life?
+
+    * That will depend on the implementation strategy chosen by the email clients.
+
+* Will this enable people to send me Bitcoin miners in my email?
+
+    * No. Valid AMP documents are not permitted to have their own Javascript.
+
+* How will AMPHTML Email deal with spam since attackers can evade spam detection in real time at mail-open time?
+
+    * Email providers will need to proxy all XHRs and use the responses to render the content and perform phishing checks.
+
+* Are there any CSS restrictions?
+
+    * Yes. For a reference list of CSS properties and values that are allowed within email messages, see [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). Furthermore, the [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) can be used to check them or [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email) with the "AMP for Email" runtime selected.
+
+* Will the AMP `CLIENT_ID` be supported?
+
+    * No.
+
+* Will [AMP Variable Substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) be supported?
+
+    * No. They are mainly used in `amp-analytics` and `amp-pixel`, that are not supported in AMPHTML Email. In addition, page URLs used for variable substitution do not apply to emails.
+
+* Will `AMP.navigateTo(url=STRING)` be supported?
+
+    * No.
+
 ## The AMPHTML Email Format
 
 ### Required markup
@@ -65,7 +155,7 @@ The following is a proposed list of AMP components that are supported in AMP ema
 | `<amp-form>` [[Example](https://ampbyexample.com/components/amp-form/)] | Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with `<template type="amp-mustache">` to render a response. |
 | `<amp-selector>` [[Example](https://ampbyexample.com/components/amp-selector/)] | A multi-select widget for use within a form. |
 | `<amp-bind>` and `<amp-state>` [[Example](https://ampbyexample.com/components/amp-bind/)] | Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.<br><br>`<amp-state>` is used to remotely fetch the initial state machine values.<br><br>**Note:** It is prohibited to bind to `[href]` or `[src]`. It is also prohibited to use the `AMP.print`, `AMP.navigateTo` and `AMP.goBack` actions. |
-| `<amp-list>` [[Example](https://ampbyexample.com/components/amp-list/)] | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://www.ampproject.org/docs/reference/components/amp-mustache).<br><br>Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
+| `<amp-list>` [[Example](https://ampbyexample.com/components/amp-list/)] | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://www.ampproject.org/docs/reference/components/amp-mustache).<br><br>**Note:** Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
 | `<template type="amp-mustache">` [[Example](https://ampbyexample.com/components/amp-mustache/)] | A Mustache template markup to render the results of an `amp-list` call. |
 
 ### Layout
