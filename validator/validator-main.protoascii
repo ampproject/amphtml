@@ -3420,7 +3420,7 @@ tags {
   }
 }
 attr_lists: {
-  name: "textual-input-attr"
+  name: "input-common-attr"
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
   attrs: { name: "autocomplete" }
@@ -3611,7 +3611,7 @@ tags: {
         "image|"
         ")(\\s|$)"
   }
-  attr_lists: "textual-input-attr"
+  attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
@@ -3624,7 +3624,7 @@ tags: {
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attr_lists: "textual-input-attr"
+  attr_lists: "input-common-attr"
   attr_lists: "input-name-attr"
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
