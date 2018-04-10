@@ -439,11 +439,11 @@ describe('Google A4A utils', () => {
       });
     });
 
-    it('should have correct bc value when everything supported', function() {
+    it('should have correct bc value when everything supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
-        doc.win = window;
+        doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -459,18 +459,17 @@ describe('Google A4A utils', () => {
           },
         });
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
-            expect(url1).to.match(/[&?]bc=7[&$]/);
-          });
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=7[&$]/);
         });
       });
     });
 
-    it('should have correct bc value when sandbox not supported', function() {
+    it('should have correct bc value when sandbox not supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
-        doc.win = window;
+        doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -481,23 +480,20 @@ describe('Google A4A utils', () => {
         const createElementStub =
           sandbox.stub(impl.win.document, 'createElement');
         createElementStub.withArgs('iframe').returns({
-          sandbox: {
-            supports: undefined,
-          },
+          sandbox: {},
         });
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
-            expect(url1).to.match(/[&?]bc=1[&$]/);
-          });
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+            /[&?]bc=1[&$]/);
         });
       });
     });
 
-    it('should not include bc when nothing supported', function() {
+    it('should not include bc when nothing supported', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
-        doc.win = window;
+        doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {
           'type': 'adsense',
           'width': '320',
@@ -514,9 +510,9 @@ describe('Google A4A utils', () => {
           },
         });
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
-            expect(url1).to.not.match(/[&?]bc=/);
-          });
+          return expect(
+            googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              /[&?]bc=1[&$]/);
         });
       });
     });
