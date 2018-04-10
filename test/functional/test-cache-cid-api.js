@@ -68,10 +68,14 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       viewerMock.isProxyOrigin.returns(true);
   });
 
-    function verifyClientIdApiInUse(result) {
-      fetchJsonStub.returns(Promise.resolve({
+    it('should use client ID API from api if everything great', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+           fetchJsonStub.returns(Promise.resolve({
 	json: () => {
-	  return Promise.resolve(result);
+	  return Promise.resolve({
+	    publisherClientId: 'publisher-client-id-from-cache'
+	  });
 	}
       }));
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
@@ -88,14 +92,6 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
               },
             });
       });
-    }
-
-    it('should use client ID API from api if everything great', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      return verifyClientIdApiInUse({
-	    publisherClientId: 'publisher-client-id-from-cache'
-	  });
     });
 
     it('should not use client ID API if no opt in meta tag', () => {
@@ -115,11 +111,27 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     it('should return null if opted out', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-      verifyClientIdApiInUse({
+      fetchJsonStub.returns(Promise.resolve({
+	json: () => {
+	  return Promise.resolve({
 	optOut: true
 	  });
-      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.null;
+	}
+      }));
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        expect(cid).to.equal(null);
+        expect(fetchJsonStub)
+            .to.be.calledWith(`https://ampcid.google.com/v1/cache:getClientId?key=${SERVICE_KEY_}`,
+            {
+              method: 'POST',
+              ampCors: false,
+              credentials: 'include',
+              mode: 'cors',
+              body: {
+                publisherOrigin: 'about:srcdoc',
+              },
+            });
+      });
     });
 
     it('should try alternative url if API provides', () => {
