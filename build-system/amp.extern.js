@@ -279,6 +279,14 @@ FB.init;
 var gist;
 gist.gistid;
 
+var bodymovin;
+bodymovin.loadAnimation;
+var animationHandler;
+animationHandler.play;
+animationHandler.pause;
+animationHandler.stop;
+animationHandler.goToAndStop;
+
 // Validator
 var amp;
 amp.validator;

@@ -16,10 +16,13 @@
 
 import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
+import {LayoutPriority} from '../../../../src/layout';
+import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
   removeChildren,
 } from '../../../../src/dom';
+
 describe('Amp custom ad', () => {
   let sandbox;
 
@@ -97,6 +100,28 @@ describe('Amp custom ad', () => {
     expect(ad4.getFullUrl_()).to.equal(expected34);
   });
 
+  it('should perform multiple requests if no `data-slot`', () => {
+    const stub = sandbox.stub(Services, 'xhrFor').callsFake(() => ({
+      fetchJson: () => Promise.resolve({'foo': 1}),
+    }));
+
+    // Single ad with no slot
+    const url1 = 'example.com/ad';
+    const element1 = getCustomAd(url1);
+    const ad1 = new AmpAdCustom(element1);
+    ad1.buildCallback();
+    ad1.layoutCallback();
+
+    // Single ad with no slot
+    const url2 = 'example.com/ad';
+    const element2 = getCustomAd(url2);
+    const ad2 = new AmpAdCustom(element2);
+    ad2.buildCallback();
+    ad1.layoutCallback();
+
+    assert(stub.calledTwice);
+  });
+
   describe('#getLayoutPriority', () => {
     const url = '/examples/custom.ad.example.json';
     const slot = 'myslot';
@@ -106,10 +131,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'shadow',
       },
     }, env => {
-      it('should return priority of 1', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(1);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
 
@@ -118,10 +143,10 @@ describe('Amp custom ad', () => {
         ampdoc: 'single',
       },
     }, env => {
-      it('should return priority of 2', () => {
+      it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(2);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
   });

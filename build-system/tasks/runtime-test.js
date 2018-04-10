@@ -84,9 +84,9 @@ function getConfig() {
         'SL_Safari_9',
         'SL_iOS_latest',
         'SL_iOS_10_0',
-        'SL_iOS_9_1',
-        'SL_Edge_latest',
-        'SL_IE_11',
+        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
+        // 'SL_Edge_latest',
+        // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.

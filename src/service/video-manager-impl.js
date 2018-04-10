@@ -37,7 +37,9 @@ import {
 } from './position-observer/position-observer-worker';
 import {RelativePositions, layoutRectLtwh} from '../layout-rect';
 import {Services} from '../services';
+import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
+import {VideoUtils} from '../utils/video';
 import {
   createCustomEvent,
   getData,
@@ -58,6 +60,35 @@ import {setStyles} from '../style';
 import {startsWith} from '../string.js';
 
 const TAG = 'video-manager';
+
+
+/** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
+let VideoAnalyticsDef; // alias for line length
+
+
+/** @interface */
+export class VideoService {
+
+  /** @param {!../video-interface.VideoInterface} unusedVideo */
+  register(unusedVideo) {}
+
+  /**
+   * Gets the current analytics details for the given video.
+   * Fails silently if the video is not registered.
+   * @param {!AmpElement} unusedVideo
+   * @return {!Promise<!VideoAnalyticsDef>|!Promise<void>}
+   */
+  getAnalyticsDetails(unusedVideo) {}
+
+  /**
+   * Delegates autoplay.
+   * @param {!AmpElement} unusedVideo
+   * @param {!../observable.Observable<boolean>=} opt_unusedObservable
+   *    If provided, video will be played or paused when this observable fires.
+   */
+  delegateAutoplay(unusedVideo, opt_unusedObservable) {}
+}
+
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -132,6 +163,8 @@ export const DockStates = {
  *
  * It is responsible for providing a unified user experience and analytics for
  * all videos within a document.
+ *
+ * @implements {VideoService}
  */
 export class VideoManager {
 
@@ -212,12 +245,8 @@ export class VideoManager {
     }
   }
 
-  /**
-   * Registers a video component that implements the VideoInterface.
-   * @param {!../video-interface.VideoInterface} video
-   * @param {boolean=} manageAutoplay
-   */
-  register(video, manageAutoplay = true) {
+  /** @override */
+  register(video) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -227,14 +256,28 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video, manageAutoplay);
+    const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+
+    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
+    // moment in the element's lifecycle and the promise will resolve
+    // appropriately each time.
+    video.element.signals().signal(VideoEvents.REGISTERED);
+
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
+  }
+
+  /** @override */
+  delegateAutoplay(videoElement, opt_unusedObservable) {
+    videoElement.signals().whenSignal(VideoEvents.REGISTERED).then(() => {
+      const entry = this.getEntryForElement_(videoElement);
+      entry.delegateAutoplay();
+    });
   }
 
   /**
@@ -414,13 +457,8 @@ export class VideoManager {
     return null;
   }
 
-  /**
-   * Get the current analytics details for the given video.
-   * Silently fail if the video is not found in this manager.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
-   */
-  getVideoAnalyticsDetails(videoElement) {
+  /** @override */
+  getAnalyticsDetails(videoElement) {
     const entry = this.getEntryForElement_(videoElement);
     return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
@@ -483,10 +521,8 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
-   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video, allowAutoplay) {
-
+  constructor(manager, video) {
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
 
@@ -499,8 +535,8 @@ class VideoEntry {
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
-    /** @private @const {boolean} */
-    this.allowAutoplay_ = allowAutoplay;
+    /** @private {boolean} */
+    this.allowAutoplay_ = true;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -533,8 +569,10 @@ class VideoEntry {
         () => analyticsEvent(this, VideoAnalyticsEvents.SESSION_VISIBLE));
 
     /** @private @const {function(): !Promise<boolean>} */
-    this.boundSupportsAutoplay_ = supportsAutoplay.bind(null, this.ampdoc_.win,
-        getMode(this.ampdoc_.win).lite);
+    this.supportsAutoplay_ = () => {
+      const {win} = this.ampdoc_;
+      return VideoUtils.isAutoplaySupported(win, getMode(win).lite);
+    };
 
     const element = dev().assert(video.element);
 
@@ -635,15 +673,21 @@ class VideoEntry {
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    // Currently we only register after video player is build.
-    this.videoBuilt_();
+    element.signals().whenSignal(VideoEvents.REGISTERED)
+        .then(() => this.onRegister_());
   }
 
-  /**
-   * Called when the video element is built.
-   * @private
-   */
-  videoBuilt_() {
+  /** Delegates autoplay to a different module. */
+  delegateAutoplay() {
+    this.allowAutoplay_ = false;
+
+    if (this.isPlaying_) {
+      this.video.pause();
+    }
+  }
+
+  /** @private */
+  onRegister_() {
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
@@ -795,12 +839,12 @@ class VideoEntry {
     }
     // Put the video in/out of fullscreen depending on screen orientation
     if (!isLandscape && this.isFullscreenByOrientationChange_) {
-    	this.exitFullscreen_();
+      this.exitFullscreen_();
     } else if (isLandscape
                && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
                && this.isVisible_
                && Services.viewerForDoc(this.ampdoc_).isVisible()) {
-    	this.enterFullscreen_();
+      this.enterFullscreen_();
     }
   }
 
@@ -837,7 +881,7 @@ class VideoEntry {
       return;
     }
 
-    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then(supportsAutoplay => {
       const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
 
       if (canAutoplay && supportsAutoplay) {
@@ -863,7 +907,7 @@ class VideoEntry {
       this.video.hideControls();
     }
 
-    this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    this.supportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
@@ -1866,7 +1910,7 @@ class VideoEntry {
    */
   getAnalyticsDetails() {
     const video = this.video;
-    return this.boundSupportsAutoplay_().then(supportsAutoplay => {
+    return this.supportsAutoplay_().then(supportsAutoplay => {
       const {width, height} = this.video.element.getLayoutBox();
       const autoplay = this.hasAutoplay && supportsAutoplay;
       const playedRanges = video.getPlayedRanges();
@@ -1890,71 +1934,6 @@ class VideoEntry {
   }
 }
 
-/* @type {?Promise<boolean>} */
-let supportsAutoplayCache_ = null;
-
-/**
- * Detects whether autoplay is supported.
- * Note that even if platfrom supports autoplay, users or browsers can disable
- * autoplay to save data / battery. This function detects both platfrom support
- * and when autoplay is disabled.
- *
- * Service dependencies are taken explicitly for testability.
- *
- * @private visible for testing.
- * @param {!Window} win
- * @param {boolean} isLiteViewer
- * @return {!Promise<boolean>}
- */
-export function supportsAutoplay(win, isLiteViewer) {
-
-  // Use cached result if available.
-  if (supportsAutoplayCache_) {
-    return supportsAutoplayCache_;
-  }
-
-  // We do not support autoplay in amp-lite viewer regardless of platform.
-  if (isLiteViewer) {
-    return supportsAutoplayCache_ = Promise.resolve(false);
-  }
-
-  // To detect autoplay, we create a video element and call play on it, if
-  // `paused` is true after `play()` call, autoplay is supported. Although
-  // this is unintuitive, it works across browsers and is currently the lightest
-  // way to detect autoplay without using a data source.
-  const detectionElement = win.document.createElement('video');
-  // NOTE(aghassemi): We need both attributes and properties due to Chrome and
-  // Safari differences when dealing with non-attached elements.
-  detectionElement.setAttribute('muted', '');
-  detectionElement.setAttribute('playsinline', '');
-  detectionElement.setAttribute('webkit-playsinline', '');
-  detectionElement.muted = true;
-  detectionElement.playsinline = true;
-  detectionElement.webkitPlaysinline = true;
-  detectionElement.setAttribute('height', '0');
-  detectionElement.setAttribute('width', '0');
-  setStyles(detectionElement, {
-    position: 'fixed',
-    top: '0',
-    width: '0',
-    height: '0',
-    opacity: '0',
-  });
-
-  try {
-    const playPromise = detectionElement.play();
-    if (playPromise && playPromise.catch) {
-      playPromise.catch(() => {
-        // Suppress any errors, useless to report as they are expected.
-      });
-    }
-  } catch (e) {
-    // Suppress any errors, useless to report as they are expected.
-  }
-
-  const supportsAutoplay = !detectionElement.paused;
-  return supportsAutoplayCache_ = Promise.resolve(supportsAutoplay);
-}
 
 /**
  * @param {!VideoEntry} entry
@@ -1973,18 +1952,16 @@ function analyticsEvent(entry, eventType, opt_vars) {
   });
 }
 
-/**
- * Clears the cache used by supportsAutoplay method.
- *
- * @private visible for testing.
- */
-export function clearSupportsAutoplayCacheForTesting() {
-  supportsAutoplayCache_ = null;
-}
 
-/**
- * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
- */
+/** @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc */
+// TODO(alanorozco, #13674): Rename to `installVideoServiceForDoc`
 export function installVideoManagerForDoc(nodeOrDoc) {
-  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
+  // TODO(alanorozco, #13674): Rename to `video-service`
+  registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', ampdoc => {
+    const {win} = ampdoc;
+    if (VideoServiceSync.shouldBeUsedIn(win)) {
+      return new VideoServiceSync(ampdoc);
+    }
+    return new VideoManager(ampdoc);
+  });
 }

@@ -17,7 +17,10 @@ import {RTC_VENDORS} from './callout-vendors.js';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
-import {isSecureUrl} from '../../../src/url';
+import {
+  isSecureUrl,
+  parseUrl,
+} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
@@ -29,42 +32,60 @@ const MAX_RTC_CALLOUTS = 5;
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
 
-/** @enum {string} */
+/**
+ * Enum starts at 4 because 1-3 reserved as:
+ *  1 = custom remote.html in use.
+ *  2 = RTC succeeded.
+ *  3 = deprecated generic RTC failures.
+ * @enum {string}
+ */
 export const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
-  MALFORMED_JSON_RESPONSE: 'malformed_json_response',
+  MALFORMED_JSON_RESPONSE: '4',
   // Occurs when a publisher has specified the same url
   // or vendor url (after macros are substituted) to call out to more than once.
-  DUPLICATE_URL: 'duplicate_url',
+  DUPLICATE_URL: '5',
   // Occurs when a URL fails isSecureUrl check.
-  INSECURE_URL: 'insecure_url',
+  INSECURE_URL: '6',
   // Occurs when 5 valid callout urls have already been built, and additional
   // urls are still specified.
-  MAX_CALLOUTS_EXCEEDED: 'max_callouts_exceeded',
+  MAX_CALLOUTS_EXCEEDED: '7',
   // Occurs due to XHR failure.
-  NETWORK_FAILURE: 'network_failure',
+  NETWORK_FAILURE: '8',
   // Occurs when a specified vendor does not exist in RTC_VENDORS.
-  UNKNOWN_VENDOR: 'unknown_vendor',
+  UNKNOWN_VENDOR: '9',
   // Occurs when request took longer than timeout
-  TIMEOUT: 'timeout',
+  TIMEOUT: '10',
   // Occurs when URL expansion time exceeded allowed timeout, request never sent.
-  MACRO_EXPAND_TIMEOUT: 'macro_expand_timeout',
+  MACRO_EXPAND_TIMEOUT: '11',
 };
 
 /**
  * @param {string} error
  * @param {string} callout
  * @param {number=} opt_rtcTime
- * @param {boolean=} opt_log
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
-  if (opt_log) {
-    dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
-  }
+function buildErrorResponse_(error, callout, opt_rtcTime) {
+  dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
+}
+
+/**
+ * Converts a URL into its corresponding shortened callout string.
+ * We also truncate to a maximum length of 50 characters.
+ * For instance, if we are passed
+ * "https://example.com/example.php?foo=a&bar=b, then we return
+ * example.com/example.php
+ * @param {string} url
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getCalloutParam_(url) {
+  const parsedUrl = parseUrl(url);
+  return (parsedUrl.hostname + parsedUrl.pathname).substr(0, 50);
 }
 
 /**
@@ -100,7 +121,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     if (!url) {
       return promiseArray.push(
           buildErrorResponse_(
-              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, undefined, true));
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor));
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -136,6 +157,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   rtcStartTime, macros, timeoutMillis, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
+  const callout = opt_vendor || getCalloutParam_(url);
   /**
    * The time that it takes to substitute the macros into the URL can vary
    * depending on what the url requires to be substituted, i.e. a long
@@ -146,22 +168,22 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-          opt_vendor || url, undefined, true);
+          callout);
     }
     if (!isSecureUrl(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-          opt_vendor || url, undefined, true);
+          callout);
     }
     if (seenUrls[url]) {
       return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-          opt_vendor || url, undefined, true);
+          callout);
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
     return sendRtcCallout_(
-        url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
+        url, rtcStartTime, win, timeoutMillis, callout);
   };
 
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
@@ -175,7 +197,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return send(url);
   }).catch(unused => {
     return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        opt_vendor || url, undefined, true);
+        callout);
   }));
 }
 
@@ -276,10 +298,11 @@ export function validateRtcConfig_(element) {
           if (isNaN(timeout)) {
             user().warn(TAG, 'Invalid RTC timeout is NaN, ' +
                         `using default timeout ${defaultTimeoutMillis}ms`);
-          } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
             timeout = undefined;
+          } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
             user().warn(TAG, `Invalid RTC timeout: ${timeout}ms, ` +
                         `using default timeout ${defaultTimeoutMillis}ms`);
+            timeout = undefined;
           }
           break;
         default:

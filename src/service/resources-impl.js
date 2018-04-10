@@ -32,10 +32,10 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isArray} from '../types';
+import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {reportError} from '../error';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -625,7 +625,9 @@ export class Resources {
       // Build failed: remove the resource. No other state changes are
       // needed.
       this.removeResource_(resource);
-      throw error;
+      if (!isBlockedByConsent(error)) {
+        throw error;
+      }
     });
   }
 
@@ -891,8 +893,19 @@ export class Resources {
   }
 
   /**
-   * Runs the specified mutation on the element and ensures that measures
-   * and layouts performed for the affected elements.
+   * Runs the specified measure, which is called in the "measure" vsync phase.
+   * This is simply a proxy to the privileged vsync service.
+   *
+   * @param {function()} measurer
+   * @return {!Promise}
+   */
+  measureElement(measurer) {
+    return this.vsync_.measurePromise(measurer);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
    *
    * This method should be called whenever a significant mutations are done
    * on the DOM that could affect layout of elements inside this subtree or
@@ -905,6 +918,41 @@ export class Resources {
    * @return {!Promise}
    */
   mutateElement(element, mutator) {
+    return this.measureMutateElement(element, null, mutator);
+  }
+
+  /**
+   * Runs the specified mutation on the element and ensures that remeasures and
+   * layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElement(element, measurer, mutator) {
+    if (this.useLayers_) {
+      return this.measureMutateElementLayers_(element, measurer, mutator);
+    } else {
+      return this.measureMutateElementResources_(element, measurer, mutator);
+    }
+  }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Resources system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -913,15 +961,17 @@ export class Resources {
       return -1;
     };
     let relayoutTop = -1;
+    // TODO(jridgewell): support state
     return this.vsync_.runPromise({
       measure: () => {
+        if (measurer) {
+          measurer();
+        }
         relayoutTop = calcRelayoutTop();
       },
       mutate: () => {
         mutator();
 
-        // TODO(jridgewell): Mark parent layer as dirty, skip the rest of this.
-        // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
           r.requestMeasure();
@@ -949,6 +999,32 @@ export class Resources {
       },
     });
   }
+
+  /**
+   * Handles element mutation (and measurement) APIs in the Layers system.
+   *
+   * @param {!Element} element
+   * @param {?function()} measurer
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  measureMutateElementLayers_(element, measurer, mutator) {
+    return this.vsync_.runPromise({
+      measure: measurer || undefined,
+      mutate: () => {
+        mutator();
+
+        // TODO(jridgewell): This API needs to be audited. Common practice is
+        // to pass the amp-element in as the root even though we are only
+        // mutating children. If the amp-element is passed, we invalidate
+        // everything in the parent layer above it, where only invalidating the
+        // amp-element was necessary (only children were mutated, only
+        // amp-element's scroll box is affected).
+        this.layers_.dirty(element);
+      },
+    });
+  }
+
 
   /**
    * Return a promise that requests runtime to collapse this element.
@@ -1052,11 +1128,13 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
+      const documentInfo = Services.documentInfoForDoc(this.ampdoc);
       this.viewer_.sendMessage('documentLoaded', dict({
         'title': doc.title,
         'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
         'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
-        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
+        'linkRels': documentInfo.linkRels,
+        'metaTags': documentInfo.metaTags,
       }), /* cancelUnsent */true);
 
       this.contentHeight_ = this.viewport_.getContentHeight();

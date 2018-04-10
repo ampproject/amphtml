@@ -19,23 +19,11 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the bookend should be opened
-  SHOW_BOOKEND: 'ampstory:showbookend',
-
-  // Triggered when the user clicks the close bookend button
-  CLOSE_BOOKEND: 'ampstory:closebookend',
-
   // Triggered when the user mutes the story
   MUTE: 'ampstory:mute',
 
   // Triggered when the user unmutes the story
   UNMUTE: 'ampstory:unmute',
-
-  // Triggered when there are audio sources playing on the active page
-  AUDIO_PLAYING: 'ampstory:audioplaying',
-
-  // Triggered when there are no audio sources playing on the active page
-  AUDIO_STOPPED: 'ampstory:audiostopped',
 
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',

@@ -17,12 +17,21 @@
 import {CSS} from '../../../build/amp-document-recommendations-0.1.css';
 import {Layout} from '../../../src/layout';
 import {MultidocManager} from '../../../src/runtime';
+import {
+  PositionObserverFidelity,
+} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {assertConfig} from './config';
+import {getServiceForDoc} from '../../../src/service';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
+import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+
 import {user} from '../../../src/log';
 
 /** @const */
@@ -40,6 +49,14 @@ const SEPARATOR_RECOS = 3;
 /** @private {AmpDocumentRecommendations} */
 let activeInstance_ = null;
 
+/**
+ * @typedef {{
+ *   ampUrl: string,
+ *   amp: ?Object
+ * }}
+ */
+export let DocumentRef;
+
 export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -52,6 +69,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
     activeInstance_ = this;
 
+    const ampDoc = this.getAmpDoc();
+    installPositionObserverServiceForDoc(ampDoc);
+
     /** @private {?./config.AmpDocumentRecommendationsConfig} */
     this.config_ = null;
 
@@ -62,7 +82,19 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.nextArticle_ = 0;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(ampDoc);
+
+    /**
+     * @private @const
+     * {!../../../../src/service/position-observer/position-observer-impl.PositionObserver}
+     */
+    this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
+
+    /** @private @const {!Array<!DocumentRef>} */
+    this.documentRefs_ = [{
+      ampUrl: this.win.document.location.href,
+      amp: {title: this.win.document.title},
+    }];
   }
 
   /** @override */
@@ -71,13 +103,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 
   /**
-   * Append a divider between two recommendations or articles.
+   * Creates a divider between two recommendations or articles.
+   * @return {!Element}
    */
-  appendDivision_() {
+  createDivider_() {
     const doc = this.win.document;
     const topDivision = doc.createElement('div');
     topDivision.classList.add('amp-document-recommendations-division');
-    this.element.appendChild(topDivision);
+    return topDivision;
   }
 
   /**
@@ -87,29 +120,34 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
       const next = this.config_.recommendations[this.nextArticle_];
+      const documentRef = {ampUrl: next.ampUrl, amp: null};
+      this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
       Services.xhrFor(this.win)
-          .fetchDocument(next.ampUrl)
-          .then(
-              doc => {this.attachShadowDoc_(doc);},
-              () => {});
+          .fetchDocument(next.ampUrl, {ampCors: false})
+          .then(doc => this.attachShadowDoc_(doc), () => {})
+          .then(amp => documentRef.amp = amp);
     }
   }
 
   /**
    * Append recommendation links to articles, starting from a given
    * one.
-   * @param {number} from
+   * @param {number} nextRecommendation Index of the next unseen recommendation
+   *     to use as the first recommendation in the list.
    */
-  appendArticleLinks_(from) {
+  appendArticleLinks_(nextRecommendation) {
     const doc = this.win.document;
-    let article = from;
+    const currentArticle = nextRecommendation - 1;
+    let article = nextRecommendation;
+
+    const recommendations = doc.createElement('div');
 
     while (article < this.config_.recommendations.length &&
-        article - from < SEPARATOR_RECOS) {
+           article - nextRecommendation < SEPARATOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
@@ -120,59 +158,61 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       });
 
       const imageElement = doc.createElement('div');
-      imageElement.classList.add('i-amphtml-next-article-image',
-          'amp-document-recommendations-image');
+      imageElement.classList.add(
+          'i-amphtml-next-article-image', 'amp-document-recommendations-image');
       setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
-      titleElement.classList.add('i-amphtml-next-article-title',
-          'amp-document-recommendations-text');
+      titleElement.classList.add(
+          'i-amphtml-next-article-title', 'amp-document-recommendations-text');
 
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
 
-      this.element.appendChild(articleHolder);
-
-      this.appendDivision_();
+      recommendations.appendChild(articleHolder);
+      recommendations.appendChild(this.createDivider_());
     }
+
+    this.element.appendChild(recommendations);
+    this.positionObserver_.observe(recommendations,
+        PositionObserverFidelity.LOW,
+        position => this.positionUpdate_(currentArticle, position));
   }
 
   /**
    * Attach a ShadowDoc using the given document.
    * @param {!Document} doc
+   * @return {!Promise<?Object>} Promise resolved with the return value of
+   *     {@link MultiDocManager#attachShadowDoc}
    */
   attachShadowDoc_(doc) {
-    this.getVsync().mutate(() => {
-      const shadowRoot = this.win.document.createElement('div');
+    let amp = null;
+    return this.getVsync()
+        .mutatePromise(() => {
+          const shadowRoot = this.win.document.createElement('div');
 
-      try {
-        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+          try {
+            amp =
+                this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-        // TODO(peterjosling): Update document title.
-        // TODO(emarchiori): Trigger analtyics event when active
-        // document changes.
-        // TODO(emarchiori): Hide position fixed elements of inactive
-        // documents and update approriately.
+            this.element.appendChild(shadowRoot);
+            this.element.appendChild(this.createDivider_());
+            this.appendArticleLinks_(this.nextArticle_ + 1);
 
-        this.element.appendChild(shadowRoot);
-        this.appendDivision_();
-        this.appendArticleLinks_(this.nextArticle_ + 1);
-
-        if (this.nextArticle_ < this.config_.recommendations.length) {
-          this.appendNextArticle_();
-        }
-
-      } catch (e) {
-        // TODO(emarchiori): Handle loading errors.
-      }
-    });
+            if (this.nextArticle_ < this.config_.recommendations.length) {
+              this.appendNextArticle_();
+            }
+          } catch (e) {
+            // TODO(emarchiori): Handle loading errors.
+          }
+        })
+        .then(() => amp);
   }
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment ${TAG} disabled`);
+    user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
 
     if (activeInstance_ !== this) {
       return Promise.resolve();
@@ -180,11 +220,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     this.element.classList.add('i-amphtml-document-recommendations');
 
-    this.multidocManager_ = new MultidocManager(
-        this.win,
-        Services.ampdocServiceFor(this.win),
-        Services.extensionsFor(this.win),
-        Services.timerFor(this.win));
+    this.multidocManager_ =
+        new MultidocManager(this.win, Services.ampdocServiceFor(this.win),
+          Services.extensionsFor(this.win), Services.timerFor(this.win));
 
     // TODO(peterjosling): Read config from another source.
 
@@ -192,21 +230,21 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
     const scriptElement = children[0];
-    user().assert(
-        isJsonScriptTag(scriptElement),
+    user().assert(isJsonScriptTag(scriptElement),
         'The amp-document-recommendations config should ' +
-        'be inside a <script> tag with type="application/json"');
+            'be inside a <script> tag with type="application/json"');
 
-    const configJson = tryParseJson(
-        scriptElement.textContent, error => {
-          throw user().createError(
-              'failed to parse content discovery script', error);
-        });
+    const configJson = tryParseJson(scriptElement.textContent, error => {
+      throw user().createError(
+          'failed to parse content discovery script', error);
+    });
 
-    this.config_ = assertConfig(configJson);
+    const docInfo = Services.documentInfoForDoc(this.element);
+    const host = parseUrl(docInfo.sourceUrl).host;
+    this.config_ = assertConfig(configJson, host);
 
     this.mutateElement(() => {
-      this.appendDivision_();
+      this.element.appendChild(this.createDivider_());
       this.appendArticleLinks_(this.nextArticle_ + 1);
     });
   }
@@ -217,6 +255,48 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     // based on PositionObserver.
     this.appendNextArticle_();
     return Promise.resolve();
+  }
+
+  /**
+   * Handles updates from the {@code PositionObserver} indicating a change in
+   * the position of a recommendation unit in the viewport.
+   * @param {number} i Index of the documentRef this recommendation unit is
+   *     attached to.
+   * @param
+   * {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+   *     position Position of the current recommendation unit in the viewport.
+   */
+  positionUpdate_(i, position) {
+    // We're only interested when the recommendations exit the viewport
+    if (position.positionRect !== null) {
+      return;
+    }
+
+    if (position.relativePos === 'top') {
+      this.setActiveDocument_(this.documentRefs_[i + 1]);
+    } else if (position.relativePos === 'bottom') {
+      this.setActiveDocument_(this.documentRefs_[i]);
+    }
+  }
+
+  /**
+   * Sets the specified document as active, updating the document title and URL.
+   * @param {!DocumentRef} documentRef Reference to the document to set as
+   *     active.
+   */
+  setActiveDocument_(documentRef) {
+    const amp = documentRef.amp;
+    this.win.document.title = amp.title || '';
+    if (this.win.history.replaceState) {
+      const url = parseUrl(documentRef.ampUrl);
+      this.win.history.replaceState({}, amp.title, url.pathname);
+    }
+
+    // TODO(peterjosling): Send request to viewer with title/URL
+    // TODO(emarchiori): Trigger analtyics event when active
+    // document changes.
+    // TODO(emarchiori): Hide position fixed elements of inactive
+    // documents and update approriately.
   }
 }
 

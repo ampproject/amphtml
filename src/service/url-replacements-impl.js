@@ -46,8 +46,13 @@ import {isProtocolValid} from '../url';
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
+
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @private @const {Object<string, boolean>} */
+const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
@@ -65,7 +70,8 @@ function encodeValue(val) {
 }
 
 /**
- * Returns a function that executes method on a new Date instance.
+ * Returns a function that executes method on a new Date instance. This is a
+ * byte saving hack.
  *
  * @param {string} method
  * @return {!SyncResolverDef}
@@ -75,7 +81,8 @@ function dateMethod(method) {
 }
 
 /**
- * Returns a function that returns property of screen.
+ * Returns a function that returns property of screen. This is a byte saving
+ * hack.
  *
  * @param {!Screen} screen
  * @param {string} property
@@ -83,6 +90,19 @@ function dateMethod(method) {
  */
 function screenProperty(screen, property) {
   return () => screen[property];
+}
+
+/**
+ * Returns a function that executes method on the viewport. This is a byte
+ * saving hack.
+ *
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {string} method
+ * @return {!SyncResolverDef}
+ */
+function viewportMethod(viewport, method) {
+  // Convert to object to allow dynamic access.
+  return () => /** @type {!Object} */(viewport)[method]();
 }
 
 /**
@@ -141,27 +161,17 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
-      return info.canonicalUrl;
-    }));
+    this.set('CANONICAL_URL', this.getDocInfoUrl_('canonicalUrl'));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.host;
-    }));
+    this.set('CANONICAL_HOST', this.getDocInfoUrl_('canonicalUrl', 'host'));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.hostname;
-    }));
+    this.set('CANONICAL_HOSTNAME', this.getDocInfoUrl_('canonicalUrl',
+        'hostname'));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
-      const url = parseUrl(info.canonicalUrl);
-      return url && url.pathname;
-    }));
+    this.set('CANONICAL_PATH', this.getDocInfoUrl_('canonicalUrl', 'pathname'));
 
     // Returns the referrer URL.
     this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
@@ -206,37 +216,29 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
-      return removeFragment(info.sourceUrl);
-    }), () => {
+    this.setBoth('SOURCE_URL', () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      return removeFragment(docInfo.sourceUrl);
+    }, () => {
       return getTrackImpressionPromise().then(() => {
-        return this.getDocInfoValue_(info => {
-          return removeFragment(info.sourceUrl);
-        });
+        const docInfo = Services.documentInfoForDoc(this.ampdoc);
+        return removeFragment(docInfo.sourceUrl);
       });
     });
 
     // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).host;
-    }));
+    this.set('SOURCE_HOST', this.getDocInfoUrl_('sourceUrl', 'host'));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).hostname;
-    }));
+    this.set('SOURCE_HOSTNAME', this.getDocInfoUrl_('sourceUrl', 'hostname'));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).pathname;
-    }));
+    this.set('SOURCE_PATH', this.getDocInfoUrl_('sourceUrl', 'pathname'));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
-      return info.pageViewId;
-    }));
+    this.set('PAGE_VIEW_ID', this.getDocInfoUrl_('pageViewId'));
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
@@ -245,6 +247,17 @@ export class GlobalVariableSource extends VariableSource {
         return this.getQueryParamData_(param, defaultValue);
       });
     });
+
+    // Returns the value of the given field name in the fragment query string.
+    // Second parameter is an optional default value.
+    // For example, if location is 'pub.com/amp.html?x=1#y=2' then
+    // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
+    this.setAsync('FRAGMENT_PARAM',
+        this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+
+    // Returns the first item in the ancestorOrigins array, if available.
+    this.setAsync('ANCESTOR_ORIGIN',
+        this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
 
     /**
      * Stores client ids that were generated during this page view
@@ -327,6 +340,18 @@ export class GlobalVariableSource extends VariableSource {
       }, 'VARIANTS');
     }));
 
+    // Returns assigned geo value for geoType or all groups.
+    this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
+      return this.getGeo_(geos => {
+        if (geoType) {
+          user().assert(geoType === 'ISOCountry',
+              'The value passed to AMP_GEO() is not valid name:' + geoType);
+          return /** @type {string} */ (geos[geoType] || 'unknown');
+        }
+        return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
+      }, 'AMP_GEO');
+    }));
+
     // Returns incoming share tracking fragment.
     this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
       () => {
@@ -352,23 +377,35 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
+    // Returns the IANA timezone code
+    this.set('TIMEZONE_CODE', () => {
+      let tzCode;
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+
+      return tzCode || '';
+    });
+
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+    this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.set('SCROLL_LEFT', viewportMethod(viewport, 'getScrollLeft'));
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
+    this.set('SCROLL_HEIGHT', viewportMethod(viewport, 'getScrollHeight'));
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
+    this.set('SCROLL_WIDTH', viewportMethod(viewport, 'getScrollWidth'));
 
     // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', () => viewport.getSize().height);
+    this.set('VIEWPORT_HEIGHT', viewportMethod(viewport, 'getHeight'));
 
     // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
+    this.set('VIEWPORT_WIDTH', viewportMethod(viewport, 'getWidth'));
 
 
     const screen = this.ampdoc.win.screen;
@@ -517,19 +554,15 @@ export class GlobalVariableSource extends VariableSource {
           root.getElementById(/** @type {string} */ (id)),
           `Could not find an element with id="${id}" for VIDEO_STATE`);
       return Services.videoManagerForDoc(this.ampdoc)
-          .getVideoAnalyticsDetails(video)
+          .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
-          'STORY_PAGE_INDEX');
-    });
+    this.setAsync('STORY_PAGE_INDEX', this.getStoryValue_('pageIndex',
+        'STORY_PAGE_INDEX'));
 
-    this.setAsync('STORY_PAGE_ID', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageId,
-          'STORY_PAGE_ID');
-    });
+    this.setAsync('STORY_PAGE_ID', this.getStoryValue_('pageId',
+        'STORY_PAGE_ID'));
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
@@ -545,13 +578,18 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
-   * Resolves the value via document info.
-   * @param {function(!./document-info-impl.DocumentInfoDef):T} getter
+   * Resolves the value via one of document info's urls.
+   * @param {string} field A field on the docInfo
+   * @param {string=} opt_urlProp A subproperty of the field
    * @return {T}
    * @template T
    */
-  getDocInfoValue_(getter) {
-    return getter(Services.documentInfoForDoc(this.ampdoc));
+  getDocInfoUrl_(field, opt_urlProp) {
+    return () => {
+      const docInfo = Services.documentInfoForDoc(this.ampdoc);
+      const value = docInfo[field];
+      return opt_urlProp ? parseUrl(value)[opt_urlProp] : value;
+    };
   }
 
   /**
@@ -614,6 +652,24 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
+   * Resolves the value via geo service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getGeo_(getter, expr) {
+    return Services.geoForOrNull(this.ampdoc.win)
+        .then(geo => {
+          user().assert(geo,
+              'To use variable %s, amp-geo should be configured',
+              expr);
+          return getter(geo);
+        });
+  }
+
+  /**
    * Resolves the value via amp-share-tracking's service.
    * @param {function(!ShareTrackingFragmentsDef):T} getter
    * @param {string} expr
@@ -636,22 +692,40 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-story's service.
-   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
-   * @param {string} expr
-   * @return {!Promise<T>}
-   * @template T
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
    * @private
    */
-  getStoryValue_(getter, expr) {
-    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
-        .then(storyVariables => {
-          user().assert(storyVariables,
-              'To use variable %s amp-story should be configured',
-              expr);
-          return getter(
-              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
-              (storyVariables));
+  getStoryValue_(property, name) {
+    return () => {
+      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
+      return service.then(storyVariables => {
+        user().assert(storyVariables,
+            'To use variable %s amp-story should be configured', name);
+        return storyVariables[property];
+      });
+    };
+  }
+
+  /**
+   * Resolves the value via amp-viewer-integration's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getViewerIntegrationValue_(property, name) {
+    return /** @type {!AsyncResolverDef} */ (
+      (param, defaultValue = '') => {
+        const service =
+            Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+        return service.then(viewerIntegrationVariables => {
+          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
+          return viewerIntegrationVariables[property](param, defaultValue);
         });
+      });
   }
 }
 
@@ -894,7 +968,7 @@ export class UrlReplacements {
     // additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended.
     // #2: If the expansion function is not whitelisted:
-    // addionalUrlParamters will not be expanded,
+    // additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
@@ -990,7 +1064,8 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          replacement = replacement.replace(match, encodeValue(v));
+          replacement = replacement.replace(match,
+              NOENCODE_WHITELIST[match] ? v : encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -1005,7 +1080,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return NOENCODE_WHITELIST[match] ? val : encodeValue(val);
     });
 
     if (replacementPromise) {

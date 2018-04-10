@@ -4,25 +4,23 @@
 ## Objective
 
 For AMP Fast Fetch, support publisher-specified, multiple, simultaneous callouts in order to augment targeting information included in the ad request.  
-
-
 ## Background
 
 Remote HTML support was added for Delayed Fetch to support first-party cookie targeting. This was because AMP does not allow custom JavaScript, and pages served from the AMP cache are identical for each user.  However, Remote HTML leverages the fact that custom JavaScript execution occurs as a part of generating an ad request via Delayed Fetch. Fast Fetch allows for sending the ad request early by moving all code related to ad generation within the AMP runtime, disallowing any custom JavaScript as part of ad request creation. Therefore Fast Fetch is incompatible with Remote HTML. Real Time Config (RTC) has been added as an optional feature of Fast Fetch to allow for publishers to add user-targeting information to ad requests from AMP pages in a generic way that can be utilized by any ad networks, and any user-targeting vendors.
 
-
 ## Overview
 
-The design of RTC is per-slot, with a** maximum of 5 parallel callouts allowed per slot**. RTC is usable by any Fast Fetch network implementation. Call-outs for all slots will be sent as soon as possible. There are two different types of callouts that will be supported:
+The design of RTC is per-slot, with a **maximum of 5 parallel callouts allowed per slot**. RTC is usable by any Fast Fetch network implementation. Call-outs for all slots will be sent as soon as possible. There are two different types of callouts that will be supported:
 
+### Custom URL callout
 
+The publisher specifies a custom URL that should be called out to. For example, a publisher may specify their own targeting server as a custom URL. If the ad network in use supports macro substitution for custom URLs, the publisher may specify macros in the URL. See the [URL Macro Substitution](#url-macro-substitution) section for details.
 
-1.  **Custom URL callout**
-    1.  The publisher specifies a custom URL that should be called out to. For example, a publisher may specify their own targeting server as a custom URL. If the ad network in use supports macro substitution for custom URLs, the publisher may specify macros in the URL. See URL Macro Substitution section below for details.
-1.  **Vendor-Specified URL**
-    1.  RTC supports call-outs to third-party vendors. For example, take VendorFooBar  which provides an API service that returns similar interests when provided a given interest (i.e. "baseball" yields ["sports", "apple-pie"]). If VendorFooBar wants publishers to be able to use them for RTC call outs, they simply add their call-out url with built-in macros to the AMP RTC vendor registry. Then publishers specify that they want to call out to VendorFooBar, and supply the value to substitute into the macro. This gives the Vendor complete control over the actual URL, with the Publisher only needing to supply the relevant inputs. See [URL Macro Substitution ](#bookmark=id.n1ot128b5nbl)section below for details.
+### Vendor-specified URL Callout
 
-In both cases, the results of these call-outs will be passed to the Fast Fetch implementations as part of ad url construction via the **getAdUrl** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.   
+RTC supports call-outs to third-party vendors. For example, take VendorFooBar  which provides an API service that returns similar interests when provided a given interest (i.e. "baseball" yields ["sports", "apple-pie"]). If VendorFooBar wants publishers to be able to use them for RTC call outs, they simply add their call-out url with built-in macros to the AMP RTC vendor registry. Then publishers specify that they want to call out to VendorFooBar, and supply the value to substitute into the macro. This gives the Vendor complete control over the actual URL, with the Publisher only needing to supply the relevant inputs. See the [URL Macro Substitution](#url-macro-substitution) section for details.
+
+In both cases, the results of these call-outs are passed to the Fast Fetch implementations as part of ad url construction via the **`getAdUrl`** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.   
 
 
 ## Design
@@ -30,13 +28,11 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 ### Per-Slot RTC Specification
 
-Publishers may use RTC to send callouts to a maximum of 5 different endpoints. Each amp-ad element that will use RTC must have the rtc-config attribute set with valid JSON, see example:
+Publishers may use RTC to send callouts to a maximum of 5 different endpoints. Each `amp-ad` element that uses RTC must have the `rtc-config` attribute set with valid JSON.
 
+#### Example 1: RTC specification on an amp-ad
 
 ```html
-#########################################
-Example 1: RTC Specification on an amp-ad
-#########################################
 <amp-ad width="320" height="50"
             type="network-foo"
             data-slot="/1234/5678"
@@ -54,10 +50,10 @@ Example 1: RTC Specification on an amp-ad
 </amp-ad>
 ```
 
-The value of rtc-config must conform to the following specification:
+The value of `rtc-config` must conform to the following specification:
 
 
-```
+```json
 {
     "vendors": {
         "vendor1": {
@@ -77,36 +73,32 @@ The value of rtc-config must conform to the following specification:
 ```
 
 
-
-
-*   vendors
+*   `vendors`
     *   Optional parameter
     *   Type: Object
         *   Key is the name of the vendor to use.
             *   Vendor to use must appear as a key in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js)
         *   Value is a mapping of macros to values.
     *   Macros for a given vendor URL are specified by that particular vendor.
-        *   E.g., in Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see Vendor URL Specification below). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL. You may also set the value of a macro as a JSON object or array. This JSON object will be stringified automatically prior to replacement in the URL.
+        *   For example, in the Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see [Vendor URL Specification](#vendor-url-specification)). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL. You may also set the value of a macro as a JSON object or array. This JSON object will be stringified automatically prior to replacement in the URL.
         *   Vendors can use the same macros as other vendors.
-*   urls
+*   `urls`
     *   Optional parameter
     *   Type: Array
     *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
-        *   See [RTC Callout Endpoint and Response Specification](#bookmark=id.bxd6zwocqzsy) section below on all requirements for endpoint.
-*   timeoutMillis
+        *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint.
+*   `timeoutMillis`
     *   Optional parameter
     *   Type: integer
     *   Value in milliseconds for timeout to use for each individual RTC callout. Must be less than default value of 1000ms, and greater than 0.
 
 While all three parameters of rtc-config are optional, either "vendors" or "urls" _must be specified_ for RTC to occur. Both may be specified simultaneously. If neither "vendors" nor "urls" are specified, there are no endpoints to callout to and RTC is aborted. An error will be logged to the console.
 
-
 ### Vendor URL Specification
 
-In order to spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros. Vendors may include these macros in their URLs, which publishers can then specify the value for. For instance:
+To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros. Vendors may include these macros in their URLs, which publishers can then specify the value for. For instance:
 
-
-```
+```text
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor1": {
@@ -117,18 +109,15 @@ vendors: {
 ```
 
 
-The only valid strings that can be replaced for a given URL are specified by the 'macros' array. In the above example, the only valid macro to replace in `https://vendor1.com/slot_id=SLOT_ID` is "SLOT_ID".
+The only valid strings that can be replaced for a given URL are specified by the `macros` array. In the above example, the only valid macro to replace in `https://vendor1.com/slot_id=SLOT_ID` is `"SLOT_ID"`.
 
-The 'macros' attribute is optional, i.e. a vendor could specify a URL that has no macros to substitute in.
+The `macros` attribute is optional, i.e. a vendor could specify a URL that has no macros to substitute in.
 
-Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#bookmark=id.n1ot128b5nbl) section below for detailed explanation and example.
-
+Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#url-macro-substitution) section below for detailed explanation and example.
 
 ### RTC Callout Request Specification
 
-RTC Callout Requests are sent from the AMP runtime with the following headers:
-
-
+RTC callout requests are sent from the AMP runtime with the following headers:
 
 *   Accept: application/JSON
 *   Origin: Whatever the origin of the page is.
@@ -141,7 +130,6 @@ RTC requests are sent using the [fetchJson method defined in xhr-impl.js.](https
 
 RTC requests are only sent to HTTPS endpoints.
 
-
 ### RTC Callout Endpoint and Response Specification
 
 The RTC endpoint must respond to the RTC GET request with a valid JSON object of targeting information to insert into the ad request URL. Redirects are not allowed, and if the endpoint attempts to redirect, the RTC will be abandoned. Special care should be made to respond to these requests as quickly as possible, as there is a 1 second default timeout imposed by RTC, and publishers may optionally shorten this timeout. Responses that return after the timeout will be dropped.
@@ -152,32 +140,23 @@ The RTC callout endpoint must use HTTPS. HTTP requests are forbidden.
 
 The RTC Response to a GET request must meet the following requirements:
 
-
-
 *   Status Code = 200
-*   Headers (in addition to automatically added headers):
-    *   CORS
-    *   AMP-Access-Control-Allow-Source-Origin
-    *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
+*   See [here for Required Headers](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#ensuring-secure-responses) and note that Access-Control-Allow-Credentials: true must be present for cookies to be included in the request.
 *   Body of response is a JSON object of targeting information such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code>**</strong>
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
-
 
 ### URL Macro Substitution
 
 RTC supports macro substitution for building callout URLs. These macros can be specified by vendors, and by Fast Fetch implementations.
 
-
-##### Vendor Defined Macros
+#### Vendor Defined Macros
 
 A vendor can specify macros for substitution in their URL. The only requirement to do this is to include text in their URL in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js) that is intended to be replaced.
 
 **Example**
 
-
-```
+```text
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor1": {
@@ -187,13 +166,11 @@ vendors: {
 };
 ```
 
+##### Example 2: Use of Vendor URLs
 
 If a publisher wishes to callout to vendor1, then they would specify their RTC config as:
 
 ```html
-#############################
-Example 2: Use of Vendor URLs
-#############################
 <amp-ad width="320" height="50"
             type="network-foo"
             data-slot="/1234/5678"
@@ -210,16 +187,15 @@ The resulting RTC callout URL will then be, after macro expansion:
 **`https://vendor1.com/foo?slot_id=1234`**
 
 
-##### Fast Fetch Implementation Defined Macros
+#### Fast Fetch Implementation Defined Macros
 
 In addition to vendor-defined macros, with publishers specifying the values for substitution, there is also the ability to utilize macros defined by the Fast Fetch implementation. For example, imagine if there is a property, **fooProp,** of the element **fooEl** that is only calculated at runtime. A Fast Fetch network that wants to support optionally adding the value of fooProp to RTC callout URLs that it sends can do so by overriding the method [getCustomRealTimeConfigMacros on AmpA4a ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js)in their Fast Fetch implementation. The method should return a mapping of macros to values or functions that resolve to a value.
+
+##### Example 3: Fast Fetch implementation defined macros
 
 For example, Ad Network AmpAdCom overrides the property in their Fast Fetch Implementation:
 
 ```
-###################################################
-Example 3: Fast Fetch Implementation Defined Macros
-###################################################
 /** amp-ad-network-ampadcom-impl.js */
 
 export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
@@ -235,17 +211,16 @@ getCustomRealTimeConfigMacros() {
 
 Then, publishers and vendors alike would be able to specify the macro FOO_PROP in their URL, and the value would be substituted in at runtime by the Fast Fetch implementation.
 
-
 ##### Vendor Macro Substitution with Fast Fetch Network Macro Substitution
 
-It is possible for a vendor to specify macros in their URL into which the Fast Fetch implementation will substitute values, in addition to their own custom macros that the publisher may specify in the rtc-config.. Take the following example:
+It is possible for a vendor to specify macros in their URL into which the Fast Fetch implementation will substitute values, in addition to their own custom macros that the publisher may specify in the rtc-config. Take the following example:
 
-**Example 4**
+###### Example 4
 
 Vendor1 wants to allow publishers to substitute in the value of the slot_id, and allow the Fast Fetch network implementation to substitute in the start time. Thus, they define their URL in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js) as follows. Note, the vendor only lists SLOT_ID in the macros array, even though SLOT_ID and START are both macros in their URL. The macros array is a list of macros that can be utilized by the publisher. Fast Fetch will always attempt to substitute in network-defined macros, regardless of whether they are defined in the macros array.
 
 
-```
+```text
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor1": {
@@ -259,7 +234,7 @@ vendors: {
 The Fast Fetch implementation has overridden **getCustomRealTimeConfigMacros**, and supports the macro 'START', as seen here:
 
 
-```
+```text
 /** amp-ad-network-ampadcom-impl.js */
 
 export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
@@ -298,9 +273,7 @@ After URL macro expansion, the resulting URL is then
 https://vendor1.com/slot_id=1234&start_time=1508508227577
 ```
 
-
-
-##### Conflicting Macro Substitution
+##### Conflicting macro substitution
 
 It is possible, but inadvisable, to have a situation where a vendor specifies the same macro as the Fast Fetch network, i.e. in the above example if **getCustomRealTimeConfigMacros** was defined as
 
@@ -392,7 +365,7 @@ In the case that more than one callout is attempted to be sent to the same URL, 
 
 ##### Insecure URLs
 
-All RTC requests must be sent to valid SSL endpoints. An attempt to send a request to a URL that does not start with 'https://' will be dropped. An error will be logged to the console.
+All RTC requests must be sent to valid SSL endpoints. An attempt to send a request to a URL that does not start with `https://` will be dropped. An error will be logged to the console.
 
 
 ##### Maximum Callouts Exceeded

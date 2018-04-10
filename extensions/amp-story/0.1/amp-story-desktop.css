@@ -297,7 +297,7 @@ amp-story[standalone][desktop] {
 }
 
 /* Top bar */
-.i-amphtml-story-top {
+div.i-amphtml-story-top {
   position: relative!important;
   display: block!important;
   height: 96px!important;
@@ -322,9 +322,8 @@ amp-story[standalone][desktop] {
 }
 
 /* Share text for share box */
-.i-amphtml-story-share-pill:after {
+span.i-amphtml-story-share-pill-label {
   font-family: 'Roboto', sans-serif!important;
-  content: 'SHARE'!important;
   position: absolute!important;
   right: 15px!important;
   text-align: center!important;
@@ -334,6 +333,8 @@ amp-story[standalone][desktop] {
   letter-spacing: .5px!important;
   margin: auto!important;
   color:#fff!important;
+  box-sizing: initial !important;
+  text-transform: uppercase !important;
 }
 
 /* background for the share box */
@@ -345,6 +346,7 @@ amp-story[standalone][desktop] {
   padding: 0 16px!important;
   background-color: rgba(255, 255, 255, .2)!important;
   border-radius: 500px!important;
+  box-sizing: initial !important;
   transition: width 300ms ease-in-out!important;
   right: 0!important;
 }
@@ -448,88 +450,7 @@ amp-story[standalone][desktop] {
 }
 
 /* system layer changes */
-[desktop] .i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
-  top: auto!important;
-  bottom: 0!important;
-  height: 96px!important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-[desktop] .i-amphtml-story-progress-bar {
-  position: relative !important;
-  height: 3px !important;
-  width: calc(100vw/3) !important;
-  margin: 0px !important;
-}
-
-[desktop] .i-amphtml-story-page-progress-bar {
-  border-radius: 100px !important;
-}
-
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-unmute-audio-control {
-  display: none!important;
-}
-
-.i-amphtml-story-ui-left {
-  display: none!important;
-}
-
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
-  display: flex !important;
-  height: 40px !important;
-  flex: 1 !important;
-  min-width: 200px;
-  align-items: center;
-  justify-content: flex-end;
-  margin-right: 32px;
-}
-[desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
-  display: block !important;
-  flex: 1 !important;
-}
 
 [desktop] .i-amphtml-story-top {
   z-index: 100002 !important; /* 1 higher than bookend */
-}
-
-[desktop] .i-amphtml-story-bookend .i-amphtml-story-share-widget {
-  /* TODO(alanorozco): Don't render at all when on desktop */
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-bookend-inner {
-  box-sizing: border-box !important;
-  min-height: 100vh !important;
-  padding: 104px 156px 64px !important;
-  margin: 0 !important;
-}
-
-[desktop] .i-amphtml-story-bookend-inner::before {
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-bookend-replay {
-  /* This is replaced with the forward button on desktop. */
-  display: none !important;
-}
-
-[desktop] .i-amphtml-story-bookend-overflow {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-@media (min-width: 952px) {
-  [desktop] .i-amphtml-story-bookend-article {
-    max-width: calc(50%) !important;
-  }
-}
-
-@media (min-width: 1272px) {
-  [desktop] .i-amphtml-story-bookend-article {
-    max-width: calc(33%) !important;
-  }
 }

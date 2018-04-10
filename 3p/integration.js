@@ -66,6 +66,7 @@ import {urls} from '../src/config';
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
@@ -87,10 +88,13 @@ import {adform} from '../ads/adform';
 import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
+import {adincube} from '../ads/adincube';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
+import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
+import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
@@ -128,7 +132,7 @@ import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
-import {doubleclick} from '../ads/google/doubleclick';
+import {deprecatedDoubleclick} from '../ads/google/deprecated_doubleclick';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
@@ -157,6 +161,7 @@ import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
+import {kuadio} from '../ads/kuadio';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -193,6 +198,7 @@ import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
+import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
@@ -209,6 +215,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
+import {uas} from '../ads/uas';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -240,6 +247,7 @@ const AMP_EMBED_ALLOWED = {
   bringhub: true,
   dable: true,
   engageya: true,
+  kuadio: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -277,10 +285,13 @@ register('adform', adform);
 register('adfox', adfox);
 register('adgeneration', adgeneration);
 register('adhese', adhese);
+register('adincube', adincube);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
+register('admixer', admixer);
 register('adocean', adocean);
+register('adpicker', adpicker);
 register('adplugg', adplugg);
 register('adreactor', adreactor);
 register('adsense', adsense);
@@ -302,6 +313,7 @@ register('appvador', appvador);
 register('atomx', atomx);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);
@@ -319,7 +331,7 @@ register('dable', dable);
 register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
-register('doubleclick', doubleclick);
+register('doubleclick', deprecatedDoubleclick);
 register('eadv', eadv);
 register('eas', eas);
 register('engageya', engageya);
@@ -351,6 +363,7 @@ register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
+register('kuadio', kuadio);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
@@ -390,6 +403,7 @@ register('relap', relap);
 register('revcontent', revcontent);
 register('revjet', revjet);
 register('rubicon', rubicon);
+register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
@@ -407,6 +421,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);

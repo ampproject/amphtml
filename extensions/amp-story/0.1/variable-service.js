@@ -14,7 +14,21 @@
  * limitations under the License.
  */
 import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
+
+/**
+ * @typedef {!Object<string, *>}
+ */
+export let StoryVariableDef;
+
+
+/** @enum {string} */
+const Variable = {
+  STORY_PAGE_ID: 'storyPageId',
+  STORY_PAGE_INDEX: 'storyPageIndex',
+  STORY_PAGE_COUNT: 'storyPageCount',
+  STORY_IS_MUTED: 'storyIsMuted',
+  STORY_PROGRESS: 'storyProgress',
+};
 
 
 /**
@@ -23,37 +37,47 @@ import {dev} from '../../../src/log';
  */
 export class AmpStoryVariableService {
   constructor() {
-    /** @private {?string} */
-    this.pageIndex_ = null;
+    /** @private {!StoryVariableDef} */
+    this.variables_ = {
+      [Variable.STORY_PAGE_INDEX]: null,
+      [Variable.STORY_PAGE_ID]: null,
+      [Variable.STORY_PAGE_COUNT]: null,
+      [Variable.STORY_PROGRESS]: null,
+      [Variable.STORY_IS_MUTED]: null,
+    };
 
-    /** @private {?number} */
-    this.pageId_ = null;
+    /** @private {boolean} */
+    this.isInitialized_ = false;
   }
 
   /**
    * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
    */
-  onStateChange(stateChangeEvent) {
+  onNavigationStateChange(stateChangeEvent) {
     switch (stateChangeEvent.type) {
       case StateChangeType.ACTIVE_PAGE:
-        const {pageIndex, pageId} = stateChangeEvent.value;
-        this.pageIndex_ = pageIndex;
-        this.pageId_ = pageId;
+        const {pageIndex, pageId, storyProgress, totalPages} =
+            stateChangeEvent.value;
+        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+        this.variables_[Variable.STORY_PAGE_ID] = pageId;
+        this.variables_[Variable.STORY_PROGRESS] = storyProgress;
+        this.variables_[Variable.STORY_PAGE_COUNT] = totalPages;
         break;
     }
   }
 
   /**
-   * @return {number}
+   * @param {boolean} isMuted
    */
-  get pageIndex() {
-    return dev().assertNumber(this.pageIndex_);
+  onMutedStateChange(isMuted) {
+    this.variables_[Variable.STORY_IS_MUTED] = isMuted;
   }
 
   /**
-   * @return {string}
+   * @return {!StoryVariableDef}
    */
-  get pageId() {
-    return dev().assertString(this.pageId_);
+  get() {
+    // TODO(newmius): You should probably Object.freeze this in development.
+    return this.variables_;
   }
 }

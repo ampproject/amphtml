@@ -25,7 +25,7 @@ describes.fakeWin('amp-story variable service', {}, () => {
   });
 
   it('should update pageIndex and pageId on change', () => {
-    variableService.onStateChange({
+    variableService.onNavigationStateChange({
       type: StateChangeType.ACTIVE_PAGE,
       value: {
         pageIndex: 123,
@@ -33,7 +33,8 @@ describes.fakeWin('amp-story variable service', {}, () => {
       },
     });
 
-    expect(variableService.pageIndex).to.equal(123);
-    expect(variableService.pageId).to.equal('my-page-id');
+    const variables = variableService.get();
+    expect(variables['storyPageIndex']).to.equal(123);
+    expect(variables['storyPageId']).to.equal('my-page-id');
   });
 });

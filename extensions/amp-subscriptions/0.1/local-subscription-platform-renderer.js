@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {DialogRenderer} from './dialog-renderer';
 import {Entitlement} from './entitlement';
+import {Services} from '../../../src/services';
 import {evaluateExpr} from './expr';
 
 /**
@@ -35,8 +35,11 @@ export class LocalSubscriptionPlatformRenderer {
     /** @private @const */
     this.rootNode_ = ampdoc.getRootNode();
 
-    /** @private @const */
-    this.dialogRenderer_ = new DialogRenderer(ampdoc, dialog);
+    /** @private @const {!./dialog.Dialog} */
+    this.dialog_ = dialog;
+
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(ampdoc.win);
   }
 
   /**
@@ -44,30 +47,87 @@ export class LocalSubscriptionPlatformRenderer {
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   render(renderState) {
-    this.renderActions_(renderState);
-    this.dialogRenderer_.render(/** @type {!JsonObject} */(renderState));
+    return Promise.all([
+      this.renderActions_(renderState),
+      this.renderDialog_(/** @type {!JsonObject} */(renderState)),
+    ]);
   }
 
   /**
-   *
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   renderActions_(renderState) {
+    this.renderActionsInNode_(renderState, this.rootNode_);
+  }
+
+  /**
+   * @param {!JsonObject} authResponse
+   * @return {!Promise<boolean>}
+   */
+  renderDialog_(authResponse) {
+    // Make sure the document is fully parsed.
+    return this.ampdoc_.whenReady().then(() => {
+      // Find the first matching dialog.
+      const candidates = this.ampdoc_.getRootNode()
+          .querySelectorAll('[subscriptions-dialog][subscriptions-display]');
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        const expr = candidate.getAttribute('subscriptions-display');
+        if (expr && evaluateExpr(expr, authResponse)) {
+          return candidate;
+        }
+      }
+    }).then(candidate => {
+      if (!candidate) {
+        return;
+      }
+      if (candidate.tagName == 'TEMPLATE') {
+        return this.templates_.renderTemplate(candidate, authResponse)
+            .then(element => {
+              const renderState =
+                  /** @type {!./amp-subscriptions.RenderState} */(authResponse);
+              return this.renderActionsInNode_(
+                  renderState,
+                  element);
+            });
+      }
+      const clone = candidate.cloneNode(true);
+      clone.removeAttribute('subscriptions-dialog');
+      clone.removeAttribute('subscriptions-display');
+      return clone;
+    }).then(element => {
+      if (!element) {
+        return;
+      }
+      return this.dialog_.open(element, /* showCloseButton */ true);
+    });
+  }
+
+  /**
+   * Renders actions inside a given node according to an authResponse
+   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!Node} rootNode
+   * @return {!Promise<Node>}
+   * @private
+   */
+  renderActionsInNode_(renderState, rootNode) {
     return this.ampdoc_.whenReady().then(() => {
       // Find the matching actions and sections and make them visible if evalutes to true.
       const querySelectors =
           '[subscriptions-action], [subscriptions-section="actions"],'
               + ' [subscriptions-actions]';
-      const actionCandidates =
-          this.rootNode_.querySelectorAll(querySelectors);
+      const actionCandidates = rootNode.querySelectorAll(querySelectors);
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
-          candidate.setAttribute('i-amphtml-subs-display', '');
+          candidate.classList.add('i-amphtml-subs-display');
+        } else {
+          candidate.classList.remove('i-amphtml-subs-display');
         }
       }
+      return rootNode;
     });
   }
 }
