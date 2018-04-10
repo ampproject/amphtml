@@ -40,7 +40,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
 ];
 
 /**
- * A mapping of animation names to CSS class names.
+ * A mapping of animation categories to corresponding CSS class names.
  * @private @const {!Object<string, string>}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
