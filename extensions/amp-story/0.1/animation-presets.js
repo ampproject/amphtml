@@ -27,14 +27,16 @@ import {
 import {px} from '../../../src/style';
 
 /**
- * A list of panning animation names.
+ * A list of animations that take the whole screen.
  * @private @const {!Array<string>}
  */
-const PANNING_ANIMATION_NAMES = [
+const FULL_SCREEN_ANIMATION_NAMES = [
   'pan-up',
   'pan-down',
   'pan-right',
   'pan-left',
+  'zoom-in',
+  'zoom-out',
 ];
 
 /**
@@ -42,7 +44,7 @@ const PANNING_ANIMATION_NAMES = [
  * @private @const {!Object<string, string>}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
-  'pan': 'i-amphtml-story-grid-template-with-pan-animation',
+  'full-screen': 'i-amphtml-story-grid-template-with-full-screen-animation',
 };
 
 /**
@@ -51,17 +53,17 @@ const ANIMATION_CSS_CLASS_NAMES = {
  * @param {string} presetName
  */
 export function setStyleForPreset(el, presetName) {
-  const pan = 'pan';
+  const fullScreen = 'full-screen';
   const fillTemplate = 'fill';
 
-  // For panning and zooming animations.
-  if (PANNING_ANIMATION_NAMES.indexOf(presetName) >= 0) {
+  // For full screen animations.
+  if (FULL_SCREEN_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
     if (parent.classList.contains(
         GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
       parent.classList.remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate]);
     }
-    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[pan]);
+    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[fullScreen]);
   }
 }
 
