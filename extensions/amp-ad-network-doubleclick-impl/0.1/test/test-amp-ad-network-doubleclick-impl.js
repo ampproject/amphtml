@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
+import * as sinon from 'sinon';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -775,6 +776,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(impl.element.getAttribute('data-amp-slot-index'))
               .to.equal('1');
         });
+
+    it('should call #unobserve on refreshManager', () => {
+      impl.refreshManager_ = {
+        unobserve: () => {},
+      };
+      const sandbox = sinon.sandbox.create();
+      const unobserveSpy = sandbox.spy(impl.refreshManager_.unobserve);
+      impl.unlayoutCallback();
+      expect(unobserveSpy).to.be.calledOnce;
+    });
   });
 
   describe('#getNetworkId', () => {
