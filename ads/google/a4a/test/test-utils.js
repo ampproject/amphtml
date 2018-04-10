@@ -460,7 +460,7 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-            /[&?]bc=7[&$]/);
+              /[&?]bc=7[&$]/);
         });
       });
     });
@@ -484,7 +484,7 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-            /[&?]bc=1[&$]/);
+              /[&?]bc=1[&$]/);
         });
       });
     });
@@ -511,7 +511,7 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
               /[&?]bc=1[&$]/);
         });
       });
