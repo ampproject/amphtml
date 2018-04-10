@@ -202,7 +202,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.HIGH);
+    }, ActionTrust.LOW);
   }
 
   /** @override */
