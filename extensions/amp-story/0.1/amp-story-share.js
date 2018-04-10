@@ -219,6 +219,15 @@ export class ShareWidget {
     return this.root;
   }
 
+  /**
+   * @return {!../../../src/service/ampdoc-impl.AmpDoc}
+   * @private
+   */
+  getAmpDoc_() {
+    return /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
+      dev().assert(this.ampdoc_));
+  }
+
   /** @private */
   maybeAddLinkShareButton_() {
     if (!isCopyingToClipboardSupported(this.win.document)) {
@@ -240,9 +249,7 @@ export class ShareWidget {
   /** @private */
   // TODO(alanorozco): i18n for toast.
   copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-          dev().assert(this.ampdoc_))).canonicalUrl;
+    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
@@ -260,7 +267,7 @@ export class ShareWidget {
 
   /** @private */
   maybeAddSystemShareButton_() {
-    if (!this.isSystemShareSupported_()) {
+    if (!this.isSystemShareSupported()) {
       // `amp-social-share` will hide `system` buttons when not supported, but
       // we also need to avoid adding it for rendering reasons.
       return;
@@ -269,18 +276,19 @@ export class ShareWidget {
     const container = dev().assertElement(this.root).querySelector(
         '.i-amphtml-story-share-system');
 
-    this.loadRequiredExtensions_();
+    this.loadRequiredExtensions();
 
     container.appendChild(buildProvider(this.win.document, 'system'));
   }
 
-  /** @private */
-  // NOTE(alanorozco): This is a duplicate of the logic in the
-  // `amp-social-share` component.
-  isSystemShareSupported_() {
-    const viewer = Services.viewerForDoc(
-        /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-          dev().assert(this.ampdoc_)));
+  /**
+   * NOTE(alanorozco): This is a duplicate of the logic in the
+   * `amp-social-share` component.
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc=}  ampdoc
+   * @return {boolean} Whether the browser supports native system sharing.
+   */
+  isSystemShareSupported(ampdoc = this.getAmpDoc_()) {
+    const viewer = Services.viewerForDoc(ampdoc);
 
     const platform = Services.platformFor(this.win);
 
@@ -296,7 +304,7 @@ export class ShareWidget {
    * @protected
    */
   loadProviders() {
-    this.loadRequiredExtensions_();
+    this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
       const providers = config && config['share-providers'];
@@ -341,11 +349,10 @@ export class ShareWidget {
     });
   }
 
-  /** @private */
-  loadRequiredExtensions_() {
-    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-      dev().assert(this.ampdoc_));
-
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
+   */
+  loadRequiredExtensions(ampdoc = this.getAmpDoc_()) {
     Services.extensionsFor(this.win)
         .installExtensionForDoc(ampdoc, 'amp-social-share');
   }
