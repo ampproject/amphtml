@@ -29,7 +29,7 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
-        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
+        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth', 'package']);
 
   if (data['autoFormat'] == 'rspv') {
     user().assert(data.hasOwnProperty('fullWidth'),
@@ -53,7 +53,8 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
-  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
+    'package']
       .forEach(datum => {
         if (data[datum]) {
           i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
