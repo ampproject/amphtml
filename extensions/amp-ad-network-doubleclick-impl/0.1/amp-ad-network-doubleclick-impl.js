@@ -1197,6 +1197,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // Note that this getter actually changes state by preloading safeframe.
     // Plan to cleanup this API as part of generate amp-a4a modularization
     // refactor.
+    console.log('preloadSafeframe_', this.preloadSafeframe_);
     if (this.preloadSafeframe_) {
       this.preconnect.preload(this.getSafeframePath());
     }

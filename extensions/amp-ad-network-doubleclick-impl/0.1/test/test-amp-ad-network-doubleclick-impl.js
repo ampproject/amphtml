@@ -49,7 +49,6 @@ import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
-import {SAFEFRAME_ORIGIN} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {
@@ -1136,6 +1135,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   describe('#disable safeframe preload experiment', () => {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+    let preloadSpy;
 
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1145,6 +1145,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
     });
 
     it('should not preload SafeFrame', () => {
@@ -1153,7 +1154,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.false;
       expect(isInExperiment(element, '21061136')).to.be.true;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com']);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.not.be.called;
     });
 
     it('should preload SafeFrame', () => {
@@ -1162,7 +1164,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.true;
       expect(isInExperiment(element, '21061136')).to.be.false;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.be.calledOnce;
+      expect(preloadSpy.args[0]).to.match(/safeframe/);
     });
   });
 
