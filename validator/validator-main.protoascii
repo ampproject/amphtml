@@ -3609,6 +3609,7 @@ tags: {
         "button|"
         "file|"
         "image|"
+        "password|"
         ")(\\s|$)"
   }
   attr_lists: "input-common-attr"
@@ -3616,6 +3617,7 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 tags: {
+  html_format: AMP
   tag_name: "INPUT"
   spec_name: "INPUT [type=password]"
   attrs: {
