@@ -20,6 +20,7 @@ import {Services} from '../../../../src/services';
 import {adConfig} from '../../../../ads/_config';
 import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {stubService} from '../../../../testing/test-helper';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('Ad loader', {amp: true}, env => {
@@ -111,9 +112,21 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return expect(ampAd.upgradeCallback())
               .to.eventually.be.instanceof(AmpAd3PImpl);
         });
+
+        it('selects into dblclick DF white list deprecation exp', () => {
+          ampAdElement.setAttribute('type', 'doubleclick');
+          toggleExperiment(win, 'dcdf-whitelist-deprecation');
+          new AmpAd(ampAdElement).upgradeCallback().then(() => {
+            expect(ampAdElement
+                .getAttribute('data-amp-is-in-dcdfwld-experiment')).to.be.ok;
+            expect(ampAdElement.getAttribute('experimentId')).to.be.ok;
+          });
+        });
       });
 
-      it('fails upgrade on A4A upgrade with loadElementClass error', () => {
+      // TODO(jridgewell, #14336): Fails due to console errors.
+      it.skip('fails upgrade on A4A upgrade with loadElementClass ' +
+          'error', () => {
         a4aRegistry['zort'] = function() {
           return true;
         };

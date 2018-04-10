@@ -88,6 +88,7 @@ import {adform} from '../ads/adform';
 import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
+import {adincube} from '../ads/adincube';
 import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
@@ -160,6 +161,7 @@ import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
+import {kuadio} from '../ads/kuadio';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -213,6 +215,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
+import {uas} from '../ads/uas';
 import {valuecommerce} from '../ads/valuecommerce';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
@@ -244,6 +247,7 @@ const AMP_EMBED_ALLOWED = {
   bringhub: true,
   dable: true,
   engageya: true,
+  kuadio: true,
   'mantis-recommend': true,
   mywidget: true,
   outbrain: true,
@@ -281,6 +285,7 @@ register('adform', adform);
 register('adfox', adfox);
 register('adgeneration', adgeneration);
 register('adhese', adhese);
+register('adincube', adincube);
 register('adition', adition);
 register('adman', adman);
 register('admanmedia', admanmedia);
@@ -358,6 +363,7 @@ register('ix', ix);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
+register('kuadio', kuadio);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
@@ -415,6 +421,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
+register('uas', uas);
 register('valuecommerce', valuecommerce);
 register('videonow', videonow);
 register('viralize', viralize);

@@ -16,6 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -52,6 +53,7 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -90,6 +92,9 @@ const TAG = 'amp-a4a';
 
 /** @type {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+
+/** @type {string} */
+export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
@@ -401,7 +406,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   /** @override */
@@ -682,11 +687,12 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent();
           this.handleLifecycleStage_('adRequestEnd');
-          // If the response is null, we want to return null so that
-          // unlayoutCallback will attempt to render via x-domain iframe,
-          // assuming ad url or creative exist.
-          if (!fetchResponse) {
-            return null;
+          // If the response is null (can occur for non-200 responses)  or
+          // arrayBuffer is null, force collapse.
+          if (!fetchResponse || !fetchResponse.arrayBuffer ||
+              fetchResponse.headers.has('amp-ff-empty-creative')) {
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
               EXPERIMENT_FEATURE_HEADER_NAME)) {
@@ -704,12 +710,6 @@ export class AmpA4A extends AMP.BaseElement {
               this.populatePostAdResponseExperimentFeatures_(
                   tryDecodeUriComponent(match[1]));
             }
-          }
-          // If the response has response code 204, or arrayBuffer is null,
-          // collapse it.
-          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
-            this.forceCollapse();
-            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
@@ -794,7 +794,7 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
           // Update priority.
-          this.updateLayoutPriority(0);
+          this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);
@@ -809,8 +809,9 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
-          if (error == NO_CONTENT_RESPONSE) {
-            return {
+          switch (error) {
+            case NETWORK_FAILURE: return null;
+            case NO_CONTENT_RESPONSE: return {
               minifiedCreative: '',
               customElementExtensions: [],
               customStylesheets: [],
@@ -1029,9 +1030,8 @@ export class AmpA4A extends AMP.BaseElement {
             checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
-            user().error(TAG, this.element.getAttribute('type'),
+            user().warn(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
-            this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative();
           });
     }).catch(error => {
@@ -1251,6 +1251,10 @@ export class AmpA4A extends AMP.BaseElement {
     return Services.xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(error => {
+          if (error.response && error.response.status > 200) {
+            // Invalid server response code so we should collapse.
+            return null;
+          }
           // If an error occurs, let the ad be rendered via iframe after delay.
           // TODO(taymonbeal): Figure out a more sophisticated test for deciding
           // whether to retry with an iframe after an ad request failure or just
@@ -1267,6 +1271,7 @@ export class AmpA4A extends AMP.BaseElement {
             this.resetAdUrl();
           } else {
             this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;
+            return Promise.reject(NETWORK_FAILURE);
           }
           return null;
         });
@@ -1439,6 +1444,12 @@ export class AmpA4A extends AMP.BaseElement {
     }
     if (this.shouldSandbox_) {
       mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
+    }
+    if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
+      // Block synchronous XHR in ad. These are very rare, but super bad for UX
+      // as they block the UI thread for the arbitrary amount of time until the
+      // request completes.
+      mergedAttributes['allow'] = 'sync-xhr \'none\';';
     }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),

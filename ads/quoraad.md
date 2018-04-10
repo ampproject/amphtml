@@ -21,10 +21,9 @@ limitations under the License.
 ### Normal Ad
 
 ```html
-<amp-ad
-    width="450" height="220"
+<amp-ad width="450" height="220"
     type="quoraad"
-    data-aid="39223922" >
+    data-aid="39223922">
 </amp-ad>
 ```
 
@@ -34,4 +33,4 @@ Please consult internal reference documents on AMP. This is used only for first-
 
 Required parameter:
 
-- data-aid
+- `data-aid`

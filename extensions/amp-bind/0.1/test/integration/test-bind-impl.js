@@ -105,7 +105,8 @@ function waitForEvent(env, name) {
   });
 }
 
-describe.configure().ifNewChrome().run('Bind', function() {
+// TODO(choumx, #14336): Fails due to console errors.
+describe.skip('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);

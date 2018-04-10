@@ -70,7 +70,9 @@ There could be one or more services configured for `amp-subscriptions`. There co
  1. The product ID that the user must be granted to view the content.
  2. Whether this content requires this product at this time.
 
-### JSON-LD markup
+The JSON-LD and Microdata formats are supported.
+
+## JSON-LD markup
 
 Using JSON-LD, the markup would look like:
 
@@ -96,11 +98,30 @@ Using JSON-LD, the markup would look like:
 
 Thus, notice that:
  1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
- 2. This document is currently locked (`"isAccessibleForFree": false`)
+ 2. This document is currently locked (`"isAccessibleForFree": false`).
 
-### Microdata markup
 
-The support for microdata format is coming soon.
+## Microdata markup
+
+Using Microdata, the markup could look like this:
+
+```
+<div itemscope itemtype="http://schema.org/NewsArticle">
+  <meta itemprop="isAccessibleForFree" content="false"/>
+  <div itemprop="isPartOf" itemscope itemtype="http://schema.org/CreativeWork http://schema.org/Product">
+    <meta itemprop="name" content="The Norcal Tribune"/>
+    <meta itemprop="productID" content="norcal_tribute.com:basic"/>
+  </div>
+</div>
+```
+
+A usable configuration will provide `NewsArticle` typed item with `isAccessibleForFree` property and a subitem of type `Product` that specifies the `productID`.
+
+In this example:
+ 1. The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
+ 2. This document is currently locked (`"isAccessibleForFree": false`).
+
+The configuration is resolved as soon as `productID` and `isAccessibleForFree` are found. It is, therefore, advised to place the configuration as high up in the DOM tree as possible.
 
 
 ## Service configuration
@@ -112,17 +133,23 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
 {
   "services": [
     {
-      // Service 1
+      // Service 1 (local service)
     },
     {
-      // Service 2, etc
+      // Service 2 (a vendor service)
     }
-  ]
+  ],
+  "preferViewerSupport": true
 }
 </script>
 ```
 
 The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+
+Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
+
+If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
+
 
 ### The "local" service configuration
 
@@ -161,7 +188,7 @@ The vendor service configuration must reference the service ID and can contain a
   "services": [
     ...,
     {
-      "serviceId": "vendor id"
+      "serviceId": "subscribe.google.com"
     }
   ]
 }

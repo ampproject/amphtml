@@ -32,5 +32,14 @@
   "expUnconditionedAdxIdentity": 0.01,
   "expUnconditionedDfpIdentity": 0.01,
   "expUnconditionedCanonicalHoldback": 0.01,
-  "rollback-delayed-fetch-deprecation": 1
+  "rollback-delayed-fetch-deprecation": 0,
+  "rollback-dfd-ix": 1,
+  "rollback-dfd-criteo": 1,
+  "rollback-dfd-rubicon": 1,
+  "rollback-dfd-navegg": 1,
+  "rollback-dfd-openx": 1,
+  "rollback-dfd-yieldbot": 1,
+  "rollback-dfd-imonomy": 1,
+  "rollback-dfd-pulsepoint": 1,
+  "dcdf-whitelist-deprecation": 0.01
 }

@@ -53,13 +53,23 @@ export const RTC_VENDORS = {
     disableKeyAppend: true,
   },
   indexexchange: {
-    url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=HREF',
+    url: 'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL',
     macros: ['SITE_ID'],
     disableKeyAppend: true,
   },
   lotame: {
     url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
     macros: ['CLIENT_ID', 'AD_NETWORK'],
+  },
+  yieldbot: {
+    url: 'https://i.yldbt.com/m/YB_PSN/v1/amp/init?curl=CANONICAL_URL&sn=YB_SLOT&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&aup=ATTR(data-slot)&pvi=PAGEVIEWID&tgt=TGT&adcid=ADCID&href=HREF',
+    macros: ['YB_PSN', 'YB_SLOT'],
+    disableKeyAppend: true,
+  },
+  salesforcedmp: {
+    url: 'https://cdn.krxd.net/userdata/v2/amp/ORGANIZATION_ID?segments_key=SEGMENTS_KEY&kuid_key=USER_KEY',
+    macros: ['ORGANIZATION_ID', 'SEGMENTS_KEY', 'USER_KEY'],
+    disableKeyAppend: true,
   },
 };
 

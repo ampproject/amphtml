@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
@@ -103,8 +101,7 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    dev().assert(this.product_, 'Current product is not set');
-    return this.enables(this.product_);
+    return this.product_ ? this.enables(this.product_) : false;
   }
 
   /**
@@ -117,13 +114,14 @@ export class Entitlement {
 
   /**
    * @param {?JsonObject} json
+   * @param {?string} rawData
    * @return {!Entitlement}
    */
-  static parseFromJson(json) {
+  static parseFromJson(json, rawData = null) {
     if (!json) {
       json = dict();
     }
-    const raw = JSON.stringify(json);
+    const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];

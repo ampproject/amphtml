@@ -27,6 +27,7 @@ const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const colors = require('ansi-colors');
 const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+const exec = require('./build-system/exec').exec;
 const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
@@ -113,6 +114,7 @@ declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
 declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
@@ -146,9 +148,17 @@ declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {
   hasCss: true,
-  cssBinaries: ['amp-story-bookend', 'amp-story-share'],
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -188,7 +198,7 @@ declareExtension('amp-video-service', '0.1', {
 declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
-    'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+    'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
 
 
 /**
@@ -258,19 +268,27 @@ function declareExtension(name, version, options) {
  * the correct one to use.
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {string} lastestVersion
- * @param {boolean} hasCss
+ * @param {string} latestVersion
+ * @param {!ExtensionOption} options extension options object.
  */
-function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
+function declareExtensionVersionAlias(name, version, latestVersion, options) {
   extensionAliasFilePath[name + '-' + version + '.js'] = {
     'name': name,
-    'file': name + '-' + lastestVersion + '.js',
+    'file': name + '-' + latestVersion + '.js',
   };
-  if (hasCss) {
+  if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
       'name': name,
-      'file': name + '-' + lastestVersion + '.css',
+      'file': name + '-' + latestVersion + '.css',
     };
+  }
+  if (options.cssBinaries) {
+    options.cssBinaries.forEach(cssBinaryName => {
+      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
+        'name': cssBinaryName,
+        'file': cssBinaryName + '-' + latestVersion + '.css',
+      };
+    });
   }
 }
 
@@ -786,6 +804,26 @@ function performBuild(watch) {
 }
 
 /**
+ * @param {boolean} compiled
+ */
+function checkBinarySize(compiled) {
+  const file = compiled ? './dist/v0.js' : './dist/amp.js';
+  const size = compiled ? '76.5KB' : '333.28KB';
+  const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
+  log(green('Running ') + cyan(cmd) + green('...\n'));
+  const p = exec(cmd);
+  if (p.status != 0) {
+    log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
+        'exceeded its size cap. This is part of a new effort to reduce ' +
+        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+    // Terminate Travis builds on failure.
+    if (process.env.TRAVIS) {
+      process.exit(p.status);
+    }
+  }
+}
+
+/**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
@@ -800,7 +838,9 @@ function watch() {
  */
 function build() {
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  return performBuild()
+      .then(() => checkBinarySize(/* compiled */ false))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -852,7 +892,9 @@ function dist() {
         if (argv.fortesting) {
           return enableLocalTesting(minified3pTarget);
         }
-      }).then(() => exitCtrlcHandler(handlerProcess));
+      })
+      .then(() => checkBinarySize(/* compiled */ true))
+      .then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1081,19 +1123,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const browsers = [];
-  if (process.env.TRAVIS) {
-    browsers.push('last 2 versions', 'safari >= 9');
-  } else {
-    browsers.push('Last 4 Chrome versions');
-  }
-
   let bundler = browserify(entryPoint, {debug: true})
       .transform(babel, {
         presets: [
           ['env', {
             targets: {
-              browsers,
+              browsers: ['last 2 versions', 'safari >= 9'],
             },
           }],
         ],
@@ -1277,8 +1312,8 @@ function buildWebPushPublisherFilesVersion(version, options) {
 }
 
 function buildWebPushPublisherFile(version, fileName, watch, options) {
-  const basePath = 'extensions/amp-web-push/' + version + '/';
-  const tempBuildDir = 'build/all/v0/';
+  const basePath = `extensions/amp-web-push/${version}/`;
+  const tempBuildDir = `build/all/amp-web-push-${version}/`;
   const distDir = 'dist/v0';
 
   // Build Helper Frame JS
@@ -1295,6 +1330,9 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           minify: options.minify || argv.minify,
           minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          extraGlobs: [
+            tempBuildDir + '*.js',
+          ],
         });
       })
       .then(function() {
@@ -1331,7 +1369,8 @@ function buildLoginDone(options) {
  */
 function buildLoginDoneVersion(version, options) {
   options = options || {};
-  const path = 'extensions/amp-access/' + version + '/';
+  const path = `extensions/amp-access/${version}/`;
+  const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
   let watch = options.watch;
@@ -1378,15 +1417,19 @@ function buildLoginDoneVersion(version, options) {
   const latestName = 'amp-login-done-latest.js';
   return toPromise(gulp.src(path + '/*.js')
       .pipe($$.file(builtName, js))
-      .pipe(gulp.dest('build/all/v0/')))
+      .pipe(gulp.dest(buildDir)))
       .then(function() {
-        return compileJs('./build/all/v0/', builtName, './dist/v0/', {
+        return compileJs('./' + buildDir, builtName, './dist/v0/', {
           watch: false,
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName,
+          extraGlobs: [
+            buildDir + 'amp-login-done-0.1.max.js',
+            buildDir + 'amp-login-done-dialog.js',
+          ],
         });
       });
 }

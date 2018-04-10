@@ -617,7 +617,7 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 
 The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
 
-For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii#L221) field in the validation rules.
+For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.
 
 ## Animations
 
@@ -644,6 +644,12 @@ The following animation effects are available as presets for AMP stories:
 | `twirl-in`        | 1000                  | 0 |
 | `whoosh-in-left`  | 500                   | 0 |
 | `whoosh-in-right` | 500                   | 0 |
+| `pan-left`        | 1000                  | 0 |
+| `pan-right`       | 1000                  | 0 |
+| `pan-down`        | 1000                  | 0 |
+| `pan-up`          | 1000                  | 0 |
+| `zoom-in`         | 1000                  | 0 |
+| `zoom-out`        | 1000                  | 0 |
 
 
 {% call callout('Tip', type='success') %}

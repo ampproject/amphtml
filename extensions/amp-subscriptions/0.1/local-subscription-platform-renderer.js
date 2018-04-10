@@ -122,7 +122,9 @@ export class LocalSubscriptionPlatformRenderer {
         const expr = candidate.getAttribute('subscriptions-display');
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
-          candidate.setAttribute('i-amphtml-subs-display', '');
+          candidate.classList.add('i-amphtml-subs-display');
+        } else {
+          candidate.classList.remove('i-amphtml-subs-display');
         }
       }
       return rootNode;

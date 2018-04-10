@@ -16,27 +16,25 @@ limitations under the License.
 
 # Innity
 
-## Tag Example
-
-### Basic
+## Example
 
 ```html
-  <amp-ad width=300 height=250
-      type="innity"
-      data-pub="eda80a3d5b344bc40f3bc04f65b7a357"
-      data-zone="62546">
-  </amp-ad>
+<amp-ad width="300" height="250"
+    type="innity"
+    data-pub="eda80a3d5b344bc40f3bc04f65b7a357"
+    data-zone="62546">
+</amp-ad>
 ```
 
 ## Configuration
 
 For semantics of configuration, please reach out to your account manager.
 
-### Required parameters:
+### Required parameters
 
-- data-pub  - Publisher ID
-- data-zone - Zone ID
+- `data-pub`: Publisher ID
+- `data-zone`: Zone ID
 
-### Optional parameters:
+### Optional parameters
 
-- data-channel - Channel Code
+- `data-channel`: Channel code

@@ -253,6 +253,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'vis': visibilityStateCodes[visibilityState] || '0',
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
+          'bc': getBrowserCapabilitiesBitmap(win) || null,
           'debug_experiment_id':
               (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
@@ -757,10 +758,8 @@ function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
         const token = obj['newToken'];
         const jar = obj['1p_jar'] || '';
         const pucrd = obj['pucrd'] || '';
-        const freshLifetimeSecs =
-            parseInt(obj['freshLifetimeSecs'] || '', 10) || 3600;
-        const validLifetimeSecs =
-            parseInt(obj['validLifetimeSecs'] || '', 10) || 86400;
+        const freshLifetimeSecs = parseInt(obj['freshLifetimeSecs'] || '', 10);
+        const validLifetimeSecs = parseInt(obj['validLifetimeSecs'] || '', 10);
         const altDomain = obj['altDomain'];
         const fetchTimeMs = Date.now() - startTime;
         if (IDENTITY_DOMAIN_REGEXP_.test(altDomain)) {
@@ -828,4 +827,40 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
       }
     });
   }
+}
+
+/**
+ * Enum for browser capabilities. NOTE: Since JS is 32-bit, do not add anymore
+ * than 32 capabilities to this enum.
+ * @enum {number}
+ */
+const Capability = {
+  SVG_SUPPORTED: 1 << 0,
+  SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
+  SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
+};
+
+/**
+ * Returns a bitmap representing what features are supported by this browser.
+ * @param {!Window} win
+ * @return {number}
+ */
+function getBrowserCapabilitiesBitmap(win) {
+  let browserCapabilities = 0;
+  const doc = win.document;
+  if (win.SVGElement && doc.createElementNS) {
+    browserCapabilities |= Capability.SVG_SUPPORTED;
+  }
+  const iframeEl = doc.createElement('iframe');
+  if (iframeEl.sandbox && iframeEl.sandbox.supports) {
+    if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+    }
+    if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
+      browserCapabilities |=
+        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+    }
+  }
+  return browserCapabilities;
 }

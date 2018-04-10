@@ -134,7 +134,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element.setAttribute('width', '666');
       expect(impl.isValidElement()).to.be.false;
     });
-    it('should NOT be valid (responsive with missing data-full-width)', () => {
+    it('should NOT be valid (responsive with missing ' +
+        'data-full-width)', () => {
       isResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
@@ -229,62 +230,70 @@ describes.realWin('amp-ad-network-adsense-impl', {
       sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
 
-    it('injects amp analytics', () => {
-      impl.ampAnalyticsConfig_ = {
-        transport: {beacon: false, xhrpost: false},
-        requests: {
-          visibility1: 'https://foo.com?hello=world',
-          visibility2: 'https://bar.com?a=b',
-        },
-        triggers: {
-          continuousVisible: {
-            on: 'visible',
-            request: ['visibility1', 'visibility2'],
-            visibilitySpec: {
+    [true, false].forEach(exp => {
+      it('injects amp analytics' +
+        (exp ? ', trigger immediate disable exp' : ''), () => {
+        impl.ampAnalyticsConfig_ = {
+          transport: {beacon: false, xhrpost: false},
+          requests: {
+            visibility1: 'https://foo.com?hello=world',
+            visibility2: 'https://bar.com?a=b',
+          },
+          triggers: {
+            continuousVisible: {
+              on: 'visible',
+              request: ['visibility1', 'visibility2'],
+              visibilitySpec: {
+                selector: 'amp-ad',
+                selectionMethod: 'closest',
+                visiblePercentageMin: 50,
+                continuousTimeMin: 1000,
+              },
+            },
+            continuousVisibleIniLoad: {
+              on: 'ini-load',
               selector: 'amp-ad',
               selectionMethod: 'closest',
-              visiblePercentageMin: 50,
-              continuousTimeMin: 1000,
+            },
+            continuousVisibleRenderStart: {
+              on: 'render-start',
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
             },
           },
-          continuousVisibleIniLoad: {
-            on: 'ini-load',
-            selector: 'amp-ad',
-            selectionMethod: 'closest',
+        };
+        // To placate assertion.
+        impl.responseHeaders_ = {
+          get: function(name) {
+            if (name == 'X-QQID') {
+              return 'qqid_string';
+            }
           },
-          continuousVisibleRenderStart: {
-            on: 'render-start',
-            selector: 'amp-ad',
-            selectionMethod: 'closest',
+          has: function(name) {
+            if (name == 'X-QQID') {
+              return true;
+            }
           },
-        },
-      };
-      // To placate assertion.
-      impl.responseHeaders_ = {
-        get: function(name) {
-          if (name == 'X-QQID') {
-            return 'qqid_string';
-          }
-        },
-        has: function(name) {
-          if (name == 'X-QQID') {
-            return true;
-          }
-        },
-      };
-      // Next two lines are to ensure that internal parts not relevant for this
-      // test are properly set.
-      impl.size_ = {width: 200, height: 50};
-      impl.iframe = impl.win.document.createElement('iframe');
-      impl.onCreativeRender(false);
-      const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
-      expect(ampAnalyticsElement).to.be.ok;
-      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
-      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');
-      expect(impl.ampAnalyticsElement_).to.be.ok;
-      // Exact format of amp-analytics element covered in
-      // test/functional/test-analytics.js.
-      // Just ensure extensions is loaded, and analytics element appended.
+        };
+        // Next two lines are to ensure that internal parts not relevant for this
+        // test are properly set.
+        impl.size_ = {width: 200, height: 50};
+        impl.iframe = impl.win.document.createElement('iframe');
+        if (exp) {
+          impl.postAdResponseExperimentFeatures['avr_disable_immediate'] = '1';
+        }
+        impl.onCreativeRender(false);
+        const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
+        expect(ampAnalyticsElement).to.be.ok;
+        expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
+        expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');
+        expect(ampAnalyticsElement.getAttribute('trigger')).to.equal(
+            exp ? '' : 'immediate');
+        expect(impl.ampAnalyticsElement_).to.be.ok;
+        // Exact format of amp-analytics element covered in
+        // test/functional/test-analytics.js.
+        // Just ensure extensions is loaded, and analytics element appended.
+      });
     });
 
     it('should register click listener', () => {
@@ -624,6 +633,12 @@ describes.realWin('amp-ad-network-adsense-impl', {
             regexp => expect(url).to.match(regexp));
       });
     });
+
+    it('includes adsense package code when present', () => {
+      element.setAttribute('data-package', 'package_code');
+      return expect(impl.getAdUrl()).to.eventually
+          .match(/pwprc=package_code(&|$)/);
+    });
   });
 
   describe('#unlayoutCallback', () => {
@@ -843,8 +858,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       }
       doc.body.style.direction = '';
     });
-
-    it('should change left margin for responsive', () => {
+    // TODO(charliereams, #14336): Fails due to console errors.
+    it.skip('should change left margin for responsive', () => {
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       return buildImpl({
@@ -859,7 +874,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
     });
 
-    it('should change right margin for responsive in RTL', () => {
+    // TODO(charliereams, #14336): Fails due to console errors.
+    it.skip('should change right margin for responsive in RTL', () => {
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       doc.body.style.direction = 'rtl'; // todo: revert

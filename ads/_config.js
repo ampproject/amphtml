@@ -119,6 +119,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adincube: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
@@ -518,6 +522,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  kuadio: {},
+
   ligatus: {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,
@@ -829,6 +835,10 @@ export const adConfig = {
   trugaze: {
     clientIdScope: '__tg_amp',
     renderStartImplemented: true,
+  },
+
+  uas: {
+    prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
   valuecommerce: {

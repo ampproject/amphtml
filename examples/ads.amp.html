@@ -73,6 +73,7 @@
         <option>adfox</option>
         <option>adgeneration</option>
         <option>adhese</option>
+        <option>adincube</option>
         <option>adition</option>
         <option>adman</option>
         <option>admanmedia</option>
@@ -144,6 +145,7 @@
         <option>kargo</option>
         <option>kiosked</option>
         <option>kixer</option>
+        <option>kuadio</option>
         <option>ligatus</option>
         <option>lockerdome</option>
         <option>loka</option>
@@ -193,6 +195,7 @@
         <option>teads</option>
         <option>triplelift</option>
         <option>trugaze</option>
+        <option>uas</option>
         <option>valuecommerce</option>
         <option>videonow</option>
         <option>viralize</option>
@@ -270,6 +273,13 @@
       type="adbutler"
       data-account="167283"
       data-zone="212491">
+  </amp-ad>
+
+  <h2>adincube</h2>
+  <amp-ad width="300" height="250"
+      type="adincube"
+      data-ad-type="in_content"
+      data-site-key="TEST_WEBSITE_KEY">
   </amp-ad>
 
   <h2>ADITION</h2>
@@ -1010,6 +1020,17 @@
       data-adslot="6812">
   </amp-ad>
 
+  <h2>Kuadio</h2>
+  <amp-embed
+    type="kuadio"
+    width="300"
+    height="660"
+    layout="responsive"
+    heights="(min-width:1024px) 23%, (min-width:760px) 27%, (min-width:480px) 72%, 220%"
+    data-region="tpe"
+    data-widget-id="78a32765-30f1-4ac1-a3e7-b42ebc6df88a">
+  </amp-embed>
+
   <h2>Ligatus</h2>
   <amp-ad width="300" height="250"
       type="ligatus"
@@ -1488,6 +1509,12 @@
       json='{"targeting":{"target":["sample"],"pos":["amp"]}}'>
   </amp-ad>
 
+  <h2>UAS</h2>
+  <amp-ad width=300 height=250
+      type="uas"
+      json='{"accId": "132109", "adUnit": "10002912", "sizes": [[300, 250]], "targetings": {"country": ["India", "USA"], "car": "Civic"}, "locLat": "12.24", "locLon": "24.13", "locSrc": "wifi", "pageURL": "mydomain.com"}'>
+  </amp-ad>
+
   <h2>Weborama</h2>
   <amp-ad width="300" height="250"
       type="weborama-display"
@@ -1546,9 +1573,15 @@
 
   <h2>Yieldbot</h2>
   <amp-ad width="300" height="250"
-      type="yieldbot"
-      data-psn="1234"
-      data-yb-slot="medrec"
+      type="doubleclick"
+      rtc-config='{
+        "vendors": {
+          "yieldbot": {
+            "YB_PSN": "1234",
+            "YB_SLOT": "medrec"
+          }
+        }
+      }'
       data-slot="/2476204/medium-rectangle"
       data-multi-size="300x220,300x200"
       json='{"targeting":{"category":["food","lifestyle"]},"categoryExclusions":["health"]}'>

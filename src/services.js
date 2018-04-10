@@ -34,6 +34,11 @@ export let SubscriptionService;
 
 export class Services {
   /**
+   * Hint: Add extensions folder path to compile.js with
+   * warnings cannot find modules.
+   */
+
+  /**
    * Returns a promise for the Access service.
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!../extensions/amp-access/0.1/amp-access.AccessService>}
@@ -300,7 +305,7 @@ export class Services {
   static storyStoreServiceForOrNull(win) {
     return (
     /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
-      (getElementServiceIfAvailable(win, 'story-store', 'amp-story', true)));
+      (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
@@ -309,6 +314,32 @@ export class Services {
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestService(win) {
+    return getService(win, 'story-request');
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationService(win) {
+    return getService(win, 'localization');
   }
 
   /**
@@ -380,6 +411,29 @@ export class Services {
   }
 
   /**
+   * Returns a promise for the consentPolicy Service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>}
+   */
+  static consentPolicyServiceForDocOrNull(nodeOrDoc) {
+    return (/** @type {!Promise<?../extensions/amp-consent/0.1/consent-policy-manager.ConsentPolicyManager>} */
+      (getElementServiceIfAvailableForDoc(nodeOrDoc, 'consentPolicyManager',
+          'amp-consent')));
+  }
+
+  /**
+   * Returns a promise for the geo service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Window} win
+   * @return {!Promise<?Object<string,(string|Array<string>)>>}
+   */
+  static geoForOrNull(win) {
+    return (/** @type {!Promise<?Object<string,(string|Array<string>)>>} */
+      (getElementServiceIfAvailable(win, 'geo', 'amp-geo', true)));
+  }
+
+  /**
    * Returns a promise for the experiment variants or a promise for null if it is
    * not available on the current page.
    * @param {!Window} win
@@ -392,10 +446,10 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/video-manager-impl.VideoManager}
+   * @return {!./service/video-manager-impl.VideoService}
    */
   static videoManagerForDoc(nodeOrDoc) {
-    return /** @type {!./service/video-manager-impl.VideoManager} */ (
+    return /** @type {!./service/video-manager-impl.VideoService} */ (
       getServiceForDoc(nodeOrDoc, 'video-manager'));
   }
 

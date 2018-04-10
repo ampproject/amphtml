@@ -110,11 +110,38 @@
       background: #f4f4f4;
     }
 
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
     hr {
       margin: 0;
     }
   </style>
-  <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -125,14 +152,51 @@
     </div>
   </header>
   <main role="main">
-    <amp-consent id='ABC' layout='nodisplay'>
+    <h3>Image that is blocked by both consent</h3>
+    <amp-img
+        data-block-on-consent
+        src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+    <h3>Image that is blocked by first consent</h3>
+    <amp-img
+        data-block-on-consent='Policy_DEF'
+        src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+    <h3>Image that is NOT blocked by consent</h3>
+    <amp-img
+        src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+     <amp-consent id='ABC' layout='nodisplay'>
       <script type="application/json">{
         "consents": {
           "DEF": {
-            "checkConsentHref": "http://localhost:8000/get-consent-v1"
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui1"
+          },
+          "ABC": {
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui1"
           }
-        }
+        },
+        "policy": {
+          "Policy_DEF": {
+            "waitFor": {
+              "DEF": []
+            }
+          }
+        },
+        "postPromptUI": "postPromptUI"
       }</script>
+      <div id="ui1">
+        Please Accept to load image.
+        <button on="tap:ABC.accept" role="button">Accept</button>
+        <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt(consent=ABC)" role="button">Manage</button>
+      </div>
     </amp-consent>
     <article>
 
@@ -146,6 +210,19 @@
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
           </p>
         </header>
+
+        <div>
+        Revoke consent ABC and DEF
+        <button class="button" on="tap:ABC.prompt(consent=ABC),ABC.prompt(consent=DEF)" role="button">Manage</button>
+      </div>
+       <div>
+        Revoke error consent doesn't exsit
+        <button class="button" on="tap:ABC.prompt(consent=ABCd)" role="button">Manage</button>
+      </div>
+      <div>
+        Only revoke DEF
+        <button class="button" on="tap:ABC.prompt(consent=DEF)" role="button">Manage</button>
+      </div>
 
         <div class="author">
           <div class="byline">
