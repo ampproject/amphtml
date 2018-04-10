@@ -87,7 +87,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.currentDisplayInstance_ = null;
 
     /** @private {?Element} */
-    this.revokeUI_ = null;
+    this.postPromptUI_ = null;
 
     /** @private {!Object<string, function()>} */
     this.dialogResolver_ = map();
@@ -97,6 +97,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isMultiSupported_ = false;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = this.getVsync();
   }
 
   getConsentPolicy() {
@@ -210,21 +213,22 @@ export class AmpConsent extends AMP.BaseElement {
   show_(instanceId) {
     dev().assert(!this.currentDisplayInstance_,
         'Other consent instance on display');
+    this.vsync_.mutate(() => {
+      if (!this.uiInit_) {
+        this.uiInit_ = true;
+        toggle(this.element, true);
+        this.getViewport().addToFixedLayer(this.element);
+      }
 
+      this.element.classList.remove('amp-hidden');
+      this.element.classList.add('amp-active');
 
-    if (!this.uiInit_) {
-      this.uiInit_ = true;
-      toggle(this.element, true);
-      this.getViewport().addToFixedLayer(this.element);
-    }
+      // Display the current instance
+      this.currentDisplayInstance_ = instanceId;
+      setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
+          {display: 'block'});
+    });
 
-    this.element.classList.remove('amp-hidden');
-    this.element.classList.add('amp-active');
-
-    // Display the current instance
-    this.currentDisplayInstance_ = instanceId;
-    setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
-        {display: 'block'});
     return new Promise(resolve => {
       this.dialogResolver_[instanceId] = resolve;
     });
@@ -234,15 +238,17 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
-    this.element.classList.add('amp-hidden');
-    this.element.classList.remove('amp-active');
-    // Do not remove from fixed layer because of invoke button
-    // this.getViewport().removeFromFixedLayer(this.element);
-    dev().assert(this.currentDisplayInstance_
-        && this.consentUI_[this.currentDisplayInstance_],
-    'no consent UI to hide');
+    const uiToHide = this.currentDisplayInstance_ &&
+        this.consentUI_[this.currentDisplayInstance_];
+    this.vsync_.mutate(() => {
+      this.element.classList.add('amp-hidden');
+      this.element.classList.remove('amp-active');
+      // Do not remove from fixed layer because of invoke button
+      // this.getViewport().removeFromFixedLayer(this.element);
+      dev().assert(uiToHide, 'no consent UI to hide');
 
-    toggle(this.consentUI_[this.currentDisplayInstance_], false);
+      toggle(uiToHide, false);
+    });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
       this.dialogResolver_[this.currentDisplayInstance_] = null;
@@ -289,27 +295,16 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(instanceId);
       this.getConsentRemote_(instanceId).then(response => {
         this.parseConsentResponse_(instanceId, response);
-        this.handleUI_(instanceId);
+        this.handlePromptUI_(instanceId);
       }).catch(unusedError => {
         // TODO: Handle errors
       });
     }
-    this.notificationUiManager_.onQueueEmpty(() => {
-      if (!this.revokeUI_) {
-        return;
-      }
-      this.element.classList.add('amp-active');
-      this.element.classList.remove('amp-hidden');
-      setImportantStyles(this.revokeUI_, {display: 'block'});
-    });
 
-    this.notificationUiManager_.onQueueNotEmpty(() => {
-      if (!this.revokeUI_) {
-        return;
-      }
-      this.element.classList.add('amp-hidden');
-      this.element.classList.remove('amp-active');
-      toggle(this.revokeUI_, false);
+    // TODO(@zhouyx): Use setTimeout to make sure we handle postPromptUI
+    // after all prompt UI registerd. Make handle PromptUI a promise instead.
+    this.win.setTimeout(() => {
+      this.handlePostPromptUI_();
     });
 
     this.enableInteractions_();
@@ -399,6 +394,10 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentConfig_ = consents;
+    if (config['postPromptUI']) {
+      this.postPromptUI_ = this.getAmpDoc().getElementById(
+          config['postPromptUI']);
+    }
     this.policyConfig_ = config['policy'] || this.policyConfig_;
   }
 
@@ -425,10 +424,10 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Handle UI.
+   * Handle Prompt UI.
    * @param {string} instanceId
    */
-  handleUI_(instanceId) {
+  handlePromptUI_(instanceId) {
     // Prompt UI based on other UI on display and promptList for the instance.
     if (!this.consentUIRequired_[instanceId]) {
       return;
@@ -437,11 +436,6 @@ export class AmpConsent extends AMP.BaseElement {
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
     const element = this.getAmpDoc().getElementById(promptUI);
     this.consentUI_[instanceId] = element;
-
-    if (!this.revokeUI_ && this.consentConfig_[instanceId]['revokeUI']) {
-      this.revokeUI_ = this.getAmpDoc().getElementById(
-          this.consentConfig_[instanceId]['revokeUI']);
-    }
 
     // Get current consent state
     this.consentStateManager_.getConsentInstanceState(instanceId)
@@ -454,6 +448,39 @@ export class AmpConsent extends AMP.BaseElement {
             this.scheduleDisplay_(instanceId);
           }
         });
+  }
+
+  /**
+   * Handles the display of postPromptUI
+   */
+  handlePostPromptUI_() {
+    this.notificationUiManager_.onQueueEmpty(() => {
+      if (!this.postPromptUI_) {
+        return;
+      }
+      this.vsync_.mutate(() => {
+        if (!this.uiInit_) {
+          this.uiInit_ = true;
+          toggle(this.element, true);
+          this.getViewport().addToFixedLayer(this.element);
+        }
+        this.element.classList.add('amp-active');
+        this.element.classList.remove('amp-hidden');
+        setImportantStyles(dev().assertElement(this.postPromptUI_),
+            {display: 'block'});
+      });
+    });
+
+    this.notificationUiManager_.onQueueNotEmpty(() => {
+      if (!this.postPromptUI_) {
+        return;
+      }
+      this.vsync_.mutate(() => {
+        this.element.classList.add('amp-hidden');
+        this.element.classList.remove('amp-active');
+        toggle(dev().assertElement(this.postPromptUI_), false);
+      });
+    });
   }
 }
 
