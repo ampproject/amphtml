@@ -866,6 +866,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     this.destroySafeFrameApi_();
+    if (this.refreshManager_) {
+      this.refreshManager_.stop();
+    }
     return super.unlayoutCallback();
   }
 

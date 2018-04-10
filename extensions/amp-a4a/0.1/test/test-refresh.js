@@ -236,7 +236,7 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      mockA4a.element.viewportCallback(true);
+      mockA4a.element.viewportCallback(false);
       return Services.timerFor(window).promise(500).then(() => {
         expect(callbackSpy).to.not.be.called;
       });

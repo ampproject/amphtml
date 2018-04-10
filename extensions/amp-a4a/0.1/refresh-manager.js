@@ -211,6 +211,9 @@ export class RefreshManager {
     /** @private {?(number|string)} */
     this.visibilityTimeoutId_ = null;
 
+    /** @private {boolean} */
+    this.isActive_ = true;
+
     const managerId = String(refreshManagerIdCounter++);
     this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
     managers[managerId] = this;
@@ -291,8 +294,10 @@ export class RefreshManager {
   initiateRefreshCycle() {
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
-        this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).observe(this.element_);
+        if (this.isActive_) {
+          this.getIntersectionObserverWithThreshold_(
+              this.config_.visiblePercentageMin).observe(this.element_);
+        }
         break;
       case RefreshLifecycleState.REFRESH_PENDING:
       case RefreshLifecycleState.VIEW_PENDING:
@@ -311,9 +316,12 @@ export class RefreshManager {
   startRefreshTimer_() {
     return new Promise(resolve => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
+        if (!this.isActive_) {
+          resolve(false);
+          return;
+        }
         this.state_ = RefreshLifecycleState.INITIAL;
-        this.getIntersectionObserverWithThreshold_(
-            this.config_.visiblePercentageMin).unobserve(this.element_);
+        this.stopObserving_();
         this.a4a_.refresh(() => this.initiateRefreshCycle());
         resolve(true);
       }, /** @type {number} */ (this.refreshInterval_));
@@ -334,6 +342,23 @@ export class RefreshManager {
     config['continuousTimeMin'] *= 1000;
     config['visiblePercentageMin'] /= 100;
     return config;
+  }
+
+  /**
+   * Stops the intersection observer from observing the element.
+   * @private
+   */
+  stopObserving_() {
+    this.getIntersectionObserverWithThreshold_(
+            this.config_.visiblePercentageMin).unobserve(this.element_);
+  }
+
+  /**
+   * Halts all operation.
+   */
+  stop() {
+    this.isActive_ = false;
+    this.stopObserving_();
   }
 }
 
