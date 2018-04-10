@@ -15,9 +15,9 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {ScrollableShareWidget} from '../amp-story-share';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
+import {ShareWidget} from '../amp-story-share';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -35,7 +35,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     const shareWidget = {build: () => win.document.createElement('div')};
     shareWidgetMock = sandbox.mock(shareWidget);
-    sandbox.stub(ScrollableShareWidget, 'create').returns(shareWidget);
+    sandbox.stub(ShareWidget, 'create').returns(shareWidget);
 
     // Making sure the vsync tasks run synchronously.
     sandbox.stub(Services, 'vsyncFor').returns({
