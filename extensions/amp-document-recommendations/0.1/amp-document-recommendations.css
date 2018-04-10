@@ -31,6 +31,10 @@
   background: #FFFFFF;
 }
 
+.i-amphtml-document-recommendations > *[separator] {
+  display: none;
+}
+
 .i-amphtml-reco-holder-article {
   padding-top: 10px;
   padding-bottom: 10px;
