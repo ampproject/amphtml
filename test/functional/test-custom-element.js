@@ -2025,7 +2025,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     expect(overflowElement.onclick).to.not.exist;
   });
 
-  it.only('should force change size when clicked', () => {
+  it('should force change size when clicked', () => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
     resourcesMock.expects('changeSize').withExactArgs(element, 117, 113).once();

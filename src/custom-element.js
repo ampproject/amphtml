@@ -579,13 +579,7 @@ function createBaseCustomElementClass(win) {
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
-          if (this.resources_) {
-            this.getResources().mutateElement(this, () => {
-              this.prepareLoading_();
-            });
-          } else {
-            this.prepareLoading_();
-          }
+          this.mutateWithConnected_(() => this.prepareLoading_());
         }
       }
     }
@@ -673,11 +667,9 @@ function createBaseCustomElementClass(win) {
         // preserved.
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
-        if (this.resources_) {
-          this.getResources().mutateElement(this, () => {
-            dom.removeElement(sizer);
-          });
-        }
+        this.mutateWithConnected_(() => {
+          dom.removeElement(sizer);
+        });
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
@@ -1561,7 +1553,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      const mutator = () => {
+      this.mutateWithConnected_(() => {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
@@ -1583,17 +1575,11 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().mutateElement(this, () => {
+          this.mutateWithConnected_(() => {
             dom.removeElement(loadingContainer);
           });
         }
-      };
-
-      if (this.resources_) {
-        this.getResources().mutateElement(this, mutator);
-      } else {
-        mutator();
-      }
+      });
     }
 
     /**
@@ -1658,6 +1644,20 @@ function createBaseCustomElementClass(win) {
         } else {
           this.overflowElement_.onclick = null;
         }
+      }
+    }
+
+    /**
+     * Mutates the element using resources if available.
+     *
+     * @param {function()} mutator
+     * @param {?Element=} opt_element
+     */
+    mutateWithConnected_(mutator, opt_element) {
+      if (this.resources_) {
+        this.getResources().mutateElement(opt_element || this, mutator);
+      } else {
+        mutator();
       }
     }
   }
