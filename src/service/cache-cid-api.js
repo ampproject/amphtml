@@ -19,10 +19,25 @@ import {dev, user} from '../log';
 import {dict} from '../utils/object';
 import {getSourceOrigin} from '../url';
 
-const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
+
+/**
+ * The name of the Google CID API as it appears in the meta tag to opt-in.
+ * @const @private {string}
+ */
+const GOOGLE_CID_API_META_NAME = 'amp-google-client-id-api';
+
+/**
+ * The mapping from analytics providers to CID scopes.
+ * @const @private {Object<string, string>}
+ */
 const CID_API_SCOPE_WHITELIST = {
   'googleanalytics': 'AMP_ECID_GOOGLE',
 };
+
+/**
+ * The mapping from analytics providers to their CID API service keys.
+ * @const @private {Object<string, string>}
+ */
 const API_KEYS = {
   'googleanalytics': 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM',
 };
@@ -33,16 +48,30 @@ const API_KEYS = {
  */
 const SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
 
+/**
+ * Tag for debug logging.
+ * @const {string}
+ */
 const TAG = 'CacheCidApi';
+
+/**
+ * The URL for the cache-served CID API.
+ * @const @private {string}
+ */
 const CACHE_API_URL = 'https://ampcid.google.com/v1/cache:getClientId?key=';
 
-const TIMEOUT = 30000;
+/**
+ * The XHR timeout in milliseconds for requests to the CID API.
+ * @const @private {number}
+ */
+const TIMEOUT_ = 30000;
 
 /**
  * Exposes CID API for cache-served pages without a viewer.
  */
 export class CacheCidApi {
 
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
 
     /** @private {!./ampdoc-impl.AmpDoc} */
@@ -72,7 +101,7 @@ export class CacheCidApi {
   /**
    * Returns scoped CID retrieved from the Viewer.
    * @param {string} scope
-   * @return {!Promise<?string>}
+   * @return {!Promise<string>}
    */
   getScopedCid(scope) {
     if (!this.viewer_.isCctEmbedded()) {
@@ -90,7 +119,7 @@ export class CacheCidApi {
     }
 
     return this.publisherCidPromise_.then(publisherCid => {
-      return this.scopeCid_(publisherCid, scope);
+      return publisherCid ? this.scopeCid_(publisherCid, scope) : null;
     });
   }
 
@@ -100,7 +129,7 @@ export class CacheCidApi {
    * @param {boolean=} useAlternate
    * @return {!Promise<?string>}
    */
-  fetchCid_(url, useAlternate=true) {
+  fetchCid_(url, useAlternate = true) {
     const payload = dict({
       'publisherOrigin': getSourceOrigin(this.ampdoc_.win.location),
     });
@@ -147,9 +176,6 @@ export class CacheCidApi {
    * @return {!Promise<string>}
    */
   scopeCid_(publisherCid, scope) {
-    if (!publisherCid) {
-      return Promise.resolve(null);
-    }
     const text = publisherCid + ';' + scope;
     return Services.cryptoFor(this.ampdoc_.win).sha384Base64(text).then(enc => {
       return 'amp-' + enc;
@@ -171,12 +197,14 @@ export class CacheCidApi {
   }
 
   /**
+   * Reads meta tags for opted in scopes.  Meta tags will have the form
+   * <meta name="provider-api-name" content="provider-name">
    * @return {!Object<string, string>}
    */
   getOptedInScopes_() {
     const apiKeyMap = {};
     const optInMeta = this.ampdoc_.win.document.head./*OK*/querySelector(
-        `meta[name=${GOOGLE_CLIENT_ID_API_META_NAME}]`);
+        `meta[name=${GOOGLE_CID_API_META_NAME}]`);
     if (optInMeta && optInMeta.hasAttribute('content')) {
       const list = optInMeta.getAttribute('content').split(',');
       list.forEach(item => {
