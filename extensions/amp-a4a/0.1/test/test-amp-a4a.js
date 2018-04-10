@@ -55,10 +55,10 @@ import {
   resetScheduledElementForTesting,
 } from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -627,7 +627,8 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-          expect(a4a.iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+          expect(a4a.iframe.getAttribute('allow'))
+              .to.equal('sync-xhr \'none\';');
         });
       });
     });
