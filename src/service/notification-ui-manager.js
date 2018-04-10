@@ -37,6 +37,9 @@ export class NotificationUiManager {
    */
   onQueueEmpty(handler) {
     this.queueEmptyHandler_ = handler;
+    if (this.queueSize_ == 0) {
+      handler();
+    }
   }
 
   /**
@@ -45,6 +48,9 @@ export class NotificationUiManager {
    */
   onQueueNotEmpty(handler) {
     this.queueNotEmptyHandler_ = handler;
+    if (this.queueSize_ > 0) {
+      handler();
+    }
   }
 
   /**

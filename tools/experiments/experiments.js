@@ -277,6 +277,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
+    id: 'no-sync-xhr-in-ads',
+    name: 'Disables syncronous XHR requests in 3p iframes.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'video-service',
     name: 'Enables new implementation of unified Video Interface services.',
     spec: 'https://github.com/ampproject/amphtml/issues/13674',
