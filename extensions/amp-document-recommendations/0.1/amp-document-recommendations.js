@@ -32,23 +32,21 @@ import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
 import {isExperimentOn} from '../../../src/experiments';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 import {user} from '../../../src/log';
 
-/** @const */
 const TAG = 'amp-document-recommendations';
 
-/** @const */
 const MAX_ARTICLES = 2;
 
-/**
- * @const
- * TODO(emarchiori): Make this a configurable parameter.
- */
+// TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
+
+const PRERENDER_VIEWPORT_COUNT = 3;
 
 /** @private {AmpDocumentRecommendations} */
 let activeInstance_ = null;
@@ -88,8 +86,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     /** @private {Element} */
     this.separator_ = null;
 
+    /** @private {boolean} */
+    this.documentQueued_ = false;
+
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampDoc);
+
+    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(ampDoc);
 
     /**
      * @private @const
@@ -136,7 +140,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       Services.xhrFor(this.win)
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => this.attachShadowDoc_(doc), () => {})
-          .then(amp => documentRef.amp = amp);
+          .then(amp => {
+            documentRef.amp = amp;
+            this.documentQueued_ = false;
+          });
     }
   }
 
@@ -212,10 +219,6 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
-
-            if (this.nextArticle_ < this.config_.recommendations.length) {
-              this.appendNextArticle_();
-            }
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
@@ -267,14 +270,36 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       this.element.appendChild(this.createDivider_());
       this.appendArticleLinks_(this.nextArticle_ + 1);
     });
+
+    this.viewport_.onScroll(() => this.scrollHandler_());
+    this.viewport_.onResize(() => this.scrollHandler_());
   }
 
-  /** @override */
-  layoutCallback() {
-    // TODO(emarchiori): Decide when to append the next article
-    // based on PositionObserver.
-    this.appendNextArticle_();
-    return Promise.resolve();
+  /**
+   * Handles scroll events from the viewport and appends the next document when
+   * the user comes within {@code PRERENDER_VIEWPORT_COUNT} viewports of the
+   * end.
+   * @private
+   */
+  scrollHandler_() {
+    if (this.documentQueued_) {
+      return;
+    }
+
+    const viewportSize = this.viewport_.getSize();
+    const viewportBox =
+        layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
+    this.viewport_.getClientRectAsync(this.element).then(elementBox => {
+      if (this.documentQueued_) {
+        return;
+      }
+
+      const prerenderHeight = PRERENDER_VIEWPORT_COUNT * viewportSize.height;
+      if (elementBox.bottom - viewportBox.bottom < prerenderHeight) {
+        this.documentQueued_ = true;
+        this.appendNextArticle_();
+      }
+    });
   }
 
   /**
