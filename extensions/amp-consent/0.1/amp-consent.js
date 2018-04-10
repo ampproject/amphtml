@@ -405,14 +405,14 @@ export class AmpConsent extends AMP.BaseElement {
    * Parse response from server endpoint
    * The response format example:
    * {
-   *   "consentRequired": true/false
+   *   "promptIfUnknown": true/false
    * }
    * TODO: Support vendor lists
    * @param {string} instanceId
    * @param {?JsonObject} response
    */
   parseConsentResponse_(instanceId, response) {
-    if (!response || !response['consentRequired']) {
+    if (!response || !response['promptIfUnknown']) {
       //Do not need to block.
       this.consentUIRequired_[instanceId] = false;
       this.consentStateManager_.ignoreConsentInstance(instanceId);
