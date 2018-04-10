@@ -233,11 +233,14 @@ function applyResponse(win, response) {
       return;
     }
 
+    const viewer = Services.viewerForDoc(win.document);
     const currentHref = win.location.href;
     const url = parseUrl(adLocation);
     const params = parseQueryString(url.search);
     const newHref = addParamsToUrl(currentHref, params);
+    // TODO: Avoid overwriting the fragment parameter.
     win.history.replaceState(null, '', newHref);
+    viewer.maybeUpdateFragmentForCct();
   }
 }
 
