@@ -16,17 +16,18 @@
 
 
 import {CacheCidApi} from '../../src/service/cache-cid-api';
-import {dict} from '../../src/utils/object';
 import {mockServiceForDoc, stubService} from '../../testing/test-helper';
 
 const SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
-const TEST_CID_ = 'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGClrvvfkCif_N9oYLdZEB976uJDhYgL';
+const TEST_CID_ =
+      'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGClrvvfkCif_N9oYLdZEB976uJDhYgL';
 
 describes.realWin('cacheCidApi', {amp: true}, env => {
   let ampdoc;
   let api;
   let sandbox;
   let viewerMock;
+  let fetchJsonStub;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -43,7 +44,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
   });
 
   describe('isSupported', () => {
-    it('should return true if page is embedded in CCT and is served by a proxy', () => {
+    it('should return true if page is in CCT and is served by a proxy', () => {
       viewerMock.isCctEmbedded.returns(true);
       viewerMock.isProxyOrigin.returns(true);
       return expect(api.isSupported()).to.be.true;
@@ -63,34 +64,33 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
   });
 
   describe('getScopedCid', () => {
-  beforeEach(() => {
+    beforeEach(() => {
       viewerMock.isCctEmbedded.returns(true);
       viewerMock.isProxyOrigin.returns(true);
-  });
+    });
 
     it('should use client ID API from api if everything great', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-           fetchJsonStub.returns(Promise.resolve({
-	json: () => {
-	  return Promise.resolve({
-	    publisherClientId: 'publisher-client-id-from-cache'
-	  });
-	}
+      fetchJsonStub.returns(Promise.resolve({
+        json: () => { return Promise.resolve({
+          publisherClientId: 'publisher-client-id-from-cache',
+        });
+        },
       }));
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(TEST_CID_);
         expect(fetchJsonStub)
             .to.be.calledWith(`https://ampcid.google.com/v1/cache:getClientId?key=${SERVICE_KEY_}`,
-            {
-              method: 'POST',
-              ampCors: false,
-              credentials: 'include',
-              mode: 'cors',
-              body: {
-                publisherOrigin: 'about:srcdoc',
-              },
-            });
+                {
+                  method: 'POST',
+                  ampCors: false,
+                  credentials: 'include',
+                  mode: 'cors',
+                  body: {
+                    publisherOrigin: 'about:srcdoc',
+                  },
+                });
       });
     });
 
@@ -112,51 +112,51 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       fetchJsonStub.returns(Promise.resolve({
-	json: () => {
+        json: () => {
 	  return Promise.resolve({
-	optOut: true
+            optOut: true,
 	  });
-	}
+        },
       }));
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
         expect(fetchJsonStub)
             .to.be.calledWith(`https://ampcid.google.com/v1/cache:getClientId?key=${SERVICE_KEY_}`,
-            {
-              method: 'POST',
-              ampCors: false,
-              credentials: 'include',
-              mode: 'cors',
-              body: {
-                publisherOrigin: 'about:srcdoc',
-              },
-            });
+                {
+                  method: 'POST',
+                  ampCors: false,
+                  credentials: 'include',
+                  mode: 'cors',
+                  body: {
+                    publisherOrigin: 'about:srcdoc',
+                  },
+                });
       });
     });
 
     it('should try alternative url if API provides', () => {
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
-    fetchJsonStub.onCall(0).returns(Promise.resolve({
-      json: () => {
-        return Promise.resolve({
-          alternateUrl: 'https://ampcid.google.co.uk/v1/cache:getClientId',
-        });
-      },
-    }));
-    fetchJsonStub.onCall(1).returns(Promise.resolve({
-      json: () => {
-        return Promise.resolve({
-          publisherClientId: 'publisher-client-id-from-cache',
-        });
-      },
-    }));
-    return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
-      expect(cid).to.equal(TEST_CID_);
-      expect(fetchJsonStub.getCall(1).args[0]).to.equal(
-          `https://ampcid.google.co.uk/v1/cache:getClientId?key=${SERVICE_KEY_}`);
-    });
+      fetchJsonStub.onCall(0).returns(Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            alternateUrl: 'https://ampcid.google.co.uk/v1/cache:getClientId',
+          });
+        },
+      }));
+      fetchJsonStub.onCall(1).returns(Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            publisherClientId: 'publisher-client-id-from-cache',
+          });
+        },
+      }));
+      return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
+        expect(cid).to.equal(TEST_CID_);
+        expect(fetchJsonStub.getCall(1).args[0]).to.equal(
+            `https://ampcid.google.co.uk/v1/cache:getClientId?key=${SERVICE_KEY_}`);
       });
+    });
 
   });
 

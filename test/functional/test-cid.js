@@ -87,7 +87,7 @@ describe('cid', () => {
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
-	search: 'f=0',
+        search: 'f=0',
       },
       crypto: {
         getRandomValues: array => {
