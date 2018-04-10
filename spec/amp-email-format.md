@@ -42,39 +42,15 @@ Hello, world.
 
 An AMP email message must:
 
-<table>
-  <tr>
-    <td>Rule</td>
-    <td>Description</td>
-  </tr>
-  <tr>
-    <td>Start with the <!doctype html> doctype.</td>
-    <td>Standard for HTML.</td>
-  </tr>
-  <tr>
-    <td>Contain a top-level <html ⚡4email> tag.
+| Rule | Description |
+| ---- | ----------- |
+| Start with the `<!doctype html>` doctype. | Standard for HTML. |
+| Contain a top-level `<html ⚡4email>` tag.<br>(`<html amp4email>` is accepted as well) | Identifies the document as AMPHTML Email. |
+| Contain `<head>` and `<body>` tags. | Optional in HTML but not in AMPHTML Email. |
+| Contain a `<meta charset="utf-8">` tag as the first child of their `<head>` tag. | Identifies the encoding for the page. |
+| Contain the amp4email boilerplate in the `<head>` :<br>`<style amp4email-boilerplate>body{visibility:hidden}</style><script async src="https://cdn.ampproject.org/v0.js"></script>` | CSS boilerplate to initially hide the content until AMP JS is loaded. |
 
-(<code>&lt;html amp4email&gt;</code> is accepted as well )</td>
-    <td>Identifies the document as AMPHTML Email. </td>
-  </tr>
-  <tr>
-    <td>Contain <head> and <body> tags.</td>
-    <td>Optional in HTML but not in AMPHTML Email. </td>
-  </tr>
-  <tr>
-    <td>Contain a <meta charset="utf-8"> tag as the first child of their <head> tag.</td>
-    <td>Identifies the encoding for the page.</td>
-  </tr>
-  <tr>
-    <td>Contain the amp4email boilerplate in the  <head> :
-<style amp4email-boilerplate>body{visibility:hidden}</style>
-<script async src="https://cdn.ampproject.org/v0.js"></script></td>
-    <td>CSS boilerplate to initially hide the content until AMP JS is loaded.
-</td>
-  </tr>
-</table>
-
-## AMP components
+## AMP Components
 
 The following is a proposed list of AMP components that are supported in AMP email messages. The components are grouped into the following categories:
 
@@ -84,110 +60,39 @@ The following is a proposed list of AMP components that are supported in AMP ema
 
 ### Dynamic Content
 
-<table>
-  <tr>
-    <td>Element</td>
-    <td>Description</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-form&gt;</code> [Example]</td>
-    <td>Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with <code>&lt;template type="amp-mustache"&gt;</code> to render a response.
-
-Note that submitting a form WILL NOT propagate a user’s cookies, even if they are already logged-into your service.
-
-Binding to the [action-xhr] attribute is also not allowed.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-selector&gt;</code> [Example]</td>
-    <td>A multi-select widget for use within a form.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-bind&gt;</code> and <code>&lt;amp-state&gt;</code> [Example]
-</td>
-    <td>Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.
-
-<code>&lt;amp-state&gt;</code> is used to remotely fetch the initial state machine values.
-
-Note: It is prohibited to bind an [href] or [src] value. It is also prohibited to use the print, navigate and goBack actions.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-list&gt;</code> [Example]</td>
-    <td>Remotely fetches JSON data that will be rendered by an <code>&lt;amp-mustache&gt;</code>.
-
-Binding to the [src] attribute is not allowed.   Including user credentials with credentials="include" is also prohibited.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;template type="amp-mustache"&gt;</code> [Example]</td>
-    <td>A Mustache template markup to render the results of an <code>&lt;amp-list&gt;</code> call.</td>
-  </tr>
-</table>
-
+| Element | Description |
+| ------- | ----------- |
+| `<amp-form>` [[Example](https://ampbyexample.com/components/amp-form/)] | Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with `<template type="amp-mustache">` to render a response. |
+| `<amp-selector>` [[Example](https://ampbyexample.com/components/amp-selector/)] | A multi-select widget for use within a form. |
+| `<amp-bind>` and `<amp-state>` [[Example](https://ampbyexample.com/components/amp-bind/)] | Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.<br><br>`<amp-state>` is used to remotely fetch the initial state machine values.<br><br>**Note:** It is prohibited to bind to `[href]` or `[src]`. It is also prohibited to use the `AMP.print`, `AMP.navigateTo` and `AMP.goBack` actions. |
+| `<amp-list>` [[Example](https://ampbyexample.com/components/amp-list/)] | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://www.ampproject.org/docs/reference/components/amp-mustache).<br><br>Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
+| `<template type="amp-mustache">` [[Example](https://ampbyexample.com/components/amp-mustache/)] | A Mustache template markup to render the results of an `amp-list` call. |
 
 ### Layout
 
-<table>
-  <tr>
-    <td>Element</td>
-    <td>Description</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-accordion&gt;</code> [Example]</td>
-    <td>A UI element that facilitates showing/hiding different sections.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-carousel&gt;</code> [Example]</td>
-    <td>A carousel UI component.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-sidebar&gt;</code> [Example]</td>
-    <td>A sidebar for navigational purposes.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-image-lightbox&gt;</code> [Example]</td>
-    <td>A lightbox for containing images.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-lightbox&gt;</code> [Example]</td>
-    <td>A lightbox for containing content.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-fit-text&gt;</code> [Example]</td>
-    <td>A helper component for fitting text within a certain area.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-timeago&gt;</code> [Example]</td>
-    <td>Provides a convenient way of rendering timestamps.</td>
-  </tr>
-</table>
-
+| Element | Description |
+| ------- | ----------- |
+| `<amp-accordion>` [[Example](https://ampbyexample.com/components/amp-accordion/)] | A UI element that facilitates showing/hiding different sections. |
+| `<amp-carousel>` [[Example](https://ampbyexample.com/components/amp-carousel/)] | A carousel UI component. |
+| `<amp-sidebar>` [[Example](https://ampbyexample.com/components/amp-sidebar/)] | A sidebar for navigational purposes. |
+| `<amp-image-lightbox>` [[Example](https://ampbyexample.com/components/amp-image-lightbox/)] | A lightbox for containing images. |
+| `<amp-lightbox>` [[Example](https://ampbyexample.com/components/amp-lightbox/)] | A lightbox for containing content. |
+| `<amp-fit-text>` [[Example](https://ampbyexample.com/components/amp-fit-text/)] | A helper component for fitting text within a certain area. |
+| `<amp-timeago>` [[Example](https://ampbyexample.com/components/amp-timeago/)] | Provides a convenient way of rendering timestamps. |
 
 ### Media
 
-<table>
-  <tr>
-    <td>Element</td>
-    <td>Description</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-img&gt;</code> [Example]</td>
-    <td>An AMP component that replaces <code>&lt;img&gt;</code>.
-
-Note: Binding to [src] is not allowed.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-anim&gt;</code> [Example]</td>
-    <td>Embeds GIF files.
-
-Note: Binding to [src] is not allowed.</td>
-  </tr>
-</table>
+| Element | Description |
+| ------- | ----------- |
+| `<amp-img>` [[Example](https://ampbyexample.com/components/amp-img/)] | An AMP component that replaces `<img>`.<br><br>**Note:** Binding to `[src]` is not allowed. |
+| `<amp-anim>` [[Example](https://ampbyexample.com/components/amp-anim/)] | Embeds GIF files.<br><br>**Note:** Binding to `[src]` is not allowed. |
 
 
 ## CSS requirements
 
 ### Specifying CSS in an AMP document
 
-All CSS in any AMP document must be included in a <style amp-custom> tag within the header. Inline style attributes are not allowed in AMP.
+All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header. Inline style attributes are not allowed in AMP.
 
 ```html
 ...
@@ -207,12 +112,11 @@ All CSS in any AMP document must be included in a <style amp-custom> tag within 
 </head>
 ```
 
-Note: The entire <style> tag cannot exceed 50,000 bytes. The validator will check for this.
-
+**Note:** The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
 
 ### Allowed CSS properties and selectors
 
-For a  comprehensive list of CSS properties and values that are allowed within email messages, see [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
+CSS allowed within email messages vary depending on the email provider. For  reference, the list of CSS properties and values allowed in Gmail can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
 
 ## Document dimensions
 
@@ -330,9 +234,9 @@ The following is a fictional email that shows interactivity features by using [`
 
 Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This MIME tree contains the message body and any attachments to the email.
 
-Embedding AMP within an email is simple, add a new MIME part with a content type of text/x-amp-html as a descendant of multipart/alternative. It should live alongside the existing text/html or text/plain parts. This ensures that the email message works on all clients.
+Embedding AMP within an email is simple, add a new MIME part with a content type of `text/x-amp-html` as a descendant of `multipart/alternative`. It should live alongside the existing `text/html` or `text/plain` parts. This ensures that the email message works on all clients.
 
-It is important to note that the text/x-amp-html part must be nested under a multipart/alternative node, it will not be recognized by the email client otherwise. See the following example:
+It is important to note that the `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise. See the following example:
 
 ```
 From:  Person A <persona@gmail.com>
@@ -375,7 +279,7 @@ To start, the email client strips out the `text/x-amp-html` part of the MIME tre
 
 There is no authentication for outgoing XHR calls from AMP email messages.  Every XHR request is considered anonymous. Email senders should not rely on cookies to authenticate outgoing XHR requests from emails.
 
-Note: There is also no plan to include things like OAuth tokens to authenticate a user to a request.
+**Note:** There is also no plan to include things like OAuth tokens to authenticate a user to a request.
 
 # Feedback & Support
 
