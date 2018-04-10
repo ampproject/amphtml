@@ -63,7 +63,8 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     function verifyClientIdApiInUse(used) {
       viewerMock.sendMessageAwaitResponse
           .returns(Promise.resolve('client-id-from-viewer'));
-      return api.getScopedCid(used ? API_KEY : undefined, 'AMP_ECID_GOOGLE').then(cid => {
+      return api.getScopedCid(used ? API_KEY : undefined,
+          'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal('client-id-from-viewer');
         const payload = dict({
           'scope': 'AMP_ECID_GOOGLE',
@@ -92,7 +93,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
         'clientIdApi': false,
         'canonicalOrigin': 'http://localhost:9876',
       })).returns(Promise.resolve('client-id-from-viewer'));
-      return expect(api.getScopedCid(API_KEY, 'NON_WHITELISTED_SCOPE'))
+      return expect(api.getScopedCid(undefined, 'NON_WHITELISTED_SCOPE'))
           .to.eventually.equal('client-id-from-viewer');
     });
 

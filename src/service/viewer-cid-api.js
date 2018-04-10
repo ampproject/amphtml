@@ -17,9 +17,6 @@
 import {Services} from '../services';
 import {dict} from '../utils/object';
 import {parseUrl} from '../url';
-import {user} from '../log';
-
-const TAG = 'ViewerCidApi';
 
 /**
  * Exposes CID API if provided by the Viewer.

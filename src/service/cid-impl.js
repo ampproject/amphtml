@@ -57,6 +57,12 @@ const CID_OPTOUT_STORAGE_KEY = 'amp-cid-optout';
 const CID_OPTOUT_VIEWER_MESSAGE = 'cidOptOut';
 
 /**
+ * Tag for debug logging.
+ * @const @private {string}
+ */
+const TAG_ = 'CID';
+
+/**
  * The name of the Google CID API as it appears in the meta tag to opt-in.
  * @const @private {string}
  */
