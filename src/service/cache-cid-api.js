@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * amp-lUSTQLTz0csodkt327ZRHm30PG-6sJOuZwTh-PPmzqRMGZrTCRBMJ8Pfdw8f_UGC
- * amp-lUSTQLTz0csodkt327ZRHm30PG-6sJOuZwTh-PPmzqRMGZrTCRBMJ8Pfdw8f_UGC
  */
 
 import {Services} from '../services';
@@ -68,7 +66,7 @@ export class CacheCidApi {
    * @returns {boolean}
    */
   isSupported() {
-    return this.isCctEmbedded() && this.viewer_.isProxyOrigin();
+    return this.viewer_.isCctEmbedded() && this.viewer_.isProxyOrigin();
   }
 
   /**
@@ -77,7 +75,6 @@ export class CacheCidApi {
    * @return {!Promise<?string>}
    */
   getScopedCid(scope) {
-    // promise for whether we do stuff at all
     if (!this.viewer_.isCctEmbedded()) {
       return Promise.resolve(null);
     }
@@ -100,9 +97,10 @@ export class CacheCidApi {
   /**
    * Returns scoped CID retrieved from the Viewer.
    * @param {string} url
+   * @param {boolean=} useAlternate
    * @return {!Promise<?string>}
    */
-  fetchCid_(url) {
+  fetchCid_(url, useAlternate=true) {
     const payload = dict({
       'publisherOrigin': getSourceOrigin(this.ampdoc_.win.location),
     });
@@ -122,16 +120,11 @@ export class CacheCidApi {
 	      return null;
 	    }
 	    const cid = response['publisherClientId'];
-            if (!cid && response['alternateUrl']) {
+            if (!cid && useAlternate && response['alternateUrl']) {
               // If an alternate url is provided, try again with the alternate url
               // The client is still responsible for appending API keys to the URL.
               const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
-              return this.fetchCid_(dev().assertString(alt))
-                  .then(altRes => {
-                    return altRes.json().then(altResponse => {
-		      return altResponse['publisherClientId'] || null;
-		    });
-                  });
+              return this.fetchCid_(dev().assertString(alt), false);
 	    }
             return cid;
 	  });
@@ -151,7 +144,7 @@ export class CacheCidApi {
    * Returns scoped CID extracted from the fetched publisherCid.
    * @param {string} publisherCid
    * @param {string} scope
-   * @return {?string}
+   * @return {!Promise<string>}
    */
   scopeCid_(publisherCid, scope) {
     if (!publisherCid) {
