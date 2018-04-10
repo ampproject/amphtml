@@ -18,7 +18,7 @@ limitations under the License.
 
 AMP is a technology commonly known for developing super fast web pages on mobile clients. AMP is in fact a set of HTML tags backed by JavaScript that allow all kinds of functionality with a focus on performance and security.
 
-There are AMP components for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints. The AMP for Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email message.
+There are [AMP components](https://www.ampproject.org/docs/reference/components) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints. The AMPHTML Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email message.
 
 ## The AMPHTML Email Format
 
@@ -54,12 +54,12 @@ An AMP email message must:
   <tr>
     <td>Contain a top-level <html ⚡4email> tag.
 
-(<html amp4email> is accepted as well )</td>
-    <td>Identifies the document as AMP for Email. </td>
+(<code>&lt;html amp4email&gt;</code> is accepted as well )</td>
+    <td>Identifies the document as AMPHTML Email. </td>
   </tr>
   <tr>
     <td>Contain <head> and <body> tags.</td>
-    <td>Optional in HTML but not in AMP for Email. </td>
+    <td>Optional in HTML but not in AMPHTML Email. </td>
   </tr>
   <tr>
     <td>Contain a <meta charset="utf-8"> tag as the first child of their <head> tag.</td>
@@ -222,17 +222,17 @@ For a  comprehensive list of CSS properties and values that are allowed within e
 
 # Validation tools
 
-To ensure your email messages meet the strict criteria for the AMP for Email format, validate your content with one of the following tools:
+To ensure your email messages meet the strict criteria for the AMPHTML Email format, validate your content with one of the following tools:
 
 ## Web-based validator
 
 A web-based validator is available at [https://validator.ampproject.org/](https://validator.ampproject.org/)
 
-Simply paste in the AMP HTML to ensure the document meets all the AMP for Email restrictions. This tool shows you the validation errors directly inline.
+Simply paste in the AMP HTML to ensure the document meets all the AMPHTML Email restrictions. This tool shows you the validation errors directly inline.
 
 ## Command-line validator
 
-A command-line validation tool is also available for validating your AMP for Email document.
+A command-line validation tool is also available for validating your AMPHTML Email document.
 
 **Installation**
 
@@ -256,7 +256,7 @@ amp_email.html
 
 # Examples
 
-This section provides some AMP for Email code examples.
+This section provides some AMPHTML Email code examples.
 
 ## Basic usage of `<amp-list>`
 
