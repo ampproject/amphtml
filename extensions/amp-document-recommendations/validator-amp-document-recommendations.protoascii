@@ -36,6 +36,15 @@ tags: {  # amp-document-recommendations: json config
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-document-recommendations"
 }
+tags: {
+  tag_name: "DIV"
+  spec_name: "AMP-DOCUMENT-RECOMMENDATIONS > DIV [separator]"
+  mandatory_parent: "AMP-DOCUMENT-RECOMMENDATIONS"
+  attrs: {
+    name: "separator"
+    mandatory: true
+  }
+}
 tags: {  # <amp-document-recommendations>
   html_format: AMP
   tag_name: "AMP-DOCUMENT-RECOMMENDATIONS"
