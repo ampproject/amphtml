@@ -295,7 +295,7 @@ export const repeated = (function() {
  * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
  */
 function attachFetchMock(env) {
-  fetchMock.constructor.global = env.win;
+  fetchMock.global = env.win;
   fetchMock._mock();
 
   env.fetchMock = fetchMock;
