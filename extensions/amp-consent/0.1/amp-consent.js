@@ -213,7 +213,7 @@ export class AmpConsent extends AMP.BaseElement {
   show_(instanceId) {
     dev().assert(!this.currentDisplayInstance_,
         'Other consent instance on display');
-    return this.vsync_.mutatePromise(() => {
+    this.vsync_.mutate(() => {
       if (!this.uiInit_) {
         this.uiInit_ = true;
         toggle(this.element, true);
@@ -227,10 +227,10 @@ export class AmpConsent extends AMP.BaseElement {
       this.currentDisplayInstance_ = instanceId;
       setImportantStyles(this.consentUI_[this.currentDisplayInstance_],
           {display: 'block'});
-    }).then(() => {
-      return new Promise(resolve => {
-        this.dialogResolver_[instanceId] = resolve;
-      });
+    });
+
+    return new Promise(resolve => {
+      this.dialogResolver_[instanceId] = resolve;
     });
   }
 
@@ -238,16 +238,16 @@ export class AmpConsent extends AMP.BaseElement {
    * Hide current prompt UI
    */
   hide_() {
+    const uiToHide = this.currentDisplayInstance_ &&
+        this.consentUI_[this.currentDisplayInstance_];
     this.vsync_.mutate(() => {
       this.element.classList.add('amp-hidden');
       this.element.classList.remove('amp-active');
       // Do not remove from fixed layer because of invoke button
       // this.getViewport().removeFromFixedLayer(this.element);
-      dev().assert(this.currentDisplayInstance_
-          && this.consentUI_[this.currentDisplayInstance_],
-      'no consent UI to hide');
+      dev().assert(uiToHide, 'no consent UI to hide');
 
-      toggle(this.consentUI_[this.currentDisplayInstance_], false);
+      toggle(uiToHide, false);
     });
     if (this.dialogResolver_[this.currentDisplayInstance_]) {
       this.dialogResolver_[this.currentDisplayInstance_]();
