@@ -254,7 +254,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'scr_x': viewport.getScrollLeft(),
           'scr_y': viewport.getScrollTop(),
           'debug_experiment_id':
-              (/(^|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
+              (/(?:^|,)deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?

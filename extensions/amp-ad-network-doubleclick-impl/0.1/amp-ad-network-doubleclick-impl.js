@@ -228,7 +228,7 @@ const BLOCK_SRA_COMBINERS_ = [
       if (currEids) {
         currEids.split(',').forEach(eid => eids[eid] = 1);
       }
-      const deid = /(^|,)deid=(\d+)/i.exec(instance.win.location.hash);
+      const deid = /(?:^|,)deid=(\d+)/i.exec(instance.win.location.hash);
       if (deid) {
         eids[deid[0]] = 1;
       }
