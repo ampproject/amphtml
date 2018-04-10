@@ -251,10 +251,6 @@ describes.realWin('amp-consent', {
       consentElement.appendChild(scriptElement);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
-      sandbox.stub(ampConsent.vsync_, 'mutatePromise').callsFake(fn => {
-        fn();
-        return Promise.resolve();
-      });
       sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
         fn();
       });
