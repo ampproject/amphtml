@@ -50,9 +50,9 @@ const SERVICE_KEY_ = 'AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc';
 
 /**
  * Tag for debug logging.
- * @const {string}
+ * @const @private {string}
  */
-const TAG = 'CacheCidApi';
+const TAG_ = 'CacheCidApi';
 
 /**
  * The URL for the cache-served CID API.
@@ -136,7 +136,7 @@ export class CacheCidApi {
 
     // Make the XHR request to the cache endpoint.
     return this.timer_.timeoutPromise(
-        TIMEOUT,
+        TIMEOUT_,
         Services.xhrFor(this.ampdoc_.win).fetchJson(url, {
           method: 'POST',
           ampCors: false,
@@ -160,10 +160,10 @@ export class CacheCidApi {
         }).catch(e => {
           if (e && e.response) {
             e.response.json().then(res => {
-              dev().error(TAG, JSON.stringify(res));
+              dev().error(TAG_, JSON.stringify(res));
             });
           } else {
-            dev().error(TAG, e);
+            dev().error(TAG_, e);
           }
           return null;
         }));
@@ -219,7 +219,7 @@ export class CacheCidApi {
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];
           } else {
-            user().error(TAG,
+            user().error(TAG_,
                 `Unsupported client for Google CID API: ${clientName}`);
           }
         }
