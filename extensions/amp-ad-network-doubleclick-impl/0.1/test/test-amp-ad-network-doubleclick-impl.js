@@ -43,13 +43,13 @@ import {
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
-import {SAFEFRAME_ORIGIN} from '../safeframe-host';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
+import {SAFEFRAME_ORIGIN} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {
