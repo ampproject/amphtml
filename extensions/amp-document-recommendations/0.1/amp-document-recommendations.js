@@ -98,7 +98,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.positionObserver_ = getServiceForDoc(ampDoc, 'position-observer');
 
     /** @private @const {!Array<!DocumentRef>} */
-    this.documentRef_ = [{
+    this.documentRefs_ = [{
       ampUrl: this.win.document.location.href,
       amp: {title: this.win.document.title},
     }];
@@ -241,10 +241,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     const scriptElements = childElementsByTag(this.element, 'SCRIPT');
     user().assert(scriptElements.length == 1,
-        'The tag should contain only one <script> child.');
+        `${TAG} should contain only one <script> child.`);
     const scriptElement = scriptElements[0];
     user().assert(isJsonScriptTag(scriptElement),
-        'The amp-document-recommendations config should ' +
+        `${TAG} config should ` +
             'be inside a <script> tag with type="application/json"');
     const configJson = tryParseJson(scriptElement.textContent, error => {
       throw user().createError(
@@ -257,7 +257,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
     user().assert(separatorElements.length <= 1,
-        'The tag should contain at most one <div separator> child.');
+        `${TAG} should contain at most one <div separator> child`);
 
     if (separatorElements.length == 1) {
       this.separator_ = separatorElements[0];
