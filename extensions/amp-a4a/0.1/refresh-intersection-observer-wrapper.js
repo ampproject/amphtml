@@ -27,6 +27,9 @@ export class RefreshIntersectionObserverWrapper {
    */
   constructor(callback, baseElement, config) {
 
+    /**
+     * @private @const {!IntersectionObserverPolyfill}
+     */
     this.intersectionObserver_ = new IntersectionObserverPolyfill(
         callback, config);
 
