@@ -942,8 +942,10 @@ describes.realWin('amp-selector', {
             multiple: true,
           },
         });
-        return expect(ampSelector.build()).to.eventually.be.rejectedWith(
-            /not supported for multiple selection amp-selector​​​/);
+        allowConsoleError(() => {
+          return expect(ampSelector.build()).to.eventually.be.rejectedWith(
+              /not supported for multiple selection amp-selector​​​/);
+        });
       });
 
       it('should ONLY change selection in `select` mode', () => {

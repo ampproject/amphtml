@@ -48,20 +48,26 @@ describe('amp-document-recommendations config', () => {
     });
 
     it('throws on null config', () => {
-      expect(() => assertConfig(null, host))
-          .to.throw('amp-document-recommendations config must be specified');
+      allowConsoleError(() => {
+        expect(() => assertConfig(null, host)).to.throw(
+            'amp-document-recommendations config must be specified');
+      });
     });
 
     it('throws on config with no "recommendations" key', () => {
       const config = {};
-      expect(() => assertConfig(config, host))
-          .to.throw('recommendations must be an array');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'recommendations must be an array');
+      });
     });
 
     it('throws on config with non-array "recommendations" key', () => {
       const config = {recommendations: {}};
-      expect(() => assertConfig(config, host))
-          .to.throw('recommendations must be an array');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'recommendations must be an array');
+      });
     });
 
     it('throws on config with missing recommendation title', () => {
@@ -71,8 +77,10 @@ describe('amp-document-recommendations config', () => {
           image: 'https://example.com/image.png',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('title must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'title must be a string');
+      });
     });
 
     it('throws on config with non-string recommendation title', () => {
@@ -83,8 +91,10 @@ describe('amp-document-recommendations config', () => {
           title: {},
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('title must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'title must be a string');
+      });
     });
 
     it('throws on config with missing recommendation image', () => {
@@ -94,8 +104,10 @@ describe('amp-document-recommendations config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('image must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'image must be a string');
+      });
     });
 
     it('throws on config with non-string recommendation image', () => {
@@ -106,8 +118,10 @@ describe('amp-document-recommendations config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('image must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'image must be a string');
+      });
     });
 
     it('throws on config with recommendations from different domains', () => {
@@ -120,10 +134,11 @@ describe('amp-document-recommendations config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw(
-              'recommendations must be from the same host as the current' +
-              ' document');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'recommendations must be from the same host as the current' +
+            ' document');
+      });
     });
 
     it('throws on config with recommendations from different subdomains',
@@ -137,10 +152,11 @@ describe('amp-document-recommendations config', () => {
               },
             ],
           };
-          expect(() => assertConfig(config, host))
-              .to.throw(
-                  'recommendations must be from the same host as the current' +
-                  ' document');
+          allowConsoleError(() => {
+            expect(() => assertConfig(config, host)).to.throw(
+                'recommendations must be from the same host as the current' +
+                ' document');
+          });
         });
 
     it('throws on config with recommendations on different ports', () => {
@@ -153,10 +169,11 @@ describe('amp-document-recommendations config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw(
-              'recommendations must be from the same host as the current' +
-              ' document');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host)).to.throw(
+            'recommendations must be from the same host as the current' +
+            ' document');
+      });
     });
   });
 });
