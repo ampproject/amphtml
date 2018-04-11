@@ -195,8 +195,7 @@ export class AccessIframeAdapter {
   authorizeRemote_() {
     return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('authorize', {});
-    }).then(response => {
-      const data = response['data'];
+    }).then(data => {
       if (data) {
         // Store the value in a non-blocking microtask.
         Promise.resolve().then(() => this.store_(data));

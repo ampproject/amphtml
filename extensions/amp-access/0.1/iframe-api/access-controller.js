@@ -35,10 +35,7 @@ export class AccessController {
 
   /**
    * Authorize document.
-   * @return {!Promise<{
-   *   granted: boolean,
-   *   data: !JsonObject,
-   * }>}
+   * @return {!Promise<!JsonObject>}
    */
   authorize() {}
 
