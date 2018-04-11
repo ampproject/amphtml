@@ -1,10 +1,3 @@
-import {Dialog} from '../dialog';
-import {Entitlement} from '../entitlement';
-import {PageConfig} from '../../../../third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
-import {getWinOrigin} from '../../../../src/url';
-
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -20,6 +13,14 @@ import {getWinOrigin} from '../../../../src/url';
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
+import {PageConfig} from '../../../../third_party/subscriptions-project/config';
+import {ServiceAdapter} from '../service-adapter';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {getWinOrigin} from '../../../../src/url';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   let ampdoc, win;

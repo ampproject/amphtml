@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import {Entitlement} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
