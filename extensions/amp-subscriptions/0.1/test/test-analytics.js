@@ -17,11 +17,12 @@
 import {SubscriptionAnalytics} from '../analytics';
 
 
-describes.realWin('SubscriptionAnalytics', {amp: true}, () => {
+describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
   let analytics;
-
+  let ampdoc;
   beforeEach(() => {
-    analytics = new SubscriptionAnalytics();
+    ampdoc = env.ampdoc;
+    analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
   });
 
   it('should not fail', () => {
