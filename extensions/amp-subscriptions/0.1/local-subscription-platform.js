@@ -38,7 +38,7 @@ export class LocalSubscriptionPlatform {
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
-    /** @const */
+    /** @private @const */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
@@ -91,7 +91,7 @@ export class LocalSubscriptionPlatform {
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog());
 
-    /** {?Entitlement}*/
+    /** @private {?Entitlement}*/
     this.entitlement_ = null;
 
     /** @private @const {boolean} */

@@ -18,23 +18,33 @@ import {Entitlement} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {user} from '../../../src/log';
 /**
  * This implements the methods to interact with viewer subscription platform.
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
-export class ViewerSubscriptionPlatform extends LocalSubscriptionPlatform {
+export class ViewerSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {string} publicationId
+   * @param {string} currentProductId
+   * @param {string} origin
    */
-  constructor(ampdoc, platformConfig, serviceAdapter) {
-    super(ampdoc, platformConfig, serviceAdapter);
+  constructor(ampdoc, platformConfig, serviceAdapter,
+    publicationId, currentProductId, origin) {
+
+    /** @private @const */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const @private {!LocalSubscriptionPlatform} */
+    this.platform_ = new LocalSubscriptionPlatform(
+        ampdoc, platformConfig, serviceAdapter);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
@@ -42,34 +52,21 @@ export class ViewerSubscriptionPlatform extends LocalSubscriptionPlatform {
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
 
-    /** @private {?string} */
-    this.publicationId_ = null;
-
-    /** @private {?string} */
-    this.currentProductId_ = null;
-
-    /** @private {?string} */
-    this.origin_ = null;
-  }
-
-  /**
-   * Set details to send mesage to viewer;
-   * @param {string} publicationId
-   * @param {string} currentProductId
-   * @param {string} origin
-   */
-  setMessageDetails(publicationId, currentProductId, origin) {
+    /** @private {string} */
     this.publicationId_ = publicationId;
+
+    /** @private {string} */
     this.currentProductId_ = currentProductId;
+
+    /** @private {string} */
     this.origin_ = origin;
+
+    /** @private {?Entitlement}*/
+    this.entitlement_ = null;
   }
 
   /** @override */
   getEntitlements() {
-    dev().assert(this.publicationId_, 'Publication id is missing');
-    dev().assert(this.currentProductId_, 'Publication id is missing');
-    dev().assert(this.origin_, 'Publication id is missing');
-
     return this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
@@ -146,7 +143,26 @@ export class ViewerSubscriptionPlatform extends LocalSubscriptionPlatform {
   }
 
   /** @override */
+  getServiceId() {
+    return this.platform_.getServiceId();
+  }
+
+  /** @override */
   activate() {
-    user().error('This platform should not be activated');
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    this.platform_.isPingbackEnabled();
+  }
+
+  /** @override */
+  pingback(selectedPlatform) {
+    this.platform_.pingback(selectedPlatform);
+  }
+
+  /** @override */
+  supportsCurrentViewer() {
+    this.platform_.supportsCurrentViewer();
   }
 }
