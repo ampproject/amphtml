@@ -21,7 +21,11 @@
     };
     Controller.prototype.authorize = function() {
       log('authorize');
-      return {granted: true, data: {}};
+      // This is the JSON expected in the article-access-iframe.amp.html.
+      return Promise.resolve({
+        views: 3,
+        maxViews: 5
+      });
     };
     Controller.prototype.pingback = function() {
       log('pingback');
