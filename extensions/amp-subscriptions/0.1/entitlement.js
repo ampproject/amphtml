@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
 /** @typedef {{left: number, total: number, resetTime: number, durationUnit: string, token: string}} */
@@ -101,7 +102,8 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    return this.product_ ? this.enables(this.product_) : false;
+    dev().assert(this.product_, 'Current Product is not set');
+    return this.enables(this.product_);
   }
 
   /**

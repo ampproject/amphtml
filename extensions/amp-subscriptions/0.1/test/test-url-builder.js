@@ -16,7 +16,7 @@
 
 import {UrlBuilder} from '../url-builder';
 
-describes.realWin('UrlBuilder', {amp: true}, env => {
+describes.fakeWin('UrlBuilder', {amp: true}, env => {
   let ampdoc;
   let readerIdPromise;
   let urlBuilder;
