@@ -16,10 +16,14 @@
 
 
 import {dashToUnderline} from '../../../src/string';
+import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
+import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
+import {startsWith} from '../../../src/string';
 
 class AmpFacebookLike extends AMP.BaseElement {
 
@@ -34,6 +38,9 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.dataLocale_ = element.hasAttribute('data-locale') ?
       element.getAttribute('data-locale') :
       dashToUnderline(window.navigator.language);
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /** @override */
@@ -67,13 +74,39 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this.attemptChangeHeight(data['height']).catch(() => {
-        /* ignore failures */
-      });
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+    );
+    this.toggleLoading(true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /** @private */
+  handleFacebookMessages_(event) {
+    if (this.iframe_ && event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+      return; // Doesn't look like JSON.
+    }
+
+    /** @const {?JsonObject} */
+    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
+      ? getData(event)
+      : parseJson(getData(event)));
+    if (eventData === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (eventData['action'] == 'ready') {
+      this.toggleLoading(false);
+    }
   }
 
   /** @override */
