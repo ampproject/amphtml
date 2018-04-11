@@ -544,7 +544,7 @@ export class Viewer {
     const canonicalUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
     const canonicalSourceOrigin = getSourceOrigin(canonicalUrl);
     if (this.hasRoughlySameOrigin_(sourceOrigin, canonicalSourceOrigin)) {
-      const oldFragment = getFragment(this.win.location.href || this.win.location.originalHash);
+      const oldFragment = getFragment(this.win.location.originalHash || this.win.location.href);
       const newFragment = 'ampshare=' + encodeURIComponent(canonicalUrl);
       // Attempt to merge the fragments, if an old fragment was present.
       this.win.history.replaceState({}, '',

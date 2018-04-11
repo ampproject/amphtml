@@ -201,7 +201,7 @@ describe('Viewer', () => {
         'http://www.example.com');
     expect(viewer.getParam('click')).to.equal('abc');
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+        '#click=abc&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
   it('should configure visibilityState visible by default', () => {
