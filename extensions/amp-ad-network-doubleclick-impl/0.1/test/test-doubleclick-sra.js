@@ -160,6 +160,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           width: 250,
           'data-slot': '/1234/def/xyz',
           'json': JSON.stringify(targeting2),
+          'data-multi-size-validation': 'false',
+          'data-multi-size': '1x2,3x4',
         };
         const element2 =
           createElementWithAttributes(doc, 'amp-ad', config2);
@@ -172,7 +174,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           'iu_parts': '1234,abc,def,xyz',
           'enc_prev_ius': '0/1/2,0/2/3',
           adks: '13579,2468',
-          'prev_iu_szs': '50x320,250x300',
+          'prev_iu_szs': '50x320,250x300|1x2|3x4',
           'prev_scp':
             'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
           co: '1',
