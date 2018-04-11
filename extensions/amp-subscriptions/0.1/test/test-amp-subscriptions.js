@@ -146,7 +146,9 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       expect(factoryStub.getCall(0).args[1]).to.be.equal(
           subscriptionService.serviceAdapter_);
       expect(analyticsEventStub).to.be.calledWith(
-          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED);
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          'local'
+      );
     });
   });
 

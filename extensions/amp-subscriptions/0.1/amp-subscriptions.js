@@ -178,8 +178,10 @@ export class SubscriptionService {
 
       this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
           subscriptionPlatform);
-      this.subscriptionAnalytics_.event(
-          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED);
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          subscriptionPlatform.getServiceId()
+      );
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
