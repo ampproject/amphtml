@@ -719,24 +719,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
   }
-  
+
   /**
    * Returns the referrer or undefined if the referrer is not resolved
    * before the given timeout
    * @param {number=} opt_timeout
-   * @return {!Promise<string|undefined>} A promise for a referrer or undefined 
+   * @return {!Promise<string|undefined>} A promise for a referrer or undefined
    * @private
    */
   getReferrer_(opt_timeout) {
     const timeoutInt = parseInt(opt_timeout, 10);
-    const refererPromise = Services.viewerForDoc(this.getAmpDoc())
-      .getReferrerUrl();
-    if (opt_timeout == null || isNaN(opt_timeout) || opt_timeout < 0) {
-      return refererPromise;
+    const referrerPromise = Services.viewerForDoc(this.getAmpDoc())
+        .getReferrerUrl();
+    if (isNaN(timeoutInt) || timeoutInt < 0) {
+      return referrerPromise;
     }
     return Services.timerFor(this.win)
-      .timeoutPromise(opt_timeout, refererPromise)
-      .catch(() => undefined);
+        .timeoutPromise(timeoutInt, referrerPromise)
+        .catch(() => undefined);
   }
 
   /**

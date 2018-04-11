@@ -362,9 +362,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       const viewer = Services.viewerForDoc(impl.getAmpDoc());
       sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      return customMacros.REFERRER(0).then(referrer => {
-        expect(referrer).to.be.undefined;
-      });
+      return expect(customMacros.REFERRER(0)).to.eventually.be.undefined;
     });
 
     it('should handle TGT macro when targeting not set', () => {
