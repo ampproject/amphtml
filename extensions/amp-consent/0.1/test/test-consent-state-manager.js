@@ -197,8 +197,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(value).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
-      // TODO(zhouyx, #14336): Fails due to console errors.
-      it.skip('should return unknown value with error', function* () {
+      it('should return unknown value with error', function* () {
         let value;
         storageGetSpy = () => {
           const e = new Error('intentional');

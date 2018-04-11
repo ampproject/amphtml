@@ -134,9 +134,7 @@ describes.realWin('amp-youtube', {
       });
     });
 
-
-    // TODO(cathyxz, #14336): Fails due to console errors.
-    it.skip('should pass data-param-* attributes to the iframe src', () => {
+    it('should pass data-param-* attributes to the iframe src', () => {
       return getYt({
         'data-videoid': datasource,
         'data-param-autoplay': '1',

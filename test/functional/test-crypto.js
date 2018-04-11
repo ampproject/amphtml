@@ -129,14 +129,13 @@ describes.realWin('crypto-impl', {}, env => {
       },
     },
   });
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  // testSuite('with native crypto API throws', {
-  //   crypto: {
-  //     subtle: {
-  //       digest: () => {throw new Error();},
-  //     },
-  //   },
-  // });
+  testSuite('with native crypto API throws', {
+    crypto: {
+      subtle: {
+        digest: () => {throw new Error();},
+      },
+    },
+  });
 
   it('native API result should exactly equal to crypto lib result', () => {
     return Promise
