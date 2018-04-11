@@ -21,7 +21,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import { SubscriptionAnalytics } from '../analytics';
 
-describes.fakeWin('local-subscriptions', {amp: true}, env => {
+describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
