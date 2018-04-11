@@ -266,13 +266,28 @@ describes.realWin('amp-analytics', {
     }
   });
 
-  // TODO(jonkeller, #14336): Fails due to console errors.
-  it.skip('does not unnecessarily preload iframe transport script', function() {
+  it('does not unnecessarily preload iframe transport script', function() {
     const el = doc.createElement('amp-analytics');
+    el.setAttribute('type', 'foo');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     const preloadSpy = sandbox.spy(analytics, 'preload');
+    sandbox.stub(analytics, 'predefinedConfig_').value(
+        {
+          'foo': {
+            'triggers': {
+              'sample_visibility_trigger': {
+                'on': 'visible',
+                'request': 'sample_visibility_request',
+              },
+            },
+            'requests': {
+              'sample_visibility_request': 'fake-request',
+            },
+          },
+        }
+    );
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
