@@ -374,7 +374,7 @@ describes.realWin('amp-story', {
 
 describes.realWin('amp-story origin whitelist', {
   amp: {
-    extensions: ['amp-story'],
+    extensions: ['amp-story:1.0'],
   },
 }, env => {
   let win;

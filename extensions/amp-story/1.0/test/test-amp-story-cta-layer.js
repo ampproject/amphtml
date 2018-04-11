@@ -19,7 +19,7 @@ import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
 describes.realWin('amp-story-cta-layer', {
   amp: {
     runtimeOn: true,
-    extensions: ['amp-story'],
+    extensions: ['amp-story:1.0'],
   },
 }, env => {
   let win;
