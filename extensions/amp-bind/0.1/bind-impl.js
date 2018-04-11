@@ -283,7 +283,7 @@ export class Bind {
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
-   * @param {!Node|null} titleNode
+   * @param {Node} titleNode
    * @return {!Promise}
    * @private
    */
@@ -875,7 +875,7 @@ export class Bind {
       case 'text':
         element.textContent = String(newValue);
         if (tag === 'TITLE') {
-          this.win_.document.title = String(newValue);
+          this.localWin_.document.title = String(newValue);
         }
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
