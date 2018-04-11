@@ -82,12 +82,14 @@ describe('batchFetchJsonFor', () => {
       urlReplacements.collectUnwhitelistedVars
           .withArgs(el)
           .returns(Promise.resolve(['BAR']));
-      const userError = sandbox.stub(user(), 'error');
-
-      const optIn = UrlReplacementPolicy.OPT_IN;
-      return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
-        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(userError).calledWithMatch('AMP-LIST', /data-amp-replace="BAR"/);
+      allowConsoleError(() => {
+        const userError = sandbox.stub(user(), 'error');
+        const optIn = UrlReplacementPolicy.OPT_IN;
+        return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
+          expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
+          expect(userError).calledWithMatch(
+              'AMP-LIST', /data-amp-replace="BAR"/);
+        });
       });
     });
 
@@ -97,13 +99,14 @@ describe('batchFetchJsonFor', () => {
       urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
-      const userError = sandbox.stub(user(), 'error');
-
-      const all = UrlReplacementPolicy.ALL;
-      return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
-        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
-        expect(userError).to.not.be.called;
+      allowConsoleError(() => {
+        const userError = sandbox.stub(user(), 'error');
+        const all = UrlReplacementPolicy.ALL;
+        return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
+          expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
+          expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
+          expect(userError).to.not.be.called;
+        });
       });
     });
   });

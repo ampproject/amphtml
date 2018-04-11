@@ -45,9 +45,9 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
 
     it('should require vendor name', () => {
       delete validConfig['vendor'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessVendorAdapter(ampdoc, validConfig);
-      }).to.throw(/"vendor" name must be specified/);
+      }).to.throw(/"vendor" name must be specified/); });
     });
 
     it('should wait on registration', () => {
@@ -65,9 +65,9 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
       const adapter = new AccessVendorAdapter(ampdoc, validConfig);
       expect(adapter.vendorResolve_).to.exist;
       adapter.registerVendor('vendor1', {});
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         adapter.registerVendor('vendor2', {});
-      }).to.throw(/Vendor has already been registered/);
+      }).to.throw(/Vendor has already been registered/); });
     });
   });
 

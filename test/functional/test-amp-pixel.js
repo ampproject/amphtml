@@ -100,20 +100,26 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should disallow http URLs', () => {
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually
-        .rejectedWith(/src attribute must start with/);
+    allowConsoleError(() => {
+      return expect(trigger(url)).to.eventually.be.rejectedWith(
+          /src attribute must start with/);
+    });
   });
 
   it('should disallow relative URLs', () => {
     const url = '/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually
-        .rejectedWith(/src attribute must start with/);
+    allowConsoleError(() => {
+      return expect(trigger(url)).to.eventually.be.rejectedWith(
+          /src attribute must start with/);
+    });
   });
 
   it('should disallow fake-protocol URLs', () => {
     const url = 'https/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually
-        .rejectedWith(/src attribute must start with/);
+    allowConsoleError(() => {
+      return expect(trigger(url)).to.eventually.be.rejectedWith(
+          /src attribute must start with/);
+    });
   });
 
   it('should replace URL parameters', () => {
@@ -127,14 +133,16 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   it('should throw for referrerpolicy with value other than ' +
       'no-referrer', () => {
-    return createPixel(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
-        'origin')
-        .then(() => {
-          throw new Error('must have failed.');
-        }, reason => {
-          expect(reason.message).to.match(/referrerpolicy/);
-        });
+    allowConsoleError(() => {
+      return createPixel(
+          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
+          'origin')
+          .then(() => {
+            throw new Error('must have failed.');
+          }, reason => {
+            expect(reason.message).to.match(/referrerpolicy/);
+          });
+    });
   });
 });
 

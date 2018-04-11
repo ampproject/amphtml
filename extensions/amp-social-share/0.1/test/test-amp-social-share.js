@@ -79,23 +79,29 @@ describes.realWin('amp-social-share', {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'unknown-provider');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /data-share-endpoint attribute is required/);
+    allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /data-share-endpoint attribute is required/);
+    });
   });
 
   it('errors if type is missing', () => {
     const share = doc.createElement('amp-social-share');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /type attribute is required/);
+    allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /type attribute is required/);
+    });
   });
 
   it('errors if type has space characters', () => {
     const share = doc.createElement('amp-social-share');
     share.setAttribute('type', 'hello world');
     doc.body.appendChild(share);
-    return expect(loaded(share)).to.be.eventually.rejectedWith(
-        /Space characters are not allowed in type attribute value/);
+    allowConsoleError(() => {
+      return expect(loaded(share)).to.eventually.be.rejectedWith(
+          /Space characters are not allowed in type attribute value/);
+    });
   });
 
   it('renders unconfigured providers if share endpoint provided', () => {

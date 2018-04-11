@@ -339,16 +339,16 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://example.com/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window);
-    }).to.throw(/meta source must start with "https/);
+    }).to.throw(/meta source must start with "https/); });
   });
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window, true);
-    }).to.throw(/must not be on the same origin as the/);
+    }).to.throw(/must not be on the same origin as the/); });
   });
 
   // TODO(keithwrightbos, #14336): Fails due to console errors.

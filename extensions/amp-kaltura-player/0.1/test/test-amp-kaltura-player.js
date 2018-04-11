@@ -72,10 +72,11 @@ describes.realWin('amp-kaltura-player', {
   });
 
   it('requires data-account', () => {
-    return getKaltura({}).then(kp => {
+    allowConsoleError(() => { return getKaltura({}).then(kp => {
       kp.build();
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);
+    });
   });
 
   it('should pass data-param-* attributes to the iframe src', () => {

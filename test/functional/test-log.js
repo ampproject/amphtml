@@ -298,9 +298,9 @@ describe('Logging', () => {
     });
 
     it('should fail', () => {
-      expect(function() {
+      allowConsoleError(() => { expect(function() {
         log.assert(false, 'xyz');
-      }).to.throw(/xyz/);
+      }).to.throw(/xyz/); });
       try {
         log.assert(false, '123');
       } catch (e) {
@@ -318,18 +318,18 @@ describe('Logging', () => {
     });
 
     it('should substitute', () => {
-      expect(function() {
+      allowConsoleError(() => { expect(function() {
         log.assert(false, 'should fail %s', 'XYZ');
-      }).to.throw(/should fail XYZ/);
-      expect(function() {
+      }).to.throw(/should fail XYZ/); });
+      allowConsoleError(() => { expect(function() {
         log.assert(false, 'should fail %s %s', 'XYZ', 'YYY');
-      }).to.throw(/should fail XYZ YYY/);
+      }).to.throw(/should fail XYZ YYY/); });
       const div = document.createElement('div');
       div.id = 'abc';
       div.textContent = 'foo';
-      expect(function() {
+      allowConsoleError(() => { expect(function() {
         log.assert(false, 'should fail %s', div);
-      }).to.throw(/should fail div#abc/);
+      }).to.throw(/should fail div#abc/); });
 
       let error;
       try {
@@ -430,15 +430,15 @@ describe('Logging', () => {
     });
 
     it('should should identify non-elements', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         log.assertElement(document);
-      }).to.throw(/Element expected: /);
-      expect(() => {
+      }).to.throw(/Element expected: /); });
+      allowConsoleError(() => { expect(() => {
         log.assertElement(null);
-      }).to.throw(/Element expected: null/);
-      expect(() => {
+      }).to.throw(/Element expected: null/); });
+      allowConsoleError(() => { expect(() => {
         log.assertElement(null, 'custom error');
-      }).to.throw(/custom error: null/);
+      }).to.throw(/custom error: null/); });
     });
   });
 
@@ -458,16 +458,13 @@ describe('Logging', () => {
     });
 
     it('should fail with on non string', () => {
-      expect(() => log.assertString({}))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(3))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(null))
-          .to.throw('String expected: ');
-      expect(() => log.assertString(undefined))
-          .to.throw('String expected: ');
-      expect(() => log.assertString([]))
-          .to.throw('String expected: ');
+      allowConsoleError(() => {
+        expect(() => log.assertString({})).to.throw('String expected: ');
+        expect(() => log.assertString(3)).to.throw('String expected: ');
+        expect(() => log.assertString(null)).to.throw('String expected: ');
+        expect(() => log.assertString(undefined)).to.throw('String expected: ');
+        expect(() => log.assertString([])).to.throw('String expected: ');
+      });
     });
   });
 
@@ -491,16 +488,13 @@ describe('Logging', () => {
     });
 
     it('should fail with on non number', () => {
-      expect(() => log.assertNumber({}))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber('a'))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber(null))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber(undefined))
-          .to.throw('Number expected: ');
-      expect(() => log.assertNumber([]))
-          .to.throw('Number expected: ');
+      allowConsoleError(() => {
+        expect(() => log.assertNumber({})).to.throw('Number expected: ');
+        expect(() => log.assertNumber('a')).to.throw('Number expected: ');
+        expect(() => log.assertNumber(null)).to.throw('Number expected: ');
+        expect(() => log.assertNumber(undefined)).to.throw('Number expected: ');
+        expect(() => log.assertNumber([])).to.throw('Number expected: ');
+      });
     });
   });
 
@@ -520,16 +514,20 @@ describe('Logging', () => {
 
     it('should fail with unknown enum value', () => {
       const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'value3'))
-          .to.throw('Unknown enum value: "value3"');
-      expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum'))
-          .to.throw('Unknown MyEnum value: "value3"');
+      allowConsoleError(() => {
+        expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
+            'Unknown enum value: "value3"');
+        expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
+            'Unknown MyEnum value: "value3"');
+      });
     });
 
     it('should fail with values of different case', () => {
       const enum1 = {a: 'value1', b: 'value2'};
-      expect(() => log.assertEnumValue(enum1, 'VALUE1'))
-          .to.throw('Unknown enum value: "VALUE1"');
+      allowConsoleError(() => {
+        expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
+            'Unknown enum value: "VALUE1"');
+      });
     });
   });
 

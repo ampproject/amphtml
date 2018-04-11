@@ -133,9 +133,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         service.getAmpDoc(content);
-      }).to.throw(/No ampdoc found/);
+      }).to.throw(/No ampdoc found/); });
 
       const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
@@ -151,9 +151,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         service.getAmpDoc(host);
-      }).to.throw(/No ampdoc found/);
+      }).to.throw(/No ampdoc found/); });
     });
 
     it('should fail to install shadow doc twice', () => {
@@ -161,9 +161,9 @@ describe('AmpDocService', () => {
         return;
       }
       installShadowDoc(service, 'https://a.org/', shadowRoot);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         installShadowDoc(service, 'https://a.org/', shadowRoot);
-      }).to.throw(/The shadow root already contains ampdoc/);
+      }).to.throw(/The shadow root already contains ampdoc/); });
     });
 
     // TODO(dvoytenko, #11827): Make this test work on Safari.
@@ -211,9 +211,9 @@ describe('AmpDocService', () => {
 
     it('should fail when installing AmpDocShell in single-doc mode', () => {
       const ampdocService = new AmpDocService(window, /* isSingleDoc */ true);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         installShadowDocForShell(ampdocService);
-      }).to.throw(/AmpDocShell cannot be installed in single-doc mode/);
+      }).to.throw(/AmpDocShell cannot be installed in single-doc mode/); });
     });
 
     it('should install AmpDocShell in shadow-doc mode', () => {
@@ -366,7 +366,9 @@ describe('AmpDocSingle', () => {
     const ampdoc = new AmpDocSingle(win);
 
     expect(ampdoc.isBodyAvailable()).to.be.false;
-    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    allowConsoleError(() => {
+      expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    });
     const bodyPromise = ampdoc.whenBodyAvailable();
     const readyPromise = ampdoc.whenReady();
 
@@ -463,7 +465,9 @@ describe('AmpDocShadow', () => {
   it('should update when body is available', () => {
     // Body is still expected.
     expect(ampdoc.isBodyAvailable()).to.be.false;
-    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    allowConsoleError(() => {
+      expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    });
     expect(ampdoc.bodyResolver_).to.be.ok;
 
     // Set body.
@@ -483,9 +487,9 @@ describe('AmpDocShadow', () => {
   it('should only allow one body update', () => {
     const body = {nodeType: 1};
     shadowDocHasBody(ampdoc, body);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       shadowDocHasBody(ampdoc, body);
-    }).to.throw(/Duplicate body/);
+    }).to.throw(/Duplicate body/); });
   });
 
   it('should update when doc is ready', () => {
@@ -506,9 +510,9 @@ describe('AmpDocShadow', () => {
 
   it('should only allow one ready update', () => {
     shadowDocReady(ampdoc);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       shadowDocReady(ampdoc);
-    }).to.throw(/Duplicate ready state/);
+    }).to.throw(/Duplicate ready state/); });
   });
 });
 

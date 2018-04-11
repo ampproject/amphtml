@@ -118,8 +118,10 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       viewerMock.sendMessageAwaitResponse
           .returns(Promise.reject('Client API error'));
-      return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
-          .to.eventually.be.rejectedWith(/Client API error/);
+      allowConsoleError(() => {
+        return expect(api.getScopedCid('AMP_ECID_GOOGLE'))
+            .to.eventually.be.rejectedWith(/Client API error/);
+      });
     });
   });
 

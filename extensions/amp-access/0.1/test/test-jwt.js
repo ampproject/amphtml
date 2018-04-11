@@ -63,23 +63,23 @@ describe('JwtHelper', () => {
     });
 
     it('should fail on invalid format', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         helper.decodeInternal_('ABC');
-      }).to.throw(/Invalid token/);
+      }).to.throw(/Invalid token/); });
     });
 
     it('should fail on invalid JSON in header', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         helper.decodeInternal_(
             `${TOKEN_HEADER.substring(1)}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`);
-      }).to.throw(/Invalid token/);
+      }).to.throw(/Invalid token/); });
     });
 
     it('should fail on invalid JSON in payload', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         helper.decodeInternal_(
             `${TOKEN_HEADER}.${TOKEN_PAYLOAD.substring(1)}.${TOKEN_SIG}`);
-      }).to.throw(/Invalid token/);
+      }).to.throw(/Invalid token/); });
     });
 
     it('should decode web safe and non-web-safe base64', () => {

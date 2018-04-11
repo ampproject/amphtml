@@ -112,11 +112,11 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration without promise', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         registerExtension(extensions, 'amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/);
+      }).to.throw(/intentional/); });
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -138,11 +138,11 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should fail registration with promise', () => {
       const promise = extensions.waitForExtension('amp-ext');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         registerExtension(extensions, 'amp-ext', () => {
           throw new Error('intentional');
         }, {});
-      }).to.throw(/intentional/);
+      }).to.throw(/intentional/); });
       expect(extensions.currentExtensionId_).to.be.null;
 
       const holder = extensions.extensions_['amp-ext'];
@@ -448,10 +448,12 @@ describes.sandboxed('Extensions', {}, () => {
       expect(ampdoc.declaresExtension('amp-test')).to.be.false;
       expect(factory1).to.be.not.called;
       expect(factory2).to.be.not.called;
-      expect(() => getServiceForDoc(ampdoc, 'service1'))
-          .to.throw(/to be registered/);
-      expect(() => getServiceForDoc(ampdoc, 'service2'))
-          .to.throw(/to be registered/);
+      allowConsoleError(() => {
+        expect(() => getServiceForDoc(ampdoc, 'service1')).to.throw(
+            /to be registered/);
+        expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw(
+            /to be registered/);
+      });
     });
 
     it('should install declared services for single-doc', () => {
@@ -765,10 +767,12 @@ describes.sandboxed('Extensions', {}, () => {
       expect(ampdoc.declaresExtension('amp-test')).to.be.false;
 
       // Services do not exist yet.
-      expect(() => getServiceForDoc(ampdoc, 'service1'))
-          .to.throw(/to be registered/);
-      expect(() => getServiceForDoc(ampdoc, 'service2'))
-          .to.throw(/to be registered/);
+      allowConsoleError(() => {
+        expect(() => getServiceForDoc(ampdoc, 'service1')).to.throw(
+            /to be registered/);
+        expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw(
+            /to be registered/);
+      });
       expect(factory1Spy).to.not.be.called;
       expect(factory2Spy).to.not.be.called;
 
@@ -821,7 +825,9 @@ describes.sandboxed('Extensions', {}, () => {
         expect(getServiceForDoc(ampdoc, 'service3').a).to.equal(3);
         // Erroneous
         expect(factory3Spy).to.be.calledOnce;
-        expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw();
+        allowConsoleError(() => {
+          expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw();
+        });
         // Extension is marked as declared.
         expect(ampdoc.declaresExtension('amp-test')).to.be.true;
       });

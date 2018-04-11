@@ -99,9 +99,9 @@ describe('vsync', () => {
     });
 
     it('should fail canAnimate without node', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         vsync.canAnimate();
-      }).to.throw(/Assertion failed/);
+      }).to.throw(/Assertion failed/); });
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.

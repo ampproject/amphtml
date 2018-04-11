@@ -251,8 +251,10 @@ describes.realWin('amp-youtube', {
   });
 
   it('requires data-videoid or data-live-channelid', () => {
-    return getYt({}).should.eventually.be.rejectedWith(
-        /Exactly one of data-videoid or data-live-channelid should/);
+    allowConsoleError(() => {
+      return getYt({}).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid or data-live-channelid should/);
+    });
   });
 
   it('adds an img placeholder in prerender mode if source is videoid', () => {

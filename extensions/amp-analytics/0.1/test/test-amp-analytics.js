@@ -450,9 +450,9 @@ describes.realWin('amp-analytics', {
     const analytics = getAnalyticsTag();
     // An incomplete click request.
     analytics.addTriggerNoInline_({'on': 'click'});
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       clock.tick(1);
-    }).to.throw(/Failed to process trigger/);
+    }).to.throw(/Failed to process trigger/); });
   });
 
   it('expands recursive requests', function() {
