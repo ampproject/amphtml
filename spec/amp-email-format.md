@@ -46,7 +46,7 @@ There are [AMP components](https://www.ampproject.org/docs/reference/components)
 
     * No.
 
-* Will the `amp-analytics` component by supported?
+* Will the `amp-pixel` and `amp-analytics` components be supported?
 
     * No.
 
@@ -96,7 +96,7 @@ There are [AMP components](https://www.ampproject.org/docs/reference/components)
 
 * Are there any CSS restrictions?
 
-    * Yes. For a reference list of CSS properties and values that are allowed within email messages, see [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). Furthermore, the [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) can be used to check them or [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email) with the "AMP for Email" runtime selected.
+    * Yes. For a reference list of CSS properties and values are allowed by Gmail, see [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). Furthermore, the [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) can be used to check them or [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email) with the "AMP for Email" runtime selected.
 
 * Will the AMP `CLIENT_ID` be supported?
 
@@ -209,7 +209,7 @@ CSS allowed within email messages vary depending on the email provider. For  ref
 
 ## Document dimensions
 
-* **Optimal width**: 800px or less (any wider and things will get cut off).
+* **Optimal width**: 800px or less (any wider and content may be unexpectedly truncated on some clients).
 
 * **Height**: variable, the client allows the user to scroll through the content.
 
