@@ -476,8 +476,10 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
       this.vsync_.mutate(() => {
-        this.element.classList.add('amp-hidden');
-        this.element.classList.remove('amp-active');
+        if (!this.currentDisplayInstance_) {
+          this.element.classList.add('amp-hidden');
+          this.element.classList.remove('amp-active');
+        }
         toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });
