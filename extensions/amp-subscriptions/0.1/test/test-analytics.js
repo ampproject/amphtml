@@ -26,5 +26,6 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, () => {
 
   it('should not fail', () => {
     analytics.event('event1');
+    analytics.serviceEvent('event1', 'serviceId');
   });
 });
