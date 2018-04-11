@@ -297,11 +297,12 @@ export class SubscriptionService {
         const viewerPlatform = new ViewerSubscriptionPlatform(
             this.ampdoc_,
             service,
-            this.serviceAdapter_
+            this.serviceAdapter_,
+            publicationId,
+            currentProductId,
+            origin
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform.setMessageDetails(publicationId, currentProductId,
-            origin);
         viewerPlatform.getEntitlements()
             .then(entitlement => {
               entitlement.setCurrentProduct(currentProductId);

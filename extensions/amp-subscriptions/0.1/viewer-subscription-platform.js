@@ -17,6 +17,7 @@
 import {Entitlement} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
@@ -42,10 +43,10 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
-    /** @const {!../../../third_party/subscriptions-project/config.PageConfig} */
+    /** @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
-    /** @private @const @private {!LocalSubscriptionPlatform} */
+    /** @private @const {!LocalSubscriptionPlatform} */
     this.platform_ = new LocalSubscriptionPlatform(
         ampdoc, platformConfig, serviceAdapter);
 
@@ -70,11 +71,14 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.viewer_.sendMessageAwaitResponse('auth', dict({
-      'publicationId': this.publicationId_,
-      'productId': this.currentProductId_,
-      'origin': this.origin_,
-    })).then(entitlementData => {
+    const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
+        'auth',
+        dict({
+          'publicationId': this.publicationId_,
+          'productId': this.currentProductId_,
+          'origin': this.origin_,
+        })
+    ).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
       if (!authData) {
         return Entitlement.empty('local');
@@ -89,6 +93,7 @@ export class ViewerSubscriptionPlatform {
       this.sendAuthTokenErrorToViewer_(reason.message);
       throw reason;
     });
+    return /** @type{!Promise<Entitlement>} */ (entitlementPromise);
   }
 
   /**
@@ -156,7 +161,7 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   isPingbackEnabled() {
-    this.platform_.isPingbackEnabled();
+    return this.platform_.isPingbackEnabled();
   }
 
   /** @override */
@@ -166,6 +171,14 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   supportsCurrentViewer() {
-    this.platform_.supportsCurrentViewer();
+    return this.platform_.supportsCurrentViewer();
   }
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
 }
