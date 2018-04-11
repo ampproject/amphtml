@@ -32,6 +32,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -922,6 +923,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return true', () => {
       expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
           .to.be.true;
+    });
+  });
+
+  describe('#preconnect', () => {
+    it('should preload nameframe', () => {
+      const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://googleads.g.doubleclick.net']);
+      expect(preloadSpy).to.be.calledOnce;
+      expect(preloadSpy.args[0]).to.match(/nameframe/);
     });
   });
 });
