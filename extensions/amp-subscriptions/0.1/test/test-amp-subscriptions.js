@@ -197,6 +197,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', () => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
@@ -220,6 +221,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       });
     });
     it('should call selectPlatform with preferViewerSupport config', () => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {

@@ -217,7 +217,7 @@ export class SubscriptionService {
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
-        serviceId,
+        serviceId
     );
   }
 
@@ -445,7 +445,7 @@ export class SubscriptionService {
       selectedPlatform.activate(renderState);
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-          selectedPlatform.getServiceId(),
+          selectedPlatform.getServiceId()
       );
 
       if (this.viewTrackerPromise_) {
@@ -484,7 +484,7 @@ export class SubscriptionService {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
       this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-          subscriptionPlatform.getServiceId(),
+          subscriptionPlatform.getServiceId()
       );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
