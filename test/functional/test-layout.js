@@ -293,7 +293,7 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
-    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
   });
 
   it('layout=intrinsic - default with sizes', () => {
@@ -310,7 +310,7 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
-    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
   });
 
   it('layout=fill', () => {
