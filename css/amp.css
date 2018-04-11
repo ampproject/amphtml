@@ -174,6 +174,7 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 
 .i-amphtml-intrinsic-sizer {
   max-width: 100%;
+  display: block !important;
 }
 
 .i-amphtml-layout-fixed-height,
@@ -248,10 +249,6 @@ i-amphtml-sizer {
 
 .i-amphtml-layout-intrinsic .i-amphtml-sizer {
   max-width: 100%;
-}
-
-.i-amphtml-intrinsic-sizer {
-  display: block !important;
 }
 
 .i-amphtml-replaced-content {
