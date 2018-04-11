@@ -74,16 +74,11 @@ export class CacheCidApi {
 
   /**
    * Returns scoped CID retrieved from the Viewer.
-   * @param {string|undefined} apiKey
    * @param {string} scope
-   * @return {!Promise<string>}
+   * @return {!Promise<?string>}
    */
-  getScopedCid(apiKey, scope) {
+  getScopedCid(scope) {
     if (!this.viewer_.isCctEmbedded()) {
-      return Promise.resolve(null);
-    }
-
-    if (!apiKey) {
       return Promise.resolve(null);
     }
 
@@ -117,30 +112,30 @@ export class CacheCidApi {
           credentials: 'include',
           mode: 'cors',
           body: payload,
-        }).then(res => {
-	  return res.json().then(response => {
-	    if (response['optOut']) {
-	      return null;
-	    }
-	    const cid = response['publisherClientId'];
-            if (!cid && useAlternate && response['alternateUrl']) {
-              // If an alternate url is provided, try again with the alternate url
-              // The client is still responsible for appending API keys to the URL.
-              const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
-              return this.fetchCid_(dev().assertString(alt), false);
-	    }
-            return cid;
-	  });
-        }).catch(e => {
-          if (e && e.response) {
-            e.response.json().then(res => {
-              dev().error(TAG_, JSON.stringify(res));
-            });
-          } else {
-            dev().error(TAG_, e);
-          }
-          return null;
-        }));
+        })).then(res => {
+      return res.json().then(response => {
+        if (response['optOut']) {
+	            return null;
+	          }
+	          const cid = response['publisherClientId'];
+        if (!cid && useAlternate && response['alternateUrl']) {
+          // If an alternate url is provided, try again with the alternate url
+          // The client is still responsible for appending API keys to the URL.
+          const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
+          return this.fetchCid_(dev().assertString(alt), false);
+	          }
+        return cid;
+	        });
+    }).catch(e => {
+      if (e && e.response) {
+        e.response.json().then(res => {
+          dev().error(TAG_, JSON.stringify(res));
+        });
+      } else {
+        dev().error(TAG_, e);
+      }
+      return null;
+    });
   }
 
   /**

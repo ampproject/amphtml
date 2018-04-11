@@ -19,8 +19,6 @@ import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {dict} from '../../src/utils/object';
 import {mockServiceForDoc} from '../../testing/test-helper';
 
-const API_KEY = 'AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM';
-
 describes.realWin('viewerCidApi', {amp: true}, env => {
   let ampdoc;
   let api;
@@ -63,7 +61,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     function verifyClientIdApiInUse(used) {
       viewerMock.sendMessageAwaitResponse
           .returns(Promise.resolve('client-id-from-viewer'));
-      return api.getScopedCid(used ? API_KEY : undefined,
+      return api.getScopedCid(used ? 'api-key' : undefined,
           'AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal('client-id-from-viewer');
         const payload = dict({
@@ -72,7 +70,7 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
           'canonicalOrigin': 'http://localhost:9876',
         });
         if (used) {
-          payload['apiKey'] = API_KEY;
+          payload['apiKey'] = 'api-key';
         }
         expect(viewerMock.sendMessageAwaitResponse)
             .to.be.calledWith('cid', payload);
@@ -99,14 +97,14 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
     it('should return undefined if Viewer returns undefined', () => {
       viewerMock.sendMessageAwaitResponse.returns(Promise.resolve());
-      return expect(api.getScopedCid(API_KEY, 'AMP_ECID_GOOGLE'))
+      return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE'))
           .to.eventually.be.undefined;
     });
 
     it('should reject if Viewer rejects', () => {
       viewerMock.sendMessageAwaitResponse
           .returns(Promise.reject('Client API error'));
-      return expect(api.getScopedCid(API_KEY, 'AMP_ECID_GOOGLE'))
+      return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE'))
           .to.eventually.be.rejectedWith(/Client API error/);
     });
   });

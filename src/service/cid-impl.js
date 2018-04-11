@@ -124,7 +124,7 @@ export class Cid {
     this.externalCidCache_ = Object.create(null);
 
     /**
-     * @private {!CacheCidApi}
+     * @private @const {!CacheCidApi}
      */
     this.cacheCidApi_ = new CacheCidApi(ampdoc);
 
@@ -212,8 +212,8 @@ export class Cid {
     const scope = getCidStruct.scope;
     /** @const {!Location} */
     const url = parseUrl(this.ampdoc.win.location.href);
-    const apiKey = this.isScopeOptedIn_(scope);
     if (!isProxyOrigin(url)) {
+      const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then(scopedCid => {
           if (scopedCid == TokenStatus.OPT_OUT) {
@@ -230,10 +230,15 @@ export class Cid {
       return getOrCreateCookie(this, getCidStruct, persistenceConsent);
     }
     if (this.cacheCidApi_.isSupported()) {
-      return this.cacheCidApi_.getScopedCid(apiKey, scope);
+      const apiKey = this.isScopeOptedIn_(scope);
+      if (!apiKey) {
+        return Promise.resolve(null);
+      }
+      return this.cacheCidApi_.getScopedCid(scope);
     }
     return this.viewerCidApi_.isSupported().then(supported => {
       if (supported) {
+        const apiKey = this.isScopeOptedIn_(scope);
         return this.viewerCidApi_.getScopedCid(apiKey, scope);
       }
       return getBaseCid(this, persistenceConsent)
