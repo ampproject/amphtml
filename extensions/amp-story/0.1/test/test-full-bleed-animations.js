@@ -69,8 +69,8 @@ describes.realWin('amp-story-full-bleed-animations', {
     container.appendChild(gridLayer);
   }
 
-  it('should add corresponding css class when a full bleed animation target is'
-  + ' attached as a child of a grid layer with fill template', () => {
+  it('Should add corresponding CSS class when a full bleed animation target is'
+  + ' attached as a child of a grid layer with fill template.', () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
         .then(() => {
@@ -93,8 +93,9 @@ describes.realWin('amp-story-full-bleed-animations', {
         });
   });
 
-  it('should not add additional css class to full-bleed animation target ' +
-     'attached as a child of a grid layer with a template OTHER than fill',
+  it('Should not add additional CSS class to the target when a full-bleed ' +
+     'animation is used BUT the target is a child of a grid layer with a ' +
+     'template other than `fill`.',
   () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
@@ -118,8 +119,8 @@ describes.realWin('amp-story-full-bleed-animations', {
         });
   });
 
-  it('should not add additional css class to non-full-bleed animation target ' +
-     'attached as a child of a grid layer with fill template', () => {
+  it('Should not add additional CSS class to the target when a non-full-bleed' +
+     'animation is used.', () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
         .then(() => {
@@ -159,19 +160,22 @@ describes.realWin('amp-story-animations-utils', {
     });
   }
 
-  it('should tell if target fits within page', () => {
-    let dimensions = setDimensions(380 , 580, 360, 580);
+  it('Should fit target same size as the screen.', () => {
+    const dimensions = setDimensions(380 , 580, 360, 580);
     expect(targetFitsWithinPage(dimensions)).to.be.true;
+  });
 
-    dimensions = setDimensions(380, 580, 400, 580);
+  it('Should fit target with bigger width but same height as screen.', () => {
+    const dimensions = setDimensions(380, 580, 400, 580);
     expect(targetFitsWithinPage(dimensions)).to.be.true;
+  });
 
-    dimensions = setDimensions(380, 580, 400, 600);
+  it('Should not fit target with larger width and height than screen.', () => {
+    const dimensions = setDimensions(380, 580, 400, 600);
     expect(targetFitsWithinPage(dimensions)).to.be.false;
   });
 
-
-  it('scale target accordingly', () => {
+  it('Should scale the target accordingly.', () => {
     const dimensions = setDimensions(380, 580, 360, 580);
     expect(targetFitsWithinPage(dimensions)).to.be.true;
 
@@ -185,14 +189,15 @@ describes.realWin('amp-story-animations-utils', {
     const offsetX = -dimensions.targetWidth / 2;
     const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-    const expectedKeyframes = [{
-      'transform': `translate(${offsetX}px, ${offsetY}px) scale(${factor})`,
-      'transform-origin': 'left top',
-    },
-    {
-      'transform': `translate(${offsetX}px, 0px) scale(${factor})`,
-      'transform-origin': 'left top',
-    },
+    const expectedKeyframes = [
+      {
+        'transform': `translate(${offsetX}px, ${offsetY}px) scale(${factor})`,
+        'transform-origin': 'left top',
+      },
+      {
+        'transform': `translate(${offsetX}px, 0px) scale(${factor})`,
+        'transform-origin': 'left top',
+      },
     ];
 
     expect(calculatedKeyframes.keyframes).to.deep.equal(expectedKeyframes);

@@ -18,13 +18,14 @@ import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
 import {StoryAnimationPresetDef} from './animation-types';
 import {
   calculateTargetScalingFactor,
-  enlargeKeyFrames,
   rotateAndTranslate,
-  targetFitsWithinPage,
+  scaleAndTranslate,
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
+
+const FULL_BLEED_CATEGORY = 'full-bleed';
 
 /**
  * A list of animations that are full bleed.
@@ -44,7 +45,8 @@ const FULL_BLEED_ANIMATION_NAMES = [
  * @private @const {!Object<string, string>}
  */
 const ANIMATION_CSS_CLASS_NAMES = {
-  'full-bleed': 'i-amphtml-story-grid-template-with-full-bleed-animation',
+  [FULL_BLEED_CATEGORY]:
+      'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**
@@ -53,7 +55,6 @@ const ANIMATION_CSS_CLASS_NAMES = {
  * @param {string} presetName
  */
 export function setStyleForPreset(el, presetName) {
-  const fullBleed = 'full-bleed';
   const fillTemplate = 'fill';
 
   // For full bleed animations.
@@ -63,7 +64,7 @@ export function setStyleForPreset(el, presetName) {
         GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
       parent.classList.remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate]);
     }
-    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[fullBleed]);
+    parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
 
@@ -227,88 +228,56 @@ export const PRESETS = {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
-      let resized = false;
-      let scalingFactor = 1;
-
-      if (targetFitsWithinPage(dimensions)) {
-        scalingFactor = calculateTargetScalingFactor(dimensions);
-        resized = true;
-        dimensions.targetWidth *= scalingFactor;
-        dimensions.targetHeight *= scalingFactor;
-      }
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
 
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-      let frames = translate2d(offsetX, offsetY, 0, offsetY);
-
-      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
-      return frames;
+      return scaleAndTranslate(offsetX, offsetY, 0, offsetY, scalingFactor);
     },
   },
   'pan-right': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
-      let resized = false;
-      let scalingFactor = 1;
-
-      if (targetFitsWithinPage(dimensions)) {
-        scalingFactor = calculateTargetScalingFactor(dimensions);
-        resized = true;
-        dimensions.targetWidth *= scalingFactor;
-        dimensions.targetHeight *= scalingFactor;
-      }
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
 
       const offsetX = dimensions.pageWidth - dimensions.targetWidth;
       const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
 
-      let frames = translate2d(0, offsetY, offsetX, offsetY);
-      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
-      return frames;
+      return scaleAndTranslate(0, offsetY, offsetX, offsetY, scalingFactor);
     },
   },
   'pan-down': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
-      let resized = false;
-      let scalingFactor = 1;
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
 
-      if (targetFitsWithinPage(dimensions)) {
-        scalingFactor = calculateTargetScalingFactor(dimensions);
-        resized = true;
-        dimensions.targetWidth *= scalingFactor;
-        dimensions.targetHeight *= scalingFactor;
-      }
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-      let frames = translate2d(offsetX, 0, offsetX, offsetY);
-      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
-      return frames;
+      return scaleAndTranslate(offsetX, 0, offsetX, offsetY, scalingFactor);
     },
   },
   'pan-up': {
     duration: 1000,
     easing: 'linear',
     keyframes(dimensions) {
-      let resized = false;
-      let scalingFactor = 1;
-
-      if (targetFitsWithinPage(dimensions)) {
-        scalingFactor = calculateTargetScalingFactor(dimensions);
-        resized = true;
-        dimensions.targetWidth *= scalingFactor;
-        dimensions.targetHeight *= scalingFactor;
-      }
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
 
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
-      let frames = translate2d(offsetX, offsetY, offsetX, 0);
-      if (resized) { frames = enlargeKeyFrames(frames, scalingFactor); }
-      return frames;
+      return scaleAndTranslate(offsetX, offsetY, offsetX, 0, scalingFactor);
     },
   },
   'zoom-in': {

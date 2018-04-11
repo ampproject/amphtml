@@ -82,7 +82,8 @@ export function whooshIn(startX, startY, endX, endY) {
 }
 
 /**
- * Checks if the target's dimensions are smaller than or equal to those of the page.
+ * Checks if either of the target's dimensions are smaller than or equal to
+ * those of the page.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
  * @return {boolean}
  */
@@ -97,12 +98,15 @@ export function targetFitsWithinPage(dimensions) {
  * @return {number}
  */
 export function calculateTargetScalingFactor(dimensions) {
-  const scalingFactor = 1.25;
-  const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
-    dimensions.pageWidth / dimensions.targetWidth : 1;
-  const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
-    dimensions.pageHeight / dimensions.targetHeight : 1;
-  return Math.max(widthFactor, heightFactor) * scalingFactor;
+  if (targetFitsWithinPage(dimensions)) {
+    const scalingFactor = 1.25;
+    const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
+      dimensions.pageWidth / dimensions.targetWidth : 1;
+    const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
+      dimensions.pageHeight / dimensions.targetHeight : 1;
+    return Math.max(widthFactor, heightFactor) * scalingFactor;
+  }
+  return 1;
 }
 
 /**
@@ -117,4 +121,21 @@ export function enlargeKeyFrames(keyframes, scalingFactor) {
     frame['transform-origin'] = 'left top';
   });
   return keyframes;
+}
+
+/**
+ * Translates the element and scales it if necessary.
+ * @param {number} startX Starting point in the abscissa.
+ * @param {number} startY Starting point in the ordinate.
+ * @param {number} endX Ending point in the abscissa.
+ * @param {number} endY Ending point in the ordinate.
+ * @param {number} scalingFactor Factor by which target will be scaled.
+ * @return {KeyframesDef} Keyframes that make up the animation.
+ */
+export function scaleAndTranslate(startX, startY, endX, endY, scalingFactor) {
+  if (scalingFactor === 1) {
+    return translate2d(startX, startY, endX, endY);
+  }
+  return enlargeKeyFrames(
+      translate2d(startX, startY, endX, endY), scalingFactor);
 }
