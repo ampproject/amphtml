@@ -25,6 +25,7 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
@@ -73,6 +74,10 @@ export class SubscriptionService {
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
+
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ =
+        new SubscriptionAnalytics(this.configElement_);
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
@@ -130,7 +135,8 @@ export class SubscriptionService {
           new LocalSubscriptionPlatform(
               this.ampdoc_,
               serviceConfig,
-              this.serviceAdapter_
+              this.serviceAdapter_,
+              this.subscriptionAnalytics_
           )
       );
     }
@@ -172,7 +178,10 @@ export class SubscriptionService {
 
       this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
           subscriptionPlatform);
-
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          subscriptionPlatform.getServiceId()
+      );
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -206,6 +215,10 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
+    this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
+        serviceId
+    );
   }
 
   /**
@@ -243,7 +256,7 @@ export class SubscriptionService {
    */
   start() {
     this.initialize_().then(() => {
-
+      this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
@@ -362,6 +375,10 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          selectedPlatform.getServiceId()
+      );
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
@@ -397,6 +414,10 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+          subscriptionPlatform.getServiceId()
+      );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
@@ -411,7 +432,13 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
-
+    // TODO: add which service is passing this event
+    this.subscriptionAnalytics_.event(
+        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+        {
+          action,
+        }
+    );
     return localPlatform.executeAction(action);
   }
 }

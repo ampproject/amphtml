@@ -19,7 +19,6 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
@@ -36,9 +35,10 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter) {
-    /** @private @const */
+  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
+    /** @const */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
@@ -71,8 +71,8 @@ export class LocalSubscriptionPlatform {
     /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
-    /** @private {!SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+    /** @private {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = subscriptionAnalytics;
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
