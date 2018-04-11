@@ -529,21 +529,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.preload(this.getSafeframePath_());
-    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     const preconnect = this.getPreconnectUrls();
-
-    // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
-    // given preferential treatment.  Currently this would be false when
-    // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
-    // causes preconnect to delay for 1 sec (see custom-element#preconnect)
-    // therefore hard coding to true.
     // NOTE(keithwrightbos): Does not take isValidElement into account so could
     // preconnect unnecessarily, however it is assumed that isValidElement
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
-        this.preconnect.url(p, true);
+        this.preconnect.url(p, /*opt_preloadAs*/true);
       });
     }
   }
@@ -718,6 +710,11 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
+          if (this.experimentalNonAmpCreativeRenderMethod_ ==
+              XORIGIN_MODE.NAMEFRAME) {
+            this.preconnect.preload(
+                getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+          }
           const browserSupportsSandbox = this.win.HTMLIFrameElement &&
               'sandbox' in this.win.HTMLIFrameElement.prototype;
           this.shouldSandbox_ = browserSupportsSandbox &&
@@ -727,7 +724,7 @@ export class AmpA4A extends AMP.BaseElement {
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion = safeframeVersionHeader;
-            this.preconnect.preload(this.getSafeframePath_());
+            this.preconnect.preload(this.getSafeframePath());
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -1522,7 +1519,7 @@ export class AmpA4A extends AMP.BaseElement {
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
-          srcPath = this.getSafeframePath_() + '?n=0';
+          srcPath = this.getSafeframePath() + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1647,9 +1644,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {string} full url to safeframe implementation.
-   * @private
    */
-  getSafeframePath_() {
+  getSafeframePath() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`;
   }
@@ -1783,7 +1779,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
     }
     return Services.platformFor(this.win).isIos() ?
-      XORIGIN_MODE.SAFEFRAME : null;
+      XORIGIN_MODE.NAMEFRAME : null;
   }
 
   /**

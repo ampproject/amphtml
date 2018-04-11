@@ -129,9 +129,6 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  */
 export const TFCD = 'tagForChildDirectedTreatment';
 
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
-
 /** @private {?Promise} */
 let sraRequests = null;
 
@@ -1225,12 +1222,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
   }
 
+  /** @override */
   getPreconnectUrls() {
-    const urls = ['https://partner.googleadservices.com'];
+    // Note that this getter actually changes state by preloading safeframe.
+    // Plan to cleanup this API as part of generate amp-a4a modularization
+    // refactor.
     if (this.preloadSafeframe_) {
-      urls.push(SAFEFRAME_ORIGIN);
+      this.preconnect.preload(this.getSafeframePath());
     }
-    return urls;
+    return ['https://securepubads.g.doubleclick.net/'];
   }
 
   /** @override */
