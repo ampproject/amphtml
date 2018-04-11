@@ -39,6 +39,13 @@ export class RefreshIntersectionObserverWrapper {
 
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = baseElement.getViewport();
+
+    /**
+     * Flag that indicates when #tick should be called on the observer
+     * polyfill.
+     * @private {boolean}
+     */
+    this.updateObserver_ = false;
   }
 
   /**
@@ -56,11 +63,14 @@ export class RefreshIntersectionObserverWrapper {
       const viewportCallback = element.viewportCallback.bind(element);
       this.viewportCallbacks_[refreshId] = viewportCallback;
       element.viewportCallback = inViewport => {
-        this.intersectionObserver_.tick(this.viewport_.getRect());
+        if (this.updateObserver_) {
+          this.intersectionObserver_.tick(this.viewport_.getRect());
+        }
         viewportCallback(inViewport);
       };
     }
 
+    this.updateObserver_ = true;
     this.intersectionObserver_.observe(element);
   }
 
@@ -74,5 +84,6 @@ export class RefreshIntersectionObserverWrapper {
     // indicate that the element is in the viewport when it's not.
     this.intersectionObserver_.tick(this.viewport_.getRect());
     this.intersectionObserver_.unobserve(element);
+    this.updateObserver_ = false;
   }
 }
