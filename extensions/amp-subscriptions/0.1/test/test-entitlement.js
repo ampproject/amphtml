@@ -17,7 +17,7 @@
 import {Entitlement} from '../entitlement';
 
 
-describes.realWin('entitlement', {}, () => {
+describes.realWin('EntitlementClass', {}, () => {
   const service = 'sample-service';
   const source = 'sample-source';
   const products = ['scenic-2017.appspot.com:news',
