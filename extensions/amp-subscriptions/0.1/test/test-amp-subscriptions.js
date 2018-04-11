@@ -138,8 +138,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     subscriptionService.platformStore_ = new PlatformStore(
         [serviceData.serviceId]);
 
-    platform.getEntitlements = () => Promise.resolve(entitlement);
-    platform.getServiceId = () => 'local';
+    platform.getEntitlements = sandbox.stub()
+        .callsFake(() => Promise.resolve(entitlement));
+    platform.getServiceId = sandbox.stub().callsFake(() => 'local');
 
     subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);

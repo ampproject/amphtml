@@ -102,10 +102,8 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    if (!this.product_) {
-      dev().warn('amp-subscriptions', 'Current Product is not set');
-    }
-    return this.product_ ? this.enables(this.product_) : false;
+    dev().assert(this.product_, 'Current Product is not set');
+    return this.enables(this.product_);
   }
 
   /**
