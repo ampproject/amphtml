@@ -670,6 +670,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
   describe('#unlayoutCallback', () => {
+    let sandbox;
+
     beforeEach(() => {
       const setup = createImplTag({
         width: '300',
@@ -690,7 +692,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.element.appendChild(placeholder);
       impl.element.appendChild(fallback);
       impl.size_ = {width: 123, height: 456};
+      sandbox = sinon.sandbox.create();
     });
+
+    afterEach(() => sandbox.restore());
 
     it('should reset state to null on non-FIE unlayoutCallback', () => {
       impl.onCreativeRender();
@@ -780,12 +785,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should call #unobserve on refreshManager', () => {
       impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
       impl.refreshManager_ = {
-        unobserve: () => {},
+        unobserve: sandbox.spy(),
       };
-      const sandbox = sinon.sandbox.create();
-      const unobserveSpy = sandbox.spy(impl.refreshManager_.unobserve);
       impl.unlayoutCallback();
-      expect(unobserveSpy).to.be.calledOnce;
+      expect(impl.refreshManager_.unobserve).to.be.calledOnce;
     });
   });
 
