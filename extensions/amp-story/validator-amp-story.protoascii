@@ -35,7 +35,7 @@ tags: {  # <amp-story>
   # requirement to be expressed on the <amp-story> children, however.
   requires: "amp-story-page"
   attrs: {
-    name: "bookend-config-src"
+    name: "background-audio"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -43,7 +43,7 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
-    name: "background-audio"
+    name: "bookend-config-src"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -116,14 +116,14 @@ tags: {  # <amp-story> without metadata (deprecated)
   mandatory_parent: "BODY"
   requires: "amp-story-page"
   attrs: {
-    name: "bookend-config-src"
+    name: "background-audio"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
   attrs: {
-    name: "background-audio"
+    name: "bookend-config-src"
     value_url: {
       allowed_protocol: "http"
       allowed_protocol: "https"
