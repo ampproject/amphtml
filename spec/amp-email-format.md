@@ -96,7 +96,7 @@ There are [AMP components](https://www.ampproject.org/docs/reference/components)
 
 * Are there any CSS restrictions?
 
-    * Yes. For a reference list of CSS properties and values are allowed by Gmail, see [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). Furthermore, the [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) can be used to check them or [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email) with the "AMP for Email" runtime selected.
+    * Yes.<br><br>For Gmail, the allowed list of CSS properties and values can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css). The [AMP Validator](https://github.com/ampproject/amphtml/tree/master/validator) currently enforces these restrictions which can by checked in [AMP by Example’s Playground](https://ampbyexample.com/playground/#runtime=amp4email).<br><br>Other email clients may have their own CSS restrictions. We encourage clients that are considering implementing AMPHTML email to work with us to extend the spec.
 
 * Will the AMP `CLIENT_ID` be supported?
 
