@@ -250,6 +250,10 @@ i-amphtml-sizer {
   max-width: 100%;
 }
 
+.i-amphtml-intrinsic-sizer {
+  display: block !important;
+}
+
 .i-amphtml-replaced-content {
   padding: 0 !important;
   border: none !important;
