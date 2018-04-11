@@ -188,7 +188,7 @@ describes.realWin('amp-video', {
   });
 
   it('should not load a video with http src', () => {
-    return expect(getVideo({
+    allowConsoleError(() => { return expect(getVideo({
       src: 'http://example.com/video.mp4',
       width: 160,
       height: 90,
@@ -196,7 +196,7 @@ describes.realWin('amp-video', {
       'autoplay': '',
       'muted': '',
       'loop': '',
-    })).to.be.rejectedWith(/start with/);
+    })).to.be.rejectedWith(/start with/); });
   });
 
   it('should not load a video with http source children', () => {
@@ -209,7 +209,7 @@ describes.realWin('amp-video', {
       source.setAttribute('type', mediatype);
       sources.push(source);
     }
-    return expect(getVideo({
+    allowConsoleError(() => { return expect(getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
@@ -217,7 +217,7 @@ describes.realWin('amp-video', {
       'autoplay': '',
       'muted': '',
       'loop': '',
-    }, sources)).to.be.rejectedWith(/start with/);
+    }, sources)).to.be.rejectedWith(/start with/); });
   });
 
   it('should set poster, controls, controlsList in prerender mode', () => {

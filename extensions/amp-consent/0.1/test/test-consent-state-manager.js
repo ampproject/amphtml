@@ -71,8 +71,10 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
     it('should not register consent instance twice', () => {
       manager.registerConsentInstance('test');
-      expect(() => manager.registerConsentInstance('test')).to.throw(
-          'CONSENT-STATE-MANAGER: instance already registered');
+      allowConsoleError(() => {
+        expect(() => manager.registerConsentInstance('test')).to.throw(
+            'CONSENT-STATE-MANAGER: instance already registered');
+      });
     });
 
     it('get consent state', function* () {
