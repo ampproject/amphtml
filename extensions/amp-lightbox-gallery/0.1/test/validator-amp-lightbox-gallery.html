@@ -29,6 +29,7 @@
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 </head>
 <body>
   <!-- Valid -->
@@ -65,7 +66,7 @@
       <amp-img src="/awesome.png" width="300" height="300"></amp-img>
   </amp-carousel>
 
-  <!-- Valid: carousel with video, img, youtube -->
+  <!-- Valid: carousel with video, img, youtube, ad -->
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
     <amp-video
       src="../av/ForBiggerJoyrides-short.mp4"
@@ -80,6 +81,13 @@
       height="204"
       layout="responsive"></amp-youtube>
     <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
+    <amp-ad width="300"
+      height="250"
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="test123"
+      data-aax_src="302">
+    </amp-ad>
   </amp-carousel>
 
   <!-- Invalid: missing value for lightbox-thumbnail-id -->
