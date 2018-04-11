@@ -1,6 +1,7 @@
 import {AmpStory} from '../amp-story';
-import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
+import { targetFitsWithinPage, calculateTargetScalingFactor } from '../animation-presets-utils';
+import { PRESETS } from '../animation-presets';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -29,52 +30,172 @@ describes.realWin('amp-story-full-bleed-animations', {
   },
 }, env => {
   let win;
+  let storyElem;
+  let ampStory;
 
   beforeEach(() => {
     win = env.win;
+    storyElem = win.document.createElement('amp-story');
+    win.document.body.appendChild(storyElem);
+    AmpStory.isBrowserSupported = () => true;
+    ampStory = new AmpStory(storyElem);
+  });
+
+  afterEach(() => {
+    storyElem.remove();
   });
 
   function createPages(container, count, opt_ids) {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
       page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
-
-      const img = win.document.createElement('amp-img');
-      const gridLayer = win.document.createElement('amp-story-grid-layer');
-      img.setAttribute('animate-in', 'pan-down');
-      gridLayer.setAttribute('template', 'fill');
-      gridLayer.appendChild(img);
-      page.appendChild(gridLayer);
-
-
       page.getImpl = () => Promise.resolve(new AmpStoryPage(page));
       container.appendChild(page);
       return page;
     });
   }
 
-  it('should add corresponding css class after the grid layer is built', () => {
-    const storyElem = win.document.createElement('amp-story');
-    win.document.body.appendChild(storyElem);
-    AmpStory.isBrowserSupported = () => true;
-    const story = new AmpStory(storyElem);
+  function addAnimationToImage(container, animationName,
+    opt_gridLayerTempalate) {
+    const img = win.document.createElement('amp-img');
+    img.setAttribute('animate-in', animationName);
 
-    createPages(story.element, 2, ['cover', 'page-1']);
-    return story.layoutCallback()
+    const gridLayer = win.document.createElement('amp-story-grid-layer');
+    opt_gridLayerTempalate = opt_gridLayerTempalate.length ?
+      opt_gridLayerTempalate : 'fill';
+    gridLayer.setAttribute('template', opt_gridLayerTempalate);
+
+    gridLayer.appendChild(img);
+    container.appendChild(gridLayer);
+  }
+
+  it('should add corresponding css class when a full bleed animation target is \
+attached as a child of a grid layer with fill template', () => {
+    createPages(ampStory.element, 2, ['cover', 'page-1']);
+    return ampStory.layoutCallback()
         .then(() => {
           // Get pages.
           const pageElements =
-              story.element.getElementsByTagName('amp-story-page');
+            ampStory.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
-
           return Promise.all(pages);
         })
         .then(pages => {
-          pages[0].layoutCallback().then(() => {
-            const imgEls = pages[0].element.getElementsByTagName('amp-img');
+          // Append an image animated with a full-bleed animation inside a grid-
+          // layer with a `fill` template of the first page.
+          addAnimationToImage(pages[1].element, 'pan-down', 'fill');
+
+          pages[1].layoutCallback().then(() => {
+            const imgEls = pages[1].element.getElementsByTagName('amp-img');
             expect(imgEls[0]).to.have.class(
                 'i-amphtml-story-grid-template-with-full-bleed-animation');
           });
         });
   });
+
+  it('should not add additional css class to full-bleed animation target \
+attached as a child of a grid layer with a template OTHER than fill',
+  () => {
+    createPages(ampStory.element, 2, ['cover', 'page-1']);
+    return ampStory.layoutCallback()
+        .then(() => {
+          // Get pages.
+          const pageElements =
+            ampStory.element.getElementsByTagName('amp-story-page');
+          const pages = Array.from(pageElements).map(el => el.getImpl());
+          return Promise.all(pages);
+        })
+        .then(pages => {
+          // Append an image animated with a full-bleed animation inside a grid-
+          // layer with a template other than fill.
+          addAnimationToImage(pages[1].element, 'fade-in', 'vertical');
+
+          pages[1].layoutCallback().then(() => {
+            const imgEls = pages[1].element.getElementsByTagName('amp-img');
+            expect(imgEls[0]).to.not.have.class(
+                'i-amphtml-story-grid-template-with-full-bleed-animation');
+          });
+        });
+  });
+
+  it('should not add additional css class to non-full-bleed animation target \
+attached as a child of a grid layer with fill template', () => {
+    createPages(ampStory.element, 2, ['cover', 'page-1']);
+    return ampStory.layoutCallback()
+        .then(() => {
+          // Get pages.
+          const pageElements =
+            ampStory.element.getElementsByTagName('amp-story-page');
+          const pages = Array.from(pageElements).map(el => el.getImpl());
+          return Promise.all(pages);
+        })
+        .then(pages => {
+          // Append an image animated with a non-full-bleed animation.
+          addAnimationToImage(pages[1].element, 'fade-in', 'fill');
+
+          pages[1].layoutCallback().then(() => {
+            const imgEls = pages[1].element.getElementsByTagName('amp-img');
+            expect(imgEls[0]).to.not.have.class(
+                'i-amphtml-story-grid-template-with-full-bleed-animation');
+          });
+        });
+  });
+});
+
+describes.realWin('amp-story-animations-utils', {
+  amp: {
+    runtimeOn: true,
+    extensions: ['amp-story'],
+  },
+}, () => {
+  function setDimensions(pageW, pageH, targetW, targetH) {
+    return /** @type {!StoryAnimationDimsDef} */ ({
+      pageWidth: pageW,
+      pageHeight: pageH,
+      targetWidth: targetW,
+      targetHeight: targetH,
+      targetX: 0,
+      targetY: 0,
+    });
+  }
+
+  it('should tell if target fits within page', () => {
+    let dimensions = setDimensions(380 , 580, 360, 580);
+    expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+    dimensions = setDimensions(380, 580, 400, 580);
+    expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+    dimensions = setDimensions(380, 580, 400, 600);
+    expect(targetFitsWithinPage(dimensions)).to.be.false;
+  });
+
+
+  it('scale target accordingly', () => {
+    const dimensions = setDimensions(380, 580, 360, 580);
+    expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+    const factorThatWillMakeTargetFitPage = 380 / 360;
+    const factor = factorThatWillMakeTargetFitPage * 1.25;
+    expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
+
+    const calculatedKeyframes = PRESETS['pan-up'];
+    calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(dimensions);
+
+    const offsetX = -dimensions.targetWidth / 2;
+    const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+    const expectedKeyframes = [{
+      'transform': `translate(${offsetX}px, ${offsetY}px) scale(${factor})`,
+      'transform-origin': 'left top',
+    },
+    {
+      'transform': `translate(${offsetX}px, 0px) scale(${factor})`,
+      'transform-origin': 'left top',
+    },
+    ];
+
+    expect(calculatedKeyframes.keyframes).to.deep.equal(expectedKeyframes);
+  });
+
 });
