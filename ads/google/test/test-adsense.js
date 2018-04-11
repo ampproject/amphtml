@@ -28,6 +28,7 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     'adHost': 'data-ad-host',
     'adtest': 'data-adtest',
     'tagOrigin': 'data-tag-origin',
+    'package': 'data-package',
   };
 
   beforeEach(() => {
