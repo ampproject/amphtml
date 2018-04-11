@@ -31,9 +31,6 @@ attr_lists: {
   attrs: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"
-    trigger: {
-      also_requires_attr: "lightbox"
-    }
   }
 }
 attr_lists: {

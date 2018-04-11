@@ -56,7 +56,6 @@ tags: {  # <amp-carousel>
   # <amp-bind>
   attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
-  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
@@ -105,7 +104,6 @@ tags: {  # <amp-carousel> lightbox
   # <amp-bind>
   attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
-  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
