@@ -861,14 +861,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return false;
         }
     }
+    if (this.refreshManager_) {
+      this.refreshManager_.unobserve();
+    }
     if (!this.useSra && this.isAmpCreative_) {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
     }
     this.destroySafeFrameApi_();
-    if (this.refreshManager_) {
-      this.refreshManager_.unobserve();
-    }
     return super.unlayoutCallback();
   }
 
