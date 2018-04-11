@@ -1,4 +1,5 @@
-/* global THREE */
+/* global THREE, resolveURL */
+
 export default function() {
   /**
    * @author Rich Tibbett / https://github.com/richtr
@@ -118,6 +119,7 @@ export default function() {
       },
     };
     /* GLTFREGISTRY */
+    /** @constructor */
     function GLTFRegistry() {
       let objects = {};
       return	{
@@ -150,6 +152,7 @@ export default function() {
    * Lights Extension
    *
    * Specification: PENDING
+   * @constructor
    */
     function GLTFLightsExtension(json) {
       this.name = XT.KHR_LIGHTS;
@@ -204,8 +207,9 @@ export default function() {
    * Unlit Materials Extension (pending)
    *
    * PR: https://github.com/KhronosGroup/glTF/pull/1163
+   * @constructor
    */
-    function GLTFMaterialsUnlitExtension() {
+    function GLTFMaterialsUnlitExtension(unused_json) {
       this.name = XT.KHR_MATERIALS_UNLIT;
     }
     GLTFMaterialsUnlitExtension.prototype.getMaterialType = function() {
@@ -238,6 +242,7 @@ export default function() {
     const BINARY_EXTENSION_HEADER_MAGIC = 'glTF';
     const BIN_EXT_HDR_LEN = 12;
     const BINARY_EXTENSION_CHUNK_TYPES = {JSON: 0x4E4F534A, BIN: 0x004E4942};
+    /** @constructor */
     function GLTFBinaryExtension(data) {
       this.name = XT.KHR_BINARY_GLTF;
       this.content = null;
@@ -283,6 +288,7 @@ export default function() {
    * DRACO Mesh Compression Extension
    *
    * Specification: https://github.com/KhronosGroup/glTF/pull/874
+   * @constructor
    */
     function GLTFDracoMeshCompressionExtension(dracoLoader) {
       if (!dracoLoader) {
@@ -313,6 +319,7 @@ export default function() {
    * Specular-Glossiness Extension
    *
    * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness
+   * @constructor
    */
     function GLTFMaterialsPbrSpecularGlossinessExtension() {
       return {
@@ -496,18 +503,6 @@ export default function() {
           material.extensions.derivatives = true;
           return material;
         },
-        /**
-       * Clones a GLTFSpecularGlossinessMaterial instance. The ShaderMaterial.copy() method can
-       * copy only properties it knows about or inherits, and misses many properties that would
-       * normally be defined by MeshStandardMaterial.
-       *
-       * This method allows GLTFSpecularGlossinessMaterials to be cloned in the process of
-       * loading a glTF model, but cloning later (e.g. by the user) would require these changes
-       * AND also updating `.onBeforeRender` on the parent mesh.
-       *
-       * @param  {T.ShaderMaterial} source
-       * @return {T.ShaderMaterial}
-       */
         cloneMaterial: function(source) {
           const target = source.clone();
           target.isGLTFSpecularGlossinessMaterial = true;
@@ -623,6 +618,7 @@ export default function() {
     /*********************************/
     // Spline Interpolation
     // Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-c-spline-interpolation
+    /** @constructor */
     function GLTFCubicSplineInterpolant(
       parameterPositions,
       sampleValues,
@@ -844,14 +840,6 @@ export default function() {
         side: T.FrontSide,
       });
     }
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#morph-targets
-   *
-   * @param {T.Mesh} mesh
-   * @param {GLTF.Mesh} meshDef
-   * @param {GLTF.Primitive} primitiveDef
-   * @param {Array<T.BufferAttribute>} accessors
-   */
     function addMorphTargets(mesh, meshDef, primitiveDef, accessors) {
       const geometry = mesh.geometry;
       const material = mesh.material;
@@ -977,6 +965,7 @@ export default function() {
       return attribute.clone();
     }
     /* GLTF PARSER */
+    /** @constructor */
     function GLTFParser(json, extensions, options) {
       this.json = json || {};
       this.extensions = extensions || {};
@@ -1053,12 +1042,6 @@ export default function() {
       this.json.meshReferences = meshReferences;
       this.json.meshUses = meshUses;
     };
-    /**
-   * Requests the specified dependency asynchronously, with caching.
-   * @param {string} type
-   * @param {number} index
-   * @return {Promise<Object>}
-   */
     GLTFParser.prototype.getDependency = function(type, index) {
       const cacheKey = type + ':' + index;
       let dependency = this.cache.get(cacheKey);
@@ -1069,11 +1052,6 @@ export default function() {
       }
       return dependency;
     };
-    /**
-   * Requests all dependencies of the specified type asynchronously, with caching.
-   * @param {string} type
-   * @return {Promise<Array<Object>>}
-   */
     GLTFParser.prototype.getDependencies = function(type) {
       let dependencies = this.cache.get(type);
       if (!dependencies) {
@@ -1086,11 +1064,6 @@ export default function() {
       }
       return dependencies;
     };
-    /**
-   * Requests all multiple dependencies of the specified types asynchronously, with caching.
-   * @param {Array<string>} types
-   * @return {Promise<Object<Array<Object>>>}
-   */
     GLTFParser.prototype.getMultiDependencies = function(types) {
       const results = {};
       const pendings = [];
@@ -1106,11 +1079,6 @@ export default function() {
         return results;
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#buffers-and-buffer-views
-   * @param {number} bufferIndex
-   * @return {Promise<ArrayBuffer>}
-   */
     GLTFParser.prototype.loadBuffer = function(bufferIndex) {
       const bufferDef = this.json.buffers[bufferIndex];
       const loader = this.fileLoader;
@@ -1137,11 +1105,6 @@ export default function() {
         );
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#buffers-and-buffer-views
-   * @param {number} bufferViewIndex
-   * @return {Promise<ArrayBuffer>}
-   */
     GLTFParser.prototype.loadBufferView = function(bufferViewIndex) {
       const bufferViewDef = this.json.bufferViews[bufferViewIndex];
       return this.getDependency('buffer', bufferViewDef.buffer)
@@ -1151,11 +1114,6 @@ export default function() {
             return buffer.slice(byteOffset, byteOffset + byteLength);
           });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#accessors
-   * @param {number} accessorIndex
-   * @return {Promise<T.BufferAttribute|T.InterleavedBufferAttribute>}
-   */
     GLTFParser.prototype.loadAccessor = function(accessorIndex) {
       const parser = this;
       const json = this.json;
@@ -1269,11 +1227,6 @@ export default function() {
         return bufferAttribute;
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#textures
-   * @param {number} textureIndex
-   * @return {Promise<T.Texture>}
-   */
     GLTFParser.prototype.loadTexture = function(textureIndex) {
       const parser = this;
       const json = this.json;
@@ -1349,11 +1302,6 @@ export default function() {
                 materialParams[textureName] = texture;
               });
         };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#materials
-   * @param {number} materialIndex
-   * @return {Promise<T.Material>}
-   */
     GLTFParser.prototype.loadMaterial = function(materialIndex) {
       const parser = this;
       const xts = this.extensions;
@@ -1495,11 +1443,6 @@ export default function() {
         return material;
       });
     };
-    /**
-   * @param  {T.BufferGeometry} geometry
-   * @param  {GLTF.Primitive} primitiveDef
-   * @param  {Array<T.BufferAttribute>} accessors
-   */
     function addPrimitiveAttributes(geometry, primitiveDef, accessors) {
       const attributes = primitiveDef.attributes;
       for (const gltfAttributeName in attributes) {
@@ -1514,11 +1457,6 @@ export default function() {
         geometry.setIndex(accessors[primitiveDef.indices]);
       }
     }
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#geometry
-   * @param {Array<Object>} primitives
-   * @return {Promise<Array<T.BufferGeometry>>}
-   */
     GLTFParser.prototype.loadGeometries = function(primitives) {
       const parser = this;
       const extensions = this.extensions;
@@ -1559,11 +1497,6 @@ export default function() {
         return Promise.all(pending);
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#meshes
-   * @param {number} meshIndex
-   * @return {Promise<T.Group|T.Mesh|T.SkinnedMesh>}
-   */
     GLTFParser.prototype.loadMesh = function(meshIndex) {
       const scope = this;
       const extensions = this.extensions;
@@ -1696,11 +1629,6 @@ export default function() {
         });
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#cameras
-   * @param {number} cameraIndex
-   * @return {Promise<T.Camera>}
-   */
     GLTFParser.prototype.loadCamera = function(cameraIndex) {
       let camera;
       const cameraDef = this.json.cameras[cameraIndex];
@@ -1730,11 +1658,6 @@ export default function() {
       if (cameraDef.extras) {camera.userData = cameraDef.extras;}
       return Promise.resolve(camera);
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#skins
-   * @param {number} skinIndex
-   * @return {Promise<Object>}
-   */
     GLTFParser.prototype.loadSkin = function(skinIndex) {
       const skinDef = this.json.skins[skinIndex];
       const skinEntry = {joints: skinDef.joints};
@@ -1748,11 +1671,6 @@ export default function() {
             return skinEntry;
           });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#animations
-   * @param {number} animIndex
-   * @return {Promise<T.AnimationClip>}
-   */
     GLTFParser.prototype.loadAnimation = function(animIndex) {
       const animDef = this.json.animations[animIndex];
       return this.getMultiDependencies([
@@ -1848,11 +1766,6 @@ export default function() {
         return new T.AnimationClip(name, undefined, tracks);
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#nodes-and-hierarchy
-   * @param {number} nodeIndex
-   * @return {Promise<T.Object3D>}
-   */
     GLTFParser.prototype.loadNode = function(nodeIndex) {
       const extensions = this.extensions;
       const meshReferences = this.json.meshReferences;
@@ -1919,11 +1832,6 @@ export default function() {
         return node;
       });
     };
-    /**
-   * Specification: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#scenes
-   * @param {number} sceneIndex
-   * @return {Promise<T.Scene>}
-   */
     GLTFParser.prototype.loadScene = (function() {
     // scene node hierachy builder
       function buildNodeHierachy(nodeId, parentObject, json, allNodes, skins) {

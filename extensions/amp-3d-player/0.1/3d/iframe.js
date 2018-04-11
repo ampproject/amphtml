@@ -36,6 +36,6 @@ export default function makeViewerIframe(win, parent) {
       parent.removeChild(iframe);
       URL.revokeObjectURL(url);
       released = true;
-    }
+    },
   };
 }

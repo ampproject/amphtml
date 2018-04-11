@@ -22,7 +22,7 @@ export const query = (target, tag, queryBody) => {
       query: true,
       queryId,
       queryBody,
-    }, origin);
+    });
   });
 };
 
@@ -40,7 +40,7 @@ export const addQueryHandler = (target, tag, fn) => {
                   response: true,
                   queryId,
                   responseBody,
-                }, '*');
+                });
               },
               error => {
                 const errorBody = (error instanceof Error)

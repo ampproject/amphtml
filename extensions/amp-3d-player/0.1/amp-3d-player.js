@@ -23,10 +23,10 @@ export class Amp3dPlayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {!Window} */
+    /** @private {?Window} */
     this.viewerWindow_ = null;
 
     /** @private {!Promise} */
@@ -39,8 +39,10 @@ export class Amp3dPlayer extends AMP.BaseElement {
     this.releaseIframe_ = () => {};
   }
 
+  /** @override */
   unlayoutCallback() {
     this.releaseIframe_();
+    return false;
   }
 
   /** @override */
@@ -53,7 +55,7 @@ export class Amp3dPlayer extends AMP.BaseElement {
     this.viewerWindow_ = this.container_.contentWindow;
     this.willBeReady_ =
         willReceiveNotification(this.viewerWindow_, 'heartbeat', () => true)
-            .then(() => query(this.viewerWindow_, 'ready'));
+            .then(() => query(this.viewerWindow_, 'ready', null));
     this.applyFillContent(this.container_, /* replacedContent */ true);
   }
 

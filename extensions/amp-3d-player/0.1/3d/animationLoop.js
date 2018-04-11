@@ -4,10 +4,16 @@ export default (() => {
     return performance && performance.now ? performance.now() : Date.now();
   }
 
-  function AnimationLoop(tasks) {
+  /** @constructor
+   * @callback task */
+  function AnimationLoop(task) {
+    /** @public {number} */
     this.fpsLimit = 0;
-    /** @private {Array<function>} */
-    this.tasks_ = tasks;
+
+    /** @function
+     * @private */
+    this.task_ = task;
+
     /** @private {boolean} */
     this.isRunning_ = false;
     /** @private {(number)} */
@@ -18,16 +24,15 @@ export default (() => {
     /** @public {boolean} */
     this.needsUpdate = true;
 
+    /** @function
+     * @private */
     this.loop_ = this.loop_.bind(this);
   }
 
   AnimationLoop.prototype = {
     constructor: AnimationLoop,
-    /** @private */
-    performTasks_() {
-      this.tasks_.forEach(t => {t();});
-    },
 
+    /** @private */
     run() {
       if (this.isRunning_) {
         return false;
@@ -47,7 +52,7 @@ export default (() => {
     /** @private */
     loop_() {
       if (this.isNeedToRender_) {
-        this.performTasks_();
+        this.performTask_();
       }
       this.currentRAF_ = requestAnimationFrame(this.loop_);
     },
