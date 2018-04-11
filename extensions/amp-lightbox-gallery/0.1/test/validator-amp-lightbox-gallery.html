@@ -29,7 +29,6 @@
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-
 </head>
 <body>
   <!-- Valid -->
@@ -37,7 +36,7 @@
   <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
   <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
 
-  <!-- Valid -->
+  <!-- Valid: basic use case -->
   <amp-video
     lightbox
     src="../av/ForBiggerJoyrides-short.mp4"
@@ -51,21 +50,22 @@
     width="358"
     height="204"
     layout="responsive"></amp-youtube>
-
-  <!-- Valid -->
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
+
   <!-- Valid: lightboxed carousel with lightbox exclude and lightbox thumbnail -->
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
       <amp-img src="/awesome.png" width="300" height="300"></amp-img>
       <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
       <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
   </amp-carousel>
-  <!-- lightboxed child of unlightboxed carousel -->
+
+  <!-- Valid: lightboxed child of unlightboxed carousel -->
   <amp-carousel width=400 height=300 layout=responsive type=slides>
       <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
       <amp-img src="/awesome.png" width="300" height="300"></amp-img>
   </amp-carousel>
-  <!-- carousel with video, img, youtube -->
+
+  <!-- Valid: carousel with video, img, youtube -->
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
     <amp-video
       src="../av/ForBiggerJoyrides-short.mp4"
@@ -88,6 +88,5 @@
   <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
   <!-- Invalid: invalid use of lightbox-exclude -->
   <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
-
 </body>
 </html>

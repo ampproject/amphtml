@@ -1,13 +1,13 @@
 FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
+|  
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|
+|  
 |        http://www.apache.org/licenses/LICENSE-2.0
-|
+|  
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,15 +30,14 @@ FAIL
 |    <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 |    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 |    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-|
 |  </head>
 |  <body>
 |    <!-- Valid -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
-|
-|    <!-- Valid -->
+|  
+|    <!-- Valid: basic use case -->
 |    <amp-video
 |      lightbox
 |      src="../av/ForBiggerJoyrides-short.mp4"
@@ -52,21 +51,22 @@ FAIL
 |      width="358"
 |      height="204"
 |      layout="responsive"></amp-youtube>
-|
-|    <!-- Valid -->
 |    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
+|  
 |    <!-- Valid: lightboxed carousel with lightbox exclude and lightbox thumbnail -->
 |    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
 |        <amp-img src="/awesome.png" width="300" height="300"></amp-img>
 |        <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
 |        <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |    </amp-carousel>
-|    <!-- lightboxed child of unlightboxed carousel -->
+|  
+|    <!-- Valid: lightboxed child of unlightboxed carousel -->
 |    <amp-carousel width=400 height=300 layout=responsive type=slides>
 |        <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
 |        <amp-img src="/awesome.png" width="300" height="300"></amp-img>
 |    </amp-carousel>
-|    <!-- carousel with video, img, youtube -->
+|  
+|    <!-- Valid: carousel with video, img, youtube -->
 |    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
 |      <amp-video
 |        src="../av/ForBiggerJoyrides-short.mp4"
@@ -82,7 +82,7 @@ FAIL
 |        layout="responsive"></amp-youtube>
 |      <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
 |    </amp-carousel>
-|
+|  
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
@@ -93,6 +93,5 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:86:2 The attri
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
 >>   ^~~~~~~~~
 amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:90:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
-|
 |  </body>
 |  </html>
