@@ -72,7 +72,7 @@ See the [AMP Components](#amp-components) section in the spec below.
 
 No.
 
-###### Do AMPHTML Email documents use AMP Caches?
+##### Do AMPHTML Email documents use AMP Caches?
 
 No.
 
@@ -92,7 +92,7 @@ AMPHTML Emails can track opens just like regular emails today using pixel tracki
 
 Request for images in the carousel can indicate to the sender that the user is interacting with the message.
 
-###### What will happen if I open an AMPHTML Email in an email client without AMPHTML support?
+##### What will happen if I open an AMPHTML Email in an email client without AMPHTML support?
 
 The usual HTML content will be rendered. Email clients currently ignore MIME types they don’t understand. For example the [`text/watch-html` MIME type](https://litmus.com/blog/how-to-send-hidden-version-email-apple-watch) gets ignored according to the rules specified in [RFC 1341 7.2.3](https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html) which state:<br><br>*“In general, user agents that compose multipart/alternative entities should place the body parts in increasing order of preference, that is, with the preferred format last. For fancy text, the sending user agent should put the plainest format first and the richest format last. Receiving user agents should pick and display the last format they are capable of displaying.”*
 
@@ -108,7 +108,7 @@ Currently, Gmail is the first adopter with their [Gmail Developer Preview](https
 
 That will depend on the implementation strategy chosen by the email clients.
 
-###### Will this enable people to send me Bitcoin miners in my email?
+##### Will this enable people to send me Bitcoin miners in my email?
 
 No. Valid AMP documents are not permitted to have their own Javascript.
 
