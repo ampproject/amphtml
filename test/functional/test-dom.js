@@ -832,10 +832,10 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
-      }).to.throw(/intentional2/);
+      }).to.throw(/intentional2/); });
     });
 
     it('should retry only non-top target', () => {
@@ -1025,8 +1025,10 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-          'element is not AmpElement');
+      allowConsoleError(() => {
+        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement');
+      });
     });
 
     it('should resolve if element has already upgrade', () => {

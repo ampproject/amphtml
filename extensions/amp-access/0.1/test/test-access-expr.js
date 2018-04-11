@@ -20,9 +20,9 @@ import {evaluateAccessExpr} from '../access-expr';
 describe('evaluateAccessExpr', () => {
 
   it('should NOT allow double equal', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('access == true', {});
-    }).to.throw(/\"\=\=\" is not allowed, use \"\=\"/);
+    }).to.throw(/\"\=\=\" is not allowed, use \"\=\"/); });
   });
 
   it('should evaluate simple boolean expressions', () => {
@@ -256,18 +256,18 @@ describe('evaluateAccessExpr', () => {
 
     expect(evaluateAccessExpr('obj.other = NULL', {obj: 11})).to.be.true;
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('obj.NULL', {});
-    }).to.throw();
-    expect(() => {
+    }).to.throw(); });
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('NULL.obj', {});
-    }).to.throw();
-    expect(() => {
+    }).to.throw(); });
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('1.obj', {});
-    }).to.throw();
-    expect(() => {
+    }).to.throw(); });
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('TRUE.obj', {});
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should evaluate nested expressions securely', () => {
@@ -280,14 +280,14 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('num_ = 10', {num_: 10})).to.be.true;
     expect(evaluateAccessExpr('_num = 10', {_num: 10})).to.be.true;
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('1num = 10', {'1num': 10});
-    }).to.throw();
-    expect(() => {
+    }).to.throw(); });
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('num-a = 10', {'num-a': 10});
-    }).to.throw();
-    expect(() => {
+    }).to.throw(); });
+    allowConsoleError(() => { expect(() => {
       evaluateAccessExpr('num-1 = 10', {'num-1': 10});
-    }).to.throw();
+    }).to.throw(); });
   });
 });

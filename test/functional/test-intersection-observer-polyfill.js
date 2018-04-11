@@ -225,12 +225,10 @@ describe('IntersectionObserverPolyfill', () => {
           threshold: Infinity,
         });
       };
-      expect(io1).to.throw(
-          'Threshold should be a ' +
-          'finite number or an array of finite numbers');
-      expect(io2).to.throw(
-          'Threshold should be a ' +
-          'finite number or an array of finite numbers');
+      allowConsoleError(() => { expect(io1).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
+      allowConsoleError(() => { expect(io2).to.throw('Threshold should be a ' +
+          'finite number or an array of finite numbers'); });
     });
 
     it('will be sorted', () => {
@@ -251,10 +249,10 @@ describe('IntersectionObserverPolyfill', () => {
           threshold: [0, 1.1],
         });
       };
-      expect(io1).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
-      expect(io2).to.throw(
-          'Threshold should be in the range from "[0, 1]"');
+      allowConsoleError(() => {
+        expect(io1).to.throw('Threshold should be in the range from "[0, 1]"');
+        expect(io2).to.throw('Threshold should be in the range from "[0, 1]"');
+      });
     });
 
     it('getThresholdSlot function', () => {

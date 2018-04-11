@@ -76,30 +76,30 @@ describes.realWin('AccessIframeAdapter', {
 
     it('should require "iframeSrc"', () => {
       delete validConfig['iframeSrc'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/iframeSrc/);
+      }).to.throw(/iframeSrc/); });
     });
 
     it('should require "iframeSrc" to be secure', () => {
       validConfig['iframeSrc'] = 'http://acme.com/iframe';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
 
     it('should require "defaultResponse"', () => {
       delete validConfig['defaultResponse'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/defaultResponse/);
+      }).to.throw(/defaultResponse/); });
     });
 
     it('should disallow non-array vars', () => {
       validConfig['iframeVars'] = {};
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/array/);
+      }).to.throw(/array/); });
     });
   });
 
