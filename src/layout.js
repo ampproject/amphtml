@@ -449,7 +449,7 @@ export function applyStaticLayout(element) {
     sizer.classList.add('i-amphtml-sizer');
     intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
     intrinsicSizer.setAttribute('src',
-        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>`);
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     sizer.appendChild(intrinsicSizer);
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = intrinsicSizer;
