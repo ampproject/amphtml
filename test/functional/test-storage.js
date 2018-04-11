@@ -415,12 +415,14 @@ describe('Store', () => {
   });
 
   it('should prohibit unsafe values', () => {
-    expect(() => {
-      store.set('__proto__', 'value1');
-    }).to.throw(/Name is not allowed/);
-    expect(() => {
-      store.set('prototype', 'value1');
-    }).to.throw(/Name is not allowed/);
+    allowConsoleError(() => {
+      expect(() => {
+        store.set('__proto__', 'value1');
+      }).to.throw(/Name is not allowed/);
+      expect(() => {
+        store.set('prototype', 'value1');
+      }).to.throw(/Name is not allowed/);
+    });
   });
 });
 

@@ -72,36 +72,46 @@ describe('OriginExperiments', () => {
   it('should throw for an unknown token version number', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadVersion, 'https://origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.rejectedWith('Unrecognized token version: 42');
+    allowConsoleError(() => {
+      return expect(verify).to.eventually.be.rejectedWith(
+          'Unrecognized token version: 42');
+    });
   });
 
   it('should throw if config length exceeds byte length', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadConfigLength, 'https://origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.rejectedWith('Unexpected config length: 999');
+    allowConsoleError(() => {
+      return expect(verify).to.eventually.be.rejectedWith(
+          'Unexpected config length: 999');
+    });
   });
 
   it('should throw if signature cannot be verified', () => {
     const verify = originExperiments.verifyToken(
         tokenWithBadSignature, 'https://origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.rejectedWith('Failed to verify token signature.');
+    allowConsoleError(() => {
+      return expect(verify).to.eventually.be.rejectedWith(
+          'Failed to verify token signature.');
+    });
   });
 
   it('should throw if approved origin is not current origin', () => {
     const verify = originExperiments.verifyToken(
         token, 'https://not-origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.rejectedWith(/does not match window/);
+    allowConsoleError(() => {
+      return expect(verify).to.eventually.be.rejectedWith(
+          /does not match window/);
+    });
   });
 
   it('should return false if trial has expired', () => {
     const verify = originExperiments.verifyToken(
         tokenWithExpiredExperiment, 'https://origin.com', publicKey);
-    return expect(verify)
-        .to.eventually.be.rejectedWith('Experiment "expired" has expired.');
+    allowConsoleError(() => {
+      return expect(verify).to.eventually.be.rejectedWith(
+          'Experiment "expired" has expired.');
+    });
   });
 
   it('should return true for a well-formed, unexpired token', () => {

@@ -150,14 +150,18 @@ describe('3p ampcontext.js', () => {
 
   it('should throw error if sentinel invalid', () => {
     win.name = generateSerializedAttributes('foobar');
-    expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    allowConsoleError(() => {
+      expect(() => new AmpContext(win)).to.throw('Incorrect sentinel format');
+    });
   });
 
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
     const platform = new Platform(window);
-    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
-      /undefined is not an object/ : /Cannot read property/);
+    allowConsoleError(() => {
+      expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
+        /undefined is not an object/ : /Cannot read property/);
+    });
   });
 
   it('should be able to send an intersection observer request', () => {

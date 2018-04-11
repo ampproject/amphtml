@@ -112,6 +112,8 @@ describes.realWin('ad-cid', {amp: true}, env => {
     sandbox.stub(cidService, 'get').callsFake(() => {
       return Promise.reject(new Error('nope'));
     });
-    return expect(getAdCid(adElement)).to.eventually.be.undefined;
+    allowConsoleError(() => {
+      return expect(getAdCid(adElement)).to.eventually.be.undefined;
+    });
   });
 });

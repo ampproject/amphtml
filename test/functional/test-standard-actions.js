@@ -374,7 +374,9 @@ describes.sandboxed('StandardActions', {}, () => {
           },
         },
       };
-      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      allowConsoleError(() => {
+        expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      });
       expect(printStub).to.not.be.called;
     });
 

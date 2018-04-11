@@ -231,9 +231,9 @@ describes.realWin('Expander', {
 
     it('throws on bad input with back ticks', () => {
       const url = 'CONCAT(bad`hello`, world)';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         expander.expand(url, mockBindings);
-      }).to.throw(/bad/);
+      }).to.throw(/bad/); });
     });
 
     it('should handle tokens with parenthesis next to each other', () => {

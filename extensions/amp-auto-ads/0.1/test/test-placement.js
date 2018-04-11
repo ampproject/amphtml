@@ -94,7 +94,9 @@ describes.realWin('placement', {
       });
       expect(placements).to.have.lengthOf(1);
 
-      expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      allowConsoleError(() => {
+        expect(() => placements[0].getAdElement()).to.throw(/No ad element/);
+      });
     });
   });
 

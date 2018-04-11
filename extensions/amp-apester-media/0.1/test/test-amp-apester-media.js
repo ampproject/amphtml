@@ -187,9 +187,10 @@ describes.realWin(
       });
 
       it('requires media-id or channel-token', () => {
-        expect(getApester()).to.be.rejectedWith(
-            /The media-id attribute is required for/
-        );
+        allowConsoleError(() => {
+          expect(getApester()).to.be.rejectedWith(
+              /The media-id attribute is required for/);
+        });
       });
     }
 );

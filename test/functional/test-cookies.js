@@ -107,28 +107,32 @@ describe('cookies', () => {
     test('www.example.net', 'example.com', true);
     test('example.net', 'example.com', true);
     test('cdn.ampproject.org', 'ampproject.org', true, true);
-    expect(() => {
-      test('cdn.ampproject.org', 'ampproject.org', true);
-    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
-    expect(() => {
-      test('CDN.ampproject.org', 'ampproject.org', true);
-    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
-    expect(() => {
-      test('CDN.ampproject.org', 'AMPproject.org', true);
-    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+    allowConsoleError(() => {
+      expect(() => {
+        test('cdn.ampproject.org', 'ampproject.org', true);
+      }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+      expect(() => {
+        test('CDN.ampproject.org', 'ampproject.org', true);
+      }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+      expect(() => {
+        test('CDN.ampproject.org', 'AMPproject.org', true);
+      }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+    });
     test('www.ampproject.org', 'www.ampproject.org');
     test('cdn.ampproject.org', 'cdn.ampproject.org', false, true);
-    expect(() => {
-      test('cdn.ampproject.org', 'cdn.ampproject.org', false);
-    }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
-    expect(() => {
-      test('foo.bar.cdn.ampproject.org', 'foo.bar.cdn.ampproject.org', false);
-    }).to.throw(/in depth check/);
-    expect(() => {
-      test('&&&.cdn.ampproject.org', '&&&.cdn.ampproject.org', false);
-    }).to.throw(/in depth check/);
-    expect(() => {
-      test('&&&.CDN.ampproject.org', '&&&.cdn.AMPproject.org', false);
-    }).to.throw(/in depth check/);
+    allowConsoleError(() => {
+      expect(() => {
+        test('cdn.ampproject.org', 'cdn.ampproject.org', false);
+      }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
+      expect(() => {
+        test('foo.bar.cdn.ampproject.org', 'foo.bar.cdn.ampproject.org', false);
+      }).to.throw(/in depth check/);
+      expect(() => {
+        test('&&&.cdn.ampproject.org', '&&&.cdn.ampproject.org', false);
+      }).to.throw(/in depth check/);
+      expect(() => {
+        test('&&&.CDN.ampproject.org', '&&&.cdn.AMPproject.org', false);
+      }).to.throw(/in depth check/);
+    });
   });
 });

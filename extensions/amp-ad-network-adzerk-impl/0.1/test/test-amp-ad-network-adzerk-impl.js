@@ -66,7 +66,9 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     });
 
     it('should be invalid', () => {
-      expect(() => impl.getAdUrl()).to.throw(/Expected data-r attribte/);
+      allowConsoleError(() => {
+        expect(() => impl.getAdUrl()).to.throw(/Expected data-r attribte/);
+      });
     });
   });
 

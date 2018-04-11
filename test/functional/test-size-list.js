@@ -97,17 +97,17 @@ describe('SizeList parseSizeList', () => {
 
   it('should fail on invalid CSS functions', () => {
     // Spaces are not allowed between function name and `(`.
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseSizeList('screen calc (111vw + 10px) \n, 10px ');
-    }).to.throw(/Invalid CSS function/);
+    }).to.throw(/Invalid CSS function/); });
 
     // Parens don't match.
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseSizeList('screen calc(111vw + 10px)) \n, 10px ');
-    }).to.throw(/Invalid CSS function/);
-    expect(() => {
+    }).to.throw(/Invalid CSS function/); });
+    allowConsoleError(() => { expect(() => {
       parseSizeList('screen calc((111vw + 10px) \n, 10px ');
-    }).to.throw(/Invalid CSS function/);
+    }).to.throw(/Invalid CSS function/); });
   });
 
   it('should accept percent when allowed', () => {
@@ -119,15 +119,15 @@ describe('SizeList parseSizeList', () => {
   });
 
   it('should not accept percent', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseSizeList(' \n 111% \n ', /* opt_allowPercentAsLength */ false);
-    }).to.throw(/Invalid length value/);
+    }).to.throw(/Invalid length value/); });
   });
 
   it('should fail bad length', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseSizeList(' \n 111 \n ');
-    }).to.throw(/Invalid length value/);
+    }).to.throw(/Invalid length value/); });
   });
 });
 
@@ -135,25 +135,29 @@ describe('SizeList parseSizeList', () => {
 describe('SizeList construct', () => {
 
   it('should have at least one option', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new SizeList([]);
-    }).to.throw(/SizeList must have at least one option/);
+    }).to.throw(/SizeList must have at least one option/); });
   });
 
   it('the last option must not have a query', () => {
-    expect(() => {
-      new SizeList([{mediaQuery: 'screen', size: '111px'}]);
-    }).to.throw(/The last option must not have a media condition/);
-    expect(() => {
-      new SizeList([{mediaQuery: 'print', size: '222px'},
-        {mediaQuery: 'screen', size: '111px'}]);
-    }).to.throw(/The last option must not have a media condition/);
+    allowConsoleError(() => {
+      expect(() => {
+        new SizeList([{mediaQuery: 'screen', size: '111px'}]);
+      }).to.throw(/The last option must not have a media condition/);
+      expect(() => {
+        new SizeList([{mediaQuery: 'print', size: '222px'},
+          {mediaQuery: 'screen', size: '111px'}]);
+      }).to.throw(/The last option must not have a media condition/);
+    });
   });
 
   it('non-last options must have media query', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       new SizeList([{size: '222px'}, {size: '111px'}]);
-    }).to.throw(/All options except for the last must have a media condition/);
+    }).to.throw(
+        /All options except for the last must have a media condition/);
+    });
   });
 });
 

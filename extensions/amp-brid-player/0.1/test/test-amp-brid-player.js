@@ -87,19 +87,21 @@ describes.realWin('amp-brid-player', {
   });
 
   it('requires data-partner', () => {
-    return getBridPlayer({
+    allowConsoleError(() => { return getBridPlayer({
       'data-player': '4144',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-partner attribute is required for/);
+    });
   });
 
   it('requires data-player', () => {
-    return getBridPlayer({
+    allowConsoleError(() => { return getBridPlayer({
       'data-partner': '264',
       'data-video': '13663',
     }).should.eventually.be.rejectedWith(
         /The data-player attribute is required for/);
+    });
   });
 
   it('should forward events from brid-player to the amp element', () => {

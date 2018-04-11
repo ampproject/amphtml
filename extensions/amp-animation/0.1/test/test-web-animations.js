@@ -134,8 +134,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({duration: 'calc(10ms)'}).duration).to.equal(10);
     expect(scanTiming({duration: 'var(--unk)'}).duration).to.equal(0);
     expect(scanTiming({duration: 'var(--unk, 11ms)'}).duration).to.equal(11);
-    expect(() => scanTiming({duration: 'a'})).to.throw(/"duration" is invalid/);
-    expect(() => scanTiming({duration: -1})).to.throw(/"duration" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({duration: 'a'})).to.throw(
+          /"duration" is invalid/);
+      expect(() => scanTiming({duration: -1})).to.throw(
+          /"duration" is invalid/);
+    });
     expect(warnStub).to.not.be.calledWith(sinon.match.any, sinon.match(arg => {
       return /fractional/.test(arg);
     }));
@@ -153,7 +157,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({delay: 'var(--unk, 11ms)'}).delay).to.equal(11);
     // Note! The negative "delay" is allowed.
     expect(scanTiming({delay: -1}).delay).to.equal(-1);
-    expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({delay: 'a'})).to.throw(/"delay" is invalid/);
+    });
 
     expect(scanTiming({}).endDelay).to.equal(0);
     expect(scanTiming({endDelay: 0}).endDelay).to.equal(0);
@@ -162,8 +168,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({endDelay: '10s'}).endDelay).to.equal(10000);
     expect(scanTiming({endDelay: '10ms'}).endDelay).to.equal(10);
     expect(scanTiming({endDelay: 'calc(10ms)'}).endDelay).to.equal(10);
-    expect(() => scanTiming({endDelay: 'a'})).to.throw(/"endDelay" is invalid/);
-    expect(() => scanTiming({endDelay: -1})).to.throw(/"endDelay" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({endDelay: 'a'})).to.throw(
+          /"endDelay" is invalid/);
+      expect(() => scanTiming({endDelay: -1})).to.throw(
+          /"endDelay" is invalid/);
+    });
   });
 
   it('should parse/validate timing iterations', () => {
@@ -176,20 +186,24 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({iterations: 'Infinity'}).iterations).to.equal(Infinity);
     expect(scanTiming({iterations: 'infinite'}).iterations).to.equal(Infinity);
     expect(scanTiming({iterations: 'INFINITE'}).iterations).to.equal(Infinity);
-    expect(() => scanTiming({iterations: 'a'}))
-        .to.throw(/"iterations" is invalid/);
-    expect(() => scanTiming({iterations: -1}))
-        .to.throw(/"iterations" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({iterations: 'a'})).to.throw(
+          /"iterations" is invalid/);
+      expect(() => scanTiming({iterations: -1})).to.throw(
+          /"iterations" is invalid/);
+    });
 
     expect(scanTiming({}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 0}).iterationStart).to.equal(0);
     expect(scanTiming({iterationStart: 10}).iterationStart).to.equal(10);
     expect(scanTiming({iterationStart: 'calc(10)'}).iterationStart)
         .to.equal(10);
-    expect(() => scanTiming({iterationStart: 'a'}))
-        .to.throw(/"iterationStart" is invalid/);
-    expect(() => scanTiming({iterationStart: -1}))
-        .to.throw(/"iterationStart" is invalid/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({iterationStart: 'a'})).to.throw(
+          /"iterationStart" is invalid/);
+      expect(() => scanTiming({iterationStart: -1})).to.throw(
+          /"iterationStart" is invalid/);
+    });
   });
 
   it('should warn if timing is fractional', () => {
@@ -217,8 +231,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({direction: 'reverse'}).direction).to.equal('reverse');
     expect(scanTiming({direction: 'var(--unk, reverse)'}).direction)
         .to.equal('reverse');
-    expect(() => scanTiming({direction: 'invalid'}))
-        .to.throw(/Unknown direction value/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({direction: 'invalid'})).to.throw(
+          /Unknown direction value/);
+    });
   });
 
   it('should parse/validate timing fill', () => {
@@ -226,8 +242,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(scanTiming({fill: 'both'}).fill).to.equal('both');
     expect(scanTiming({fill: 'var(--unk, backwards)'}).fill)
         .to.equal('backwards');
-    expect(() => scanTiming({fill: 'invalid'}))
-        .to.throw(/Unknown fill value/);
+    allowConsoleError(() => {
+      expect(() => scanTiming({fill: 'invalid'})).to.throw(
+          /Unknown fill value/);
+    });
   });
 
   it('should merge timing', () => {
@@ -685,8 +703,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should fail when cannot discover style keyframes', () => {
-    expect(() => scan({target: target1, keyframes: 'keyframes1'}))
-        .to.throw(/Keyframes not found/);
+    allowConsoleError(() => {
+      expect(() => scan({target: target1, keyframes: 'keyframes1'})).to.throw(
+          /Keyframes not found/);
+    });
   });
 
   it('should discover style keyframes', () => {
@@ -855,16 +875,16 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should require any target spec', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       scan([{duration: 400, keyframes: {}}]);
-    }).to.throw(/No target specified/);
+    }).to.throw(/No target specified/); });
   });
 
   it('should not allow both selector and target spec', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       scan([{selector: '#target1', target: 'target1',
         duration: 400, keyframes: {}}]);
-    }).to.throw(/Both/);
+    }).to.throw(/Both/); });
   });
 
   it('should build keyframe for multiple targets', () => {
@@ -952,18 +972,18 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should fail when animation cannot be found', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         scanner.resolveRequests({animation: 'animation3'});
-      }).to.throw(/Animation not found/);
+      }).to.throw(/Animation not found/); });
     });
 
     it('should fail when animation reference is not an amp-animation', () => {
       const animation3 = env.createAmpElement('amp-other');
       animation3.id = 'animation3';
       doc.body.appendChild(animation3);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         scanner.resolveRequests({animation: 'animation3'});
-      }).to.throw(/Element is not an animation/);
+      }).to.throw(/Element is not an animation/); });
     });
 
     it('should fail the recursive animation', () => {
@@ -1239,8 +1259,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should require target for CSS that need element context', () => {
-      expect(() => css.resolveCss('calc(10em + 10px)'))
-          .to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.resolveCss('calc(10em + 10px)')).to.throw(
+            /target is specified/);
+      });
       target1.style.fontSize = '10px';
       expect(css.withTarget(target1, 0,
           () => css.resolveCss('calc(10em + 10px)')))
@@ -1333,10 +1355,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       }, () => {
         expect(css.getVar('--var1').num_).to.equal(11);
         expect(css.getVar('--var2').num_).to.equal(11);
-        expect(() => css.getVar('--rec1')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec2')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec3')).to.throw(/Recursive/);
-        expect(() => css.getVar('--rec4')).to.throw(/Recursive/);
+        allowConsoleError(() => {
+          expect(() => css.getVar('--rec1')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec2')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec3')).to.throw(/Recursive/);
+          expect(() => css.getVar('--rec4')).to.throw(/Recursive/);
+        });
       });
     });
 
@@ -1358,7 +1382,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should resolve current index', () => {
-      expect(() => css.getCurrentIndex()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentIndex()).to.throw(/target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentIndex()))
           .to.equal(0);
       expect(css.withTarget(target1, 11, () => css.getCurrentIndex()))
@@ -1370,7 +1396,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       expect(css.getRootFontSize()).to.equal(12);
 
       target1.style.fontSize = '16px';
-      expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentFontSize()).to.throw(/target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentFontSize()))
           .to.equal(16);
       expect(css.withTarget(target2, 0, () => css.getCurrentFontSize()))
@@ -1380,7 +1408,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should resolve current element size', () => {
       target1.style.width = '11px';
       target1.style.height = '12px';
-      expect(() => css.getCurrentElementSize()).to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getCurrentElementSize()).to.throw(
+            /target is specified/);
+      });
       expect(css.withTarget(target1, 0, () => css.getCurrentElementSize()))
           .to.deep.equal({width: 11, height: 12});
     });
@@ -1400,8 +1431,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           .to.deep.equal({width: 11, height: 12});
 
       // Closest selectors always need a context node.
-      expect(() => css.getElementSize('#target1', 'closest'))
-          .to.throw(/target is specified/);
+      allowConsoleError(() => {
+        expect(() => css.getElementSize('#target1', 'closest')).to.throw(
+            /target is specified/);
+      });
       expect(css.withTarget(child, 0,
           () => css.getElementSize('.parent', 'closest')))
           .to.deep.equal({width: 11, height: 12});
@@ -1415,8 +1448,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should NOT resolve an invalid URL', () => {
-      expect(() => css.resolveUrl('http://acme.org/path'))
-          .to.throw(/https/);
+      allowConsoleError(() => {
+        expect(() => css.resolveUrl('http://acme.org/path')).to.throw(/https/);
+      });
     });
   });
 
@@ -1617,9 +1651,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
 
   it('should fail to init twice', () => {
     runner.init();
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.init();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should set vars on start', () => {
@@ -1666,9 +1700,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   });
 
   it('should only allow pause when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.pause();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should resume all animations', () => {
@@ -1726,9 +1760,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   });
 
   it('should only allow resume when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.resume();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should reverse all animations', () => {
@@ -1742,9 +1776,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
   });
 
   it('should only allow reverse when started', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       runner.reverse();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should finish all animations', () => {
@@ -1887,7 +1921,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
       const runner = new WebAnimationRunner([
         {target: target1, keyframes: keyframes1, timing},
       ]);
-      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      allowConsoleError(() => {
+        expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      });
     });
 
     it('multiple requests - 0 total', () => {
@@ -1994,7 +2030,9 @@ describes.sandboxed('WebAnimationRunner', {}, () => {
         {target: target1, keyframes: keyframes1, timing: timing2},
       ]);
 
-      expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      allowConsoleError(() => {
+        expect(() => runner.getTotalDuration_()).to.throw(/has infinite/);
+      });
     });
 
   });

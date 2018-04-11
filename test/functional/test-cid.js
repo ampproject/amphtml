@@ -495,9 +495,9 @@ describe('cid', () => {
     });
 
     it('should fail on invalid scope', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         cid.get({scope: '$$$'}, Promise.resolve());
-      }).to.throw(/\$\$\$/);
+      }).to.throw(/\$\$\$/); });
     });
 
     it('should not store until persistence promise resolves', () => {
@@ -712,9 +712,9 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
-    }).to.throw(/Expected proxy origin/);
+    }).to.throw(/Expected proxy origin/); });
   });
 });
 
@@ -874,7 +874,9 @@ describes.fakeWin('cid optout:', {amp: true}, env => {
 
     it('should reject promise if storage set fails', () => {
       storageSetStub.returns(Promise.reject('failed!'));
-      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+      allowConsoleError(() => {
+        return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+      });
     });
   });
 

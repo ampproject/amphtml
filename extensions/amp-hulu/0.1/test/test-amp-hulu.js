@@ -60,7 +60,9 @@ describes.realWin('amp-hulu', {
   });
 
   it('requires data-eid', () => {
-    return getHulu('').should.eventually.be.rejectedWith(
-        /The data-eid attribute is required for/);
+    allowConsoleError(() => {
+      return getHulu('').should.eventually.be.rejectedWith(
+          /The data-eid attribute is required for/);
+    });
   });
 });

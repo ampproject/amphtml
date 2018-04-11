@@ -42,15 +42,15 @@ describe('3p', () => {
   describe('validateSrcPrefix()', () => {
 
     it('should throw when a string prefix does not match', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateSrcPrefix('https:', 'http://example.org');
-      }).to.throw(/Invalid src/);
+      }).to.throw(/Invalid src/); });
     });
 
     it('should throw when array prefixes do not match', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateSrcPrefix(['https:', 'ftp:'], 'http://example.org');
-      }).to.throw(/Invalid src/);
+      }).to.throw(/Invalid src/); });
     });
 
     it('should not throw when a string prefix matches', () => {
@@ -64,9 +64,9 @@ describe('3p', () => {
   });
 
   it('should throw an error if src does not contain addyn', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
-    }).to.throw(/Invalid src/);
+    }).to.throw(/Invalid src/); });
   });
 
   it('should not throw if source contains /addyn/', () => {
@@ -107,16 +107,16 @@ describe('3p', () => {
       }, ['foo', 'bar']);
       clock.tick(1);
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
           foo: true,
           bar: true,
         }, ['foo', 'bar', 'persika']);
-      }).to.throw(/Missing attribute for xxxxxx: persika./);
+      }).to.throw(/Missing attribute for xxxxxx: persika./); });
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         validateData({
           width: '',
           type: 'xxxxxx',
@@ -125,6 +125,7 @@ describe('3p', () => {
         }, [['red', 'green', 'blue']]);
       }).to.throw(
           /xxxxxx must contain exactly one of attributes: red, green, blue./);
+      });
     });
 
     it('should check mandatory fields with alternative options', () => {
@@ -163,9 +164,9 @@ describe('3p', () => {
         'not-whitelisted': true,
       }, [], ['foo']);
 
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         clock.tick(1);
-      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./); });
     });
 
     it('should check mandatory and optional fields', () => {

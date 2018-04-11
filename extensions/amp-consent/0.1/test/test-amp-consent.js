@@ -116,21 +116,29 @@ describes.realWin('amp-consent', {
         scriptElement.textContent = JSON.stringify(defaultConfig);
         consentElement.appendChild(scriptElement);
         scriptElement.setAttribute('type', '');
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
         scriptElement.textContent = JSON.stringify({});
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
       });
     });
   });
@@ -290,8 +298,10 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
-          /No consent is displaying/);
+      allowConsoleError(() => {
+        expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
+            /No consent is displaying/);
+      });
     });
 
     describe('schedule display', () => {
