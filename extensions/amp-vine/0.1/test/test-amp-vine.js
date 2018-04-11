@@ -59,7 +59,9 @@ describes.realWin('amp-vine', {
   });
 
   it('requires data-vineid', () => {
-    return getVine('').should.eventually.be.rejectedWith(
-        /The data-vineid attribute is required for/);
+    allowConsoleError(() => {
+      return getVine('').should.eventually.be.rejectedWith(
+          /The data-vineid attribute is required for/);
+    });
   });
 });

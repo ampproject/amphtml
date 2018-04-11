@@ -128,11 +128,13 @@ describes.realWin('amp-app-banner', {
   }
 
   function testButtonMissing() {
-    return getAppBanner({
+    allowConsoleError(() => { return getAppBanner({
       iosMeta,
       androidManifest,
       noOpenButton: true,
-    }).should.eventually.be.rejectedWith(/<button open-button> is required/);
+    }).should.eventually.be.rejectedWith(
+        /<button open-button> is required/);
+    });
   }
 
   function testRemoveBannerIfDismissed() {
@@ -193,11 +195,12 @@ describes.realWin('amp-app-banner', {
     });
 
     it('should parse meta content and validate app-argument url', () => {
-      return getAppBanner({
+      allowConsoleError(() => { return getAppBanner({
         iosMeta: {content:
             'app-id=828256236, app-argument=javascript:alert("foo");'},
       }).should.eventually.be.rejectedWith(
           /The url in app-argument has invalid protocol/);
+      });
     });
   }
 

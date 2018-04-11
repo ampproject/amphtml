@@ -146,7 +146,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    });
   });
 
   it('should throw if artwork src is invalid - string', () => {
@@ -159,7 +161,9 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       ],
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    });
   });
 
   it('should throw if artwork is not array', () => {
@@ -169,6 +173,8 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
       'artwork': 'https://NotArray',
       'title': '',
     };
-    expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    allowConsoleError(() => {
+      expect(() => {setMediaSession(ampdoc.win, fakeMetaData);}).to.throw();
+    });
   });
 });

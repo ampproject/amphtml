@@ -308,10 +308,9 @@ describe('rewriteAttributeValue', () => {
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
-    expect(() => resolveUrlAttr('a', 'href',
+    allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
-        'http://acme.org/doc1'))
-        .to.throw(/Source origin is not allowed in/);
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
   });
 
   it('should be called by sanitizer', () => {
