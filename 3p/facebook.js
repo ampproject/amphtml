@@ -161,7 +161,6 @@ export function facebook(global, data) {
 
     FB.init({xfbml: true, version: 'v2.5'});
 
-    console.log('SDK loaded');
     // Report to parent that the SDK has loaded and is ready to paint
     const message = JSON.stringify(dict({
       'action': 'ready',
