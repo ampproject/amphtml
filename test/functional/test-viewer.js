@@ -176,6 +176,12 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
+    // The call in the constructor always replaces the hash.
+    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    // However, subsequently calls merge.
+    windowApi.location.href = 'http://www.example.com/#test=1';
+    viewer.maybeUpdateFragmentForCct();
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
@@ -191,7 +197,7 @@ describe('Viewer', () => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
-  it('should restore fragment within custom tab with click param', () => {
+  it('should clear fragment within custom tab with click param', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
@@ -201,7 +207,7 @@ describe('Viewer', () => {
         'http://www.example.com');
     expect(viewer.getParam('click')).to.equal('abc');
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#click=abc&ampshare=http%3A%2F%2Fwww.example.com%2F');
+        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
   });
 
   it('should configure visibilityState visible by default', () => {
