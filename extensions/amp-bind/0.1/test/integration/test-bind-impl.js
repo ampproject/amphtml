@@ -369,6 +369,16 @@ describe.skip('Bind', function() {
       });
     });
 
+    it('should update document title for <title> elements', () => {
+      const element = createElement(
+          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'title');
+      element.value = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.value).to.equal('abc');
+        expect(env.win.document.title).to.equal('abc');
+      });
+    });
+
     it('should support binding to CSS classes with strings', () => {
       const element = createElement(env, container, '[class]="[\'abc\']"');
       expect(toArray(element.classList)).to.deep.equal([]);
