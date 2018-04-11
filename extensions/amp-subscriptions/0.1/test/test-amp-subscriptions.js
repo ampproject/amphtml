@@ -161,7 +161,9 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.serviceAdapter_);
       expect(analyticsEventStub).to.be.calledWith(
           SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
-          'local'
+          {
+            serviceId: 'local',
+          }
       );
     });
   });
@@ -211,7 +213,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           expect(analyticsEventStub).to.be.calledWith(
               SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
               {
-                'platform-id': 'local',
+                'serviceId': 'local',
               }
           );
         });
@@ -295,12 +297,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
       const failureStub = sandbox.stub(subscriptionService.platformStore_,
           'reportPlatformFailure');
-      const promise = subscriptionService.fetchEntitlements_(platform)
+      subscriptionService.fetchEntitlements_(platform)
           .catch(() => {
             expect(failureStub).to.be.calledOnce;
             done();
           });
-      expect(promise).to.throw;
     }).timeout(7000);
 
     it('should report failure if platform reject promise', done => {
@@ -329,7 +330,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         expect(analyticsEventStub).to.be.calledWith(
             SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
             {
-              'platform-id': 'local',
+              'serviceId': 'local',
             }
         );
       });

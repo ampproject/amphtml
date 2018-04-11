@@ -38,8 +38,7 @@ export class SubscriptionAnalytics {
    * @param {Object<string, string>=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    // TODO(dvoytenko): implement.
-    triggerAnalyticsEvent(this.element_, eventType, Object.assign({
+    this.event(eventType, Object.assign({
       serviceId,
     }, opt_vars));
   }
@@ -50,7 +49,6 @@ export class SubscriptionAnalytics {
    * @param {Object<string, string>=} opt_vars
    */
   event(eventType, opt_vars) {
-    // TODO(dvoytenko): implement.
     triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
   }
 }
