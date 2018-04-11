@@ -27,6 +27,38 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+
+    <amp-carousel
+        id="scrollable-carousel"
+        width="800"
+        height="300"
+        layout="fixed"
+        type="carousel">
+        <amp-img src="https://picsum.photos/1600/900?image=110"
+            width="400"
+            height="225"
+            aria-label="Aria labels are cool."></amp-img>
+        <amp-img src="https://picsum.photos/1600/900?image=112"
+            width="400"
+            height="225"></amp-img>
+        <amp-img src="https://picsum.photos/1600/900?image=113"
+            width="400"
+            height="225"></amp-img>
+        <amp-img src="https://picsum.photos/1600/900?image=110"
+            width="400"
+            height="225"
+            alt="a beautiful cat"></amp-img>
+        <amp-img src="https://picsum.photos/1600/900?image=112"
+            width="400"
+            height="225"></amp-img>
+        <amp-img src="https://picsum.photos/1600/900?image=113"
+            width="400"
+            height="225"></amp-img>
+    </amp-carousel>
+    <button on="tap:scrollable-carousel.goToSlide(index=0)">Go to slide 0</button>
+    <button on="tap:scrollable-carousel.goToSlide(index=3)">Go to slide 3</button>
+    <button on="tap:scrollable-carousel.goToSlide(index=5)">Go to slide 5</button>
+
   <amp-carousel width=400 height=300 layout=responsive type=slides>
 
     <div>hello world</div>
