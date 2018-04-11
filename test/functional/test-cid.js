@@ -87,6 +87,7 @@ describe('cid', () => {
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+        search: 'f=0',
       },
       crypto: {
         getRandomValues: array => {
@@ -147,9 +148,10 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
+    sandbox.stub(cid, 'isScopeOptedIn_').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -733,6 +735,7 @@ describes.realWin('cid', {amp: true}, env => {
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -795,7 +798,8 @@ describes.realWin('cid', {amp: true}, env => {
 
     beforeEach(() => {
       sandbox.stub(url, 'isProxyOrigin').returns(false);
-      sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').returns('api-key');
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       setCookie(win, '_ga', '', 0);
     });
 
@@ -804,6 +808,7 @@ describes.realWin('cid', {amp: true}, env => {
     });
 
     it('should use cid api on pub origin if opted in', () => {
+      cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
       const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
       getScopedCidStub.returns(Promise.resolve('cid-from-api'));
       return cid.get({
@@ -812,7 +817,7 @@ describes.realWin('cid', {amp: true}, env => {
         createCookieIfNotPresent: true,
       }, hasConsent).then(scopedCid => {
         expect(getScopedCidStub)
-            .to.be.calledWith('api-key', 'AMP_ECID_GOOGLE');
+            .to.be.calledWith('cid-api-key', 'AMP_ECID_GOOGLE');
         expect(scopedCid).to.equal('cid-from-api');
         expect(getCookie(win, '_ga')).to.equal('cid-from-api');
       });
@@ -842,6 +847,49 @@ describes.realWin('cid', {amp: true}, env => {
         expect(getCookie(win, '_ga')).to.be.null;
       });
     });
+  });
+
+  describe('isScopeOptedIn', () => {
+    it('should read predefined clients and custom API keys correctly', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="googleanalytics, ' +
+          'foo = foo-api-key,' +
+          'bar=bar-api-key ,' +
+          'hello=hello-api-key">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+      expect(cid.isScopeOptedIn_('hello')).to.equal('hello-api-key');
+      expect(cid.isScopeOptedIn_('non-existing')).to.be.undefined;
+    });
+
+    it('should work if meta only contains predefined clients', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+    });
+
+    it('should work if meta only contains custom scopes', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="' +
+          'foo=foo-api-key,' +
+          'bar=bar-api-key">';
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+    });
+
+    // TODO(lannka, #14336): Fails due to console errors.
+    it.skip('should not work if vendor not whitelisted', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="abodeanalytics">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+    });
+
+
   });
 });
 
