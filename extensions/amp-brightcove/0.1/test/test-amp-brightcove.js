@@ -69,8 +69,10 @@ describes.realWin('amp-brightcove', {
   });
 
   it('requires data-account', () => {
-    return getBrightcove({}).should.eventually.be.rejectedWith(
-        /The data-account attribute is required for/);
+    allowConsoleError(() => {
+      return getBrightcove({}).should.eventually.be.rejectedWith(
+          /The data-account attribute is required for/);
+    });
   });
 
   it('removes iframe after unlayoutCallback', () => {
