@@ -1,7 +1,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import { targetFitsWithinPage, calculateTargetScalingFactor } from '../animation-presets-utils';
-import { PRESETS } from '../animation-presets';
+import {PRESETS} from '../animation-presets';
+import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
 
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -69,8 +69,8 @@ describes.realWin('amp-story-full-bleed-animations', {
     container.appendChild(gridLayer);
   }
 
-  it('should add corresponding css class when a full bleed animation target is \
-attached as a child of a grid layer with fill template', () => {
+  it('should add corresponding css class when a full bleed animation target is'
+  + ' attached as a child of a grid layer with fill template', () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
         .then(() => {
@@ -93,15 +93,15 @@ attached as a child of a grid layer with fill template', () => {
         });
   });
 
-  it('should not add additional css class to full-bleed animation target \
-attached as a child of a grid layer with a template OTHER than fill',
+  it('should not add additional css class to full-bleed animation target ' +
+     'attached as a child of a grid layer with a template OTHER than fill',
   () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
         .then(() => {
           // Get pages.
           const pageElements =
-            ampStory.element.getElementsByTagName('amp-story-page');
+                ampStory.element.getElementsByTagName('amp-story-page');
           const pages = Array.from(pageElements).map(el => el.getImpl());
           return Promise.all(pages);
         })
@@ -118,8 +118,8 @@ attached as a child of a grid layer with a template OTHER than fill',
         });
   });
 
-  it('should not add additional css class to non-full-bleed animation target \
-attached as a child of a grid layer with fill template', () => {
+  it('should not add additional css class to non-full-bleed animation target ' +
+     'attached as a child of a grid layer with fill template', () => {
     createPages(ampStory.element, 2, ['cover', 'page-1']);
     return ampStory.layoutCallback()
         .then(() => {
