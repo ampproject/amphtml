@@ -85,6 +85,7 @@
     "no-self-compare": 2,
     "no-sequences": 2,
     "no-spaced-func": 2,
+    "no-style-property-setting": 2,
     "no-throw-literal": 2,
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
