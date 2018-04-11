@@ -306,7 +306,7 @@ The first dialog with matching `subscriptions-display` is shown.
 
 The `subscriptions-display` uses expressions for actions and dialogs.
 
-The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1][../amp-acccess/amp-access.md#appendix-a-amp-access-expression-grammar].
+The value of the `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in the [AMP Access Appendix 1](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
 The expression is executed against the object in the following form:
 
