@@ -14,13 +14,41 @@
  * limitations under the License.
  */
 
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+
+export const SubscriptionAnalyticsEvents = {
+  PLATFORM_ACTIVATED: 'subscriptions-platform-activated',
+  PLATFORM_REGISTERED: 'subscriptions-platform-registered',
+  PLATFORM_REAUTHORIZED: 'subscriptions-platform-re-authorized',
+  ACTION_DELEGATED: 'subscriptions-action-delegated',
+  ENTITLEMENT_RESOLVED: 'subscriptions-entitlement-resolved',
+  STARTED: 'subscriptions-started',
+};
 
 export class SubscriptionAnalytics {
 
+  constructor(element) {
+    this.element_ = element;
+  }
+
   /**
-   * @param {string} unusedType
+   *
+   * @param {string} eventType
+   * @param {string} serviceId
+   * @param {Object<string, string>=} opt_vars
    */
-  event(unusedType) {
-    // TODO(dvoytenko): implement.
+  serviceEvent(eventType, serviceId, opt_vars) {
+    this.event(eventType, Object.assign({
+      serviceId,
+    }, opt_vars));
+  }
+
+  /**
+   *
+   * @param {string} eventType
+   * @param {Object<string, string>=} opt_vars
+   */
+  event(eventType, opt_vars) {
+    triggerAnalyticsEvent(this.element_, eventType, opt_vars || {});
   }
 }
