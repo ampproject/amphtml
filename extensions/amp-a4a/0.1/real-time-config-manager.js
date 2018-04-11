@@ -33,7 +33,7 @@ const MAX_RTC_CALLOUTS = 5;
 const MAX_URL_LENGTH = 16384;
 
 /** @type {number} */
-const RTC_ERROR_REPORTING_FREQUENCY = 1;
+const RTC_ERROR_REPORTING_FREQUENCY = 0.01;
 
 /**
  * Enum starts at 4 because 1-3 reserved as:
