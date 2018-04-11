@@ -50,7 +50,7 @@ FAIL
 |    </style>
 |  </head>
 |  <body>
-|    <amp-story standalone>
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
 |      <amp-story-page id="fill-template-title">
 |        <amp-story-cta-layer>
 >>       ^~~~~~~~~
