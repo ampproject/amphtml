@@ -17,6 +17,7 @@
 import {ACTION_TYPE, AMP_CONSENT_EXPERIMENT, AmpConsent} from '../amp-consent';
 import {CONSENT_ITEM_STATE} from '../consent-state-manager';
 import {MULTI_CONSENT_EXPERIMENT} from '../consent-policy-manager';
+import {computedStyle} from '../../../../src/style';
 import {macroTask} from '../../../../testing/yield';
 
 import {
@@ -45,7 +46,7 @@ describes.realWin('amp-consent', {
 
     storageValue = {};
     jsonMockResponses = {
-      'response1': '{"consentRequired": true, "prompt": true}',
+      'response1': '{"promptIfUnknown": true, "prompt": true}',
     };
 
     resetServiceForTesting(win, 'xhr');
@@ -115,21 +116,29 @@ describes.realWin('amp-consent', {
         scriptElement.textContent = JSON.stringify(defaultConfig);
         consentElement.appendChild(scriptElement);
         scriptElement.setAttribute('type', '');
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
         doc.body.appendChild(consentElement);
         const ampConsent = new AmpConsent(consentElement);
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
 
         // Check consent config exists
         scriptElement.setAttribute('type', 'application/json');
         scriptElement.textContent = JSON.stringify({});
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
 
         // Check there is only one script object
         scriptElement.textContent = JSON.stringify(defaultConfig);
         const script2 = doc.createElement('script');
         consentElement.appendChild(script2);
-        expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        allowConsoleError(() => {
+          expect(() => ampConsent.assertAndParseConfig_()).to.throw();
+        });
       });
     });
   });
@@ -169,7 +178,7 @@ describes.realWin('amp-consent', {
       ampConsent.buildCallback();
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {
-        'consentRequired': true,
+        'promptIfUnknown': true,
         'prompt': true,
       });
     });
@@ -219,6 +228,7 @@ describes.realWin('amp-consent', {
     let defaultConfig;
     let ampConsent;
     let updateConsentInstanceStateSpy;
+    let consentElement;
     beforeEach(() => {
       defaultConfig = {
         'consents': {
@@ -235,8 +245,9 @@ describes.realWin('amp-consent', {
             'promptUI': '123',
           },
         },
+        'postPromptUI': 'test',
       };
-      const consentElement = doc.createElement('amp-consent');
+      consentElement = doc.createElement('amp-consent');
       consentElement.setAttribute('id', 'amp-consent');
       consentElement.setAttribute('layout', 'nodisplay');
       const scriptElement = doc.createElement('script');
@@ -248,6 +259,9 @@ describes.realWin('amp-consent', {
       consentElement.appendChild(scriptElement);
       doc.body.appendChild(consentElement);
       ampConsent = new AmpConsent(consentElement);
+      sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
+        fn();
+      });
     });
 
     it('update current displaying consent', function* () {
@@ -256,6 +270,9 @@ describes.realWin('amp-consent', {
       updateConsentInstanceStateSpy =
           sandbox.spy(ampConsent.consentStateManager_,
               'updateConsentInstanceState');
+      yield macroTask();
+      yield macroTask();
+      yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
       expect(updateConsentInstanceStateSpy).to.be.calledWith(
           'ABC', CONSENT_ITEM_STATE.GRANTED);
@@ -281,8 +298,10 @@ describes.realWin('amp-consent', {
       yield macroTask();
       ampConsent.handleAction_(ACTION_TYPE.DISMISS);
       yield macroTask();
-      expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
-          /No consent is displaying/);
+      allowConsoleError(() => {
+        expect(() => ampConsent.handleAction_(ACTION_TYPE.DISMISS)).to.throw(
+            /No consent is displaying/);
+      });
     });
 
     describe('schedule display', () => {
@@ -299,6 +318,41 @@ describes.realWin('amp-consent', {
         expect(ampConsent.notificationUiManager_.queueSize_).to.equal(2);
         ampConsent.scheduleDisplay_('ABC');
         expect(ampConsent.notificationUiManager_.queueSize_).to.equal(3);
+      });
+    });
+
+    describe('postPromptUI', () => {
+      let postPromptUI;
+
+      beforeEach(() => {
+        postPromptUI = document.createElement('div');
+        postPromptUI.setAttribute('id', 'test');
+        consentElement.appendChild(postPromptUI);
+        storageValue = {
+          'amp-consent:ABC': CONSENT_ITEM_STATE.GRANTED,
+          'amp-consent:DEF': CONSENT_ITEM_STATE.GRANTED,
+          'amp-consent:GH': CONSENT_ITEM_STATE.GRANTED,
+        };
+        ampConsent.buildCallback();
+      });
+
+      it('handle postPromptUI', function* () {
+        yield macroTask();
+        expect(ampConsent.postPromptUI_).to.not.be.null;
+        expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
+            .to.equal('none');
+        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
+            ['display']).to.equal('none');
+        yield macroTask();
+        expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
+            .to.not.equal('none');
+        expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
+        expect(ampConsent.element.classList.contains('amp-hidden')).to.be.false;
+        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
+            ['display']).to.not.equal('none');
+        ampConsent.scheduleDisplay_('ABC');
+        expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
+            ['display']).to.equal('none');
       });
     });
   });

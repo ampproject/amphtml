@@ -49,6 +49,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
@@ -487,6 +488,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     return ['https://googleads.g.doubleclick.net'];
   }
 

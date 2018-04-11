@@ -296,6 +296,7 @@ exports.rules = [
       'src/3p-frame.js',
       'src/iframe-helper.js',
     ],
+    whitelist: 'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->src/3p-frame.js',
   },
 
   {
