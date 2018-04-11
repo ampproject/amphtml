@@ -55,6 +55,7 @@ import {
   resetScheduledElementForTesting,
 } from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
@@ -608,6 +609,26 @@ describe('amp-a4a', () => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
               false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('shouldn\'t set feature policy for sync-xhr with exp off-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
+        });
+      });
+
+      it('should set feature policy for sync-xhr with exp on-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow'))
+              .to.equal('sync-xhr \'none\';');
         });
       });
     });
@@ -1556,7 +1577,7 @@ describe('amp-a4a', () => {
   });
 
   describe('#preconnectCallback', () => {
-    it('validate adsense', () => {
+    it('validate', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -1567,16 +1588,9 @@ describe('amp-a4a', () => {
         a4a.preconnectCallback(false);
         return Promise.resolve().then(() => {
           const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-          expect(preconnects).to.have.lengthOf(3);
-          // SafeFrame origin.
-          expect(preconnects[0]).to.have.property(
-              'href', 'https://tpc.googlesyndication.com/');
-          // NameFrame origin (in testing mode).  Use a substring match here to
-          // be agnostic about localhost server port.
-          expect(preconnects[1]).to.have.property('href')
-              .that.has.string('http://ads.localhost');
+          expect(preconnects).to.have.lengthOf(1);
           // AdSense origin.
-          expect(preconnects[2]).to.have.property(
+          expect(preconnects[0]).to.have.property(
               'href', 'https://googleads.g.doubleclick.net/');
         });
       });
@@ -1907,9 +1921,9 @@ describe('amp-a4a', () => {
     });
 
     it('should rethrow cancellation', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         a4a.promiseErrorHandler_(cancellation());
-      }).to.throw(/CANCELLED/);
+      }).to.throw(/CANCELLED/); });
     });
 
     it('should create an error if needed', () => {

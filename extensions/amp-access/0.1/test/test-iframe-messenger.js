@@ -43,9 +43,9 @@ describes.fakeWin('Messenger', {}, env => {
     });
 
     it('should now allow connecting twice', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.connect(onCommand);
-      }).to.throw(/already connected/);
+      }).to.throw(/already connected/); });
     });
 
     it('should add and remove message listener', () => {
@@ -62,9 +62,9 @@ describes.fakeWin('Messenger', {}, env => {
     });
 
     it('should fail target until connected', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.getTarget();
-      }).to.throw(/not connected/);
+      }).to.throw(/not connected/); });
     });
 
     it('should succeed target once connected', () => {
@@ -78,9 +78,9 @@ describes.fakeWin('Messenger', {}, env => {
     });
 
     it('should fail sending a command until connected', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.sendCommand('start', {});
-      }).to.throw(/not connected/);
+      }).to.throw(/not connected/); });
     });
 
     it('should send a command once connected', () => {
@@ -214,7 +214,9 @@ describes.fakeWin('Messenger', {}, env => {
       return promise.then(() => {
         throw new Error('must have failed');
       }, reason => {
-        expect(() => {throw reason;}).to.throw(/intentional/);
+        allowConsoleError(() => {
+          expect(() => {throw reason;}).to.throw(/intentional/);
+        });
       });
     });
 
@@ -319,15 +321,15 @@ describes.fakeWin('Messenger', {}, env => {
 
     it('should fail to return origin until connected', () => {
       expect(messenger.isConnected()).to.be.false;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.getTargetOrigin();
-      }).to.throw(/not connected/);
+      }).to.throw(/not connected/); });
     });
 
     it('should disallow other commands before connect', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.sendCommand('other', {});
-      }).to.throw(/not connected/);
+      }).to.throw(/not connected/); });
       expect(target.postMessage).to.not.be.called;
     });
 
@@ -376,9 +378,9 @@ describes.fakeWin('Messenger', {}, env => {
         data: {sentinel: '__AMP__', cmd: 'other', payload: {a: 1}},
       });
       expect(messenger.isConnected()).to.be.false;
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         messenger.getTargetOrigin();
-      }).to.throw(/not connected/);
+      }).to.throw(/not connected/); });
       expect(onCommand).to.not.be.called;
     });
   });

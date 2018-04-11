@@ -202,7 +202,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.HIGH);
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -475,7 +475,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that require
+      // TODO(amphtml): Identify more platforms that require
       // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.

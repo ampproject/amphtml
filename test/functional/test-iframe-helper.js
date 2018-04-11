@@ -49,18 +49,18 @@ describe('iframe-helper', function() {
   it('should assert src in iframe', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.srcdoc = '<html>';
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('only iframes with src supported');
+    }).to.throw('only iframes with src supported'); });
   });
 
   it('should assert iframe is detached', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.src = iframeSrc;
     insert(iframe);
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('cannot register events on an attached iframe');
+    }).to.throw('cannot register events on an attached iframe'); });
   });
 
   // TODO(dvoytenko, #12499): Make this work with latest mocha / karma.

@@ -138,13 +138,29 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   });
 
   describe('proxy methods', () => {
-    let spyObject;
-    beforeEach(() => {
-      spyObject = sandbox.spy(viewerPlatform.platform_);
-    });
     it('should delegate getServiceId', () => {
+      const proxyStub =
+        sandbox.stub(viewerPlatform.platform_, 'getServiceId');
       viewerPlatform.getServiceId();
-      expect(spyObject.getServiceId).to.be.called;
+      expect(proxyStub).to.be.called;
+    });
+    it('should delegate isPingbackEnabled', () => {
+      const proxyStub =
+        sandbox.stub(viewerPlatform.platform_, 'isPingbackEnabled');
+      viewerPlatform.isPingbackEnabled();
+      expect(proxyStub).to.be.called;
+    });
+    it('should delegate pingback', () => {
+      const proxyStub =
+        sandbox.stub(viewerPlatform.platform_, 'pingback');
+      viewerPlatform.pingback();
+      expect(proxyStub).to.be.called;
+    });
+    it('should delegate supportsCurrentViewer', () => {
+      const proxyStub =
+        sandbox.stub(viewerPlatform.platform_, 'supportsCurrentViewer');
+      viewerPlatform.supportsCurrentViewer();
+      expect(proxyStub).to.be.called;
     });
   });
 });

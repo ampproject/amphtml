@@ -42,6 +42,9 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
+    /** @const {!../../../third_party/subscriptions-project/config.PageConfig} */
+    this.pageConfig_ = serviceAdapter.getPageConfig();
+
     /** @private @const @private {!LocalSubscriptionPlatform} */
     this.platform_ = new LocalSubscriptionPlatform(
         ampdoc, platformConfig, serviceAdapter);

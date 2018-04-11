@@ -65,9 +65,9 @@ describes.realWin('web-push-config', {
     return env.ampdoc.whenReady().then(() => {
       const element = createConfigElementWithAttributes(webPushConfig);
       element.removeAttribute('id');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         element.implementation_.validate();
-      }).to.throw(/must have an id attribute with value/);
+      }).to.throw(/must have an id attribute with value/); });
     });
   });
 
@@ -75,9 +75,9 @@ describes.realWin('web-push-config', {
     return env.ampdoc.whenReady().then(() => {
       createConfigElementWithAttributes(webPushConfig);
       const element = createConfigElementWithAttributes(webPushConfig);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         element.implementation_.validate();
-      }).to.throw(/only one .* element may exist on a page/i);
+      }).to.throw(/only one .* element may exist on a page/i); });
     });
   });
 
@@ -90,10 +90,11 @@ describes.realWin('web-push-config', {
         webPushConfig = setDefaultWebPushConfig();
         delete webPushConfig[configName];
         const element = createConfigElementWithAttributes(webPushConfig);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           element.implementation_.validate();
         }).to.throw(
             new RegExp('must have a valid ' + configName + ' attribute'));
+        });
       });
       promises.push(promise);
     }
@@ -108,9 +109,9 @@ describes.realWin('web-push-config', {
         removeAllWebPushConfigElements();
         webPushConfig[configName] = 'http://example.com/test';
         const element = createConfigElementWithAttributes(webPushConfig);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           element.implementation_.validate();
-        }).to.throw(/should begin with the https:\/\/ protocol/);
+        }).to.throw(/should begin with the https:\/\/ protocol/); });
       });
       promises.push(promise);
     }
@@ -125,9 +126,9 @@ describes.realWin('web-push-config', {
         removeAllWebPushConfigElements();
         webPushConfig[configName] = 'http://example.com/';
         const element = createConfigElementWithAttributes(webPushConfig);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           element.implementation_.validate();
-        }).to.throw(/and point to the/);
+        }).to.throw(/and point to the/); });
       });
       promises.push(promise);
     }
@@ -142,9 +143,9 @@ describes.realWin('web-push-config', {
         removeAllWebPushConfigElements();
         webPushConfig[configName] = 'www.example.com/test';
         const element = createConfigElementWithAttributes(webPushConfig);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           element.implementation_.validate();
-        }).to.throw(/should begin with the https:\/\/ protocol/);
+        }).to.throw(/should begin with the https:\/\/ protocol/); });
       });
       promises.push(promise);
     }
@@ -156,9 +157,9 @@ describes.realWin('web-push-config', {
       'https://another-origin.com/test';
     return env.ampdoc.whenReady().then(() => {
       const element = createConfigElementWithAttributes(webPushConfig);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         element.implementation_.validate();
-      }).to.throw(/must all share the same origin/);
+      }).to.throw(/must all share the same origin/); });
     });
   });
 

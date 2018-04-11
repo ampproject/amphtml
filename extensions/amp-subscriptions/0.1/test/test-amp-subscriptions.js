@@ -28,26 +28,24 @@ import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {setTimeout} from 'timers';
 
 
-describes.realWin('amp-subscriptions', {amp: true}, env => {
+describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   let win;
   let ampdoc;
   let element;
   let pageConfig;
   let subscriptionService;
   let configResolver;
-
   const products = ['scenic-2017.appspot.com:news',
     'scenic-2017.appspot.com:product2'];
 
   const serviceConfig = {
     services: [
       {
-        authorizationUrl: 'https://subscribe.google.com/subscription/2/entitlements',
+        authorizationUrl: 'https://lipsum.com/authorize',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
         },
-        pingbackUrl: 'https://lipsum.com/pingback',
       },
       {
         serviceId: 'google.subscription',
@@ -76,13 +74,18 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   it('should call `initialize_` on start', () => {
+    const localPlatformStub =
+      sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
     const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
-    expect(subscriptionService.start()).to.throw;
+    subscriptionService.start();
     expect(initializeStub).to.be.calledOnce;
+    return subscriptionService.initialize_().then(() => {
+      expect(localPlatformStub).to.be.called;
+    });
   });
 
   it('should setup store and page on start', () => {
-
+    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
     const renderLoadingStub =
         sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
@@ -126,8 +129,22 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceData = serviceConfig['services'][1];
-    const factoryStub = sandbox.stub().callsFake(() => Promise.resolve());
+    const platform = new SubscriptionPlatform();
+    const entitlementData = {source: 'local',
+      service: 'local', products, subscriptionToken: 'token'};
+    const entitlement = Entitlement.parseFromJson(entitlementData);
+    const factoryStub = sandbox.stub().callsFake(() => platform);
+
+    subscriptionService.platformStore_ = new PlatformStore(
+        [serviceData.serviceId]);
+
+    platform.getEntitlements = sandbox.stub()
+        .callsFake(() => Promise.resolve(entitlement));
+    platform.getServiceId = sandbox.stub().callsFake(() => 'local');
+
+    subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
+
     return subscriptionService.initialize_().then(() => {
       expect(factoryStub).to.be.calledOnce;
       expect(factoryStub.getCall(0).args[0]).to.be.equal(serviceData);
@@ -165,6 +182,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     it('should wait for grantStatus and selectPlatform promise', done => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
@@ -183,6 +201,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
       });
     });
     it('should call selectPlatform with preferViewerSupport config', done => {
+      sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       subscriptionService.initialize_().then(() => {
@@ -297,6 +316,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   describe('viewer authorization', () => {
+    let fetchEntitlementsStub;
     beforeEach(() => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
@@ -305,6 +325,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
           .callsFake(() => Promise.resolve());
       sandbox.stub(subscriptionService.viewer_, 'sendMessageAwaitResponse')
           .callsFake(() => Promise.resolve());
+      fetchEntitlementsStub = sandbox.stub(subscriptionService,
+          'fetchEntitlements_');
     });
     it('should put LocalSubscriptionPlatform in platformstore, '
         + 'if viewer does not have auth capability', () => {
@@ -327,8 +349,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
     it('should not fetch entitlements for any platform other than '
         + 'local', () => {
-      const fetchEntitlementsStub = sandbox.stub(
-          subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
         subscriptionService.registerPlatform('google.subscription',
@@ -340,8 +360,6 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     it('should fetch entitlements for other platforms if viewer does '
         + 'not provide auth', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
-      const fetchEntitlementsStub = sandbox.stub(
-          subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.registerPlatform('google.subscription',
           () => new SubscriptionPlatform());
