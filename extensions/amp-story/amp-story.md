@@ -50,7 +50,7 @@ This component is experimental and under active development. For any issues, ple
 
 ## Announcements
 
-### (3/22/2018) **New metadata requirements**
+### (4/2018) **New metadata requirements**
 
 We're adding four new required attributes and two optional attributes to the `<amp-story>` element:
 
