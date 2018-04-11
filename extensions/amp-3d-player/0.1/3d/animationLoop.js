@@ -52,7 +52,7 @@ export default (() => {
     /** @private */
     loop_() {
       if (this.isNeedToRender_) {
-        this.performTask_();
+        this.task_();
       }
       this.currentRAF_ = requestAnimationFrame(this.loop_);
     },

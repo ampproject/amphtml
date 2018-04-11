@@ -142,9 +142,6 @@ export default function gltfViewer() {
     scene.add(makeLight());
 
     const camera = new THREE.PerspectiveCamera();
-    camera.position.set(2, 3, 4);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     Object.assign(controls, options.controls);
 
@@ -154,10 +151,11 @@ export default function gltfViewer() {
 
     const step = () => {
       controls.update();
+      viewer.lastRenderCamera = camera;
       renderer.render(scene, camera);
     };
 
-    const animationLoop = new AnimationLoop([step]);
+    const animationLoop = new AnimationLoop(step);
 
     const updateSize = () => {
       const w = window.innerWidth;
@@ -165,6 +163,7 @@ export default function gltfViewer() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      animationLoop.needsUpdate = true;
     };
 
     updateSize();
