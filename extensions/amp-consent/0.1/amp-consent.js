@@ -113,7 +113,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} consentId
    */
   handlePostPrompt_(consentId) {
-    user().assert(consentId, 'revoke must specify a consent instance id');
     user().assert(this.consentConfig_[consentId],
         `consent with id ${consentId} not found`);
     // toggle the UI for this consent
@@ -171,8 +170,11 @@ export class AmpConsent extends AMP.BaseElement {
         () => this.handleAction_(ACTION_TYPE.DISMISS));
     this.registerAction('prompt', invocation => {
       const args = invocation.args;
-      const consentId = args && args['consent'];
-      this.handlePostPrompt_(consentId);
+      let consentId = args && args['consent'];
+      if (!this.isMultiSupported_) {
+        consentId = Object.keys(this.consentConfig_)[0];
+      }
+      this.handlePostPrompt_(consentId || '');
     });
   }
 
@@ -381,7 +383,8 @@ export class AmpConsent extends AMP.BaseElement {
     const config = parseJson(script.textContent);
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
-
+    user().assert(Object.keys(consents).length != 0,
+        `${TAG}: can't find consent instance`);
     if (!this.isMultiSupported_) {
       // Assert single consent instance
       user().assert(Object.keys(consents).length <= 1,
