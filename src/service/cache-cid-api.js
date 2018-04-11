@@ -79,7 +79,7 @@ export class CacheCidApi {
    */
   getScopedCid(scope) {
     if (!this.viewer_.isCctEmbedded()) {
-      return Promise.resolve(null);
+      return /** @type {!Promise<?string>} */ (Promise.resolve(null));
     }
 
     if (!this.publisherCidPromise_) {

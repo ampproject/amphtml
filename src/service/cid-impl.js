@@ -232,7 +232,7 @@ export class Cid {
     if (this.cacheCidApi_.isSupported()) {
       const apiKey = this.isScopeOptedIn_(scope);
       if (!apiKey) {
-        return Promise.resolve(null);
+        return /** @type {!Promise<?string>} */ (Promise.resolve(null));
       }
       return this.cacheCidApi_.getScopedCid(scope);
     }
