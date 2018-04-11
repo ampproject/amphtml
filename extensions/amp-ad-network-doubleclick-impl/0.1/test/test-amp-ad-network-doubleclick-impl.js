@@ -778,6 +778,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
 
     it('should call #unobserve on refreshManager', () => {
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      impl.isAmpCreative_ = null;
       impl.refreshManager_ = {
         unobserve: () => {},
       };
