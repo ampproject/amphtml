@@ -172,11 +172,13 @@ export class ConsentPolicyInstance {
     }
 
 
-    if (state == CONSENT_ITEM_STATE.IGNORED) {
-      // Ignore the consent item state
-      if (this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
-          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED) {
-        this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.IGNORED;
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      const shouldOverwrite =
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED;
+      // Ignore the consent item state and overwrite state value.
+      if (shouldOverwrite) {
+        this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.NOT_REQUIRED;
       }
     } else if (state == CONSENT_ITEM_STATE.DISMISSED) {
       // When dismissed, use the old value
@@ -210,7 +212,8 @@ export class ConsentPolicyInstance {
         return;
       }
 
-      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.IGNORED) {
+      if (this.itemToConsentState_[consentId] ==
+          CONSENT_ITEM_STATE.NOT_REQUIRED) {
         isSufficient = false;
       }
 
@@ -231,7 +234,7 @@ export class ConsentPolicyInstance {
     if (isSufficient) {
       state = CONSENT_POLICY_STATE.SUFFICIENT;
     } else if (isIgnored) {
-      state = CONSENT_POLICY_STATE.IGNORED;
+      state = CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
     } else if (isUnknown) {
       state = CONSENT_POLICY_STATE.UNKNOWN;
     } else {

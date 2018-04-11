@@ -433,7 +433,7 @@ export class AmpConsent extends AMP.BaseElement {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
             if (!this.consentRequired_[instanceId]) {
               this.consentStateManager_.updateConsentInstanceState(
-                  instanceId, CONSENT_ITEM_STATE.IGNORED);
+                  instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
               return;
             }
             // TODO(@zhouyx):

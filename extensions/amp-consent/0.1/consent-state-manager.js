@@ -29,7 +29,7 @@ export const CONSENT_ITEM_STATE = {
   GRANTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
-  IGNORED: 4,
+  NOT_REQUIRED: 4,
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
   // ui_state = {pending, active, complete}
   // consent_state = {unknown, granted, rejected}
@@ -158,9 +158,9 @@ export class ConsentInstance {
       return;
     }
 
-    if (state == CONSENT_ITEM_STATE.IGNORED) {
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
       if (!this.localValue_ || this.localValue_ == CONSENT_ITEM_STATE.UNKNOWN) {
-        this.localValue_ = CONSENT_ITEM_STATE.IGNORED;
+        this.localValue_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
       }
       return;
     }

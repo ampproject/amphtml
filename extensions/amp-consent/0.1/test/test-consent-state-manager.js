@@ -107,8 +107,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       it('should call handler when consent is ignored', () => {
         manager.onConsentStateChange('test', spy);
-        manager.updateConsentInstanceState('test', CONSENT_ITEM_STATE.IGNORED);
-        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.IGNORED);
+        manager.updateConsentInstanceState('test',
+            CONSENT_ITEM_STATE.NOT_REQUIRED);
+        expect(spy).to.be.calledWith(CONSENT_ITEM_STATE.NOT_REQUIRED);
       });
 
       it('should call handler when register observable', function*() {
@@ -145,7 +146,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
-        instance.update(CONSENT_ITEM_STATE.IGNORED);
+        instance.update(CONSENT_ITEM_STATE.NOT_REQUIRED);
         yield macroTask();
         expect(storageSetSpy).to.not.be.called;
         instance.update(CONSENT_ITEM_STATE.GRANTED);
