@@ -213,11 +213,9 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
-    this.subscriptionAnalytics_.event(
+    this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
-        {
-          'platform-id': serviceId,
-        }
+        serviceId,
     );
   }
 
@@ -443,11 +441,9 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
-      this.subscriptionAnalytics_.event(
+      this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
-          {
-            'platform-id': selectedPlatform.getServiceId(),
-          }
+          selectedPlatform.getServiceId(),
       );
 
       if (this.viewTrackerPromise_) {
@@ -484,11 +480,9 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
-      this.subscriptionAnalytics_.event(
+      this.subscriptionAnalytics_.serviceEvent(
           SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-          {
-            'platform-id': subscriptionPlatform.getServiceId(),
-          }
+          subscriptionPlatform.getServiceId(),
       );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
@@ -504,6 +498,7 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
+    // TODO: add which service is passing this event
     this.subscriptionAnalytics_.event(
         SubscriptionAnalyticsEvents.ACTION_DELEGATED,
         {
