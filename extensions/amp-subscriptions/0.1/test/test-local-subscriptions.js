@@ -19,6 +19,7 @@ import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+import {SubscriptionAnalytics} from '../analytics';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;
@@ -64,7 +65,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
+        serviceConfig.services[0], serviceAdapter,
+        new SubscriptionAnalytics(ampdoc.getRootNode()));
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
