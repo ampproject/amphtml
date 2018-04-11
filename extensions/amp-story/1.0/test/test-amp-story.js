@@ -28,7 +28,7 @@ const IDENTITY_FN = x => x;
 describes.realWin('amp-story', {
   amp: {
     runtimeOn: true,
-    extensions: ['amp-story'],
+    extensions: ['amp-story:1.0'],
   },
 }, env => {
 
@@ -68,12 +68,6 @@ describes.realWin('amp-story', {
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story');
-    // element.getAmpDoc = () => env.ampdoc;
-    // element.getResources = () => {
-    //   return {
-    //     measureMutateElement: () => Promise.resolve(),
-    //   };
-    // };
     win.document.body.appendChild(element);
 
     AmpStory.isBrowserSupported = () => true;
