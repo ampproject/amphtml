@@ -88,8 +88,11 @@ function buildErrorResponse_(
  */
 function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
   if (Math.random() < RTC_ERROR_REPORTING_FREQUENCY) {
-    const whitelist = {ERROR_TYPE: true};
-    const macros = {ERROR_TYPE: errorType};
+    const whitelist = {ERROR_TYPE: true, HREF: true};
+    const macros = {
+      ERROR_TYPE: errorType,
+      HREF: win.location.href
+    };
     Services.urlReplacementsForDoc(ampDoc).expandUrlAsync(
         errorReportingUrl, macros, whitelist).then(url => {
       Services.xhrFor(win).fetch(url);
