@@ -226,6 +226,10 @@ export class LocalSubscriptionPlatform {
   supportsCurrentViewer() {
     return false;
   }
+
+  getBaseScore() {
+    return this.serviceConfig_.baseScore || 0;
+  }
 }
 
 /**

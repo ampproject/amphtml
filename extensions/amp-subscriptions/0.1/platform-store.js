@@ -28,10 +28,9 @@ const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
-   *
    * @param {!Array<string>} expectedServiceIds
    */
-  constructor(expectedServiceIds) {
+  constructor(expectedServiceIds, scoreConfig) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -53,6 +52,11 @@ export class PlatformStore {
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
+
+    /** @private @const {!JsonObject} */
+    this.scoreConfig_ = Object.assign({
+      supportsViewer: 9,
+    }, scoreConfig);
   }
 
   /**
@@ -273,14 +277,17 @@ export class PlatformStore {
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
-      // Subscriber, gains weight 10
+      // Subscriber wins immediatly.
       if (!!entitlement.subscriptionToken) {
-        weight += 10;
+        return platform;
       }
+
+      // Add the base score
+      weight += platform.getBaseScore();
 
       // If supports the current viewer, gains weight 9
       if (preferViewerSupport && platform.supportsCurrentViewer()) {
-        weight += 9;
+        weight += this.scoreConfig_.supportsViewer;
       }
 
       platformWeights.push({

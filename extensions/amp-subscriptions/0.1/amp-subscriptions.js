@@ -273,7 +273,7 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds);
+      this.platformStore_ = new PlatformStore(serviceIds, this.pageConfig_);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
