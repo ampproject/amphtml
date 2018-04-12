@@ -34,7 +34,9 @@ describes.realWin('Platform store', {}, () => {
   entitlementsForService2.setCurrentProduct(currentProduct);
 
   beforeEach(() => {
-    platformStore = new PlatformStore(serviceIds);
+    platformStore = new PlatformStore(serviceIds, {
+      supportsViewer: 9,
+    });
   });
 
   it('should instantiate with the service ids', () => {
@@ -161,11 +163,17 @@ describes.realWin('Platform store', {}, () => {
   describe('selectApplicablePlatform_', () => {
     let localPlatform;
     let anotherPlatform;
+    let localPlatformBaseScore = 0;
+    let anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
       sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(localPlatform, 'getBaseScore')
+          .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
       sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
+      sandbox.stub(anotherPlatform, 'getBaseScore')
+          .callsFake(() => anotherPlatformBaseScore);
       platformStore.resolvePlatform('local', localPlatform);
       platformStore.resolvePlatform('another', anotherPlatform);
     });
@@ -253,6 +261,23 @@ describes.realWin('Platform store', {}, () => {
         subscriptionToken: null}));
       expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
           .equal(localPlatform.getServiceId());
+    });
+
+    it('should use baseScore', () => {
+      sandbox.stub(localPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
+          .callsFake(() => false);
+      localPlatformBaseScore = 1;
+      anotherPlatformBaseScore = 10;
+      platformStore.resolveEntitlement('local', new Entitlement({
+        source: 'local', raw: '', service: 'local', products: ['product1'],
+        subscriptionToken: null}));
+      platformStore.resolveEntitlement('another', new Entitlement({
+        source: 'another', raw: '', service: 'another', products: ['product2'],
+        subscriptionToken: null}));
+      expect(platformStore.selectApplicablePlatform_().getServiceId()).to.be
+          .equal(anotherPlatform.getServiceId());
     });
   });
 
