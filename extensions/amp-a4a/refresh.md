@@ -47,7 +47,7 @@ const refreshManager = new RefreshManager(this, refreshConfig, refreshInterval);
 refreshManager.initiateRefreshCycle();
 ```
 
-Optionally, a network may override AmpA4a's `refresh` method, which would allow it to insert custom logic in between refresh events. Note: RefreshManager passes a callback to `refresh` which must be invoked in order to reset the cycle; if it is not invoked, the RefreshManager will become idle until either the callback or `initiateRefreshCycle` is called. If `refresh` is not overridden, this is handled automatically by AmpA4A.
+Optionally, a network may override AmpA4A's `refresh` method, which would allow it to insert custom logic in between refresh events. Note: RefreshManager passes a callback to `refresh` which must be invoked in order to reset the cycle; if it is not invoked, the RefreshManager will become idle until either the callback or `initiateRefreshCycle` is called. If `refresh` is not overridden, this is handled automatically by AmpA4A.
 
 <table>
   <tr>
