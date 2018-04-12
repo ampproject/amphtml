@@ -21,9 +21,8 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {parseJson} from '../../../src/json';
+import {parseJson, tryParseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 
 class AmpFacebookPage extends AMP.BaseElement {
 
@@ -99,10 +98,7 @@ class AmpFacebookPage extends AMP.BaseElement {
       return; // Doesn't look like JSON.
     }
 
-    /** @const {?JsonObject} */
-    eventData = /** @type {?JsonObject} */ (isObject(eventData)
-      ? eventData
-      : parseJson(eventData));
+    eventData = (isObject(eventData) ? eventData : parseJson(eventData));
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }
