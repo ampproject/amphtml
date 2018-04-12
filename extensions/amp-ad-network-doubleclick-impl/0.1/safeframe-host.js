@@ -418,8 +418,10 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    dev().assert(this.iframe_.contentWindow,
-        'Frame contentWindow unavailable.');
+    if (!this.iframe_.contentWindow) {
+      dev().log('Frame contentWindow unavailable.');
+      return;
+    }
     const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(

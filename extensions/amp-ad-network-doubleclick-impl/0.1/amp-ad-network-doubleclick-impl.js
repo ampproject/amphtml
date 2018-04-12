@@ -613,6 +613,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
     const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
         .then(results => {
+          this.verifyStillCurrent();
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
