@@ -1768,7 +1768,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
     it('should turn off and cleanup', () => {
       stubInA4A(false);
       element.prepareLoading_();
-      resourcesMock.expects('mutateElement').once();
       element.toggleLoading(false, {cleanup: true});
 
       expect(element.loadingContainer_).to.be.null;
