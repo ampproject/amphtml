@@ -28,7 +28,7 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import {setImportantStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -152,7 +152,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       const attributeName = attribute.name.toLowerCase();
       const propertyName = SUPPORTED_CSS_GRID_ATTRIBUTES[attributeName];
       if (propertyName) {
-        setImportantStyles(element, {[propertyName]: attribute.value});
+        setStyle(element, propertyName, attribute.value);
         element.removeAttribute(attributeName);
       }
     }
