@@ -123,8 +123,6 @@ An explicit size of the image, which is used by the AMP runtime to determine the
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
-Note that the usage of the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) common attribute is not recommended with `<amp-img>`, as its effects can be created with more refined control by using the `srcset`, `sizes`, and `heights` attributes instead.
-
 
 ## Styling
 
@@ -178,6 +176,14 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
   <div placeholder></div> 
 </amp-iframe>
 </div>
+
+#### Setting multiple source files for different screen resolutions
+
+The [`srcset`](#attributes) attribute should be used to provide different resolutions of the same image, that all have the same aspect ratio. The AMP runtime will automatically choose the most appropriate file from `srcset` based on the screen resolution and width of the user's device.
+
+In contrast, the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
+
+See the guide on [creating responsive AMP pages](https://www.ampproject.org/docs/design/responsive/responsive_design#displaying-responsive-images) for more details.
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 
