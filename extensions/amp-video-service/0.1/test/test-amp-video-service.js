@@ -63,8 +63,8 @@ describes.fakeWin('VideoEntry', {
 
     const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate');
-    sandbox.stub(entry, 'registerCommonActions');
+    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
+    sandbox.stub(entry, 'registerCommonActions_');
 
     expect(element).to.not.have.class(expectedClass);
     expect(element.signals().signal).to.not.have.been.called;
@@ -83,7 +83,7 @@ describes.fakeWin('VideoEntry', {
   it('should register common actions on install', () => {
     const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate');
+    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
 
     video.registerAction = sandbox.spy();
 
@@ -97,57 +97,38 @@ describes.fakeWin('VideoEntry', {
     });
   });
 
-  [
-    {
-      on: '',
-      triggers: false,
-    },
-    {
-      on: 'timeUpdate:blah',
-      triggers: true,
-    },
-  ].forEach(testCase => {
-    const {triggers, on} = testCase;
-    const shouldOrNot = 'should' + (!triggers ? ' not' : '');
+  it('should trigger \`timeUpdate\` based on \`on\` attr', () => {
+    element.setAttribute('on', 'timeUpdate:foo');
 
-    it(`${shouldOrNot} trigger \`timeUpdate\` based on \`on\` attr`, () => {
-      element.setAttribute('on', on);
+    const tick = new Observable();
 
-      const tick = new Observable();
+    const actionService = {
+      trigger: sandbox.spy(),
+    };
 
-      const actionService = {
-        trigger: sandbox.spy(),
-      };
+    sandbox.stub(Services, 'actionServiceForDoc').returns(actionService);
+    const videoService = {
+      onTick: sandbox.stub().callsFake(tick.add.bind(tick)),
+    };
+    const entry = new VideoEntry(env.ampdoc, videoService, video);
 
-      sandbox.stub(Services, 'actionServiceForDoc').returns(actionService);
-      const videoService = {
-        onTick: sandbox.stub().callsFake(tick.add.bind(tick)),
-      };
-      const entry = new VideoEntry(env.ampdoc, videoService, video);
+    sandbox.stub(entry, 'registerCommonActions_');
+    entry.isPlaying_ = true;
 
-      sandbox.stub(entry, 'registerCommonActions');
+    entry.install();
 
-      entry.install();
-      entry.isPlaying = true;
+    video.getCurrentTime = sandbox.stub().returns(1);
+    video.getDuration = sandbox.stub().returns(2);
 
-      video.getCurrentTime = sandbox.stub().returns(1);
-      video.getDuration = sandbox.stub().returns(2);
+    return element.whenBuilt().then(() => {
+      tick.fire();
 
-      return element.whenBuilt().then(() => {
-        tick.fire();
+      const {any} = sinon.match;
+      const triggerWithArgs =
+          actionService.trigger.withArgs(element, 'timeUpdate', any, any);
 
-        if (triggers) {
-          const {any} = sinon.match;
-          const triggerWithArgs =
-              actionService.trigger.withArgs(element, 'timeUpdate', any, any);
-
-          expect(videoService.onTick).to.have.been.calledOnce;
-          expect(triggerWithArgs).to.have.been.calledOnce;
-        } else {
-          expect(videoService.onTick).to.not.have.been.called;
-          expect(actionService.trigger).to.not.have.been.called;
-        }
-      });
+      expect(videoService.onTick).to.have.been.calledOnce;
+      expect(triggerWithArgs).to.have.been.calledOnce;
     });
   });
 });

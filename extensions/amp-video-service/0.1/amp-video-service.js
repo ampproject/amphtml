@@ -26,7 +26,6 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {closestBySelector} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
@@ -104,7 +103,6 @@ export class VideoService {
 
     const entry = VideoEntry.create(this.ampdoc_, this, video);
 
-    entry.install();
     this.setEntry_(element, entry);
 
     return entry;
@@ -156,7 +154,10 @@ export class VideoService {
 }
 
 
-/** @visibleForTesting */
+/**
+ * Handler for a registered video component.
+ * @visibleForTesting
+ */
 export class VideoEntry {
 
   /**
@@ -166,17 +167,17 @@ export class VideoEntry {
    */
   constructor(ampdoc, videoService, video) {
 
-    /** @private @const{!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @private @const {!VideoService} */
     this.service_ = videoService;
 
-    /** @private @const{!../../../src/video-interface.VideoInterface} */
+    /** @private @const {!../../../src/video-interface.VideoInterface} */
     this.video_ = video;
 
-    /** @visibleForTesting {boolean} */
-    this.isPlaying = false;
+    /** @private {boolean} */
+    this.isPlaying_ = false;
   }
 
   /**
@@ -185,13 +186,17 @@ export class VideoEntry {
    * @param {!../../../src/video-interface.VideoInterface} video
    */
   static create(ampdoc, videoService, video) {
-    return new VideoEntry(ampdoc, videoService, video);
+    const entry = new VideoEntry(ampdoc, videoService, video);
+    // Called here as opposed to constructor so that tests can stub VideoEntry
+    // methods before install.
+    entry.install();
+    return entry;
   }
 
   /** @param {function()} handler */
   onPlaybackTick(handler) {
     this.service_.onTick(() => {
-      if (!this.isPlaying) {
+      if (!this.isPlaying_) {
         return;
       }
       handler();
@@ -221,7 +226,7 @@ export class VideoEntry {
   onBuilt_() {
     const {element} = this.video_;
 
-    this.registerCommonActions();
+    this.registerCommonActions_();
     this.addEventHandlers_();
 
     element.classList.add('i-amphtml-video-interface');
@@ -229,7 +234,7 @@ export class VideoEntry {
 
   /** @private */
   onLoadStart_() {
-    this.maybeTriggerTimeUpdate();
+    this.maybeTriggerTimeUpdate_();
   }
 
   /** @private */
@@ -237,20 +242,20 @@ export class VideoEntry {
     const {element} = this.video_;
 
     listen(element, VideoEvents.PAUSE, () => {
-      this.isPlaying = false;
+      this.isPlaying_ = false;
     });
 
     listen(element, VideoEvents.PLAYING, () => {
-      this.isPlaying = true;
+      this.isPlaying_ = true;
     });
   }
 
   /**
    * Register common actions such as play, pause, etc... so they can be called
    * using AMP Actions, e.g.: `<button on="tap:myVideo.play">`.
-   * @visibleForTesting
+   * @private
    */
-  registerCommonActions() {
+  registerCommonActions_() {
     const video = this.video_;
 
     // Only require ActionTrust.LOW for video actions to defer to platform
@@ -269,15 +274,9 @@ export class VideoEntry {
    * required.
    * Frequency of this event is controlled by VideoService.onTick() and is
    * every second for now.
-   * @visibleForTesting
+   * @private
    */
-  maybeTriggerTimeUpdate() {
-    const {element} = this.video_;
-
-    if (!closestBySelector(element, '[on*="timeUpdate:"]')) {
-      return;
-    }
-
+  maybeTriggerTimeUpdate_() {
     this.onPlaybackTick(() => {
       const video = this.video_;
       const time = video.getCurrentTime();
