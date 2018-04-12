@@ -63,7 +63,7 @@ describes.fakeWin('VideoEntry', {
 
     const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
+    sandbox.stub(entry, 'triggerTimeUpdate_');
     sandbox.stub(entry, 'registerCommonActions_');
 
     expect(element).to.not.have.class(expectedClass);
@@ -83,7 +83,7 @@ describes.fakeWin('VideoEntry', {
   it('should register common actions on install', () => {
     const entry = new VideoEntry(env.ampdoc, /* service */ null, video);
 
-    sandbox.stub(entry, 'maybeTriggerTimeUpdate_');
+    sandbox.stub(entry, 'triggerTimeUpdate_');
 
     video.registerAction = sandbox.spy();
 

@@ -234,7 +234,7 @@ export class VideoEntry {
 
   /** @private */
   onLoadStart_() {
-    this.maybeTriggerTimeUpdate_();
+    this.triggerTimeUpdate_();
   }
 
   /** @private */
@@ -276,7 +276,7 @@ export class VideoEntry {
    * every second for now.
    * @private
    */
-  maybeTriggerTimeUpdate_() {
+  triggerTimeUpdate_() {
     this.onPlaybackTick(() => {
       const video = this.video_;
       const time = video.getCurrentTime();
