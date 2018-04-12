@@ -92,15 +92,15 @@ class AmpFacebook extends AMP.BaseElement {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+    let eventData = getData(event);
+    if (!eventData || !(isObject(eventData) || tryParseJson(eventData))) {
       return; // Doesn't look like JSON.
     }
 
     /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
+    eventData = /** @type {?JsonObject} */ (isObject(eventData)
+      ? eventData
+      : parseJson(eventData));
     if (eventData === undefined) {
       return; // We only process valid JSON.
     }
