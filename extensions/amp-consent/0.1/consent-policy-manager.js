@@ -171,13 +171,22 @@ export class ConsentPolicyInstance {
       return;
     }
 
-    if (state != CONSENT_ITEM_STATE.DISMISSED) {
-      this.itemToConsentState_[consentId] = state;
-    } else {
+
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      const shouldOverwrite =
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED;
+      // Ignore the consent item state and overwrite state value.
+      if (shouldOverwrite) {
+        this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.NOT_REQUIRED;
+      }
+    } else if (state == CONSENT_ITEM_STATE.DISMISSED) {
       // When dismissed, use the old value
       if (this.itemToConsentState_[consentId] === null) {
         this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.UNKNOWN;
       }
+    } else {
+      this.itemToConsentState_[consentId] = state;
     }
 
     this.evaluate_();
@@ -185,7 +194,14 @@ export class ConsentPolicyInstance {
 
 
   evaluate_() {
+    // All consent instances need to be granted
     let isSufficient = true;
+
+    // All consent instances need to be granted or ignored
+    let isIgnored = true;
+
+    // A single consent instance is unknown
+    let isUnknown = false;
 
     // Decide to traverse item list every time instead of keeping reject/pending counts
     // Performance should be OK since we expect item list to be small.
@@ -196,13 +212,34 @@ export class ConsentPolicyInstance {
         return;
       }
 
-      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED ||
-          this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+      if (this.itemToConsentState_[consentId] ==
+          CONSENT_ITEM_STATE.NOT_REQUIRED) {
         isSufficient = false;
       }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
+        isSufficient = false;
+        isIgnored = false;
+      }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        isSufficient = false;
+        isIgnored = false;
+        isUnknown = true;
+      }
     }
-    const state = isSufficient ?
-      CONSENT_POLICY_STATE.SUFFICIENT : CONSENT_POLICY_STATE.INSUFFICIENT;
+
+    let state = null;
+
+    if (isSufficient) {
+      state = CONSENT_POLICY_STATE.SUFFICIENT;
+    } else if (isIgnored) {
+      state = CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
+    } else if (isUnknown) {
+      state = CONSENT_POLICY_STATE.UNKNOWN;
+    } else {
+      state = CONSENT_POLICY_STATE.INSUFFICIENT;
+    }
 
     this.status_ = state;
 
