@@ -292,7 +292,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.dispose();
     spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
     allowConsoleError(() => {
-      // On the [10, 10] only, again expect user().error(TAG,
+      // On the [10, 10] and [30, 30] only, again expect user().error(TAG,
       //   'visiblePercentageThresholds entry invalid min/max value')
       root.listenRoot(spec, null, null, null);
     });
