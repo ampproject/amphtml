@@ -579,7 +579,7 @@ function createBaseCustomElementClass(win) {
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
-          this.mutateWithConnected_(() => this.prepareLoading_());
+          this.mutateOrInvoke_(() => this.prepareLoading_());
         }
       }
     }
@@ -667,7 +667,7 @@ function createBaseCustomElementClass(win) {
         // preserved.
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
-        this.mutateWithConnected_(() => {
+        this.mutateOrInvoke_(() => {
           dom.removeElement(sizer);
         });
       }
@@ -1553,7 +1553,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      this.mutateWithConnected_(() => {
+      this.mutateOrInvoke_(() => {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
@@ -1575,7 +1575,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.mutateWithConnected_(() => {
+          this.mutateOrInvoke_(() => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1653,7 +1653,7 @@ function createBaseCustomElementClass(win) {
      * @param {function()} mutator
      * @param {?Element=} opt_element
      */
-    mutateWithConnected_(mutator, opt_element) {
+    mutateOrInvoke_(mutator, opt_element) {
       if (this.resources_) {
         this.getResources().mutateElement(opt_element || this, mutator);
       } else {
