@@ -591,8 +591,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * If the safeframed creative asks to expand with invalid expand
      * values, should fail gracefully.
      */
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('expand_request fails if invalid values sent', () => {
+    it('expand_request fails if invalid values sent', () => {
       const expandMessage = {};
       expandMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
       expandMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;

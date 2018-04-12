@@ -351,8 +351,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     }).to.throw(/must not be on the same origin as the/); });
   });
 
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  it.skip('should pick default url if custom disabled', () => {
+  it('should pick default url if custom disabled', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
@@ -380,8 +379,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     });
   });
 
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  it.skip('should prefetch default bootstrap frame if custom disabled', () => {
+  it('should prefetch default bootstrap frame if custom disabled', () => {
     window.AMP_MODE = {localDev: true};
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     preloadBootstrap(window, preconnect, undefined, true);

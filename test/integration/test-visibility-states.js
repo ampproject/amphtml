@@ -20,8 +20,7 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-// TODO(jridgewell, #14336): Fails due to console errors.
-describe.skip('Viewer Visibility State', () => {
+describe.configure().ifNewChrome().run('Viewer Visibility State', () => {
 
   function noop() {}
 
@@ -127,8 +126,7 @@ describe.skip('Viewer Visibility State', () => {
     });
 
     describe('from in the PRERENDER state', () => {
-      // TODO(jridgewell, #14336): Fails due to console errors.
-      describe.skip('for prerenderable element', () => {
+      describe('for prerenderable element', () => {
         beforeEach(() => {
           prerenderAllowed.returns(true);
           setupSpys();
