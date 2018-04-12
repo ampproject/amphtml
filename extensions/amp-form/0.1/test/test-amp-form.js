@@ -538,9 +538,7 @@ describes.repeated('', {
       });
     });
 
-    // TODO(danielrozenberg, #14336): Fails due to console errors.
-    it.skip('should allow rendering responses through inlined ' +
-        'templates', () => {
+    it('should allow rendering responses through inlined templates', () => {
       return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
@@ -1633,8 +1631,7 @@ describes.repeated('', {
           });
         });
 
-        // TODO(cvializ, #14336): Fails due to console errors.
-        it.skip('should redirect on error and header is set', () => {
+        it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
           const logSpy = sandbox.spy(user(), 'error');

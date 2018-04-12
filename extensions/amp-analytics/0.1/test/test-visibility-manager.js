@@ -235,8 +235,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(0);
   });
 
-  // TODO(zhouyx, #14336): Fails due to console errors.
-  it.skip('create correct number of models', () => {
+  it('create correct number of models', () => {
     let spec = {};
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
@@ -282,8 +281,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.dispose();
   });
 
-  // TODO(jonkeller, #14336): Fails due to console errors.
-  it.skip('does not allow min==max, when they are neither 0 nor 100', () => {
+  it('does not allow min==max, when they are neither 0 nor 100', () => {
     let spec = {visiblePercentageThresholds: [[50, 50]]};
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(0);

@@ -124,9 +124,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
         });
       });
 
-      // TODO(jridgewell, #14336): Fails due to console errors.
-      it.skip('fails upgrade on A4A upgrade with loadElementClass ' +
-          'error', () => {
+      it('fails upgrade on A4A upgrade with loadElementClass error', () => {
         a4aRegistry['zort'] = function() {
           return true;
         };
