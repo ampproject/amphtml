@@ -402,9 +402,24 @@ describe.configure().ifNewChrome().run('Bind', function() {
           '[text]="\'a\' + \'b\' + \'c\'"', 'title', /* opt_amp */ false,
           /* opt_head */ true);
       element.textContent = 'foo';
+      env.win.document.title = 'foo';
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('abc');
         expect(env.win.document.title).to.equal('abc');
+      });
+    });
+
+    it('should not update document title for <title> elements in body', () => {
+      // Add a <title> element to <head> because if we don't, setting
+      // `textContent` on a <title> element in the <body> will strangely update
+      // `document.title`.
+      const title = env.win.document.createElement('title');
+      title.textContent = 'my-title';
+      env.win.document.head.appendChild(title);
+      // Add <title [text]="'abc'"> to <body>.
+      createElement(env, container, '[text]="\'abc\'"', 'title');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(env.win.document.title).to.equal('my-title');
       });
     });
 

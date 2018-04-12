@@ -161,8 +161,8 @@ export class Bind {
      */
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
-          return this.initialize_(
-              body, elementByTag(ampdoc.getHeadNode(), 'title'));
+          const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
+          return this.initialize_(body, elementByTag(head, 'title'));
         });
 
     /** @private {Promise} */
@@ -874,7 +874,9 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
-        if (tag === 'TITLE' && this.ampdoc.isSingleDoc()) {
+        // If this is a <title> element in the <head>, update document title.
+        if (tag === 'TITLE'
+            && element.parentNode === this.localWin_.document.head) {
           this.localWin_.document.title = String(newValue);
         }
         // Setting `textContent` on TEXTAREA element only works if user
