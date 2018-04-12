@@ -309,6 +309,9 @@ function restoreConsoleError() {
 
 // Used to silence info, log, and warn level logging during each test.
 function stubConsoleInfoLogWarn() {
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
   consoleInfoLogWarnSandbox = sinon.sandbox.create();
   consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
   consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
