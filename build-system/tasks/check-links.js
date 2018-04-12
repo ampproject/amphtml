@@ -140,7 +140,10 @@ function filterWhitelistedLinks(markdown) {
   filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
 
   // Links inside a <code> block (illustrative, and not always valid)
-  filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
+  filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/gs, '');
+
+  // Links inside a <pre> block (illustrative, and not always valid)
+  filteredMarkdown = filteredMarkdown.replace(/<pre>(.*?)<\/pre>/gs, '');
 
   // The heroku nightly build page is not always acccessible by the checker.
   filteredMarkdown = filteredMarkdown.replace(
