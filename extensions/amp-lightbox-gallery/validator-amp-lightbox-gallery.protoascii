@@ -29,14 +29,7 @@ attr_lists: {
   name: "lightboxable-elements"
   attrs: { name: "lightbox" }
   attrs: {
-    name: "lightbox-exclude"
-    value: ""
-  }
-  attrs: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"
-    trigger: {
-      also_requires_attr: "lightbox"
-    }
   }
 }

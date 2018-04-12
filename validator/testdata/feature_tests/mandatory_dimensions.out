@@ -125,7 +125,11 @@ feature_tests/mandatory_dimensions.html:96:4 The tag 'amp-iframe' requires inclu
 feature_tests/mandatory_dimensions.html:100:4 The tag 'amp-fit-text' requires including the 'amp-fit-text' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-carousel height="42"></amp-carousel>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:101:4 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/mandatory_dimensions.html:101:4 The mandatory attribute 'lightbox' is missing in tag 'AMP-CAROUSEL [lightbox]'. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [DISALLOWED_HTML]
+>>     ^~~~~~~~~
+feature_tests/mandatory_dimensions.html:101:4 The tag 'AMP-CAROUSEL [lightbox]' requires including the 'amp-carousel' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+>>     ^~~~~~~~~
+feature_tests/mandatory_dimensions.html:101:4 The tag 'AMP-CAROUSEL [lightbox]' requires including the 'amp-lightbox-gallery' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-carousel) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-youtube data-videoid="dQw4w9WgXcQ" height="42"></amp-youtube>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:102:4 The tag 'amp-youtube' requires including the 'amp-youtube' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

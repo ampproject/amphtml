@@ -56,7 +56,6 @@ tags: {  # <amp-carousel>
   # <amp-bind>
   attrs: { name: "[slide]" }
   attr_lists: "extended-amp-global"
-  attr_lists: "lightboxable-elements"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
   amp_layout: {
     supported_layouts: FILL
@@ -66,5 +65,69 @@ tags: {  # <amp-carousel>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-carousel> lightbox
+  tag_name: "AMP-CAROUSEL"
+  spec_name: "AMP-CAROUSEL [lightbox]"
+  requires_extension: "amp-carousel"
+  requires_extension: "amp-lightbox-gallery"
+  attrs: {
+    name: "arrows"
+    value: ""
+  }
+  attrs: {
+    name: "autoplay"
+    value: ""
+  }
+  attrs: { name: "controls" }
+  attrs: {
+    name: "delay"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "dots"
+    value: ""
+  }
+  attrs: {
+    name: "lightbox"
+    mandatory: true
+  }
+  attrs: {
+    name: "loop"
+    value: ""
+  }
+  attrs: {
+    name: "type"
+    value_regex: "slides|carousel"
+  }
+  # <amp-bind>
+  attrs: { name: "[slide]" }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-carousel"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  reference_points: {
+    tag_spec_name: "AMP-CAROUSEL lightbox [child]"
+  }
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-CAROUSEL lightbox [child]"
+  attrs: {
+    name: "lightbox-exclude"
+  }
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    value_regex_casei: "^[a-z][a-z\\d_-]*"
   }
 }
