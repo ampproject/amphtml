@@ -69,13 +69,9 @@ tags: {  # <amp-carousel>
 }
 tags: {  # <amp-carousel> lightbox
   tag_name: "AMP-CAROUSEL"
-  spec_name: "amp-carousel with lightbox attribute"
+  spec_name: "AMP-CAROUSEL[lightbox]"
   requires_extension: "amp-carousel"
   requires_extension: "amp-lightbox-gallery"
-  attrs: {
-    name: "lightbox"
-    mandatory: true
-  }
   attrs: {
     name: "arrows"
     value: ""
@@ -92,6 +88,10 @@ tags: {  # <amp-carousel> lightbox
   attrs: {
     name: "dots"
     value: ""
+  }
+  attrs: {
+    name: "lightbox"
+    mandatory: true
   }
   attrs: {
     name: "loop"
@@ -124,4 +124,14 @@ tags: {
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-CAROUSEL lightbox [child]"
   attr_lists: "children-of-lightboxed-carousel"
+}
+attr_lists: {
+  name: "children-of-lightboxed-carousel"
+  attrs: {
+    name: "lightbox-exclude"
+  }
+  attrs: {
+    name: "lightbox-thumbnail-id"
+    value_regex_casei: "^[a-z][a-z\\d_-]*"
+  }
 }

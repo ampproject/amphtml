@@ -33,13 +33,3 @@ attr_lists: {
     value_regex_casei: "^[a-z][a-z\\d_-]*"
   }
 }
-attr_lists: {
-  name: "children-of-lightboxed-carousel"
-  attrs: {
-    name: "lightbox-exclude"
-  }
-  attrs: {
-    name: "lightbox-thumbnail-id"
-    value_regex_casei: "^[a-z][a-z\\d_-]*"
-  }
-}
