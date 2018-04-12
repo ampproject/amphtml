@@ -19,6 +19,7 @@ import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+import {SubscriptionAnalytics} from '../analytics';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {getWinOrigin} from '../../../../src/url';
 
@@ -57,7 +58,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
     viewerPlatform = new ViewerSubscriptionPlatform(
-        ampdoc, serviceConfig, serviceAdapter, origin);
+        ampdoc, serviceConfig, serviceAdapter, origin,
+        new SubscriptionAnalytics(ampdoc.getRootNode()));
     sandbox.stub(viewerPlatform.viewer_,
         'sendMessageAwaitResponse').callsFake(() =>
       Promise.resolve(fakeAuthToken));
