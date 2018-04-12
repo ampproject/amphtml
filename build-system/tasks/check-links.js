@@ -141,7 +141,7 @@ function filterWhitelistedLinks(markdown) {
 
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/gs, '');
-  
+
   // Links inside a <pre> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<pre>(.*?)<\/pre>/gs, '');
 
