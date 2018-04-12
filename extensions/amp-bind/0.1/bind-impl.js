@@ -23,13 +23,13 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
+import {elementByTag, iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {filterSplice} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
-import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
@@ -161,7 +161,8 @@ export class Bind {
      */
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
-          return this.initialize_(body);
+          return this.initialize_(
+              body, elementByTag(ampdoc.getHeadNode(), 'title'));
         });
 
     /** @private {Promise} */
@@ -282,14 +283,19 @@ export class Bind {
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
+   * @param {Node} titleNode
    * @return {!Promise}
    * @private
    */
-  initialize_(rootNode) {
+  initialize_(rootNode, titleNode) {
     dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    const nodes = [rootNode];
+    if (titleNode) {
+      nodes.push(titleNode);
+    }
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_([rootNode])]
+      this.addBindingsForNodes_(nodes)]
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
@@ -868,6 +874,9 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
+        if (tag === 'TITLE') {
+          this.localWin_.document.title = String(newValue);
+        }
         // Setting `textContent` on TEXTAREA element only works if user
         // has not interacted with the element, therefore `value` also needs
         // to be set (but `value` is not an attribute on TEXTAREA)
