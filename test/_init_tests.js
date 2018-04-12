@@ -275,6 +275,7 @@ function warnForConsoleError() {
   consoleErrorSandbox = sinon.sandbox.create();
   const originalConsoleError = console/*OK*/.error;
   consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
+    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
     const helpMessage = '    The test "' + testName + '"' +
         ' resulted in a call to console.error.\n' +
         '    ⤷ If this is not expected, fix the code that generated ' +
@@ -284,7 +285,7 @@ function warnForConsoleError() {
         '        \'allowConsoleError(() => { <code that generated the ' +
             'error> });';
     // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
-    originalConsoleError(messages.join(' ') + '\'\n' + helpMessage);
+    originalConsoleError(errorMessage + '\'\n' + helpMessage);
   });
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
