@@ -307,7 +307,8 @@ export class SubscriptionService {
             this.ampdoc_,
             service,
             this.serviceAdapter_,
-            origin
+            origin,
+            this.subscriptionAnalytics_
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
         viewerPlatform.getEntitlements()

@@ -20,9 +20,9 @@ import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
-import {user} from '../../../src/log';
 
 
 /**
@@ -36,9 +36,10 @@ export class ViewerSubscriptionPlatform {
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    * @param {string} origin
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics_
    */
-  constructor(ampdoc, platformConfig, serviceAdapter, origin) {
-
+  constructor(ampdoc, platformConfig, serviceAdapter, origin,
+    subscriptionAnalytics_) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
@@ -47,7 +48,7 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {!LocalSubscriptionPlatform} */
     this.platform_ = new LocalSubscriptionPlatform(
-        ampdoc, platformConfig, serviceAdapter);
+        ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics_);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
@@ -58,7 +59,7 @@ export class ViewerSubscriptionPlatform {
     /** @private {string} */
     this.publicationId_ = this.pageConfig_.getPublicationId();
 
-    /** @private {string} */
+    /** @private {?string} */
     this.currentProductId_ = this.pageConfig_.getProductId();
 
     /** @private {string} */
@@ -70,6 +71,8 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   getEntitlements() {
+    dev().assert(this.currentProductId_, 'Current product is not set');
+
     const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
         'auth',
         dict({
