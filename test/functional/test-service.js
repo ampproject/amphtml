@@ -449,8 +449,7 @@ describe('service', () => {
       expect(getServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should dispose disposable services', () => {
+    it('should dispose disposable services', () => {
       const disposableFactory = function() {
         return {
           dispose: sandbox.spy(),

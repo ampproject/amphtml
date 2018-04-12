@@ -123,8 +123,7 @@ describe('Google A4A utils', () => {
       },
     };
 
-    // TODO(zhouyx, #14336): Fails due to console errors.
-    it.skip('should extract correct config from header', () => {
+    it('should extract correct config from header', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         let url;

@@ -290,8 +290,7 @@ describes.sandboxed('StandardActions', {}, () => {
       });
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should not allow chained setState', () => {
+    it('should not allow chained setState', () => {
       const spy = sandbox.spy();
       window.services.bind = {
         obj: {

@@ -115,8 +115,7 @@ describes.realWin('AmpState', {
     });
   });
 
-  // TODO(choumx, #14336): Fails due to console errors.
-  it.skip('should fetch json if `src` is mutated', () => {
+  it('should fetch json if `src` is mutated', () => {
     element.setAttribute('src', 'https://foo.com/bar?baz=1');
     element.build();
 
