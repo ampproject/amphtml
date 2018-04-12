@@ -17,6 +17,7 @@
 import {
   AmpMustache,
 } from '../amp-mustache';
+import { expectConsoleError } from '../../../../testing/test-helper';
 
 describe('amp-mustache template', () => {
 
@@ -315,11 +316,13 @@ describe('amp-mustache template', () => {
       const nestedTemplateElement = outerResult.querySelector('template');
       const nestedTemplate = new AmpMustache(nestedTemplateElement);
       nestedTemplate.compileCallback();
-      const nestedResult = nestedTemplate.render({
-        value: 'Nested',
-      });
-      expect(nestedResult./*OK*/innerHTML).to.equal(
-          '<div>nested</div>: Nested');
+      expectConsoleError(() => {
+        const nestedResult = nestedTemplate.render({
+          value: 'Nested',
+        });
+        expect(nestedResult./*OK*/innerHTML).to.equal(
+            '<div>nested</div>: Nested');
+      }, [/^\[sanitizer\] Removing "onclick"/]);
     });
 
     it('should not allow users to pass data having key that starts with ' +
