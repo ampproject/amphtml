@@ -515,6 +515,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         'i-amphtml-lbg-button-next', nextSlide);
     const prevButton = this.buildButton_('Prev',
         'i-amphtml-lbg-button-prev', prevSlide);
+
+    const input = Services.inputFor(this.win);
+    if (!input.isMouseDetected()) {
+      prevButton.classList.add('i-amphtml-screen-reader');
+      nextButton.classList.add('i-amphtml-screen-reader');
+    }
     this.navControls_.appendChild(nextButton);
     this.navControls_.appendChild(prevButton);
     this.controlsContainer_.appendChild(this.navControls_);
