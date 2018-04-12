@@ -29,6 +29,7 @@ const TAG = 'amp-subscriptions';
 export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
+   * @param {!JsonObject} scoreConfig
    */
   constructor(expectedServiceIds, scoreConfig) {
 
@@ -53,9 +54,9 @@ export class PlatformStore {
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
 
-    /** @private @const {!JsonObject} */
+    /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign({
-      supportsViewer: 9,
+      'supportsViewer': 9,
     }, scoreConfig);
   }
 
@@ -279,7 +280,7 @@ export class PlatformStore {
 
       // Subscriber wins immediatly.
       if (!!entitlement.subscriptionToken) {
-        return platform;
+        weight += 100000;
       }
 
       // Add the base score

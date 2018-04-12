@@ -225,7 +225,7 @@ export class GoogleSubscriptionsPlatform {
   }
 
   getBaseScore() {
-    return this.serviceConfig_.baseScore || 0;
+    return this.serviceConfig_['baseScore'] || 0;
   }
 }
 

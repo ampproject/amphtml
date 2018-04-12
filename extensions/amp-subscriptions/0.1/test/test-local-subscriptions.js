@@ -53,6 +53,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'authorizationUrl': authUrl,
         'actions': actionMap,
         'pingbackUrl': pingbackUrl,
+        'baseScore': 99,
       },
     ],
   };
@@ -77,6 +78,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(domStub).calledOnce;
     expect(domStub.getCall(0).args[0])
         .to.be.equals('click');
+  });
+
+  it('should return baseScore', () => {
+    expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
   it('should fetch the entitlements on getEntitlements', () => {

@@ -273,7 +273,8 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds, this.pageConfig_);
+      this.platformStore_ = new PlatformStore(serviceIds,
+          this.platformConfig_['score']);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
@@ -304,7 +305,8 @@ export class SubscriptionService {
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
-    this.platformStore_ = new PlatformStore(serviceIds);
+    this.platformStore_ = new PlatformStore(serviceIds,
+        this.platformConfig_['score']);
     // TODO: Implement viewer authentication class
     this.platformConfig_['services'].forEach(service => {
       this.initializeLocalPlatforms_(service);
