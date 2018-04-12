@@ -57,7 +57,7 @@ const TAG = 'amp-geo';
  *
  * So don't change the magic string!
  */
-const COUNTRY = 'AMP_ISO_COUNTRY_HOTPATCH';
+const COUNTRY = '{{AMP_ISO_COUNTRY_HOTPATCH}}';
 const COUNTRY_PREFIX = 'amp-iso-country-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
