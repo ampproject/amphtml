@@ -867,11 +867,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
 
+    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImageBoxWithOffset();
+
+    // If the image isn't initialized, bail out the transition.
+    if (imageBox.width == 0 && imageBox.height == 0) {
+      return this.fade_(0, 1);
+    }
+
     // TODO (#13039): implement crop and object fit contain transitions
     const transLayer = this.element.ownerDocument.createElement('div');
     transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
-        .implementation_.getImageBoxWithOffset();
     const sourceImg = childElementByTag(sourceElement, 'img');
     const clone = sourceImg.cloneNode(true);
     clone.removeAttribute('class');
@@ -1247,10 +1253,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Close gallery view
+   * @returns {!Promise}
    * @private
    */
   closeGallery_() {
-    this.vsync_.mutate(() => {
+    return this.vsync_.mutatePromise(() => {
       this.container_.removeAttribute('gallery-view');
       toggle(dev().assertElement(this.navControls_), true);
       toggle(dev().assertElement(this.carousel_), true);
@@ -1417,11 +1424,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     }
 
     const closeGalleryAndShowTargetSlide = event => {
-      this.closeGallery_();
-      this.currentElemId_ = thumbnailObj.element.lightboxItemId;
-      dev().assert(this.carousel_).getImpl()
-          .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
-      this.updateDescriptionBox_();
+      this.closeGallery_().then(() => {
+        this.currentElemId_ = thumbnailObj.element.lightboxItemId;
+        dev().assert(this.carousel_).getImpl()
+            .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
+        this.updateDescriptionBox_();
+      });
+
       event.stopPropagation();
     };
     element.addEventListener('click', closeGalleryAndShowTargetSlide);
