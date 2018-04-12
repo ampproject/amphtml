@@ -724,7 +724,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the referrer or undefined if the referrer is not resolved
    * before the given timeout
    * @param {number=} opt_timeout
-   * @return {!Promise<string|undefined>} A promise for a referrer or undefined
+   * @return {!(Promise<string>|Promise<undefined>)} A promise with a referrer or undefined
+   * if timed out
    * @private
    */
   getReferrer_(opt_timeout) {
