@@ -324,8 +324,14 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  const elements = element.getElementsByTagName(tagName);
-  return elements[0] || null;
+  let elements;
+  // getElementsByTagName() is not supported on ShadowRoot.
+  if (typeof element.getElementsByTagName === 'function') {
+    elements = element.getElementsByTagName(tagName);
+  } else {
+    elements = scopedQuerySelectorAll(element, tagName);
+  }
+  return (elements && elements[0]) || null;
 }
 
 

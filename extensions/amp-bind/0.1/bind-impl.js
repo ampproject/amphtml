@@ -874,7 +874,7 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
-        if (tag === 'TITLE') {
+        if (tag === 'TITLE' && this.ampdoc.isSingleDoc()) {
           this.localWin_.document.title = String(newValue);
         }
         // Setting `textContent` on TEXTAREA element only works if user
