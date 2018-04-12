@@ -177,6 +177,14 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 </amp-iframe>
 </div>
 
+#### Setting multiple source files for different screen resolutions
+
+The [`srcset`](#attributes) attribute should be used to provide different resolutions of the same image, that all have the same aspect ratio. The AMP runtime will automatically choose the most appropriate file from `srcset` based on the screen resolution and width of the user's device.
+
+In contrast, the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
+
+See the guide on [creating responsive AMP pages](https://www.ampproject.org/docs/design/responsive/responsive_design#displaying-responsive-images) for more details.
+
 #### Maintaining the aspect ratio for images with unknown dimensions
 
 The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://www.ampproject.org/docs/design/responsive/control_layout#the-layout-attribute) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see AMP By Example's [How to support images with unknown dimensions](https://ampbyexample.com/advanced/how_to_support_images_with_unknown_dimensions).
