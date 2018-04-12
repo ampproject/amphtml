@@ -184,6 +184,7 @@ export const WebAnimationTimingFill = {
 const WHITELISTED_RPOPS = {
   'opacity': true,
   'transform': true,
+  'transform-origin': true,
   'visibility': true,
   'offset-distance': true,
   'offsetDistance': true,
