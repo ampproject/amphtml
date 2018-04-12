@@ -193,7 +193,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
       container = env.ampdoc.getBody();
     });
 
-    it('should scan for bindings when ampdoc is ready', () => {
+    // TODO(choumx, #14581): Flaky on Travis.
+    it.skip('should scan for bindings when ampdoc is ready', () => {
       createElement(env, container, '[text]="1+1"');
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
@@ -368,7 +369,8 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
-    it('should update document title for <title> elements', () => {
+    // TODO(choumx, #14581): Flaky on Travis.
+    it.skip('should update document title for <title> elements', () => {
       const element = createElement(
           env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'title');
       element.value = 'foo';
