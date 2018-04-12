@@ -361,8 +361,6 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.activeDocumentRef_ = documentRef;
 
     // TODO(peterjosling): Send request to viewer with title/URL
-    // TODO(emarchiori): Trigger analtyics event when active
-    // document changes.
     // TODO(emarchiori): Consider updating position fixed elements.
   }
 
