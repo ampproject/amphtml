@@ -180,28 +180,36 @@ describes.realWin('amp-geo', {
     expect(() => {
       addConfigElement('script');
       addConfigElement('script');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw(/should have exactly one <script> child​​​/);
   });
 
   it('should throw if the child element is not a <script> element', () => {
     expect(() => {
       addConfigElement('a');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw(/script/);
   });
 
   it('should throw if the child script element is not json typed', () => {
     expect(() => {
       addConfigElement('script', 'wrongtype');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw(/application\/json/);
   });
 
   it('should throw if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
-      geo.buildCallback();
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
     }).to.throw();
   });
 });
