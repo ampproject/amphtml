@@ -924,8 +924,7 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should update slide when `slide` attribute is mutated', () => {
+    it('should update slide when `slide` attribute is mutated', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
@@ -962,8 +961,7 @@ describes.realWin('SlideScroll', {
       });
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should goToSlide on action', () => {
+    it('should goToSlide on action', () => {
       return getAmpSlideScroll(true).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');

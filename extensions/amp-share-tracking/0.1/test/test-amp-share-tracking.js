@@ -185,8 +185,7 @@ describes.fakeWin('amp-share-tracking', {
         });
   });
 
-  // TODO(lannka, #14336): Fails due to console errors.
-  it.skip('should get empty outgoing fragment if vendor url is provided ' +
+  it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.resolve({
@@ -227,8 +226,7 @@ describes.fakeWin('amp-share-tracking', {
         });
   });
 
-  // TODO(lannka, #14336): Fails due to console errors.
-  it.skip('should get empty outgoing fragment if vendor url is provided ' +
+  it('should get empty outgoing fragment if vendor url is provided ' +
       'but the xhr fails', () => {
     historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
     xhrStub.onFirstCall().returns(Promise.reject({

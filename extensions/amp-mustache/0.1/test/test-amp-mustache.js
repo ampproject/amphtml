@@ -38,8 +38,7 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should sanitize output', () => {
+  it('should sanitize output', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
         'value = <a href="{{value}}">abc</a>';
@@ -65,8 +64,7 @@ describe('amp-mustache template', () => {
     expect(result.firstElementChild).to.be.null;
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  describe.skip('Sanitizing data- attributes', () => {
+  describe('Sanitizing data- attributes', () => {
 
     it('should sanitize templated attribute names', () => {
       const templateElement = document.createElement('template');
@@ -134,8 +132,7 @@ describe('amp-mustache template', () => {
     });
   });
 
-  // TODO(mkhatib, #14336): Fails due to console errors.
-  describe.skip('Rendering Form Fields', () => {
+  describe('Rendering Form Fields', () => {
     it('should allow rendering inputs', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML = 'value = ' +
@@ -303,8 +300,7 @@ describe('amp-mustache template', () => {
       expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
     });
 
-    // TODO(danielrozenberg, #14336): Fails due to console errors.
-    it.skip('should sanitize the inner template when it gets rendered', () => {
+    it('should sanitize the inner template when it gets rendered', () => {
       const outerTemplateElement = document.createElement('template');
       outerTemplateElement./*OK*/innerHTML =
           'outer: {{value}} ' +

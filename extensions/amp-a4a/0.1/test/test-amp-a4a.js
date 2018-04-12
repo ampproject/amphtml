@@ -643,8 +643,7 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
       });
 
-      // TODO(lannka, #14336): Fails due to console errors.
-      it.skip('should render via cached iframe', () => {
+      it('should render via cached iframe', () => {
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL);
           // Should have reported an error.
@@ -657,9 +656,7 @@ describe('amp-a4a', () => {
         });
       });
 
-      // TODO(keithwrightbos, #14336): Fails due to console errors.
-      it.skip('should fire amp-analytics triggers for illegal ' +
-          'render modes', () => {
+      it('should fire amp-analytics triggers for illegal render modes', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() => {
@@ -716,8 +713,7 @@ describe('amp-a4a', () => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
           headerVal => {
-            // TODO(lannka, #14336): Fails due to console errors.
-            it.skip(`should not attach a NameFrame when header is ${headerVal}`,
+            it(`should not attach a NameFrame when header is ${headerVal}`,
                 () => {
                   // Make sure there's no signature, so that we go down the 3p iframe path.
                   delete adResponse.headers['AMP-Fast-Fetch-Signature'];
@@ -808,8 +804,7 @@ describe('amp-a4a', () => {
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
           headerVal => {
-            // TODO(lannka, #14336): Fails due to console errors.
-            it.skip(`should not attach a SafeFrame when header is ${headerVal}`,
+            it(`should not attach a SafeFrame when header is ${headerVal}`,
                 () => {
                   // If rendering type is anything but safeframe, we SHOULD NOT attach a
                   // SafeFrame.
@@ -1359,8 +1354,7 @@ describe('amp-a4a', () => {
         }));
       });
     });
-    it('should handle XHR error when resolves after ' +
-        'layoutCallback', () => {
+    it('should handle XHR error when resolves after layoutCallback', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         let rejectXhr;
@@ -2216,9 +2210,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       expect(AMP.maybeExecuteRealTimeConfig).to.be.undefined;
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
     });
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('should log user error if RTC Config set but RTC not ' +
-        'supported', () => {
+    it('should log user error if RTC Config set but RTC not supported', () => {
       element.setAttribute('rtc-config',
           JSON.stringify({'urls': ['https://a.com']}));
       expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
@@ -2235,8 +2227,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
       expect(AMP.maybeExecuteRealTimeConfig.calledWith(a4a, macros)).to.be.true;
     });
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('should catch error in maybeExecuteRealTimeConfig', () => {
+    it('should catch error in maybeExecuteRealTimeConfig', () => {
       const err = new Error('Test');
       AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
       a4a.tryExecuteRealTimeConfig_();

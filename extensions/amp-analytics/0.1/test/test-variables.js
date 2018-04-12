@@ -68,16 +68,14 @@ describe('amp-analytics.VariableService', function() {
           );
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('expands nested vars', () => {
+    it('expands nested vars', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars))
           .then(actual =>
             expect(actual).to.equal('123%24%7B4%7D')
           );
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('expands nested vars (no encode)', () => {
+    it('expands nested vars (no encode)', () => {
       return variables.expandTemplate('${1}',
           new ExpansionOptions(vars, undefined, true))
           .then(actual =>
@@ -85,15 +83,13 @@ describe('amp-analytics.VariableService', function() {
           );
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('expands nested vars without double encoding', () => {
+    it('expands nested vars without double encoding', () => {
       return expect(variables.expandTemplate('${a}',
           new ExpansionOptions(vars))).to.eventually.equal(
           'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2');
     });
 
-    // TODO(avimehta, #14336): Fails due to console errors.
-    it.skip('limits the recursion to n', () => {
+    it('limits the recursion to n', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
           .then(actual =>
             expect(actual).to.equal('1234%24%7B1%7D'))

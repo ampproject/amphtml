@@ -41,8 +41,7 @@ describes.sandboxed('shadow-embed', {}, () => {
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
       .forEach(scenario => {
-        // TODO(dvoytenko, #14336): Fails due to console errors.
-        describe.skip('shadow APIs ' + scenario, () => {
+        describe('shadow APIs ' + scenario, () => {
           let hostElement;
 
           beforeEach(function() {

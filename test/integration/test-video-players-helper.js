@@ -67,8 +67,7 @@ export function runVideoPlayerIntegrationTests(
     return button;
   }
 
-  // TODO(alanorozco, #14336): Fails due to console errors.
-  describe.skip('Video Interface', function() {
+  describe.configure().ifNewChrome().run('Video Interface', function() {
     this.timeout(TIMEOUT);
 
     it('should override the video interface methods', function() {
@@ -90,8 +89,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  // TODO(alanorozco, #14336): Fails due to console errors.
-  describe.skip('Actions', function() {
+  describe.configure().ifNewChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
     it('should support mute, play, pause, unmute actions', function() {
@@ -140,8 +138,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  // TODO(alanorozco, #14336): Fails due to console errors.
-  describe.skip('Analytics Triggers', function() {
+  describe.configure().ifNewChrome().run('Analytics Triggers', function() {
     this.timeout(TIMEOUT);
     let video;
 
@@ -330,8 +327,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  // TODO(alanorozco, #14336): Fails due to console errors.
-  describe.skip('Video Docking', function() {
+  describe.configure().ifNewChrome().run('Video Docking', function() {
     this.timeout(TIMEOUT);
 
     describe('General Behavior', () => {
@@ -349,8 +345,7 @@ export function runVideoPlayerIntegrationTests(
         });
       });
 
-      it('should have class when attribute is set ' +
-          '(no-autoplay)', function() {
+      it('should have class when attribute is set (no-autoplay)', function() {
         return getVideoPlayer(
             {
               outsideView: false,
@@ -412,8 +407,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(aghassemi, #14336): Fails due to console errors.
-    describe.skip('with-autoplay', () => {
+    describe('with-autoplay', () => {
       it('should minimize when out of viewport', function() {
         let viewport;
         let video;
@@ -506,8 +500,7 @@ export function runVideoPlayerIntegrationTests(
     afterEach(cleanUp);
   });
 
-  // TODO(alanorozco, #14336): Fails due to console errors.
-  describe.skip('Autoplay', function() {
+  describe.configure().ifNewChrome().run('Autoplay', function() {
     this.timeout(TIMEOUT);
 
     describe('play/pause', () => {

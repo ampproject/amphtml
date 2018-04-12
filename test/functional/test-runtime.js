@@ -1026,8 +1026,7 @@ describes.realWin('runtime multidoc', {
       win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should ignore unknown script', () => {
+    it('should ignore unknown script', () => {
       extensionsMock.expects('preloadExtension').never();
 
       const scriptEl = win.document.createElement('script');
@@ -1107,8 +1106,7 @@ describes.realWin('runtime multidoc', {
           'script[data-id="test1"]').textContent).to.equal('{}');
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should ignore inline script if javascript', () => {
+    it('should ignore inline script if javascript', () => {
       const scriptEl1 = win.document.createElement('script');
       scriptEl1.setAttribute('type', 'application/javascript');
       scriptEl1.setAttribute('data-id', 'test1');
@@ -1370,8 +1368,7 @@ describes.realWin('runtime multidoc', {
       return ampdoc.whenBodyAvailable();
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should ignore unknown script', () => {
+    it('should ignore unknown script', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension').never();
@@ -1437,8 +1434,7 @@ describes.realWin('runtime multidoc', {
       });
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should ignore inline script if javascript', () => {
+    it('should ignore inline script if javascript', () => {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       writer.write(
