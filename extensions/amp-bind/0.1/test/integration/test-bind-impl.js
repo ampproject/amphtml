@@ -148,11 +148,14 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
 
     it('should not update host document title for <title> elements', () => {
-      createElement(env, fieBody, '[text]="\'a\' + \'b\' + \'c\'"', 'title',
+      createElement(env, fieBody, '[text]="\'bar\'"', 'title',
           /* opt_amp */ false, /* opt_head */ true);
+      fieWindow.document.title = 'foo';
+      hostWindow.document.title = 'foo';
       return onBindReadyAndSetState(env, fieBind, {}).then(() => {
         // Make sure it does not update the host window's document title.
-        expect(hostWindow.document.title).to.not.equal('abc');
+        expect(fieWindow.document.title).to.equal('bar');
+        expect(hostWindow.document.title).to.equal('foo');
       });
     });
 
@@ -222,11 +225,12 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
 
     it('should not update document title for <title> elements', () => {
-      createElement(env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'title',
+      createElement(env, container, '[text]="\'bar\'"', 'title',
           /* opt_amp */ false, /* opt_head */ true);
+      env.win.document.title = 'foo';
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         // Make sure does not update the host window's document title.
-        expect(env.win.document.title).to.not.equal('abc');
+        expect(env.win.document.title).to.equal('foo');
       });
     });
   }); // in shadow ampdoc
@@ -398,14 +402,13 @@ describe.configure().ifNewChrome().run('Bind', function() {
     });
 
     it('should update document title for <title> elements', () => {
-      const element = createElement(env, container,
-          '[text]="\'a\' + \'b\' + \'c\'"', 'title', /* opt_amp */ false,
-          /* opt_head */ true);
+      const element = createElement(env, container, '[text]="\'bar\'"',
+          'title', /* opt_amp */ false, /* opt_head */ true);
       element.textContent = 'foo';
       env.win.document.title = 'foo';
       return onBindReadyAndSetState(env, bind, {}).then(() => {
-        expect(element.textContent).to.equal('abc');
-        expect(env.win.document.title).to.equal('abc');
+        expect(element.textContent).to.equal('bar');
+        expect(env.win.document.title).to.equal('bar');
       });
     });
 
@@ -414,12 +417,12 @@ describe.configure().ifNewChrome().run('Bind', function() {
       // `textContent` on a <title> element in the <body> will strangely update
       // `document.title`.
       const title = env.win.document.createElement('title');
-      title.textContent = 'my-title';
+      title.textContent = 'foo';
       env.win.document.head.appendChild(title);
-      // Add <title [text]="'abc'"> to <body>.
-      createElement(env, container, '[text]="\'abc\'"', 'title');
+      // Add <title [text]="'bar'"> to <body>.
+      createElement(env, container, '[text]="\'bar\'"', 'title');
       return onBindReadyAndSetState(env, bind, {}).then(() => {
-        expect(env.win.document.title).to.equal('my-title');
+        expect(env.win.document.title).to.equal('foo');
       });
     });
 
