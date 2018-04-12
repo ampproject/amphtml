@@ -23,6 +23,7 @@ import {findIndex} from '../utils/array';
 import {
   getFragment,
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -280,6 +281,13 @@ export class Viewer {
     this.isCctEmbedded_ = !this.isIframed_ &&
         parseQueryString(this.win.location.search)['amp_agsa'] === '1';
 
+    const url = parseUrl(this.ampdoc.win.location.href);
+    /**
+     * Whether the AMP document was served by a proxy.
+     * @private @const {boolean}
+     */
+    this.isProxyOrigin_ = isProxyOrigin(url);
+
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
@@ -526,6 +534,14 @@ export class Viewer {
    */
   isCctEmbedded() {
     return this.isCctEmbedded_;
+  }
+
+  /**
+   * Whether the document was served by a proxy.
+   * @return {boolean}
+   */
+  isProxyOrigin() {
+    return this.isProxyOrigin_;
   }
 
   /**

@@ -78,7 +78,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.policyConfig_ = dict();
 
     /** @private {!Object} */
-    this.consentUIRequired_ = map();
+    this.consentRequired_ = map();
 
     /** @private {boolean} */
     this.uiInit_ = false;
@@ -113,7 +113,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} consentId
    */
   handlePostPrompt_(consentId) {
-    user().assert(consentId, 'revoke must specify a consent instance id');
     user().assert(this.consentConfig_[consentId],
         `consent with id ${consentId} not found`);
     // toggle the UI for this consent
@@ -171,8 +170,11 @@ export class AmpConsent extends AMP.BaseElement {
         () => this.handleAction_(ACTION_TYPE.DISMISS));
     this.registerAction('prompt', invocation => {
       const args = invocation.args;
-      const consentId = args && args['consent'];
-      this.handlePostPrompt_(consentId);
+      let consentId = args && args['consent'];
+      if (!this.isMultiSupported_) {
+        consentId = Object.keys(this.consentConfig_)[0];
+      }
+      this.handlePostPrompt_(consentId || '');
     });
   }
 
@@ -186,13 +188,6 @@ export class AmpConsent extends AMP.BaseElement {
 
     if (this.consentUIPendingMap_[instanceId]) {
       // Already pending to be shown. Do nothing.
-      return;
-    }
-
-    if (!this.consentUIRequired_[instanceId]) {
-      // If consent not required.
-      // TODO(@zhouyx): Need to fix this
-      // We still need to show management UI even consent not required.
       return;
     }
 
@@ -381,7 +376,8 @@ export class AmpConsent extends AMP.BaseElement {
     const config = parseJson(script.textContent);
     const consents = config['consents'];
     user().assert(consents, `${TAG}: consents config is required`);
-
+    user().assert(Object.keys(consents).length != 0,
+        `${TAG}: can't find consent instance`);
     if (!this.isMultiSupported_) {
       // Assert single consent instance
       user().assert(Object.keys(consents).length <= 1,
@@ -414,12 +410,10 @@ export class AmpConsent extends AMP.BaseElement {
   parseConsentResponse_(instanceId, response) {
     if (!response || !response['promptIfUnknown']) {
       //Do not need to block.
-      this.consentUIRequired_[instanceId] = false;
-      this.consentStateManager_.ignoreConsentInstance(instanceId);
-      return;
+      this.consentRequired_[instanceId] = false;
     } else {
       // TODO: Check for current consent state and decide if UI is required.
-      this.consentUIRequired_[instanceId] = true;
+      this.consentRequired_[instanceId] = true;
     }
   }
 
@@ -428,10 +422,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string} instanceId
    */
   handlePromptUI_(instanceId) {
-    // Prompt UI based on other UI on display and promptList for the instance.
-    if (!this.consentUIRequired_[instanceId]) {
-      return;
-    }
 
     const promptUI = this.consentConfig_[instanceId]['promptUI'];
     const element = this.getAmpDoc().getElementById(promptUI);
@@ -441,6 +431,11 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentStateManager_.getConsentInstanceState(instanceId)
         .then(state => {
           if (state == CONSENT_ITEM_STATE.UNKNOWN) {
+            if (!this.consentRequired_[instanceId]) {
+              this.consentStateManager_.updateConsentInstanceState(
+                  instanceId, CONSENT_ITEM_STATE.NOT_REQUIRED);
+              return;
+            }
             // TODO(@zhouyx):
             // 1. Race condition on consent state change between
             // schedule to display and display. Add one more check before display
@@ -476,8 +471,10 @@ export class AmpConsent extends AMP.BaseElement {
         return;
       }
       this.vsync_.mutate(() => {
-        this.element.classList.add('amp-hidden');
-        this.element.classList.remove('amp-active');
+        if (!this.currentDisplayInstance_) {
+          this.element.classList.add('amp-hidden');
+          this.element.classList.remove('amp-active');
+        }
         toggle(dev().assertElement(this.postPromptUI_), false);
       });
     });

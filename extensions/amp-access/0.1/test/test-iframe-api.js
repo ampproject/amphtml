@@ -82,6 +82,14 @@ describes.fakeWin('AmpAccessIframeApi', {
     return iframeApi.handleCommand_('pingback', {});
   });
 
+  it('should tolerate pingback without response', () => {
+    controllerMock.expects('pingback')
+        .withExactArgs()
+        .returns(undefined)
+        .once();
+    return iframeApi.handleCommand_('pingback', {});
+  });
+
   it('should ignore unimplemented pingback', () => {
     iframeApi = new AmpAccessIframeApi({}, win);
     return iframeApi.handleCommand_('pingback', {});
