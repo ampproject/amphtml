@@ -26,7 +26,6 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   let ampdoc, win;
   let viewerPlatform;
   let serviceAdapter, sendAuthTokenStub;
-  const publicationId = 'publicationId';
   const currentProductId = 'example.org:basic';
   const origin = 'origin';
   const entitlementData = {source: 'local', raw: 'raw',
@@ -58,8 +57,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     sandbox.stub(serviceAdapter, 'getDialog')
         .callsFake(() => new Dialog(ampdoc));
     viewerPlatform = new ViewerSubscriptionPlatform(
-        ampdoc, serviceConfig, serviceAdapter, publicationId, currentProductId,
-        origin);
+        ampdoc, serviceConfig, serviceAdapter, origin);
     sandbox.stub(viewerPlatform.viewer_,
         'sendMessageAwaitResponse').callsFake(() =>
       Promise.resolve(fakeAuthToken));

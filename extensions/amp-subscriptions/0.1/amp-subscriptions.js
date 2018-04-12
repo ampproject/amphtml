@@ -295,10 +295,6 @@ export class SubscriptionService {
    */
   delegateAuthToViewer_() {
     const serviceIds = ['local'];
-    const publicationId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getPublicationId(),
-        'Publication id is null'
-    ));
     const origin = getWinOrigin(this.ampdoc_.win);
     const currentProductId = /** @type {string} */ (user().assert(
         this.pageConfig_.getProductId(),
@@ -311,8 +307,6 @@ export class SubscriptionService {
             this.ampdoc_,
             service,
             this.serviceAdapter_,
-            publicationId,
-            currentProductId,
             origin
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);

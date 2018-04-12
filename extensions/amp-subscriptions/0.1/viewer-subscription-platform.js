@@ -23,9 +23,10 @@ import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {user} from '../../../src/log';
+
+
 /**
  * This implements the methods to interact with viewer subscription platform.
- *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
 export class ViewerSubscriptionPlatform {
@@ -34,12 +35,9 @@ export class ViewerSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
-   * @param {string} publicationId
-   * @param {string} currentProductId
    * @param {string} origin
    */
-  constructor(ampdoc, platformConfig, serviceAdapter,
-    publicationId, currentProductId, origin) {
+  constructor(ampdoc, platformConfig, serviceAdapter, origin) {
 
     /** @private @const */
     this.ampdoc_ = ampdoc;
@@ -58,10 +56,10 @@ export class ViewerSubscriptionPlatform {
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
 
     /** @private {string} */
-    this.publicationId_ = publicationId;
+    this.publicationId_ = this.pageConfig_.getPublicationId();
 
     /** @private {string} */
-    this.currentProductId_ = currentProductId;
+    this.currentProductId_ = this.pageConfig_.getProductId();
 
     /** @private {string} */
     this.origin_ = origin;
@@ -84,9 +82,7 @@ export class ViewerSubscriptionPlatform {
       if (!authData) {
         return Entitlement.empty('local');
       }
-      return this.verifyAuthToken_(authData).then(entitlement => {
-        return entitlement;
-      });
+      return this.verifyAuthToken_(authData);
     }).then(entitlement => {
       this.entitlement_ = entitlement;
       return entitlement;
