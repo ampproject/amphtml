@@ -42,6 +42,7 @@ import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
 let consoleErrorSandbox;
+let consoleErrorStub;
 let consoleInfoLogWarnSandbox;
 let testName;
 
@@ -290,6 +291,15 @@ function warnForConsoleError() {
   this.allowConsoleError = function(func) {
     dontWarnForConsoleError();
     func();
+    try {
+      expect(consoleErrorStub).to.have.been.called;
+    } catch (e) {
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
+      originalConsoleError(helpMessage);
+    }
     warnForConsoleError();
   };
 }
@@ -300,7 +310,8 @@ function dontWarnForConsoleError() {
     consoleErrorSandbox.restore();
   }
   consoleErrorSandbox = sinon.sandbox.create();
-  consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+  consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
 }
 
 // Used to restore error level logging after each test.
