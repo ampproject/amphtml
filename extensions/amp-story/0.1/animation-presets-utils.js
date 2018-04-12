@@ -115,7 +115,7 @@ export function calculateTargetScalingFactor(dimensions) {
  * @param {number} scalingFactor Scaling factor at which target will be scaled.
  * @return {KeyframesDef}
  */
-export function enlargeKeyFrames(keyframes, scalingFactor) {
+function enlargeKeyFrames(keyframes, scalingFactor) {
   keyframes.forEach(frame => {
     frame['transform'] += ' ' + scale(scalingFactor);
     frame['transform-origin'] = 'left top';

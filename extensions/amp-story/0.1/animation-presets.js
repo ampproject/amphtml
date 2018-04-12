@@ -26,6 +26,7 @@ import {
 import {px} from '../../../src/style';
 
 const FULL_BLEED_CATEGORY = 'full-bleed';
+const FILL_TEMPLATE_LAYOUT = 'fill';
 
 /**
  * A list of animations that are full bleed.
@@ -55,14 +56,13 @@ const ANIMATION_CSS_CLASS_NAMES = {
  * @param {string} presetName
  */
 export function setStyleForPreset(el, presetName) {
-  const fillTemplate = 'fill';
-
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
     if (parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate])) {
-      parent.classList.remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[fillTemplate]);
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT])) {
+      parent.classList
+          .remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]);
     }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }

@@ -1,8 +1,3 @@
-import {AmpStory} from '../amp-story';
-import {AmpStoryPage} from '../amp-story-page';
-import {PRESETS} from '../animation-presets';
-import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
-
 /**
  * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
@@ -22,6 +17,11 @@ import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-p
 /**
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */
+
+import {AmpStory} from '../amp-story';
+import {AmpStoryPage} from '../amp-story-page';
+import {PRESETS} from '../animation-presets';
+import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-presets-utils';
 
 describes.realWin('amp-story-full-bleed-animations', {
   amp: {
