@@ -17,6 +17,7 @@
 
     body.amp-geo-group-anz {
       transform: rotate(180deg);
+      transition: transform 0.5s 0.2s;
     }
     
   </style>
@@ -68,7 +69,7 @@
   <p [text]="'Matched country groups: ' + ampGeo.ISOCountryGroups.join(', ') "></p>
 
   <p>There is an amp-pixel variable substitution example here</p>
-  <amp-pixel src="https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=pixel&groups=AMP_GEO()&country=AMP_GEO(ISOCountry)" layout="nodisplay"></amp-pixel>
+  <amp-pixel src="https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?via=pixel&groups=AMP_GEO&country=AMP_GEO(ISOCountry)" layout="nodisplay"></amp-pixel>
   <p>There is an amp-analytics variable substitution example here</p>
   <amp-analytics>
     <script type="application/json">
@@ -82,7 +83,7 @@
                 "on": "visible",
                 "request": "event",
                 "vars": {
-                  "geoGroups": "${ampGeo()}",
+                  "geoGroups": "${ampGeo}",
                   "geoCountry": "${ampGeo(ISOCountry)}"
                 }
               }
