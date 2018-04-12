@@ -69,7 +69,7 @@ tags: {  # <amp-carousel>
 }
 tags: {  # <amp-carousel> lightbox
   tag_name: "AMP-CAROUSEL"
-  spec_name: "AMP-CAROUSEL[lightbox]"
+  spec_name: "AMP-CAROUSEL [lightbox]"
   requires_extension: "amp-carousel"
   requires_extension: "amp-lightbox-gallery"
   attrs: {
@@ -123,10 +123,6 @@ tags: {
   html_format: EXPERIMENTAL
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-CAROUSEL lightbox [child]"
-  attr_lists: "children-of-lightboxed-carousel"
-}
-attr_lists: {
-  name: "children-of-lightboxed-carousel"
   attrs: {
     name: "lightbox-exclude"
   }
