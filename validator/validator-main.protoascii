@@ -120,6 +120,7 @@ tags: {
 tags: {
   tag_name: "TITLE"
   spec_name: "title"
+  attrs: { name: "[text]" }
 }
 # 4.2.3 the base element
 tags: {
