@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html amp>
+
 <head>
   <meta charset="utf-8">
   <title>amp-story</title>
@@ -12,48 +13,56 @@
     body {
       font-family: sans-serif;
     }
-    h1, p {
+
+    h1,
+    p {
       font-family: Menlo, Monaco, monospace;
       width: 100%;
       font-weight: bold;
     }
+
     h1 {
       font-size: 24px;
       z-index: 1;
       text-align: left;
     }
+
     p {
       font-size: 18px;
       text-align: right;
     }
+
     amp-story-page {
       background: #ddd;
     }
+
     amp-story-grid-layer {
       justify-items: center;
     }
+
     .square,
     .circle {
       background: #4285f4;
       width: 80px;
       height: 80px;
     }
+
     .circle {
       border-radius: 80px;
     }
+
     .img-container {
       position: absolute;
     }
-    </style>
+  </style>
 </head>
+
 <body>
   <amp-story standalone>
     <amp-story-page id="pulse-page">
       <amp-story-grid-layer template="vertical">
         <h1>pulse</h1>
-        <div class="circle"
-            animate-in="pulse"
-            animate-in-duration="1s">
+        <div class="circle" animate-in="pulse" animate-in-duration="1s">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -61,9 +70,7 @@
     <amp-story-page id="fade-in-page">
       <amp-story-grid-layer template="vertical">
         <h1>fade-in</h1>
-        <div class="circle"
-            animate-in="fade-in"
-            animate-in-duration="0.8s">
+        <div class="circle" animate-in="fade-in" animate-in-duration="0.8s">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -71,8 +78,7 @@
     <amp-story-page id="twirl-in-page">
       <amp-story-grid-layer template="vertical">
         <h1>twirl-in</h1>
-        <div class="square"
-            animate-in="twirl-in">
+        <div class="square" animate-in="twirl-in">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -80,8 +86,7 @@
     <amp-story-page id="fly-in-left-page">
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-left</h1>
-        <div class="square"
-            animate-in="fly-in-left">
+        <div class="square" animate-in="fly-in-left">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -89,8 +94,7 @@
     <amp-story-page id="fly-in-right-page">
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-right</h1>
-        <div class="square"
-            animate-in="fly-in-right">
+        <div class="square" animate-in="fly-in-right">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -98,8 +102,7 @@
     <amp-story-page id="fly-in-top-page">
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-top</h1>
-        <div class="square"
-            animate-in="fly-in-top">
+        <div class="square" animate-in="fly-in-top">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -107,8 +110,7 @@
     <amp-story-page id="fly-in-bottom-page">
       <amp-story-grid-layer template="vertical">
         <h1>fly-in-bottom</h1>
-        <div class="square"
-            animate-in="fly-in-bottom">
+        <div class="square" animate-in="fly-in-bottom">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -116,8 +118,7 @@
     <amp-story-page id="rotate-in-left-page">
       <amp-story-grid-layer template="vertical">
         <h1>rotate-in-left</h1>
-        <div class="square"
-            animate-in="rotate-in-left">
+        <div class="square" animate-in="rotate-in-left">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -125,8 +126,7 @@
     <amp-story-page id="rotate-in-right-page">
       <amp-story-grid-layer template="vertical">
         <h1>rotate-in-right</h1>
-        <div class="square"
-            animate-in="rotate-in-right">
+        <div class="square" animate-in="rotate-in-right">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -134,8 +134,7 @@
     <amp-story-page id="drop-page">
       <amp-story-grid-layer template="vertical">
         <h1>drop-in</h1>
-        <div class="circle"
-             animate-in="drop">
+        <div class="circle" animate-in="drop">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -143,8 +142,7 @@
     <amp-story-page id="whoosh-in-left-page">
       <amp-story-grid-layer template="vertical">
         <h1>whoosh-in-left</h1>
-        <div class="square"
-            animate-in="whoosh-in-left">
+        <div class="square" animate-in="whoosh-in-left">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -152,44 +150,83 @@
     <amp-story-page id="whoosh-in-right-page">
       <amp-story-grid-layer template="vertical">
         <h1>whoosh-in-right</h1>
-        <div class="square"
-            animate-in="whoosh-in-right">
+        <div class="square" animate-in="whoosh-in-right">
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
 
-    <amp-story-page id="ken-burns-effect">
-      <amp-story-grid-layer template="vertical">
-        <h1>ken-burns-effect</h1>
-        <div animate-in="zoom-in" animate-in-duration="30s" class="img-container">
-            <amp-img id="ken-burns-img1"
-              src="https://picsum.photos/1024/768?image=1077"
-              animate-in="pan-right"
-              animate-in-duration="30s"
-              layout="fixed"
-              width="1024"
-              height="768">
-            </amp-img>
-        </div>
-        <div animate-in="fade-in" animate-in-after="ken-burns-img1" animate-in-delay="0.25s" animate-in-duration="1s">
-          <div
-            animate-in="zoom-out"
-            animate-in-duration="30s"
-            class="img-container"
-            animate-in-after="ken-burns-img1">
-            <amp-img id="ken-burns-img2"
-              src="https://picsum.photos/1024/768?image=1026"
-              layout="fixed"
-              width="1024"
-              height="768"
-              animate-in="pan-down"
-              animate-in-duration="30s"
-              animate-in-after="ken-burns-img1">
-            </amp-img>
-          </div>
-        </div>
-        </amp-story-grid-layer>
-      </amp-story-page>
+    <!-- ## Zoom-In -->
+    <amp-story-page id="zoom-in">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="zoom-in" animate-in-duration="4s" layout="responsive" src="https://picsum.photos/720/320?image=1026"
+          width="720" height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>zoom-in</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Zoom-Out -->
+    <amp-story-page id="zoom-out">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="zoom-out" animate-in-duration="4s" layout="responsive" src="https://picsum.photos/720/320?image=1026"
+          width="720" height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>zoom-out</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Left -->
+    <amp-story-page id="pan-left">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="pan-left" id="img-pan-left" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026"
+          width="720" height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>pan-left</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Right -->
+    <amp-story-page id="pan-right">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="pan-right" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
+          height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>pan-right</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Up -->
+    <amp-story-page id="pan-up">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="pan-up" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
+          height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>pan-up</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <!-- ## Pan-Down -->
+    <amp-story-page id="pan-down">
+      <amp-story-grid-layer template="fill">
+        <amp-img animate-in="pan-down" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720"
+          height="320">
+        </amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="fill">
+        <h1>pan-down</h1>
+      </amp-story-grid-layer>
+    </amp-story-page>
   </amp-story>
 </body>
+
 </html>
