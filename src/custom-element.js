@@ -483,7 +483,8 @@ function createBaseCustomElementClass(win) {
           resolve(this.implementation_.buildCallback());
         } else {
           getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
-            if (state == CONSENT_POLICY_STATE.INSUFFICIENT) {
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
+                state == CONSENT_POLICY_STATE.UNKNOWN) {
               // Need to change after support more policy state
               reject(blockedByConsentError());
             } else {
