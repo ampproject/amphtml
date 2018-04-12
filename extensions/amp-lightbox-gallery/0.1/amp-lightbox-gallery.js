@@ -1257,7 +1257,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   closeGallery_() {
-    return this.vsync_.mutatePromise(() => {
+    return this.mutateElement(() => {
       this.container_.removeAttribute('gallery-view');
       toggle(dev().assertElement(this.navControls_), true);
       toggle(dev().assertElement(this.carousel_), true);
@@ -1384,6 +1384,26 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   *
+   * @param {string} id
+   * @return {function(Event)}
+   * @private
+   */
+  generateThumbnailClickHandler_(id) {
+    return event => {
+      event.stopPropagation();
+      Promise.all([
+        this.closeGallery_(),
+        dev().assert(this.carousel_).getImpl(),
+      ]).then(values => {
+        this.currentElemId_ = id;
+        values[1].showSlideWhenReady(this.currentElemId_);
+        this.updateDescriptionBox_();
+      });
+    };
+  }
+
+  /**
    * Create an element inside gallery from the thumbnail info from manager.
    * @param {!LightboxThumbnailDataDef} thumbnailObj
    * @return {!Element}
@@ -1423,17 +1443,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       element.appendChild(timestampDiv);
     }
 
-    const closeGalleryAndShowTargetSlide = event => {
-      this.closeGallery_().then(() => {
-        this.currentElemId_ = thumbnailObj.element.lightboxItemId;
-        dev().assert(this.carousel_).getImpl()
-            .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
-        this.updateDescriptionBox_();
-      });
-
-      event.stopPropagation();
-    };
-    element.addEventListener('click', closeGalleryAndShowTargetSlide);
+    const handleThumbnailClick = this.generateThumbnailClickHandler_(
+        thumbnailObj.element.lightboxItemId);
+    element.addEventListener('click', handleThumbnailClick.bind(this));
     return element;
   }
 }
