@@ -72,17 +72,19 @@ describes.realWin('amp-byside-content', {
   });
 
   it('requires data-label', () => {
-    return getElement({
+    allowConsoleError(() => { return getElement({
       'data-webcare-id': 'D6604AE5D0',
     }).should.eventually.be.rejectedWith(
         /The data-label attribute is required for/);
+    });
   });
 
   it('requires data-webcare-id', () => {
-    return (getElement({
+    allowConsoleError(() => { return getElement({
       'data-label': 'placeholder-label',
-    })).should.eventually.be.rejectedWith(
+    }).should.eventually.be.rejectedWith(
         /The data-webcare-id attribute is required for/);
+    });
   });
 
   it('generates correct default origin', () => {

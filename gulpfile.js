@@ -158,7 +158,7 @@ declareExtension('amp-story', '0.1', {
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -808,7 +808,7 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.2kB' : '332.6kB';
+  const size = compiled ? '76.81KB' : '334.41KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);

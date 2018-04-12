@@ -107,18 +107,18 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
 
     it('should reject trigger in a disallowed environment', () => {
       sandbox.stub(root, 'getType').callsFake(() => 'other');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
-      }).to.throw(/Trigger type "click" is not allowed in the other/);
+      }).to.throw(/Trigger type "click" is not allowed in the other/); });
     });
 
     it('should reject trigger that fails to initialize', () => {
       sandbox.stub(root, 'getTracker').callsFake(() => {
         throw new Error('intentional');
       });
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
-      }).to.throw(/intentional/);
+      }).to.throw(/intentional/); });
     });
 
     it('should delegate to deprecated addListener', () => {
@@ -381,8 +381,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     expect(fn1).to.have.callCount(2);
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('fails gracefully on bad scroll config', () => {
+  it('fails gracefully on bad scroll config', () => {
     const fn1 = sandbox.stub();
 
     ins.addListenerDepr_({'on': 'scroll'}, fn1);
@@ -414,8 +413,7 @@ describe('amp-analytics.instrumentation OLD', function() {
     expect(fn1).to.have.not.been.called;
   });
 
-  // TODO(avimehta, #14336): Fails due to console errors.
-  it.skip('normalizes boundaries correctly.', () => {
+  it('normalizes boundaries correctly.', () => {
     expect(ins.normalizeBoundaries_([])).to.be.empty;
     expect(ins.normalizeBoundaries_(undefined)).to.be.empty;
     expect(ins.normalizeBoundaries_(['foo'])).to.be.empty;

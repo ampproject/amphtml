@@ -24,7 +24,6 @@
  * </amp-story>
  * </code>
  */
-import './amp-story-auto-ads';
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
@@ -575,8 +574,13 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(initialPageId))
         .then(() => this.preloadPagesByDistance_())
-        // TODO(gmajoulet): only preload the share menu on mobile.
-        .then(() => this.shareMenu_.build());
+        .then(() => {
+          // Preloads and prerenders the share menu if mobile, where the share
+          // button is visible.
+          if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+            this.shareMenu_.build();
+          }
+        });
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -1015,6 +1019,10 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element, /* initial */ true);
       }
     } else {
+      // Preloads and prerenders the share menu as the share button gets visible
+      // on the mobile UI. No-op if already built.
+      this.shareMenu_.build();
+
       this.vsync_.mutate(() => {
         this.element.removeAttribute('desktop');
       });

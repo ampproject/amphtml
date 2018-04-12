@@ -160,6 +160,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           width: 250,
           'data-slot': '/1234/def/xyz',
           'json': JSON.stringify(targeting2),
+          'data-multi-size-validation': 'false',
+          'data-multi-size': '1x2,3x4',
         };
         const element2 =
           createElementWithAttributes(doc, 'amp-ad', config2);
@@ -172,7 +174,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
           'iu_parts': '1234,abc,def,xyz',
           'enc_prev_ius': '0/1/2,0/2/3',
           adks: '13579,2468',
-          'prev_iu_szs': '50x320,250x300',
+          'prev_iu_szs': '50x320,250x300|1x2|3x4',
           'prev_scp':
             'foo=bar&names=x,y,z&excl_cat=sports|hello=world&excl_cat=food',
           co: '1',
@@ -428,21 +430,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     it('should not send SRA request if only 1 slot is valid', () =>
       executeTest([{networkId: 1234, instances: 1, invalidInstances: 2}]));
 
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('should handle xhr failure by not sending subsequent request',
+    it('should handle xhr failure by not sending subsequent request',
         () => executeTest([{networkId: 1234, instances: 2, xhrFail: true}]));
 
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('should handle mixture of xhr and ' +
-        'non xhr failures', () => executeTest(
+    it('should handle mixture of xhr and non xhr failures', () => executeTest(
         [{networkId: 1234, instances: 2, xhrFail: true}, 4567, 4567]));
 
     it('should correctly use SRA for multiple slots. multiple networks',
         () => executeTest([1234, 4567, 1234, 4567]));
 
-    // TODO(bradfrizzell, #14336): Fails due to console errors.
-    it.skip('should handle mixture of all ' +
-        'possible scenarios', () => executeTest(
+    it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
           {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });

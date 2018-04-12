@@ -39,7 +39,7 @@ describes.realWin('Actions', {amp: true}, env => {
     urlBuilder.setAuthResponse({
       'a': 'A',
     });
-    analytics = new SubscriptionAnalytics();
+    analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     analyticsMock = sandbox.mock(analytics);
     buildSpy = sandbox.spy(Actions.prototype, 'build');
     actions = new Actions(ampdoc, urlBuilder, analytics, {
@@ -167,22 +167,22 @@ describes.realWin('Actions', {amp: true}, env => {
     }).then(() => {
       throw new Error('must have failed');
     }, reason => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         throw reason;
-      }).to.throw(/broken/);
+      }).to.throw(/broken/); });
       expect(actions.actionPromise_).to.be.null;
     });
   });
 
   it('should disallow unknown action', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       actions.execute('unknown');
-    }).to.throw(/Action URL is not configured/);
+    }).to.throw(/Action URL is not configured/); });
   });
 
   it('should fail before build is complete', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       actions.execute('login');
-    }).to.throw(/Action URL is not ready/);
+    }).to.throw(/Action URL is not ready/); });
   });
 });

@@ -228,6 +228,10 @@ exports.rules = [
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
           'src/service/url-replacements-impl.js',
@@ -292,6 +296,7 @@ exports.rules = [
       'src/3p-frame.js',
       'src/iframe-helper.js',
     ],
+    whitelist: 'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->src/3p-frame.js',
   },
 
   {

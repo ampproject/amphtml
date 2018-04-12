@@ -290,8 +290,7 @@ describes.sandboxed('StandardActions', {}, () => {
       });
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should not allow chained setState', () => {
+    it('should not allow chained setState', () => {
       const spy = sandbox.spy();
       window.services.bind = {
         obj: {
@@ -374,7 +373,9 @@ describes.sandboxed('StandardActions', {}, () => {
           },
         },
       };
-      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      allowConsoleError(() => {
+        expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      });
       expect(printStub).to.not.be.called;
     });
 

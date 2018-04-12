@@ -67,10 +67,10 @@ describes.fakeWin('AmpAccessIframeApi', {
   it('should authorize', () => {
     controllerMock.expects('authorize')
         .withExactArgs()
-        .returns(Promise.resolve({granted: true}))
+        .returns(Promise.resolve({a: 1}))
         .once();
     return iframeApi.handleCommand_('authorize', {}).then(result => {
-      expect(result).to.deep.equal({granted: true});
+      expect(result).to.deep.equal({a: 1});
     });
   });
 
@@ -78,6 +78,14 @@ describes.fakeWin('AmpAccessIframeApi', {
     controllerMock.expects('pingback')
         .withExactArgs()
         .returns(Promise.resolve())
+        .once();
+    return iframeApi.handleCommand_('pingback', {});
+  });
+
+  it('should tolerate pingback without response', () => {
+    controllerMock.expects('pingback')
+        .withExactArgs()
+        .returns(undefined)
         .once();
     return iframeApi.handleCommand_('pingback', {});
   });
