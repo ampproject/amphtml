@@ -32,21 +32,26 @@ import {user} from '../../../../../src/log';
  * @param {!Object} env
  * @param {!Element} container
  * @param {string} binding
- * @param {string=} opt_tagName
- * @param {boolean=} opt_amp
+ * @param {string=} opt_tag Tag name of element (default is <p>).
+ * @param {boolean=} opt_amp Is this an AMP element?
+ * @param {boolean=} opt_head Add element to document <head>?
  * @return {!Element}
  */
-function createElement(env, container, binding, opt_tagName, opt_amp) {
-  const tag = opt_tagName || 'p';
+function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
+  const tag = opt_tag || 'p';
   const div = env.win.document.createElement('div');
   div.innerHTML = `<${tag} ${binding}></${tag}>`;
-  const newElement = div.firstElementChild;
+  const element = div.firstElementChild;
   if (opt_amp) {
-    newElement.className = 'i-amphtml-foo -amp-foo amp-foo';
-    newElement.mutatedAttributesCallback = () => {};
+    element.className = 'i-amphtml-foo -amp-foo amp-foo';
+    element.mutatedAttributesCallback = () => {};
   }
-  container.appendChild(newElement);
-  return newElement;
+  if (opt_head) {
+    env.win.document.head.appendChild(element);
+  } else {
+    container.appendChild(element);
+  }
+  return element;
 }
 
 /**
@@ -117,54 +122,72 @@ describe.configure().ifNewChrome().run('Bind', function() {
     },
     mockFetch: false,
   }, env => {
-    let bind;
-    let container;
+    let fieBind;
+    let fieBody;
+    let fieWindow;
+
+    let hostWindow;
 
     beforeEach(() => {
       // Make sure we have a chunk instance for testing.
       chunkInstanceForTesting(env.ampdoc);
 
-      bind = new Bind(env.ampdoc, env.win);
-      container = env.embed.getBodyElement();
+      fieWindow = env.embed.win;
+      fieBind = new Bind(env.ampdoc, fieWindow);
+      fieBody = env.embed.getBodyElement();
+
+      hostWindow = env.ampdoc.win;
     });
 
     it('should scan for bindings when ampdoc is ready', () => {
-      createElement(env, container, '[text]="1+1"');
-      expect(bind.numberOfBindings()).to.equal(0);
-      return onBindReady(env, bind).then(() => {
-        expect(bind.numberOfBindings()).to.equal(1);
+      createElement(env, fieBody, '[text]="1+1"');
+      expect(fieBind.numberOfBindings()).to.equal(0);
+      return onBindReady(env, fieBind).then(() => {
+        expect(fieBind.numberOfBindings()).to.equal(1);
       });
     });
 
-    describe('with Bind in parent window', () => {
-      let parentBind;
-      let parentContainer;
+    it('should not update host document title for <title> elements', () => {
+      createElement(env, fieBody, '[text]="\'bar\'"', 'title',
+          /* opt_amp */ false, /* opt_head */ true);
+      fieWindow.document.title = 'foo';
+      hostWindow.document.title = 'foo';
+      return onBindReadyAndSetState(env, fieBind, {}).then(() => {
+        // Make sure it does not update the host window's document title.
+        expect(fieWindow.document.title).to.equal('bar');
+        expect(hostWindow.document.title).to.equal('foo');
+      });
+    });
+
+    describe('with Bind in host window', () => {
+      let hostBind;
+      let hostBody;
 
       beforeEach(() => {
-        parentBind = new Bind(env.ampdoc);
-        parentContainer = env.ampdoc.getBody();
+        hostBind = new Bind(env.ampdoc);
+        hostBody = env.ampdoc.getBody();
       });
 
       it('should only scan elements in provided window', () => {
-        createElement(env, container, '[text]="1+1"');
-        createElement(env, parentContainer, '[text]="2+2"');
+        createElement(env, fieBody, '[text]="1+1"');
+        createElement(env, hostBody, '[text]="2+2"');
         return Promise.all([
-          onBindReady(env, bind),
-          onBindReady(env, parentBind),
+          onBindReady(env, fieBind),
+          onBindReady(env, hostBind),
         ]).then(() => {
-          expect(bind.numberOfBindings()).to.equal(1);
-          expect(parentBind.numberOfBindings()).to.equal(1);
+          expect(fieBind.numberOfBindings()).to.equal(1);
+          expect(hostBind.numberOfBindings()).to.equal(1);
         });
       });
 
       it('should not be able to access variables from other windows', () => {
         const element =
-            createElement(env, container, '[text]="foo + bar"');
+            createElement(env, fieBody, '[text]="foo + bar"');
         const parentElement =
-            createElement(env, parentContainer, '[text]="foo + bar"');
+            createElement(env, hostBody, '[text]="foo + bar"');
         const promises = [
-          onBindReadyAndSetState(env, bind, {foo: '123', bar: '456'}),
-          onBindReadyAndSetState(env, parentBind, {foo: 'ABC', bar: 'DEF'}),
+          onBindReadyAndSetState(env, fieBind, {foo: '123', bar: '456'}),
+          onBindReadyAndSetState(env, hostBind, {foo: 'ABC', bar: 'DEF'}),
         ];
         return Promise.all(promises).then(() => {
           // `element` only sees `foo` and `parentElement` only sees `bar`.
@@ -193,12 +216,21 @@ describe.configure().ifNewChrome().run('Bind', function() {
       container = env.ampdoc.getBody();
     });
 
-    // TODO(choumx, #14581): Flaky on Travis.
-    it.skip('should scan for bindings when ampdoc is ready', () => {
+    it('should scan for bindings when ampdoc is ready', () => {
       createElement(env, container, '[text]="1+1"');
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
         expect(bind.numberOfBindings()).to.equal(1);
+      });
+    });
+
+    it('should not update document title for <title> elements', () => {
+      createElement(env, container, '[text]="\'bar\'"', 'title',
+          /* opt_amp */ false, /* opt_head */ true);
+      env.win.document.title = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        // Make sure does not update the host window's document title.
+        expect(env.win.document.title).to.equal('foo');
       });
     });
   }); // in shadow ampdoc
@@ -369,14 +401,28 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
-    // TODO(choumx, #14581): Flaky on Travis.
-    it.skip('should update document title for <title> elements', () => {
-      const element = createElement(
-          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'title');
-      element.value = 'foo';
+    it('should update document title for <title> elements', () => {
+      const element = createElement(env, container, '[text]="\'bar\'"',
+          'title', /* opt_amp */ false, /* opt_head */ true);
+      element.textContent = 'foo';
+      env.win.document.title = 'foo';
       return onBindReadyAndSetState(env, bind, {}).then(() => {
-        expect(element.value).to.equal('abc');
-        expect(env.win.document.title).to.equal('abc');
+        expect(element.textContent).to.equal('bar');
+        expect(env.win.document.title).to.equal('bar');
+      });
+    });
+
+    it('should not update document title for <title> elements in body', () => {
+      // Add a <title> element to <head> because if we don't, setting
+      // `textContent` on a <title> element in the <body> will strangely update
+      // `document.title`.
+      const title = env.win.document.createElement('title');
+      title.textContent = 'foo';
+      env.win.document.head.appendChild(title);
+      // Add <title [text]="'bar'"> to <body>.
+      createElement(env, container, '[text]="\'bar\'"', 'title');
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(env.win.document.title).to.equal('foo');
       });
     });
 
