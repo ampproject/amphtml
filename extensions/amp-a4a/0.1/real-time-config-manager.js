@@ -35,7 +35,7 @@ const MAX_RTC_CALLOUTS = 5;
 const MAX_URL_LENGTH = 16384;
 
 /** @type {boolean} */
-export const ERROR_REPORTING_ENABLED = Math.random() < 0.01;
+const ERROR_REPORTING_ENABLED = Math.random() < 0.01;
 
 /**
  * Enum starts at 4 because 1-3 reserved as:

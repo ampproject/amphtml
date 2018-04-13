@@ -513,8 +513,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
-      /*{'vendors': {}, 'urls': []},
-      {'vendors': 'incorrect', 'urls': 'incorrect'}*/].forEach(rtcConfig => {
+      {'vendors': {}, 'urls': []},
+      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
         allowConsoleError(() => {
           setRtcConfig(rtcConfig);
