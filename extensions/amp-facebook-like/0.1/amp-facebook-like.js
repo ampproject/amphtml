@@ -21,8 +21,8 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
-import {parseJson, tryParseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookLike extends AMP.BaseElement {
 
@@ -98,7 +98,8 @@ class AmpFacebookLike extends AMP.BaseElement {
       return;
     }
 
-    const parsedEventData = isObject(eventData) ? eventData : tryParseJson(eventData);
+    const parsedEventData = isObject(eventData) ?
+      eventData : tryParseJson(eventData);
     if (!parsedEventData) {
       return;
     }
