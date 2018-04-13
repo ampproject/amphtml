@@ -127,7 +127,7 @@ export class WebAnimationRunner {
       // Apply vars.
       if (request.vars) {
         for (const k in request.vars) {
-          setStyle(request.target, k, String(request.vars[k]));
+          setStyle(request.target, String(request.vars[k]));
         }
       }
 
