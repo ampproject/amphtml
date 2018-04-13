@@ -875,89 +875,96 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
 
-    // TODO (#13039): implement crop and object fit contain transitions
     const transLayer = this.element.ownerDocument.createElement('div');
     transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
-    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
-        .implementation_.getImageBoxWithOffset();
     const sourceImg = childElementByTag(sourceElement, 'img');
     const clone = sourceImg.cloneNode(true);
     clone.removeAttribute('class');
     transLayer.appendChild(clone);
 
-    // Gradually fade in the black background
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(0, 1),
-    }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-
-    // Fade in the carousel at the end of the animation while fading out
-    // the transition layer
-    anim.add(MOTION_DURATION_RATIO - 0.01,
-        tr.setStyles(dev().assertElement(this.carousel_), {
-          opacity: tr.numeric(0, 1),
-        }),
-        0.01
-    );
-
-    // At the end of the animation, fade out the transition layer.
-    anim.add(0.9, tr.setStyles(transLayer, {
-      opacity: tr.numeric(1, 0.01),
-    }), 0.1, EXIT_CURVE_);
-
-    return this.vsync_.runPromise({
-      measure: () => {
-        const rect = layoutRectFromDomRect(sourceElement
-            ./*OK*/getBoundingClientRect());
-        st.setStyles(clone, {
-          position: 'absolute',
-          top: st.px(rect.top),
-          left: st.px(rect.left),
-          width: st.px(rect.width),
-          height: st.px(rect.height),
-          transformOrigin: 'top left',
-          willChange: 'transform',
-        });
-        const dx = imageBox.left - rect.left;
-        const dy = imageBox.top - rect.top;
-        const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
-        const viewportHeight = this.getViewport().getSize().height;
-        duration = this.getTransitionDuration_(Math.abs(dy), viewportHeight);
-
-        // Animate the position and scale of the transition image to its
-        // final lightbox destination in the middle of the page
-        anim.add(0, tr.setStyles(clone, {
-          transform: tr.concat([
-            tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-            tr.scale(tr.numeric(1, scaleX)),
-          ]),
-        }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-      },
-      mutate: () => {
-        st.setStyles(dev().assertElement(this.carousel_), {
-          opacity: 0,
-          display: '',
-        });
-        sourceElement.classList.add('i-amphtml-ghost');
-        this.element.ownerDocument.body.appendChild(transLayer);
-      },
-    }).then(() => {
-      return anim.start(duration).thenAlways(() => {
-        return this.vsync_.mutatePromise(() => {
-          st.setStyles(this.element, {opacity: ''});
-          st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
-          sourceElement.classList.remove('i-amphtml-ghost');
-          if (transLayer) {
-            this.element.ownerDocument.body.removeChild(transLayer);
+    return this.getCurrentElement_().imageViewer.getImpl()
+        .then(imageViewer => {
+          const imageBox = imageViewer.getImageBoxWithOffset();
+          if (!imageBox) {
+            return this.fade_(0, 1);
           }
+
+          // Gradually fade in the black background
+          anim.add(0, tr.setStyles(this.element, {
+            opacity: tr.numeric(0, 1),
+          }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+
+          // Fade in the carousel at the end of the animation while fading out
+          // the transition layer
+          anim.add(MOTION_DURATION_RATIO - 0.01,
+              tr.setStyles(dev().assertElement(this.carousel_), {
+                opacity: tr.numeric(0, 1),
+              }),
+              0.01
+          );
+
+          // At the end of the animation, fade out the transition layer.
+          anim.add(0.9, tr.setStyles(transLayer, {
+            opacity: tr.numeric(1, 0.01),
+          }), 0.1, EXIT_CURVE_);
+
+          return this.vsync_.runPromise({
+            measure: () => {
+              const rect = layoutRectFromDomRect(sourceElement
+                  ./*OK*/getBoundingClientRect());
+              st.setStyles(clone, {
+                position: 'absolute',
+                top: st.px(rect.top),
+                left: st.px(rect.left),
+                width: st.px(rect.width),
+                height: st.px(rect.height),
+                transformOrigin: 'top left',
+                willChange: 'transform',
+              });
+              const dx = imageBox.left - rect.left;
+              const dy = imageBox.top - rect.top;
+              const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
+              const viewportHeight = this.getViewport().getSize().height;
+              duration = this.getTransitionDuration_(Math.abs(dy),
+                  viewportHeight);
+
+              // Animate the position and scale of the transition image to its
+              // final lightbox destination in the middle of the page
+              anim.add(0, tr.setStyles(clone, {
+                transform: tr.concat([
+                  tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+                  tr.scale(tr.numeric(1, scaleX)),
+                ]),
+              }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+            },
+            mutate: () => {
+              st.setStyles(dev().assertElement(this.carousel_), {
+                opacity: 0,
+                display: '',
+              });
+              sourceElement.classList.add('i-amphtml-ghost');
+              this.element.ownerDocument.body.appendChild(transLayer);
+            },
+          });
+        }).then(() => {
+          return anim.start(duration).thenAlways(() => {
+            return this.vsync_.mutatePromise(() => {
+              st.setStyles(this.element, {opacity: ''});
+              st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
+              sourceElement.classList.remove('i-amphtml-ghost');
+              if (transLayer) {
+                this.element.ownerDocument.body.removeChild(transLayer);
+              }
+            });
+          });
         });
-      });
-    });
   }
 
   /**
    * If no transition image is applicable, fade the lightbox in and out.
    * @param {number} startOpacity
    * @param {number} endOpacity
+   * @returns {!Promise}
    * @private
    */
   fade_(startOpacity, endOpacity) {
@@ -1007,92 +1014,101 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     let duration = MIN_TRANSITION_DURATION;
     const anim = new Animation(this.element);
     const transLayer = this.element.ownerDocument.createElement('div');
-
-    // Initialize transition layer and image based on ImageViewer measurements
-    const imageBox = /**@type {?}*/ (currentElementMetadata.imageViewer)
-        .implementation_.getImageBoxWithOffset();
-    const image = /**@type {?}*/ (currentElementMetadata.imageViewer)
-        .implementation_.getImage();
-
     transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
 
-    const clone = image.cloneNode(true);
-    clone.removeAttribute('class');
-    clone.removeAttribute('style');
-    st.setStyles(clone, {
-      position: 'absolute',
-      top: st.px(imageBox.top),
-      left: st.px(imageBox.left),
-      width: st.px(imageBox.width),
-      height: st.px(imageBox.height),
-      transform: '',
-      transformOrigin: 'top left',
-      willChange: 'transform',
-    });
-    transLayer.appendChild(clone);
+    // Initialize transition layer and image based on ImageViewer measurements
+    return currentElementMetadata.imageViewer.getImpl()
+        .then(imageViewer => {
+          const imageBox = imageViewer.getImageBoxWithOffset();
+          const image = imageViewer.getImage();
 
-    // Gradually fade out the lightbox
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(1, 0),
-    }), MOTION_DURATION_RATIO, ENTER_CURVE_);
-
-    // Fade out the transition image.
-    anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
-      opacity: tr.numeric(1, 0.01),
-    }), 0.2, EXIT_CURVE_);
-
-    return this.vsync_.runPromise({
-      measure: () => {
-        const rect = layoutRectFromDomRect(sourceElement
-            ./*OK*/getBoundingClientRect());
-
-        // Move and resize the image back to where it is in the article.
-        const dx = rect.left - imageBox.left;
-        const dy = rect.top - imageBox.top;
-        const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
-        const viewportHeight = this.getViewport().getSize().height;
-        duration = this.getTransitionDuration_(Math.abs(dy), viewportHeight);
-
-        // Animate the position and scale of the transition image to its
-        // final lightbox destination in the middle of the page
-        /** @const {!TransitionDef<void>} */
-        const moveAndScale = tr.setStyles(clone, {
-          transform: tr.concat([
-            tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
-            tr.scale(tr.numeric(1, scaleX)),
-          ]),
-        });
-
-        anim.add(0, (time, complete) => {
-          moveAndScale(time);
-          if (complete) {
-            sourceElement.classList.remove('i-amphtml-ghost');
+          if (!imageBox) {
+            return this.fade_(1, 0);
           }
-        }, MOTION_DURATION_RATIO, EXIT_CURVE_);
 
-      },
-      mutate: () => {
-        sourceElement.classList.add('i-amphtml-ghost');
-        this.element.ownerDocument.body.appendChild(transLayer);
-        st.setStyles(dev().assertElement(this.carousel_), {
-          opacity: 0,
-        });
-      },
-    }).then(() => {
-      return anim.start(duration).thenAlways(() => {
-        return this.vsync_.mutatePromise(() => {
-          st.setStyles(this.element, {
-            opacity: '',
+          const clone = image.cloneNode(true);
+          clone.removeAttribute('class');
+          clone.removeAttribute('style');
+
+          st.setStyles(clone, {
+            position: 'absolute',
+            top: st.px(imageBox.top),
+            left: st.px(imageBox.left),
+            width: st.px(imageBox.width),
+            height: st.px(imageBox.height),
+            transform: '',
+            transformOrigin: 'top left',
+            willChange: 'transform',
           });
-          st.setStyles(dev().assertElement(this.carousel_), {
-            opacity: '',
+          transLayer.appendChild(clone);
+
+          // Gradually fade out the lightbox
+          anim.add(0, tr.setStyles(this.element, {
+            opacity: tr.numeric(1, 0),
+          }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+
+          // Fade out the transition image.
+          anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
+            opacity: tr.numeric(1, 0.01),
+          }), 0.2, EXIT_CURVE_);
+
+          const transitionMeasure = () => {
+            const rect = layoutRectFromDomRect(sourceElement
+                ./*OK*/getBoundingClientRect());
+
+            // Move and resize the image back to where it is in the article.
+            const dx = rect.left - imageBox.left;
+            const dy = rect.top - imageBox.top;
+            const scaleX = imageBox.width != 0 ?
+              rect.width / imageBox.width : 1;
+            const viewportHeight = this.getViewport().getSize().height;
+            duration = this.getTransitionDuration_(Math.abs(dy),
+                viewportHeight);
+
+            // Animate the position and scale of the transition image to its
+            // final lightbox destination in the middle of the page
+            /** @const {!TransitionDef<void>} */
+            const moveAndScale = tr.setStyles(clone, {
+              transform: tr.concat([
+                tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+                tr.scale(tr.numeric(1, scaleX)),
+              ]),
+            });
+
+            anim.add(0, (time, complete) => {
+              moveAndScale(time);
+              if (complete) {
+                sourceElement.classList.remove('i-amphtml-ghost');
+              }
+            }, MOTION_DURATION_RATIO, EXIT_CURVE_);
+          };
+
+          const transitionMutate = () => {
+            sourceElement.classList.add('i-amphtml-ghost');
+            this.element.ownerDocument.body.appendChild(transLayer);
+            st.setStyles(dev().assertElement(this.carousel_), {
+              opacity: 0,
+            });
+          };
+
+          return this.measureMutateElement(transitionMeasure,
+              transitionMutate);
+
+        }).then(() => {
+          return anim.start(duration).thenAlways(() => {
+            return this.mutateElement(() => {
+              st.setStyles(this.element, {
+                opacity: '',
+              });
+              st.setStyles(dev().assertElement(this.carousel_), {
+                opacity: '',
+              });
+              toggle(dev().assertElement(this.carousel_), false);
+              toggle(this.element, false);
+              this.element.ownerDocument.body.removeChild(transLayer);
+            });
           });
-          toggle(dev().assertElement(this.carousel_), false);
-          toggle(this.element, false);
-          this.element.ownerDocument.body.removeChild(transLayer);
         });
-      });
-    });
   }
 
   /**
@@ -1255,10 +1271,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Close gallery view
+   * @returns {!Promise}
    * @private
    */
   closeGallery_() {
-    this.vsync_.mutate(() => {
+    return this.mutateElement(() => {
       this.container_.removeAttribute('gallery-view');
       toggle(dev().assertElement(this.navControls_), true);
       toggle(dev().assertElement(this.carousel_), true);
@@ -1385,6 +1402,23 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
+   * @param {Event} event
+   * @param {string} id
+   * @private
+   */
+  handleThumbnailClick_(event, id) {
+    event.stopPropagation();
+    Promise.all([
+      this.closeGallery_(),
+      dev().assert(this.carousel_).getImpl(),
+    ]).then(values => {
+      this.currentElemId_ = id;
+      values[1].showSlideWhenReady(this.currentElemId_);
+      this.updateDescriptionBox_();
+    });
+  }
+
+  /**
    * Create an element inside gallery from the thumbnail info from manager.
    * @param {!LightboxThumbnailDataDef} thumbnailObj
    * @return {!Element}
@@ -1424,15 +1458,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       element.appendChild(timestampDiv);
     }
 
-    const closeGalleryAndShowTargetSlide = event => {
-      this.closeGallery_();
-      this.currentElemId_ = thumbnailObj.element.lightboxItemId;
-      dev().assert(this.carousel_).getImpl()
-          .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
-      this.updateDescriptionBox_();
-      event.stopPropagation();
-    };
-    element.addEventListener('click', closeGalleryAndShowTargetSlide);
+    element.addEventListener('click', e => {
+      this.handleThumbnailClick_(e, thumbnailObj.element.lightboxItemId);
+    });
     return element;
   }
 }
