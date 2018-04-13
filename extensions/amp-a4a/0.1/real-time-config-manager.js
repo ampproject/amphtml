@@ -193,6 +193,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   promiseArray.push(Services.timerFor(win).timeoutPromise(
       timeoutMillis,
       urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
+    a4aElement.verifyStillCurrent();
     timeoutMillis -= (urlReplacementStartTime - Date.now());
     return send(url);
   }).catch(unused => {
