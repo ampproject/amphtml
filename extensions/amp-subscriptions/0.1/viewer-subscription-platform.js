@@ -56,7 +56,7 @@ export class ViewerSubscriptionPlatform {
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
 
-    /** @private {string} */
+    /** @private @const {string} */
     this.publicationId_ = this.pageConfig_.getPublicationId();
 
     /** @private @const {?string} */
