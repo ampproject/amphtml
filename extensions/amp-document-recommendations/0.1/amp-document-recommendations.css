@@ -27,6 +27,10 @@
   font-size: 17px;
 }
 
+.i-amphtml-recommended-document > *[i-amphtml-fixedid] {
+  display: none;
+}
+
 .i-amphtml-document-recommendations {
   background: #FFFFFF;
 }
