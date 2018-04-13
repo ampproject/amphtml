@@ -357,7 +357,7 @@ export class SubscriptionService {
     return requireValuesPromise.then(resolvedValues => {
       const grantState = resolvedValues[0];
       const selectedPlatform = resolvedValues[1];
-      const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
+      const selectedEntitlement = this.platformStore_.getGrantEntitlement(
           selectedPlatform.getServiceId());
 
       /** @type {!RenderState} */
