@@ -26,7 +26,7 @@ import {calculateTargetScalingFactor, targetFitsWithinPage} from '../animation-p
 describes.realWin('amp-story-full-bleed-animations', {
   amp: {
     runtimeOn: true,
-    extensions: ['amp-story'],
+    extensions: ['amp-story:1.0'],
   },
 }, env => {
   let win;
