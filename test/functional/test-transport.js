@@ -18,7 +18,7 @@ import * as sinon from 'sinon';
 import {
   Transport,
   sendRequest,
-  sendRequestUsingIframe
+  sendRequestUsingIframe,
 } from '../../src/transport';
 import {adopt} from '../../src/runtime';
 import {loadPromise} from '../../src/event-helper';
