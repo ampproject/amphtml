@@ -211,6 +211,10 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   flex: 1 1 auto;
 }
 
+.i-amphtml-layout-fluid {
+  position: relative;
+}
+
 .i-amphtml-layout-size-defined {
   overflow: hidden !important;
 }
