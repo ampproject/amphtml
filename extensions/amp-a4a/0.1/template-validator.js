@@ -17,6 +17,7 @@
 import {AmpAdTemplateHelper} from '../../amp-a4a/0.1/amp-ad-template-helper';
 import {Services} from '../../../src/services';
 import {Validator, ValidatorResult} from './amp-ad-type-defs';
+import {getAmpAdMetadata} from './amp-ad-utils';
 import {pushIfNotExist} from '../../../src/utils/array';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -39,37 +40,22 @@ export class TemplateValidator extends Validator {
   /**
    * @param {string} templateString
    * @param {!./amp-ad-type-defs.AmpTemplateCreativeDef} parsedResponseBody
+   * @param {!Window} win
    * @return {!./amp-ad-type-defs.CreativeMetaDataDef}
    * @private
    */
-  getAmpAdMetadata_(templateString, parsedResponseBody) {
-    // TODO(levitzky) The following minification is for demo purposes only. Once
-    // launched this will either be performed server-side, or will be replaced
-    // by more sophisticated logic.
-    const minifiedCreative = templateString.replace(
-        /<script async.+?<\/script>/g, '');
-    const metadata = /** @type {!./amp-ad-type-defs.CreativeMetaDataDef} */ ({
-      minifiedCreative,
-      customElementExtensions: [],
-      extensions: [],
-    });
+  getAmpAdMetadata_(templateString, parsedResponseBody, win) {
+    const metadata = getAmpAdMetadata(templateString);
     if (parsedResponseBody.analytics) {
       pushIfNotExist(metadata['customElementExtensions'], 'amp-analytics');
     }
     pushIfNotExist(metadata['customElementExtensions'], 'amp-mustache');
-    return metadata;
-  }
 
-  /**
-   * @param {!./amp-ad-type-defs.CreativeMetaDataDef} metadata
-   * @param {!Window} win
-   * @private
-   */
-  processMetadata_(metadata, win) {
     const extensions = Services.extensionsFor(win);
     metadata.customElementExtensions.forEach(
         extensionId => extensions./*OK*/preloadExtension(extensionId));
     // TODO(levitzky) Add preload logic for fonts / images.
+    return metadata;
   }
 
   /** @override */
@@ -95,9 +81,8 @@ export class TemplateValidator extends Validator {
     return this.ampAdTemplateHelper_
         .fetch(parsedResponseBody.templateUrl)
         .then(template => {
-          const creativeMetadata =
-              this.getAmpAdMetadata_(template, parsedResponseBody);
-          this.processMetadata_(creativeMetadata, context.win);
+          const creativeMetadata = this.getAmpAdMetadata_(
+              template, parsedResponseBody, context.win);
           creativeData.templateData = parsedResponseBody;
           creativeData.creativeMetadata = creativeMetadata;
           return {creativeData, type: ValidatorResult.AMP};
