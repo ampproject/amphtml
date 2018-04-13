@@ -363,67 +363,73 @@ describe('ActionService parseAction', () => {
   });
 
   it('should fail parse without event', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       parseAction('target1.method1');
-    }).to.throw(/expected \[\:\]/);
+    }).to.throw(/expected \[\:\]/); });
   });
 
   it('should fail parse without target', () => {
-    expect(() => {
-      parseAction('event1:');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('.method1');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event1:.method1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event1:');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('.method1');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event1:.method1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with period in event or method', () => {
-    expect(() => {
-      parseAction('event.1:target1.method');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method.1');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      expect(() => {
+        parseAction('event.1:target1.method');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method.1');
+      }).to.throw(/Invalid action/);
+    });
   });
 
   it('should fail parse with invalid args', () => {
-    // No args allowed without explicit action.
-    expect(() => {
-      parseAction('event:target1()');
-    }).to.throw(/Invalid action/);
-    // Missing parens
-    expect(() => {
-      parseAction('event:target1.method(');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key = value');
-    }).to.throw(/Invalid action/);
-    // No arg value.
-    expect(() => {
-      parseAction('event:target1.method(key)');
-    }).to.throw(/Invalid action/);
-    expect(() => {
-      parseAction('event:target1.method(key=)');
-    }).to.throw(/Invalid action/);
-    // Missing quote
-    expect(() => {
-      parseAction('event:target1.method(key = "value)');
-    }).to.throw(/Invalid action/);
-    // Broken quotes.
-    expect(() => {
-      parseAction('event:target1.method(key = "value"")');
-    }).to.throw(/Invalid action/);
-    // Missing comma.
-    expect(() => {
-      parseAction('event:target1.method(key = value key2 = value2)');
-    }).to.throw(/Invalid action/);
-    // Empty (2...n)nd target
-    expect(() => {
-      parseAction('event:target1,');
-    }).to.throw(/Invalid action/);
+    allowConsoleError(() => {
+      // No args allowed without explicit action.
+      expect(() => {
+        parseAction('event:target1()');
+      }).to.throw(/Invalid action/);
+      // Missing parens
+      expect(() => {
+        parseAction('event:target1.method(');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key = value');
+      }).to.throw(/Invalid action/);
+      // No arg value.
+      expect(() => {
+        parseAction('event:target1.method(key)');
+      }).to.throw(/Invalid action/);
+      expect(() => {
+        parseAction('event:target1.method(key=)');
+      }).to.throw(/Invalid action/);
+      // Missing quote
+      expect(() => {
+        parseAction('event:target1.method(key = "value)');
+      }).to.throw(/Invalid action/);
+      // Broken quotes.
+      expect(() => {
+        parseAction('event:target1.method(key = "value"")');
+      }).to.throw(/Invalid action/);
+      // Missing comma.
+      expect(() => {
+        parseAction('event:target1.method(key = value key2 = value2)');
+      }).to.throw(/Invalid action/);
+      // Empty (2...n)nd target
+      expect(() => {
+        parseAction('event:target1,');
+      }).to.throw(/Invalid action/);
+    });
   });
 });
 
@@ -649,18 +655,18 @@ describe('Action method', () => {
   });
 
   it('should not allow invoke on non-AMP and non-whitelisted element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('img'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Target element does not support provided action/);
+    }).to.throw(/Target element does not support provided action/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
   it('should not allow invoke on unresolved AMP element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('amp-foo'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Unrecognized AMP element/);
+    }).to.throw(/Unrecognized AMP element/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
@@ -714,8 +720,7 @@ describe('installActionHandler', () => {
     expect(callArgs.event).to.be.equal('tap');
   });
 
-  // TODO(choumx, #14336): Fails due to console errors.
-  it.skip('should check trust level before invoking action', () => {
+  it('should check trust level before invoking action', () => {
     const handlerSpy = sandbox.spy();
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
@@ -954,8 +959,7 @@ describe('Action common handler', () => {
     expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
   });
 
-  // TODO(choumx, #14336): Fails due to console errors.
-  it.skip('should check trust before invoking action', () => {
+  it('should check trust before invoking action', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
@@ -1258,14 +1262,20 @@ describes.fakeWin('Core events', {amp: true}, env => {
       const errorText = 'cannot access native event functions';
 
       // Specifically test these commonly used functions
-      expect(() => deferredEvent.preventDefault()).to.throw(errorText);
-      expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      allowConsoleError(() => {
+        expect(() => deferredEvent.preventDefault()).to.throw(errorText);
+      });
+      allowConsoleError(() => {
+        expect(() => deferredEvent.stopPropagation()).to.throw(errorText);
+      });
 
       // Test all functions
       for (const key in deferredEvent) {
         const value = deferredEvent[key];
         if (typeof value === 'function') {
-          expect(() => value()).to.throw(errorText);
+          allowConsoleError(() => {
+            expect(() => value()).to.throw(errorText);
+          });
         }
       }
     });

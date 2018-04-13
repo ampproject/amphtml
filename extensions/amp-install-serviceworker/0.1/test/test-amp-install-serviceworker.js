@@ -99,8 +99,7 @@ describes.realWin('amp-install-serviceworker', {
     expect(maybeInstallUrlRewriteStub).to.be.calledOnce;
   });
 
-  // TODO(malteubl, #14336): Fails due to console errors.
-  it.skip('should do nothing with non-matching origins', () => {
+  it('should do nothing with non-matching origins', () => {
     const install = doc.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
     expect(implementation).to.exist;
@@ -254,14 +253,14 @@ describes.realWin('amp-install-serviceworker', {
     it('should reject bad iframe URLs', () => {
       const iframeSrc = 'https://www2.example.com/install-sw.html';
       install.setAttribute('data-iframe-src', iframeSrc);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/should be a URL on the same origin as the source/);
+      }).to.throw(/should be a URL on the same origin as the source/); });
       install.setAttribute('data-iframe-src',
           'http://www.example.com/install-sw.html');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.buildCallback();
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
   });
 });
@@ -339,32 +338,32 @@ describes.fakeWin('url rewriter', {
 
     it('should fail when only mask configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-shell-url');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when only shell configured', () => {
       element.removeAttribute('data-no-service-worker-fallback-url-match');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be specified/);
+      }).to.throw(/must be specified/); });
     });
 
     it('should fail when shell is on different origin', () => {
       element.setAttribute('data-no-service-worker-fallback-shell-url',
           'https://acme.org/shell#abc');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/must be the same as source origin/);
+      }).to.throw(/must be the same as source origin/); });
     });
 
     it('should fail when mask is an invalid expression', () => {
       element.setAttribute('data-no-service-worker-fallback-url-match',
           '?');
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         implementation.maybeInstallUrlRewrite_();
-      }).to.throw(/Invalid/);
+      }).to.throw(/Invalid/); });
     });
   });
 

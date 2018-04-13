@@ -131,8 +131,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     expect(fireDelayedImpressionsSpy).to.not.be.calledOnce;
   });
 
-  // TODO(glevitzky, #14336): Fails due to console errors.
-  it.skip('should contain sz=320x50 in ad request by default', () => {
+  it('should contain sz=320x50 in ad request by default', () => {
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       expect(impl.adUrl_).to.be.ok;
@@ -140,8 +139,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  // TODO(glevitzky, #14336): Fails due to console errors.
-  it.skip('should contain mulitple sizes in ad request', () => {
+  it('should contain mulitple sizes in ad request', () => {
     multiSizeImpl.initiateAdRequest();
     return multiSizeImpl.adPromise_.then(() => {
       expect(multiSizeImpl.adUrl_).to.be.ok;

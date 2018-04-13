@@ -105,8 +105,7 @@ function waitForEvent(env, name) {
   });
 }
 
-// TODO(choumx, #14336): Fails due to console errors.
-describe.skip('Bind', function() {
+describe.configure().ifNewChrome().run('Bind', function() {
   // Give more than default 2000ms timeout for local testing.
   const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
   this.timeout(TIMEOUT);
@@ -194,7 +193,8 @@ describe.skip('Bind', function() {
       container = env.ampdoc.getBody();
     });
 
-    it('should scan for bindings when ampdoc is ready', () => {
+    // TODO(choumx, #14581): Flaky on Travis.
+    it.skip('should scan for bindings when ampdoc is ready', () => {
       createElement(env, container, '[text]="1+1"');
       expect(bind.numberOfBindings()).to.equal(0);
       return onBindReady(env, bind).then(() => {
@@ -366,6 +366,17 @@ describe.skip('Bind', function() {
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('abc');
         expect(element.value).to.equal('abc');
+      });
+    });
+
+    // TODO(choumx, #14581): Flaky on Travis.
+    it.skip('should update document title for <title> elements', () => {
+      const element = createElement(
+          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'title');
+      element.value = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.value).to.equal('abc');
+        expect(env.win.document.title).to.equal('abc');
       });
     });
 

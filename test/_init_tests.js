@@ -40,8 +40,11 @@ import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
-// Used to surface console errors as mocha test failures.
-let consoleSandbox;
+// Used to print warnings for unexpected console errors.
+let consoleErrorSandbox;
+let consoleErrorStub;
+let consoleInfoLogWarnSandbox;
+let testName;
 
 // All exposed describes.
 global.describes = describes;
@@ -265,13 +268,79 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+// Used during normal test execution, to detect unexpected console errors.
+function warnForConsoleError() {
+  if (consoleErrorSandbox) {
+    consoleErrorSandbox.restore();
+  }
+  consoleErrorSandbox = sinon.sandbox.create();
+  const originalConsoleError = console/*OK*/.error;
+  consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
+    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
+    const helpMessage = '    The test "' + testName + '"' +
+        ' resulted in a call to console.error.\n' +
+        '    ⤷ If this is not expected, fix the code that generated ' +
+            'the error.\n' +
+        '    ⤷ If this is expected, use the following pattern to wrap the ' +
+            'test code that generated the error:\n' +
+        '        \'allowConsoleError(() => { <code that generated the ' +
+            'error> });';
+    // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
+    originalConsoleError(errorMessage + '\'\n' + helpMessage);
+  });
+  this.allowConsoleError = function(func) {
+    dontWarnForConsoleError();
+    func();
+    try {
+      expect(consoleErrorStub).to.have.been.called;
+    } catch (e) {
+      const helpMessage =
+          'The test "' + testName + '" contains an "allowConsoleError" block ' +
+          'that didn\'t result in a call to console.error.';
+      // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
+      originalConsoleError(helpMessage);
+    }
+    warnForConsoleError();
+  };
+}
+
+// Used during sections of tests where an error is expected.
+function dontWarnForConsoleError() {
+  if (consoleErrorSandbox) {
+    consoleErrorSandbox.restore();
+  }
+  consoleErrorSandbox = sinon.sandbox.create();
+  consoleErrorStub =
+      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
+}
+
+// Used to restore error level logging after each test.
+function restoreConsoleError() {
+  consoleErrorSandbox.restore();
+}
+
+// Used to silence info, log, and warn level logging during each test.
+function stubConsoleInfoLogWarn() {
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  consoleInfoLogWarnSandbox = sinon.sandbox.create();
+  consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+  consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
+}
+
+// Used to restore info, log, and warn level logging after each test.
+function restoreConsoleInfoLogWarn() {
+  consoleInfoLogWarnSandbox.restore();
+}
+
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
-  consoleSandbox = sinon.sandbox.create();
-  consoleSandbox.stub(console, 'error').callsFake((...messages) => {
-    throw new Error(messages.join(' '));
-  });
+  testName = this.currentTest.fullTitle();
+  stubConsoleInfoLogWarn();
+  warnForConsoleError();
 });
 
 function beforeTest() {
@@ -292,7 +361,8 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
-  consoleSandbox.restore();
+  restoreConsoleError();
+  restoreConsoleInfoLogWarn();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {

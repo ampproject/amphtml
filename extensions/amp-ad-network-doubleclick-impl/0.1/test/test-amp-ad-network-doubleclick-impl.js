@@ -34,7 +34,6 @@ import {
   AmpAdNetworkDoubleclickImpl,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
-  SAFEFRAME_ORIGIN,
   getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -46,6 +45,7 @@ import {
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
+import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -913,8 +913,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    // TODO(glevitzky, #14336): Fails due to console errors.
-    it.skip('should force iframe to match size of creative', () => {
+    it('should force iframe to match size of creative', () => {
       sandbox.stub(impl, 'sendXhrRequest').returns(
           mockSendXhrRequest('150x50'));
       impl.buildCallback();
@@ -927,8 +926,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    // TODO(glevitzky, #14336): Fails due to console errors.
-    it.skip('amp creative - should force iframe to match size of slot', () => {
+    it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
@@ -948,8 +946,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    // TODO(glevitzky, #14336): Fails due to console errors.
-    it.skip('should force iframe to match size of slot', () => {
+    it('should force iframe to match size of slot', () => {
       sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       sandbox.stub(impl, 'renderViaCachedContentIframe_').callsFake(
           () => impl.iframeRenderHelper_({src: impl.adUrl_, name: 'name'}));
@@ -965,9 +962,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    // TODO(glevitzky, #14336): Fails due to console errors.
-    it.skip('should issue an ad request even with bad multi-size ' +
-        'data attr', () => {
+    it('should issue an ad request even with bad multi-size data attr', () => {
       stubForAmpCreative();
       sandbox.stub(impl, 'sendXhrRequest').callsFake(mockSendXhrRequest);
       impl.element.setAttribute('data-multi-size', '201x50');
@@ -1135,6 +1130,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   describe('#disable safeframe preload experiment', () => {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+    let preloadSpy;
 
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1144,6 +1140,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
     });
 
     it('should not preload SafeFrame', () => {
@@ -1152,7 +1149,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.false;
       expect(isInExperiment(element, '21061136')).to.be.true;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com']);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.not.be.called;
     });
 
     it('should preload SafeFrame', () => {
@@ -1161,7 +1159,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.true;
       expect(isInExperiment(element, '21061136')).to.be.false;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.be.calledOnce;
+      expect(preloadSpy.args[0]).to.match(/safeframe/);
     });
   });
 
@@ -1293,8 +1293,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
       });
 
-      // TODO(bradfrizzell, #14336): Fails due to console errors.
-      describe.skip('centering', () => {
+      describe('centering', () => {
         const size = {width: '300px', height: '150px'};
 
         function verifyCss(iframe, expectedSize) {
@@ -1496,6 +1495,28 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           return impl.renderNonAmpCreative().then(() => {
             expect(Date.now() - startTime).to.be.at.most(50);
           });
+        });
+      });
+
+      describe('#preconnect', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          doc.body.appendChild(element);
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should preload safeframe', () => {
+          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
+          // Note that this causes preconnection to tpc.googlesyndication.com
+          // due to preloading safeframe.
+          expect(impl.getPreconnectUrls()).to.deep.equal(
+              ['https://securepubads.g.doubleclick.net/']);
+          expect(preloadSpy).to.be.calledOnce;
+          expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
       });
     });

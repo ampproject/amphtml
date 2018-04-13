@@ -57,7 +57,7 @@ const TAG = 'amp-geo';
  *
  * So don't change the magic string!
  */
-const COUNTRY = 'AMP_ISO_COUNTRY_HOTPATCH';
+const COUNTRY = '{{AMP_ISO_COUNTRY_HOTPATCH}}';
 const COUNTRY_PREFIX = 'amp-iso-country-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
@@ -138,10 +138,10 @@ export class AmpGeo extends AMP.BaseElement {
     }
 
     // Are we in debug override?
-    // match to \w+ to prevent xss vector
+    // match to \w characters only to prevent xss vector
     if (getMode(this.win).geoOverride &&
       (isCanary(this.win) || getMode(this.win).localDev) &&
-      getMode(this.win).geoOverride.match(/\w+/)) {
+      /^\w+$/.test(getMode(this.win).geoOverride)) {
       this.mode_ = mode.GEO_OVERRIDE;
       this.country_ = getMode(this.win).geoOverride ;
     }

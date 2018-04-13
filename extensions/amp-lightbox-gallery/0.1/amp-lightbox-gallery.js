@@ -465,6 +465,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.descriptionBox_.classList.remove('i-amphtml-lbg-standard');
         this.descriptionBox_.classList.add('i-amphtml-lbg-overflow');
         toggle(dev().assertElement(this.navControls_), false);
+        toggle(dev().assertElement(this.topBar_), false);
       } else if (state.isInOverflowMode) {
         this.clearDescOverflowState_();
       }
@@ -484,6 +485,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_.classList.remove('i-amphtml-lbg-overflow');
     this.descriptionBox_.classList.add('i-amphtml-lbg-standard');
     toggle(dev().assertElement(this.navControls_), true);
+    toggle(dev().assertElement(this.topBar_), true);
   }
 
   /**
@@ -515,6 +517,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         'i-amphtml-lbg-button-next', nextSlide);
     const prevButton = this.buildButton_('Prev',
         'i-amphtml-lbg-button-prev', prevSlide);
+
+    const input = Services.inputFor(this.win);
+    if (!input.isMouseDetected()) {
+      prevButton.classList.add('i-amphtml-screen-reader');
+      nextButton.classList.add('i-amphtml-screen-reader');
+    }
     this.navControls_.appendChild(nextButton);
     this.navControls_.appendChild(prevButton);
     this.controlsContainer_.appendChild(this.navControls_);

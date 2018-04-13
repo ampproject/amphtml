@@ -32,7 +32,11 @@ FAIL
 |    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 |  </head>
 |  <body>
-|    <amp-story standalone bookend-config-src="./related.json" background-audio="path/to/my.mp3">
+|    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg" bookend-config-src="./related.json" background-audio="path/to/my.mp3">
+>>   ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-video-error.html:34:2 The relative URL 'path/to/my.mp3' for attribute 'background-audio' in tag 'amp-story' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+>>   ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-video-error.html:34:2 The relative URL './related.json' for attribute 'bookend-config-src' in tag 'amp-story' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 |      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
 |        <amp-story-grid-layer template="horizontal">
 |          <!-- This should fail because amp-video doesn't have the [poster] attribute. -->

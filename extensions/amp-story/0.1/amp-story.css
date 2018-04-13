@@ -204,6 +204,12 @@ amp-story-grid-layer * {
   margin: 0 !important;
 }
 
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
+}
+
 .i-amphtml-story-grid-template-fill > :not(:first-child) {
   display: none !important;
 }

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {ScrollableShareWidget} from '../amp-story-share';
+import {
+  Action,
+  AmpStoryStoreService,
+  StateProperty,
+} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {ShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
+import {ShareWidget} from '../amp-story-share';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
+  let isSystemShareSupported;
   let parentEl;
   let shareMenu;
   let shareWidgetMock;
@@ -33,9 +38,15 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    const shareWidget = {build: () => win.document.createElement('div')};
+    isSystemShareSupported = false;
+
+    const shareWidget = {
+      build: () => win.document.createElement('div'),
+      isSystemShareSupported: () => isSystemShareSupported,
+      loadRequiredExtensions: () => {},
+    };
     shareWidgetMock = sandbox.mock(shareWidget);
-    sandbox.stub(ScrollableShareWidget, 'create').returns(shareWidget);
+    sandbox.stub(ShareWidget, 'create').returns(shareWidget);
 
     // Making sure the vsync tasks run synchronously.
     sandbox.stub(Services, 'vsyncFor').returns({
@@ -104,6 +115,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     shareMenu.element_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).not.to.have.class(VISIBLE_CLASS);
+    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 
   it('should not hide the share menu on click on the widget container', () => {
@@ -113,5 +125,56 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     shareMenu.innerContainerEl_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.element_).to.have.class(VISIBLE_CLASS);
+  });
+
+  it('should render the amp-social-share button if system share', () => {
+    isSystemShareSupported = true;
+
+    shareMenu.build();
+
+    expect(shareMenu.element_.tagName).to.equal('AMP-SOCIAL-SHARE');
+  });
+
+  it('should hide the amp-social-share button if system share', () => {
+    isSystemShareSupported = true;
+
+    shareMenu.build();
+
+    expect(shareMenu.element_.style.display).to.equal('none');
+  });
+
+  it('should load the amp-social-share extension if system share', () => {
+    isSystemShareSupported = true;
+    shareWidgetMock.expects('loadRequiredExtensions').once();
+
+    shareMenu.build();
+
+    shareWidgetMock.verify();
+  });
+
+  it('should dispatch an event on system share button if system share', () => {
+    isSystemShareSupported = true;
+
+    shareMenu.build();
+
+    const clickCallbackSpy = sandbox.spy();
+    shareMenu.element_.addEventListener('click', clickCallbackSpy);
+
+    // Toggling the share menu dispatches a click event on the amp-social-share
+    // button, which triggers the native sharing menu.
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    expect(clickCallbackSpy).to.have.been.calledOnce;
+  });
+
+  // See ShareMenu.onShareMenuStateUpdate_ for details.
+  it('should close back the share menu right away if system share', () => {
+    isSystemShareSupported = true;
+
+    shareMenu.build();
+
+    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+
+    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
   });
 });

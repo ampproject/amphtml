@@ -21,7 +21,7 @@ import {
   StoryAnimationDimsDef,
   StoryAnimationPresetDef,
 } from './animation-types';
-import {PRESETS} from './animation-presets';
+import {PRESETS, setStyleForPreset} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
@@ -33,7 +33,7 @@ import {setStyles} from '../../../src/style';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
-const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
+export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
 /** const {string} */
 const ANIMATE_IN_DURATION_ATTRIBUTE_NAME = 'animate-in-duration';
 /** const {string} */
@@ -527,6 +527,7 @@ export class AnimationManager {
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
+    setStyleForPreset(el, name);
 
     return user().assert(
         PRESETS[name],

@@ -126,11 +126,15 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       form.setAttribute('action-xhr', 'http://example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr must start with/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr must start with/);
+      });
       form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr should not be on AMP CDN/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr should not be on AMP CDN/);
+      });
       form.setAttribute('action-xhr', 'https://example.com');
       expect(() => new AmpForm(form)).to.not.throw;
       document.body.removeChild(form);
@@ -144,8 +148,10 @@ describes.repeated('', {
       illegalInput.setAttribute('name', '__amp_source_origin');
       illegalInput.value = 'https://example.com';
       form.appendChild(illegalInput);
-      expect(() => new AmpForm(form)).to.throw(
-          /Illegal input name, __amp_source_origin found/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /Illegal input name, __amp_source_origin found/);
+      });
       document.body.removeChild(form);
     });
 
@@ -231,7 +237,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      });
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
@@ -291,7 +299,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      });
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
     });
@@ -528,9 +538,7 @@ describes.repeated('', {
       });
     });
 
-    // TODO(danielrozenberg, #14336): Fails due to console errors.
-    it.skip('should allow rendering responses through inlined ' +
-        'templates', () => {
+    it('should allow rendering responses through inlined templates', () => {
       return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
@@ -1623,8 +1631,7 @@ describes.repeated('', {
           });
         });
 
-        // TODO(cvializ, #14336): Fails due to console errors.
-        it.skip('should redirect on error and header is set', () => {
+        it('should redirect on error and header is set', () => {
           sandbox.stub(ampForm.xhr_, 'fetch').returns(fetchRejectPromise);
           redirectToValue = 'https://example2.com/hello';
           const logSpy = sandbox.spy(user(), 'error');
