@@ -15,42 +15,24 @@
  */
 'use strict';
 
-const path = require('path')
+const path = require('path');
 
 module.exports = function(context) {
-  const sourceCode = context.getSourceCode();
   return {
-    Program: function(node) {
+    MemberExpression: function(node) {
       // Ignore style.js, fixed-layer.js and tests for usage of style property
       // changes.
-      if (!/^(style|fixed-layer|test-(\w|-)+)\.js$/.test(
-            path.basename(context.getFilename()))) {
-        const sourceCodeAsText =
-            /** @type {string>} */ (sourceCode.getText(node));
-        /**
-         * Match style mutations via dot notation.
-         * e.g. element.style.width = '2px';
-         * @type {boolean}
-         */
-        const isStyleMutationViaDotNotation =
-            /\s*[a-zA-Z_$][0-9a-zA-Z_$]+\.style\.\\w+\s=/.test(sourceCodeAsText);
-        /**
-         * Match style mutations via name string property accessor.
-         * e.g.
-         * element.style["width"] = '2px';
-         * element.style[propertyName] = someValue;
-         * @type {boolean}
-         */
-        const isStyleMutateViaPropertyAccessor =
-            /\s*[a-zA-Z_$][0-9a-zA-Z_$]+\.style\[(')?\w+\1]\s=/
-                .test(sourceCodeAsText);
-        if (isStyleMutationViaDotNotation || isStyleMutateViaPropertyAccessor) {
-          context.report({
-            node,
-            message: context.getFilename() + 'The setting of a style property is forbidden. Please use '
-                + 'style.js#setStyles or style.js#setImportantStyles.'
-          });
-        }
+      if (/^(style|fixed-layer|test-(\w|-)+)\.js$/.test(
+          path.basename(context.getFilename()))) {
+        return;
+      }
+      if (node.computed) {
+        return;
+      }
+      if (node.property.name == 'style') {
+        context.report(node, 'The use of ssElement#style '
+            + '(CSSStyleDeclaration live object) to style elements is ' +
+            'forbidden. Use getStyle and setStyle from style.js');
       }
     },
   };
