@@ -622,7 +622,7 @@ Provides the time when the element met visibility conditions for the first time 
 Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
 
 * **platform variable**: AMP_GEO
-*  Example: <br>
+  *  Example: <br>
   ```html
    <amp-pixel src="https://foo.com/pixel?domInteractiveTime=AMP_GEO"></amp-pixel>
   ```
