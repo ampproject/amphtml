@@ -27,11 +27,14 @@ import {
   maybeExecuteRealTimeConfig_,
   truncUrl_,
   validateRtcConfig_,
+  sendErrorMessage,
+  ERROR_REPORTING_ENABLED
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {isFiniteNumber} from '../../../../src/types';
+import {Transport} from '../../../../src/transport';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
   let element;
@@ -511,12 +514,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
-      {'vendors': {}, 'urls': []},
-      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
+      /*{'vendors': {}, 'urls': []},
+      {'vendors': 'incorrect', 'urls': 'incorrect'}*/].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
-        setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
-        expect(validatedRtcConfig).to.be.null;
+        allowConsoleError(() => {
+          setRtcConfig(rtcConfig);
+          validatedRtcConfig = validateRtcConfig_(element);
+          expect(validatedRtcConfig).to.be.null;
+        });
       });
     });
 
@@ -549,6 +554,43 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
+    });
+  });
+
+  describe('sendErrorMessage', () => {
+    let fetchStub, sendRequestUsingImageStub, requestUrl, ampDoc;
+    let errorType, errorReportingUrl;
+
+    beforeEach(() => {
+      // Make sure that we always send the message, as we are using
+      // the check Math.random() < reporting frequency.
+      sandbox.stub(Math, 'random').returns(0);
+      fetchStub = sandbox.stub(Xhr.prototype, 'fetch');
+      sendRequestUsingImageStub =
+          sandbox.stub(Transport, 'sendRequestUsingImage');
+      ampDoc = a4aElement.getAmpDoc();
+
+      errorType = RTC_ERROR_ENUM.TIMEOUT;
+      errorReportingUrl = "https://www.example.com?e=ERROR_TYPE&h=HREF";
+      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const macros = {
+        ERROR_TYPE: errorType,
+        HREF: env.win.location.href
+      };
+      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+          errorReportingUrl, macros, whitelist)
+    });
+
+    it('should send error message pingback to correct url', () => {
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(sendRequestUsingImageStub).to.be.calledOnce;
+      expect(sendRequestUsingImageStub).to.be.calledWith(requestUrl, false);
+    });
+
+    it('should not send error message if insecure url', () => {
+      errorReportingUrl = "http://www.IAmInsecure.biz";
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(sendRequestUsingImageStub).to.not.be.called;
     });
   });
 });

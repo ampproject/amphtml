@@ -16,12 +16,14 @@
 import {RTC_VENDORS} from './callout-vendors.js';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
   isSecureUrl,
   parseUrl,
 } from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
+import {sendRequest} from '../../../src/transport';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -32,8 +34,8 @@ const MAX_RTC_CALLOUTS = 5;
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
 
-/** @type {number} */
-const RTC_ERROR_REPORTING_FREQUENCY = 0.01;
+/** @type {boolean} */
+export const ERROR_REPORTING_ENABLED = Math.random() < 0.01;
 
 /**
  * Enum starts at 4 because 1-3 reserved as:
@@ -85,18 +87,22 @@ function buildErrorResponse_(
  * @param {string} errorType Uses the RTC_ERROR_ENUM above.
  * @param {string} errorReportingUrl
  * @param {!Window} win
+ * @param {../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  */
-function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
-  if (Math.random() < RTC_ERROR_REPORTING_FREQUENCY) {
+export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
+  if (ERROR_REPORTING_ENABLED || getMode(win).localDev || getMode(win).test) {
+    if (!isSecureUrl(errorReportingUrl)) {
+      dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorReportingUrl}`);
+      return;
+    }
     const whitelist = {ERROR_TYPE: true, HREF: true};
     const macros = {
       ERROR_TYPE: errorType,
       HREF: win.location.href
     };
-    Services.urlReplacementsForDoc(ampDoc).expandUrlAsync(
-        errorReportingUrl, macros, whitelist).then(url => {
-      Services.xhrFor(win).fetch(url);
-    }).catch(unused => {});
+    const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+        errorReportingUrl, macros, whitelist);
+    sendRequest(win, url, {image: true});
   }
 }
 
@@ -140,6 +146,10 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     if (isObject(urlObj)) {
       url = urlObj['url'];
       errorReportingUrl = urlObj['errorReportingUrl'];
+    } else if (typeof urlObj == "string") {
+      url = urlObj;
+    } else {
+      dev().warn(TAG, `Invalid url: ${urlObj}`);
     }
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         rtcStartTime, customMacros,
