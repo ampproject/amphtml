@@ -74,11 +74,11 @@ function renderMulti(doc, elementsDef) {
  * @return {!Element}
  */
 function renderSingle(doc, elementDef) {
-  const el = elementDef.attrs ?
+  const el = elementDef.hasOwnProperty('attrs') ?
     createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
     doc.createElement(elementDef.tag);
 
-  if (elementDef.localizedStringId) {
+  if (elementDef.hasOwnProperty('localizedStringId')) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNull(win).then(localizationService => {
       dev().assert(localizationService,
@@ -89,11 +89,11 @@ function renderSingle(doc, elementDef) {
     });
   }
 
-  if (elementDef.unlocalizedString) {
+  if (elementDef.hasOwnProperty('unlocalizedString')) {
     el.textContent = elementDef.unlocalizedString;
   }
 
-  if (elementDef.children) {
+  if (elementDef.hasOwnProperty('children')) {
     el.appendChild(renderMulti(doc, elementDef.children));
   }
 
