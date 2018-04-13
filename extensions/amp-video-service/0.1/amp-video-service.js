@@ -162,9 +162,18 @@ export class VideoService {
    */
   delegateAutoplay(video, observable) {
     this.whenRegistered_(video).then(() => {
-      const entry = dev().assert(this.getEntryOrNull());
+      const entry = dev().assert(this.getEntryOrNull(video));
       entry.delegateAutoplay(observable);
     });
+  }
+
+  /**
+   * @param {!AmpElement} video
+   * @return {!Promise}
+   * @private
+   */
+  whenRegistered_(video) {
+    return video.signals().whenSignal(VideoEvents.REGISTERED);
   }
 }
 
