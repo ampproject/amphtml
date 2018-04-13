@@ -25,3 +25,12 @@ limitations under the License.
     data-slot="medyanet/2729856/Medyanet_AMP_AdUnit">
  </amp-ad>
 ```
+
+## Configuration
+
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+
+### Required parameters
+
+- `data-slot`
+- `data-domain`
