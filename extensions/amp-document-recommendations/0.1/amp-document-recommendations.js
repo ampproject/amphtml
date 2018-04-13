@@ -31,6 +31,7 @@ import {getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
@@ -229,6 +230,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
             this.appendArticleLinks_(this.nextArticle_ + 1);
+
+            installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
+            const body = amp.ampdoc.getBody();
+            body.classList.add('i-amphtml-recommended-document');
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
@@ -356,8 +361,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.activeDocumentRef_ = documentRef;
 
     // TODO(peterjosling): Send request to viewer with title/URL
-    // TODO(emarchiori): Hide position fixed elements of inactive
-    // documents and update approriately.
+    // TODO(emarchiori): Consider updating position fixed elements.
   }
 
   /**
