@@ -18,6 +18,7 @@ import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
+import {htmlFor} from '../../template';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {px, setImportantStyles} from '../../style';
@@ -44,14 +45,15 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    const topClasses = this.win.document.documentElement.className;
-    this.win.document.documentElement.className = '';
-    this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
+    const documentElement = this.win.document.documentElement;
+    const topClasses = documentElement.className;
+    documentElement.className = 'i-amphtml-ios-embed';
 
+    const html = htmlFor(documentElement);
+    const wrapper = html`<html id="i-amphtml-wrapper" />`;
     /** @private @const {!Element} */
-    this.wrapper_ = this.win.document.createElement('html');
-    this.wrapper_.id = 'i-amphtml-wrapper';
-    this.wrapper_.className = topClasses;
+    this.wrapper_ = wrapper;
+    wrapper.className = topClasses;
 
     /** @private {!../../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
