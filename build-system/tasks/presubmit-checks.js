@@ -318,7 +318,7 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
-      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
@@ -339,7 +339,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
-      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
     ],
   },
