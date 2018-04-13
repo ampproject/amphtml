@@ -176,6 +176,12 @@ export class LaterpayVendor {
       this.purchaseConfigBaseUrl_ +=
         '&article_id=' + encodeURIComponent(articleId);
     }
+    const jwt = this.laterpayConfig_['jwt'];
+    if (jwt) {
+      this.purchaseConfigBaseUrl_ +=
+        '&jwt=' + encodeURIComponent(jwt);
+    }
+
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
