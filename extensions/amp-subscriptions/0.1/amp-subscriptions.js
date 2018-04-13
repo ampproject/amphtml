@@ -357,9 +357,8 @@ export class SubscriptionService {
     return requireValuesPromise.then(resolvedValues => {
       const grantState = resolvedValues[0];
       const selectedPlatform = resolvedValues[1];
-      const selectedEntitlement = this.platformStore_.getGrantEntitlement(
+      const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
-
       /** @type {!RenderState} */
       const renderState = {
         entitlement: selectedEntitlement.json(),
@@ -377,16 +376,10 @@ export class SubscriptionService {
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
+          return this.platformStore_.getGrantEntitlement();
+        }).then(grantStateEntitlement => {
           const localPlatform = this.platformStore_.getLocalPlatform();
-
-          if (selectedPlatform.isPingbackEnabled()) {
-            selectedPlatform.pingback(selectedEntitlement);
-          }
-
-          if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
-              && localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(selectedEntitlement);
-          }
+          localPlatform.pingback(grantStateEntitlement);
         });
       }
     });

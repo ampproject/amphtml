@@ -161,6 +161,7 @@ export class PlatformStore {
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
         if (entitlement.enablesThis()) {
+          this.saveGrantEntitlement_(entitlement);
           return resolve(true);
         }
       }
@@ -172,6 +173,7 @@ export class PlatformStore {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
           if (entitlement.enablesThis()) {
+            this.saveGrantEntitlement_(entitlement);
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
             resolve(false);
@@ -207,14 +209,14 @@ export class PlatformStore {
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
-      if (this.grantStatusEntitlement_
-          && this.grantStatusEntitlement_.subscriptionToken) {
+      if ((this.grantStatusEntitlement_
+          && this.grantStatusEntitlement_.subscriptionToken)
+          || this.areAllPlatformsResolved_()) {
         resolve(this.grantStatusEntitlement_);
       } else {
         this.onGrantStateResolvedCallbacks_.add(() => {
-          if ((this.grantStatusEntitlement_
-            && this.grantStatusEntitlement_.subscriptionToken)
-            || this.allResolvedPromise_) {
+          if (this.grantStatusEntitlement_.subscriptionToken
+              || this.areAllPlatformsResolved_()) {
             resolve(this.grantStatusEntitlement_);
           }
         });
