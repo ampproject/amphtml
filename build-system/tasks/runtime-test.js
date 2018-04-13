@@ -37,6 +37,7 @@ const green = colors.green;
 const yellow = colors.yellow;
 const cyan = colors.cyan;
 const red = colors.red;
+const bold = colors.bold;
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
@@ -361,12 +362,14 @@ function runTests() {
   // reporter, since it likely contains copious amounts of logs.
   const shouldCollapseSummary =
       process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  const sectionMarker =
+      (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
 
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
     if (shouldCollapseSummary) {
-      console./* OK*/log('travis_fold:end:run_summary');
+      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
     }
     server.emit('kill');
     if (exitCode) {
@@ -387,10 +390,9 @@ function runTests() {
     }
   }).on('run_complete', function() {
     if (shouldCollapseSummary) {
-      console./* OK*/log(yellow(
-          'Console logs (expand this section and fix all errors ' +
-          'printed by your tests)'));
-      console./* OK*/log('travis_fold:start:run_summary');
+      console./* OK*/log(bold(red('Console errors:')),
+          'Expand this section and fix all errors printed by your tests.');
+      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
     }
   }).on('browser_complete', function(browser) {
     if (shouldCollapseSummary) {
