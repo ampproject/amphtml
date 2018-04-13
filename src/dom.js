@@ -329,7 +329,7 @@ export function elementByTag(element, tagName) {
   if (typeof element.getElementsByTagName === 'function') {
     elements = element.getElementsByTagName(tagName);
   } else {
-    elements = scopedQuerySelectorAll(element, tagName);
+    elements = element./*OK*/querySelectorAll(tagName);
   }
   return (elements && elements[0]) || null;
 }

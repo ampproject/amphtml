@@ -162,7 +162,7 @@ export class Bind {
     this.initializePromise_ =
         this.viewer_.whenFirstVisible().then(() => bodyPromise).then(body => {
           const head = (opt_win) ? opt_win.document.head : ampdoc.getHeadNode();
-          return this.initialize_(body, elementByTag(head, 'title'));
+          return this.initialize_(body, head && elementByTag(head, 'title'));
         });
 
     /** @private {Promise} */
@@ -283,7 +283,7 @@ export class Bind {
   /**
    * Scans the ampdoc for bindings and creates the expression evaluator.
    * @param {!Node} rootNode
-   * @param {Node} titleNode
+   * @param {?Node} titleNode
    * @return {!Promise}
    * @private
    */
