@@ -67,12 +67,12 @@ If the country cannot be determined, the value is set to 'unknown'.  If the grou
 
 Note: It's possible that an IP address with country information in the WHOIS database will not have country information in amp-geo. 
 
-The `amp-geo` component `amp-geo` provides CSS, `amp-bind` and variable substitution interfaces. 
+The `amp-geo` component provides CSS, `amp-bind` and variable substitution interfaces. 
 
 ### Generated CSS classes
-If no configuration is provided the `amp-iso-country-XX` class  is applied to the `body` element, where 'XX' is replaced by the ISO country code or with the value 'unknown'.
+If the `amp-iso-country-XX` class is applied to the `body` element, where 'XX' is replaced by the ISO country code or with the value 'unknown'.
 
-Configuring groups of country codes via the “ISOCountryCodes” key allows selection by groups of countries.
+Optionally, configuring groups of country codes via the “ISOCountryCodes” key allows selection by groups of countries.
 
 ```html
 <amp-geo>
@@ -87,7 +87,7 @@ Configuring groups of country codes via the “ISOCountryCodes” key allows sel
 </amp-geo>
 ```
 
-If country groups are specified `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `body`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
+If country groups are specified `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
 
 Example: Generated CSS classes
 
@@ -159,15 +159,13 @@ If the user were in Canada, the inserted `amp-state` would be as follows:
 </amp-state>
 ````
 
-This would all
-
 
 ### <a name="variable-substitution"></a>Variable substitution
 
 The country code is also available via AMP variable substitution:
 
 `AMP_GEO` or `${ampGeo}` returns the list of matched groups (comma delimited).
-`AMP_GEO(ISOCountry)` or `${ampGeo(ISOCountry)}` returns the country code (or unknown).
+`AMP_GEO(ISOCountry)` or `${ampGeo(ISOCountry)}` returns the country code (or "unknown").
 
 ### Pre-rendering
 
