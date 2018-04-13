@@ -91,14 +91,14 @@ class AmpFacebookComments extends AMP.BaseElement {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
     }
-    let eventData = getData(event);
-    if (!eventData || !(isObject(eventData) || tryParseJson(eventData))) {
-      return; // Doesn't look like JSON.
+    const eventData = getData(event);
+    if (!eventData) {
+      return;
     }
 
-    eventData = (isObject(eventData) ? eventData : parseJson(eventData));
-    if (eventData === undefined) {
-      return; // We only process valid JSON.
+    const parsedEventData = isObject(eventData) ? eventData : tryParseJson(eventData);
+    if (!parsedEventData) {
+      return;
     }
     if (eventData['action'] == 'ready') {
       this.toggleLoading(false);
