@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-document-recommendations-0.1.css';
+import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
 import {MultidocManager} from '../../../src/runtime';
 import {
@@ -41,7 +41,7 @@ import {tryParseJson} from '../../../src/json';
 
 import {user} from '../../../src/log';
 
-const TAG = 'amp-document-recommendations';
+const TAG = 'amp-next-page';
 
 const MAX_ARTICLES = 2;
 
@@ -50,7 +50,7 @@ const SEPARATOR_RECOS = 3;
 
 const PRERENDER_VIEWPORT_COUNT = 3;
 
-/** @private {AmpDocumentRecommendations} */
+/** @private {AmpNextPage} */
 let activeInstance_ = null;
 
 /**
@@ -61,7 +61,7 @@ let activeInstance_ = null;
  */
 export let DocumentRef;
 
-export class AmpDocumentRecommendations extends AMP.BaseElement {
+export class AmpNextPage extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -76,7 +76,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     const ampDoc = this.getAmpDoc();
     installPositionObserverServiceForDoc(ampDoc);
 
-    /** @private {?./config.AmpDocumentRecommendationsConfig} */
+    /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
 
     /** @private {?MultidocManager} */
@@ -125,7 +125,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   createDivider_() {
     const doc = this.win.document;
     const topDivision = doc.createElement('div');
-    topDivision.classList.add('amp-document-recommendations-division');
+    topDivision.classList.add('amp-next-page-division');
     return topDivision;
   }
 
@@ -134,8 +134,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
    */
   appendNextArticle_() {
     if (this.nextArticle_ < MAX_ARTICLES &&
-        this.nextArticle_ < this.config_.recommendations.length) {
-      const next = this.config_.recommendations[this.nextArticle_];
+        this.nextArticle_ < this.config_.pages.length) {
+      const next = this.config_.pages[this.nextArticle_];
       const documentRef = {ampUrl: next.ampUrl, amp: null};
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
@@ -169,28 +169,28 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     const recommendations = doc.createElement('div');
 
-    while (article < this.config_.recommendations.length &&
+    while (article < this.config_.pages.length &&
            article - nextRecommendation < SEPARATOR_RECOS) {
-      const next = this.config_.recommendations[article];
+      const next = this.config_.pages[article];
       article++;
 
       const articleHolder = doc.createElement('button');
       articleHolder.classList.add('i-amphtml-reco-holder-article');
       articleHolder.addEventListener('click', () => {
         this.triggerAnalyticsEvent_(
-            'amp-document-recommendations-click', next.ampUrl, currentAmpUrl);
+            'amp-next-page-click', next.ampUrl, currentAmpUrl);
         this.viewer_.navigateToAmpUrl(next.ampUrl, 'content-discovery');
       });
 
       const imageElement = doc.createElement('div');
       imageElement.classList.add(
-          'i-amphtml-next-article-image', 'amp-document-recommendations-image');
+          'i-amphtml-next-article-image', 'amp-next-page-image');
       setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
       titleElement.classList.add(
-          'i-amphtml-next-article-title', 'amp-document-recommendations-text');
+          'i-amphtml-next-article-title', 'amp-next-page-text');
 
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
@@ -249,7 +249,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.element.classList.add('i-amphtml-document-recommendations');
+    this.element.classList.add('i-amphtml-next-page');
 
     this.multidocManager_ =
         new MultidocManager(this.win, Services.ampdocServiceFor(this.win),
@@ -334,12 +334,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     if (position.relativePos === 'top') {
       const documentRef = this.documentRefs_[i + 1];
-      this.triggerAnalyticsEvent_('amp-document-recommendations-scroll',
+      this.triggerAnalyticsEvent_('amp-next-page-scroll',
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     } else if (position.relativePos === 'bottom') {
       const documentRef = this.documentRefs_[i];
-      this.triggerAnalyticsEvent_('amp-document-recommendations-scroll-back',
+      this.triggerAnalyticsEvent_('amp-next-page-scroll-back',
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     }
@@ -378,4 +378,4 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpDocumentRecommendations, CSS);
+AMP.registerElement(TAG, AmpNextPage, CSS);

@@ -257,8 +257,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
-    id: 'amp-document-recommendations',
-    name: 'Docment level recommendations and infinte scroll',
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {

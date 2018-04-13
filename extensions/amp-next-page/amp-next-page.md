@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-document-recommendations"></a> `amp-document-recommendations`
+# <a name="amp-next-page"></a> `amp-next-page`
 
 <table>
   <tr>
@@ -30,8 +30,8 @@ limitations under the License.
     <td width="40%"><strong>Required Script</strong></td>
     <td>
       <code>
-        &lt;script async custom-element="amp-document-recommendations"
-        src="https://cdn.ampproject.org/v0/amp-document-recommendations-0.1.js">&lt;/script>
+        &lt;script async custom-element="amp-next-page"
+        src="https://cdn.ampproject.org/v0/amp-next-page-0.1.js">&lt;/script>
       </code>
     </td>
   </tr>
@@ -51,19 +51,19 @@ limitations under the License.
 
 ## Behavior
 
-Given a list of recommended documents, `amp-document-recommendations` tries to load them after the current document, provding an infinite-scroll type experience.
+Given a list of pages, `amp-next-page` tries to load them after the current document, providing an infinite-scroll type experience.
 
-The `<amp-document-recommendations>` tag should be placed as the last child of the `<body>`.
+The `<amp-next-page>` tag should be placed as the last child of the `<body>`.
 
-The recommendations should be inlined using a JSON format.
+The pages should be inlined using a JSON format.
 ```html
-<amp-document-recommendations>
+<amp-next-page>
   <script type="application/json">
     {
-      "recos": ...
+      "pages": ...
     }
   </script>
-</amp-document-recommendations>
+</amp-next-page>
 ```
 
 ## Attributes
@@ -76,7 +76,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Configuration Spec
 
-The configuration defines the documents recommended by `<amp-document-recommendations>` to the user.
+The configuration defines the documents recommended by `<amp-next-page>` to the user.
 
 ### Example Configuration
 
@@ -84,7 +84,7 @@ The following configuration will only recommend one more document for the user t
 
 ```json
 {
-  "recommendations": [
+  "pages": [
     {
       "image": "http://example.com/image1.jpg",
       "title": "This is one another article",
@@ -96,4 +96,4 @@ The following configuration will only recommend one more document for the user t
 
 ## Validation
 
-See [amp-document-recommendations rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-document-recommendations/validator-amp-document-recommendations.protoascii) in the AMP validator specification.
+See [amp-next-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-next-page/validator-amp-next-page.protoascii) in the AMP validator specification.

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-.amp-document-recommendations-division {
+.amp-next-page-division {
   border-bottom: 1px solid rgba(0,0,0,0.12);
 }
 
-.amp-document-recommendations-image {
+.amp-next-page-image {
 }
 
-.amp-document-recommendations-text {
+.amp-next-page-text {
   color: #3c4043;
   font-family: sans-serif;
   font-size: 17px;
 }
 
-.i-amphtml-recommended-document > *[i-amphtml-fixedid] {
+.i-amphtml-next-page-document > *[i-amphtml-fixedid] {
   display: none;
 }
 
-.i-amphtml-document-recommendations {
+.i-amphtml-next-page {
   background: #FFFFFF;
 }
 
-.i-amphtml-document-recommendations > *[separator] {
+.i-amphtml-next-page > *[separator] {
   display: none;
 }
 

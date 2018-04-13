@@ -20,10 +20,10 @@ import {user} from '../../../src/log';
 
 /**
  * @typedef {{
- *   recommendations: (!Array<!AmpDocumentRecommendationsReco>|undefined),
+ *   pages: (!Array<!AmpNextPageItem>|undefined),
  * }}
  */
-export let AmpDocumentRecommendationsConfig;
+export let AmpNextPageConfig;
 
 /**
  * @typedef {{
@@ -32,25 +32,23 @@ export let AmpDocumentRecommendationsConfig;
  *   title: string,
  * }}
  */
-export let AmpDocumentRecommendationsReco;
+export let AmpNextPageItem;
 
 /**
- * Checks whether the object conforms to the AmpDocumentRecommendationsConfig
+ * Checks whether the object conforms to the AmpNextPageConfig
  * spec.
  *
  * @param {*} config The config to validate.
  * @param {string} host The host of the current document
- *     (document.location.host). All recommendations must be for the same domain
- *     as the current document so the URL can be updated safely.
- * @return {!./config.AmpDocumentRecommendationsConfig}
+ *     (document.location.host). All pages must be from the same domain as the
+ *     current document so the URL can be updated safely.
+ * @return {!./config.AmpNextPageConfig}
  */
 export function assertConfig(config, host) {
-  user().assert(
-      config, 'amp-document-recommendations config must be specified');
-  user().assert(
-      isArray(config.recommendations), 'recommendations must be an array');
-  assertRecos(config.recommendations, host);
-  return /** @type {!AmpDocumentRecommendationsConfig} */ (config);
+  user().assert(config, 'amp-next-page config must be specified');
+  user().assert(isArray(config.pages), 'pages must be an array');
+  assertRecos(config.pages, host);
+  return /** @type {!AmpNextPageConfig} */ (config);
 }
 
 function assertRecos(recos, host) {
@@ -61,7 +59,7 @@ function assertReco(reco, host) {
   const url = parseUrl(reco.ampUrl);
   user().assert(typeof reco.ampUrl == 'string', 'ampUrl must be a string');
   user().assert(url.host == host,
-      'recommendations must be from the same host as the current document');
+      'pages must be from the same host as the current document');
   user().assert(typeof reco.image == 'string', 'image must be a string');
   user().assert(typeof reco.title == 'string', 'title must be a string');
 }

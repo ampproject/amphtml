@@ -228,9 +228,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
-      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js->' +
+      'extensions/amp-next-page/0.1/amp-next-page.js->' +
           'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-document-recommendations/0.1/amp-document-recommendations.js->' +
+      'extensions/amp-next-page/0.1/amp-next-page.js->' +
           'src/service/position-observer/position-observer-worker.js',
       // TODO(calebcordry) remove this once experiment is launched
       'extensions/amp-analytics/0.1/variables.js->' +
