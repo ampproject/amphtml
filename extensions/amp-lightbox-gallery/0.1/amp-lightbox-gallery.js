@@ -1011,7 +1011,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     ];
 
     return Promise.all(promises).then(values => {
-      return values[0] ? this.transitionIn_(sourceElement)
+      const shouldAnimate = values[0];
+      return shouldAnimate
+        ? this.transitionIn_(sourceElement)
         : this.fade_(0, 1);
     });
   }
