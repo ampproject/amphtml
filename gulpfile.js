@@ -815,7 +815,8 @@ function checkBinarySize(compiled) {
   if (p.status != 0) {
     log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
         'exceeded its size cap. This is part of a new effort to reduce ' +
-        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+        'AMP\'s binary size (#14392). Please contact @choumx or @jridgewell ' +
+        'for assistance.');
     // Terminate Travis builds on failure.
     if (process.env.TRAVIS) {
       process.exit(p.status);
