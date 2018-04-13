@@ -789,7 +789,22 @@ For complete documentation and additional examples please see: https://marketing
 <script type="application/json">
 {
   "vars": {
-    "apikey": "example.com"
+    "apikey": "missing.parsely.com"
+  },
+  "triggers": {
+      "defaultPageview": {
+          "on": "visible",
+          "request": "pageview"
+      },
+      "heartbeat": {
+         "on": "timer",
+         "enabled": "${incrementalEngagedTime(parsely-js,false)}",
+         "timerSpec": {
+             "interval": 5,
+             "maxTimerLength": 7200
+         },
+         "request": "heartbeat"
+      }
   }
 }
 </script>

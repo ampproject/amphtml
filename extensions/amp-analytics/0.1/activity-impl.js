@@ -318,20 +318,33 @@ export class Activity {
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
   }
   /**
-   * Get the incremental engaged time since the last push and reset it.
+   * Get the incremental engaged time since the last push and reset it if asked.
    * @param {string} name
+   * @param {boolean} reset
    * @return {number}
    */
-  getIncrementalEngagedTime(name = '') {
+  getIncrementalEngagedTime(name='', reset='true') {
+    // if it doesn't exist set the initial value and return
     if (!this.totalEngagedTimeByTrigger_.hasOwnProperty(name)) {
       this.totalEngagedTimeByTrigger_[name] =
         this.getTotalEngagedTime();
       return this.totalEngagedTimeByTrigger_[name];
     }
+    // if it does exist get the last value
     const currentIncrementalEngagedTime =
       this.totalEngagedTimeByTrigger_[name];
+    // if we are just checking the value compute and return
+    if (reset !== 'true') {
+        let otherRetval = this.getTotalEngagedTime() - currentIncrementalEngagedTime;
+        console.log('Not resetting ' + otherRetval);
+        console.log('Not resetting total ' + this.getTotalEngagedTime());
+        return otherRetval;
+    }
     this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
-    return this.totalEngagedTimeByTrigger_[name] -
+    let retval = this.totalEngagedTimeByTrigger_[name] -
       currentIncrementalEngagedTime;
+    console.log('Resetting ' + retval);
+    console.log('Resetting total ' + this.getTotalEngagedTime());
+    return retval;
   }
 }
