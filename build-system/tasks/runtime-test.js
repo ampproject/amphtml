@@ -357,9 +357,17 @@ function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
+  // reporter, since it likely contains copious amounts of logs.
+  const shouldCollapseSummary =
+      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
+    if (shouldCollapseSummary) {
+      console./* OK*/log('travis_fold:end:run_summary');
+    }
     server.emit('kill');
     if (exitCode) {
       log(
@@ -377,8 +385,15 @@ function runTests() {
     } else {
       console./* OK*/log(green('Running tests locally...'));
     }
+  }).on('run_complete', function() {
+    if (shouldCollapseSummary) {
+      console./* OK*/log(yellow(
+          'Console logs (expand this section and fix all errors ' +
+          'printed by your tests)'));
+      console./* OK*/log('travis_fold:start:run_summary');
+    }
   }).on('browser_complete', function(browser) {
-    if (argv.saucelabs || argv.saucelabs_lite) {
+    if (shouldCollapseSummary) {
       const result = browser.lastResult;
       let message = '\n' + browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
