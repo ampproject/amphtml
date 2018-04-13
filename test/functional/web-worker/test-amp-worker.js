@@ -70,8 +70,10 @@ describe('invokeWebWorker', () => {
 
   it('should check if Worker is supported', () => {
     fakeWin.Worker = undefined;
-    return expect(invokeWebWorker(fakeWin, 'foo'))
-        .to.eventually.be.rejectedWith('not supported');
+    allowConsoleError(() => {
+      return expect(invokeWebWorker(fakeWin, 'foo'))
+          .to.eventually.be.rejectedWith('not supported');
+    });
   });
 
   it('should send and receive a message', () => {
@@ -190,13 +192,13 @@ describe('invokeWebWorker', () => {
       expect(errorStub).to.have.been.calledWith('web-worker');
 
       // Unexpected method at valid `id`.
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         fakeWorker.onmessage({data: {
           method: 'bar',
           returnValue: undefined,
           id: 0,
         }});
-      }).to.throw('mismatched method');
+      }).to.throw('mismatched method'); });
     });
   });
 

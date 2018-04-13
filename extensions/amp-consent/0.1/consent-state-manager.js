@@ -29,6 +29,7 @@ export const CONSENT_ITEM_STATE = {
   GRANTED: 1,
   REJECTED: 2,
   DISMISSED: 3,
+  NOT_REQUIRED: 4,
   // TODO(@zhouyx): Seperate UI state from consent state. Add consent requirement state
   // ui_state = {pending, active, complete}
   // consent_state = {unknown, granted, rejected}
@@ -69,31 +70,11 @@ export class ConsentStateManager {
   }
 
   /**
-   * Ignore a consent instance.
-   * @param {string} instanceId
-   */
-  ignoreConsentInstance(instanceId) {
-    // TODO: Add new CONSENT_ITEM_STATE.IGNORED
-    // TODO: Remove instance completely
-    dev().assert(this.instances_[instanceId],
-        `${TAG}: cannot find this instance`);
-
-    if (this.consentChangeObservables_[instanceId] === null) {
-      // This consent instance has been ignored before
-      return;
-    }
-    this.consentChangeObservables_[instanceId].fire(CONSENT_ITEM_STATE.GRANTED);
-    this.consentChangeObservables_[instanceId].removeAll();
-    this.consentChangeObservables_[instanceId] = null;
-  }
-
-  /**
    * Update consent instance state
    * @param {string} instanceId
    * @param {CONSENT_ITEM_STATE} state
    */
   updateConsentInstanceState(instanceId, state) {
-
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
     dev().assert(this.consentChangeObservables_[instanceId],
@@ -121,14 +102,8 @@ export class ConsentStateManager {
   onConsentStateChange(instanceId, handler) {
     dev().assert(this.instances_[instanceId],
         `${TAG}: cannot find this instance`);
-    let unlistener = null;
-    if (this.consentChangeObservables_[instanceId] === null) {
-      // Do not need consent for this instance.
-      handler(CONSENT_ITEM_STATE.GRANTED);
-      return () => {};
-    } else {
-      unlistener = this.consentChangeObservables_[instanceId].add(handler);
-    }
+
+    const unlistener = this.consentChangeObservables_[instanceId].add(handler);
     // Fire first consent instance state.
     this.getConsentInstanceState(instanceId).then(state => {
       handler(state);
@@ -180,6 +155,13 @@ export class ConsentInstance {
 
     if (state == CONSENT_ITEM_STATE.DISMISSED) {
       this.localValue_ = this.localValue_ || CONSENT_ITEM_STATE.UNKNOWN;
+      return;
+    }
+
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      if (!this.localValue_ || this.localValue_ == CONSENT_ITEM_STATE.UNKNOWN) {
+        this.localValue_ = CONSENT_ITEM_STATE.NOT_REQUIRED;
+      }
       return;
     }
 

@@ -176,7 +176,7 @@ event.value</pre>
   </tr>
   <tr>
     <td><code>slideChange</code></td>
-    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+    <td>Fired when the carousel's current slide changes.</td>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>

@@ -16,13 +16,13 @@
 
 import {assertConfig} from '../config';
 
-describe('amp-document-recommendations config', () => {
+describe('amp-next-page config', () => {
   describe('assertConfig', () => {
     const host = 'example.com';
 
     it('allows a valid config', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: 'https://example.com/article1',
           image: 'https://example.com/image.png',
           title: 'Article 1',
@@ -31,14 +31,14 @@ describe('amp-document-recommendations config', () => {
       expect(() => assertConfig(config, host)).to.not.throw();
     });
 
-    it('allows a config with no recommendations', () => {
-      const config = {recommendations: []};
+    it('allows a config with no pages', () => {
+      const config = {pages: []};
       expect(() => assertConfig(config, host)).to.not.throw();
     });
 
-    it('allows recommendations with relative URLs', () => {
+    it('allows pages with relative URLs', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: '/article1',
           image: '/image.png',
           title: 'Article 1',
@@ -48,71 +48,85 @@ describe('amp-document-recommendations config', () => {
     });
 
     it('throws on null config', () => {
-      expect(() => assertConfig(null, host))
-          .to.throw('amp-document-recommendations config must be specified');
+      allowConsoleError(() => {
+        expect(() => assertConfig(null, host))
+            .to.throw('amp-next-page config must be specified');
+      });
     });
 
-    it('throws on config with no "recommendations" key', () => {
+    it('throws on config with no "pages" key', () => {
       const config = {};
-      expect(() => assertConfig(config, host))
-          .to.throw('recommendations must be an array');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('pages must be an array');
+      });
     });
 
-    it('throws on config with non-array "recommendations" key', () => {
-      const config = {recommendations: {}};
-      expect(() => assertConfig(config, host))
-          .to.throw('recommendations must be an array');
+    it('throws on config with non-array "pages" key', () => {
+      const config = {pages: {}};
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('pages must be an array');
+      });
     });
 
     it('throws on config with missing recommendation title', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: 'https://example.com/article1',
           image: 'https://example.com/image.png',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('title must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('title must be a string');
+      });
     });
 
     it('throws on config with non-string recommendation title', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: 'https://example.com/article1',
           image: 'https://example.com/image.png',
           title: {},
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('title must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('title must be a string');
+      });
     });
 
     it('throws on config with missing recommendation image', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: 'https://example.com/article1',
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('image must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('image must be a string');
+      });
     });
 
     it('throws on config with non-string recommendation image', () => {
       const config = {
-        recommendations: [{
+        pages: [{
           ampUrl: 'https://example.com/article1',
           image: {},
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw('image must be a string');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('image must be a string');
+      });
     });
 
-    it('throws on config with recommendations from different domains', () => {
+    it('throws on config with pages from different domains', () => {
       const config = {
-        recommendations: [
+        pages: [
           {
             ampUrl: 'https://othersite.com/article1',
             image: 'https://othersite.com/image.png',
@@ -120,16 +134,17 @@ describe('amp-document-recommendations config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw(
-              'recommendations must be from the same host as the current' +
-              ' document');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw('pages must be from the same host as the current' +
+                      ' document');
+      });
     });
 
-    it('throws on config with recommendations from different subdomains',
+    it('throws on config with pages from different subdomains',
         () => {
           const config = {
-            recommendations: [
+            pages: [
               {
                 ampUrl: 'https://www.example.com/article1',
                 image: 'https://example.com/image.png',
@@ -137,15 +152,16 @@ describe('amp-document-recommendations config', () => {
               },
             ],
           };
-          expect(() => assertConfig(config, host))
-              .to.throw(
-                  'recommendations must be from the same host as the current' +
-                  ' document');
+          allowConsoleError(() => {
+            expect(() => assertConfig(config, host))
+                .to.throw(
+                    'pages must be from the same host as the current document');
+          });
         });
 
-    it('throws on config with recommendations on different ports', () => {
+    it('throws on config with pages on different ports', () => {
       const config = {
-        recommendations: [
+        pages: [
           {
             ampUrl: 'https://example.com:8080/article1',
             image: 'https://example.com/image.png',
@@ -153,10 +169,11 @@ describe('amp-document-recommendations config', () => {
           },
         ],
       };
-      expect(() => assertConfig(config, host))
-          .to.throw(
-              'recommendations must be from the same host as the current' +
-              ' document');
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, host))
+            .to.throw(
+                'pages must be from the same host as the current document');
+      });
     });
   });
 });

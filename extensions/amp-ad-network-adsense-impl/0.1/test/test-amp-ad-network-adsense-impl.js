@@ -32,6 +32,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -134,8 +135,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       element.setAttribute('width', '666');
       expect(impl.isValidElement()).to.be.false;
     });
-    it('should NOT be valid (responsive with missing ' +
-        'data-full-width)', () => {
+    it('should NOT be valid (responsive with missing data-full-width)', () => {
       isResponsiveStub.callsFake(() => true);
       element.setAttribute('height', '320');
       element.setAttribute('width', '100vw');
@@ -858,8 +858,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
       }
       doc.body.style.direction = '';
     });
-    // TODO(charliereams, #14336): Fails due to console errors.
-    it.skip('should change left margin for responsive', () => {
+
+    it('should change left margin for responsive', () => {
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       return buildImpl({
@@ -874,8 +874,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
     });
 
-    // TODO(charliereams, #14336): Fails due to console errors.
-    it.skip('should change right margin for responsive in RTL', () => {
+    it('should change right margin for responsive in RTL', () => {
       containerContainer = doc.createElement('div');
       container = doc.createElement('div');
       doc.body.style.direction = 'rtl'; // todo: revert
@@ -922,6 +921,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return true', () => {
       expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
           .to.be.true;
+    });
+  });
+
+  describe('#preconnect', () => {
+    it('should preload nameframe', () => {
+      const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+      expect(impl.getPreconnectUrls()).to.deep.equal(
+          ['https://googleads.g.doubleclick.net']);
+      expect(preloadSpy).to.be.calledOnce;
+      expect(preloadSpy.args[0]).to.match(/nameframe/);
     });
   });
 });

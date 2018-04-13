@@ -56,8 +56,7 @@ function getPostContainer(global, data) {
   // If the user hasn't set the `data-embed-as` attribute and the provided href
   // is a video, Force the `data-embed-as` attribute to 'video' and make sure
   // to show the post's text.
-  if (data.href.match(/\/videos\/\d+\/?$/) &&
-    !container.hasAttribute('data-embed-as')) {
+  if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
     embedAs = 'video';
     container.setAttribute('data-embed-as', 'video');
     // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'

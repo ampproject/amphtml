@@ -136,8 +136,7 @@ describe('sanitizeHtml', () => {
         + '<a target="_top">other</a>');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should NOT output security-sensitive attributes', () => {
+  it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
     expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(
         'a<a>b</a>');
@@ -161,14 +160,12 @@ describe('sanitizeHtml', () => {
         'a<a target="_top">b</a>');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should catch attribute value whitespace variations', () => {
+  it('should catch attribute value whitespace variations', () => {
     expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
         .to.be.equal('a<a target="_top">b</a>');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should NOT output security-sensitive attributes', () => {
+  it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be
         .equal('a<a>b</a>');
@@ -186,8 +183,7 @@ describe('sanitizeHtml', () => {
         .equal('<p [text]="foo" [class]="bar"></p>');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should NOT output blacklisted values for class attributes', () => {
+  it('should NOT output blacklisted values for class attributes', () => {
     expect(sanitizeHtml('<p class="i-amphtml-">hello</p>')).to.be
         .equal('<p>hello</p>');
     expect(sanitizeHtml('<p class="i-amphtml-class">hello</p>')).to.be
@@ -202,8 +198,7 @@ describe('sanitizeHtml', () => {
         .equal('<p>hello</p>');
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should NOT output security-sensitive binding attributes', () => {
+  it('should NOT output security-sensitive binding attributes', () => {
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
@@ -308,10 +303,9 @@ describe('rewriteAttributeValue', () => {
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
-    expect(() => resolveUrlAttr('a', 'href',
+    allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
-        'http://acme.org/doc1'))
-        .to.throw(/Source origin is not allowed in/);
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
   });
 
   it('should be called by sanitizer', () => {
@@ -443,20 +437,17 @@ describe('sanitizeFormattingHtml', () => {
           .to.equal('<div style="color:blue">Test</div>');
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should ignore styles containing `!important`',() => {
+    it('should ignore styles containing `!important`',() => {
       expect(sanitizeHtml('<div style="color:blue!important">Test</div>'))
           .to.equal('<div>Test</div>');
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should ignore styles containing `position:fixed`', () => {
+    it('should ignore styles containing `position:fixed`', () => {
       expect(sanitizeHtml('<div style="position:fixed">Test</div>'))
           .to.equal('<div>Test</div>');
     });
 
-    // TODO(choumx, #14336): Fails due to console errors.
-    it.skip('should ignore styles containing `position:sticky`', () => {
+    it('should ignore styles containing `position:sticky`', () => {
       expect(sanitizeHtml('<div style="position:sticky">Test</div>'))
           .to.equal('<div>Test</div>');
     });

@@ -16,7 +16,6 @@
 
 @import './amp-story-desktop.css';
 @import './amp-story-user-overridable.css';
-@import './amp-story-ads.css';
 @import './amp-story-share.css';
 
 /** Common */
@@ -203,6 +202,12 @@ amp-story-grid-layer {
 amp-story-grid-layer * {
   box-sizing: border-box !important;
   margin: 0 !important;
+}
+
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
 }
 
 .i-amphtml-story-grid-template-fill > :not(:first-child) {

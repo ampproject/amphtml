@@ -19,9 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad
-    width="300"
-    height="250"
+<amp-ad width="300" height="250"
     type="kiosked"
     data-scriptid="91">
 </amp-ad>
@@ -29,9 +27,9 @@ limitations under the License.
 
 ## Configuration
 
-You need to get a scriptid parameter from one of our account managers. 
-For testing purposes you can use data-scriptid="91".
+You need to get a `scriptid` parameter from one of our account managers. 
+For testing purposes you can use `data-scriptid="91"`.
 
-Required parameters:
+### Required parameters
 
-- data-scriptid
+- `data-scriptid`

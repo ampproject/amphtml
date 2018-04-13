@@ -25,12 +25,13 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
+import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
+import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {tryParseJson} from '../../../src/json';
 
@@ -73,6 +74,10 @@ export class SubscriptionService {
 
     /** @const @private {!Element} */
     this.configElement_ = user().assertElement(configElement);
+
+    /** @private {!SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ =
+        new SubscriptionAnalytics(this.configElement_);
 
     /** @private {!ServiceAdapter} */
     this.serviceAdapter_ = new ServiceAdapter(this);
@@ -130,7 +135,8 @@ export class SubscriptionService {
           new LocalSubscriptionPlatform(
               this.ampdoc_,
               serviceConfig,
-              this.serviceAdapter_
+              this.serviceAdapter_,
+              this.subscriptionAnalytics_
           )
       );
     }
@@ -172,7 +178,10 @@ export class SubscriptionService {
 
       this.platformStore_.resolvePlatform(subscriptionPlatform.getServiceId(),
           subscriptionPlatform);
-
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REGISTERED,
+          subscriptionPlatform.getServiceId()
+      );
       this.fetchEntitlements_(subscriptionPlatform);
     });
   }
@@ -206,6 +215,10 @@ export class SubscriptionService {
     ));
     entitlement.setCurrentProduct(productId);
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
+    this.subscriptionAnalytics_.serviceEvent(
+        SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
+        serviceId
+    );
   }
 
   /**
@@ -243,13 +256,15 @@ export class SubscriptionService {
    */
   start() {
     this.initialize_().then(() => {
-
+      this.subscriptionAnalytics_.event(SubscriptionAnalyticsEvents.STARTED);
       this.renderer_.toggleLoading(true);
 
       user().assert(this.pageConfig_, 'Page config is null');
 
       if (this.doesViewerProvideAuth_) {
-        return this.delegateAuthToViewer_();
+        this.delegateAuthToViewer_();
+        this.startAuthorizationFlow_(false);
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
@@ -280,98 +295,30 @@ export class SubscriptionService {
    */
   delegateAuthToViewer_() {
     const serviceIds = ['local'];
-    const publicationId = /** @type {string} */ (user().assert(
-        this.pageConfig_.getPublicationId(),
-        'Publication id is null'
-    ));
     const origin = getWinOrigin(this.ampdoc_.win);
     const currentProductId = /** @type {string} */ (user().assert(
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
     this.platformStore_ = new PlatformStore(serviceIds);
-    this.viewer_.sendMessageAwaitResponse('auth', dict({
-      'publicationId': publicationId,
-      'productId': currentProductId,
-      'origin': origin,
-    })).then(entitlementData => {
-      const authData = (entitlementData || {})['authorization'];
-      if (!authData) {
-        return this.platformStore_.resolveEntitlement('local',
-            Entitlement.empty('local'));
+    this.platformConfig_['services'].forEach(service => {
+      if ((service['serviceId'] || 'local') == 'local') {
+        const viewerPlatform = new ViewerSubscriptionPlatform(
+            this.ampdoc_,
+            service,
+            this.serviceAdapter_,
+            origin,
+            this.subscriptionAnalytics_
+        );
+        this.platformStore_.resolvePlatform('local', viewerPlatform);
+        viewerPlatform.getEntitlements()
+            .then(entitlement => {
+              entitlement.setCurrentProduct(currentProductId);
+              // Viewer authorization is redirected to use local platform instead.
+              this.platformStore_.resolveEntitlement('local', entitlement);
+            });
       }
-
-      return this.verifyAuthToken_(authData).then(entitlement => {
-        // Viewer authorization is redirected to use local platform instead.
-        this.platformStore_.resolveEntitlement('local', entitlement);
-      }).catch(reason => {
-        this.sendAuthTokenErrorToViewer_(String(reason));
-        throw reason;
-      });
-
-    }, reason => {
-      throw user().createError('Viewer authorization failed', reason);
     });
-  }
-
-  /**
-   * Logs error and sends message to viewer
-   * @param {string} token
-   * @return {!Promise<!Entitlement>}
-   * @private
-   */
-  verifyAuthToken_(token) {
-    return new Promise(resolve => {
-      const origin = getWinOrigin(this.ampdoc_.win);
-      const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
-      const decodedData = this.jwtHelper_.decode(token);
-      const currentProductId = /** @type {string} */ (user().assert(
-          this.pageConfig_.getProductId(),
-          'Product id is null'
-      ));
-      if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
-        throw user().createError(
-            `The mismatching "aud" field: ${decodedData['aud']}`);
-      }
-      if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
-        throw user().createError('Payload is expired');
-      }
-
-      const entitlements = decodedData['entitlements'];
-      let entitlementJson;
-      if (Array.isArray(entitlements)) {
-        for (let index = 0; index < entitlements.length; index++) {
-          const entitlementObject =
-              Entitlement.parseFromJson(entitlements[index]);
-          if (entitlementObject.enables(currentProductId)) {
-            entitlementJson = entitlements[index];
-            break;
-          }
-        }
-      } else if (entitlements) { // Not null
-        entitlementJson = entitlements;
-      }
-
-      let entitlement;
-      if (entitlementJson) {
-        entitlement = Entitlement.parseFromJson(entitlementJson, token);
-      } else {
-        entitlement = Entitlement.empty('local');
-      }
-      entitlement.service = 'local';
-      resolve(entitlement);
-    });
-  }
-
-  /**
-   * Logs error and sends message to viewer
-   * @param {string} errorString
-   * @private
-   */
-  sendAuthTokenErrorToViewer_(errorString) {
-    this.viewer_.sendMessage('auth-rejected', dict({
-      'reason': errorString,
-    }));
   }
 
   /**
@@ -384,13 +331,16 @@ export class SubscriptionService {
 
   /**
    * Unblock document based on grant state and selected platform
+   * @param {boolean=} doPlatformSelection
    * @private
    */
-  startAuthorizationFlow_() {
+  startAuthorizationFlow_(doPlatformSelection = true) {
     this.platformStore_.getGrantStatus()
         .then(grantState => {this.processGrantState_(grantState);});
 
-    this.selectAndActivatePlatform_();
+    if (doPlatformSelection) {
+      this.selectAndActivatePlatform_();
+    }
   }
 
   /** @private */
@@ -420,6 +370,10 @@ export class SubscriptionService {
       };
 
       selectedPlatform.activate(renderState);
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
+          selectedPlatform.getServiceId()
+      );
 
       if (this.viewTrackerPromise_) {
         this.viewTrackerPromise_.then(() => {
@@ -455,6 +409,10 @@ export class SubscriptionService {
    */
   reAuthorizePlatform(subscriptionPlatform) {
     return this.fetchEntitlements_(subscriptionPlatform).then(() => {
+      this.subscriptionAnalytics_.serviceEvent(
+          SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+          subscriptionPlatform.getServiceId()
+      );
       this.platformStore_.reset();
       this.startAuthorizationFlow_();
     });
@@ -469,7 +427,13 @@ export class SubscriptionService {
     const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
       dev().assert(this.platformStore_.getLocalPlatform(),
           'Local platform is not registered'));
-
+    // TODO: add which service is passing this event
+    this.subscriptionAnalytics_.event(
+        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+        {
+          action,
+        }
+    );
     return localPlatform.executeAction(action);
   }
 }

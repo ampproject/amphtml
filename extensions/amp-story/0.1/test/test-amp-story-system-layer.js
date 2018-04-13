@@ -22,7 +22,7 @@ import {registerServiceBuilder} from '../../../../src/service';
 const NOOP = () => {};
 
 
-describes.fakeWin('amp-story system layer', {}, env => {
+describes.fakeWin('amp-story system layer', {amp: true}, env => {
   let win;
   let systemLayer;
   let progressBarStub;

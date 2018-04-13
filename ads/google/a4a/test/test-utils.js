@@ -123,8 +123,7 @@ describe('Google A4A utils', () => {
       },
     };
 
-    // TODO(zhouyx, #14336): Fails due to console errors.
-    it.skip('should extract correct config from header', () => {
+    it('should extract correct config from header', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         let url;
@@ -435,6 +434,84 @@ describe('Google A4A utils', () => {
             expect(url).to.match(/[&?]ga_cid=foo[&$]/);
             expect(url).to.match(/[&?]ga_hid=bar[&$]/);
           });
+        });
+      });
+    });
+
+    it('should have correct bc value when everything supported', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => true,
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+              /[&?]bc=7[&$]/);
+        });
+      });
+    });
+
+    it('should have correct bc value when sandbox not supported', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {},
+        });
+        return fixture.addElement(elem).then(() => {
+          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
+              /[&?]bc=1[&$]/);
+        });
+      });
+    });
+
+    it('should not include bc when nothing supported', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.SVGElement = undefined;
+        const createElementStub =
+          sandbox.stub(impl.win.document, 'createElement');
+        createElementStub.withArgs('iframe').returns({
+          sandbox: {
+            supports: () => false,
+          },
+        });
+        return fixture.addElement(elem).then(() => {
+          return expect(
+              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
+              /[&?]bc=1[&$]/);
         });
       });
     });

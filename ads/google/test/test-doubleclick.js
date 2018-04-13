@@ -56,8 +56,7 @@ describes.sandboxed('writeAdScript', {}, env => {
     verifyScript(win, 'gpt.js');
   });
 
-  // TODO(bradfrizzell, #14336): Fails due to console errors.
-  it.skip('should use GPT when multiSize is not null', () => {
+  it('should use GPT when multiSize is not null', () => {
     const data = {multiSize: 'hey!'};
     writeAdScript(win, data);
     verifyScript(win, 'gpt.js');

@@ -168,9 +168,9 @@ describe('json', () => {
 
   describe('recursiveEquals', () => {
     it('should throw on non-finite depth arg', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         recursiveEquals({}, {}, Number.POSITIVE_INFINITY);
-      }).to.throw(/must be finite/);
+      }).to.throw(/must be finite/); });
     });
 
     it('should handle null and empty objects', () => {

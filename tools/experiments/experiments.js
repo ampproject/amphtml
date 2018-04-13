@@ -257,8 +257,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
-    id: 'amp-document-recommendations',
-    name: 'Docment level recommendations and infinte scroll',
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
@@ -275,6 +275,12 @@ const EXPERIMENTS = [
     id: 'amp-consent',
     name: 'Enables the amp-consent extension',
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
+  },
+  {
+    id: 'no-sync-xhr-in-ads',
+    name: 'Disables syncronous XHR requests in 3p iframes.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
   },
   {
     id: 'video-service',

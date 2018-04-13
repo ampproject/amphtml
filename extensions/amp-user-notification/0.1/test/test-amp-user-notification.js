@@ -287,8 +287,7 @@ describes.realWin('amp-user-notification', {
     });
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('shouldShow should recover from error to xhr', () => {
+  it('shouldShow should recover from error to xhr', () => {
     const el = getUserNotification(dftAttrs);
     const impl = el.implementation_;
     impl.buildCallback();
@@ -311,9 +310,7 @@ describes.realWin('amp-user-notification', {
     });
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('shouldShow should recover from error and return true with ' +
-      'no xhr', () => {
+  it('shouldShow should recover from error and return true with no xhr', () => {
     const el = getUserNotification({id: 'n1'});
     const impl = el.implementation_;
     impl.buildCallback();
@@ -647,8 +644,7 @@ describes.realWin('amp-user-notification', {
       });
     });
 
-    // TODO(aghassemi, #14336): Fails due to console errors.
-    it.skip('should dissmiss without persistence if cid.optOut() fails', () => {
+    it('should dissmiss without persistence if cid.optOut() fails', () => {
       const element = getUserNotification({id: 'n1'});
       const impl = element.implementation_;
       impl.buildCallback();

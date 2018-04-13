@@ -17,9 +17,10 @@
 import * as lolex from 'lolex';
 import {AccessIframeAdapter} from '../amp-access-iframe';
 import {Messenger} from '../iframe-api/messenger';
+import {dev} from '../../../../src/log';
 
 
-describes.realWin('AccessIframeAdapter', {
+describes.fakeWin('AccessIframeAdapter', {
   amp: true,
 }, env => {
   let ampdoc;
@@ -76,30 +77,30 @@ describes.realWin('AccessIframeAdapter', {
 
     it('should require "iframeSrc"', () => {
       delete validConfig['iframeSrc'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/iframeSrc/);
+      }).to.throw(/iframeSrc/); });
     });
 
     it('should require "iframeSrc" to be secure', () => {
       validConfig['iframeSrc'] = 'http://acme.com/iframe';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
 
     it('should require "defaultResponse"', () => {
       delete validConfig['defaultResponse'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/defaultResponse/);
+      }).to.throw(/defaultResponse/); });
     });
 
     it('should disallow non-array vars', () => {
       validConfig['iframeVars'] = {};
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessIframeAdapter(ampdoc, validConfig, context);
-      }).to.throw(/array/);
+      }).to.throw(/array/); });
     });
   });
 
@@ -155,16 +156,16 @@ describes.realWin('AccessIframeAdapter', {
   describe('runtime', () => {
     let adapter;
     let messengerMock;
-    let storageMock;
+    let storage, storageMock;
 
     beforeEach(() => {
-      const storage = {
+      storage = {
         getItem: () => {},
         setItem: () => {},
         removeItem: () => {},
       };
       storageMock = sandbox.mock(storage);
-      Object.defineProperty(ampdoc.win, 'sessionStorage', {value: storage});
+      Object.defineProperty(ampdoc.win, 'sessionStorage', {get: () => storage});
       adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
       messengerMock = sandbox.mock(adapter.messenger_);
     });
@@ -194,7 +195,7 @@ describes.realWin('AccessIframeAdapter', {
       it('should issue authorization', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({granted: true, data: {a: 1}}))
+            .returns(Promise.resolve({a: 1}))
             .once();
         return adapter.authorize().then(result => {
           expect(result).to.deep.equal({a: 1});
@@ -223,7 +224,7 @@ describes.realWin('AccessIframeAdapter', {
             .once();
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({granted: true, data}))
+            .returns(Promise.resolve(data))
             .once();
         return adapter.authorize().then(() => {
           // Skip a microtask.
@@ -274,8 +275,8 @@ describes.realWin('AccessIframeAdapter', {
         });
       });
 
-      // TODO(dvoytenko, #14336): Fails due to console errors.
-      it.skip('should tolerate storage failures', () => {
+      it('should tolerate storage failures', () => {
+        const devErrorStub = sandbox.stub(dev(), 'error');
         storageMock.expects('getItem')
             .withExactArgs('amp-access-iframe')
             .throws(new Error('intentional'))
@@ -293,17 +294,19 @@ describes.realWin('AccessIframeAdapter', {
         clock.tick(3001);
         return p.then(result => {
           expect(result).to.deep.equal({response: 'default'});
+          expect(devErrorStub).to.be.calledOnce;
+          expect(devErrorStub.args[0][1]).to.match(/failed to restore/);
         });
       });
 
       it('should ignore absent storage', () => {
-        Object.defineProperty(ampdoc.win, 'sessionStorage', {value: null});
-        Object.defineProperty(ampdoc.win, 'localStorage', {value: null});
+        storage = null;
         storageMock.expects('getItem')
             .withExactArgs('amp-access-iframe')
             .never();
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
+            // Never resolved.
             .returns(new Promise(() => {}))
             .once();
         const p = adapter.authorize();

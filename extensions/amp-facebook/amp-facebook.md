@@ -84,7 +84,7 @@ The URL of the Facebook post/video. For example, `https://www.facebook.com/zuck/
 
 The value is either `post` or `video`.  The default is `post`.
 
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the player of the video, and ignores the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos embeds the player of the video, and adds the accompanying post card with it. Setting `data-embed-as="post"` ignores the caption card. This is done to make sure we are zooming in on videos correctly.
 
 Check out the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
 

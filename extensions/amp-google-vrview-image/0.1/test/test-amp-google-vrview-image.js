@@ -80,12 +80,16 @@ describes.realWin('amp-google-vrview-image', {
   });
 
   it('requires src', () => {
-    return getVrImage({}).should.eventually.be.rejectedWith(
-        /must be available/);
+    allowConsoleError(() => {
+      return getVrImage({}).should.eventually.be.rejectedWith(
+          /must be available/);
+    });
   });
 
   it('requires https src', () => {
-    return getVrImage({'src': 'http://example.com/image1'}).should
-        .eventually.be.rejectedWith(/https/);
+    allowConsoleError(() => {
+      return getVrImage({'src': 'http://example.com/image1'})
+          .should.eventually.be.rejectedWith(/https/);
+    });
   });
 });

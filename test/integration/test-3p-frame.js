@@ -272,6 +272,23 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     expect(iframe.not_whitelisted).to.equal(undefined);
   });
 
+  it('should not set feature policy for sync-xhr with exp off', () => {
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('allow')).to.equal(null);
+  });
+
+  it('should set feature policy for sync-xhr with exp on', () => {
+    toggleExperiment(window, 'no-sync-xhr-in-ads', true);
+    const div = document.createElement('my-element');
+    setupElementFunctions(div);
+    container.appendChild(div);
+    const iframe = getIframe(window, div, 'none');
+    expect(iframe.getAttribute('allow')).to.equal('sync-xhr \'none\';');
+  });
+
   it('should pick the right bootstrap url for local-dev mode', () => {
     window.AMP_MODE = {localDev: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
@@ -322,20 +339,19 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://example.com/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window);
-    }).to.throw(/meta source must start with "https/);
+    }).to.throw(/meta source must start with "https/); });
   });
 
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getBootstrapBaseUrl(window, true);
-    }).to.throw(/must not be on the same origin as the/);
+    }).to.throw(/must not be on the same origin as the/); });
   });
 
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  it.skip('should pick default url if custom disabled', () => {
+  it('should pick default url if custom disabled', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     expect(getBootstrapBaseUrl(window, true, undefined, true)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
@@ -363,8 +379,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     });
   });
 
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  it.skip('should prefetch default bootstrap frame if custom disabled', () => {
+  it('should prefetch default bootstrap frame if custom disabled', () => {
     window.AMP_MODE = {localDev: true};
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     preloadBootstrap(window, preconnect, undefined, true);

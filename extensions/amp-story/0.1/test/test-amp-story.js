@@ -156,6 +156,32 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should prerender/load the share menu', () => {
+    createPages(story.element, 1, ['cover']);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.have.been.calledOnce;
+        });
+  });
+
+  it('should not prerender/load the share menu on desktop', () => {
+    createPages(story.element, 1, ['cover']);
+
+    story.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
+
+    sandbox.stub(story.bookend_, 'build');
+    const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildShareMenuStub).to.not.have.been.called;
+        });
+  });
+
   // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(

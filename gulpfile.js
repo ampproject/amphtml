@@ -102,7 +102,6 @@ declareExtension('amp-compare-slider', '0.1');
 declareExtension('amp-consent', '0.1', {hasCss: true});
 declareExtension('amp-crypto-polyfill', '0.1');
 declareExtension('amp-dailymotion', '0.1');
-declareExtension('amp-document-recommendations', '0.1', {hasCss: true});
 declareExtension('amp-dynamic-css-classes', '0.1');
 declareExtension('amp-experiment', '0.1');
 declareExtension('amp-facebook', '0.1');
@@ -114,6 +113,7 @@ declareExtension('amp-font', '0.1');
 declareExtension('amp-form', '0.1', {hasCss: true});
 declareExtension('amp-fx-collection', '0.1');
 declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-geo', '0.1');
 declareExtension('amp-gfycat', '0.1');
 declareExtension('amp-gist', '0.1');
 declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
@@ -132,6 +132,7 @@ declareExtension('amp-list', '0.1');
 declareExtension('amp-live-list', '0.1', {hasCss: true});
 declareExtension('amp-mathml', '0.1', {hasCss: true});
 declareExtension('amp-mustache', '0.1');
+declareExtension('amp-next-page', '0.1', {hasCss: true});
 declareExtension('amp-nexxtv-player', '0.1');
 declareExtension('amp-o2-player', '0.1');
 declareExtension('amp-ooyala-player', '0.1');
@@ -153,10 +154,11 @@ declareExtension('amp-story', '0.1', {
     'amp-story-unsupported-browser-layer',
     'amp-story-viewport-warning-layer',
     'amp-story-share',
+    'amp-story-share-menu',
     'amp-story-system-layer',
   ],
 });
-declareExtension('amp-story-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
 declareExtension('amp-wistia-player', '0.1');
@@ -806,7 +808,7 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.1kB' : '332.3kB';
+  const size = compiled ? '76.79KB' : '334.46KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);

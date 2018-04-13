@@ -26,6 +26,10 @@ import {isExperimentOn} from '../experiments';
 const EXTENSION = 'amp-video-service';
 
 
+/** @private @const {string} */
+const DISABLED_FEATURES = '__AMP_VIDEO_DISABLED__';
+
+
 /**
  * @typedef
  * {../../extensions/amp-video-service/0.1/amp-video-service.VideoService}
@@ -105,7 +109,7 @@ export class VideoServiceSync {
   /** @override */
   disable(element, ...varFeatures) {
     dev().assert(!element.signals().get(VideoEvents.REGISTERED));
-    const disabled = '__AMP_DISABLED__';
-    element[disabled] = (element[disabled] || []).concat(varFeatures);
+    element[DISABLED_FEATURES] =
+        (element[DISABLED_FEATURES] || []).concat(varFeatures);
   }
 }
