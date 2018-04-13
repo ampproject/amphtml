@@ -22,8 +22,8 @@ import {
   isSecureUrl,
   parseUrl,
 } from '../../../src/url';
-import {tryParseJson} from '../../../src/json';
 import {sendRequest} from '../../../src/transport';
+import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -69,6 +69,7 @@ export const RTC_ERROR_ENUM = {
  * @param {string} error
  * @param {string} callout
  * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} opt_rtcTime
  * @return {!Promise<!rtcResponseDef>}
  * @private
@@ -87,7 +88,7 @@ function buildErrorResponse_(
  * @param {string} errorType Uses the RTC_ERROR_ENUM above.
  * @param {string} errorReportingUrl
  * @param {!Window} win
- * @param {../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  */
 export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
   if (ERROR_REPORTING_ENABLED || getMode(win).localDev || getMode(win).test) {
@@ -98,7 +99,7 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
     const whitelist = {ERROR_TYPE: true, HREF: true};
     const macros = {
       ERROR_TYPE: errorType,
-      HREF: win.location.href
+      HREF: win.location.href,
     };
     const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
         errorReportingUrl, macros, whitelist);
@@ -146,14 +147,14 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     if (isObject(urlObj)) {
       url = urlObj['url'];
       errorReportingUrl = urlObj['errorReportingUrl'];
-    } else if (typeof urlObj == "string") {
+    } else if (typeof urlObj == 'string') {
       url = urlObj;
     } else {
       dev().warn(TAG, `Invalid url: ${urlObj}`);
     }
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         rtcStartTime, customMacros,
-        rtcConfig['timeoutMillis'], undefined, errorReportingUrl);
+        rtcConfig['timeoutMillis'], errorReportingUrl);
   });
   // For each vendor the publisher has specified, inflate the vendor
   // url if it exists, and send the RTC request.
@@ -161,7 +162,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
     const url = vendorObject ? vendorObject.url : '';
     const errorReportingUrl = vendorObject ?
-      vendorObject.errorReportingUrl : '';
+      vendorObject['errorReportingUrl'] : '';
     if (!url) {
       return promiseArray.push(
           buildErrorResponse_(
@@ -181,8 +182,8 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     // The ad network defined macros override vendor defined/pub specifed.
     const macros = Object.assign(validVendorMacros, customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
-        macros, rtcConfig['timeoutMillis'],
-        vendor.toLowerCase(), errorReportingUrl);
+        macros, rtcConfig['timeoutMillis'], errorReportingUrl,
+        vendor.toLowerCase());
   });
   return Promise.all(promiseArray);
 }
@@ -195,12 +196,12 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @param {number} rtcStartTime
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
  * @param {number} timeoutMillis
- * @param {string=} opt_vendor
  * @param {string} errorReportingUrl
+ * @param {string=} opt_vendor
  * @private
  */
 export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-  rtcStartTime, macros, timeoutMillis, opt_vendor, errorReportingUrl) {
+  rtcStartTime, macros, timeoutMillis, errorReportingUrl, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
