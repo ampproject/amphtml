@@ -36,19 +36,19 @@ export class ViewerSubscriptionPlatform {
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    * @param {string} origin
-   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics_
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
   constructor(ampdoc, platformConfig, serviceAdapter, origin,
-    subscriptionAnalytics_) {
+    subscriptionAnalytics) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
-    /** @const {!PageConfig} */
+    /** @private @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @private @const {!LocalSubscriptionPlatform} */
     this.platform_ = new LocalSubscriptionPlatform(
-        ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics_);
+        ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
@@ -59,10 +59,10 @@ export class ViewerSubscriptionPlatform {
     /** @private {string} */
     this.publicationId_ = this.pageConfig_.getPublicationId();
 
-    /** @private {?string} */
+    /** @private @const {?string} */
     this.currentProductId_ = this.pageConfig_.getProductId();
 
-    /** @private {string} */
+    /** @private @const {string} */
     this.origin_ = origin;
 
     /** @private {?Entitlement}*/
