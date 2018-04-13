@@ -194,6 +194,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
       this.buildMask_();
+      this.registerAction('open', invocation => this.activate(invocation));
     });
   }
 
@@ -787,13 +788,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
     const tagName = this.getCurrentElement_().tagName;
     this.updateDescriptionBox_();
-    if (ELIGIBLE_TAP_TAGS[tagName]) {
-      return this.getCurrentElement_().imageViewer.signals()
-          .whenSignal(CommonSignals.LOAD_END)
-          .then(() => this.enter_());
-    } else {
-      return Promise.resolve();
-    }
+    return this.enter_();
   }
 
   /**
@@ -996,7 +991,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     return this.shouldAnimate_(sourceElement)
         .then(shouldAnimate => {
           if (shouldAnimate) {
-            return this.transitionIn_(sourceElement);
+            return this.getCurrentElement_().imageViewer.signals()
+                .whenSignal(CommonSignals.LOAD_END)
+                .then(() => this.transitionIn_(sourceElement));
           } else {
             return this.fade_(0, 1);
           }
