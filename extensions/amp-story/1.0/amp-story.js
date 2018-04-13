@@ -412,6 +412,14 @@ export class AmpStory extends AMP.BaseElement {
       this.onDesktopStateUpdate_(isDesktop);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
+        canShowButtons => {
+          this.mutateElement(() => {
+            this.topBar_.classList
+                .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
+          });
+        }, true /* callToInitialize */);
+
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
