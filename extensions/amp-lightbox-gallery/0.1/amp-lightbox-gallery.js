@@ -1004,16 +1004,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return this.fade_(0, 1);
     }
 
-    return Promise.all([
+    const promises = [
       this.shouldAnimate_(sourceElement),
       this.getCurrentElement_().imageViewer.signals()
           .whenSignal(CommonSignals.LOAD_END),
-    ]).then(values => {
-      if (values[0]) {
-        return this.transitionIn_(sourceElement);
-      } else {
-        return this.fade_(0, 1);
-      }
+    ];
+
+    return Promise.all(promises).then(values => {
+      return values[0] ? this.transitionIn_(sourceElement)
+        : this.fade_(0, 1);
     });
   }
 
