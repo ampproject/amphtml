@@ -250,6 +250,8 @@
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
   <style amp-boilerplate>
     body {
@@ -370,10 +372,27 @@
           </figcaption>
         </figure>
 
+        <amp-youtube lightbox="toronto"
+          width="480"
+          height="270"
+          layout="responsive"
+          data-videoid="UsZ2dXf7qh4"
+          autoplay>
+        </amp-youtube>
+
         <amp-img lightbox="toronto" src="https://picsum.photos/900/1600?image=948" layout="responsive" width="900" height="1600"
           alt="Picture of a tall building" aria-describedby="img2desc">
           <span id=img2desc>The brutalist architecture of this building is obvious from its small windows and raw concrete look.</span>
         </amp-img>
+
+        <amp-ad lightbox="toronto" 
+          width="300"
+          height="250"
+          type="a9"
+          data-aax_size="300x250"
+          data-aax_pubname="test123"
+          data-aax_src="302">
+        </amp-ad>
 
         <amp-img lightbox="toronto" src="https://picsum.photos/1600/1600?image=430" layout="responsive" width="1600" height="1600"
         alt="Picture of new york city skyline" aria-describedby="img3desc">
