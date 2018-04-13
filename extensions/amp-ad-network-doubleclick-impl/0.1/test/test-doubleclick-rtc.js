@@ -296,6 +296,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
+      env.win.document.referrer = 'https://www.google.com/';
       const docInfo = Services.documentInfoForDoc(element);
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
@@ -307,9 +308,14 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
-      return customMacros.ADCID().then(adcid => {
-        expect(adcid).to.not.be.null;
-      });
+      return Promise.all([
+        customMacros.ADCID().then(adcid => {
+          expect(adcid).to.not.be.null;
+        }),
+        customMacros.REFERRER().then(referrer => {
+          expect(referrer).to.equal(env.win.document.referrer);
+        }),
+      ]);
     });
 
     it('should return the same ADCID on multiple calls', () => {
@@ -343,6 +349,20 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       return customMacros.ADCID(0).then(adcid => {
         expect(adcid).to.be.undefined;
       });
+    });
+
+    it('should respect timeout for referrer', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const viewer = Services.viewerForDoc(impl.getAmpDoc());
+      sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      return expect(customMacros.REFERRER(0)).to.eventually.be.undefined;
     });
 
     it('should handle TGT macro when targeting not set', () => {

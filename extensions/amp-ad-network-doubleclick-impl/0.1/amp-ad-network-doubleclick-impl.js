@@ -705,6 +705,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
+      REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
         JSON.stringify(
             (tryParseJson(
@@ -722,6 +723,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
+  }
+
+  /**
+   * Returns the referrer or undefined if the referrer is not resolved
+   * before the given timeout
+   * @param {number=} opt_timeout
+   * @return {!(Promise<string>|Promise<undefined>)} A promise with a referrer or undefined
+   * if timed out
+   * @private
+   */
+  getReferrer_(opt_timeout) {
+    const timeoutInt = parseInt(opt_timeout, 10);
+    const referrerPromise = Services.viewerForDoc(this.getAmpDoc())
+        .getReferrerUrl();
+    if (isNaN(timeoutInt) || timeoutInt < 0) {
+      return referrerPromise;
+    }
+    return Services.timerFor(this.win)
+        .timeoutPromise(timeoutInt, referrerPromise)
+        .catch(() => undefined);
   }
 
   /**
