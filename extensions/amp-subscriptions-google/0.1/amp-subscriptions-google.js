@@ -224,6 +224,7 @@ export class GoogleSubscriptionsPlatform {
     }
   }
 
+  /** @override */
   getBaseScore() {
     return this.serviceConfig_['baseScore'] || 0;
   }

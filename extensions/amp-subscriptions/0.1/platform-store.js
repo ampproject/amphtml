@@ -288,7 +288,7 @@ export class PlatformStore {
 
       // If supports the current viewer, gains weight 9
       if (preferViewerSupport && platform.supportsCurrentViewer()) {
-        weight += this.scoreConfig_.supportsViewer;
+        weight += this.scoreConfig_['supportsViewer'];
       }
 
       platformWeights.push({
