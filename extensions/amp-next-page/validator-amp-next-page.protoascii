@@ -13,43 +13,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 
-tags: {  # amp-document-recommendations
+tags: {  # amp-next-page
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-document-recommendations"
+    name: "amp-next-page"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
 }
-tags: {  # amp-document-recommendations: json config
+tags: {  # amp-next-page: json config
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-document-recommendations extension .json configuration"
-  requires_extension: "amp-document-recommendations"
-  mandatory_parent: "AMP-DOCUMENT-RECOMMENDATIONS"
+  spec_name: "amp-next-page extension .json configuration"
+  requires_extension: "amp-next-page"
+  mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
-    name: "recommendations"
+    name: "pages"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-document-recommendations"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
 tags: {
   tag_name: "DIV"
-  spec_name: "AMP-DOCUMENT-RECOMMENDATIONS > DIV [separator]"
-  mandatory_parent: "AMP-DOCUMENT-RECOMMENDATIONS"
+  spec_name: "AMP-NEXT-PAGE > DIV [separator]"
+  mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
     name: "separator"
     mandatory: true
   }
 }
-tags: {  # <amp-document-recommendations>
+tags: {  # <amp-next-page>
   html_format: AMP
-  tag_name: "AMP-DOCUMENT-RECOMMENDATIONS"
+  tag_name: "AMP-NEXT-PAGE"
   mandatory_parent: "BODY"
   mandatory_last_child: true
-  requires_extension: "amp-document-recommendations"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-document-recommendations"
+  requires_extension: "amp-next-page"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-next-page"
 }
