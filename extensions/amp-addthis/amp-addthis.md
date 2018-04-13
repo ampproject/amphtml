@@ -89,3 +89,7 @@ when sharing occurs. If not set, this is left undefined.
 ## Validation
 
 See amp-addthis rules in the AMP validator specification.
+
+## Privacy
+
+http://www.addthis.com/privacy/privacy-policy/
