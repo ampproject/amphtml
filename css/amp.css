@@ -221,6 +221,10 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   bottom: auto !important;
 }
 
+.i-amphtml-layout-fluid {
+  position: relative;
+}
+
 i-amphtml-sizer {
   display: block !important;
 }
