@@ -1398,8 +1398,14 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.isDesktop_()) {
       return Promise.resolve(true);
     }
-    return this.bookend_.loadConfig(false /** applyConfig */).then(config =>
-      !!(config && config.relatedArticles && config.relatedArticles.length));
+
+    return this.bookend_.loadConfig(false /** applyConfig */).then(
+        config => {
+          // TODO(#14591): Remove when old version is deprecated.
+          return !!(config && (config.relatedArticles &&
+            config.relatedArticles.length) ||
+            (config.components && config.components.length));
+        });
   }
 
 

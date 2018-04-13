@@ -1,5 +1,5 @@
 {
-  "bookend-version": 2.0,
+  "bookend-version": "v2.0",
   "components": [
     {
       "type": "share-providers",

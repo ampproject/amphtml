@@ -61,6 +61,12 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
+/**
+ * Share providers tag.
+ * @private @const {string}
+ */
+const SHARE_PROVIDERS = 'share-providers';
+
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -307,7 +313,11 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config['share-providers'];
+      // TODO(#14591): Remove when old version is deprecated.
+      const providers = config && (config[SHARE_PROVIDERS] ||
+                        config['components'].find(component => {
+                          return component['type'] == SHARE_PROVIDERS;
+                        }));
       if (!providers) {
         return;
       }
@@ -316,11 +326,38 @@ export class ShareWidget {
   }
 
   /**
+   * TODO(#14591)
+   * If using the new API, converts the contents to match with the old version.
+   * @param {*} providers
+   * @return {!Object<string, (!JsonObject|boolean)>} providers
+   */
+  parseToClassicApi_(providers) {
+    const providerObjs = {};
+    providers.map(val => {
+      if (isObject(val)) {
+        if (val['provider'] == 'facebook') {
+          providerObjs['facebook'] = ({'app_id': val['app_id']});
+        } else {
+          providerObjs[val['provider']] = true;
+        }
+      } else {
+        providerObjs[val] = true;
+      }
+    });
+    return providerObjs;
+  }
+
+  /**
    * @param {!Object<string, (!JsonObject|boolean)>} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
+    // TODO(#14591): Check if using new API and convert if so.
+    if (providers[SHARE_PROVIDERS]) {
+      providers = this.parseToClassicApi_(providers[SHARE_PROVIDERS]);
+    }
+
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',

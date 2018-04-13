@@ -14,8 +14,24 @@
  * limitations under the License.
  */
 
-export function componentsFromJson(components) {
-  components.map(component => {
-    componentsMap[component].build();
-  })
+/**
+ * Abstract class implemented by the bookend components.
+ * @abstract
+ */
+export class AbstractBookendComponent {
+
+  /**
+   * Builds the component.
+   * @param {BookendComponentDef} componentJson
+   * @abstract
+   */
+  static build(componentJson) {}
+
+  /**
+   * Builds the template for the component.
+   * @param {BookendComponentDef} componentJson
+   * @return {!../../simple-template.ElementDef}
+   * @abstract
+   */
+  static buildTemplate(componentJson) {}
 }

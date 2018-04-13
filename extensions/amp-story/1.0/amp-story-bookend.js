@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {Action, StateProperty} from './amp-story-store-service';
+import {BookendComponent} from './bookend/bookend-component';
 import {CSS} from '../../../build/amp-story-bookend-1.0.css';
 import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -28,7 +29,7 @@ import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
-import {relatedArticlesFromJson, componentsFromJson} from './bookend/component-builder';
+import {relatedArticlesFromJson} from './related-articles';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
 
@@ -56,6 +57,9 @@ const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 
+// TODO(#14591): Clean when older version is deprecated.
+const BOOKEND_VERSION_2 = 'v2.0';
+const BOOKEND_VERSION = 'bookend-version';
 
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
@@ -369,12 +373,14 @@ export class Bookend {
           if (!response) {
             return null;
           }
-
-          if(response['bookend-version'] == 2.0){
-            this.config = {
-              components: componentsFromJson(response['components']),
-            }
-          } else { // Prepare for the new API. Remove when previous version is deprecated.
+          // TODO(#14591): Clean when old version is deprecated.
+          if (response[BOOKEND_VERSION] === BOOKEND_VERSION_2) {
+            this.config_ = {
+              [BOOKEND_VERSION]: BOOKEND_VERSION_2,
+              components: BookendComponent
+                  .buildFromJson(response['components']),
+            };
+          } else {
             this.config_ = {
               shareProviders: response['share-providers'],
               relatedArticles:
@@ -490,7 +496,12 @@ export class Bookend {
     this.assertBuilt_();
     this.isConfigRendered_ = true;
 
-    this.setRelatedArticles_(bookendConfig.relatedArticles);
+    if (bookendConfig[BOOKEND_VERSION] === BOOKEND_VERSION_2) {
+      this.renderComponents_(bookendConfig.components);
+    } else {
+      // TODO(#14591): Remove when old version is deprecated.
+      this.setRelatedArticles_(bookendConfig.relatedArticles);
+    }
   }
 
   /**
@@ -502,6 +513,18 @@ export class Bookend {
       this.getInnerContainer_().appendChild(
           renderSimpleTemplate(this.win_.document,
               buildArticlesContainerTemplate(articleSets)));
+    });
+  }
+
+  /**
+   * @param {!Array<!./bookend/bookend-component.BookendComponentDef>} components
+   * @private
+   */
+  renderComponents_(components) {
+    this.vsync_.mutate(() => {
+      this.getInnerContainer_().appendChild(
+          renderSimpleTemplate(this.win_.document,
+              BookendComponent.buildTemplates(components)));
     });
   }
 
