@@ -262,6 +262,12 @@
       cursor: pointer;
     }
 
+    .open-in-lightbox span {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+    }
+
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
@@ -566,7 +572,9 @@
             layout="responsive"
             lightbox="gallery"
             controls>
-            <div class="open-in-lightbox" on="tap:amp-lightbox-gallery.activate(id='lightboxed-video')">Open in lightbox</div>
+            <div class="open-in-lightbox" on="tap:amp-lightbox-gallery.activate(id='lightboxed-video')">
+              <span>Open video in lightbox</span>
+            </div>
           </amp-video>
         </div>
     </article>
