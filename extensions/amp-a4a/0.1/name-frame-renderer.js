@@ -22,16 +22,6 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {utf8Decode} from '../../../src/utils/bytes';
 
-/** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = dict({
-  'frameborder': '0',
-  'allowfullscreen': '',
-  'allowtransparency': '',
-  'scrolling': 'no',
-  'marginwidth': '0',
-  'marginheight': '0',
-});
-
 /**
  * Render a non-AMP creative into a NameFrame.
  */
@@ -55,14 +45,19 @@ export class NameFrameRenderer extends Renderer {
       'name': JSON.stringify(contextMetadata),
       'height': context.size.height,
       'width': context.size.width,
+      'frameborder': '0',
+      'allowfullscreen': '',
+      'allowtransparency': '',
+      'scrolling': 'no',
+      'marginwidth': '0',
+      'marginheight': '0',
     });
     if (crossDomainData.sentinel) {
       attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
     }
     const iframe = createElementWithAttributes(
         /** @type {!Document} */ (element.ownerDocument), 'iframe',
-        /** @type {!JsonObject} */ (
-          Object.assign(attributes, SHARED_IFRAME_PROPERTIES)));
+        /** @type {!JsonObject} */ (attributes));
     context.applyFillContent(iframe);
     element.appendChild(iframe);
     return Promise.resolve();
