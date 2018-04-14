@@ -528,6 +528,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildTopBar_() {
+    // TODO(gmajoulet): Move the desktop "top bar" into the system layer.
     const doc = this.element.ownerDocument;
 
     this.topBar_ = doc.createElement('div');
