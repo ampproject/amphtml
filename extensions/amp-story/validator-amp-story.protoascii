@@ -20,6 +20,7 @@ tags: {  # amp-story
   extension_spec: {
     name: "amp-story"
     allowed_versions: "0.1"
+    allowed_versions: "1.0"
     allowed_versions: "latest"
   }
   attr_lists: "common-extension-attrs"
