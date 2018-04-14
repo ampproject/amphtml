@@ -75,7 +75,8 @@ function renderMulti(doc, elementsDef) {
  */
 function renderSingle(doc, elementDef) {
   const el = elementDef.hasOwnProperty('attrs') ?
-    createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
+    createElementWithAttributes(doc, elementDef.tag,
+        /** @type {!JsonObject} */ (elementDef.attrs)) :
     doc.createElement(elementDef.tag);
 
   if (elementDef.hasOwnProperty('localizedStringId')) {
@@ -94,7 +95,8 @@ function renderSingle(doc, elementDef) {
   }
 
   if (elementDef.hasOwnProperty('children')) {
-    el.appendChild(renderMulti(doc, elementDef.children));
+    el.appendChild(renderMulti(doc,
+        /** @type {!Array<!ElementDef>} */ (elementDef.children)));
   }
 
   return el;
