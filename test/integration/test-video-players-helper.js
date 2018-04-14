@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import * as st from '../../src/style';
+import {Services} from '../../src/services';
 import {
-  PlayingStates,
   VideoAnalyticsEvents,
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
-import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
@@ -54,8 +52,6 @@ export function runVideoPlayerIntegrationTests(
   const FRAME_HEIGHT = 1000;
 
   const TIMEOUT = 20000;
-  const DOCK_SCALE = 0.6;
-  const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
 
   let fixtureGlobal;
   let videoGlobal;
@@ -322,179 +318,6 @@ export function runVideoPlayerIntegrationTests(
       }).then(() => {
         return listenOncePromise(video, VideoAnalyticsEvents.SECONDS_PLAYED);
       });
-    });
-
-    afterEach(cleanUp);
-  });
-
-  describe.configure().ifNewChrome().run('Video Docking', function() {
-    this.timeout(TIMEOUT);
-
-    describe('General Behavior', () => {
-      it.skip('should have class when attribute is set (autoplay)', function() {
-        return getVideoPlayer(
-            {
-              outsideView: false,
-              autoplay: true,
-              dock: true,
-            }
-        ).then(r => {
-          return poll('checking class list', () => {
-            return r.video.classList.contains('i-amphtml-dockable-video');
-          }, undefined, TIMEOUT);
-        });
-      });
-
-      it('should have class when attribute is set (no-autoplay)', function() {
-        return getVideoPlayer(
-            {
-              outsideView: false,
-              autoplay: false,
-              dock: true,
-            }
-        ).then(r => {
-          return poll('checking class list', () => {
-            return r.video.classList.contains('i-amphtml-dockable-video');
-          }, undefined, TIMEOUT);
-        });
-      });
-    });
-
-    describe.configure('without-autoplay', () => {
-
-      it('should minimize when out of viewport', function() {
-        this.skip();
-
-        let viewport;
-        let video;
-        let insideElement;
-        return getVideoPlayer(
-            {
-              outsideView: true,
-              autoplay: false,
-              dock: true,
-            }
-        ).then(r => {
-          video = r.video;
-          const playButton = createButton(r, 'play');
-          playButton.click();
-          return listenOncePromise(video, VideoEvents.PLAYING);
-        }).then(() => {
-          viewport = video.implementation_.getViewport();
-          // scroll to the bottom, make video fully visible
-          viewport.scrollIntoView(video);
-          return poll('wait for scroll', () => {
-            return video.querySelector('video, iframe')
-             && viewport.getScrollTop() != 0;
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          viewport.setScrollTop(0);
-          return poll('waiting for scroll', () => {
-            return viewport.getScrollTop() == 0;
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          return poll('checking class list', () => {
-            insideElement = video.querySelector('video, iframe');
-            const classes = insideElement.classList;
-            return classes.contains(DOCK_CLASS);
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          expect(insideElement).to.have.class(DOCK_CLASS);
-          expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.translate(st.px(300), st.px(680)) + ' ' + st.scale(DOCK_SCALE)
-          );
-        });
-      });
-    });
-
-    describe('with-autoplay', () => {
-      it('should minimize when out of viewport', function() {
-        let viewport;
-        let video;
-        let insideElement;
-        return getVideoPlayer(
-            {
-              outsideView: false,
-              autoplay: true,
-              dock: true,
-            }
-        ).then(r => {
-          video = r.video;
-          viewport = video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAYING);
-        }).then(() => {
-          return poll('wait for mask', () => {
-            return !!video.querySelector('i-amphtml-video-mask');
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          video.querySelector('i-amphtml-video-mask').click();
-          return poll('wait for mask to hide', () => {
-            return !video.querySelector('i-amphtml-video-mask');
-          });
-        }).then(() => {
-          const vidManager = Services.videoManagerForDoc(
-              video.implementation_.getAmpDoc()
-          );
-          return poll('wait for video to be playing manually', () => {
-            const curState = vidManager.getPlayingState(video.implementation_);
-            return curState == PlayingStates.PLAYING_MANUAL;
-          });
-        }).then(() => {
-          viewport.setScrollTop(FRAME_HEIGHT);
-          return poll('wait for video/iframe', () => {
-            return !!video.querySelector('video, iframe');
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          return poll('wait for minimization', () => {
-            insideElement = video.querySelector('video, iframe');
-            const classes = insideElement.classList;
-            return classes.contains(DOCK_CLASS);
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          expect(insideElement).to.have.class(DOCK_CLASS);
-          expect(st.getStyle(insideElement, 'transform')).to.equal(
-              st.translate(st.px(300), st.px(20)) + ' ' + st.scale(DOCK_SCALE)
-          );
-        });
-      });
-
-      it('should only minimize when video is manually playing', function() {
-        let viewport;
-        let video;
-        return getVideoPlayer(
-            {
-              outsideView: false,
-              autoplay: true,
-              dock: true,
-            }
-        ).then(r => {
-          video = r.video;
-          viewport = r.video.implementation_.getViewport();
-          return listenOncePromise(video, VideoEvents.PLAYING);
-        }).then(() => {
-          viewport.setScrollTop(FRAME_HEIGHT);
-          return poll('wait for video/iframe', () => {
-            return !!video.querySelector('video, iframe');
-          }, undefined, TIMEOUT);
-        }).then(() => {
-          return poll('check for class', () => {
-            const insideElement = video.querySelector('video, iframe');
-            const classes = insideElement.classList;
-            return !classes.contains(DOCK_CLASS);
-          }, undefined, TIMEOUT);
-        });
-      });
-    });
-
-    // Although these tests are not about autoplay, we can ony run them in
-    // browsers that do support autoplay, this is because a synthetic click
-    // event will not be considered a user-action and mobile browsers that
-    // don't support muted autoplay will block it. In real life, the click
-    // would be considered a user-initiated action, but no way to do that in a
-    // scripted test environment.
-    before(function() {
-      this.timeout(TIMEOUT);
-      return skipIfAutoplayUnsupported.call(this, window);
     });
 
     afterEach(cleanUp);
