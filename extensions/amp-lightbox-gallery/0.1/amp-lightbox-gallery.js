@@ -194,6 +194,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
       this.buildMask_();
+      this.registerAction('open', invocation => this.activate(invocation));
     });
   }
 
@@ -785,17 +786,29 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.currentElemId_ = element.lightboxItemId;
     dev().assert(this.carousel_).getImpl()
         .then(carousel => carousel.showSlideWhenReady(this.currentElemId_));
-    const tagName = this.getCurrentElement_().tagName;
     this.updateDescriptionBox_();
-    if (ELIGIBLE_TAP_TAGS[tagName]) {
-      return this.getCurrentElement_().imageViewer.signals()
-          .whenSignal(CommonSignals.LOAD_END)
-          .then(() => this.enter_());
-    } else {
-      return Promise.resolve();
-    }
+    return this.enter_();
   }
 
+  /**
+   * Returns true if the element is loaded and contains an img.
+   * @param {!Element} element
+   * @returns {boolean}
+   * @private
+   */
+  elementTypeCanBeAnimated_(element) {
+    if (!element || !isLoaded(element)) {
+      return false;
+    }
+    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
+      return false;
+    }
+    const img = elementByTag(dev().assertElement(element), 'img');
+    if (!img) {
+      return false;
+    }
+    return true;
+  }
   /**
    * This function verifies that the source element is an amp-img and contains
    * an img element and preserves the natural aspect ratio of the original img.
@@ -804,17 +817,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   shouldAnimate_(element) {
-    if (!element || !isLoaded(element)) {
-      return Promise.resolve(false);
-    }
-    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
-      return Promise.resolve(false);
-    }
     const img = elementByTag(dev().assertElement(element), 'img');
-    if (!img) {
-      return Promise.resolve(false);
-    }
-    return this.vsync_.measurePromise(() => {
+    return this.measureElement(() => {
       const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
       const elementHeight = element./*OK*/offsetHeight;
       const elementWidth = element./*OK*/offsetWidth;
@@ -835,6 +839,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   shouldExit_() {
     const target = this.getCurrentElement_().sourceElement;
     if (!this.transitionTargetIsInViewport_(target)) {
+      return Promise.resolve(false);
+    }
+    if (!this.elementTypeCanBeAnimated_(target)) {
       return Promise.resolve(false);
     }
     return this.shouldAnimate_(target)
@@ -993,14 +1000,22 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   // TODO (cathyxz): make this generalizable to more than just images
   enter_() {
     const sourceElement = this.getCurrentElement_().sourceElement;
-    return this.shouldAnimate_(sourceElement)
-        .then(shouldAnimate => {
-          if (shouldAnimate) {
-            return this.transitionIn_(sourceElement);
-          } else {
-            return this.fade_(0, 1);
-          }
-        });
+    if (!this.elementTypeCanBeAnimated_(sourceElement)) {
+      return this.fade_(0, 1);
+    }
+
+    const promises = [
+      this.shouldAnimate_(sourceElement),
+      this.getCurrentElement_().imageViewer.signals()
+          .whenSignal(CommonSignals.LOAD_END),
+    ];
+
+    return Promise.all(promises).then(values => {
+      const shouldAnimate = values[0];
+      return shouldAnimate
+        ? this.transitionIn_(sourceElement)
+        : this.fade_(0, 1);
+    });
   }
 
   /**

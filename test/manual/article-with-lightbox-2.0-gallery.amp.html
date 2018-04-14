@@ -246,10 +246,35 @@
       cursor: pointer;
     }
 
+    .video-container {
+      margin: auto;
+      width: 80%;
+    }
+
+    .open-in-lightbox {
+      position: absolute;
+      top: 0;
+      z-index: 1;
+      color: white;
+      bottom: 32px;
+      left: 0;
+      right: 0;
+      cursor: pointer;
+    }
+
+    .open-in-lightbox span {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+    }
+
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
   <style amp-boilerplate>
     body {
@@ -370,10 +395,25 @@
           </figcaption>
         </figure>
 
+        <amp-youtube lightbox="toronto"
+          width="480"
+          height="270"
+          layout="responsive"
+          data-videoid="UsZ2dXf7qh4"
+          autoplay>
+        </amp-youtube>
+
         <amp-img lightbox="toronto" src="https://picsum.photos/900/1600?image=948" layout="responsive" width="900" height="1600"
           alt="Picture of a tall building" aria-describedby="img2desc">
           <span id=img2desc>The brutalist architecture of this building is obvious from its small windows and raw concrete look.</span>
         </amp-img>
+
+        <amp-ad data-slot="/30497360/a4a/a4a_native"
+          lightbox="toronto"
+          height="250"
+          type="doubleclick"
+          width="300">
+        </amp-ad>
 
         <amp-img lightbox="toronto" src="https://picsum.photos/1600/1600?image=430" layout="responsive" width="1600" height="1600"
         alt="Picture of new york city skyline" aria-describedby="img3desc">
@@ -401,6 +441,14 @@
                 <p>Short - Sed pharetra semper fringilla. Nulla fringilla, neque eget</p>
               </div>
             </amp-img>
+
+            <amp-ad
+              width="300"
+              height="250"
+              type="doubleclick"
+              data-slot="/35096353/amptesting/adx">
+            </amp-ad>
+
             <amp-img src="https://picsum.photos/1600/900?image=864" layout="responsive" width="1600" height="900" aria-describedby="desc2">
               <div id="desc2" class="lightbox-only-description">
                 <p> Medium - Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio,
@@ -409,6 +457,15 @@
                 </p>
               </div>
             </amp-img>
+
+            <amp-ad
+              width="300"
+              height="250"
+              type="a9"
+              data-aax_size="300x250"
+              data-aax_pubname="test123"
+              data-aax_src="302">
+            </amp-ad>
 
             <amp-img src="https://picsum.photos/1600/900?image=870" layout="responsive" width="1600" height="900" aria-describedby="desc3">
               <div id="desc3" class="lightbox-only-description">
@@ -422,6 +479,14 @@
                 </p>
               </div>
             </amp-img>
+
+            <amp-youtube
+              width="480"
+              height="270"
+              layout="responsive"
+              data-videoid="Yyrtm7c1Ivs"
+              autoplay>
+            </amp-youtube>
 
             <amp-img src="https://picsum.photos/1600/400?image=857" layout="responsive" width="1600" height="400"
               alt="Wide image">
@@ -513,6 +578,20 @@
             at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui
             porttitor
           </p>
+        </div>
+        <div class="video-container">
+          <amp-video
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+            id="lightboxed-video"
+            width="358"
+            height="204"
+            layout="responsive"
+            lightbox="gallery"
+            controls>
+            <div class="open-in-lightbox" on="tap:amp-lightbox-gallery.activate(id='lightboxed-video')">
+              <span>Open video in lightbox</span>
+            </div>
+          </amp-video>
         </div>
     </article>
   </main>
