@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import * as st from '../../src/style';
+import {Services} from '../../src/services';
 import {
-  PlayingStates,
   VideoAnalyticsEvents,
   VideoEvents,
   VideoInterface,
 } from '../../src/video-interface';
-import {Services} from '../../src/services';
 import {VideoUtils} from '../../src/utils/video';
 import {
   createFixtureIframe,
@@ -54,8 +52,6 @@ export function runVideoPlayerIntegrationTests(
   const FRAME_HEIGHT = 1000;
 
   const TIMEOUT = 20000;
-  const DOCK_SCALE = 0.6;
-  const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
 
   let fixtureGlobal;
   let videoGlobal;
