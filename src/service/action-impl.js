@@ -125,8 +125,7 @@ export let ActionInfoDef;
  * If the action is chainable, returns a Promise which resolves when the
  * action is complete. Otherwise, returns null.
  *
- * @typedef {function(
- *     !ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
+ * @typedef {function(!ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
  */
 let ActionHandlerDef;
 
@@ -144,15 +143,34 @@ export let ActionEventDef;
  */
 export class ActionInvocation {
   /**
-   * @param {!Node} target
-   * @param {string} method
-   * @param {?JsonObject} args
-   * @param {?Element} source Element where the action was triggered.
-   * @param {?Element} caller Element where the action is being handled.
-   * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * For example:
+   *
+   *   <div id="div" on="tap:myForm.submit(foo=bar)">
+   *     <button id="btn">Submit</button>
+   *   </div>
+   *
+   * `target` is #myForm.
+   * `method` is "submit".
+   * `args` is {'foo': 'bar'}.
+   * `source` is #btn.
+   * `caller` is #div.
+   * `event` is a "click" Event object.
+   * `trust` depends on whether this action was a result of a user gesture.
+   * `targetType` is "amp-form".
+   * `index` is 0.
+   *
+   * @param {!Node} target Element whose action is being invoked.
+   * @param {string} method Name of the action being invoked.
+   * @param {?JsonObject} args Named action arguments.
+   * @param {?Element} source Element that generated the `event`.
+   * @param {?Element} caller Element that contains the invoked handler.
+   * @param {?ActionEventDef} event The event that triggered this action.
+   * @param {ActionTrust} trust The trust level of this invocation's trigger.
+   * @param {string} targetType The global target name or the element tagName.
+   * @param {number} index Position in a sequence of actions.
    */
-  constructor(target, method, args, source, caller, event, trust) {
+  constructor(target, method, args, source, caller, event, trust,
+    targetType = null, index = 0) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
@@ -167,6 +185,10 @@ export class ActionInvocation {
     this.event = event;
     /** @const {ActionTrust} */
     this.trust = trust;
+    /** @const {string} */
+    this.targetType = targetType || target.tagName;
+    /** @const {number} */
+    this.index = index;
   }
 
   /**
@@ -199,7 +221,6 @@ export class ActionInvocation {
  * @implements {../service.EmbeddableService}
  */
 export class ActionService {
-
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_root
@@ -211,15 +232,27 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
+    /**
+     * Optional whitelist of actions e.g. ["AMP.navigateTo", "amp-form.submit"].
+     * If not null, any actions that are not in the whitelist will be ignored
+     * and throw a user error at invocation time.
+     * @private {?Array<string>}
+     */
+    this.whitelist_ = null;
+
+    /**
+     * Optional custom error message to display when a non-whitelisted action
+     * is invoked.
+     * @private {?string}
+     */
+    this.whitelistErrorMessage_ = null;
+
     /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
 
     /**
-     * @const @private {!Object<string, {
-      *   handler: ActionHandlerDef,
-      *   minTrust: ActionTrust,
-      * }>}
-      */
+     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
+     */
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
@@ -421,24 +454,18 @@ export class ActionService {
     let currentPromise = null;
 
     action.actionInfos.forEach((actionInfo, i) => {
+      const targetType = actionInfo.target;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
-
       const invoke = () => {
-        // Global target, e.g. `AMP`.
-        const globalTarget = this.globalTargets_[actionInfo.target];
-        if (globalTarget) {
-          const invocation = new ActionInvocation(this.root_, actionInfo.method,
-              args, source, action.node, event, trust);
-          return globalTarget(invocation, i, action.actionInfos);
-        }
-
-        // Element target via `id` attribute.
-        const target = this.root_.getElementById(actionInfo.target);
+        // Use `this.root_` as the target for global targets e.g. "AMP".
+        // Otherwise, targetType should be an element id.
+        const target = (this.globalTargets_[targetType]) ?
+          this.root_ : this.root_.getElementById(targetType);
         if (target) {
           const invocation = new ActionInvocation(target, actionInfo.method,
-              args, source, action.node, event, trust);
-          return this.invoke_(invocation, actionInfo);
+              args, source, action.node, event, trust, targetType, i);
+          return this.invoke_(invocation, actionInfo, action.actionInfos);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
@@ -466,23 +493,46 @@ export class ActionService {
   }
 
   /**
+   * Invokes an element-specific action.
+   * For global actions (e.g. "AMP" target), see the `ActionService#action_()`.
    * @param {!ActionInvocation} invocation
    * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
+   * @param {Array<ActionInfoDef>} otherInfos
    * @return {?Promise}
    * @private visible for testing
    */
-  invoke_(invocation, actionInfo) {
-    const target = dev().assertElement(invocation.target);
+  invoke_(invocation, actionInfo, otherInfos = null) {
     const method = invocation.method;
+    const targetType = invocation.targetType;
 
-    // Try a global method handler first.
+    // Check that this action is whitelisted (if a whitelist is set).
+    const whitelist = this.queryWhitelist_();
+    if (whitelist) {
+      const id = `${targetType}.${method}`;
+      if (!whitelist.includes(id)) {
+        const error = `Action (${id}) was not found in the whitelist ` +
+            `(${whitelist}). ` + (this.whitelistErrorMessage_ || '');
+        return Promise.reject(user().error(TAG_, error));
+      }
+    }
+
+    // Handle global targets e.g. "AMP".
+    const globalTarget = this.globalTargets_[targetType];
+    if (globalTarget) {
+      return globalTarget(invocation, invocation.index, otherInfos);
+    }
+
+    // Subsequent handlers assume that invocation target is an Element.
+    const target = dev().assertElement(invocation.target);
+
+    // Handle global actions e.g. "<any-element-id>.toggle".
     const globalMethod = this.globalMethodHandlers_[method];
     if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
       return globalMethod.handler(invocation);
     }
 
+    // Handle element-specific actions.
     const lowerTagName = target.tagName.toLowerCase();
-    // AMP elements.
     if (lowerTagName.substring(0, 4) == 'amp-') {
       if (target.enqueAction) {
         target.enqueAction(invocation);
@@ -578,6 +628,28 @@ export class ActionService {
 
     // Clear cache.
     delete node[ACTION_MAP_];
+  }
+
+  /**
+   * Searches for a meta tag containing whitelist of actions.
+   * <meta name="amp-action-whitelist" content="AMP.setState, amp-form.submit">
+   * @private
+   */
+  queryWhitelist_() {
+    if (this.whitelist_) {
+      return this.whitelist_;
+    }
+    const head = this.ampdoc.getRootNode().head;
+    if (!head) {
+      return null;
+    }
+    const meta = head.querySelector('meta[name="amp-action-whitelist"]');
+    if (!meta) {
+      return null;
+    }
+    this.whitelist_ = meta.getAttribute('content').split(',')
+        .map(action => action.trim());
+    return this.whitelist_;
   }
 
   /**
