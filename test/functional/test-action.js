@@ -27,6 +27,7 @@ import {ActionTrust} from '../../src/action-trust';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
 
 
@@ -1278,6 +1279,42 @@ describes.fakeWin('Core events', {amp: true}, env => {
           });
         }
       }
+    });
+  });
+});
+
+describes.realWin('whitelist', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  let action;
+  let target;
+
+  beforeEach(() => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, AMP.setState',
+    });
+    env.win.document.head.appendChild(meta);
+
+    action = new ActionService(env.ampdoc, env.win.document);
+    target = createExecElement('foo', sandbox.spy());
+  });
+
+  it('should allow whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    action.invoke_(i);
+    expect(target.enqueAction).to.be.calledWithExactly(i);
+  });
+
+  it('should not allow non-whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    allowConsoleError(() => {
+      expect(action.invoke_(i)).to.be.rejectedWith('Action (AMP.print) was ' +
+          'not found in the whitelist (AMP.pushState,AMP.setState).');
     });
   });
 });

@@ -136,10 +136,7 @@ export let ActionEventDef;
 
 /**
  * The structure that contains all details of the action method invocation.
- * @struct
- * @const
- * TODO(dvoytenko): add action arguments here as well.
- * @package For type.
+ * @struct @const @package For type.
  */
 export class ActionInvocation {
   /**
@@ -239,13 +236,6 @@ export class ActionService {
      * @private {?Array<string>}
      */
     this.whitelist_ = null;
-
-    /**
-     * Optional custom error message to display when a non-whitelisted action
-     * is invoked.
-     * @private {?string}
-     */
-    this.whitelistErrorMessage_ = null;
 
     /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
@@ -445,7 +435,6 @@ export class ActionService {
   action_(source, actionEventType, event, trust) {
     const action = this.findAction_(source, actionEventType);
     if (!action) {
-      // TODO(dvoytenko): implement default (catch-all) actions.
       return;
     }
 
@@ -510,9 +499,8 @@ export class ActionService {
     if (whitelist) {
       const id = `${targetType}.${method}`;
       if (!whitelist.includes(id)) {
-        const error = `Action (${id}) was not found in the whitelist ` +
-            `(${whitelist}). ` + (this.whitelistErrorMessage_ || '');
-        return Promise.reject(user().error(TAG_, error));
+        return Promise.reject(user().error(TAG_, `Action (${id}) was not ` +
+            `found in the whitelist (${whitelist}).`));
       }
     }
 
