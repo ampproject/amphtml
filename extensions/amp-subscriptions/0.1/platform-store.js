@@ -56,7 +56,7 @@ export class PlatformStore {
 
     /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign({
-      'supportsViewer': 9,
+      'supportsViewer': 10,
     }, scoreConfig);
   }
 
