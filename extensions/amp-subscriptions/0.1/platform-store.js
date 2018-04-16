@@ -212,8 +212,8 @@ export class PlatformStore {
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return /** @type {!Promise<!Entitlement>}*/ (Promise.resolve(
-          this.grantStatusEntitlementPromise_));
+      return /** @type {!Promise<!Entitlement>}*/ (
+        this.grantStatusEntitlementPromise_);
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
