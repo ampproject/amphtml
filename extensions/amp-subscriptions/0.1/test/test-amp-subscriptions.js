@@ -210,7 +210,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         expect(localPlatform).to.be.not.null;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
-          expect(selectPlatformStub).to.be.calledWith(true);
+          expect(selectPlatformStub).to.be.called;
           expect(analyticsEventStub).to.be.calledWith(
               SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
               {
@@ -230,7 +230,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
-          expect(selectPlatformStub).to.be.calledWith(false);
+          expect(selectPlatformStub).to.be.called;
         });
       });
     });
@@ -274,6 +274,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.startAuthorizationFlow_(false);
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.not.be.called;
+    });
+  });
+
+  describe('initializeStoreAndLocalPlatform_', () => {
+    it('should initiate platform store and local with all configs', () => {
+      const services = ['service1', 'service2'];
+      const localPlatformStub = sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformConfig_ = serviceConfig;
+      subscriptionService.initializeStoreAndLocalPlatform_(services);
+      expect(subscriptionService.platformStore_.serviceIds_)
+          .to.deep.equal(services);
+      expect(localPlatformStub).to.have.been.called;
     });
   });
 
