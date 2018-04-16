@@ -314,7 +314,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     // Disallow all actions in a (standalone) story.
-    const actions = Services.actionServiceForDoc(this.getAmpdoc());
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
     actions.setWhitelist([]);
   }
 

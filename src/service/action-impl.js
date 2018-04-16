@@ -28,6 +28,7 @@ import {
 } from '../service';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
+import {reportError} from '../error';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -379,7 +380,7 @@ export class ActionService {
   execute(target, method, args, source, caller, event, trust) {
     const invocation = new ActionInvocation(
         target, method, args, source, caller, event, trust);
-    this.invoke_(invocation, /* actionInfo */ null);
+    this.invoke_(invocation);
   }
 
   /**
@@ -446,16 +447,14 @@ export class ActionService {
     if (!action) {
       return;
     }
-
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
     let currentPromise = null;
-
     action.actionInfos.forEach((actionInfo, i) => {
       const targetType = actionInfo.target;
       // Replace any variables in args with data in `event`.
       const args = dereferenceExprsInArgs(actionInfo.args, event);
-      const invoke = () => {
+      const invokeAction = () => {
         // Use `this.root_` as the target for global targets e.g. "AMP".
         // Otherwise, targetType should be an element id.
         const target = (this.globalTargets_[targetType]) ?
@@ -463,43 +462,41 @@ export class ActionService {
         if (target) {
           const invocation = new ActionInvocation(target, actionInfo.method,
               args, source, action.node, event, trust, targetType, i);
-          return this.invoke_(invocation, actionInfo, action.actionInfos);
+          return this.invoke_(invocation, action.actionInfos);
         } else {
-          this.actionInfoError_('target not found', actionInfo, target);
+          this.error_(`Target ("#${targetType}") not found for ` +
+              `action [${actionInfo.str}].`);
         }
       };
-
-      // Wait for the previous action, if applicable.
+      // Wait for the previous action, if any.
       currentPromise = (currentPromise)
-        ? currentPromise.then(invoke)
-        : invoke();
+        ? currentPromise.then(invokeAction)
+        : invokeAction();
     });
   }
 
   /**
-   * The errors that are a result of action definition.
-   * @param {string} s
-   * @param {?ActionInfoDef} actionInfo
-   * @param {?Element} target
+   * @param {string} message
+   * @param {!Element=} opt_element
    * @private
    */
-  actionInfoError_(s, actionInfo, target) {
-    // Method not found "activate" on ' + target
-    user().assert(false, 'Action Error: ' + s +
-        (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
-        (target ? ' on [' + target + ']' : ''));
+  error_(message, opt_element) {
+    if (opt_element) {
+      // reportError() supports displaying the element in dev console.
+      reportError(user().createError(`[${TAG_}] ${message}`), opt_element);
+    } else {
+      user().error(TAG_, message);
+    }
   }
 
   /**
-   * Invokes an element-specific action.
-   * For global actions (e.g. "AMP" target), see the `ActionService#action_()`.
    * @param {!ActionInvocation} invocation
-   * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
-   * @param {Array<ActionInfoDef>} otherInfos
+   * @param {?Array<ActionInfoDef>} actionInfos
    * @return {?Promise}
-   * @private visible for testing
+   * @private
+   * @visibleForTesting
    */
-  invoke_(invocation, actionInfo, otherInfos = null) {
+  invoke_(invocation, actionInfos = null) {
     const method = invocation.method;
     const targetType = invocation.targetType;
 
@@ -516,7 +513,7 @@ export class ActionService {
     // Handle global targets e.g. "AMP".
     const globalTarget = this.globalTargets_[targetType];
     if (globalTarget) {
-      return globalTarget(invocation, invocation.index, otherInfos);
+      return globalTarget(invocation, invocation.index, actionInfos);
     }
 
     // Subsequent handlers assume that invocation target is an Element.
@@ -534,10 +531,9 @@ export class ActionService {
       if (target.enqueAction) {
         target.enqueAction(invocation);
       } else {
-        this.actionInfoError_('Unrecognized AMP element "' +
-            lowerTagName + '". ' +
-            'Did you forget to include it via <script custom-element>?',
-        actionInfo, target);
+        const message = `Unrecognized AMP element "${lowerTagName}". ` +
+          'Did you forget to include it via <script custom-element>?';
+        this.error_(message, invocation.target);
       }
       return null;
     }
@@ -561,9 +557,9 @@ export class ActionService {
       return null;
     }
 
-    // Unsupported target.
-    this.actionInfoError_('Target element does not support provided action',
-        actionInfo, target);
+    // Unsupported method.
+    this.error_(`Target (${targetType}) doesn't support "${method}" action.`,
+        invocation.caller);
 
     return null;
   }
