@@ -491,7 +491,9 @@ export class ActionService {
 
   /**
    * @param {!ActionInvocation} invocation
-   * @param {?Array<ActionInfoDef>} actionInfos
+   * @param {?Array<ActionInfoDef>} actionInfos Array of infos for all actions
+   *   being invoked during this sequence (when multiple actions are triggered).
+   *   TODO(choumx): Remove this param by moving setState limit into this file.
    * @return {?Promise}
    * @private
    * @visibleForTesting
