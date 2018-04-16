@@ -271,5 +271,84 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('getGrantEntitlement', () => {
+    it('should resolve with existing entitlement with subscriptions', () => {
+
+    });
+
+    it('should resolve with first entitlement with subscriptions', () => {
+
+    });
+
+    it('should resolve with metered entitlement when no '
+        + 'platform is subscribed', () => {
+
+    });
+  });
+
+  describe('saveGrantEntitlement_', () => {
+    it('should save first entitlement', () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+    });
+
+    it('should save firther entitlement if new one has subscription '
+        + 'and last one had metering', () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      const nextMeteredEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local', 'another-product'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      const subscribedMeteredEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local', 'another-product'],
+        subscriptionToken: 'subscribed',
+        loggedIn: false,
+      });
+      platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+      platformStore.saveGrantEntitlement_(nextMeteredEntitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+      platformStore.saveGrantEntitlement_(subscribedMeteredEntitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(subscribedMeteredEntitlement.json());
+    });
+  });
+
 });
 
