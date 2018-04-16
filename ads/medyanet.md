@@ -21,6 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
   type="medyanet"
+  data-domain="publisher.com"
   data-slot="medyanet/2729856/Medyanet_AMP_AdUnit">
 </amp-ad>
 ```
@@ -32,3 +33,4 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Required parameters
 
 - `data-slot`
+- `data-domain`
