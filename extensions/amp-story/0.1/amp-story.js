@@ -185,12 +185,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+    registerServiceBuilder(
+        this.win, 'story-store-v01', () => this.storeService_);
 
     /** @private @const {!AmpStoryRequestService} */
     this.requestService_ = new AmpStoryRequestService(this.win, this.element);
     registerServiceBuilder(
-        this.win, 'story-request', () => this.requestService_);
+        this.win, 'story-request-v01', () => this.requestService_);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
@@ -230,7 +231,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
-        this.win, 'story-variable', () => this.variableService_.get());
+        this.win, 'story-variable-v01', () => this.variableService_.get());
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
@@ -286,8 +287,8 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
-    registerServiceBuilder(this.win, 'localization',
-        () => this.localizationService_);
+    registerServiceBuilder(
+        this.win, 'localization-v01', () => this.localizationService_);
   }
 
 

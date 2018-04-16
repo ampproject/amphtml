@@ -191,7 +191,7 @@ export class ShareWidget {
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win);
+    this.requestService_ = Services.storyRequestServiceV01(this.win);
   }
 
   /** @param {!Window} win */
@@ -208,7 +208,7 @@ export class ShareWidget {
 
     this.ampdoc_ = ampdoc;
     this.localizationServicePromise_ =
-        Services.localizationServiceForOrNull(this.win);
+        Services.localizationServiceForOrNullV01(this.win);
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
