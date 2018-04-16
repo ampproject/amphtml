@@ -112,7 +112,7 @@ In this case the image in fades in over a duration of 1500ms.
 
 ### fade-in-scroll (experimental)
 
-The `fade-in-scroll` effect allows you to change the opacity of an element as it scrolls within the viewport. This creates a scroll dependent fade animation.
+The `fade-in-scroll` effect allows you to change the opacity of an element as it scrolls within the viewport. This creates a scroll dependent fade animation. By default once the element is fully visible we don't animate the opacity anymore. 
 
 ##### data-margin-start (optional)
 
@@ -121,6 +121,11 @@ This parameter determines when to start the animation. The value specified in `<
 ##### data-margin-end (optional)
 
 This parameter determines when to stop the animation. The value specified in `<percent>` dictates that the animation should have finished when the specified amount of the element being targetted is visible. The default value is `X%`
+
+##### data-repeat (optional)
+
+By default once the element is fully visible we don't animate the opacity anymore. If you want the opacity to change with the scroll, even when the element has fully loaded, specify this variable on the animation. 
+
 
 #### Example: Main image fade in
 

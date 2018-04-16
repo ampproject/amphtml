@@ -150,6 +150,10 @@ export class FxElement {
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?
       element.getAttribute('data-duration') : '1000ms';
+
+    /** @private {boolean} */
+    this.hasRepeat_ = element.hasAttribute('data-repeat');
+
   }
 
   /**
@@ -273,6 +277,13 @@ export class FxElement {
    */
   isMutateScheduled() {
     return this.mutateScheduled_;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  hasRepeat() {
+    return this.hasRepeat_;
   }
 
   /**

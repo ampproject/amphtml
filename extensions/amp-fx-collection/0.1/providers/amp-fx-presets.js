@@ -147,6 +147,10 @@ export const Presets = {
         return;
       }
 
+      // Early exit if the animation doesn't need to repeat and it is fully opaque.
+      if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
+        return;
+      }
       // Translate the element offset pixels.
       const top = entry.positionRect.top;
       const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
