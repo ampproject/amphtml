@@ -69,10 +69,8 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
    * @private
    */
   checkAndRemoveLayerIfOnFirstPage_() {
-    const IS_ON_FIRST_PAGE_SELECTOR =
-        'amp-story-page:first-of-type amp-story-cta-layer';
     if (matches(this.element,
-        IS_ON_FIRST_PAGE_SELECTOR)) {
+        'amp-story-page:first-of-type amp-story-cta-layer')) {
       this.element.remove();
       console.error(
           'amp-story-cta-layer is not allowed on the first page of an ' +
