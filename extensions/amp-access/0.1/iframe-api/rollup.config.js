@@ -9,6 +9,7 @@ export default {
   dest: 'dist/index.js',
   plugins: [
     babel({
+      babelrc: false,
       plugins: ['external-helpers'],
       externalHelpers: true,
     }),
