@@ -317,7 +317,7 @@ describe('FixedLayer', () => {
         expect(html.trim()).to.equal('<i-amphtml-fpa style="display: none" />');
         this.firstElementChild = createElement('i-amphtml-fpa');
         this.firstElementChild.style.display = 'none';
-      }
+      },
     };
     return elem;
   }

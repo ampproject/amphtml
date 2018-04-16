@@ -53,7 +53,7 @@ module.exports = function(context) {
           'The template MUST be static only.');
     }
 
-    const template = quasi.quasis[0]
+    const template = quasi.quasis[0];
     const string = template.value.cooked;
     if (!string) {
       context.report(template, 'Illegal escape sequence detected in template' +
