@@ -96,7 +96,7 @@ This parameter lets you vary the animation's speed over the course of its durati
 * “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
 or specify a `custom-bezier()` input
 
-##### data-margin
+##### data-margin-start
 
 This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `5%`
 

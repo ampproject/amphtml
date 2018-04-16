@@ -123,8 +123,8 @@ export class FxElement {
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
     /** @private {number} */
-    this.margin_ = element.hasAttribute('data-margin') ?
-      parseFloat(element.getAttribute('data-margin')) : 0.05;
+    this.marginStart_ = element.hasAttribute('data-margin-start') ?
+      parseFloat(element.getAttribute('data-margin-start')) : 0.05;
 
     /** @private {number} */
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
@@ -209,8 +209,8 @@ export class FxElement {
   /**
    * @returns {number}
    */
-  getMargin() {
-    return this.margin_;
+  getMarginStart() {
+    return this.marginStart_;
   }
 
   /**
