@@ -21,30 +21,26 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function videonow(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
-  global._videonow_amp = {
-    allowed_data: ['pid'],
-    mandatory_data: ['pid'],
-    data,
-  };
+  const mandatoryAttributes = ['pid', 'width', 'height'];
+  const optionalAttributes = ['kind', 'src'];
 
-  validateData(data,
-      global._videonow_amp.mandatory_data, global._videonow_amp.allowed_data);
+  validateData(data, mandatoryAttributes, optionalAttributes);
 
   const profileId = data.pid || 1;
-  const src = data.src || 'prod';
+  const kind = data.type || 'prod';
 
   // production version by default
-  let script = 'http://static.videonow.ru/dev/vn_init_module.js?profileId=' + profileId;
+  let script = (data.src && decodeURI(data.src)) ||
+      ('https://static.videonow.ru/dev/vn_init_module.js?profileId=' + profileId);
 
-  if (src === 'local') {
-    script = 'http://localhost:8085/vn_init.js?profileId=' +
-        profileId + '&url=' + encodeURIComponent('http://localhost:8085/init');
-  } else if (src === 'dev') {
+  if (kind === 'local') {
+    script = 'https://localhost:8085/vn_init.js?profileId=' + profileId +
+        '&url=' + encodeURIComponent('https://localhost:8085/init');
+  } else if (kind === 'dev') {
     // this part can be changed late
-    script = 'http://static.videonow.ru/dev/vn_init_module.js?profileId=' +
-        profileId + '&url=' +
-        encodeURIComponent('http://data.videonow.ru/?init');
+    script = 'https://static.videonow.ru/dev/vn_init_module.js?profileId=' +
+        profileId +
+        '&url=' + encodeURIComponent('https://data.videonow.ru/?init');
   }
 
   loadScript(global, script);

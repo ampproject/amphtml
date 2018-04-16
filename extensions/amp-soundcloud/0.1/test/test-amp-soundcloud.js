@@ -105,7 +105,9 @@ describes.realWin('amp-soundcloud', {
   });
 
   it('renders data-trackid', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-trackid attribute is required for/);
+    allowConsoleError(() => {
+      expect(getIns('')).to.be.rejectedWith(
+          /The data-trackid attribute is required for/);
+    });
   });
 });

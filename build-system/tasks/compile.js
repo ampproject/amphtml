@@ -145,8 +145,6 @@ function compile(entryModuleFilenames, outputDir,
       'build/fake-module/**/*.js',
       'build/patched-module/**/*.js',
       'build/experiments/**/*.js',
-      // Strange access/login related files.
-      'build/all/v0/*.js',
       // A4A has these cross extension deps.
       'extensions/amp-ad-network*/**/*-config.js',
       'extensions/amp-ad/**/*.js',
@@ -164,8 +162,16 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-access/**/*.js',
       // Needed for AmpStoryVariableService
       'extensions/amp-story/**/*.js',
+      // Needed for SubscriptionsService
+      'extensions/amp-subscriptions/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
+      // Needed for VideoService
+      'extensions/amp-video-service/**/*.js',
+      // Needed to access ConsentPolicyManager from other extensions
+      'extensions/amp-consent/**/*.js',
+      // Needed for AmpViewerIntegrationVariableService
+      'extensions/amp-viewer-integration/**/*.js',
       'src/*.js',
       'src/!(inabox)*/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
@@ -179,11 +185,13 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
+      'third_party/subscriptions-project/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/rrule/rrule.js',
       'third_party/react-dates/bundle.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
+      'node_modules/web-activities/activity-ports.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.node.js',
       // 'node_modules/core-js/modules/**.js',
@@ -289,6 +297,7 @@ function compile(entryModuleFilenames, outputDir,
         hide_warnings_for: [
           'third_party/caja/',
           'third_party/closure-library/sha384-generated.js',
+          'third_party/subscriptions-project/',
           'third_party/d3/',
           'third_party/mustache/',
           'third_party/vega/',
@@ -334,7 +343,8 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red('Compiler error:\n') +
+          console./* OK*/error(colors.red(
+              'Compiler error for ' + outputFilename + ':\n') +
               formatClosureCompilerError(err.message));
           process.exit(1);
         });

@@ -15,6 +15,7 @@
  */
 
 import {dashToUnderline} from '../src/string';
+import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
 import {user} from '../src/log';
@@ -49,10 +50,20 @@ function getPostContainer(global, data) {
     setStyle(c, 'text-align', 'center');
   }
   const container = global.document.createElement('div');
-  const embedAs = data.embedAs || 'post';
+  let embedAs = data.embedAs || 'post';
   user().assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
+  // If the user hasn't set the `data-embed-as` attribute and the provided href
+  // is a video, Force the `data-embed-as` attribute to 'video' and make sure
+  // to show the post's text.
+  if (data.href.match(/\/videos\/\d+\/?$/) && !data.embedAs) {
+    embedAs = 'video';
+    container.setAttribute('data-embed-as', 'video');
+    // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'
+    // to 'true' enables the ability to see the text (changed from the default 'false')
+    container.setAttribute('data-show-text', 'true');
+  }
   container.className = 'fb-' + embedAs;
   container.setAttribute('data-href', data.href);
   return container;
@@ -71,11 +82,10 @@ function getPageContainer(global, data) {
   container.setAttribute('data-href', data.href);
   container.setAttribute('data-tabs', data.tabs);
   container.setAttribute('data-hide-cover', data.hideCover);
-  container.setAttribute('data-show-facepile', data.showFacePile);
+  container.setAttribute('data-show-facepile', data.showFacepile);
   container.setAttribute('data-hide-cta', data.hideCta);
   container.setAttribute('data-small-header', data.smallHeader);
-  container.setAttribute(
-      'data-adapt-container-width', data.adaptContainerWidth);
+  container.setAttribute('data-adapt-container-width', true);
   return container;
 }
 
@@ -150,5 +160,12 @@ export function facebook(global, data) {
     });
 
     FB.init({xfbml: true, version: 'v2.5'});
+
+    // Report to parent that the SDK has loaded and is ready to paint
+    const message = JSON.stringify(dict({
+      'action': 'ready',
+    }));
+    global.parent. /*OK*/postMessage(message, '*');
+
   }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
 }

@@ -232,7 +232,7 @@ export class WebviewViewerForTesting {
       case 'tick':
       case 'sendCsi':
       case 'scroll':
-      case 'a2a':
+      case 'a2aNavigate':
       case 'unloaded':
       case 'visibilitychange':
         return;

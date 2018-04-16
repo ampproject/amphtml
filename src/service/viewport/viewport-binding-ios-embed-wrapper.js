@@ -20,7 +20,7 @@ import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {px, setStyle} from '../../style';
+import {px, setImportantStyles} from '../../style';
 import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
@@ -147,6 +147,11 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  supportsPositionFixed() {
+    return true;
+  }
+
+  /** @override */
   onScroll(callback) {
     this.scrollObservable_.add(callback);
   }
@@ -158,7 +163,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
+    setImportantStyles(this.wrapper_, {
+      'padding-top': px(paddingTop),
+    });
   }
 
   /** @override */

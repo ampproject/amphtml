@@ -30,6 +30,39 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 5:00 PM, Mar 22, 2018 UTC
+
+Validator version 322
+
+Rules version 595
+
+Includes:
+ - #13142
+ - #13962
+ - #13978
+ - #14005
+ - #13810
+ - #13782
+ - #14040
+ - #14157
+ - #14127
+
+### 8:00 PM, Mar 12, 2018 UTC
+
+Validator version 317
+
+Rules version 566
+
+Includes:
+ - #13184
+ - #13480
+ - #13752
+ - #13773
+ - #13846
+ - #13816
+ - #13883
+ - amp-story-auto-ads
+ 
 ### 11:00 PM, Feb 7, 2018 UTC
 
 Validator version 317

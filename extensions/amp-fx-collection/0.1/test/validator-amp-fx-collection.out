@@ -34,5 +34,10 @@ PASS
 |    <div>
 |      <h1 amp-fx="parallax"></h1>
 |    </div>
+|    <div amp-fx="fade-in"></div>
+|    <amp-img amp-fx="fade-in" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|    <div>
+|      <h1 amp-fx="fade-in"></h1>
+|    </div>
 |  </body>
 |  </html>

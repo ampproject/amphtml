@@ -15,11 +15,16 @@
  */
 
 const colors = require('ansi-colors');
-const execAsync = require('./exec').execAsync;
+const exec = require('./exec').exec;
+const execScriptAsync = require('./exec').execScriptAsync;
 const log = require('fancy-log');
 
 const green = colors.green;
 const cyan = colors.cyan;
+
+const killCmd =
+    (process.platform == 'win32') ? 'taskkill /f /pid' : 'kill -KILL';
+const killSuffix = (process.platform == 'win32') ? '>NUL' : '';
 
 /**
  * Creates an async child process that handles Ctrl + C and immediately cancels
@@ -32,8 +37,6 @@ exports.createCtrlcHandler = function(command) {
     log(green('Running'), cyan(command) + green('. Press'), cyan('Ctrl + C'),
         green('to cancel...'));
   }
-  const killCmd =
-      (process.platform == 'win32') ? 'taskkill /pid' : 'kill -KILL';
   const killMessage = green('\nDetected ') + cyan('Ctrl + C') +
       green('. Canceling ') + cyan(command) + green('.');
   const listenerCmd = `
@@ -46,7 +49,7 @@ exports.createCtrlcHandler = function(command) {
     trap 'ctrlcHandler' INT
     read _ # Waits until the process is terminated
   `;
-  return execAsync(
+  return execScriptAsync(
       listenerCmd, {'stdio': [null, process.stdout, process.stderr]}).pid;
 };
 
@@ -56,5 +59,6 @@ exports.createCtrlcHandler = function(command) {
  * @param {string} handlerProcess
  */
 exports.exitCtrlcHandler = function(handlerProcess) {
-  process.kill(handlerProcess, 'SIGKILL');
+  const exitCmd = killCmd + ' ' + handlerProcess + ' ' + killSuffix;
+  exec(exitCmd);
 };

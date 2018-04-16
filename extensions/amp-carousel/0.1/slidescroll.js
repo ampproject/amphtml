@@ -22,8 +22,6 @@ import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {getStyle, setStyle} from '../../../src/style';
-import {isConnectedNode} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
@@ -123,10 +121,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap') &&
-        startsWith(
-            Services.platformFor(this.win).getIosVersionString(), '10.3');
+    this.shouldDisableCssSnap_ = startsWith(
+        Services.platformFor(this.win).getIosVersionString(), '10.3');
   }
 
   /** @override */
@@ -185,10 +181,6 @@ export class AmpSlideScroll extends BaseSlides {
       slideWrapper.classList.add('i-amphtml-slide-item');
       this.slidesContainer_.appendChild(slideWrapper);
 
-      // Slides must only be re-parented to DOM-connected nodes to avoid
-      // errors when used in a shadow document (#9291).
-      dev().assert(isConnectedNode(slideWrapper),
-          'Slides must only be re-parented to connected nodes.');
       slideWrapper.appendChild(slide);
 
       this.slideWrappers_.push(slideWrapper);
@@ -210,7 +202,7 @@ export class AmpSlideScroll extends BaseSlides {
       if (args) {
         this.showSlideWhenReady(args['index']);
       }
-    }, ActionTrust.HIGH);
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -483,7 +475,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      //TODO (camelburrito): Identify more platforms that require
+      // TODO(amphtml): Identify more platforms that require
       // i-amphtml-no-scroll.
       if (this.isIos_) {
         // Make the container non scrollable to stop scroll events.

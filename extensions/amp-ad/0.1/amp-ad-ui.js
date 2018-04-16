@@ -32,7 +32,10 @@ export class AmpAdUIHandler {
     this.doc_ = baseInstance.win.document;
 
     if (!baseInstance.getFallback()) {
-      this.addDefaultUiComponent_('fallback');
+      const fallback = this.addDefaultUiComponent_('fallback');
+      if (fallback) {
+        this.baseInstance_.element.appendChild(fallback);
+      }
     }
   }
 
@@ -55,8 +58,8 @@ export class AmpAdUIHandler {
       return;
     }
     // The order here is collapse > user provided fallback > default fallback
-    this.baseInstance_.attemptCollapse().then(() => {}, () => {
-      this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.attemptCollapse().catch(() => {
+      this.baseInstance_.mutateElement(() => {
         this.baseInstance_.togglePlaceholder(false);
         this.baseInstance_.toggleFallback(true);
       });
@@ -68,7 +71,7 @@ export class AmpAdUIHandler {
    * Note: No need to togglePlaceholder here, unlayout show it by default.
    */
   applyUnlayoutUI() {
-    this.baseInstance_.deferMutate(() => {
+    this.baseInstance_.mutateElement(() => {
       this.baseInstance_.toggleFallback(false);
     });
   }
@@ -93,7 +96,6 @@ export class AmpAdUIHandler {
     content.setAttribute('data-ad-holder-text', 'Ad');
     uiComponent.appendChild(content);
 
-    this.baseInstance_.element.appendChild(uiComponent);
     return uiComponent;
   }
 

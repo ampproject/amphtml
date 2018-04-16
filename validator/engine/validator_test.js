@@ -702,6 +702,35 @@ describe('ValidatorRulesMakeSense', () => {
             .toBe(true);
       });
     }
+    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1))) {
+      // AMP4EMAIL format is the source of this whitelist.
+      const whitelistedAmp4EmailExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-ANIM': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-IMG': 0,
+        'AMP-IMAGE-LIGHTBOX': 0,
+        'AMP-LIGHTBOX': 0,
+        'AMP-LIST': 0,
+        'AMP-SELECTOR': 0,
+        'AMP-SIDEBAR': 0,
+        'AMP-STATE': 0,
+        'AMP-TIMEAGO': 0,
+      };
+      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
+             ' set for AMP4EMAIL but ' + tagSpec.tagName +
+             ' is not whitelisted' +
+             ' for AMP4EMAIL',
+         () => {
+           expect(
+               whitelistedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
+               .toBe(true);
+         });
+    }
     // mandatory_parent
     if (tagSpec.mandatoryParent !== null) {
       it('mandatory parent tag name defined', () => {
@@ -896,21 +925,25 @@ describe('ValidatorRulesMakeSense', () => {
     }
   }
 
-  // satisfies and requires need to match up
+  // satisfies needs to match up with requires and excludes
   var allSatisfies = [];
-  var allRequires = [];
+  var allRequiresAndExcludes = [];
   for (const tagSpec of rules.tags) {
     for (const condition of tagSpec.requires) {
-      allRequires.push(condition);
+      allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.satisfies)
+    for (const condition of tagSpec.excludes) {
+      allRequiresAndExcludes.push(condition);
+    }
+    for (const condition of tagSpec.satisfies) {
       allSatisfies.push(condition);
+    }
   }
   sortAndUniquify(allSatisfies);
-  sortAndUniquify(allRequires);
+  sortAndUniquify(allRequiresAndExcludes);
   it('all conditions are both required and satisfied', ()=> {
-    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
-    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+    expect(subtractDiff(allSatisfies, allRequiresAndExcludes)).toEqual([]);
+    expect(subtractDiff(allRequiresAndExcludes, allSatisfies)).toEqual([]);
   });
 
   // attr_specs within rules.

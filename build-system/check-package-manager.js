@@ -16,7 +16,10 @@
 'use strict';
 
 const getStdout = require('./exec').getStdout;
+const https = require('https');
+
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
+const nodeScheduleUrl = 'https://raw.githubusercontent.com/nodejs/Release/master/schedule.json';
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -27,13 +30,47 @@ function yellow(text) {return '\x1b[33m' + text + '\x1b[0m';}
 /**
  * @fileoverview Makes sure that packages are being installed via yarn
  */
-function main() {
-  // Yarn is already used by default on Travis, so there is nothing more to do.
-  if (process.env.TRAVIS) {
-    return 0;
-  }
 
-  // If npm is being run, print a message and cause 'npm install' to fail.
+function startVersionChecks() {
+  https.get(nodeScheduleUrl, res => {
+    res.setEncoding('utf8');
+    let schedule = '';
+    res.on('data', data => {
+      schedule += data;
+    });
+    res.on('end', () => {
+      continueVersionChecks(schedule);
+    });
+  });
+}
+
+function continueVersionChecks(schedule) {
+  const scheduleJson = JSON.parse(schedule);
+  const latestLtsMajorVersion = getNodeLatestLtsMajorVersion(scheduleJson);
+  performNodeVersionCheck(latestLtsMajorVersion);
+  performYarnVersionCheck();
+}
+
+function getNodeLatestLtsMajorVersion(scheduleJson) {
+  const versions = Object.keys(scheduleJson);
+  let latestLtsMajorVersion = '';
+  versions.forEach(version => {
+    const lts = scheduleJson[version]['lts'];
+    const maintenance = scheduleJson[version]['maintenance'];
+    if (lts && maintenance) {
+      const ltsDate = Date.parse(lts);
+      const maintenanceDate = Date.parse(maintenance);
+      const today = new Date();
+      if (today >= ltsDate && today < maintenanceDate) {
+        latestLtsMajorVersion = version;
+      }
+    }
+  });
+  return latestLtsMajorVersion;
+}
+
+// If npm is being run, print a message and cause 'npm install' to fail.
+function ensureYarn() {
   if (process.env.npm_execpath.indexOf('yarn') === -1) {
     console.log(red(
         '*** The AMP project uses yarn for package management ***'), '\n');
@@ -52,30 +89,36 @@ function main() {
     console.log(cyan('$'), 'yarn remove [package_name]', '\n');
     console.log(yellow('For detailed instructions, see'),
         cyan(setupInstructionsUrl), '\n');
-    return 1;
+    process.exit(1);
   }
+}
 
-  // Perform a node version check and print a warning if it is < v6 or == v7.
+// Check the node version and print a warning if it is not the latest LTS.
+function performNodeVersionCheck(latestLtsMajorVersion) {
   const nodeVersion = getStdout('node --version').trim();
-  let majorVersion = nodeVersion.split('.')[0];
-  if (majorVersion.charAt(0) === 'v') {
-    majorVersion = majorVersion.slice(1);
+  const nodeMajorVersion = nodeVersion.split('.')[0];
+  if (latestLtsMajorVersion === '') {
+    console.log(yellow('WARNING: Something went wrong. ' +
+        'Could not determine latest LTS node version.'));
   }
-  majorVersion = parseInt(majorVersion, 10);
-  if (majorVersion < 6 || majorVersion == 7) {
+  if (latestLtsMajorVersion !== '' &&
+      nodeMajorVersion !== latestLtsMajorVersion) {
     console.log(yellow('WARNING: Detected node version'),
-        cyan(nodeVersion) + yellow('. Recommended version is'),
-        cyan('v6') + yellow('.'));
+        cyan(nodeMajorVersion) +
+        yellow('. Recommended (latest LTS) version is'),
+        cyan(latestLtsMajorVersion) + yellow('.'));
     console.log(yellow('To fix this, run'),
-        cyan('"nvm install 6"'), yellow('or see'),
+        cyan('"nvm install --lts"'), yellow('or see'),
         cyan('https://nodejs.org/en/download/package-manager'),
         yellow('for instructions.'));
   } else {
     console.log(green('Detected node version'), cyan(nodeVersion) +
         green('.'));
   }
+}
 
-  // If yarn is being run, perform a version check and proceed with the install.
+// If yarn is being run, perform a version check and proceed with the install.
+function performYarnVersionCheck() {
   const yarnVersion = getStdout('yarn --version').trim();
   const major = parseInt(yarnVersion.split('.')[0], 10);
   const minor = parseInt(yarnVersion.split('.')[1], 10);
@@ -92,7 +135,15 @@ function main() {
     console.log(green('Detected yarn version'), cyan(yarnVersion) +
         green('. Installing packages...'));
   }
-  return 0;
 }
 
-process.exit(main());
+function main() {
+  // Yarn is already used by default on Travis, so there is nothing more to do.
+  if (process.env.TRAVIS) {
+    return 0;
+  }
+  ensureYarn();
+  startVersionChecks();
+}
+
+main();

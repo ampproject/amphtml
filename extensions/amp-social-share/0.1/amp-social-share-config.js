@@ -79,7 +79,7 @@ const BUILTINS = dict({
     },
   },
   'whatsapp': {
-    'shareEndpoint': 'whatsapp://send',
+    'shareEndpoint': 'https://api.whatsapp.com/send',
     'defaultParams': {
       'text': 'TITLE - CANONICAL_URL',
     },

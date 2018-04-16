@@ -37,6 +37,7 @@ const green = colors.green;
 const yellow = colors.yellow;
 const cyan = colors.cyan;
 const red = colors.red;
+const bold = colors.bold;
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
@@ -84,9 +85,9 @@ function getConfig() {
         'SL_Safari_9',
         'SL_iOS_latest',
         'SL_iOS_10_0',
-        'SL_iOS_9_1',
-        'SL_Edge_latest',
-        'SL_IE_11',
+        // TODO(rsimha, #14374): Re-enable these after upgrading wd.
+        // 'SL_Edge_latest',
+        // 'SL_IE_11',
       ] : [
         // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
@@ -357,9 +358,19 @@ function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
+  // reporter, since it likely contains copious amounts of logs.
+  const shouldCollapseSummary =
+      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  const sectionMarker =
+      (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
+
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
+    if (shouldCollapseSummary) {
+      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+    }
     server.emit('kill');
     if (exitCode) {
       log(
@@ -377,8 +388,14 @@ function runTests() {
     } else {
       console./* OK*/log(green('Running tests locally...'));
     }
+  }).on('run_complete', function() {
+    if (shouldCollapseSummary) {
+      console./* OK*/log(bold(red('Console errors:')),
+          'Expand this section and fix all errors printed by your tests.');
+      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
+    }
   }).on('browser_complete', function(browser) {
-    if (argv.saucelabs || argv.saucelabs_lite) {
+    if (shouldCollapseSummary) {
       const result = browser.lastResult;
       let message = '\n' + browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +

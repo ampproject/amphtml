@@ -42,6 +42,11 @@ import {urls} from './config';
  */
 const CANCELLED = 'CANCELLED';
 
+/**
+ * @const {string}
+ */
+const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
+
 
 /**
  * The threshold for errors throttled because nothing can be done about
@@ -233,6 +238,32 @@ export function isCancellation(errorOrMessage) {
   }
   return false;
 }
+
+/**
+ * Returns an error for component blocked by consent
+ * @return {!Error}
+ */
+export function blockedByConsentError() {
+  return new Error(BLOCK_BY_CONSENT);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isBlockedByConsent(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, BLOCK_BY_CONSENT);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, BLOCK_BY_CONSENT);
+  }
+  return false;
+}
+
 
 /**
  * Install handling of global unhandled exceptions.

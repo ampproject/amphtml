@@ -70,8 +70,10 @@ describes.realWin('amp-vk', {
   it('requires data-embedtype', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['embedtype'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-embedtype attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-embedtype attribute is required for/);
+    });
   });
 
   it('removes iframe after unlayoutCallback', () => {
@@ -91,22 +93,28 @@ describes.realWin('amp-vk', {
   it('post::requires data-hash', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['hash'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-hash attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-hash attribute is required for/);
+    });
   });
 
   it('post::requires data-owner-id', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['owner-id'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-owner-id attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-owner-id attribute is required for/);
+    });
   });
 
   it('post::requires data-post-id', () => {
     const params = Object.assign({}, POST_PARAMS);
     delete params['post-id'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-post-id attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-post-id attribute is required for/);
+    });
   });
 
   it('post::renders iframe in amp-vk', () => {
@@ -149,15 +157,19 @@ describes.realWin('amp-vk', {
   it('poll::requires data-api-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
     delete params['api-id'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-api-id attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-api-id attribute is required for/);
+    });
   });
 
   it('poll::requires data-poll-id', () => {
     const params = Object.assign({}, POLL_PARAMS);
     delete params['poll-id'];
-    return createAmpVkElement(params).should.eventually.be.rejectedWith(
-        /The data-poll-id attribute is required for/);
+    allowConsoleError(() => {
+      return createAmpVkElement(params).should.eventually.be.rejectedWith(
+          /The data-poll-id attribute is required for/);
+    });
   });
 
   it('poll::renders iframe in amp-vk', () => {

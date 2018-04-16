@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
+import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
@@ -46,6 +48,20 @@ export class AmpList extends AMP.BaseElement {
     /** @private {boolean} */
     this.fallbackDisplayed_ = false;
 
+    /**
+     * Maintains invariant that only one fetch result may be processed for
+     * render at a time.
+     * @const @private {!../../../src/pass.Pass}
+     */
+    this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
+
+    /**
+     * Latest fetched items to render and the promise resolver and rejecter
+     * to be invoked on render success or fail, respectively.
+     * @private {?{items:!Array, resolver:!Function, rejecter:!Function}}
+     */
+    this.renderItems_ = null;
+
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
@@ -55,8 +71,17 @@ export class AmpList extends AMP.BaseElement {
      */
     this.layoutCompleted_ = false;
 
-    /** @const @private {string} */
-    this.initialSrc_ = element.getAttribute('src');
+    /**
+     * The `src` attribute's initial value.
+     * @private {?string}
+     */
+    this.initialSrc_ = null;
+
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.fetchList_();
+      }
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
@@ -66,6 +91,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Store this in buildCallback() because `this.element` sometimes
+    // is missing attributes in the constructor.
+    this.initialSrc_ = this.element.getAttribute('src');
+
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -88,19 +117,7 @@ export class AmpList extends AMP.BaseElement {
   layoutCallback() {
     this.layoutCompleted_ = true;
 
-    const fetch = this.fetchList_();
-    if (this.getFallback()) {
-      fetch.then(() => {
-        // Hide in case fallback was displayed for a previous fetch.
-        this.toggleFallbackInMutate_(false);
-      }, unusedError => {
-        // On fetch success, firstLayoutCompleted() hides placeholder.
-        // On fetch error, hide placeholder if fallback exists.
-        this.togglePlaceholder(false);
-        this.toggleFallbackInMutate_(true);
-      });
-    }
-    return fetch;
+    return this.fetchList_();
   }
 
   /** @override */
@@ -117,7 +134,7 @@ export class AmpList extends AMP.BaseElement {
         }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
-        this.renderItems_(items);
+        this.scheduleRender_(items);
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
       } else {
@@ -125,9 +142,17 @@ export class AmpList extends AMP.BaseElement {
       }
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
-      this.renderItems_(items);
+      this.scheduleRender_(items);
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
+  }
+
+  /**
+   * amp-list reuses the loading indicator when the list is fetched again via bind mutation or refresh action
+   * @override
+   */
+  isLoadingReused() {
+    return true;
   }
 
   /**
@@ -162,6 +187,14 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
+    if (this.element.hasAttribute('reset-on-refresh')) {
+      this.togglePlaceholder(true);
+      this.toggleLoading(true);
+      this.toggleFallbackInMutate_(false);
+      // Remove any previous items before the reload
+      removeChildren(dev().assertElement(this.container_));
+    }
+
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {
@@ -179,21 +212,74 @@ export class AmpList extends AMP.BaseElement {
       if (maxLen < items.length) {
         items = items.slice(0, maxLen);
       }
-      return this.renderItems_(items);
+      return this.scheduleRender_(items);
     }, error => {
       throw user().createError('Error fetching amp-list', error);
+    }).then(() => {
+      if (this.getFallback()) {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }
+      this.togglePlaceholder(false);
+      this.toggleLoading(false);
+    }, error => {
+      this.toggleLoading(false);
+      if (this.getFallback()) {
+        this.toggleFallbackInMutate_(true);
+        this.togglePlaceholder(false);
+      } else {
+        throw error;
+      }
     });
   }
 
   /**
+   * Schedules a fetch result to be rendered in the near future.
    * @param {!Array} items
    * @return {!Promise}
    * @private
    */
-  renderItems_(items) {
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
+  scheduleRender_(items) {
+    let resolver;
+    let rejecter;
+    const promise = new Promise((resolve, reject) => {
+      resolver = resolve;
+      rejecter = reject;
+    });
+    // If there's nothing currently being rendered, schedule a render pass.
+    if (!this.renderItems_) {
+      this.renderPass_.schedule();
+    }
+    this.renderItems_ = {items, resolver, rejecter};
+    return promise;
+  }
+
+  /**
+   * Renders the items stored in `this.renderItems_`. If its value changes
+   * by the time render completes, schedules another render pass.
+   * @private
+   */
+  doRenderPass_() {
+    dev().assert(this.renderItems_, 'Nothing to render.');
+    const current = this.renderItems_;
+    const scheduleNextPass = () => {
+      // If there's a new `renderItems_`, schedule it for render.
+      if (this.renderItems_ !== current) {
+        this.renderPass_.schedule(1); // Allow paint frame before next render.
+      } else {
+        this.renderItems_ = null;
+      }
+    };
+    this.templates_.findAndRenderTemplateArray(this.element, current.items)
         .then(elements => this.updateBindings_(elements))
-        .then(elements => this.rendered_(elements));
+        .then(elements => this.rendered_(elements))
+        .then(/* onFulfilled */ () => {
+          scheduleNextPass();
+          current.resolver();
+        }, /* onRejected */ () => {
+          scheduleNextPass();
+          current.rejecter();
+        });
   }
 
   /**

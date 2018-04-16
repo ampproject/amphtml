@@ -131,7 +131,6 @@ module.exports = {
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
     '!test/coverage/**/*.*',
-    '!test/visual-diff/visual-tests.js',
   ],
   jsonGlobs: [
     '**/*.json',
@@ -144,7 +143,7 @@ module.exports = {
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
-        'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+        'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!validator/dist/**/*.*',
@@ -163,7 +162,6 @@ module.exports = {
     '!examples/*.js',
     '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
-    '!test/visual-diff/visual-tests.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

@@ -87,6 +87,39 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.isConnectedNode(c)).to.be.false;
   });
 
+  it('isConnectedNode (no Node.p.isConnected)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'isConnected');
+    try {
+      delete Node.prototype.isConnected;
+
+      expect(dom.isConnectedNode(document)).to.be.true;
+
+      const a = document.createElement('div');
+      expect(dom.isConnectedNode(a)).to.be.false;
+
+      const b = document.createElement('div');
+      b.appendChild(a);
+
+      document.body.appendChild(b);
+      expect(dom.isConnectedNode(a)).to.be.true;
+
+      const shadow = a.attachShadow({mode: 'open'});
+      const c = document.createElement('div');
+      shadow.appendChild(c);
+      expect(dom.isConnectedNode(c)).to.be.true;
+
+      document.body.removeChild(b);
+      expect(dom.isConnectedNode(c)).to.be.false;
+    } finally {
+      Object.defineProperty(Node.prototype, 'isConnected', desc);
+    }
+  });
+
   it('rootNodeFor', () => {
     const a = document.createElement('div');
     expect(dom.rootNodeFor(a)).to.equal(a);
@@ -98,6 +131,31 @@ describes.sandboxed('DOM', {}, env => {
     const c = document.createElement('div');
     b.appendChild(c);
     expect(dom.rootNodeFor(c)).to.equal(a);
+  });
+
+  it('rootNodeFor (no Node.p.getRootNode)', () => {
+    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
+      return;
+    }
+
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
+        'getRootNode');
+    try {
+      delete Node.prototype.getRootNode;
+
+      const a = document.createElement('div');
+      expect(dom.rootNodeFor(a)).to.equal(a);
+
+      const b = document.createElement('div');
+      a.appendChild(b);
+      expect(dom.rootNodeFor(b)).to.equal(a);
+
+      const c = document.createElement('div');
+      b.appendChild(c);
+      expect(dom.rootNodeFor(c)).to.equal(a);
+    } finally {
+      Object.defineProperty(Node.prototype, 'getRootNode', desc);
+    }
   });
 
   it('closest should find itself', () => {
@@ -772,10 +830,10 @@ describes.sandboxed('DOM', {}, env => {
           .withExactArgs('https://example.com/', '_top')
           .throws(new Error('intentional2'))
           .once();
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         dom.openWindowDialog(windowApi, 'https://example.com/',
             '_blank', 'width=1');
-      }).to.throw(/intentional2/);
+      }).to.throw(/intentional2/); });
     });
 
     it('should retry only non-top target', () => {
@@ -965,8 +1023,10 @@ describes.realWin('DOM', {
 
     it('should not continue if element is not AMP element', () => {
       const element = doc.createElement('div');
-      expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-          'element is not AmpElement');
+      allowConsoleError(() => {
+        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement');
+      });
     });
 
     it('should resolve if element has already upgrade', () => {

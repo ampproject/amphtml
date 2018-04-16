@@ -105,24 +105,24 @@ describe('Layout', () => {
     expect(assertLength('10.1em')).to.equal('10.1em');
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
-    expect(function() {
+    allowConsoleError(() => { expect(function() {
       assertLength('10%');
-    }).to.throw(/Invalid length value/);
-    expect(function() {
+    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => { expect(function() {
       assertLength(10);
-    }).to.throw(/Invalid length value/);
-    expect(function() {
+    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => { expect(function() {
       assertLength('10');
-    }).to.throw(/Invalid length value/);
-    expect(function() {
+    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => { expect(function() {
       assertLength(undefined);
-    }).to.throw(/Invalid length value/);
-    expect(function() {
+    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => { expect(function() {
       assertLength(null);
-    }).to.throw(/Invalid length value/);
-    expect(function() {
+    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => { expect(function() {
       assertLength('');
-    }).to.throw(/Invalid length value/);
+    }).to.throw(/Invalid length value/); });
   });
 
 
@@ -136,21 +136,21 @@ describe('Layout', () => {
     expect(assertLengthOrPercent('10.1vmin')).to.equal('10.1vmin');
     expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
 
-    expect(function() {
+    allowConsoleError(() => { expect(function() {
       assertLengthOrPercent(10);
-    }).to.throw(/Invalid length or percent value/);
-    expect(function() {
+    }).to.throw(/Invalid length or percent value/); });
+    allowConsoleError(() => { expect(function() {
       assertLengthOrPercent('10');
-    }).to.throw(/Invalid length or percent value/);
-    expect(function() {
+    }).to.throw(/Invalid length or percent value/); });
+    allowConsoleError(() => { expect(function() {
       assertLengthOrPercent(undefined);
-    }).to.throw(/Invalid length or percent value/);
-    expect(function() {
+    }).to.throw(/Invalid length or percent value/); });
+    allowConsoleError(() => { expect(function() {
       assertLengthOrPercent(null);
-    }).to.throw(/Invalid length or percent value/);
-    expect(function() {
+    }).to.throw(/Invalid length or percent value/); });
+    allowConsoleError(() => { expect(function() {
       assertLengthOrPercent('');
-    }).to.throw(/Invalid length or percent value/);
+    }).to.throw(/Invalid length or percent value/); });
   });
 
 
@@ -188,8 +188,10 @@ describe('Layout', () => {
 
   it('layout=fixed - requires width/height', () => {
     div.setAttribute('layout', 'fixed');
-    expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/);
+    allowConsoleError(() => {
+      expect(() => applyStaticLayout(div)).to.throw(
+          /Expected height to be available/);
+    });
   });
 
 
@@ -220,9 +222,9 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
     div.setAttribute('width', 300);
-    expect(function() {
+    allowConsoleError(() => { expect(function() {
       applyStaticLayout(div);
-    }).to.throw(/Expected width to be either absent or equal "auto"/);
+    }).to.throw(/Expected width to be either absent or equal "auto"/); });
   });
 
   it('layout=fixed-height - default with height', () => {
@@ -242,8 +244,10 @@ describe('Layout', () => {
 
   it('layout=fixed-height - requires height', () => {
     div.setAttribute('layout', 'fixed-height');
-    expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/);
+    allowConsoleError(() => {
+      expect(() => applyStaticLayout(div)).to.throw(
+          /Expected height to be available/);
+    });
   });
 
 
@@ -273,6 +277,40 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].style.paddingTop).to.equal('200%');
+  });
+
+
+  it('layout=intrinsic', () => {
+    div.setAttribute('layout', 'intrinsic');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('i-amphtml-layout-intrinsic');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].children.length).to.equal(1);
+    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
+  });
+
+  it('layout=intrinsic - default with sizes', () => {
+    div.setAttribute('layout', 'intrinsic');
+    div.setAttribute('sizes', '50vw');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('i-amphtml-layout-intrinsic');
+    expect(div).to.have.class('i-amphtml-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].children.length).to.equal(1);
+    expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
+    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
   });
 
   it('layout=fill', () => {
@@ -328,9 +366,9 @@ describe('Layout', () => {
 
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
-    expect(function() {
+    allowConsoleError(() => { expect(function() {
       applyStaticLayout(div);
-    }).to.throw(/Unknown layout: foo/);
+    }).to.throw(/Unknown layout: foo/); });
   });
 
 
@@ -391,16 +429,16 @@ describe('Layout', () => {
 
     // Width=X is invalid.
     pixel.setAttribute('width', 'X');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
-    }).to.throw(/Invalid width value/);
+    }).to.throw(/Invalid width value/); });
 
     // Height=X is invalid.
     pixel.setAttribute('height', 'X');
     pixel.setAttribute('width', '1px');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       applyStaticLayout(pixel);
-    }).to.throw(/Invalid height value/);
+    }).to.throw(/Invalid height value/); });
   });
 
   it('should trust server layout', () => {
@@ -444,6 +482,8 @@ describe('Layout', () => {
 
   it('should fail when server generates invalid layout', () => {
     div.setAttribute('i-amphtml-layout', 'invalid');
-    expect(() => applyStaticLayout(div)).to.throw(/failed/);
+    allowConsoleError(() => {
+      expect(() => applyStaticLayout(div)).to.throw(/failed/);
+    });
   });
 });

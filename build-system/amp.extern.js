@@ -180,16 +180,10 @@ let PropTypes = {};
 let ReactDates = {};
 
 /** @constructor */
-ReactDates.SingleDatePicker;
+ReactDates.DayPickerSingleDateController;
 
 /** @struct */
-ReactDates.SingleDatePickerShape;
-
-/** @constructor */
-ReactDates.DateRangePicker;
-
-/** @struct */
-ReactDates.DateRangePickerShape;
+ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
 ReactDates.isInclusivelyAfterDay;
@@ -269,8 +263,8 @@ data.tabs;
 data.hideCover;
 data.hideCta;
 data.smallHeader;
-data.adaptContainerWidth;
-data.showFacePile;
+data.showFacepile;
+data.showText;
 
 // 3p code
 var twttr;
@@ -284,6 +278,14 @@ FB.init;
 
 var gist;
 gist.gistid;
+
+var bodymovin;
+bodymovin.loadAnimation;
+var animationHandler;
+animationHandler.play;
+animationHandler.pause;
+animationHandler.stop;
+animationHandler.goToAndStop;
 
 // Validator
 var amp;

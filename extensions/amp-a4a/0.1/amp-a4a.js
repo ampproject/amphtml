@@ -16,6 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -52,6 +53,7 @@ import {
 } from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -68,7 +70,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-15';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-17';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -82,11 +84,17 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 
+/** @type {string} @visibileForTesting */
+export const SANDBOX_HEADER = 'amp-ff-sandbox';
+
 /** @type {string} */
 const TAG = 'amp-a4a';
 
 /** @type {string} */
 export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+
+/** @type {string} */
+export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
@@ -183,6 +191,15 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
 };
+
+/**
+ * The sandboxing flags to use when applying the "sandbox" attribute to ad
+ * iframes. See http://go/mdn/HTML/Element/iframe#attr-sandbox.
+ * @const {string} @visibleForTesting
+ */
+export const IFRAME_SANDBOXING_FLAGS = 'allow-forms allow-pointer-lock ' +
+    'allow-popups allow-popups-to-escape-sandbox allow-same-origin ' +
+    'allow-scripts allow-top-navigation-by-user-activation';
 
 /**
  * Utility function that ensures any error thrown is handled by optional
@@ -284,6 +301,13 @@ export class AmpA4A extends AMP.BaseElement {
         this.getNonAmpCreativeRenderingMethod();
 
     /**
+     * Whether or not the iframe containing the ad should be sandboxed via the
+     * "sandbox" attribute.
+     * @private {boolean}
+     */
+    this.shouldSandbox_ = false;
+
+    /**
      * Gets a notion of current time, in ms.  The value is not necessarily
      * absolute, so should be used only for computing deltas.  When available,
      * the performance system will be used; otherwise Date.now() will be
@@ -331,7 +355,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @protected {string} */
+    /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
@@ -375,14 +399,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
-  getPriority() {
+  getLayoutPriority() {
     // Priority used for scheduling preload and layout callback.  Because
     // AMP creatives will be injected as part of the promise chain created
     // within onLayoutMeasure, this is only relevant to non-AMP creatives
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? 1 : 2;
+    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
   }
 
   /** @override */
@@ -452,6 +476,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Returns the creativeSize, which is the size extracted from the ad response.
+   * @return {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
+   */
+  getCreativeSize() {
+    return this.creativeSize_;
+  }
+
+  /**
    * @return {boolean} whether ad request should be delayed until
    *    renderOutsideViewport is met.
    */
@@ -497,21 +529,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    this.preconnect.preload(this.getSafeframePath_());
-    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     const preconnect = this.getPreconnectUrls();
-
-    // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
-    // given preferential treatment.  Currently this would be false when
-    // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
-    // causes preconnect to delay for 1 sec (see custom-element#preconnect)
-    // therefore hard coding to true.
     // NOTE(keithwrightbos): Does not take isValidElement into account so could
     // preconnect unnecessarily, however it is assumed that isValidElement
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
-        this.preconnect.url(p, true);
+        this.preconnect.url(p, /*opt_preloadAs*/true);
       });
     }
   }
@@ -655,11 +679,12 @@ export class AmpA4A extends AMP.BaseElement {
         .then(fetchResponse => {
           checkStillCurrent();
           this.handleLifecycleStage_('adRequestEnd');
-          // If the response is null, we want to return null so that
-          // unlayoutCallback will attempt to render via x-domain iframe,
-          // assuming ad url or creative exist.
-          if (!fetchResponse) {
-            return null;
+          // If the response is null (can occur for non-200 responses)  or
+          // arrayBuffer is null, force collapse.
+          if (!fetchResponse || !fetchResponse.arrayBuffer ||
+              fetchResponse.headers.has('amp-ff-empty-creative')) {
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
               EXPERIMENT_FEATURE_HEADER_NAME)) {
@@ -678,12 +703,6 @@ export class AmpA4A extends AMP.BaseElement {
                   tryDecodeUriComponent(match[1]));
             }
           }
-          // If the response has response code 204, or arrayBuffer is null,
-          // collapse it.
-          if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
-            this.forceCollapse();
-            return Promise.reject(NO_CONTENT_RESPONSE);
-          }
           // TODO(tdrl): Temporary, while we're verifying whether SafeFrame is
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
@@ -691,12 +710,21 @@ export class AmpA4A extends AMP.BaseElement {
           const method = this.getNonAmpCreativeRenderingMethod(
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
+          if (this.experimentalNonAmpCreativeRenderMethod_ ==
+              XORIGIN_MODE.NAMEFRAME) {
+            this.preconnect.preload(
+                getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+          }
+          const browserSupportsSandbox = this.win.HTMLIFrameElement &&
+              'sandbox' in this.win.HTMLIFrameElement.prototype;
+          this.shouldSandbox_ = browserSupportsSandbox &&
+              fetchResponse.headers.get(SANDBOX_HEADER) == 'true';
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
             this.safeframeVersion = safeframeVersionHeader;
-            this.preconnect.preload(this.getSafeframePath_());
+            this.preconnect.preload(this.getSafeframePath());
           }
           // Note: Resolving a .then inside a .then because we need to capture
           // two fields of fetchResponse, one of which is, itself, a promise,
@@ -763,7 +791,7 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           }
           // Update priority.
-          this.updatePriority(0);
+          this.updateLayoutPriority(LayoutPriority.CONTENT);
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
           const extensions = Services.extensionsFor(this.win);
@@ -778,8 +806,9 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
-          if (error == NO_CONTENT_RESPONSE) {
-            return {
+          switch (error) {
+            case NETWORK_FAILURE: return null;
+            case NO_CONTENT_RESPONSE: return {
               minifiedCreative: '',
               customElementExtensions: [],
               customStylesheets: [],
@@ -998,9 +1027,8 @@ export class AmpA4A extends AMP.BaseElement {
             checkStillCurrent();
             // Failed to render via AMP creative path so fallback to non-AMP
             // rendering within cross domain iframe.
-            user().error(TAG, this.element.getAttribute('type'),
+            user().warn(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
-            this.promiseErrorHandler_(err);
             return this.renderNonAmpCreative();
           });
     }).catch(error => {
@@ -1015,7 +1043,7 @@ export class AmpA4A extends AMP.BaseElement {
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
     this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
-    return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
+    return super.attemptChangeSize(newHeight, newWidth);
   }
 
   /** @override  */
@@ -1220,6 +1248,10 @@ export class AmpA4A extends AMP.BaseElement {
     return Services.xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(error => {
+          if (error.response && error.response.status > 200) {
+            // Invalid server response code so we should collapse.
+            return null;
+          }
           // If an error occurs, let the ad be rendered via iframe after delay.
           // TODO(taymonbeal): Figure out a more sophisticated test for deciding
           // whether to retry with an iframe after an ad request failure or just
@@ -1236,6 +1268,7 @@ export class AmpA4A extends AMP.BaseElement {
             this.resetAdUrl();
           } else {
             this.adUrl_ = networkFailureHandlerResult.adUrl || this.adUrl_;
+            return Promise.reject(NETWORK_FAILURE);
           }
           return null;
         });
@@ -1406,6 +1439,15 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
+    if (this.shouldSandbox_) {
+      mergedAttributes['sandbox'] = IFRAME_SANDBOXING_FLAGS;
+    }
+    if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
+      // Block synchronous XHR in ad. These are very rare, but super bad for UX
+      // as they block the UI thread for the arbitrary amount of time until the
+      // request completes.
+      mergedAttributes['allow'] = 'sync-xhr \'none\';';
+    }
     this.iframe = createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe', /** @type {!JsonObject} */ (
@@ -1477,7 +1519,7 @@ export class AmpA4A extends AMP.BaseElement {
       let name = '';
       switch (method) {
         case XORIGIN_MODE.SAFEFRAME:
-          srcPath = this.getSafeframePath_() + '?n=0';
+          srcPath = this.getSafeframePath() + '?n=0';
           break;
         case XORIGIN_MODE.NAMEFRAME:
           srcPath = getDefaultBootstrapBaseUrl(this.win, 'nameframe');
@@ -1495,7 +1537,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel,
-          this.getAdditionalContextMetadata());
+          this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME));
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
@@ -1602,9 +1644,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @return {string} full url to safeframe implementation.
-   * @private
    */
-  getSafeframePath_() {
+  getSafeframePath() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`;
   }
@@ -1709,11 +1750,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
-   * @return {?Object<string,
+   * @return {!Object<string,
    *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
   getCustomRealTimeConfigMacros_() {
-    return null;
+    return {};
   }
 
   /**
@@ -1738,17 +1779,17 @@ export class AmpA4A extends AMP.BaseElement {
       }
     }
     return Services.platformFor(this.win).isIos() ?
-      XORIGIN_MODE.SAFEFRAME : null;
+      XORIGIN_MODE.NAMEFRAME : null;
   }
 
   /**
    * Returns base object that will be written to cross-domain iframe name
    * attribute.
-   * @return {!JsonObject}
+   * @param {boolean=} opt_isSafeframe Whether creative is rendering into
+   *   a safeframe.
+   * @return {!JsonObject|undefined}
    */
-  getAdditionalContextMetadata() {
-    return /** @type {!JsonObject} */ ({});
-  }
+  getAdditionalContextMetadata(opt_isSafeframe) {}
 }
 
 /**
