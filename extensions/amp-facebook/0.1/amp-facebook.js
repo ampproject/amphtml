@@ -18,6 +18,7 @@
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getMode} from '../../../src/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
@@ -40,6 +41,10 @@ class AmpFacebook extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {number} */
+    this.toggleLoadingCounter_ = 0;
+
   }
 
   /** @override */
@@ -81,6 +86,9 @@ class AmpFacebook extends AMP.BaseElement {
         this.handleFacebookMessages_.bind(this)
     );
     this.toggleLoading(true);
+    if (getMode().test) {
+      this.toggleLoadingCounter_++;
+    }
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
@@ -103,6 +111,9 @@ class AmpFacebook extends AMP.BaseElement {
     }
     if (eventData['action'] == 'ready') {
       this.toggleLoading(false);
+      if (getMode().test) {
+        this.toggleLoadingCounter_++;
+      }
     }
   }
 
