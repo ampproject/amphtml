@@ -139,17 +139,24 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
       // Service 2 (a vendor service)
     }
   ],
-  "preferViewerSupport": true
+  "score": {
+    "supportsViewer": 10,
+  }
 }
 </script>
 ```
 
 The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
-Based on `preferViewerSupport` (default: true) this document will give extra preference to the platform supported by the viewer.
-
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
+
+## Selecting platform
+So if no platforms are selected, we compete all the platforms based on platforms like
+
+1. Does the platform support the Viewer
+
+You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
 
 ### The "local" service configuration
 

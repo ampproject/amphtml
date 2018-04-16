@@ -28,10 +28,10 @@ const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
-   *
    * @param {!Array<string>} expectedServiceIds
+   * @param {!JsonObject} scoreConfig
    */
-  constructor(expectedServiceIds) {
+  constructor(expectedServiceIds, scoreConfig) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -53,6 +53,11 @@ export class PlatformStore {
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
+
+    /** @private @const {!Object<string, number>} */
+    this.scoreConfig_ = Object.assign({
+      'supportsViewer': 10,
+    }, scoreConfig);
   }
 
   /**
@@ -225,14 +230,13 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @param {boolean} preferViewerSupport
    * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
-  selectPlatform(preferViewerSupport) {
+  selectPlatform() {
 
     return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicablePlatform_(preferViewerSupport);
+      return this.selectApplicablePlatform_();
     });
   }
 
@@ -255,11 +259,10 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
-   * @param {boolean} preferViewerSupport
    * @returns {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
-  selectApplicablePlatform_(preferViewerSupport) {
+  selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
@@ -273,14 +276,17 @@ export class PlatformStore {
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
-      // Subscriber, gains weight 10
+      // Subscriber wins immediatly.
       if (!!entitlement.subscriptionToken) {
-        weight += 10;
+        weight += 100000;
       }
 
+      // Add the base score
+      weight += platform.getBaseScore();
+
       // If supports the current viewer, gains weight 9
-      if (preferViewerSupport && platform.supportsCurrentViewer()) {
-        weight += 9;
+      if (platform.supportsCurrentViewer()) {
+        weight += this.scoreConfig_['supportsViewer'];
       }
 
       platformWeights.push({

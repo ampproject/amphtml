@@ -210,7 +210,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         expect(localPlatform).to.be.not.null;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
-          expect(selectPlatformStub).to.be.calledWith(true);
+          expect(selectPlatformStub).to.be.called;
           expect(analyticsEventStub).to.be.calledWith(
               SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
               {
@@ -230,7 +230,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.platformStore_.selectPlatform;
         subscriptionService.platformConfig_['preferViewerSupport'] = false;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
-          expect(selectPlatformStub).to.be.calledWith(false);
+          expect(selectPlatformStub).to.be.called;
         });
       });
     });
