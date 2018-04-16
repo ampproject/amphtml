@@ -239,6 +239,8 @@ function runTests() {
     log(red('ERROR:'), 'Only integration tests may be run on the full set of ' +
         'Sauce Labs browsers');
     log('Use', cyan('--saucelabs'), 'with', cyan('--integration'));
+    // Flush stdout.
+    process.stdout.write('\n');
     process.exit();
   }
 
@@ -346,6 +348,8 @@ function runTests() {
             log(yellow(
                 'Shutting down test responses server on localhost:31862'));
             process.nextTick(function() {
+              // Flush stdout.
+              process.stdout.write('\n');
               process.exit();
             });
           }));
@@ -376,6 +380,8 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
+      // Flush stdout.
+      process.stdout.write('\n');
       process.exit(exitCode);
     } else {
       resolver();
