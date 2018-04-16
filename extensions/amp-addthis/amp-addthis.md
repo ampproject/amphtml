@@ -93,3 +93,28 @@ See amp-addthis rules in the AMP validator specification.
 ## Privacy
 
 http://www.addthis.com/privacy/privacy-policy/
+
+The AddThis Tools and AddThis Toolbar collect information from the device used by the End User to
+interact with Publisher Sites or by the Toolbar User to interact with the AddThis
+Toolbar (“AddThis Data”).
+
+AddThis Data may consist of the following:
+
+- Internet Protocol (IP) address, Mobile Advertising ID (MAID) (which allows mobile app developers
+  to identify who is using their mobile apps), mobile application ID, browser type, browser language,
+  type of operating system, and the date and time the End User visited a Publisher Site or Toolbar
+- User used the Toolbar;
+- Behavior on a Publisher Site, such as how long the End User visited the Publisher Site, End User
+  sharing behavior of content on a Publisher Site, and scrolling behavior of an End User on a
+  Publisher Site;
+- The referring URL and the web search the End User used to locate and navigate to a Publisher Site;
+- Keywords entered into the AddThis Toolbar search functionality, and whether and when the Toolbar
+  User downloads, installs, or uninstalls the AddThis Toolbar;
+- Information regarding how often an End User uses the AddThis Tools and how often a Toolbar User
+  uses the AddThis Toolbar; and
+- Geo-location data derived from an End User’s and Toolbar User’s IP address.
+
+AddThis Data will be treated as personal information to the extent required under applicable law.
+Publishers are required per the AddThis Terms of Service to obtain all necessary End User consents
+and authorizations, and provide any required notices for the provision of AddThis Data collected
+from End Users to Oracle.
