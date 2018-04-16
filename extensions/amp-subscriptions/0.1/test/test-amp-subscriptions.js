@@ -280,7 +280,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   describe('initializeStoreAndLocalPlatform_', () => {
     it('should initiate platform store and local with all configs', () => {
       const services = ['service1', 'service2'];
-      const localPlatformStub = sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+      const localPlatformStub = sandbox.stub(subscriptionService,
+          'initializeLocalPlatforms_');
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.initializeStoreAndLocalPlatform_(services);

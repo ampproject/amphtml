@@ -233,7 +233,7 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should not choose a platform based on supports for current '
-        + 'viewer, if prefer preferViewerSupport is false', () => {
+        + 'viewer, if prefer supportsViewer is 0', () => {
       sandbox.stub(localPlatform, 'supportsCurrentViewer')
           .callsFake(() => false);
       sandbox.stub(anotherPlatform, 'supportsCurrentViewer')
@@ -244,7 +244,8 @@ describes.realWin('Platform store', {}, () => {
       platformStore.resolveEntitlement('another', new Entitlement({
         source: 'another', raw: '', service: 'another', products: ['product2'],
         subscriptionToken: null}));
-      expect(platformStore.selectApplicablePlatform_(false).getServiceId())
+      platformStore.scoreConfig_ = {supportsViewer: 0};
+      expect(platformStore.selectApplicablePlatform_().getServiceId())
           .to.be.equal(localPlatform.getServiceId());
     });
 

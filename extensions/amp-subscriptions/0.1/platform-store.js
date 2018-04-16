@@ -230,14 +230,13 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @param {boolean} preferViewerSupport
    * @returns {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
-  selectPlatform(preferViewerSupport) {
+  selectPlatform() {
 
     return this.getAllPlatformsEntitlements_().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs waiting for all entitlement.
-      return this.selectApplicablePlatform_(preferViewerSupport);
+      return this.selectApplicablePlatform_();
     });
   }
 
@@ -260,11 +259,10 @@ export class PlatformStore {
    *
    * In the end candidate with max weight is selected.
    * However if candidate's weight is equal to local platform, then local platform is selected.
-   * @param {boolean} preferViewerSupport
    * @returns {!./subscription-platform.SubscriptionPlatform}
    * @private
    */
-  selectApplicablePlatform_(preferViewerSupport) {
+  selectApplicablePlatform_() {
     const localPlatform = this.getLocalPlatform();
     let localWeight = 0;
     /** @type {!Array<!Object<!./subscription-platform.SubscriptionPlatform, number>>} */
@@ -287,7 +285,7 @@ export class PlatformStore {
       weight += platform.getBaseScore();
 
       // If supports the current viewer, gains weight 9
-      if (preferViewerSupport && platform.supportsCurrentViewer()) {
+      if (platform.supportsCurrentViewer()) {
         weight += this.scoreConfig_['supportsViewer'];
       }
 
