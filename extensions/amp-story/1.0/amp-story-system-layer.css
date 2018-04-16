@@ -115,7 +115,7 @@
 
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons {
-  display: none !important;
+  visibility: hidden !important;
 }
 
 .i-amphtml-story-unmute-audio-control {
