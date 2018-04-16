@@ -34,16 +34,6 @@ describes.realWin('amp-story-cta-layer', {
     ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
   });
 
-  function createPages(container, count, opt_ids) {
-    return Array(count).fill(undefined).map((unused, i) => {
-      const page = win.document.createElement('amp-story-page');
-      page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
-      page.getImpl = () => Promise.resolve(new AmpStoryPage(page));
-      container.appendChild(page);
-      return page;
-    });
-  }
-
   it('should build the cta layer', () => {
     ampStoryCtaLayer.buildCallback();
     return ampStoryCtaLayer.layoutCallback().then(() => {
@@ -75,16 +65,15 @@ describes.realWin('amp-story-cta-layer', {
   });
 
   it('should not allow a cta layer on the first page', () => {
-    // Setup: create story with two pages.
-    const ampStoryEl = win.document.createElement('amp-story');
-    win.document.body.appendChild(ampStoryEl);
-    createPages(ampStoryEl, 2, ['cover', 'next-page']);
+    // Setup: create two pages.
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
 
     // Get pages in story.
     const pageElements =
-    ampStoryEl.getElementsByTagName('amp-story-page');
+    win.document.getElementsByTagName('amp-story-page');
 
-    //Attach cta layer to first page (cover page).
+    // Attach cta layer to first page (cover page).
     pageElements[0].appendChild(ampStoryCtaLayer.element);
 
     ampStoryCtaLayer.layoutCallback().then(layer => {
@@ -95,16 +84,16 @@ describes.realWin('amp-story-cta-layer', {
   });
 
   it('should allow a cta layer on the second or third page', () => {
-    // Setup: create story with three pages.
-    const ampStoryEl = win.document.createElement('amp-story');
-    win.document.body.appendChild(ampStoryEl);
-    createPages(ampStoryEl, 3, ['cover', 'pg-2', 'pg-3']);
+    // Setup: create three pages.
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
 
     // Get pages in story.
     const pageElements =
-    ampStoryEl.getElementsByTagName('amp-story-page');
+    win.document.getElementsByTagName('amp-story-page');
 
-    //Attach cta layer to second and third pages.
+    // Attach cta layer to second and third pages.
     pageElements[1].appendChild(ampStoryCtaLayer.element);
     pageElements[2].appendChild(ampStoryCtaLayer.element);
 
