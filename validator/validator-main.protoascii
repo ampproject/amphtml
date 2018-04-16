@@ -1553,6 +1553,7 @@ tags: {
       allowed_protocol: "threema"
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
+      allowed_protocol: "webcal"
       allowed_protocol: "whatsapp"
     }
     blacklisted_value_regex: "__amp_source_origin"

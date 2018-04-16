@@ -25,106 +25,95 @@ performant ads in AMP pages.  To ensure that AMPHTML ad documents ("AMP
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, AMP creatives must obey a set of validation
 rules.  Similar in spirit to the
-[AMP format rules](../../spec/amp-html-format.md), AMPHTML ads have
+[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
+
+**Table of Contents**
+
+* [AMPHTML ad format rules](#amphtml-ad-format-rules)
+    * [Boilerplate](#boilerplate)
+    * [CSS](#css)
+        * [CSS animations and transitions](#css-animations-and-transitions)
+            * [Selectors](#selectors)
+            * [Transitionable and animatable properties](#transitionable-and-animatable-properties)
+    * [Allowed AMP extensions and builtins](#allowed-amp-extensions-and-builtins)
+    * [HTML tags](#html-tags)
 
 ## AMPHTML ad format rules
 
-- Unless otherwise specified below, the creative must obey all rules
-   given by the [AMP format rules](../../spec/amp-html-format.md),
-   included here by reference.  For example, the AMPHTML ad
-   [Boilerplate](amp-a4a-format.md#2) deviates from the AMP
-   standard boilerplate.
+Unless otherwise specified below, the creative must obey all rules given by the
+[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html),
+included here by reference.  For example, the AMPHTML ad [Boilerplate](#boilerplate) deviates from the AMP standard boilerplate.
 
-   _*In addition*_:
+In addition, creatives must obey the following rules:
 
-- The creative must use `<html ⚡4ads>` or `<html amp4ads>` as its enclosing
-   tags.
-
-   _Rationale_: Allows validators to identify a creative document as either a
-   general AMP doc or a restricted AMPHTML ad doc and to dispatch appropriately.
-
-- The creative must include `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>`
-   as the runtime script instead of `https://cdn.ampproject.org/v0.js`.
-
-   _Rationale_: Allows tailored runtime behaviors for AMPHTML ads served in cross-origin iframes.
-
-- Unlike in general AMP pages, the creative must not include a `<link
-rel="canonical">` tag.
-
-   _Rationale_: Ad creatives don't have a "non-AMP canonical version"
-   and won't be independently search-indexed, so self-referencing
-   would be useless.
-
-- The creative can include optional meta tags in HTML head as identifiers,
-   in the format of `<meta name="amp4ads-id" content="vendor=${vendor},type=${type},id=${id}">`.
-   Those meta tags must be placed before the `amp4ads-v0.js` script. The
-   value of `vendor` and `id` are strings containing only [0-9a-zA-Z_-].
-   The value of `type` is either `creative-id` or `impression-id`.
-
-   _Rationale_: Those custom identifiers can be used to identify the impression
-   or the creative. They can be helpful for reporting and debugging.
-
-   _Example_:
-```html
-<meta name="amp4ads-id" content="vendor=adsense,type=creative-id,id=1283474">
-<meta name="amp4ads-id" content="vendor=adsense,type=impression-id,id=xIsjdf921S">
-```
-
-- Media: Videos must not enable autoplay.  This includes
-both the `<amp-video>`
-   tag as well as autoplay on `<amp-anim>`, and 3P video
-   tags such as `<amp-youtube>`.
-
-   _Rationale_: Autoplay forces video content to be downloaded immediately,
-   which slows the page load.
-
-- Media: Audio must not enable autoplay.  This includes both the `<amp-audio>`
-   tag as well as all audio-including video tags, as described in the previous
-   point.
-
-   _Rationale_: Same as for video.
-
-- Analytics: `<amp-analytics>` viewability tracking may only target the full-ad
-   selector, via  `"visibilitySpec": { "selector": "amp-ad" }`, as defined in
-   [Issue #4018](https://github.com/ampproject/amphtml/issues/4018) and
-   [PR #4368](https://github.com/ampproject/amphtml/pull/4368).  In
-   particular, it may not target any selectors for elements within the ad
-   creative.
-
-   _Rationale_: In some cases, AMPHTML ads may choose to render an ad creative in an
-   iframe.  In those cases, host page analytics can only target the entire
-   iframe anyway, and won’t have access to any finer-grained selectors.
-
-   _Example_:
-
-```html
-<amp-analytics id="nestedAnalytics">
-  <script type="application/json">
+<table>
+<thead>
+<tr>
+  <th>Rule</th>
+  <th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Must use <code>&lt;html ⚡4ads></code> or <code>&lt;html amp4ads></code> as its enclosing tags.</td>
+<td>Allows validators to identify a creative document as either a general AMP doc or a restricted AMPHTML ad doc and to dispatch appropriately.</td>
+</tr>
+<tr>
+<td>Must include <code>&lt;script async src="https://cdn.ampproject.org/amp4ads-v0.js">&lt;/script></code> as the runtime script instead of <code>https://cdn.ampproject.org/v0.js</code>.</td>
+<td>Allows tailored runtime behaviors for AMPHTML ads served in cross-origin iframes.</td>
+</tr>
+<tr>
+<td>Must not include a <code>&lt;link rel="canonical"></code> tag.</td>
+<td>Ad creatives don't have a "non-AMP canonical version" and won't be independently search-indexed, so self-referencing would be useless.</td>
+</tr>
+<tr>
+<td>Can include optional meta tags in HTML head as identifiers, in the format of <code>&lt;meta name="amp4ads-id" content="vendor=${vendor},type=${type},id=${id}"></code>. Those meta tags must be placed before the <code>amp4ads-v0.js</code> script. The value of <code>vendor</code> and <code>id</code> are strings containing only [0-9a-zA-Z_-]. The value of <code>type</code> is either <code>creative-id</code> or <code>impression-id</code>.</td>
+<td>Those custom identifiers can be used to identify the impression or the creative. They can be helpful for reporting and debugging.<br><br><p>Example:</p><pre>
+&lt;meta name="amp4ads-id"
+  content="vendor=adsense,type=creative-id,id=1283474">
+&lt;meta name="amp4ads-id"
+  content="vendor=adsense,type=impression-id,id=xIsjdf921S"></pre></td>
+</tr>
+<tr>
+<td>Videos must not enable autoplay. This includes both the <code>&lt;amp-video></code> tag as well as autoplay on <code>&lt;amp-anim></code>, and 3P video tags such as <code>&lt;amp-youtube></code>.</td>
+<td>Autoplay forces video content to be downloaded immediately, which slows the page load.</td>
+</tr>
+<tr>
+<td>Audio must not enable autoplay. This includes both the <code>&lt;amp-audio></code> tag as well as all audio-including video tags, as described in the previous point.</td>
+<td>Same as for video.</td>
+</tr>
+<tr>
+<td><code>&lt;amp-analytics></code> viewability tracking may only target the full-ad selector, via  <code>"visibilitySpec": { "selector": "amp-ad" }</code> as defined in <a href="https://github.com/ampproject/amphtml/issues/4018">Issue #4018</a> and <a href="https://github.com/ampproject/amphtml/pull/4368">PR #4368</a>. In particular, it may not target any selectors for elements within the ad creative.</td>
+<td>In some cases, AMPHTML ads may choose to render an ad creative in an iframe.In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.<br><br>
+<p>Example:</p>
+<pre>
+&lt;amp-analytics id="nestedAnalytics">
+  &lt;script type="application/json">
   {
     "requests": {
-       "visibility": "https://example.com/nestedAmpAnalytics"
+      "visibility": "https://example.com/nestedAmpAnalytics"
     },
     "triggers": {
       "visibilitySpec": {
-        "selector": "amp-ad",
-        "visiblePercentageMin": 50,
-        "continuousTimeMin": 1000
+      "selector": "amp-ad",
+      "visiblePercentageMin": 50,
+      "continuousTimeMin": 1000
       }
     }
   }
-  </script>
-</amp-analytics>
-```
-
-  _This configuration sends a request to URL
-  `https://example.com/nestedAmpAnalytics` when 50% of the enclosing ad has been
-  continuously visible on the screen for 1 second._
+  &lt;/script>
+&lt;/amp-analytics>
+</pre>
+<p>This configuration sends a request to the <code>https://example.com/nestedAmpAnalytics</code> URL when 50% of the enclosing ad has been continuously visible on the screen for 1 second.</p>
+</td>
+</tr>
+</tbody>
+</table>
 
 ### Boilerplate
 
-AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than
-[general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
+AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```html
 <style amp4ads-boilerplate>body{visibility:hidden}</style>
@@ -149,39 +138,45 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 
 ### CSS
 
-1. `position:fixed` and `position:sticky` are prohibited in creative CSS.
-
-   _Rationale_: position:fixed breaks out of shadow DOM, which AMPHTML ads depend on.
-   Also, ads in AMP are already not allowed to use fixed position.
-
-1. `touch-action` is prohibited.
-
-   _Rationale_: An ad that can manipulate `touch-action` can interfere with
-   the user's ability to scroll the host document.
-
-1. Creative CSS is limited to 20,000 bytes.
-
-   _Rationale_: Large CSS blocks bloat the creative, increase network
+<table>
+<thead>
+<tr>
+  <th>Rule</th>
+  <th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>position:fixed</code> and <code>position:sticky</code> are prohibited in creative CSS.</td>
+    <td><code>position:fixed</code> breaks out of shadow DOM, which AMPHTML ads depend on. lso, ads in AMP are already not allowed to use fixed position.</td>
+  </tr>
+  <tr>
+    <td><code>touch-action</code> is prohibited.</td>
+    <td>An ad that can manipulate <code>touch-action</code> can interfere with
+   the user's ability to scroll the host document.</td>
+  </tr>
+  <tr>
+    <td>Creative CSS is limited to 20,000 bytes.</td>
+    <td>Large CSS blocks bloat the creative, increase network
    latency, and degrade page performance.
-
-1. CSS: transition and animation are subject to additional restrictions.
-
-   _Rationale_: AMP must be able to control all animations belonging to an
-   ad, so that it can stop them when the ad is not on screen or system resources are very low.
-
-1. CSS: Vendor-specific prefixes are considered aliases for the same symbol
+</td>
+  </tr>
+  <tr>
+    <td>Transition and animation are subject to additional restrictions.</td>
+    <td>AMP must be able to control all animations belonging to an
+   ad, so that it can stop them when the ad is not on screen or system resources are very low.</td>
+  </tr>
+  <tr>
+    <td>Vendor-specific prefixes are considered aliases for the same symbol
    without the prefix for the purposes of validation.  This means that if
-   a symbol `foo` is prohibited by CSS validation rules, then the symbol
-   `-vendor-foo` will also be prohibited.
+   a symbol <code>foo</code> is prohibited by CSS validation rules, then the symbol <code>-vendor-foo</code> will also be prohibited.</td>
+    <td>Some vendor-prefixed properties provide equivalent functionality to properties that are otherwise prohibited or constrained under these rules.<br><br><p>Example: <code>-webkit-transition</code> and <code>-moz-transition</code> are both considered aliases for <code>transition</code>.  They will only be allowed in contexts where bare <code>transition</code> would be allowed (see <a href="#selectors">Selectors</a> section below).</p></td>
+  </tr>
+</tbody>
+</table>
+  
 
-   _Rationale:_ Some vendor-prefixed properties provide equivalent functionality
-   to properties that are otherwise prohibited or constrained under these rules.
-
-   _Example_: `-webkit-transition` and `-moz-transition` are both considered
-   aliases for `transition`.  They will only be allowed in contexts where
-   bare `transition` would be allowed (see [Selectors](#selectors) below).
-
-#### CSS Animations and Transitions
+#### CSS animations and transitions
 
 ##### Selectors
 
@@ -255,10 +250,31 @@ transition: background-color 2s;
 ```
 
 
-### AMP Extensions and Builtins
+### Allowed AMP extensions and builtins
 
-The following are _allowed_ AMP extension modules and AMP builtin tags in an
-AMPHTML ad creative. Extensions or builtin tags not explicitly allowed are prohibited.
+The following are _allowed_ AMP extension modules and AMP built-in tags in an
+AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohibited.
+
+* [amp-accordion](https://www.ampproject.org/docs/reference/components/amp-accordion)
+* [amp-ad-exit](https://www.ampproject.org/docs/reference/components/amp-ad-exit)
+* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics)
+* [amp-anim](https://www.ampproject.org/docs/reference/components/amp-anim)
+* [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+* [amp-audio](https://www.ampproject.org/docs/reference/components/amp-audio)
+* [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel)
+* [amp-fit-text](https://www.ampproject.org/docs/reference/components/amp-fit-text)
+* [amp-font](https://www.ampproject.org/docs/reference/components/amp-font)
+* [amp-form](https://www.ampproject.org/docs/reference/components/amp-form)
+* [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
+* [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
+* [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
+* [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
+* [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
+* [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
+* [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
+* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube) 
+
+
 
 Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.
@@ -287,28 +303,8 @@ may be rendered in an iframe and there is currently no mechanism for an ad to
 expand beyond an iframe.  Support may be added for this in the future, if there
 is demonstrated desire for it.
 
-<table>
-  <tr><td>amp-accordion</td></tr>
-  <tr><td>amp-ad-exit</td></tr>
-  <tr><td>amp-analytics</td></tr>
-  <tr><td>amp-anim</td></tr>
-  <tr><td>amp-animation</td></tr>
-  <tr><td>amp-audio</td></tr>
-  <tr><td>amp-carousel</td></tr>
-  <tr><td>amp-fit-text</td></tr>
-  <tr><td>amp-font</td></tr>
-  <tr><td>amp-form</td></tr>
-  <tr><td>amp-img</td></tr>
-  <tr><td>amp-layout</td></tr>
-  <tr><td>amp-mustache</td></tr>
-  <tr><td>amp-pixel</td></tr>
-  <tr><td>amp-position-observer</td></tr>
-  <tr><td>amp-social-share</td></tr>
-  <tr><td>amp-video</td></tr>
-  <tr><td>amp-youtube</td></tr>
-</table>
 
-### HTML Tags
+### HTML tags
 
 The following are _allowed_ tags in an AMPHTML ads creative.  Tags not explicitly
 allowed are prohibited.  This list is a subset of the general [AMP tag
@@ -404,10 +400,9 @@ HTML5 compatible.
 - Embedded content is supported only via AMP tags, such as `<amp-img>` or
 `<amp-video>`.
 
-#### 4.7.8
-4.7.8 `<source>`
+#### 4.7.4 `<source>`
 
-#### 4.7.15 SVG
+#### 4.7.18 SVG
 SVG tags are not in the HTML5 namespace. They are listed below without section ids.
 
 `<svg>`
