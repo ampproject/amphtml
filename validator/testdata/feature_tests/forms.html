@@ -108,11 +108,18 @@
     <option value="1">English</option>
   </select>
   <textarea name="comment"></textarea>
-  <!-- Invalid: input can not be type="button|file|image|password". -->
+  <!-- Invalid: input can not be type="button|file|image". -->
   <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="button" name="button">
     <input type="file" name="file">
     <input type="image" name="image">
+  </form>
+  <!-- Valid: input can be type="password" in a post xhr form. -->
+  <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+    <input type="password" name="password">
+  </form>
+  <!-- Invalid: password requires post and action-xhr -->
+  <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
     <input type="password" name="password">
   </form>
   <!-- Invalid: if validation-for is set on an element, then -->
