@@ -30,6 +30,7 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {matches} from '../../../src/dom';
 
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
@@ -48,6 +49,7 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.setOrOverwriteTargetAttribute_();
+    this.checkAndRemoveLayerIfOnFirstPage_();
   }
 
   /**
@@ -58,6 +60,23 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
       ctaLinks[i].setAttribute('target', '_blank');
+    }
+  }
+
+  /**
+   * CTA links or buttons are not allowed on the first amp-story page. Remove
+   * the amp-story-cta-layer if it is found on the first page of the story.
+   * @private
+   */
+  checkAndRemoveLayerIfOnFirstPage_() {
+    const IS_ON_FIRST_PAGE_SELECTOR =
+        'amp-story-page:first-of-type amp-story-cta-layer';
+    if (matches(this.element,
+        IS_ON_FIRST_PAGE_SELECTOR)) {
+      this.element.remove();
+      console.error(
+          'amp-story-cta-layer is not allowed on the first page of an ' +
+          'amp-story.');
     }
   }
 }
