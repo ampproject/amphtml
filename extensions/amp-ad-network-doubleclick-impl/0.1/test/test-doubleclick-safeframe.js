@@ -211,6 +211,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org/canonical',
+          'amp': {'canonical_url': 'http://example.org/canonical'},
         },
       });
     });
@@ -229,6 +230,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
+          'amp': {},
         },
       });
     });
@@ -248,6 +250,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
+          'amp': {},
         },
       });
     });
@@ -268,6 +271,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org',
+          'amp': {'canonical_url': 'http://example.org'},
         },
       });
     });
@@ -296,8 +300,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       // amp-ad element
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML = '.safeframe' +
-          '{height:50px!important;' +
-          'width:50px!important;' +
+          '{height:250px!important;' +
+          'width:300px!important;' +
           'background-color:blue!important;' +
           'display:block!important;}';
       doc.head.appendChild(css);
@@ -309,14 +313,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sendMessage_');
       safeframeHost.updateGeometry_();
 
-      return Services.timerFor(env.win).promise(1000).then(() => {
+      return Services.timerFor(env.win).promise(100).then(() => {
         const payload = sendMessageStub.firstCall.args[0];
         const messageType = sendMessageStub.firstCall.args[1];
         expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
               '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
-              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
+              '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
         expect(payload['uid']).to.equal(safeframeHost.uid_);
@@ -352,13 +356,13 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sendMessage_');
       safeframeHost.updateGeometry_();
 
-      return Services.timerFor(env.win).promise(1000).then(() => {
+      return Services.timerFor(env.win).promise(100).then(() => {
         const payload = sendMessageStub.firstCall.args[0];
         const messageType = sendMessageStub.firstCall.args[1];
         expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
-              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":50,' +
-              '"frameCoords_b":50,"frameCoords_l":0,"styleZIndex":"",' +
+              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":10,' +
+              '"frameCoords_b":10,"frameCoords_l":0,"styleZIndex":"",' +
               '"allowedExpansion_r":490,"allowedExpansion_b":990,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
@@ -388,7 +392,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
-      return Services.timerFor(env.win).promise(500).then(() => {
+      return Services.timerFor(env.win).promise(100).then(() => {
         expect(sendMessageStub).to.be.calledTwice;
         const payload = sendMessageStub.secondCall.args[0];
         const messageType = sendMessageStub.secondCall.args[1];
@@ -433,8 +437,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       const expectedParsedSfGU = {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
-        'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
-        'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
+        'windowCoords_l': 0, 'frameCoords_t': 300, 'frameCoords_r': 500,
+        'frameCoords_b': 1000, 'frameCoords_l': 200, 'styleZIndex': '',
         'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
         'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
         'xInView': 1,

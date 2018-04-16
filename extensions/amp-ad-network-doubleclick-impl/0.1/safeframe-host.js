@@ -221,7 +221,12 @@ export class SafeframeHostApi {
             'sf_ver': this.baseInstance_.safeframeVersion,
             'ck_on': 1,
             'flash_ver': '26.0.0',
+            // Once GPT Safeframe is updated to look in amp object,
+            // remove this canonical_url here.
             'canonical_url': this.maybeGetCanonicalUrl(),
+            'amp': {
+              'canonical_url': this.maybeGetCanonicalUrl(),
+            },
           },
         }));
     attributes['reportCreativeGeometry'] = this.isFluid_;
@@ -273,14 +278,14 @@ export class SafeframeHostApi {
     const ampAdBox = this.baseInstance_.getPageLayoutBox();
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
-    const iframeBox = {
+    const iframeBox = /** @type {!../../../src/layout-rect.LayoutRectDef} */ ({
       top: ampAdBox.top + heightOffset,
       bottom: ampAdBox.bottom - heightOffset,
       left: ampAdBox.left + widthOffset,
       right: ampAdBox.right - widthOffset,
       height: this.initialCreativeSize_.height,
       width: this.initialCreativeSize_.width,
-    };
+    });
     return this.formatGeom_(iframeBox);
   }
 
@@ -359,22 +364,21 @@ export class SafeframeHostApi {
   /**
    * Builds geometry update format expected by GPT Safeframe.
    * Also sets this.currentGeometry as side effect.
-   * @param {!Object} iframeBox The elementRect for the safeframe.
+   * @param {!../../../src/layout-rect.LayoutRectDef} iframeBox The elementRect for the safeframe.
    * @return {string} Safeframe formatted changes.
    * @private
    */
   formatGeom_(iframeBox) {
-    const ampAdBox = this.baseInstance_.getPageLayoutBox();
     const viewportSize = this.viewport_.getSize();
     const currentGeometry = /** @type {JsonObject} */({
       'windowCoords_t': 0,
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
       'windowCoords_l': 0,
-      'frameCoords_t': ampAdBox.top,
-      'frameCoords_r': ampAdBox.right,
-      'frameCoords_b': ampAdBox.bottom,
-      'frameCoords_l': ampAdBox.left,
+      'frameCoords_t': iframeBox.top,
+      'frameCoords_r': iframeBox.right,
+      'frameCoords_b': iframeBox.bottom,
+      'frameCoords_l': iframeBox.left,
       'styleZIndex': this.baseInstance_.element.style.zIndex,
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
