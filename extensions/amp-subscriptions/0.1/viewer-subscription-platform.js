@@ -173,6 +173,11 @@ export class ViewerSubscriptionPlatform {
   supportsCurrentViewer() {
     return this.platform_.supportsCurrentViewer();
   }
+
+  /** @override */
+  getBaseScore() {
+    return 0;
+  }
 }
 
 /**

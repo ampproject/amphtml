@@ -7,6 +7,24 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+# Element
+
+requirement: {
+  type: BANNED_PROPERTY_WRITE
+  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  value: 'Element.prototype.style'
+  whitelist: 'src/style.js'
+}
+
+# CSSStyleDeclaration
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use style.js#setStyle or style.js#setStyles'
+  value: 'CSSStyleDeclaration.prototype.setProperty'
+  whitelist: 'src/style.js'
+}
+
 # Strings
 
 requirement: {
@@ -23,7 +41,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'string.prototype.startsWith is not allowed'
+  error_message: 'Use string.js#startsWith'
   value: 'string.prototype.startsWith'
 }
 
