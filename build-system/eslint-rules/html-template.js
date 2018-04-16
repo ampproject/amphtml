@@ -60,7 +60,7 @@ module.exports = function(context) {
           ' literal.');
     }
 
-    if (/<(html|body|head)/.test(string)) {
+    if (/<(html|body|head)/i.test(string)) {
       context.report(template, 'It it not possible to generate HTML, BODY, or' +
           ' HEAD root elements. Please do so manually with' +
           ' document.createElement.');
