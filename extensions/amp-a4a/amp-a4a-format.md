@@ -76,14 +76,6 @@ In addition, creatives must obey the following rules:
   content="vendor=adsense,type=impression-id,id=xIsjdf921S"></pre></td>
 </tr>
 <tr>
-<td>Videos must not enable autoplay. This includes both the <code>&lt;amp-video></code> tag as well as autoplay on <code>&lt;amp-anim></code>, and 3P video tags such as <code>&lt;amp-youtube></code>.</td>
-<td>Autoplay forces video content to be downloaded immediately, which slows the page load.</td>
-</tr>
-<tr>
-<td>Audio must not enable autoplay. This includes both the <code>&lt;amp-audio></code> tag as well as all audio-including video tags, as described in the previous point.</td>
-<td>Same as for video.</td>
-</tr>
-<tr>
 <td><code>&lt;amp-analytics></code> viewability tracking may only target the full-ad selector, via  <code>"visibilitySpec": { "selector": "amp-ad" }</code> as defined in <a href="https://github.com/ampproject/amphtml/issues/4018">Issue #4018</a> and <a href="https://github.com/ampproject/amphtml/pull/4368">PR #4368</a>. In particular, it may not target any selectors for elements within the ad creative.</td>
 <td>In some cases, AMPHTML ads may choose to render an ad creative in an iframe.In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.<br><br>
 <p>Example:</p>
