@@ -599,7 +599,7 @@ function getUserLogger(suffix) {
   if (!logConstructor) {
     const errorMsg = 'failed to call initLogConstructor.' +
           (getMode().test || getMode().localDev) ?
-      ' Run "gulp clean && gulp css && gulp build" and try again' :
+      ' Run "gulp clean && gulp css" and try again' :
       '';
     throw new Error(errorMsg);
   }
@@ -629,7 +629,7 @@ export function dev() {
   if (!logConstructor) {
     const errorMsg = 'failed to call initLogConstructor' +
           (getMode().test || getMode().localDev) ?
-      ' Run "gulp clean && gulp css && gulp build" and try again' :
+      ' Run "gulp clean && gulp css" and try again' :
       '';
     throw new Error(errorMsg);
   }
