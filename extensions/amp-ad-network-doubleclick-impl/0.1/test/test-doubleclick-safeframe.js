@@ -211,7 +211,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org/canonical',
-          'is_amp': true,
+          'amp': {'canonical_url': 'http://example.org/canonical'},
         },
       });
     });
@@ -230,7 +230,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
-          'is_amp': true,
+          'amp': {},
         },
       });
     });
@@ -250,7 +250,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'sf_ver': doubleclickImpl.safeframeVersion,
           'ck_on': 1,
           'flash_ver': '26.0.0',
-          'is_amp': true,
+          'amp': {},
         },
       });
     });
@@ -271,7 +271,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'ck_on': 1,
           'flash_ver': '26.0.0',
           'canonical_url': 'http://example.org',
-          'is_amp': true,
+          'amp': {'canonical_url': 'http://example.org'},
         },
       });
     });
