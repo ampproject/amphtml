@@ -18,15 +18,19 @@
 const path = require('path');
 
 module.exports = function(context) {
-  const ignoredFiles = new RegExp(
-      '^(keyframes-extractor|fixed-layer|style|test-(\\w|-)+'
-      + '|(\\w|-)+-testing)\\.js$');
   return {
     MemberExpression: function(node) {
-      // Ignore specific js files and tests in general for usage of style
-      // property changes.
-      if (ignoredFiles.test(path.basename(context.getFilename())
-          || node.computed)) {
+      const filename = path.basename(context.getFileName());
+      // Ignore specific js files.
+      if (/^(keyframes-extractor|fixed-layer|style)\.js/
+          .test(filename)) {
+        return;
+      }
+      // Ignore tests.
+      if (/^(test-(\w|-)+|(\w|-)+-testing)\.js$/.test(filename)) {
+        return;
+      }
+      if (node.computed) {
         return;
       }
       if (node.property.name == 'style') {
