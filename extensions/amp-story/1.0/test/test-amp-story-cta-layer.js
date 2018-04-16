@@ -15,7 +15,6 @@
  */
 
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
-import {AmpStoryPage} from '../amp-story-page';
 
 describes.realWin('amp-story-cta-layer', {
   amp: {
