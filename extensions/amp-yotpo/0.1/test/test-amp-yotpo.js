@@ -30,15 +30,12 @@ describes.realWin('amp-yotpo', {
     {name: 'BottomLine', selector: '.yotpo.bottomLine'},
     {name: 'PicturesGallery', selector: '.yotpo.yotpo-pictures-gallery'},
     {name: 'ReviewsCarousel', selector: '.yotpo.yotpo-reviews-carousel'},
-    /*{name: 'badge', selector: '.yotpo.badge,.yotpo.yotpo-badge'},
-        {name: 'questions-bottomline', selector: '.yotpo.QABottomLine'},
-        {name: 'slider', selector: '.yotpo.yotpo-slider'},
-        {name: 'visual-carousel', selector: '.yotpo.yotpo-visual-carousel'},
-        {name: 'pictures-widget', selector: '.yotpo.yotpo-pictures-widget'},
-        {name: 'shoppable-gallery', selector: '.yotpo.yotpo-shoppable-gallery'},
-        {name: 'testimonials', selector: '#yotpo-testimonials-custom-tab,.yotpo.testimonials'},
-        {name: 'single-video', selector: '.yotpo.yotpo-single-video'},
-        {name: 'shop-advisor', selector: '.yotpo.y-shop-advisor'}*/];
+    {name: 'badge', selector: '.yotpo.badge,.yotpo.yotpo-badge'},
+    {name: 'questions-bottomline', selector: '.yotpo.QABottomLine'},
+    {name: 'slider', selector: '.yotpo.yotpo-slider'},
+    {name: 'visual-carousel', selector: '.yotpo.yotpo-visual-carousel'},
+    {name: 'pictures-widget', selector: '.yotpo.yotpo-pictures-widget'},
+    {name: 'shoppable-gallery', selector: '.yotpo.yotpo-shoppable-gallery'}];
 
   beforeEach(() => {
     win = env.win;

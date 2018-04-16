@@ -283,6 +283,15 @@ data.ctaText;
 data.ctaColor;
 data.appKey;
 data.widgetType;
+data.layoutRows;
+data.demo;
+data.uploadButton;
+data.reviews;
+data.headerText;
+data.headerBackgroundColor;
+data.bodyBackgroundColor;
+data.data.fontColor;
+data.width;
 
 // 3p code
 var twttr;

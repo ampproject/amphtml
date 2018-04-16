@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
@@ -29,22 +30,16 @@ export class AmpYotpo extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-  /** @override */
-  renderOutsideViewport() {
-    // We are conservative about loading heavy embeds.
-    // This will still start loading before they become visible, but it
-    // won't typically load a large number of embeds.
-    return 0.75;
-  }
-
   /**
    * @param {boolean=} opt_onLayout
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://staticw2.yotpo.com', opt_onLayout);
   }
 
-  layoutCallback() {
+  /** @override */
+  buildCallback() {
     user().assert(this.element.getAttribute('data-app-key'),
         'The data-app-key attribute is required for <amp-yotpo> %s',
         this.element);
@@ -53,6 +48,11 @@ export class AmpYotpo extends AMP.BaseElement {
         this.element);
     const iframe = getIframe(this.win, this.element, 'yotpo');
     this.applyFillContent(iframe);
+
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
+
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
