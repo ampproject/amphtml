@@ -17,6 +17,7 @@ import {LocalizedStringId} from './localization'; // eslint-disable-line no-unus
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 import {isArray, toWin} from '../../../src/types';
 
 
@@ -74,12 +75,12 @@ function renderMulti(doc, elementsDef) {
  * @return {!Element}
  */
 function renderSingle(doc, elementDef) {
-  const el = elementDef.hasOwnProperty('attrs') ?
+  const el = hasOwn(elementDef, 'attrs') ?
     createElementWithAttributes(doc, elementDef.tag,
         /** @type {!JsonObject} */ (elementDef.attrs)) :
     doc.createElement(elementDef.tag);
 
-  if (elementDef.hasOwnProperty('localizedStringId')) {
+  if (hasOwn(elementDef, 'localizedStringId')) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNull(win).then(localizationService => {
       dev().assert(localizationService,
@@ -90,11 +91,11 @@ function renderSingle(doc, elementDef) {
     });
   }
 
-  if (elementDef.hasOwnProperty('unlocalizedString')) {
+  if (hasOwn(elementDef, 'unlocalizedString')) {
     el.textContent = elementDef.unlocalizedString;
   }
 
-  if (elementDef.hasOwnProperty('children')) {
+  if (hasOwn(elementDef, 'children')) {
     el.appendChild(renderMulti(doc,
         /** @type {!Array<!ElementDef>} */ (elementDef.children)));
   }
