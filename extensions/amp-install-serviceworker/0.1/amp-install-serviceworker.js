@@ -62,26 +62,12 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     assertHttpsUrl(src, this.element);
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
-      const iframeSrc = this.element.getAttribute('data-iframe-src');
-      if (iframeSrc) {
-        assertHttpsUrl(iframeSrc, this.element);
-        const origin = parseUrl(iframeSrc).origin;
-        const docInfo = Services.documentInfoForDoc(this.element);
-        const sourceUrl = parseUrl(docInfo.sourceUrl);
-        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
-        user().assert(
-            origin == sourceUrl.origin ||
-            origin == canonicalUrl.origin,
-            'data-iframe-src (%s) should be a URL on the same origin as the ' +
-            'source (%s) or canonical URL (%s) of the AMP-document.',
-            origin, sourceUrl.origin, canonicalUrl.origin);
-        this.iframeSrc_ = iframeSrc;
-        this.scheduleIframeLoad_();
-      }
-      return;
-    }
-
-    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
+      this.loadPromise(this.win).then(() => {
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+          return this.insertIframe_();
+        });
+      });
+    } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       this.loadPromise(this.win).then(() => {
         return install(this.win, src);
       });
@@ -92,32 +78,35 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
   }
 
-  /** @private */
-  scheduleIframeLoad_() {
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 10 seconds on this page, load
-      // the external iframe to install the ServiceWorker. The wait is
-      // introduced to avoid installing SWs for content that the user
-      // only engaged with superficially.
-      Services.timerFor(this.win).delay(() => {
-        this.mutateElement(this.insertIframe_.bind(this));
-      }, 10000);
-    });
-  }
-
-  /** @private */
+  /**
+   * Insert an iframe from the origin domain to install the service worker.
+   * @return {!Promise}
+   * @private
+   */
   insertIframe_() {
-    // If we are no longer visible, we will not do a SW registration on this
-    // page view.
-    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
-      return;
+    const iframeSrc = this.element.getAttribute('data-iframe-src');
+    if (iframeSrc) {
+      assertHttpsUrl(iframeSrc, this.element);
+      const origin = parseUrl(iframeSrc).origin;
+      const docInfo = Services.documentInfoForDoc(this.element);
+      const sourceUrl = parseUrl(docInfo.sourceUrl);
+      const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+      user().assert(
+          origin == sourceUrl.origin ||
+          origin == canonicalUrl.origin,
+          'data-iframe-src (%s) should be a URL on the same origin as the ' +
+          'source (%s) or canonical URL (%s) of the AMP-document.',
+          origin, sourceUrl.origin, canonicalUrl.origin);
+      this.iframeSrc_ = iframeSrc;
+      this.mutateElement(() => {
+        setStyle(this.element, 'display', 'none');
+        const iframe = this.win.document.createElement('iframe');
+        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+        iframe.src = this.iframeSrc_;
+        this.element.appendChild(iframe);
+      });
     }
-    // The iframe will stil be loaded.
-    setStyle(this.element, 'display', 'none');
-    const iframe = this.win.document.createElement('iframe');
-    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-    iframe.src = this.iframeSrc_;
-    this.element.appendChild(iframe);
+    return Promise.resolve();
   }
 
   /** @private */
