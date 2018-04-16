@@ -30,7 +30,7 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {matches} from '../../../src/dom';
+import {matches, removeElement} from '../../../src/dom';
 
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
@@ -71,7 +71,7 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   checkAndRemoveLayerIfOnFirstPage_() {
     if (matches(this.element,
         'amp-story-page:first-of-type > amp-story-cta-layer')) {
-      this.element.removeElement();
+      removeElement(this.element);
       console.error(
           'amp-story-cta-layer is not allowed on the first page of an ' +
           'amp-story.');
