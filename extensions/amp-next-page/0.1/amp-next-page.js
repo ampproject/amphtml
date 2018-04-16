@@ -16,20 +16,31 @@
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {Layout} from '../../../src/layout';
-import {NextPage} from './next-page-impl';
+import {NextPageService} from './next-page-service';
+import {Services} from '../../../src/services';
+import {assertConfig} from './config';
+import {
+  childElementsByAttr,
+  childElementsByTag,
+  isJsonScriptTag,
+} from '../../../src/dom';
 import {getService} from '../../../src/service';
+import {getSourceOrigin, isProxyOrigin, parseUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
 const TAG = 'amp-next-page';
 
-const SERVICE_ID = 'document-recommendations';
+const SERVICE_ID = 'next-page';
 
 export class AmpNextPage extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {!./next-page-service.NextPageService} */
     this.service_ = getService(this.win, SERVICE_ID);
   }
 
@@ -41,12 +52,58 @@ export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG), `Experiment ${TAG} disabled`);
-    this.service_.register(this);
+    if (this.service_.isActive()) {
+      return;
+    }
+
+    this.element.classList.add('i-amphtml-next-page');
+
+    // TODO(peterjosling): Read config from another source.
+
+    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
+    user().assert(scriptElements.length == 1,
+        `${TAG} should contain only one <script> child.`);
+    const scriptElement = scriptElements[0];
+    user().assert(isJsonScriptTag(scriptElement),
+        `${TAG} config should ` +
+            'be inside a <script> tag with type="application/json"');
+    const configJson = tryParseJson(scriptElement.textContent, error => {
+      user().error(TAG, 'failed to parse config', error);
+    });
+
+    const docInfo = Services.documentInfoForDoc(this.element);
+    const url = parseUrl(docInfo.url);
+    const sourceOrigin = getSourceOrigin(url);
+    const config = assertConfig(configJson, url.origin, sourceOrigin);
+
+    if (isProxyOrigin(url)) {
+      config.pages.forEach(rec => {
+        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
+      });
+    }
+
+    const separatorElements = childElementsByAttr(this.element, 'separator');
+    user().assert(separatorElements.length <= 1,
+        `${TAG} should contain at most one <div separator> child`);
+
+    let separator;
+    if (separatorElements.length === 1) {
+      separator = separatorElements[0];
+    } else {
+      separator = this.win.document.createElement('div');
+    }
+
+    this.service_.register(this.element, config, separator);
+    this.service_.setAppendPageHandler(element => this.appendPage_(element));
+  }
+
+  appendPage_(element) {
+    return this.mutateElement(() => this.element.appendChild(element));
   }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  const service = new NextPage();
+  const service = new NextPageService();
   AMP.registerServiceForDoc(SERVICE_ID, () => service);
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });

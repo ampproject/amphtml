@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {assertConfig} from './config';
-import {
-  childElementsByAttr,
-  childElementsByTag,
-  isJsonScriptTag,
-} from '../../../src/dom';
-import {getServiceForDoc} from '../../../src/service';
+import {dev} from '../../../src/log';
+import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
@@ -32,8 +28,6 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {parseUrl} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
 
 // TODO(emarchiori): Make this a configurable parameter.
 const SEPARATOR_RECOS = 3;
@@ -53,26 +47,32 @@ const TAG = 'amp-next-page';
 export let DocumentRef;
 
 /**
- * Window-scoped service to handle the amp-next-page lifecycle. Attaches all
- * events and DOM manipulation to the first first {@code AmpNextPage} element
+ * Window-scoped service to handle the amp-next-page lifecycle. Handles all
+ * events and page lifecycle for the first {@code AmpNextPage} element
  * registered. All subsequent registrations will be ignored.
  */
-export class NextPage {
+export class NextPageService {
   constructor() {
-    /** @private {?./amp-next-page.AmpNextPage} */
-    this.nextPage_ = null;
+    /** @private {?Window} */
+    this.win_ = null;
+
+    /** @private {?Element} */
+    this.element_ = null;
 
     /** @private {?./config.AmpNextPageConfig} */
     this.config_ = null;
+
+    /** @private {?Element} */
+    this.separator_ = null;
+
+    /** @private {?../../../src/service/resources-impl.Resources} */
+    this.resources_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
 
     /** @private {number} */
     this.nextArticle_ = 0;
-
-    /** @private {Element} */
-    this.separator_ = null;
 
     /** @private {boolean} */
     this.documentQueued_ = false;
@@ -82,9 +82,6 @@ export class NextPage {
 
     /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = null;
-
-    /** @private {?../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = null;
 
     /**
      * @private
@@ -97,26 +94,40 @@ export class NextPage {
 
     /** @private {?DocumentRef} */
     this.activeDocumentRef_ = null;
+
+    /** @private {function(!Element)} */
+    this.appendPageHandler_ = () => {};
+  }
+
+  /** Returns true if the service has already been initialized. */
+  isActive() {
+    return this.config_ !== null;
   }
 
   /**
    * Registers the window-scoped service against the specified {@code
    * recommendationsOb}. Only the first call to this method will be used, any
    * subsequent calls will be ignored.
+   * @param {!Element} element {@link AmpNextPage} element.
+   * @param {!./config.AmpNextPageConfig} config Element configuration.
+   * @param {!Element} separator Separator element to display between pages.
    */
-  register(nextPage) {
-    if (this.nextPage_ !== null) {
+  register(element, config, separator) {
+    if (this.isActive()) {
       return;
     }
 
-    const win = nextPage.win;
-    const element = nextPage.element;
-    const ampDoc = nextPage.getAmpDoc();
+    const ampDoc = getAmpdoc(element);
+    const win = ampDoc.win;
 
-    this.nextPage_ = nextPage;
+    this.config_ = config;
+    this.separator_ = separator;
+    this.win_ = win;
+    this.element_ = element;
+
     this.viewer_ = Services.viewerForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
-    this.vsync_ = Services.vsyncFor(win);
+    this.resources_ = Services.resourcesForDoc(ampDoc);
     this.multidocManager_ =
         new MultidocManager(win, Services.ampdocServiceFor(win),
           Services.extensionsFor(win), Services.timerFor(win));
@@ -130,40 +141,17 @@ export class NextPage {
     });
     this.activeDocumentRef_ = this.documentRefs_[0];
 
-    nextPage.element.classList.add('i-amphtml-next-page');
-
-    // TODO(peterjosling): Read config from another source.
-
-    const scriptElements = childElementsByTag(this.element, 'SCRIPT');
-    user().assert(scriptElements.length == 1,
-        `${TAG} should contain only one <script> child.`);
-    const scriptElement = scriptElements[0];
-    user().assert(isJsonScriptTag(scriptElement),
-        `${TAG} config should ` +
-        'be inside a <script> tag with type="application/json"');
-    const configJson = tryParseJson(scriptElement.textContent, error => {
-      throw user().createError(`failed to parse ${TAG} config`, error);
-    });
-
-    const docInfo = Services.documentInfoForDoc(element);
-    const host = parseUrl(docInfo.sourceUrl).host;
-    this.config_ = assertConfig(configJson, host);
-
-    const separatorElements = childElementsByAttr(element, 'separator');
-    user().assert(separatorElements.length <= 1,
-        `${TAG} should contain at most one <div separator> child`);
-
-    if (separatorElements.length == 1) {
-      this.separator_ = separatorElements[0];
-    }
-
-    this.nextPage_.mutateElement(() => {
-      element.appendChild(this.createDivider_());
-      this.appendArticleLinks_(this.nextArticle_ + 1);
-    });
-
     this.viewport_.onScroll(() => this.scrollHandler_());
     this.viewport_.onResize(() => this.scrollHandler_());
+  }
+
+  /**
+   * Sets the handler to be called with a
+   * @param {function(!Element)} handler Handler to be called when a new page
+   *     needs adding to the DOM, with a container element for that page.
+   */
+  setAppendPageHandler(handler) {
+    this.appendPageHandler_ = handler;
   }
 
   /**
@@ -173,34 +161,41 @@ export class NextPage {
    *     {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(doc) {
+    const container = this.win_.document.createElement('div');
+
+    const separator = this.separator_.cloneNode(true);
+    separator.removeAttribute('separator');
+    container.appendChild(separator);
+
+    const page = this.nextArticle_ - 1;
+    this.positionObserver_.observe(separator,
+        PositionObserverFidelity.LOW,
+        position => this.positionUpdate_(page, position));
+
+    const divider = this.createDivider_();
+    container.appendChild(divider);
+
+    const articleLinks = this.createArticleLinks_(this.nextArticle_);
+    container.appendChild(articleLinks);
+
+    const shadowRoot = this.win_.document.createElement('div');
+    container.appendChild(shadowRoot);
+
     let amp = null;
-    return this.vsync_
-        .mutatePromise(() => {
-          const shadowRoot =
-              this.nextPage_.win.document.createElement('div');
+    return this.appendPageHandler_(container)
+        .then(() => {
+          return this.resources_.mutateElement(container, () => {
+            try {
+              amp = this.multidocManager_.attachShadowDoc(
+                  shadowRoot, doc, '', {});
+              installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
 
-          try {
-            amp =
-                this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
-
-            const element = this.nextPage_.element;
-
-            if (this.separator_) {
-              const separatorClone = this.separator_.cloneNode(true);
-              separatorClone.removeAttribute('separator');
-              element.appendChild(separatorClone);
+              const body = amp.ampdoc.getBody();
+              body.classList.add('i-amphtml-next-page-document');
+            } catch (e) {
+              // TODO(emarchiori): Handle loading errors.
             }
-
-            element.appendChild(shadowRoot);
-            element.appendChild(this.createDivider_());
-            this.appendArticleLinks_(this.nextArticle_ + 1);
-
-            installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
-            const body = amp.ampdoc.getBody();
-            body.classList.add('i-amphtml-next-page-document');
-          } catch (e) {
-            // TODO(emarchiori): Handle loading errors.
-          }
+          });
         })
         .then(() => amp);
   }
@@ -210,8 +205,7 @@ export class NextPage {
    * @return {!Element}
    */
   createDivider_() {
-    const topDivision =
-        this.nextPage_.win.document.createElement('div');
+    const topDivision = this.win_.document.createElement('div');
     topDivision.classList.add('amp-next-page-division');
     return topDivision;
   }
@@ -227,11 +221,9 @@ export class NextPage {
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
-      const win = this.nextPage_.win;
-
       // TODO(emarchiori): ampUrl needs to be updated to point to
       // the cache or same domain, otherwise this is a CORS request.
-      Services.xhrFor(win)
+      Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => this.attachShadowDoc_(doc), () => {})
           .then(amp => {
@@ -242,23 +234,24 @@ export class NextPage {
   }
 
   /**
-   * Append recommendation links to articles, starting from a given
+   * Creates a recommendation unit with links to articles, starting from a given
    * one.
    * @param {number} nextPage Index of the next unseen page to use as the first
    *     recommendation in the list.
+   * @return {Element} Container element for the recommendations.
    */
-  appendArticleLinks_(nextPage) {
-    const doc = this.nextPage_.win.document;
+  createArticleLinks_(nextPage) {
+    const doc = this.win_.document;
     const currentArticle = nextPage - 1;
     let article = nextPage;
     let currentAmpUrl = '';
     if (nextPage > 0) {
       currentAmpUrl = this.documentRefs_[currentArticle].ampUrl;
     }
-    const recommendations = doc.createElement('div');
 
+    const element = doc.createElement('div');
     while (article < this.config_.pages.length &&
-    article - nextPage < SEPARATOR_RECOS) {
+           article - nextPage < SEPARATOR_RECOS) {
       const next = this.config_.pages[article];
       article++;
 
@@ -283,14 +276,11 @@ export class NextPage {
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
 
-      recommendations.appendChild(articleHolder);
-      recommendations.appendChild(this.createDivider_());
+      element.appendChild(articleHolder);
+      element.appendChild(this.createDivider_());
     }
 
-    this.nextPage_.element.appendChild(recommendations);
-    this.positionObserver_.observe(recommendations,
-        PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(currentArticle, position));
+    return element;
   }
 
   /**
@@ -307,7 +297,7 @@ export class NextPage {
     const viewportSize = this.viewport_.getSize();
     const viewportBox =
         layoutRectLtwh(0, 0, viewportSize.width, viewportSize.height);
-    this.viewport_.getClientRectAsync(this.nextPage_.element)
+    this.viewport_.getClientRectAsync(dev().assertElement(this.element_))
         .then(elementBox => {
           if (this.documentQueued_) {
             return;
@@ -341,12 +331,12 @@ export class NextPage {
       const documentRef = this.documentRefs_[i + 1];
       this.triggerAnalyticsEvent_('amp-next-page-scroll',
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
-      this.setActiveDocument_(this.documentRefs_[i + 1]);
+      this.setActiveDocument_(documentRef);
     } else if (position.relativePos === 'bottom') {
       const documentRef = this.documentRefs_[i];
       this.triggerAnalyticsEvent_('amp-next-page-scroll-back',
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
-      this.setActiveDocument_(this.documentRefs_[i]);
+      this.setActiveDocument_(documentRef);
     }
   }
 
@@ -357,11 +347,10 @@ export class NextPage {
    */
   setActiveDocument_(documentRef) {
     const amp = documentRef.amp;
-    const win = this.nextPage_.win;
-    win.document.title = amp.title || '';
-    if (win.history.replaceState) {
+    this.win_.document.title = amp.title || '';
+    if (this.win_.history.replaceState) {
       const url = parseUrl(documentRef.ampUrl);
-      win.history.replaceState({}, amp.title, url.pathname);
+      this.win_.history.replaceState({}, amp.title, url.pathname);
     }
 
     this.activeDocumentRef_ = documentRef;
@@ -380,6 +369,6 @@ export class NextPage {
     fromURL = fromURL || '';
 
     const vars = {toURL, fromURL};
-    triggerAnalyticsEvent(this.nextPage_.element, eventType, vars);
+    triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }
