@@ -51,8 +51,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
               () => addToFixedLayerPromise);
     });
 
-    // TODO(zhouyx, #14336): Fails due to console errors.
-    it.skip('should listen to scroll event', function * () {
+    it('should listen to scroll event', function * () {
       expect(impl.scrollUnlisten_).to.be.null;
       yield macroTask();
       expect(impl.scrollUnlisten_).to.be.a('function');

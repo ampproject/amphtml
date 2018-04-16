@@ -745,8 +745,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #14336): Fails due to console errors.
-    it.skip('should find target in the embed only via target', function* () {
+    it('should find target in the embed only via target', function* () {
       const parentWin = env.ampdoc.win;
       const embedWin = embed.win;
       const anim = yield createAnim({},

@@ -33,6 +33,8 @@ PASS
 |  </head>
 |  <body>
 |    <amp-story standalone>
+>>   ^~~~~~~~~
+amp-story-auto-ads/0.1/test/validator-amp-story-auto-ads.html:34:2 The tag 'AMP-STORY (beta)' is deprecated - use 'AMP-STORY' instead. (see https://www.ampproject.org/docs/reference/components/amp-story#announcements) [DEPRECATION]
 |      <amp-story-page id="1">
 |        <amp-story-grid-layer template="horizontal">
 |        </amp-story-grid-layer>
