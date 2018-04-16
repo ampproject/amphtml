@@ -18,6 +18,10 @@ before_script:
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
   - chromedriver-update 2.35
   - chromedriver -v
+  - pushd build-system/eslint-rules
+  - yarn link
+  - popd
+  - yarn link eslint-plugin-amphtml-internal
   - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script:
