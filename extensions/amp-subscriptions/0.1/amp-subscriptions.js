@@ -379,7 +379,9 @@ export class SubscriptionService {
           return this.platformStore_.getGrantEntitlement();
         }).then(grantStateEntitlement => {
           const localPlatform = this.platformStore_.getLocalPlatform();
-          localPlatform.pingback(grantStateEntitlement);
+          if (localPlatform.isPingbackEnabled()) {
+            localPlatform.pingback(grantStateEntitlement);
+          }
         });
       }
     });
