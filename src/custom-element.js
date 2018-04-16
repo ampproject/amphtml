@@ -1516,7 +1516,7 @@ function createBaseCustomElementClass(win) {
      */
     prepareLoading_() {
       if (!this.loadingContainer_) {
-        const doc = dev().assert(this.ownerDocument);
+        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
 
         const container = htmlFor(doc)`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
