@@ -43,16 +43,35 @@ import {dev} from '../log';
 import {getMode} from '../mode';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
+import {
+  maybeInstallIntersectionObserver,
+} from 'intersection-observer/intersection-observer.install';
+import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
 import {removeElement} from '../dom';
 import {setStyles} from '../style';
-import {startsWith} from '../string.js';
+import {startsWith} from '../string';
 
+/** @private @const {string} */
 const TAG = 'video-manager';
 
 
 /** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
 let VideoAnalyticsDef; // alias for line length
+
+
+/**
+ * Classname indicating that a video component has been "blessed" via user
+ * interaction.
+ * @private @const {string}
+ */
+const BLESSED = 'i-amphtml-blessed';
+
+
+/** @private @enum {string} */
+const Signals = {
+  BLESSED: 'blessed',
+};
 
 
 /** @interface */
@@ -132,6 +151,9 @@ export class VideoManager {
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
+    /** @public @const {function():!Rot82xManager} */
+    this.getRot82xManager = once(() => this.createRot82xManager_());
+
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
     // video analytics are not present.
@@ -152,6 +174,11 @@ export class VideoManager {
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /** @private @return {!Rot82xManager} */
+  createRot82xManager_() {
+    return new Rot82xManager(this.ampdoc);
   }
 
   /**
@@ -187,14 +214,8 @@ export class VideoManager {
     this.entries_ = this.entries_ || [];
     const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
-    this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
-
-    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
-    // moment in the element's lifecycle and the promise will resolve
-    // appropriately each time.
-    video.element.signals().signal(VideoEvents.REGISTERED);
 
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
@@ -264,49 +285,6 @@ export class VideoManager {
       this.scrollListenerInstalled_ = true;
     }
   }
-
-
-  /**
-   * Install the necessary listeners to be notified when the user changes
-   * the orientation of their device
-   *
-   * @param {VideoEntry} entry
-   * @private
-   */
-  maybeInstallOrientationObserver_(entry) {
-    // The orientation observer is only useful for automatically putting videos
-    // in fullscreen.
-    if (!entry.hasFullscreenOnLandscape) {
-      return;
-    }
-
-    // TODO(@wassgha) Check support status for orientation API and update
-    // this as needed.
-    const win = this.ampdoc.win;
-    const screen = win.screen;
-    const handleOrientationChange = () => {
-      let isLandscape;
-      if (screen && 'orientation' in screen) {
-        isLandscape = startsWith(screen.orientation.type, 'landscape');
-      } else {
-        isLandscape = win.orientation == -90 || win.orientation == 90;
-      }
-      entry.orientationChanged_(isLandscape);
-    };
-    // Chrome apparently considers 'orientationchange' to be an untrusted
-    // event, while 'change' on screen.orientation is considered a user
-    // interaction. However on Chrome we still need to listen to
-    // 'orientationchange' to be able to exit fullscreen since 'change' does not
-    // fire when a video is in fullscreen.
-    if (screen && 'orientation' in screen) {
-      const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
-      listen(orient, 'change', handleOrientationChange.bind(this));
-    }
-    // iOS Safari does not have screen.orientation but classifies
-    // 'orientationchange' as a user interaction.
-    listen(win, 'orientationchange', handleOrientationChange.bind(this));
-  }
-
 
   /**
    * Returns the entry in the video manager corresponding to the video
@@ -409,9 +387,6 @@ class VideoEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private {boolean} */
-    this.isFullscreenByOrientationChange_ = false;
-
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
@@ -454,13 +429,6 @@ class VideoEntry {
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
 
-    const fsOnLandscapeAttr = element.getAttribute(
-        VideoAttributes.FULLSCREEN_ON_LANDSCAPE
-    );
-
-    this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
-                                    || fsOnLandscapeAttr == 'always';
-
     // Media Session API Variables
 
     /** @private {!../mediasession-helper.MetadataDef} */
@@ -474,8 +442,7 @@ class VideoEntry {
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    element.signals().whenSignal(VideoEvents.REGISTERED)
-        .then(() => this.onRegister_());
+    element.whenBuilt().then(() => this.onBuilt_());
   }
 
   /** Delegates autoplay to a different module. */
@@ -488,11 +455,31 @@ class VideoEntry {
   }
 
   /** @private */
-  onRegister_() {
+  onBuilt_() {
+    const {element} = this.video;
+
+    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
+    // moment in the element's lifecycle and the promise will resolve
+    // appropriately each time.
+    this.signal_(VideoEvents.REGISTERED);
+
+    if (this.hasFullscreenOnLandscape_()) {
+      this.manager_.getRot82xManager().register(element, this);
+    }
+
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
+  }
+
+  /**
+   * @retun {boolean}
+   * @private
+   */
+  hasFullscreenOnLandscape_() {
+    const {element} = this.video;
+    return element.hasAttribute(VideoAttributes.ROT82X);
   }
 
   /**
@@ -501,6 +488,10 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
+
+    if (!this.hasAutoplay) {
+      this.markBlessed_();
+    }
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
@@ -622,50 +613,6 @@ class VideoEntry {
   }
 
   /**
-   * Called when the orientation of the device changes
-   * @param {boolean} isLandscape
-   * @private
-   */
-  orientationChanged_(isLandscape) {
-    if (!this.loaded_) {
-      return;
-    }
-    // Put the video in/out of fullscreen depending on screen orientation
-    if (!isLandscape && this.isFullscreenByOrientationChange_) {
-      this.exitFullscreen_();
-    } else if (isLandscape
-               && this.getPlayingState() == PlayingStates.PLAYING_MANUAL
-               && this.isVisible_
-               && Services.viewerForDoc(this.ampdoc_).isVisible()) {
-      this.enterFullscreen_();
-    }
-  }
-
-  /**
-   * Makes the video element go fullscreen and updates its status
-   * @private
-   */
-  enterFullscreen_() {
-    if (this.video.isFullscreen() || this.isFullscreenByOrientationChange_) {
-      return;
-    }
-    this.video.fullscreenEnter();
-    this.isFullscreenByOrientationChange_ = this.video.isFullscreen();
-  }
-
-  /**
-   * Makes the video element quit fullscreen and updates its status
-   * @private
-   */
-  exitFullscreen_() {
-    if (!this.isFullscreenByOrientationChange_) {
-      return;
-    }
-    this.video.fullscreenExit();
-    this.isFullscreenByOrientationChange_ = false;
-  }
-
-  /**
    * Only called when visibility of a loaded video changes.
    * @private
    */
@@ -759,6 +706,7 @@ class VideoEntry {
         adEnd.bind(this)));
 
     function onInteraction() {
+      this.markBlessed_();
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
@@ -780,6 +728,22 @@ class VideoEntry {
         'display': 'block',
       });
     }
+  }
+
+  /** @private */
+  markBlessed_() {
+    const {element} = this.video;
+    this.signal_(Signals.BLESSED);
+    element.classList.add(BLESSED);
+  }
+
+  /**
+   * @param {string} signal
+   * @private
+   */
+  signal_(signal) {
+    const {element} = this.video;
+    element.signals().signal(signal);
   }
 
   /**
@@ -956,6 +920,337 @@ class VideoEntry {
       };
     });
   }
+}
+
+
+/**
+ * @struct @typedef {{
+ *  entry: !VideoEntry,
+ *  impl: !../video-interface.VideoInterface,
+ * }}
+ */
+let Rot82xEntryDef;
+
+
+/** Manages rotate-to-fullscreen video. */
+class Rot82xManager {
+
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    const {win} = ampdoc;
+
+    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private {number} */
+    this.nextId_ = 0;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!./timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
+    /** @private {?Rot82xEntryDef} */
+    this.currently_ = null;
+
+    /**
+     * Maps FOL id to entry.
+     * @private @const {!Object<string, !Rot82xEntryDef>}
+     */
+    this.entries_ = {};
+
+    /** @private @const {function()} */
+    const installOrientationObserver =
+        this.installOrientationObserver_.bind(this);
+    this.installOrientationObserver_ = once(installOrientationObserver);
+
+    /** @private @const {function():!IntersectionObserver} */
+    const getIntersectionObserver = this.getIntersectionObserver_.bind(this);
+    this.getIntersectionObserver_ =
+      /** @type {function():!IntersectionObserver} */ (
+        once(getIntersectionObserver));
+  }
+
+  /**
+   * @param {!AmpElement} element
+   * @param {!VideoEntry} entry
+   */
+  register(element, entry) {
+    const id = this.nextId_++;
+
+    element.setAttribute('data-amp-fol-id', id);
+
+    element.getImpl().then(impl => {
+      this.entries_[id.toString()] = {entry, impl};
+    });
+
+    // Wait until the video is "blessed" in order to have fullscreen access.
+    element.signals().whenSignal(Signals.BLESSED).then(() => {
+      this.installOrientationObserver_();
+      this.getIntersectionObserver_().observe(element);
+    });
+  }
+
+  /** @private */
+  // Overridden in constructor
+  installOrientationObserver_() {
+    // TODO(alanorozco) Update based on support
+    const win = this.win_;
+    const screen = win.screen;
+    // Chrome considers 'orientationchange' to be an untrusted event, but
+    // 'change' on screen.orientation is considered a user interaction.
+    // We still need to listen to 'orientationchange' on Chrome in order to
+    // exit fullscreen since 'change' does not fire in this case.
+    if (screen && 'orientation' in screen) {
+      const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
+      listen(orient, 'change', () => this.onOrientationChange_());
+    }
+    // iOS Safari does not have screen.orientation but classifies
+    // 'orientationchange' as a user interaction.
+    listen(win, 'orientationchange', () => this.onOrientationChange_());
+  }
+
+  /** @private */
+  onOrientationChange_() {
+    if (!isLandscape(this.win_)) {
+      const entries = this.getIntersectionObserver_().takeRecords();
+      this.updatePortraitVisibility_(entries);
+      if (this.currently_) {
+        this.exit_(this.currently_);
+      }
+      return;
+    }
+    const root = this.ampdoc_.getRootNode();
+    const centeredVideoSelector = `.i-amphtml-fol-centered.${BLESSED}`;
+    const video = root.querySelector(centeredVideoSelector);
+    if (!video) {
+      return;
+    }
+    console.log('enter fullscreen', video);
+    const id = this.getId_(video);
+    this.enter_(dev().assert(this.entries_[id]));
+  }
+
+  /**
+   * @param {!Rot82xEntryDef} folEntry
+   * @private
+   */
+  enter_(folEntry) {
+    const {impl, entry} = folEntry;
+
+    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+      return;
+    }
+
+    const platform = Services.platformFor(this.win_);
+
+    this.currently_ = folEntry;
+
+    if (platform.isAndroid() && platform.isChrome()) {
+      // Chrome on Android somehow knows what we're doing and executes a nice
+      // transition by default. Delegating to browser.
+      impl.fullscreenEnter();
+      return;
+    }
+
+    const {video} = entry;
+    this.maybeScrollTo_(video).then(() => impl.fullscreenEnter());
+  }
+
+  /**
+   * @param {!Rot82xEntryDef} folEntry
+   * @private
+   */
+  exit_(folEntry) {
+    this.currently_ = null;
+
+    const {entry, impl} = folEntry;
+    const {video} = entry;
+
+    this.maybeScrollTo_(video).then(() => impl.fullscreenExit());
+  }
+
+  /**
+   * Scrolls to a video if it's not in view.
+   * @param {!../video-interface.VideoInterface} impl
+   * @private
+   */
+  maybeScrollTo_(impl) {
+    const {element} = impl;
+    let stillInView = false;
+    return this.onceOrientationChanges_().then(() =>
+      (/** @type {!../base-element.BaseElement} */ (impl))
+          .measureMutateElement(() => {
+            const {top, bottom} = element.getBoundingClientRect();
+            // TODO(alanorozco): Use viewport service
+            stillInView = top >= 0 && bottom <= this.win_.innerHeight;
+          }, () => {
+            if (!stillInView) {
+              return this.scrollTo_(element);
+            }
+          }));
+  }
+
+  /**
+   * @param {!Element} element
+   * @private
+   */
+  scrollTo_(element) {
+    const pxPerFrame = 24;
+    const timeout = 1000;
+
+    const viewport = Services.viewportForDoc(this.ampdoc_);
+    const rect = element.getBoundingClientRect();
+    const vh = viewport.getSize().height;
+    const scrollY = viewport.getScrollTop();
+    const top = scrollY + rect.top;
+    const {height} = rect;
+
+    const y = top - (vh / 2 - height / 2);
+
+    const delta = Math.abs(scrollY - y);
+
+    const frames = Math.min(Math.floor(delta / pxPerFrame));
+    const direction = y < scrollY ? -1 : 1;
+
+    const scrollPromise = new Promise(resolve => {
+      let nextY = scrollY + direction * pxPerFrame;
+      let curFrame = 0;
+
+      const scroll = () => {
+        const shouldStop =
+            curFrame++ >= frames ||
+            direction > 0 && nextY >= y ||
+            direction < 0 && nextY <= y;
+
+        if (shouldStop) {
+          const magicNumber = 200;
+          this.win_.scrollTo(0, y);
+          this.timer_.delay(resolve, magicNumber);
+          return;
+        }
+
+        this.win_.scrollTo(0, nextY);
+        nextY += direction * pxPerFrame;
+        requestAnimationFrame(scroll);
+      };
+      scroll();
+    });
+
+    return this.timer_.timeoutPromise(timeout, /* race */ scrollPromise);
+  }
+
+  /** @private @return {!Promise} */
+  onceOrientationChanges_() {
+    const magicNumber = 330;
+    return this.timer_.promise(magicNumber);
+  }
+
+  /** @private @return {!IntersectionObserver} */
+  // Overridden in constructor
+  getIntersectionObserver_() {
+    maybeInstallIntersectionObserver(this.win_, this.ampdoc_.getRootNode());
+
+    const threshold = [0, 0.1, 0.2, 0.3, 0.7, 0.8, 0.9, 1];
+    const rootMargin = '0px 0px 25% 0px';
+
+    return new IntersectionObserver(
+        entries => this.onIntersectionChange_(entries),
+        {threshold, rootMargin});
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} intersectionEntries
+   * @private
+   */
+  onIntersectionChange_(intersectionEntries) {
+    if (!isLandscape(this.win_)) {
+      this.updatePortraitVisibility_(intersectionEntries);
+    }
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} intersectionEntries
+   * @private
+   */
+  updatePortraitVisibility_(intersectionEntries) {
+    intersectionEntries
+        .sort((a, b) => this.compareIntersectionEntries_(a, b))
+        .forEach((entry, i) => {
+          // Best centered element that is fully in-view is be considered
+          // in range.
+          const inRange = entry.intersectionRatio >= 1 && i == 0;
+          entry.target.classList.toggle('i-amphtml-fol-centered', inRange);
+        });
+  }
+
+  /**
+   * Compares two intersection entries in order to sort them by "best centered".
+   * @param {!IntersectionObserverEntry} a
+   * @param {!IntersectionObserverEntry} b
+   * @return {number}
+   */
+  compareIntersectionEntries_(a, b) {
+    if (a.intersectionRatio > b.intersectionRatio) {
+      return -1;
+    }
+    if (a.intersectionRatio < b.intersectionRatio) {
+      return 1;
+    }
+
+    const viewport = Services.viewportForDoc(this.ampdoc_);
+    const aCenter = centerDist(viewport, a.boundingClientRect);
+    const bCenter = centerDist(viewport, b.boundingClientRect);
+
+    if (aCenter > bCenter) {
+      return -1;
+    }
+    if (aCenter < bCenter) {
+      return 1;
+    }
+
+    if (a.boundingClientRect.top < b.boundingClientRect.top) {
+      return -1;
+    }
+    if (a.boundingClientRect.top > b.boundingClientRect.top) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getId_(element) {
+    return dev().assertString(element.getAttribute('data-amp-fol-id'));
+  }
+}
+
+
+/**
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {{top: number, height: number}} rect
+ * @return {number}
+ */
+function centerDist(viewport, rect) {
+  const centerY = rect.top + rect.height / 2;
+  const centerViewport = viewport.getSize().height / 2;
+  return Math.abs(centerY - centerViewport);
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isLandscape(win) {
+  if (win.screen && 'orientation' in win.screen) {
+    return startsWith(screen.orientation.type, 'landscape');
+  }
+  return Math.abs(win.orientation) == 90;
 }
 
 

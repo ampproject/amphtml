@@ -28,25 +28,52 @@ const log = require('fancy-log');
  * or a friendly iframe.
  */
 function patchWebAnimations() {
-  // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
+  patchWithWrapper(
+      'node_modules/web-animations-js/web-animations.min.js',
+      'node_modules/web-animations-js/web-animations.install.js',
+      /* prefix */ 'exports.installWebAnimations = function(window) {\n' +
+        'var document = window.document;',
+      /* sufix */ '};');
+}
+
+
+/**
+ * Patches IntersectionObserver polyfill by wrapping its body into an `install`
+ * function.
+ * This gives us an option to call polyfill directly on the main window
+ * or a friendly iframe.
+ */
+function patchIntersectionObserver() {
+  patchWithWrapper(
+      'node_modules/intersection-observer/intersection-observer.js',
+      'node_modules/intersection-observer/intersection-observer.install.js',
+      /* prefix */ 'exports.maybeInstallIntersectionObserver = ' +
+        'function(win, root) {\nvar document = root;',
+      /* sufix */ '};');
+}
+
+
+/**
+ * Patches a file by wrapping it with `prefix` and `sufix`.
+ * @param {string} originalName
+ * @param {string} patchedName
+ * @param {string} prefix
+ * @param {string} sufix
+ */
+function patchWithWrapper(originalName, patchedName, prefix, sufix) {
   if (fs.existsSync(patchedName)) {
     return;
   }
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
-  // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file + '\n' +
-      '}\n';
-  fs.writeFileSync(patchedName, file);
+
+  const original = fs.readFileSync(originalName).toString();
+  const patched = [prefix, original, sufix].join('\n');
+
+  fs.writeFileSync(patchedName, patched);
   if (!process.env.TRAVIS) {
     log(colors.green('Patched'), colors.cyan(patchedName));
   }
 }
+
 
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
@@ -70,6 +97,7 @@ function updatePackages() {
     }
   }
   patchWebAnimations();
+  patchIntersectionObserver();
 }
 
 gulp.task(
