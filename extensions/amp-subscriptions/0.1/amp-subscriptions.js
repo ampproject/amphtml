@@ -126,6 +126,20 @@ export class SubscriptionService {
   }
 
   /**
+   * Create platform store and initialize local
+   * @param {!Array<string>} serviceIds
+   * @private
+   */
+  initializeStoreAndLocalPlatform_(serviceIds) {
+    this.platformStore_ = new PlatformStore(serviceIds,
+        this.platformConfig_['score']);
+
+    this.platformConfig_['services'].forEach(service => {
+      this.initializeLocalPlatforms_(service);
+    });
+  }
+
+  /**
    * @param {!JsonObject} serviceConfig
    * @private
    */
@@ -273,12 +287,7 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds,
-          this.platformConfig_['score']);
-
-      this.platformConfig_['services'].forEach(service => {
-        this.initializeLocalPlatforms_(service);
-      });
+      this.initializeStoreAndLocalPlatform_(serviceIds);
 
       this.platformStore_.getAllRegisteredPlatforms().forEach(
           subscriptionPlatform => {
@@ -305,12 +314,9 @@ export class SubscriptionService {
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
-    this.platformStore_ = new PlatformStore(serviceIds,
-        this.platformConfig_['score']);
-    // TODO: Implement viewer authentication class
-    this.platformConfig_['services'].forEach(service => {
-      this.initializeLocalPlatforms_(service);
-    });
+
+    this.initializeStoreAndLocalPlatform_(serviceIds);
+
     this.viewer_.sendMessageAwaitResponse('auth', dict({
       'publicationId': publicationId,
       'productId': currentProductId,
