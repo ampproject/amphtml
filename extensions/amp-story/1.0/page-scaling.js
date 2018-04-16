@@ -17,7 +17,7 @@ import {Services} from '../../../src/services';
 import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setImportantStyles} from '../../../src/style';
+import {px, setImportantStyles, setStyle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 import {toArray, toWin} from '../../../src/types';
 import {unscaledClientRect} from './utils';
@@ -441,10 +441,9 @@ class CssPropsZoomScalingService extends PageScalingService {
   updateRootProps() {
     const {width, height, factor} = this.targetDimensions_;
     this.vsync_.mutate(() => {
-      this.rootEl_.style.setProperty('--i-amphtml-story-width', px(width));
-      this.rootEl_.style.setProperty('--i-amphtml-story-height', px(height));
-      this.rootEl_.style.setProperty('--i-amphtml-story-factor',
-          factor.toString());
+      setStyle(this.rootEl_, '--i-amphtml-story-width', px(width));
+      setStyle(this.rootEl_, '--i-amphtml-story-height', px(height));
+      setStyle(this.rootEl_, '--i-amphtml-story-factor', factor.toString());
     });
   }
 
