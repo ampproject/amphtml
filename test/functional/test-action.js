@@ -659,7 +659,7 @@ describe('Action method', () => {
     allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('img'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Target element does not support provided action/); });
+    }).to.throw(/doesn't support "method1" action/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
@@ -726,9 +726,11 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tap', ActionTrust.LOW));
-    expect(handlerSpy).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tap', ActionTrust.LOW));
+      expect(handlerSpy).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
         'button', 'button', 'tap', ActionTrust.HIGH));
@@ -964,9 +966,11 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'caller1', 'event1', ActionTrust.LOW));
-    expect(handler).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
         'source1', 'caller1', 'event1', ActionTrust.HIGH));

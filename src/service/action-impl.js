@@ -483,7 +483,9 @@ export class ActionService {
   error_(message, opt_element) {
     if (opt_element) {
       // reportError() supports displaying the element in dev console.
-      reportError(user().createError(`[${TAG_}] ${message}`), opt_element);
+      const e = user().createError(`[${TAG_}] ${message}`);
+      reportError(e, opt_element);
+      throw e;
     } else {
       user().error(TAG_, message);
     }
