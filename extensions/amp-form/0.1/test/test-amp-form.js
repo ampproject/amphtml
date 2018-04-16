@@ -1683,6 +1683,27 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+
+      it('should not execute form submit with password field present', () => {
+        const form = getForm();
+        const input = document.createElement('input');
+        input.type = 'password';
+        form.appendChild(input);
+
+        return getAmpForm(form).then(ampForm => {
+          const form = ampForm.form_;
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitAction_(/* invocation */ {}))
+                .to.throw('input[type=password]');
+          });
+          expect(form.submit).to.have.not.been.called;
+        });
+      });
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1691,9 +1712,9 @@ describes.repeated('', {
         form.id = 'registration';
 
         const passwordInput = document.createElement('input');
-        passwordInput.setAttribute('name', 'password');
-        passwordInput.setAttribute('type', 'password');
-        passwordInput.setAttribute('value', 'god');
+        passwordInput.setAttribute('name', 'email');
+        passwordInput.setAttribute('type', 'email');
+        passwordInput.setAttribute('value', 'j@hnmiller.com');
         form.appendChild(passwordInput);
 
         const unnamedInput = document.createElement('input');
@@ -1711,7 +1732,7 @@ describes.repeated('', {
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
-          'formFields[password]': 'god',
+          'formFields[email]': 'j@hnmiller.com',
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(

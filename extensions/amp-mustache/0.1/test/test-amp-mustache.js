@@ -215,7 +215,7 @@ describe('amp-mustache template', () => {
           type: 'password',
         });
         expect(result./*OK*/innerHTML).to.equal(
-            'value = <input value="myid">');
+            'value = <input value="myid" type="password">');
       });
     });
 
