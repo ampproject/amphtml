@@ -164,7 +164,7 @@ export class ActionInvocation {
    * @param {?Element} caller Element that contains the invoked handler.
    * @param {?ActionEventDef} event The event that triggered this action.
    * @param {ActionTrust} trust The trust level of this invocation's trigger.
-   * @param {string} targetType The global target name or the element tagName.
+   * @param {?string} targetType The global target name or the element tagName.
    * @param {number} index Position in a sequence of actions.
    */
   constructor(target, method, args, source, caller, event, trust,
@@ -477,7 +477,7 @@ export class ActionService {
 
   /**
    * @param {string} message
-   * @param {!Element=} opt_element
+   * @param {?Element=} opt_element
    * @private
    */
   error_(message, opt_element) {
@@ -491,14 +491,14 @@ export class ActionService {
 
   /**
    * @param {!ActionInvocation} invocation
-   * @param {?Array<ActionInfoDef>} actionInfos Array of infos for all actions
-   *   being invoked during this sequence (when multiple actions are triggered).
+   * @param {!Array<ActionInfoDef>=} opt_actionInfos Array of infos for all
+   *   actions being invoked during a sequence (multiple actions triggered).
    *   TODO(choumx): Remove this param by moving setState limit into this file.
    * @return {?Promise}
    * @private
    * @visibleForTesting
    */
-  invoke_(invocation, actionInfos = null) {
+  invoke_(invocation, opt_actionInfos) {
     const method = invocation.method;
     const targetType = invocation.targetType;
 
@@ -515,7 +515,7 @@ export class ActionService {
     // Handle global targets e.g. "AMP".
     const globalTarget = this.globalTargets_[targetType];
     if (globalTarget) {
-      return globalTarget(invocation, invocation.index, actionInfos);
+      return globalTarget(invocation, invocation.index, opt_actionInfos);
     }
 
     // Subsequent handlers assume that invocation target is an Element.
@@ -535,7 +535,7 @@ export class ActionService {
       } else {
         const message = `Unrecognized AMP element "${lowerTagName}". ` +
           'Did you forget to include it via <script custom-element>?';
-        this.error_(message, invocation.target);
+        this.error_(message, target);
       }
       return null;
     }
@@ -626,8 +626,12 @@ export class ActionService {
   }
 
   /**
-   * Searches for a meta tag containing whitelist of actions.
+   * If the whitelist is not set, searches for a meta tag containing one and
+   * sets and returns it.
+   *
    * <meta name="amp-action-whitelist" content="AMP.setState, amp-form.submit">
+   *
+   * @return {?Array<string>}
    * @private
    */
   queryWhitelist_() {
