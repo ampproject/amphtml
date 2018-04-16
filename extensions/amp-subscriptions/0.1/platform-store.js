@@ -191,6 +191,8 @@ export class PlatformStore {
    * @private
    */
   saveGrantEntitlement_(entitlement) {
+    // The entitlement will be stored either if its the first one
+    // or last one was metered and new one has full subscription.
     if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
       && (this.grantStatusEntitlement_.metering
           && entitlement.subscriptionToken))) {
