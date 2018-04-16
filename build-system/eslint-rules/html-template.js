@@ -47,12 +47,24 @@ module.exports = function(context) {
   }
 
   function htmlTagUsage(node) {
-    if (node.quasi.expressions.length === 0) {
-      return;
+    const {quasi} = node;
+    if (quasi.expressions.length !== 0) {
+      context.report(node, 'The html template tag CANNOT accept expression. ' +
+          'The template MUST be static only.');
     }
 
-    context.report(node, 'The html template tag CANNOT accept expression. ' +
-        'The template MUST be static only.');
+    const template = quasi.quasis[0]
+    const string = template.value.cooked;
+    if (!string) {
+      context.report(template, 'Illegal escape sequence detected in template' +
+          ' literal.');
+    }
+
+    if (/<(html|body|head)/.test(string)) {
+      context.report(template, 'It it not possible to generate HTML, BODY, or' +
+          ' HEAD root elements. Please do so manually with' +
+          ' document.createElement.');
+    }
   }
 
   return {

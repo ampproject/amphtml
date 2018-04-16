@@ -18,7 +18,6 @@ import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
-import {htmlFor} from '../../template';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {px, setImportantStyles} from '../../style';
@@ -45,14 +44,15 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    const documentElement = this.win.document.documentElement;
+    const doc = this.win.document;
+    const documentElement = doc.documentElement;
     const topClasses = documentElement.className;
     documentElement.className = 'i-amphtml-ios-embed';
 
-    const html = htmlFor(documentElement);
-    const wrapper = html`<html id="i-amphtml-wrapper" />`;
+    const wrapper = doc.createElement('html');
     /** @private @const {!Element} */
     this.wrapper_ = wrapper;
+    wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
 
     /** @private {!../../service/vsync-impl.Vsync} */
@@ -76,13 +76,12 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(this.win.document, this.setup_.bind(this));
+    waitForBody(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.
-    whenDocumentReady(this.win.document).then(() => {
-      this.win.document.documentElement.classList.add(
-          'i-amphtml-ios-overscroll');
+    whenDocumentReady(doc).then(() => {
+      documentElement.classList.add('i-amphtml-ios-overscroll');
     });
 
     dev().fine(TAG_, 'initialized ios-embed-wrapper viewport');
