@@ -426,6 +426,15 @@ export class ActionService {
   }
 
   /**
+   * Overwrites the current action whitelist (if any). Takes an array of strings
+   * of the form "<targetType>.<method>", e.g. "amp-form.submit" or "AMP.print".
+   * @param {!Array<string>} whitelist
+   */
+  setWhitelist(whitelist) {
+    this.whitelist_ = whitelist;
+  }
+
+  /**
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
