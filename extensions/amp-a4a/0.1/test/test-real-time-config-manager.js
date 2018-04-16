@@ -30,7 +30,7 @@ import {
   validateRtcConfig_,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
-import {Transport} from '../../../../src/transport';
+import {Transport} from '../../../../extensions/amp-analytics/0.1/transport';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {isFiniteNumber} from '../../../../src/types';

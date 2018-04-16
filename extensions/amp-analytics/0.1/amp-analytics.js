@@ -44,7 +44,7 @@ import {isArray, isObject} from '../../../src/types';
 import {isEnumValue} from '../../../src/types';
 import {isJsonScriptTag} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
-import {sendRequest, sendRequestUsingIframe} from '../../../src/transport';
+import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
 import {toggle} from '../../../src/style';
 

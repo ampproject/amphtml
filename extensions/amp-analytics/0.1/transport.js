@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
   checkCorsUrl,
   parseUrl,
-} from './url';
-import {dev, user} from './log';
-import {loadPromise} from './event-helper';
-import {removeElement} from './dom';
-import {setStyle} from './style';
+} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {loadPromise} from '../../../src/event-helper';
+import {removeElement} from '../../../src/dom';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG_ = 'Transport';

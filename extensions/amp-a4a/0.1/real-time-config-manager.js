@@ -22,7 +22,7 @@ import {
   isSecureUrl,
   parseUrl,
 } from '../../../src/url';
-import {sendRequest} from '../../../src/transport';
+import {sendRequest} from '../../../extensions/amp-analytics/0.1/transport';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
