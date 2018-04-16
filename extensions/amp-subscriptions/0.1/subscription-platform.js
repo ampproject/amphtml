@@ -43,23 +43,29 @@ export class SubscriptionPlatform {
   activate(unusedRenderState) {}
 
   /**
-   * Returns if pingback is enabled for this platform
+   * Returns if pingback is enabled for this platform.
    * @returns {boolean}
    */
   isPingbackEnabled() {}
 
   /**
-   * Performs the pingback to the subscription platform
+   * Performs the pingback to the subscription platform.
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
    * @returns {!Promise|undefined}
    */
   pingback(unusedSelectedPlatform) {}
 
   /**
-   * Tells if this platform supports the current viewer
+   * Tells if this platform supports the current viewer.
    * @returns {boolean}
    */
   supportsCurrentViewer() {}
+
+  /**
+   * Returns the base score configured for the platform.
+   * @returns {number}
+   */
+  getBaseScore() {}
 }
 
 /**

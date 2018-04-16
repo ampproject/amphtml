@@ -92,6 +92,9 @@ export class GoogleSubscriptionsPlatform {
       });
     });
 
+    /** @const @private {!JsonObject} */
+    this.serviceConfig_ = platformConfig;
+
     /** @private {boolean} */
     this.isGoogleViewer_ = false;
     this.resolveGoogleViewer_(Services.viewerForDoc(ampdoc));
@@ -219,6 +222,11 @@ export class GoogleSubscriptionsPlatform {
         }
       });
     }
+  }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
   }
 }
 
