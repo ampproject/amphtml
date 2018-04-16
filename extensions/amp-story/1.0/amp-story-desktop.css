@@ -423,6 +423,10 @@ span.i-amphtml-story-share-pill-label {
   padding: 0;
 }
 
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-share-pill {
+  visibility: hidden !important;
+}
+
 [desktop] .i-amphtml-story-share-icon {
   font-size: 0px!important;
   background-size: 24px 24px !important;

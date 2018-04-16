@@ -152,10 +152,11 @@ export class SystemLayer {
 
     this.initializeListeners_();
 
-    // TODO(newmuis): Observe this value.
-    if (!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS)) {
-      this.systemLayerEl_.classList.add('i-amphtml-story-ui-no-buttons');
-    }
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
+        canShowButtons => {
+          this.systemLayerEl_.classList
+              .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
+        }, true /* callToInitialize */);
 
     if (Services.platformFor(this.win_).isIos()) {
       this.systemLayerEl_.setAttribute('ios', '');
