@@ -48,10 +48,10 @@ export class PlatformStore {
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private @const {Observable<>} */
+    /** @private @const {Observable} */
     this.onGrantStateResolvedCallbacks_ = new Observable();
 
-    /** @private {?Entitement} */
+    /** @private {?Entitlement} */
     this.grantStatusEntitlement_ = null;
 
     /** @private {?Promise<?Entitlement>} */
@@ -205,7 +205,8 @@ export class PlatformStore {
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return this.grantStatusEntitlementPromise_;
+      return /** @type {!Promise<!Entitlement>}*/ (Promise.resolve(
+          this.grantStatusEntitlementPromise_));
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
