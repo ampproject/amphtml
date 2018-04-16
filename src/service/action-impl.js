@@ -202,8 +202,8 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
-      user().error(TAG_, `Trust for '${this.method}' (${this.trust}) ` +
-          `insufficient (min: ${minimumTrust}).`);
+      user().error(TAG_, `Insufficient trust for "${this.method}" ` +
+          `(${this.trust} < ${minimumTrust}).`);
       return false;
     }
     return true;
@@ -464,8 +464,8 @@ export class ActionService {
               args, source, action.node, event, trust, targetType, i);
           return this.invoke_(invocation, action.actionInfos);
         } else {
-          this.error_(`Target ("#${targetType}") not found for ` +
-              `action [${actionInfo.str}].`);
+          this.error_(`Target "${targetType}" not found for action ` +
+              `[${actionInfo.str}].`);
         }
       };
       // Wait for the previous action, if any.
@@ -509,8 +509,8 @@ export class ActionService {
     if (whitelist) {
       const id = `${targetType}.${method}`;
       if (!whitelist.includes(id)) {
-        return Promise.reject(user().error(TAG_, `Action (${id}) was not ` +
-            `found in the whitelist (${whitelist}).`));
+        return Promise.reject(user().error(TAG_, `"${id}" is not whitelisted ` +
+            ` (${whitelist}).`));
       }
     }
 
@@ -535,9 +535,7 @@ export class ActionService {
       if (target.enqueAction) {
         target.enqueAction(invocation);
       } else {
-        const message = `Unrecognized AMP element "${lowerTagName}". ` +
-          'Did you forget to include it via <script custom-element>?';
-        this.error_(message, target);
+        this.error_(`Unrecognized AMP element "${lowerTagName}".`, target);
       }
       return null;
     }
