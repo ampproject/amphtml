@@ -322,7 +322,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|file|image|password|)(\\s|$)',
+        blacklistedValueRegex: '(^|\\s)(button|file|image|)(\\s|$)',
       },
       'value': null,
       'width': null,
