@@ -146,7 +146,7 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
-declareExtension('amp-story', '0.1', {
+declareExtension('amp-story', '1.0', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
@@ -199,6 +199,18 @@ declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
+declareExtensionVersionAlias(
+    'amp-story', '0.1', /* latestVersion */ '1.0', {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-bookend',
+        'amp-story-hint',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
+        'amp-story-share',
+        'amp-story-system-layer',
+      ],
+    });
 
 
 /**
@@ -815,7 +827,8 @@ function checkBinarySize(compiled) {
   if (p.status != 0) {
     log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
         'exceeded its size cap. This is part of a new effort to reduce ' +
-        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+        'AMP\'s binary size (#14392). Please contact @choumx or @jridgewell ' +
+        'for assistance.');
     // Terminate Travis builds on failure.
     if (process.env.TRAVIS) {
       process.exit(p.status);
