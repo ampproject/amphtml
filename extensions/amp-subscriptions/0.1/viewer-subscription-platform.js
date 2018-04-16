@@ -130,6 +130,10 @@ export class ViewerSubscriptionPlatform {
             break;
           }
         }
+      } else if (decodedData['metering'] && !decodedData['entitlements']) { // No entitlements
+        dev().assert(this.currentProductId_, 'Current product is not set');
+        entitlement.products = [this.currentProductId_];
+        entitlement.metering = decodedData['metering'];
       } else if (entitlements) { // Not null
         entitlement = Entitlement.parseFromJson(entitlements, token);
       }
