@@ -223,7 +223,7 @@ export class VideoEntry {
 
   /** @private */
   setDisabledFeatures_() {
-    this.video_.element[DISABLED_FEATURES].forEach(feature => {
+    (this.video_.element[DISABLED_FEATURES] || []).forEach(feature => {
       dev().assert(feature in VideoFeatures);
       this.disabledFeatures_[feature] = true;
     });
