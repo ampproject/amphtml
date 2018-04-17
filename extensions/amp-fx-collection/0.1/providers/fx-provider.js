@@ -44,6 +44,9 @@ const installStyles = {
 };
 
 const marginValues = {
+  'fly-in-bottom': {
+    'start': 0.05,
+  },
   'fade-in': {
     'start': 0.05,
   },
