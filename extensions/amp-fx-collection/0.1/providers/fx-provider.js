@@ -41,12 +41,18 @@ const installStyles = {
   'fly-in-bottom': {
     'will-change': 'transform',
   },
+  'fly-in-top': {
+    'will-change': 'transform',
+  },
+  'fly-in-left': {
+    'will-change': 'transform',
+  },
+  'fly-in-right': {
+    'will-change': 'transform',
+  },
 };
 
 const marginValues = {
-  'fly-in-bottom': {
-    'start': 0.05,
-  },
   'fade-in': {
     'start': 0.05,
   },
@@ -54,6 +60,13 @@ const marginValues = {
     'start': 0,
     'end': 0.5,
   },
+};
+
+const flyInDistanceValues = {
+  'fly-in-bottom': '10%',
+  'fly-in-top': '10%',
+  'fly-in-left': '10%',
+  'fly-in-right': '10%',
 };
 
 
@@ -139,23 +152,37 @@ export class FxElement {
     /** @private {number} */
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
-    /** @private {number} */
-    this.marginStart_ = element.hasAttribute('data-margin-start') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
-      marginValues[this.fxType_]['start'];
+    // Initialize these variables only for fade in animations
+    if (this.fxType_.startsWith('fade-in')) {
+      /** @private {number} */
+      this.marginStart_ = element.hasAttribute('data-margin-start') ?
+        resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
+        marginValues[this.fxType_]['start'];
 
-    /** @private {number} */
-    this.marginEnd_ = element.hasAttribute('data-margin-end') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
-      marginValues[this.fxType_]['end'];
+      /** @private {number} */
+      this.marginEnd_ = element.hasAttribute('data-margin-end') ?
+        resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
+        marginValues[this.fxType_]['end'];      
+    }
 
-    /** @private {string} */
-    this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
-      element.getAttribute('data-easing') : 'ease-in');
+    // Initialize these variables only for scroll dependent animations
+    if (!this.fxType_.endsWith('scroll')) {
+      /** @private {string} */
+      this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
+        element.getAttribute('data-easing') : 'ease-in');
 
-    /** @private {string} */
-    this.duration_ = element.hasAttribute('data-duration') ?
-      element.getAttribute('data-duration') : '1000ms';
+      /** @private {string} */
+      this.duration_ = element.hasAttribute('data-duration') ?
+        element.getAttribute('data-duration') : '1000ms';
+    }
+
+    // Initialize these variables only for fly in animations
+    if (this.fxType_.startsWith('fly-in')) {
+      /** @private {number} */
+      this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
+        resolvePercentageToNumber(element.getAttribute('data-fly-in-distance')) :
+        flyInDistanceValues[this.fxType_][''];
+    }
 
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
