@@ -22,6 +22,7 @@ import {
   isSecureUrl,
   parseUrl,
 } from '../../../src/url';
+import {loadPromise} from '../../../src/event-helper';
 import {sendRequest} from '../../../extensions/amp-analytics/0.1/transport';
 import {tryParseJson} from '../../../src/json';
 
@@ -104,6 +105,15 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
     const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
         errorReportingUrl, macros, whitelist);
     sendRequest(win, url, {image: true});
+    const image = new Image();
+    image.src = url;
+    image.width = 1;
+    image.height = 1;
+    loadPromise(image).then(() => {
+      dev().fine(TAG, `Sent RTC error pingback to ${url}`);
+    }).catch(() => {
+      dev().warn(TAG, `Failed sending RTC error pingback to ${url}`);
+    });
   }
 }
 

@@ -26,7 +26,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
 /** @const {string} */
-const TAG_ = 'Transport';
+const TAG_ = 'amp-analytics.Transport';
 
 /**
  * @param {!Window} win
@@ -34,7 +34,7 @@ const TAG_ = 'Transport';
  * @param {!Object<string, string>} transportOptions
  */
 export function sendRequest(win, request, transportOptions) {
-  assertHttpsUrl(request, 'sendRequest');
+  assertHttpsUrl(request, 'amp-analytics request');
   checkCorsUrl(request);
   if (transportOptions['beacon'] &&
       Transport.sendRequestUsingBeacon(win, request)) {
@@ -134,11 +134,9 @@ export class Transport {
  * sendRequestUsingCrossDomainIframe()
  * @param {!Window} win
  * @param {string} request The request URL.
- * @param {string=} opt_iframeType
  */
-export function sendRequestUsingIframe(win, request, opt_iframeType) {
-  opt_iframeType = opt_iframeType || 'amp-analytics';
-  assertHttpsUrl(request, `${opt_iframeType} request`);
+export function sendRequestUsingIframe(win, request) {
+  assertHttpsUrl(request, 'amp-analytics request');
   /** @const {!Element} */
   const iframe = win.document.createElement('iframe');
   setStyle(iframe, 'display', 'none');
@@ -152,7 +150,7 @@ export function sendRequestUsingIframe(win, request, opt_iframeType) {
       'Origin of iframe request must not be equal to the document origin.' +
       ' See https://github.com/ampproject/' +
       ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
-  iframe.setAttribute(opt_iframeType, '');
+  iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
   iframe.src = request;
   win.document.body.appendChild(iframe);
