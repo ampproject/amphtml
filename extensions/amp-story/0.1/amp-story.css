@@ -1,0 +1,652 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-desktop.css';
+@import './amp-story-user-overridable.css';
+@import './amp-story-share.css';
+
+/** Common */
+amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
+  contain: strict !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-system-reset,
+.i-amphtml-story-system-reset * {
+  border: none !important;
+  box-sizing: initial !important;
+  color: initial !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: initial !important;
+  font-weight: initial !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  width: auto !important;
+}
+
+/** Story level */
+amp-story {
+  height: 100% !important;
+  position: relative !important;
+  text-rendering: geometricPrecision !important;
+  user-select: none !important;
+  width: 100% !important;
+}
+
+html.i-amphtml-story-standalone,
+html.i-amphtml-story-standalone body {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  /** Remove the cursor: pointer; style set by the runtime, to avoid wrong
+      touch feedback on mobile, like a flashing overlay on page transitions. */
+  cursor: auto !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+}
+
+html.i-amphtml-story-standalone body {
+  display: grid !important;
+}
+
+amp-story[standalone] {
+  align-self: center !important;
+  box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5) !important;
+  height: 100% !important;
+  justify-self: center !important;
+}
+
+amp-story[standalone]:-webkit-full-screen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:-moz-full-screen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:-ms-fullscreen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story[standalone]:fullscreen {
+  height: 100vh !important;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+amp-story .amp-video-eq {
+  display: none !important;
+}
+
+/** Page level */
+amp-story-page {
+  bottom: 0 !important;
+  height: auto !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  transition: none !important;
+}
+
+.i-amphtml-story-fallback amp-story-page {
+  display: none !important;
+}
+
+/* Setting `translateY` distances as a trick so that the runtime schedules
+ * layout for the next N pages. The default value (1000%) means that pages are
+ * not be automatically laid out. Max distance is set to 3 since we don't want
+ * to schedule any further pages. */
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container:not([active]) {
+  transform: translateY(1000%) !important;
+}
+
+amp-story-page[active],
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="0"] {
+  transform: translateY(0) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="1"] {
+  transform: translateY(100%) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="2"] {
+  transform: translateY(200%) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="3"] {
+  transform: translateY(300%) !important;
+}
+
+.i-amphtml-story-bookend-active:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[active] {
+  transform: translateY(0) scale(1.2) !important;
+  filter: blur(15px) !important;
+}
+
+.i-amphtml-story-bookend-active > amp-story-page[active]::after {
+  content: '' !important;
+  display: block !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+  background: rgba(117, 117, 117, 0.3) !important;
+  z-index: 2 !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+amp-story amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+amp-story-cta-layer, amp-story-grid-layer {
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  position: absolute !important;
+}
+
+/** Call to action layer */
+amp-story-cta-layer {
+  display: block !important;
+  height: 20% !important;
+  z-index: 3 !important;
+}
+
+/** Grid level */
+amp-story-grid-layer {
+  display: grid !important;
+  top: 0 !important;
+  z-index: 2 !important;
+}
+
+amp-story-grid-layer * {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.i-amphtml-story-grid-template-with-full-bleed-animation {
+  position: absolute !important;
+  display: block !important;
+  padding: 0 !important;
+}
+
+.i-amphtml-story-grid-template-fill > :not(:first-child) {
+  display: none !important;
+}
+
+.i-amphtml-story-logo {
+  display: none !important;
+  margin: 15px !important;
+}
+
+.i-amphtml-story-grid-template-fill > :first-child {
+  bottom: 0 !important;
+  display: block !important;
+  height: auto !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  width: auto !important;
+}
+
+.i-amphtml-story-grid-template-fill > amp-anim img,
+.i-amphtml-story-grid-template-fill > amp-img img,
+.i-amphtml-story-grid-template-fill > amp-video video {
+  object-fit: cover !important;
+}
+
+.i-amphtml-story-grid-template-vertical {
+  grid-auto-flow: row !important;
+  grid-template-columns: 100% !important;
+}
+
+.i-amphtml-story-grid-template-horizontal {
+  grid-auto-flow: column !important;
+  grid-template-rows: 100% !important;
+}
+
+.i-amphtml-story-grid-template-thirds {
+  grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
+  grid-template-areas: "upper-third"
+                       "middle-third"
+                       "lower-third" !important;
+}
+
+/**
+ * Development mode
+ */
+
+.i-amphtml-story-dev-logs-button[data-count="0"],
+.i-amphtml-story-bookend-active .i-amphtml-story-dev-logs-button {
+  display: none !important;
+}
+
+.i-amphtml-story-dev-logs-button {
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.i-amphtml-story-dev-logs-button::after {
+  background-color: #fff !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+  color: #444;
+  content: attr(data-count) !important;
+  display: inline-block !important;
+  font-family: Roboto !important;
+  font-size: 11px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  padding: 0 6px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 6px !important;
+}
+
+.i-amphtml-story-error-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#DB4437"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-warning-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+}
+
+.i-amphtml-story-success-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+}
+
+amp-story[standalone] .i-amphtml-story-developer-log {
+  background: rgba(0, 0, 0, 0.85) !important;
+  bottom: 0 !important;
+  box-sizing: border-box !important;
+  color: #fff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: 'Roboto' !important;
+  left: 0 !important;
+  max-height: 45% !important;
+  padding: 0 !important;
+  position: fixed !important;
+  right: 0 !important;
+  text-align: left !important;
+  z-index: 100002 !important;
+}
+
+.i-amphtml-story-developer-log-header {
+  align-items: center !important;
+  background: rgb(3,169,244, 0.85) !important;
+  display: flex !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  font-weight: bold !important;
+  justify-content: space-between !important;
+  padding: 12px 20px !important;
+  text-align: center !important;
+}
+
+.i-amphtml-story-developer-log-close {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.i-amphtml-story-developer-log-context {
+  color: #000 !important;
+  font-family: 'Roboto Mono' !important;
+}
+
+.i-amphtml-story-developer-log-entries {
+  list-style-type: none !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+}
+
+.i-amphtml-story-developer-log-entry {
+  align-items: center !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+  display: flex !important;
+  padding: 20px !important;
+}
+
+.i-amphtml-story-developer-log-entry::before {
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  content: '';
+  display: inline-block !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  height: 32px !important;
+  margin-right: 20px !important;
+  width: 32px !important;
+}
+
+.i-amphtml-story-developer-log-entry-error::before {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#DB4437"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-developer-log-entry-warning::before {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFC107"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+}
+
+.i-amphtml-story-developer-log-entry-success::before {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#0F9D58"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+}
+
+/** Experiment disabled  */
+.i-amphtml-story-experiment-error {
+  align-items: center !important;
+  align-content: center!important;
+  background-color: #222 !important;
+  bottom: 0 !important;
+  color: #f0f0f0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 20px !important;
+  justify-content: center !important;
+  left: 0 !important;
+  padding: 32px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 999999 !important;
+  text-align: center !important;
+}
+
+.i-amphtml-story-experiment-icon {
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  height: 64px !important;
+  margin: 0 auto 16px !important;
+  width: 64px !important;
+}
+
+.i-amphtml-story-experiment-icon-error {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+}
+
+.i-amphtml-story-experiment-icon-done {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
+}
+
+.i-amphtml-story-experiment-error button {
+  background-color: transparent !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 8px !important;
+  color: #f0f0f0 !important;
+  cursor: pointer !important;
+  font-size: 20px !important;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 16px 0 0 !important;
+  outline: none !important;
+  padding: 8px 32px !important;
+  text-transform: uppercase !important;
+  width: 50% !important;
+}
+
+.i-amphtml-story-experiment-error button:active,
+.i-amphtml-story-experiment-error button:focus {
+  background-color: #f0f0f0 !important;
+  color: #222 !important;
+}
+
+.i-amphtml-story-bookend-close {
+  opacity: 0.5 !important;
+  top: 8px !important;
+  left: 8px !important;
+  position: absolute !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-close {
+  opacity: 1 !important;
+  position: fixed !important;
+  z-index: 2 !important;
+}
+
+.i-amphtml-story-bookend-fullbleed::before {
+  content: " " !important;
+  display: block !important;
+  background-image: linear-gradient(0deg, rgba(1,1,1,0.00) 0%, #000000 100%) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 40px !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.i-amphtml-story-toast {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: inline-block !important;
+  padding: 1.16em 1.33em !important;
+  line-height: 1.33 !important;
+  color: #fff !important;
+  background: #212121 !important;
+  animation: toast 2.2s !important;
+  animation-fill-mode: both !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 12px !important;
+  max-width: 640px !important;
+  z-index: 100002 !important; /** Bookend + 1 */
+}
+
+@media (min-width: 640px) {
+  .i-amphtml-story-toast {
+    right: auto !important;
+    font-size: 14px !important;
+    margin: 0 auto 1.16em 1.16em !important;
+    border-radius: 6px;
+  }
+}
+
+@keyframes toast {
+  0% {
+    transform: translateY(100px);
+    easing: cubic-bezier(0.0, 0.0, 0.2, 1);
+  }
+  8% {
+    transform: translateY(0);
+  }
+  92% {
+    transform: translateY(0);
+    easing: cubic-bezier(0.4, 0.0, 1, 1);
+  }
+  100% {
+    transform: translateY(100px);
+  }
+}
+
+.i-amphtml-story-copy-successful {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#ffffff"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-size: 16px 16px !important;
+  padding-left: 24px !important;
+  color: #fff !important;
+  display: flex !important;
+}
+
+.i-amphtml-story-copy-url {
+  flex: 1 !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  margin-left: 40px !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.i-amphtml-story-button-container {
+  display: none !important;
+}
+
+/* Default loading spinner */
+
+.i-amphtml-story-spinner {
+  display: inline-block !important;
+  position: absolute !important;
+  top: calc(100% - 36px) !important;
+  right: 12px !important;
+  width: 24px !important;
+  height: 24px !important;
+  z-index: 10 !important;
+}
+
+.i-amphtml-story-spinner-container {
+  width: 100% !important;
+  height: 100% !important;
+  direction: ltr !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-container {
+  animation: container-rotate 1294ms linear infinite !important;
+}
+
+@keyframes container-rotate {
+  to { transform: rotate(360deg) }
+}
+
+.i-amphtml-story-spinner-layer {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0 !important;
+  white-space: nowrap !important;
+  color: white !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-layer {
+  animation-name: fill-unfill-rotate !important;
+  animation-duration: 4400ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  animation-iteration-count: infinite !important;
+  opacity: 1 !important;
+}
+
+@keyframes fill-unfill-rotate {
+  12.5% { transform: rotate(135deg) }
+  25%   { transform: rotate(270deg) }
+  37.5% { transform: rotate(405deg) }
+  50%   { transform: rotate(540deg) }
+  62.5% { transform: rotate(675deg) }
+  75%   { transform: rotate(810deg) }
+  87.5% { transform: rotate(945deg) }
+  to    { transform: rotate(1080deg) }
+}
+
+.i-amphtml-story-spinner-circle-clipper {
+  display: inline-block !important;
+  position: relative !important;
+  width: 50% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-story-spinner-layer::after {
+  left: 45% !important;
+  width: 10% !important;
+  border-top-style: solid !important;
+}
+
+.i-amphtml-story-spinner-layer::after,
+.i-amphtml-story-spinner-circle-clipper::after {
+  content: '' !important;
+  box-sizing: border-box !important;
+  position: absolute !important;
+  top: 0 !important;
+  border-width: 3px !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper::after {
+  bottom: 0 !important;
+  width: 200% !important;
+  border-style: solid !important;
+  border-bottom-color: transparent !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper.left::after {
+  left: 0 !important;
+  border-right-color: transparent !important;
+  transform: rotate(129deg) !important;
+}
+
+.i-amphtml-story-spinner-circle-clipper.right::after {
+  left: -100% !important;
+  border-left-color: transparent !important;
+  transform: rotate(-129deg) !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-circle-clipper::after {
+  animation-duration: 1100ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  animation-iteration-count: infinite !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-circle-clipper.left::after {
+  animation-name: left-spin !important;
+}
+
+.i-amphtml-story-spinner[active] .i-amphtml-story-spinner-circle-clipper.right::after {
+  animation-name: right-spin !important;
+}
+
+@keyframes left-spin {
+  0% { transform: rotate(130deg) }
+  50% { transform: rotate(-5deg) }
+  to { transform: rotate(130deg) }
+}
+
+@keyframes right-spin {
+  0% { transform: rotate(-130deg) }
+  50% { transform: rotate(5deg) }
+  to { transform: rotate(-130deg) }
+}
