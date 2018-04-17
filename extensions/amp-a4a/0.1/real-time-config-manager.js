@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Ping} from './amp-ad-utils';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';

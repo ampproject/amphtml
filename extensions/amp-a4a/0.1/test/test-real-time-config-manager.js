@@ -20,7 +20,6 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
-import {Ping} from '../amp-ad-utils';
 import {
   RTC_ERROR_ENUM,
   getCalloutParam_,
@@ -557,15 +556,17 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   });
 
   describe('sendErrorMessage', () => {
-    let emitPingStub, requestUrl, ampDoc;
+    let imageStub, requestUrl, ampDoc;
     let errorType, errorReportingUrl;
+    let imageMock;
 
     beforeEach(() => {
       // Make sure that we always send the message, as we are using
       // the check Math.random() < reporting frequency.
       sandbox.stub(Math, 'random').returns(0);
       sandbox.stub(Xhr.prototype, 'fetch');
-      emitPingStub = sandbox.stub(Ping.prototype, 'emitPing');
+      imageMock = {};
+      imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
       ampDoc = a4aElement.getAmpDoc();
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
@@ -581,14 +582,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should send error message pingback to correct url', () => {
       sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
-      expect(emitPingStub).to.be.calledOnce;
-      expect(emitPingStub).to.be.calledWith(requestUrl);
+      expect(imageStub).to.be.calledOnce;
+      expect(imageMock.src).to.equal(requestUrl);
     });
 
     it('should not send error message if insecure url', () => {
       errorReportingUrl = 'http://www.IAmInsecure.biz';
       sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
-      expect(emitPingStub).to.not.be.called;
+      expect(imageStub).to.not.be.called;
     });
   });
 });
