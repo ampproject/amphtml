@@ -43,11 +43,7 @@ The `amp-geo` component provides country-level geolocation. The `amp-geo` compon
 In the following example, we determine if the user is in Canada, and if so, we display a maple leaf for their background.
 
 ```html
-<amp-geo>
-  <script type="application-json">
-  {  }
-  </script>
-</amp-geo>
+<amp-geo></amp-geo>
 ```
 
 If the user is in Canada, the amp-geo component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  So, we can use CSS to apply the correct background for Canada:
@@ -72,7 +68,10 @@ The `amp-geo` component provides CSS, `amp-bind` and variable substitution inter
 ### Generated CSS classes
 If the `amp-iso-country-XX` class is applied to the `body` element, where 'XX' is replaced by the ISO country code or with the value 'unknown'.
 
-Optionally, configuring groups of country codes via the “ISOCountryCodes” key allows selection by groups of countries.
+### Optional Configuration
+
+Optionally, a JSON configuration script can be included in the `amp-geo` tag.
+The `ISOCountryGroups` key allows selections by groups of country codes.
 
 ```html
 <amp-geo>
