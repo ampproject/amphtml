@@ -208,12 +208,11 @@ export class PlatformStore {
 
   /**
    * Returns the entitlement which unlocked the document
-   * @returns {!Promise<!Entitlement>}
+   * @returns {!Promise<?Entitlement>}
    */
   getGrantEntitlement() {
     if (this.grantStatusEntitlementPromise_) {
-      return /** @type {!Promise<!Entitlement>}*/ (
-        this.grantStatusEntitlementPromise_);
+      return (this.grantStatusEntitlementPromise_);
     }
 
     this.grantStatusEntitlementPromise_ = new Promise(resolve => {
