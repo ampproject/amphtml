@@ -28,6 +28,7 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
+import {getSourceOrigin, isProxyOrigin} from '../../../src/url';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
@@ -270,8 +271,16 @@ export class AmpNextPage extends AMP.BaseElement {
     });
 
     const docInfo = Services.documentInfoForDoc(this.element);
-    const host = parseUrl(docInfo.sourceUrl).host;
-    this.config_ = assertConfig(configJson, host);
+    const url = parseUrl(docInfo.sourceUrl);
+
+    this.config_ = assertConfig(configJson, url.host, getSourceOrigin(url));
+
+    if (isProxyOrigin(url)) {
+      const sourceOrigin = getSourceOrigin(url);
+      this.config_.pages.forEach(rec => {
+        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
+      });
+    }
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
     user().assert(separatorElements.length <= 1,

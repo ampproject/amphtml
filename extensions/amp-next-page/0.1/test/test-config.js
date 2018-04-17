@@ -18,7 +18,7 @@ import {assertConfig} from '../config';
 
 describe('amp-next-page config', () => {
   describe('assertConfig', () => {
-    const host = 'example.com';
+    const origin = 'https://example.com';
 
     it('allows a valid config', () => {
       const config = {
@@ -28,12 +28,12 @@ describe('amp-next-page config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, host)).to.not.throw();
+      expect(() => assertConfig(config, origin, origin)).to.not.throw();
     });
 
     it('allows a config with no pages', () => {
       const config = {pages: []};
-      expect(() => assertConfig(config, host)).to.not.throw();
+      expect(() => assertConfig(config, origin, origin)).to.not.throw();
     });
 
     it('allows pages with relative URLs', () => {
@@ -44,12 +44,32 @@ describe('amp-next-page config', () => {
           title: 'Article 1',
         }],
       };
-      expect(() => assertConfig(config, document.location.host)).to.not.throw();
+      expect(() => assertConfig(config, document.location.origin))
+          .to.not.throw();
+    });
+
+    it('allows canonical URLs when served from the cache', () => {
+      const cdnOrigin = 'https://example-com.cdn.ampproject.org';
+      const config = {
+        pages: [
+          {
+            ampUrl: 'https://example-com.cdn.ampproject.org/example.com/art1',
+            image: 'https://example.com/image.png',
+            title: 'Article 1',
+          },
+          {
+            ampUrl: 'https://example.com/article2',
+            image: 'https://example.com/image.png',
+            title: 'Article 1',
+          },
+        ],
+      };
+      expect(() => assertConfig(config, cdnOrigin, origin)).to.not.throw();
     });
 
     it('throws on null config', () => {
       allowConsoleError(() => {
-        expect(() => assertConfig(null, host))
+        expect(() => assertConfig(null, origin, origin))
             .to.throw('amp-next-page config must be specified');
       });
     });
@@ -57,7 +77,7 @@ describe('amp-next-page config', () => {
     it('throws on config with no "pages" key', () => {
       const config = {};
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('pages must be an array');
       });
     });
@@ -65,7 +85,7 @@ describe('amp-next-page config', () => {
     it('throws on config with non-array "pages" key', () => {
       const config = {pages: {}};
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('pages must be an array');
       });
     });
@@ -78,7 +98,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('title must be a string');
       });
     });
@@ -92,7 +112,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('title must be a string');
       });
     });
@@ -105,7 +125,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('image must be a string');
       });
     });
@@ -119,7 +139,7 @@ describe('amp-next-page config', () => {
         }],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw('image must be a string');
       });
     });
@@ -135,29 +155,28 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
-            .to.throw('pages must be from the same host as the current' +
-                      ' document');
+        expect(() => assertConfig(config, origin, origin))
+            .to.throw(
+                'pages must be from the same origin as the current document');
       });
     });
 
-    it('throws on config with pages from different subdomains',
-        () => {
-          const config = {
-            pages: [
-              {
-                ampUrl: 'https://www.example.com/article1',
-                image: 'https://example.com/image.png',
-                title: 'Article 1',
-              },
-            ],
-          };
-          allowConsoleError(() => {
-            expect(() => assertConfig(config, host))
-                .to.throw(
-                    'pages must be from the same host as the current document');
-          });
-        });
+    it('throws on config with pages from different subdomains', () => {
+      const config = {
+        pages: [
+          {
+            ampUrl: 'https://www.example.com/article1',
+            image: 'https://example.com/image.png',
+            title: 'Article 1',
+          },
+        ],
+      };
+      allowConsoleError(() => {
+        expect(() => assertConfig(config, origin, origin))
+            .to.throw(
+                'pages must be from the same origin as the current document');
+      });
+    });
 
     it('throws on config with pages on different ports', () => {
       const config = {
@@ -170,9 +189,9 @@ describe('amp-next-page config', () => {
         ],
       };
       allowConsoleError(() => {
-        expect(() => assertConfig(config, host))
+        expect(() => assertConfig(config, origin, origin))
             .to.throw(
-                'pages must be from the same host as the current document');
+                'pages must be from the same origin as the current document');
       });
     });
   });
