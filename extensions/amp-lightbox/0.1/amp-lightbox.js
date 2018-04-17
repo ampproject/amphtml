@@ -210,19 +210,21 @@ class AmpLightbox extends AMP.BaseElement {
       st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
     }
 
-    // This should be in a mutateElement block, but iOS focus doesn't work
-    // if triggered asynchronously.
+    // This should be in a mutateElement block, but focus on iOS won't work
+    // if triggered asynchronously inside a callback.
     st.setStyles(this.element, {
       display: '',
       opacity: 0,
       // TODO(dvoytenko): use new animations support instead.
       transition: 'opacity 0.1s ease-in',
     });
-    Services.vsyncFor(this.win).mutate(() => {
-      st.setStyle(this.element, 'opacity', '');
-    });
 
     this.handleAutofocus_();
+
+    // TODO (jridgewell): expose an API accomodating this per PR #14676
+    this.mutateElement(() => {
+      st.setStyle(this.element, 'opacity', '');
+    });
 
     const container = dev().assertElement(this.container_);
     if (!this.isScrollable_) {
