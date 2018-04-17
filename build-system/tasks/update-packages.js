@@ -77,7 +77,8 @@ function patchWithWrapper(originalName, patchedName, prefix, sufix) {
 
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
- * Follows it up with a call to patch web-animations-js if necessary.
+ * Follows it up by patching web-animations-js and intersection-observer if
+ * necessary.
  */
 function updatePackages() {
   const integrityCmd = 'yarn check --integrity';
