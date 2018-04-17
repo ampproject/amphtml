@@ -134,6 +134,8 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
+    // This is important for cache busting as some environments force a
+    // cache-control: max-age header.
     if (this.lastCheckTime_ > 0) {
       url = addParamToUrl(url, 'amp_last_check_time',
           String(this.lastCheckTime_));
