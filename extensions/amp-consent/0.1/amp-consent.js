@@ -153,7 +153,6 @@ export class AmpConsent extends AMP.BaseElement {
             .then(manager => {
               this.notificationUiManager_ = manager;
             });
-
     Promise.all([consentStateManagerPromise, notificationUiManagerPromise])
         .then(() => {
           this.init_();
@@ -285,20 +284,20 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     const instanceKeys = Object.keys(this.consentConfig_);
+    const initPromptPromises = [];
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
       this.consentStateManager_.registerConsentInstance(instanceId);
-      this.getConsentRemote_(instanceId).then(response => {
+      const promise = this.getConsentRemote_(instanceId).then(response => {
         this.parseConsentResponse_(instanceId, response);
         this.handlePromptUI_(instanceId);
       }).catch(unusedError => {
         // TODO: Handle errors
       });
+      initPromptPromises.push(promise);
     }
 
-    // TODO(@zhouyx): Use setTimeout to make sure we handle postPromptUI
-    // after all prompt UI registerd. Make handle PromptUI a promise instead.
-    this.win.setTimeout(() => {
+    Promise.all(initPromptPromises).then(() => {
       this.handlePostPromptUI_();
     });
 
@@ -344,9 +343,12 @@ export class AmpConsent extends AMP.BaseElement {
     const href =
         this.consentConfig_[instanceId]['checkConsentHref'];
     assertHttpsUrl(href, this.element);
-    return Services.xhrFor(this.win)
-        .fetchJson(href, init)
-        .then(res => res.json());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    return viewer.whenFirstVisible().then(() => {
+      return Services.xhrFor(this.win)
+          .fetchJson(href, init)
+          .then(res => res.json());
+    });
   }
 
 
