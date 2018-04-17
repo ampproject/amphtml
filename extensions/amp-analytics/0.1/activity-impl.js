@@ -320,7 +320,7 @@ export class Activity {
   /**
    * Get the incremental engaged time since the last push and reset it if asked.
    * @param {string} name
-   * @param {boolean} reset
+   * @param {string} reset
    * @return {number}
    */
   getIncrementalEngagedTime(name = '', reset = 'true') {
