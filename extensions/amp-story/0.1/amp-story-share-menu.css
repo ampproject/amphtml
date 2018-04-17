@@ -1,0 +1,67 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import './amp-story-share.css';
+
+.i-amphtml-story-share-menu {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 100001 !important;
+  transform: translate3d(0, 100vh, 0) !important;
+  transition-delay: 0.15s !important;
+}
+
+.i-amphtml-story-share-menu-visible {
+  transform: translate3d(0, 0, 0) !important;
+  transition-delay: 0s !important;
+}
+
+/** Black opacity overlay. */
+.i-amphtml-story-share-menu::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: #000000 !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-share-menu.i-amphtml-story-share-menu-visible::before {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-share-menu-container {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: auto !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  transform: translate3d(0, 100%, 0) !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.i-amphtml-story-share-menu-visible .i-amphtml-story-share-menu-container {
+  transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}

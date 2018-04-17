@@ -17,8 +17,8 @@
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
-import {StateChangeType} from '../../amp-story/1.0/navigation-state';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StateChangeType} from '../../amp-story/0.1/navigation-state';
+import {StateProperty} from '../../amp-story/0.1/amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
@@ -74,10 +74,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
+    /** @private {?../../amp-story/0.1/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
+    /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
     /** @private {number} */
@@ -107,7 +107,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
-    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
   }
 
