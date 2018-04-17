@@ -67,6 +67,9 @@ export class LiveListManager {
     /** @private {time} */
     this.latestUpdateTime_ = 0;
 
+    /** @private {time} */
+    this.LastCheckTime_ = 0;
+
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
 
@@ -80,6 +83,7 @@ export class LiveListManager {
           .map(key => this.liveLists_[key].getUpdateTime());
       this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
 
+      this.LastCheckTime_ = Number(new Date());
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev) {
@@ -130,6 +134,10 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
+    if (this.LastCheckTime_ > 0) {
+      url = addParamToUrl(url, 'amp_last_check_time',
+          String(this.LastCheckTime_));
+    }
     return Services.xhrFor(this.ampdoc.win)
         // TODO(erwinm): add update time here when possible.
         .fetchDocument(url, {
@@ -151,6 +159,7 @@ export class LiveListManager {
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
     }
+    this.LastCheckTime_ = Number(new Date());
     // We need to do this after calling `updateLiveList` since that
     // would apply the disabled attribute if any exist from the server.
     if (!this.hasActiveLiveLists_()) {
