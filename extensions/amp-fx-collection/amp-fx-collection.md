@@ -114,7 +114,7 @@ In the below example, the animation acceleration curve is a custom specified `cu
 
 ##### data-margin-start (optional)
 
-This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the specified amount of the element being targetted is visible. The default value is `5%`.
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `5%`.
 
 In the below example, the animation doesn't start until the element has crossed 20% of the viewport from the bottom. 
 

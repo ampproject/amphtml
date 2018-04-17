@@ -337,13 +337,13 @@ describes.realWin('amp-consent', {
       });
 
       it('handle postPromptUI', function* () {
-        yield macroTask();
         expect(ampConsent.postPromptUI_).to.not.be.null;
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.equal('none');
         expect(computedStyle(ampConsent.win, ampConsent.postPromptUI_)
             ['display']).to.equal('none');
         yield macroTask();
+
         expect(computedStyle(ampConsent.win, ampConsent.element)['display'])
             .to.not.equal('none');
         expect(ampConsent.element.classList.contains('amp-active')).to.be.true;
