@@ -218,4 +218,14 @@ describes.realWin('amp-geo', {
       });
     }).to.throw();
   });
+
+  it('should throw if the group name is not valid', () => {
+    expect(() => {
+      addConfigElement('script', 'application/json',
+          {'ISOCountryGroups': {'foo<': ['us']}});
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
+    }).to.throw();
+  });
 });
