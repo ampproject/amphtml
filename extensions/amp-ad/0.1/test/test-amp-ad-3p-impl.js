@@ -143,7 +143,9 @@ describes.realWin('amp-ad-3p-impl', {
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should throw on parent being position:fixed', () => {
@@ -154,7 +156,9 @@ describes.realWin('amp-ad-3p-impl', {
       adContainerElement.appendChild(ad3p.element);
 
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should allow position:fixed with whitelisted ad container', () => {
@@ -197,8 +201,8 @@ describes.realWin('amp-ad-3p-impl', {
             `${remoteUrl}?$internalRuntimeVersion$"]`)).to.be.ok;
       });
     });
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should use default path if custom disabled', () => {
+
+    it('should use default path if custom disabled', () => {
       const meta = win.document.createElement('meta');
       meta.setAttribute('name', 'amp-3p-iframe-src');
       meta.setAttribute('content', 'https://example.com/boot/remote.html');
@@ -261,8 +265,7 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
 
-    // TODO(keithwrightbos, #14336): Fails due to console errors.
-    it.skip('should not use remote html path for preload if disabled', () => {
+    it('should not use remote html path for preload if disabled', () => {
       const meta = win.document.createElement('meta');
       meta.setAttribute('name', 'amp-3p-iframe-src');
       meta.setAttribute('content', 'https://example.com/boot/remote.html');

@@ -113,12 +113,12 @@ export const Presets = {
           'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin')) {
+      if (!element.hasAttribute('data-margin-start')) {
         return;
       }
-      const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-margin must be a number and be between 0 and 1 for: %s',
+      const marginStart = element.getAttribute('data-margin-start');
+      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
+          'data-margin-start must be a number and be between 0 and 1 for: %s',
           element);
     },
     update(entry) {
@@ -127,7 +127,8 @@ export const Presets = {
       // Outside viewport
       if (!entry.positionRect ||
           entry.positionRect.top >
-            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
+            (1 - fxElement.getMarginStart()) *
+              fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -154,21 +155,21 @@ export const Presets = {
           'amp-fx-fade-in-scroll experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin') &&
+      if (!element.hasAttribute('data-margin-start') &&
         !element.hasAttribute('data-margin-end')) {
         return;
       }
-      const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-margin must be a number and be between 0 and 1 for: %s',
+      const marginStart = element.getAttribute('data-margin-start');
+      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
+          'data-margin-start must be a number and be between 0 and 1 for: %s',
           element);
       const marginEnd = element.getAttribute('data-margin-end');
       user().assert(parseFloat(marginEnd) >= 0 && parseFloat(marginEnd) < 1,
           'data-margin-end must be a number and be between 0 and 1 for: %s',
           element);
 
-      user().assert(parseFloat(marginEnd) > parseFloat(margin),
-          'data-margin-end must be greater than data-margin for: %s',
+      user().assert(parseFloat(marginEnd) > parseFloat(marginStart),
+          'data-margin-end must be greater than data-margin-start for: %s',
           element);
     },
     update(entry) {
@@ -177,7 +178,8 @@ export const Presets = {
       // Outside viewport or margins
       if (!entry.positionRect ||
           (entry.positionRect.top >
-            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_)) {
+            (1 - fxElement.getMarginStart()) *
+              fxElement.adjustedViewportHeight_)) {
         return;
       }
 
@@ -185,13 +187,17 @@ export const Presets = {
         return;
       }
 
+      // Early exit if the animation doesn't need to repeat and it is fully opaque.
+      if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
+        return;
+      }
       // Translate the element offset pixels.
       const top = entry.positionRect.top;
-      const marginDelta = fxElement.getMarginEnd() - fxElement.getMargin();
+      const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset = 1 * (fxElement.adjustedViewportHeight_ - top -
-        (fxElement.getMargin() * fxElement.adjustedViewportHeight_)) /
+        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight_)) /
         (marginDelta * fxElement.adjustedViewportHeight_);
       fxElement.setOffset(offset);
 

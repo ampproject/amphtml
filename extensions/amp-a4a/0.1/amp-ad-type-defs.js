@@ -42,12 +42,26 @@ export const ValidatorResult = {
   NON_AMP: 'NON_AMP',
 };
 
+/** @enum {string} */
+export const AdResponseType = {
+  CRYPTO: 'crypto',
+  TEMPLATE: 'template',
+};
+
 /** @typedef {{
       type: !ValidatorResult,
-      adResponseType: string,
+      adResponseType: AdResponseType,
       creativeData: !Object,
     }} */
 export let ValidatorOutput;
+
+/** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
 
 /**
  * @abstract

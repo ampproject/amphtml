@@ -50,87 +50,87 @@ describes.sandboxed('allocateVariant', {}, () => {
   });
 
   it('should throw for invalid config', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', null);
-    }).to.throw();
+    }).to.throw(); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', undefined);
-    }).to.throw();
+    }).to.throw(); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {});
-    }).to.throw(/Missing experiment variants config/);
+    }).to.throw(/Missing experiment variants config/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {variants: {}});
-    }).to.throw(/Missing experiment variants config/);
+    }).to.throw(/Missing experiment variants config/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'invalid_char_%_in_name': 1,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'variant_1': 50,
           'variant_2': 51,
         },
       });
-    }).to.throw(/Total percentage is bigger than 100/);
+    }).to.throw(/Total percentage is bigger than 100/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'negative_percentage': -1,
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'too_big_percentage': 101,
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'non_number_percentage': '50',
         },
       });
-    }).to.throw(/Invalid percentage/);
+    }).to.throw(/Invalid percentage/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'invalid_name!', {
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, '', {
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
 
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         group: 'invalid_group_name!',
         variants: {
           'variant_1': 50,
         },
       });
-    }).to.throw(/Invalid name/);
+    }).to.throw(/Invalid name/); });
   });
 
   it('should work around float rounding error', () => {
@@ -270,13 +270,13 @@ describes.sandboxed('allocateVariant', {}, () => {
     getNotificationStub.withArgs('notif-1')
         .returns(Promise.resolve(null));
 
-    return expect(allocateVariant(ampdoc, 'name', {
+    allowConsoleError(() => { return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
       },
-    })).to.eventually.rejectedWith('Notification not found: notif-1');
+    })).to.eventually.be.rejectedWith('Notification not found: notif-1'); });
   });
 
   it('should have no variant allocated if consent is missing', () => {

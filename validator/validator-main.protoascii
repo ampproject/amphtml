@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 602
+spec_file_revision: 604
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -120,6 +120,7 @@ tags: {
 tags: {
   tag_name: "TITLE"
   spec_name: "title"
+  attrs: { name: "[text]" }
 }
 # 4.2.3 the base element
 tags: {
@@ -1552,6 +1553,7 @@ tags: {
       allowed_protocol: "threema"
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
+      allowed_protocol: "webcal"
       allowed_protocol: "whatsapp"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -4460,7 +4462,6 @@ attr_lists: {
   attrs: { name: "placeholder" value: "" }
   # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
-  attrs: { name: "lightbox" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
   # https://www.ampproject.org/docs/reference/components/amp-access

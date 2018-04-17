@@ -166,8 +166,7 @@ describe('Storage', () => {
     });
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should recover from binding failure', () => {
+  it('should recover from binding failure', () => {
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
         .returns(Promise.reject('intentional'))
@@ -180,8 +179,7 @@ describe('Storage', () => {
     });
   });
 
-  // TODO(dvoytenko, #14336): Fails due to console errors.
-  it.skip('should recover from binding error', () => {
+  it('should recover from binding error', () => {
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
         .returns(Promise.resolve('UNKNOWN FORMAT'))
@@ -415,12 +413,14 @@ describe('Store', () => {
   });
 
   it('should prohibit unsafe values', () => {
-    expect(() => {
-      store.set('__proto__', 'value1');
-    }).to.throw(/Name is not allowed/);
-    expect(() => {
-      store.set('prototype', 'value1');
-    }).to.throw(/Name is not allowed/);
+    allowConsoleError(() => {
+      expect(() => {
+        store.set('__proto__', 'value1');
+      }).to.throw(/Name is not allowed/);
+      expect(() => {
+        store.set('prototype', 'value1');
+      }).to.throw(/Name is not allowed/);
+    });
   });
 });
 
@@ -447,8 +447,7 @@ describe('LocalStorageBinding', () => {
     sandbox.restore();
   });
 
-  // TODO(erwinmombay, #14336): Fails due to console errors.
-  it.skip('should throw if localStorage is not supported', () => {
+  it('should throw if localStorage is not supported', () => {
     const errorSpy = sandbox.spy(dev(), 'expectedError');
 
     expect(errorSpy).to.have.not.been.called;
@@ -506,8 +505,7 @@ describe('LocalStorageBinding', () => {
         });
   });
 
-  // TODO(newmuis, #14336): Fails due to console errors.
-  it.skip('should bypass loading from localStorage if getItem throws', () => {
+  it('should bypass loading from localStorage if getItem throws', () => {
     localStorageMock.expects('getItem')
         .throws(new Error('unknown'))
         .once();
@@ -550,8 +548,7 @@ describe('LocalStorageBinding', () => {
         });
   });
 
-  // TODO(newmuis, #14336): Fails due to console errors.
-  it.skip('should bypass saving to localStorage if getItem throws', () => {
+  it('should bypass saving to localStorage if getItem throws', () => {
     const setItemSpy = sandbox.spy(windowApi.localStorage, 'setItem');
 
     localStorageMock.expects('getItem')

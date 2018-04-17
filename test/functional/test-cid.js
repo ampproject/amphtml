@@ -87,6 +87,7 @@ describe('cid', () => {
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+        search: 'f=0',
       },
       crypto: {
         getRandomValues: array => {
@@ -147,9 +148,10 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
+    sandbox.stub(cid, 'isScopeOptedIn_').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -294,8 +296,7 @@ describe('cid', () => {
           '');
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should read from viewer storage if embedded', () => {
+    it('should read from viewer storage if embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -318,8 +319,7 @@ describe('cid', () => {
       });
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should read from viewer storage if embedded and convert cid to ' +
+    it('should read from viewer storage if embedded and convert cid to ' +
         'new format', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
@@ -350,8 +350,7 @@ describe('cid', () => {
       });
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should store to viewer storage if embedded', () => {
+    it('should store to viewer storage if embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
       return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
@@ -382,8 +381,7 @@ describe('cid', () => {
           'sha384(in-storagehttp://www.origin.come2)');
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should expire on read after 365 days', () => {
+    it('should expire on read after 365 days', () => {
       const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
@@ -401,8 +399,7 @@ describe('cid', () => {
       });
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should expire on read after 365 days when embedded', () => {
+    it('should expire on read after 365 days when embedded', () => {
       fakeWin.parent = {};
       const expectedBaseCid = 'from-viewer';
       viewerStorage = JSON.stringify({
@@ -443,8 +440,7 @@ describe('cid', () => {
       });
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should set last access time once a day when embedded', () => {
+    it('should set last access time once a day when embedded', () => {
       fakeWin.parent = {};
       const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       function getStoredTime() {
@@ -495,9 +491,9 @@ describe('cid', () => {
     });
 
     it('should fail on invalid scope', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         cid.get({scope: '$$$'}, Promise.resolve());
-      }).to.throw(/\$\$\$/);
+      }).to.throw(/\$\$\$/); });
     });
 
     it('should not store until persistence promise resolves', () => {
@@ -530,8 +526,7 @@ describe('cid', () => {
       });
     });
 
-    // TODO(lannka, #14336): Fails due to console errors.
-    it.skip('should not wait persistence consent for viewer storage', () => {
+    it('should not wait persistence consent for viewer storage', () => {
       fakeWin.parent = {};
       const persistencePromise = new Promise(() => {/* never resolves */});
       return cid.get({scope: 'e2'}, hasConsent, persistencePromise).then(() => {
@@ -712,9 +707,9 @@ describe('cid', () => {
 
 describe('getProxySourceOrigin', () => {
   it('should fail on non-proxy origin', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       getProxySourceOrigin(parseUrl('https://abc.org/v/foo.com/'));
-    }).to.throw(/Expected proxy origin/);
+    }).to.throw(/Expected proxy origin/); });
   });
 });
 
@@ -733,6 +728,7 @@ describes.realWin('cid', {amp: true}, env => {
     clock = lolex.install({
       target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
     cid = cidServiceForDocForTesting(ampdoc);
+    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -766,8 +762,7 @@ describes.realWin('cid', {amp: true}, env => {
         .to.eventually.equal('cid-from-viewer');
   });
 
-  // TODO(zhouyx, #14336): Fails due to console errors.
-  it.skip('get method should time out when in Viewer', function *() {
+  it('get method should time out when in Viewer', function *() {
     win.parent = {};
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(new Promise(() => {}));
@@ -795,7 +790,8 @@ describes.realWin('cid', {amp: true}, env => {
 
     beforeEach(() => {
       sandbox.stub(url, 'isProxyOrigin').returns(false);
-      sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').returns('api-key');
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
       setCookie(win, '_ga', '', 0);
     });
 
@@ -804,6 +800,7 @@ describes.realWin('cid', {amp: true}, env => {
     });
 
     it('should use cid api on pub origin if opted in', () => {
+      cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
       const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
       getScopedCidStub.returns(Promise.resolve('cid-from-api'));
       return cid.get({
@@ -812,7 +809,7 @@ describes.realWin('cid', {amp: true}, env => {
         createCookieIfNotPresent: true,
       }, hasConsent).then(scopedCid => {
         expect(getScopedCidStub)
-            .to.be.calledWith('api-key', 'AMP_ECID_GOOGLE');
+            .to.be.calledWith('cid-api-key', 'AMP_ECID_GOOGLE');
         expect(scopedCid).to.equal('cid-from-api');
         expect(getCookie(win, '_ga')).to.equal('cid-from-api');
       });
@@ -842,6 +839,48 @@ describes.realWin('cid', {amp: true}, env => {
         expect(getCookie(win, '_ga')).to.be.null;
       });
     });
+  });
+
+  describe('isScopeOptedIn', () => {
+    it('should read predefined clients and custom API keys correctly', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="googleanalytics, ' +
+          'foo = foo-api-key,' +
+          'bar=bar-api-key ,' +
+          'hello=hello-api-key">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+      expect(cid.isScopeOptedIn_('hello')).to.equal('hello-api-key');
+      expect(cid.isScopeOptedIn_('non-existing')).to.be.undefined;
+    });
+
+    it('should work if meta only contains predefined clients', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="googleanalytics">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE'))
+          .to.equal('AIzaSyA65lEHUEizIsNtlbNo-l2K18dT680nsaM');
+    });
+
+    it('should work if meta only contains custom scopes', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" ' +
+          'content="' +
+          'foo=foo-api-key,' +
+          'bar=bar-api-key">';
+      expect(cid.isScopeOptedIn_('foo')).to.equal('foo-api-key');
+      expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
+    });
+
+    it('should not work if vendor not whitelisted', () => {
+      ampdoc.win.document.head.innerHTML +=
+          '<meta name="amp-google-client-id-api" content="abodeanalytics">';
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
+    });
+
+
   });
 });
 
@@ -874,7 +913,9 @@ describes.fakeWin('cid optout:', {amp: true}, env => {
 
     it('should reject promise if storage set fails', () => {
       storageSetStub.returns(Promise.reject('failed!'));
-      return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+      allowConsoleError(() => {
+        return optOutOfCid(ampdoc).should.eventually.be.rejectedWith('failed!');
+      });
     });
   });
 

@@ -84,9 +84,11 @@ describes.realWin('crypto-impl', {}, env => {
       });
 
       it('should throw when input contains chars out of range [0,255]', () => {
-        expect(() => crypto.sha384('abc今')).to.throw();
-        expect(() => crypto.sha384Base64('abc今')).to.throw();
-        expect(() => crypto.uniform('abc今')).to.throw();
+        allowConsoleError(() => {
+          expect(() => crypto.sha384('abc今')).to.throw();
+          expect(() => crypto.sha384Base64('abc今')).to.throw();
+          expect(() => crypto.uniform('abc今')).to.throw();
+        });
       });
 
       it('should hash "abc" to uniform number', () => {
@@ -127,14 +129,13 @@ describes.realWin('crypto-impl', {}, env => {
       },
     },
   });
-  // TODO(keithwrightbos, #14336): Fails due to console errors.
-  // testSuite('with native crypto API throws', {
-  //   crypto: {
-  //     subtle: {
-  //       digest: () => {throw new Error();},
-  //     },
-  //   },
-  // });
+  testSuite('with native crypto API throws', {
+    crypto: {
+      subtle: {
+        digest: () => {throw new Error();},
+      },
+    },
+  });
 
   it('native API result should exactly equal to crypto lib result', () => {
     return Promise

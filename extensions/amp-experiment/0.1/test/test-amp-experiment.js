@@ -82,38 +82,38 @@ describes.realWin('amp-experiment', {
   });
 
   it('should throw if it has no child element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if it has multiple child elements', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script');
       addConfigElement('script');
       experiment.buildCallback();
-    }).to.throw(/should contain exactly one/);
+    }).to.throw(/should contain exactly one/); });
   });
 
   it('should throw if the child element is not a <script> element', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('a');
       experiment.buildCallback();
-    }).to.throw(/script/);
+    }).to.throw(/script/); });
   });
 
   it('should throw if the child script element is not json typed', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script', 'wrongtype');
       experiment.buildCallback();
-    }).to.throw(/application\/json/);
+    }).to.throw(/application\/json/); });
   });
 
   it('should throw if the child script element has non-JSON content', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
       experiment.buildCallback();
-    }).to.throw();
+    }).to.throw(); });
   });
 
   it('should add attributes to body element for the allocated variants', () => {
