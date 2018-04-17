@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RTC_VENDORS} from './callout-vendors.js';
+import {Ping} from './amp-ad-utils';
+import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -22,7 +23,6 @@ import {
   isSecureUrl,
   parseUrl,
 } from '../../../src/url';
-import {loadPromise} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
@@ -103,15 +103,7 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
     };
     const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
         errorReportingUrl, macros, whitelist);
-    const image = new Image();
-    image.src = url;
-    image.width = 1;
-    image.height = 1;
-    loadPromise(image).then(() => {
-      dev().fine(TAG, `Sent RTC error pingback to ${url}`);
-    }).catch(() => {
-      dev().warn(TAG, `Failed sending RTC error pingback to ${url}`);
-    });
+    new Ping().emitPing(url);
   }
 }
 

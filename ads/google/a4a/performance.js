@@ -16,8 +16,8 @@
 
 import {CommonSignals} from '../../../src/common-signals';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
+import {Ping} from '../../../extensions/amp-a4a/0.1/amp-ad-utils';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
@@ -201,7 +201,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
   sendPing(name) {
     const url = this.buildPingAddress_(name);
     if (url) {
-      this.emitPing_(url);
+      new Ping().emitPing(url);
     }
   }
 
@@ -248,18 +248,6 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
       });
     }
     return extraParams ? `${this.pingbackAddress_}?${extraParams}` : '';
-  }
-
-  /**
-   * Send ping by creating an img element and attaching to the DOM.
-   * Separate function so that it can be stubbed out for testing.
-   *
-   * @param {string} url Address to ping.
-   * @visibleForTesting
-   */
-  emitPing_(url) {
-    new Image().src = url;
-    dev().info('PING', url);
   }
 
   /**

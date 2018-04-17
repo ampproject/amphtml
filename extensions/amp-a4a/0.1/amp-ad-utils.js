@@ -131,3 +131,16 @@ export function getAmpAdMetadata(creative) {
     return null;
   }
 }
+
+export class Ping {
+  /**
+   * Send ping by creating an img element and attaching to the DOM.
+   * Separate function so that it can be stubbed out for testing.
+   *
+   * @param {string} url Address to ping.
+   */
+  emitPing(url) {
+    new Image().src = url;
+    dev().info('PING', url);
+  }
+}
