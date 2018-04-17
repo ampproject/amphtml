@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ArticleComponent, ArticleTitle} from './components/article';
+import {ArticleComponent, ArticleTitle, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
 
 /**
  * @typedef {{
@@ -26,11 +26,8 @@ export let BookendDataDef;
 
 /**
  * @typedef {{
- *   type: string,
- *   share-providers: (Array<*>|undefined),
- *   title: (string|undefinded),
- *   url: (string|undefinded),
- *   image: (string|undefinded)
+ *   !BookendArticleComponentDef |
+ *   !BookendArticleTitleComponentDef
  * }}
  */
 export let BookendComponentDef;

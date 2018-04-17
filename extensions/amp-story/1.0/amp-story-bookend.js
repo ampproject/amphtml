@@ -57,9 +57,9 @@ const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 
-// TODO(#14591): Clean when older version is deprecated.
+// TODO(#14591): Clean when bookend API v1 is deprecated.
 const BOOKEND_VERSION_2 = 'v2.0';
-const BOOKEND_VERSION = 'bookend-version';
+const BOOKEND_VERSION_KEY = 'bookend-version';
 
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
@@ -373,14 +373,17 @@ export class Bookend {
           if (!response) {
             return null;
           }
-          // TODO(#14591): Clean when old version is deprecated.
-          if (response[BOOKEND_VERSION] === BOOKEND_VERSION_2) {
+          // TODO(#14591): Clean when bookend API v1 is deprecated.
+          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_2) {
             this.config_ = {
-              [BOOKEND_VERSION]: BOOKEND_VERSION_2,
+              [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_2,
               components: BookendComponent
                   .buildFromJson(response['components']),
             };
           } else {
+            // TODO(#14667): Write doc regarding amp-story bookend v2.0.
+            console.warn('Version 1 of the amp-story bookend is deprecated. ' +
+                'Use version 2.');
             this.config_ = {
               shareProviders: response['share-providers'],
               relatedArticles:
@@ -496,10 +499,10 @@ export class Bookend {
     this.assertBuilt_();
     this.isConfigRendered_ = true;
 
-    if (bookendConfig[BOOKEND_VERSION] === BOOKEND_VERSION_2) {
+    if (bookendConfig[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_2) {
       this.renderComponents_(bookendConfig.components);
     } else {
-      // TODO(#14591): Remove when old version is deprecated.
+      // TODO(#14591): Remove when bookend API v1 is deprecated.
       this.setRelatedArticles_(bookendConfig.relatedArticles);
     }
   }

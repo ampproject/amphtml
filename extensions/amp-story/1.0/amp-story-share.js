@@ -313,11 +313,7 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      // TODO(#14591): Remove when old version is deprecated.
-      const providers = config && (config[SHARE_PROVIDERS] ||
-                        config['components'].find(component => {
-                          return component['type'] == SHARE_PROVIDERS;
-                        }));
+      const providers = config && config[SHARE_PROVIDERS];
       if (!providers) {
         return;
       }
@@ -326,36 +322,32 @@ export class ShareWidget {
   }
 
   /**
-   * TODO(#14591)
-   * If using the new API, converts the contents to match with the old version.
+   * TODO(#14591): Remove when bookend API v1 is deprecated.
+   * If using the bookend API v2, converts the contents to match with the bookend API v1.
    * @param {*} providers
-   * @return {!Object<string, (!JsonObject|boolean)>} providers
+   * @return {!Array<!JsonObject|string>} providers
    */
   parseToClassicApi_(providers) {
     const providerObjs = {};
-    providers.map(val => {
-      if (isObject(val)) {
-        if (val['provider'] == 'facebook') {
-          providerObjs['facebook'] = ({'app_id': val['app_id']});
-        } else {
-          providerObjs[val['provider']] = true;
-        }
+    providers.map(currentProvider => {
+      if (isObject(currentProvider) && currentProvider['facebook']) {
+        providerObjs['facebook'] = ({'app_id': currentProvider['facebook']});
       } else {
-        providerObjs[val] = true;
+        providerObjs[currentProvider] = true;
       }
     });
     return providerObjs;
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!JsonObject|string>)} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    // TODO(#14591): Check if using new API and convert if so.
-    if (providers[SHARE_PROVIDERS]) {
-      providers = this.parseToClassicApi_(providers[SHARE_PROVIDERS]);
+    // TODO(#14591): Check if using bookend API v2 and convert it to be v1 compatible if so.
+    if (Array.isArray(providers)) {
+      providers = this.parseToClassicApi_(providers);
     }
 
     Object.keys(providers).forEach(type => {

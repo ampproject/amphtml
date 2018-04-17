@@ -22,6 +22,16 @@ import {isProtocolValid, parseUrl} from '../../../../../src/url';
 const TAG = 'amp-story';
 
 /**
+ * @typedef {{
+ *   type: string,
+ *   title: string,
+ *   url: string,
+ *   image: (string|undefined)
+ * }}
+ */
+export let BookendArticleComponentDef;
+
+/**
  * Builder class for the small article component.
  */
 export class ArticleComponent extends AbstractBookendComponent {
@@ -91,6 +101,14 @@ export class ArticleComponent extends AbstractBookendComponent {
     return template;
   }
 }
+
+/**
+ * @typedef {{
+ *   type: string,
+ *   heading: string
+ * }}
+ */
+export let BookendArticleTitleComponentDef;
 
 /**
  * Builder class for the article titles used to separate article sets.

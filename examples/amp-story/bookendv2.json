@@ -1,16 +1,11 @@
 {
   "bookend-version": "v2.0",
+  "share-providers": [
+    "email",
+    {"facebook": "254325784911610"},
+    "whatsapp"
+  ],
   "components": [
-    {
-      "type": "share-providers",
-      "share-providers": [
-        {
-          "provider": "facebook",
-          "app_id": "254325784911610"
-        },
-        "whatsapp"
-     ]
-    },
     {
       "type": "article-set-title",
       "title": "test"

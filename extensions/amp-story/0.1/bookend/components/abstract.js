@@ -25,7 +25,7 @@ export class AbstractBookendComponent {
    * @param {BookendComponentDef} componentJson
    * @abstract
    */
-  static build(componentJson) {}
+  static build() {}
 
   /**
    * Builds the template for the component.
@@ -33,5 +33,5 @@ export class AbstractBookendComponent {
    * @return {!../../simple-template.ElementDef}
    * @abstract
    */
-  static buildTemplate(componentJson) {}
+  static buildTemplate() {}
 }
