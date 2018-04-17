@@ -64,15 +64,12 @@ describes.realWin('amp-story-cta-layer', {
   });
 
   it('should not allow a cta layer on the first page', () => {
-    // Setup: create two pages.
     win.document.body.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(win.document.createElement('amp-story-page'));
 
-    // Get pages in story.
     const pageElements =
     win.document.getElementsByTagName('amp-story-page');
 
-    // Attach cta layer to first page (cover page).
     pageElements[0].appendChild(ampStoryCtaLayer.element);
 
     ampStoryCtaLayer.layoutCallback().then(layer => {
@@ -83,16 +80,13 @@ describes.realWin('amp-story-cta-layer', {
   });
 
   it('should allow a cta layer on the second or third page', () => {
-    // Setup: create three pages.
     win.document.body.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(win.document.createElement('amp-story-page'));
     win.document.body.appendChild(win.document.createElement('amp-story-page'));
 
-    // Get pages in story.
     const pageElements =
     win.document.getElementsByTagName('amp-story-page');
 
-    // Attach cta layer to second and third pages.
     pageElements[1].appendChild(ampStoryCtaLayer.element);
     pageElements[2].appendChild(ampStoryCtaLayer.element);
 
