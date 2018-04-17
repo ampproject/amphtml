@@ -103,7 +103,7 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
     };
     const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
         errorReportingUrl, macros, whitelist);
-    new Ping().emitPing(url);
+    new win.Image().src = url;
   }
 }
 
