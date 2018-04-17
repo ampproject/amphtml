@@ -136,6 +136,26 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
                 .equal('faketoken');
           });
     });
+
+    it('should resolve empty entitlement, with metering and current product if '
+        + 'viewer only sends metering', () => {
+      sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'metering': {},
+          };});
+      return viewerPlatform.verifyAuthToken_('faketoken').then(
+          resolvedEntitlement => {
+            expect(resolvedEntitlement).to.be.not.undefined;
+            expect(resolvedEntitlement.service).to.equal('local');
+            expect(resolvedEntitlement.products).to.deep
+                .equal([currentProductId]);
+            // raw should be the data which was resolved via sendMessageAwaitResponse.
+            expect(resolvedEntitlement.metering).to.deep
+                .equal({});
+          });
+    });
   });
 
   describe('proxy methods', () => {
