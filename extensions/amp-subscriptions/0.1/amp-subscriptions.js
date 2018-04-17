@@ -193,14 +193,11 @@ export class SubscriptionService {
   processGrantState_(grantState) {
     this.renderer_.toggleLoading(false);
     this.renderer_.setGrantState(grantState);
-
+    this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
-    } else {
-      this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     }
-
   }
 
   /**
@@ -337,8 +334,10 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
-    this.platformStore_.getGrantStatus()
-        .then(grantState => {this.processGrantState_(grantState);});
+    this.platformStore_.getGrantStatus().then(grantState => {
+      this.processGrantState_(grantState);
+      this.performPingback();
+    });
 
     if (doPlatformSelection) {
       this.selectAndActivatePlatform_();
@@ -371,18 +370,21 @@ export class SubscriptionService {
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()
       );
-
-      if (this.viewTrackerPromise_) {
-        this.viewTrackerPromise_.then(() => {
-          return this.platformStore_.getGrantEntitlement();
-        }).then(grantStateEntitlement => {
-          const localPlatform = this.platformStore_.getLocalPlatform();
-          if (localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(grantStateEntitlement);
-          }
-        });
-      }
     });
+  }
+
+  performPingback() {
+    if (this.viewTrackerPromise_) {
+      this.viewTrackerPromise_.then(() => {
+        return this.platformStore_.getGrantEntitlement();
+      }).then(grantStateEntitlement => {
+        const localPlatform = this.platformStore_.getLocalPlatform();
+        if (localPlatform.isPingbackEnabled()) {
+          localPlatform.pingback(grantStateEntitlement
+              || Entitlement.empty('local'));
+        }
+      });
+    }
   }
 
   /**
