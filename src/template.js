@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
+import {dev} from './log';
+import {map} from './utils/object.js';
 
 let container;
 
@@ -59,4 +60,27 @@ function html(strings) {
   container./*OK*/innerHTML = '';
 
   return el;
+}
+
+/**
+ * Queries an element for all elements with a "ref" attribute, removing
+ * the attribute afterwards.
+ * Returns a named map of all ref elements.
+ *
+ * @param {!Element} root
+ * @return {!Object<string, !Element>}
+ */
+export function htmlRefs(root) {
+  const elements = root.querySelectorAll('[ref]');
+  const refs = map();
+
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+    const ref = dev().assert(element.getAttribute('ref'), 'Empty ref attr');
+    element.removeAttribute('ref');
+    dev().assert(refs[ref] === undefined, 'Duplicate ref');
+    refs[ref] = element;
+  }
+
+  return refs;
 }
