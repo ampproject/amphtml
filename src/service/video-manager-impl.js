@@ -151,8 +151,8 @@ export class VideoManager {
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
-    /** @public @const {function():!R82FullscreenManager} */
-    this.getR82FullscreenManager =
+    /** @private @const {function():!R82FullscreenManager} */
+    this.getR82FullscreenManager_ =
         once(() => this.createR82FullscreenManager_());
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
@@ -350,6 +350,11 @@ export class VideoManager {
   userInteractedWithAutoPlay(video) {
     return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
   }
+
+  /** @param {!VideoEntry} entry */
+  registerForRotateToFullscreen(entry) {
+    this.getR82FullscreenManager_().register(entry);
+  }
 }
 
 /**
@@ -457,15 +462,13 @@ class VideoEntry {
 
   /** @private */
   onBuilt_() {
-    const {element} = this.video;
-
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
     // appropriately each time.
     this.signal_(VideoEvents.REGISTERED);
 
     if (this.hasRotateToFullscreen_()) {
-      this.manager_.getR82FullscreenManager().register(element, this);
+      this.manager_.registerForRotateToFullscreen(this);
     }
 
     this.updateVisibility();
@@ -994,12 +997,11 @@ class R82FullscreenManager {
         once(getIntersectionObserver));
   }
 
-  /**
-   * @param {!AmpElement} element
-   * @param {!VideoEntry} videoEntry
-   */
-  register(element, videoEntry) {
+  /** @param {!VideoEntry} videoEntry */
+  register(videoEntry) {
     const id = this.nextId_++;
+
+    const {element} = videoEntry.video;
 
     element[R82_FULLSCREEN_ID_PROP] = id;
 
