@@ -25,6 +25,7 @@ import {
   getCalloutParam_,
   inflateAndSendRtc_,
   maybeExecuteRealTimeConfig_,
+  sendErrorMessage,
   truncUrl_,
   validateRtcConfig_,
 } from '../real-time-config-manager';
@@ -514,9 +515,11 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
       it('should return null for rtcConfig missing required values', () => {
-        setRtcConfig(rtcConfig);
-        validatedRtcConfig = validateRtcConfig_(element);
-        expect(validatedRtcConfig).to.be.null;
+        allowConsoleError(() => {
+          setRtcConfig(rtcConfig);
+          validatedRtcConfig = validateRtcConfig_(element);
+          expect(validatedRtcConfig).to.be.null;
+        });
       });
     });
 
@@ -549,6 +552,44 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expect(errorResponse.error).to.equal(
             RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT);
       });
+    });
+  });
+
+  describe('sendErrorMessage', () => {
+    let imageStub, requestUrl, ampDoc;
+    let errorType, errorReportingUrl;
+    let imageMock;
+
+    beforeEach(() => {
+      // Make sure that we always send the message, as we are using
+      // the check Math.random() < reporting frequency.
+      sandbox.stub(Math, 'random').returns(0);
+      sandbox.stub(Xhr.prototype, 'fetch');
+      imageMock = {};
+      imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
+      ampDoc = a4aElement.getAmpDoc();
+
+      errorType = RTC_ERROR_ENUM.TIMEOUT;
+      errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
+      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const macros = {
+        ERROR_TYPE: errorType,
+        HREF: env.win.location.href,
+      };
+      requestUrl = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+          errorReportingUrl, macros, whitelist);
+    });
+
+    it('should send error message pingback to correct url', () => {
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(imageStub).to.be.calledOnce;
+      expect(imageMock.src).to.equal(requestUrl);
+    });
+
+    it('should not send error message if insecure url', () => {
+      errorReportingUrl = 'http://www.IAmInsecure.biz';
+      sendErrorMessage(errorType, errorReportingUrl, env.win, ampDoc);
+      expect(imageStub).to.not.be.called;
     });
   });
 });
