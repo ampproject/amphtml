@@ -201,9 +201,6 @@ export class AmpNextPage extends AMP.BaseElement {
     }
 
     this.element.appendChild(recommendations);
-    this.positionObserver_.observe(recommendations,
-        PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(currentArticle, position));
   }
 
   /**
@@ -222,11 +219,14 @@ export class AmpNextPage extends AMP.BaseElement {
             amp =
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-            if (this.separator_) {
-              const separatorClone = this.separator_.cloneNode(true);
-              separatorClone.removeAttribute('separator');
-              this.element.appendChild(separatorClone);
-            }
+            const separator = this.separator_.cloneNode(true);
+            separator.removeAttribute('separator');
+            this.element.appendChild(separator);
+
+            const page = this.nextArticle_ - 1;
+            this.positionObserver_.observe(separator,
+                PositionObserverFidelity.LOW,
+                position => this.positionUpdate_(page, position));
 
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
@@ -288,6 +288,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
     if (separatorElements.length == 1) {
       this.separator_ = separatorElements[0];
+    } else {
+      this.separator_ = this.win.document.createElement('div');
     }
 
     this.mutateElement(() => {
