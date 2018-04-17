@@ -60,13 +60,19 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Overwrite or set target attribute to _blank in call-to-action links.
+   * Overwrite or set target attributes that are cta-layer-specific.
    * @private
    */
-  setOrOverwriteTargetAttribute_() {
+  setOrOverwriteAttributes_() {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
       ctaLinks[i].setAttribute('target', '_blank');
+      ctaLinks[i].setAttribute('role', 'link');
+    }
+
+    const ctaButtons = this.element.querySelectorAll('button');
+    for (let i = 0; i < ctaButtons.length; i++) {
+      ctaButtons[i].setAttribute('role', 'button');
     }
   }
 
