@@ -20,7 +20,7 @@
  */
 
 import {dev, user} from './log';
-import {htmlFor} from './template';
+import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';

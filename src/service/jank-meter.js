@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {dev, user} from '../log';
-import {htmlFor} from '../template';
+import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
 
 /** @const {number} */

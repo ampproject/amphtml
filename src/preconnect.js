@@ -23,7 +23,7 @@
 import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
-import {htmlFor} from './template';
+import {htmlFor} from './static-template';
 import {parseUrl} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';

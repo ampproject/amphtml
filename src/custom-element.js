@@ -40,7 +40,7 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
-import {htmlFor} from './template';
+import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';

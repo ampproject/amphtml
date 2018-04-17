@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {htmlFor} from './template';
+import {htmlFor} from './static-template';
 
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {

@@ -24,7 +24,7 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
-import {htmlFor} from '../template';
+import {htmlFor} from '../static-template';
 
 const TAG = 'FixedLayer';
 
