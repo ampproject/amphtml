@@ -943,15 +943,15 @@ let R82FullscreenEntryDef;
 
 
 /** @private @const {string} */
-const R82_FULLSCREEN_ID_ATTR = 'data-r82Fullscreen-id';
+const R82_FULLSCREEN_ID_ATTR = 'data-i-amp-r82f-id';
 
 
-/**
- * Class indicating that an element is the "best centered" element in the page
- * for R82Fullscreen.
- * @private @const {string}
- */
-const CENTERED = 'i-amphtml-portrait-centered';
+/** @private @const {string} */
+const R82F_VISIBLE_PORTRAIT = 'i-amphtml-r82f-visible-portrait';
+
+
+/** @private @const {string} */
+const R82F_VISIBLE_LANDSCAPE = 'i-amphtml-r82f-visible-landscape';
 
 
 /** Manages rotate-to-fullscreen video. */
@@ -977,7 +977,7 @@ class R82FullscreenManager {
     this.currently_ = null;
 
     /**
-     * Maps FOL id to entry.
+     * Maps rotate-to-fullscreen entry id to entry.
      * @private @const {!Object<string, !R82FullscreenEntryDef>}
      */
     this.entries_ = {};
@@ -1007,10 +1007,17 @@ class R82FullscreenManager {
       this.entries_[id.toString()] = {videoEntry, video};
     });
 
+    this.installOrientationObserver_();
+
     // Wait until the video is "blessed" in order to have fullscreen access.
     element.signals().whenSignal(Signals.BLESSED).then(() => {
-      this.installOrientationObserver_();
       this.getIntersectionObserver_().observe(element);
+      if (!isLandscape(this.win_)) {
+        return;
+      }
+      const {video} = videoEntry;
+      const videoForVsync = /** @type {!../base-element.BaseElement} */ (video);
+      this.updateVisibilityOnBless_(videoForVsync);
     });
   }
 
@@ -1026,32 +1033,43 @@ class R82FullscreenManager {
     // exit fullscreen since 'change' does not fire in this case.
     if (screen && 'orientation' in screen) {
       const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
-      listen(orient, 'change', () => this.onOrientationChange_());
+      listen(orient, 'change', () => this.onRotation_());
     }
     // iOS Safari does not have screen.orientation but classifies
     // 'orientationchange' as a user interaction.
-    listen(win, 'orientationchange', () => this.onOrientationChange_());
+    listen(win, 'orientationchange', () => this.onRotation_());
   }
 
   /** @private */
-  onOrientationChange_() {
-    if (!isLandscape(this.win_)) {
-      console.log(this.getIntersectionObserver_().takeRecords());
-      const entries = this.getIntersectionObserver_().takeRecords();
-      this.updatePortraitVisibility_(entries);
-      if (this.currently_) {
-        this.exit_(this.currently_);
-      }
-      return;
-    }
+  onRotation_() {
     const root = this.ampdoc_.getRootNode();
-    const centeredVideoSelector = `.${CENTERED}.${BLESSED}`;
-    const video = root.querySelector(centeredVideoSelector);
-    if (!video) {
+    if (isLandscape(this.win_)) {
+      const centeredVideoSelector = `.${R82F_VISIBLE_PORTRAIT}.${BLESSED}`;
+      const video = root.querySelector(centeredVideoSelector);
+      if (!video) {
+        return;
+      }
+      const id = this.getId_(video);
+      this.enter_(dev().assert(this.entries_[id]));
       return;
     }
-    const id = this.getId_(video);
-    this.enter_(dev().assert(this.entries_[id]));
+
+    // Transfer visibility calculated in landscape to match.
+    // Rationale is that if the element is fully in view
+    // in landscape, it's most likely it will still be fully visible after
+    // rotation.
+    // This prevents a bug where videos blessed in landscape won't enter
+    // fullscreen after rotating back.
+    const videoInLandscapeRange = root.querySelector(R82F_VISIBLE_LANDSCAPE);
+    if (videoInLandscapeRange) {
+      videoInLandscapeRange.classList.remove(R82F_VISIBLE_LANDSCAPE);
+      videoInLandscapeRange.classList.add(R82F_VISIBLE_PORTRAIT);
+    }
+
+    if (!this.currently_) {
+      return;
+    }
+    this.exit_(this.currently_);
   }
 
   /**
@@ -1161,24 +1179,43 @@ class R82FullscreenManager {
    * @private
    */
   onIntersectionChange_(intersectionEntries) {
-    if (!isLandscape(this.win_)) {
-      this.updatePortraitVisibility_(intersectionEntries);
-    }
+    const className = isLandscape(this.win_) ?
+      R82F_VISIBLE_LANDSCAPE :
+      R82F_VISIBLE_PORTRAIT;
+
+    intersectionEntries
+        .sort((a, b) => this.compareIntersectionEntries_(a, b))
+        .forEach((entry, i) => this.setInRangeAfterSort_(entry, className, i));
   }
 
   /**
-   * @param {!Array<!IntersectionObserverEntry>} intersectionEntries
+   * @return {!Promise}
    * @private
    */
-  updatePortraitVisibility_(intersectionEntries) {
-    intersectionEntries
-        .sort((a, b) => this.compareIntersectionEntries_(a, b))
-        .forEach((entry, i) => {
-          // Best centered element that is fully in-view is be considered
-          // in range.
-          const inRange = entry.intersectionRatio >= 1 && i == 0;
-          entry.target.classList.toggle(CENTERED, inRange);
-        });
+  setInRangeAfterSort_(entry, className, i) {
+    // Top-most element that's fully in-view is considered in range.
+    const inRange = entry.intersectionRatio >= 0.8 && i == 0;
+    const element = entry.target;
+    const {video} = this.entries_[this.getId_(element)];
+    return video.mutateElement(() => {
+      element.classList.toggle(className, inRange);
+    });
+  }
+
+  /**
+   * @param {!../base-element.BaseElement} video
+   * @return {!Promise}
+   */
+  updateVisibilityOnBless_(video) {
+    const {element} = video;
+    let isVisible = false;
+    return video.measureMutateElement(() => {
+      const {top, bottom} = element./*OK*/getBoundingClientRect();
+      const vh = this.getViewport_().getSize().height;
+      isVisible = top >= 0 && bottom <= vh;
+    }, () => {
+      element.classList.toggle(R82F_VISIBLE_PORTRAIT, isVisible);
+    });
   }
 
   /**
