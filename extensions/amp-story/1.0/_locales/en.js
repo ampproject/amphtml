@@ -21,6 +21,21 @@ import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
  * @const {!LocalizedStringBundleDef}
  */
 export default {
+  [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
+    string: 'Accept',
+    description: 'Label for a button that allows the user to consent to ' +
+        'providing their cookie access.',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
+    string: 'Decline',
+    description: 'Label for a button that allows the user to disconsent to ' +
+        'providing their cookie access.',
+  },
+  [LocalizedStringId.AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL]: {
+    string: 'Ok',
+    description: 'Label for a button that allows the user to dismiss the ' +
+        'cookie consent dialog.',
+  },
   [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Enable',
     description: 'Label for a button that enables the amp-story experiment.',
@@ -42,13 +57,13 @@ export default {
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: 'Could not copy link to clipboard :(',
-    description: 'String shown in a toast to inform the user that a link ' +
-        'could not be successfully copied to their clipboard.',
+    description: 'String shown in a failure message to inform the user that ' +
+        'a link could not be successfully copied to their clipboard.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
     string: 'Link copied!',
-    description: 'String shown in a toast to confirm that the user has ' +
-        'successfully copied a link to their clipboard.',
+    description: 'String shown in a confirmation message to inform the user ' +
+        'that a link was successfully copied to their clipboard.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'Email',
