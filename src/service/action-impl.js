@@ -236,7 +236,7 @@ export class ActionService {
      * and throw a user error at invocation time.
      * @private {?Array<string>}
      */
-    this.whitelist_ = null;
+    this.whitelist_ = this.queryWhitelist_();
 
     /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
@@ -505,12 +505,11 @@ export class ActionService {
     const targetType = invocation.targetType;
 
     // Check that this action is whitelisted (if a whitelist is set).
-    const whitelist = this.queryWhitelist_();
-    if (whitelist) {
+    if (this.whitelist_) {
       const id = `${targetType}.${method}`;
-      if (!whitelist.includes(id)) {
+      if (!this.whitelist_.includes(id)) {
         return Promise.reject(user().error(TAG_, `"${id}" is not whitelisted ` +
-            ` (${whitelist}).`));
+            ` (${this.whitelist_}).`));
       }
     }
 
@@ -626,18 +625,18 @@ export class ActionService {
   }
 
   /**
-   * If the whitelist is not set, searches for a meta tag containing one and
-   * sets and returns it.
+   * Searches for a whitelist meta tag, parses and returns its contents.
    *
+   * For example:
    * <meta name="amp-action-whitelist" content="AMP.setState, amp-form.submit">
+   *
+   * Returns:
+   * ["AMP.setState", "amp-form.submit"]
    *
    * @return {?Array<string>}
    * @private
    */
   queryWhitelist_() {
-    if (this.whitelist_) {
-      return this.whitelist_;
-    }
     const head = this.ampdoc.getRootNode().head;
     if (!head) {
       return null;
@@ -646,9 +645,7 @@ export class ActionService {
     if (!meta) {
       return null;
     }
-    this.whitelist_ = meta.getAttribute('content').split(',')
-        .map(action => action.trim());
-    return this.whitelist_;
+    return meta.getAttribute('content').split(',').map(action => action.trim());
   }
 
   /**
