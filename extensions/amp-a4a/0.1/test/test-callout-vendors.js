@@ -25,7 +25,9 @@ describe('RTC_VENDORS', () => {
         key => expect(key).to.equal(key.toLowerCase())
     ));
   it('should all use https', () =>
-    Object.keys(RTC_VENDORS).forEach(
-        key => expect(isSecureUrl(RTC_VENDORS[key].url)).to.be.true
-    ));
+    Object.keys(RTC_VENDORS).forEach(key => {
+      expect(isSecureUrl(RTC_VENDORS[key].url)).to.be.true;
+      expect(!RTC_VENDORS[key].errorReportingUrl ||
+           isSecureUrl(RTC_VENDORS[key].errorReportingUrl)).to.be.true;
+    }));
 });
