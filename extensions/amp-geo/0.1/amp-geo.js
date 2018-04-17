@@ -153,6 +153,7 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     /* ISOCountryGroups are optional but if specified at least one must exist  */
+    /** @private @const {!Object<string, Array<string>>} */
     const ISOCountryGroups = config.ISOCountryGroups;
     const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
     if (ISOCountryGroups) {
@@ -167,7 +168,7 @@ export class AmpGeo extends AMP.BaseElement {
         user().assert(
             isArray(ISOCountryGroups[group]),
             `${errorPrefix}[${group}] must be an array`);
-        if (ISOCountryGroups[group].indexOf(this.country_) >= 0) {
+        if (ISOCountryGroups[group].includes(this.country_)) {
           this.matchedGroups_.push(group);
         }
       });
