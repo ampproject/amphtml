@@ -146,6 +146,18 @@ declareExtension('amp-sidebar', '0.1', {hasCss: true});
 declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
+declareExtension('amp-story', '0.1', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
 declareExtension('amp-story', '1.0', {
   hasCss: true,
   cssBinaries: [
@@ -199,18 +211,6 @@ declareExtension('amp-vk', '0.1');
 declareExtension('amp-youtube', '0.1');
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* latestVersion */ '1.0', {hasCss: true});
-declareExtensionVersionAlias(
-    'amp-story', '0.1', /* latestVersion */ '1.0', {
-      hasCss: true,
-      cssBinaries: [
-        'amp-story-bookend',
-        'amp-story-hint',
-        'amp-story-unsupported-browser-layer',
-        'amp-story-viewport-warning-layer',
-        'amp-story-share',
-        'amp-story-system-layer',
-      ],
-    });
 
 
 /**
@@ -820,7 +820,7 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.79KB' : '334.46KB';
+  const size = compiled ? '76.79KB' : '334.55KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
