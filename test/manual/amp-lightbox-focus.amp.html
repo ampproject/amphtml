@@ -43,12 +43,12 @@
   </style>
 </head>
 <body>
-  <amp-lightbox id="my-lightbox" layout="nodisplay" on="lightboxOpen:input.focus">
+  <amp-lightbox id="my-lightbox" layout="nodisplay">
     <div class="lightbox" role="button" tabindex="0">
       <button id="close-button" on="tap:my-lightbox.close" role="button" tabindex="0">
         Close lightbox
       </button>
-      <input id="input" type="text">
+      <input id="input" type="text" autofocus>
       
     </div>
   </amp-lightbox>
