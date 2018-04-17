@@ -230,8 +230,10 @@ export class AmpGeo extends AMP.BaseElement {
           // with missing amp-bind js
           if (config.AmpBind) {
             const state = doc.createElement('amp-state');
-            state./*OK*/innerHTML = '<script type="application/json">' +
-            JSON.stringify(/** @type {!JsonObject} */(states)) + '</script>';
+            const confScript = doc.createElement('script');
+            confScript.setAttribute('type', 'application/json');
+            confScript.innerText = JSON.stringify(/** @type {!JsonObject} */(states)) ;
+            state.appendChild(confScript);
             state.id = GEO_ID;
             doc.body.appendChild(state);
           }
