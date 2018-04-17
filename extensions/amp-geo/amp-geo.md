@@ -21,7 +21,6 @@ limitations under the License.
     <td width="40%"><strong>Description</strong></td>
     <td>Provides an approximate country-level geolocation interface.</td>
   </tr>
-
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
@@ -38,26 +37,22 @@ limitations under the License.
 
 The `amp-geo` component provides country-level geolocation. The `amp-geo` component also provides a simple mechanism to group countries, making it easier to apply attributes to several countries at once.
 
-##### Example:  Changing a flag based on country
+##### Example: Changing background based on country location
 
-In the following example, we determine if the user is in Canada, and if so, we display a maple leaf for their background.
+In the following example, we add the `<amp-geo>` to determine the user's location so that we can apply the appropriate background for their location.
 
 ```html
-<amp-geo>
-  <script type="application-json">
-  {  }
-  </script>
-</amp-geo>
+<amp-geo></amp-geo>
 ```
 
-If the user is in Canada, the amp-geo component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  So, we can use CSS to apply the correct background for Canada:
+If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  We can then use CSS to apply the correct background for Canada:
 
-````css
+```css
 /* defaults */
 .flag { background-image: "./starsandstripes.png"; }
 /* override */
 .amp-iso-country-ca .flag { background-image: "./mapleleaf.png"; }
-````
+```
 
 ## Operation
 
@@ -72,13 +67,16 @@ The `amp-geo` component provides CSS, `amp-bind` and variable substitution inter
 ### Generated CSS classes
 If the `amp-iso-country-XX` class is applied to the `body` element, where 'XX' is replaced by the ISO country code or with the value 'unknown'.
 
-Optionally, configuring groups of country codes via the “ISOCountryCodes” key allows selection by groups of countries.
+### Optional configuration for grouping locations
+
+Optionally, you can include a JSON configuration script in the `amp-geo` tag.
+The `ISOCountryGroups` key allows selections by groups of country codes.
 
 ```html
 <amp-geo>
   <script type="application-json">
   {
-    “ISOCountryGroups”: {
+    "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
       "football": [ "unknown" ]
     }
@@ -87,78 +85,77 @@ Optionally, configuring groups of country codes via the “ISOCountryCodes” ke
 </amp-geo>
 ```
 
-If country groups are specified `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
+If country groups are specified, `amp-geo` iterates through the groups. For any group that contains the current country, a class named `amp-geo-group-` followed by the group name is added to `<body>`. Group names may only contain a-z, A-Z and 0-9, and may not start with a digit.
 
-Example: Generated CSS classes
+##### Example: Generated CSS classes
 
-````html
-<body class=”amp-geo-group-football amp-iso-country-gb …” >
-````
+```html
+<body class="amp-geo-group-football amp-iso-country-gb …" >
+```
 
-##### Example: Using CSS classes and Country Groups to change "soccer" to "football" 
+##### Example: Using CSS classes and country groups to change "soccer" to "football" 
 
 In the following example, we determine if the user is in a "soccer" country and display a "football" message for those users.
 
-````html
+```html
 <amp-geo>
   <script type="application-json">
   {
-    “ISOCountryGroups”: {
+    "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
       "football": [ "unknown" ]
     }
   }
   </script>
 </amp-geo>
-````
+```
 
-If the user is in one of the 'soccer' countries, the `amp-geo-group-soccer` CSS class is applied to the `body` tag.  
+If the user is in one of the "soccer" countries, the `amp-geo-group-soccer` CSS class is applied to the `body` tag.  
 
-````css
+```css
 /* defaults */
 .football:after { content: 'football';}
 /* override */
 .amp-geo-group-soccer .football:after { content: 'soccer' }
-````
+```
 
 Then it's trivial to use CSS select the correct word (i.e., football).
 
-````html
+```html
 <div>
 The game is called <span class='football'>!
 </div>
-````
+```
 
 ### Integration with amp-bind
 
 If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information.  Using the football example above, set the  `AMPBind` flag to true to enable `amp-bind` integration.
 
-````html
+```html
 <amp-geo>
   <script type="application-json">
   {
    "AMPBind": true,
-    “ISOCountryGroups”: {
+    "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
       "football": [ "unknown" ]
     }
   }
   </script>
 </amp-geo>
-````
+```
 
 If the user were in Canada, the inserted `amp-state` would be as follows:
 
-````html
-<amp-state id=”ampGeo”>
-  <script type=”application/json”>{
-	“ISOCountry”: “ca”,
+```html
+<amp-state id="ampGeo">
+  <script type="application/json">{
+	"ISOCountry": "ca",
    	 "soccer": true
    }
    </script>
 </amp-state>
-````
-
+```
 
 ### <a name="variable-substitution"></a>Variable substitution
 
