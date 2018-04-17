@@ -39,7 +39,7 @@ import {
   listen,
   listenOncePromise,
 } from '../event-helper';
-import {dev} from '../log';
+import {dev, user} from '../log';
 import {getMode} from '../mode';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
@@ -480,6 +480,10 @@ class VideoEntry {
    */
   hasRotateToFullscreen_() {
     const {element} = this.video;
+    user().assert(this.video.isInteractive(),
+        'Only interactive videos are allowed to enter fullscreen on rotate.',
+        'Set the `controls` attribute to enable.',
+        this.video);
     return element.hasAttribute(VideoAttributes.R82_FULLSCREEN);
   }
 
@@ -864,6 +868,10 @@ class VideoEntry {
     });
   }
 
+  /** @return {boolean} */
+  isPlaying() {
+    return this.isPlaying_;
+  }
 
   /**
    * Returns whether the video is paused or playing after the user interacted
@@ -927,8 +935,8 @@ class VideoEntry {
 
 /**
  * @struct @typedef {{
- *  entry: !VideoEntry,
- *  impl: !../video-interface.VideoInterface,
+ *  videoEntry: !VideoEntry,
+ *  video: !../video-interface.VideoInterface,
  * }}
  */
 let R82FullscreenEntryDef;
@@ -988,15 +996,15 @@ class R82FullscreenManager {
 
   /**
    * @param {!AmpElement} element
-   * @param {!VideoEntry} entry
+   * @param {!VideoEntry} videoEntry
    */
-  register(element, entry) {
+  register(element, videoEntry) {
     const id = this.nextId_++;
 
     element.setAttribute(R82_FULLSCREEN_ID_ATTR, id);
 
-    element.getImpl().then(impl => {
-      this.entries_[id.toString()] = {entry, impl};
+    element.getImpl().then(video => {
+      this.entries_[id.toString()] = {videoEntry, video};
     });
 
     // Wait until the video is "blessed" in order to have fullscreen access.
@@ -1028,6 +1036,7 @@ class R82FullscreenManager {
   /** @private */
   onOrientationChange_() {
     if (!isLandscape(this.win_)) {
+      console.log(this.getIntersectionObserver_().takeRecords());
       const entries = this.getIntersectionObserver_().takeRecords();
       this.updatePortraitVisibility_(entries);
       if (this.currently_) {
@@ -1046,54 +1055,52 @@ class R82FullscreenManager {
   }
 
   /**
-   * @param {!R82FullscreenEntryDef} r82fullscreenEntry
+   * @param {!R82FullscreenEntryDef} entry
    * @private
    */
-  enter_(r82fullscreenEntry) {
-    const {impl, entry} = r82fullscreenEntry;
+  enter_(entry) {
+    const {video, videoEntry} = entry;
 
-    if (entry.getPlayingState() == PlayingStates.PAUSED) {
+    if (!videoEntry.isPlaying()) {
       return;
     }
 
     const platform = Services.platformFor(this.win_);
 
-    this.currently_ = r82fullscreenEntry;
+    this.currently_ = entry;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
       // transition by default. Delegating to browser.
-      impl.fullscreenEnter();
+      video.fullscreenEnter();
       return;
     }
 
-    const {video} = entry;
     this.scrollIntoIfNotVisible_(video)
-        .then(() => impl.fullscreenEnter());
+        .then(() => video.fullscreenEnter());
   }
 
   /**
-   * @param {!R82FullscreenEntryDef} r82fullscreenEntry
+   * @param {!R82FullscreenEntryDef} entry
    * @private
    */
-  exit_(r82fullscreenEntry) {
+  exit_(entry) {
     this.currently_ = null;
 
-    const {entry, impl} = r82fullscreenEntry;
     const {video} = entry;
 
     this.scrollIntoIfNotVisible_(video)
-        .then(() => impl.fullscreenExit());
+        .then(() => video.fullscreenExit());
   }
 
   /**
    * Scrolls to a video if it's not in view.
-   * @param {!../video-interface.VideoInterface} impl
+   * @param {!../video-interface.VideoInterface} video
    * @private
    */
-  scrollIntoIfNotVisible_(impl) {
-    const {element} = impl;
-    const implForVsync = /** @type {!../base-element.BaseElement} */ (impl);
+  scrollIntoIfNotVisible_(video) {
+    const {element} = video;
+    const videoForVsync = /** @type {!../base-element.BaseElement} */ (video);
 
     const viewport = this.getViewport_();
 
@@ -1105,7 +1112,7 @@ class R82FullscreenManager {
 
     return this.onceOrientationChanges_().then(() =>
       new Promise(resolve => {
-        implForVsync.measureMutateElement(() => {
+        videoForVsync.measureMutateElement(() => {
           const {top, bottom} = element./*OK*/getBoundingClientRect();
           const vh = viewport.getSize().height;
           if (top >= 0 && bottom <= vh) {
