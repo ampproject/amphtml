@@ -73,12 +73,12 @@ export const Presets = {
           'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin')) {
+      if (!element.hasAttribute('data-margin-start')) {
         return;
       }
-      const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-margin must be a number and be between 0 and 1 for: %s',
+      const marginStart = element.getAttribute('data-margin-start');
+      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
+          'data-margin-start must be a number and be between 0 and 1 for: %s',
           element);
     },
     update(entry) {
@@ -87,7 +87,8 @@ export const Presets = {
       // Outside viewport
       if (!entry.positionRect ||
           entry.positionRect.top >
-            (1 - fxElement.getMargin()) * fxElement.adjustedViewportHeight_) {
+            (1 - fxElement.getMarginStart()) *
+              fxElement.adjustedViewportHeight_) {
         return;
       }
 
