@@ -943,15 +943,15 @@ let R82FullscreenEntryDef;
 
 
 /** @private @const {string} */
-const R82_FULLSCREEN_ID_ATTR = 'data-i-amp-r82f-id';
+const R82_FULLSCREEN_ID_PROP = '__AMP_R82F_ID__';
 
 
 /** @private @const {string} */
-const R82F_VISIBLE_PORTRAIT = 'i-amphtml-r82f-visible-portrait';
+const CENTERED_PORTRAIT = 'i-amphtml-centered-portrait';
 
 
 /** @private @const {string} */
-const R82F_VISIBLE_LANDSCAPE = 'i-amphtml-r82f-visible-landscape';
+const CENTERED_LANDSCAPE = 'i-amphtml-centered-landscape';
 
 
 /** Manages rotate-to-fullscreen video. */
@@ -1001,7 +1001,7 @@ class R82FullscreenManager {
   register(element, videoEntry) {
     const id = this.nextId_++;
 
-    element.setAttribute(R82_FULLSCREEN_ID_ATTR, id);
+    element[R82_FULLSCREEN_ID_PROP] = id;
 
     element.getImpl().then(video => {
       this.entries_[id.toString()] = {videoEntry, video};
@@ -1012,7 +1012,7 @@ class R82FullscreenManager {
     // Wait until the video is "blessed" in order to have fullscreen access.
     element.signals().whenSignal(Signals.BLESSED).then(() => {
       this.getIntersectionObserver_().observe(element);
-      if (!isLandscape(this.win_)) {
+      if (!this.isLandscape_()) {
         return;
       }
       const {video} = videoEntry;
@@ -1043,8 +1043,8 @@ class R82FullscreenManager {
   /** @private */
   onRotation_() {
     const root = this.ampdoc_.getRootNode();
-    if (isLandscape(this.win_)) {
-      const centeredVideoSelector = `.${R82F_VISIBLE_PORTRAIT}.${BLESSED}`;
+    if (this.isLandscape_()) {
+      const centeredVideoSelector = `.${CENTERED_PORTRAIT}.${BLESSED}`;
       const video = root.querySelector(centeredVideoSelector);
       if (!video) {
         return;
@@ -1060,10 +1060,10 @@ class R82FullscreenManager {
     // rotation.
     // This prevents a bug where videos blessed in landscape won't enter
     // fullscreen after rotating back.
-    const videoInLandscapeRange = root.querySelector(R82F_VISIBLE_LANDSCAPE);
+    const videoInLandscapeRange = root.querySelector(CENTERED_LANDSCAPE);
     if (videoInLandscapeRange) {
-      videoInLandscapeRange.classList.remove(R82F_VISIBLE_LANDSCAPE);
-      videoInLandscapeRange.classList.add(R82F_VISIBLE_PORTRAIT);
+      videoInLandscapeRange.classList.remove(CENTERED_LANDSCAPE);
+      videoInLandscapeRange.classList.add(CENTERED_PORTRAIT);
     }
 
     if (!this.currently_) {
@@ -1179,9 +1179,9 @@ class R82FullscreenManager {
    * @private
    */
   onIntersectionChange_(intersectionEntries) {
-    const className = isLandscape(this.win_) ?
-      R82F_VISIBLE_LANDSCAPE :
-      R82F_VISIBLE_PORTRAIT;
+    const className = this.isLandscape_() ?
+      CENTERED_LANDSCAPE :
+      CENTERED_PORTRAIT;
 
     intersectionEntries
         .sort((a, b) => this.compareIntersectionEntries_(a, b))
@@ -1214,7 +1214,7 @@ class R82FullscreenManager {
       const vh = this.getViewport_().getSize().height;
       isVisible = top >= 0 && bottom <= vh;
     }, () => {
-      element.classList.toggle(R82F_VISIBLE_PORTRAIT, isVisible);
+      element.classList.toggle(CENTERED_PORTRAIT, isVisible);
     });
   }
 
@@ -1258,7 +1258,15 @@ class R82FullscreenManager {
    * @private
    */
   getId_(element) {
-    return dev().assertString(element.getAttribute(R82_FULLSCREEN_ID_ATTR));
+    return dev().assertString(element[R82_FULLSCREEN_ID_PROP]);
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isLandscape_() {
+    return isLandscape(this.win_);
   }
 }
 
