@@ -118,7 +118,6 @@ export class ViewerSubscriptionPlatform {
       if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
         throw user().createError('Payload is expired');
       }
-
       const entitlements = decodedData['entitlements'];
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
@@ -130,6 +129,17 @@ export class ViewerSubscriptionPlatform {
             break;
           }
         }
+      } else if (decodedData['metering'] && !decodedData['entitlements']) { // No entitlements
+        dev().assert(this.currentProductId_, 'Current product is not set');
+        entitlement = new Entitlement({
+          source: decodedData['iss'] || '',
+          raw: token,
+          service: 'local',
+          products: [this.currentProductId_],
+          subscriptionToken: null,
+          loggedIn: false,
+          metering: decodedData['metering'],
+        });
       } else if (entitlements) { // Not null
         entitlement = Entitlement.parseFromJson(entitlements, token);
       }
