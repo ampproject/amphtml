@@ -46,6 +46,10 @@ let consoleErrorStub;
 let consoleInfoLogWarnSandbox;
 let testName;
 
+// Used to clean up global state between tests.
+let initialGlobalState;
+let initialWindowState;
+
 // All exposed describes.
 global.describes = describes;
 
@@ -341,6 +345,8 @@ beforeEach(function() {
   testName = this.currentTest.fullTitle();
   stubConsoleInfoLogWarn();
   warnForConsoleError();
+  initialGlobalState = Object.keys(global);
+  initialWindowState = Object.keys(window);
 });
 
 function beforeTest() {
@@ -361,6 +367,8 @@ function beforeTest() {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(function() {
+  const globalState = Object.keys(global);
+  const windowState = Object.keys(window);
   restoreConsoleError();
   restoreConsoleInfoLogWarn();
   this.timeout(BEFORE_AFTER_TIMEOUT);
@@ -384,6 +392,21 @@ afterEach(function() {
   window.context = undefined;
   window.AMP_MODE = undefined;
 
+  if (windowState.length != initialWindowState.length) {
+    for (let i = initialWindowState.length; i < windowState.length; ++i) {
+      if (window[windowState[i]]) {
+        delete window[windowState[i]];
+      }
+    }
+  }
+
+  if (initialGlobalState.length != globalState.length) {
+    for (let i = initialGlobalState.length; i < globalState.length; ++i) {
+      if (global[globalState[i]]) {
+        delete global[globalState[i]];
+      }
+    }
+  }
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
