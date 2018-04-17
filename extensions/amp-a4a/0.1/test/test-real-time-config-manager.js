@@ -30,7 +30,6 @@ import {
   validateRtcConfig_,
 } from '../real-time-config-manager';
 import {Services} from '../../../../src/services';
-import {Transport} from '../../../../extensions/amp-analytics/0.1/transport';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {isFiniteNumber} from '../../../../src/types';
@@ -565,8 +564,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       // the check Math.random() < reporting frequency.
       sandbox.stub(Math, 'random').returns(0);
       sandbox.stub(Xhr.prototype, 'fetch');
-      sendRequestUsingImageStub =
-          sandbox.stub(Transport, 'sendRequestUsingImage');
       ampDoc = a4aElement.getAmpDoc();
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;

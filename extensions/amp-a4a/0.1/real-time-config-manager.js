@@ -23,7 +23,6 @@ import {
   parseUrl,
 } from '../../../src/url';
 import {loadPromise} from '../../../src/event-helper';
-import {sendRequest} from '../../../extensions/amp-analytics/0.1/transport';
 import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
@@ -104,7 +103,6 @@ export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
     };
     const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
         errorReportingUrl, macros, whitelist);
-    sendRequest(win, url, {image: true});
     const image = new Image();
     image.src = url;
     image.width = 1;
