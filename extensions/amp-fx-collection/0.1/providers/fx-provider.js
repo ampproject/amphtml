@@ -19,7 +19,7 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
-import {convertEasingKeyword} from './amp-fx-presets-utils';
+import {convertEasingKeyword, resolvePercentageToNumber} from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -141,12 +141,12 @@ export class FxElement {
 
     /** @private {number} */
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
-      parseFloat(element.getAttribute('data-margin-start')) :
+      resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
       marginValues[this.fxType_]['start'];
 
     /** @private {number} */
     this.marginEnd_ = element.hasAttribute('data-margin-end') ?
-      parseFloat(element.getAttribute('data-margin-end')) :
+      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
       marginValues[this.fxType_]['end'];
 
     /** @private {string} */

@@ -117,9 +117,9 @@ export const Presets = {
         return;
       }
       const marginStart = element.getAttribute('data-margin-start');
-      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
-          'data-margin-start must be a number and be between 0 and 1 for: %s',
-          element);
+      user().assert(parseFloat(marginStart) >= 0 &&
+        parseFloat(marginStart) < 100, 'data-margin-start must be a number ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
@@ -160,13 +160,13 @@ export const Presets = {
         return;
       }
       const marginStart = element.getAttribute('data-margin-start');
-      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
-          'data-margin-start must be a number and be between 0 and 1 for: %s',
-          element);
+      user().assert(parseFloat(marginStart) >= 0 &&
+        parseFloat(marginStart) < 100, 'data-margin-start must be a number ' +
+          'and be between 0% and 100% for: %s', element);
       const marginEnd = element.getAttribute('data-margin-end');
-      user().assert(parseFloat(marginEnd) >= 0 && parseFloat(marginEnd) < 1,
-          'data-margin-end must be a number and be between 0 and 1 for: %s',
-          element);
+      user().assert(parseFloat(marginEnd) >= 0 &&
+        parseFloat(marginEnd) < 100, 'data-margin-start must be a number ' +
+          'and be between 0% and 100% for: %s', element);
 
       user().assert(parseFloat(marginEnd) > parseFloat(marginStart),
           'data-margin-end must be greater than data-margin-start for: %s',
