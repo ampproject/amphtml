@@ -161,7 +161,7 @@ export class AmpGeo extends AMP.BaseElement {
           `${errorPrefix} must be an object`);
       Object.keys(ISOCountryGroups).forEach(group => {
         user().assert(
-            /[a-z]+[a-z0-9]*/i.test(group) &&
+            /^[a-z]+[a-z0-9]*$/i.test(group) &&
             !/^amp/.test(group),
             `${errorPrefix}[${group}] name is invalid`);
         user().assert(
@@ -232,7 +232,8 @@ export class AmpGeo extends AMP.BaseElement {
             const state = doc.createElement('amp-state');
             const confScript = doc.createElement('script');
             confScript.setAttribute('type', 'application/json');
-            confScript.innerText = JSON.stringify(/** @type {!JsonObject} */(states)) ;
+            confScript.textContent =
+                JSON.stringify(/** @type {!JsonObject} */(states)) ;
             state.appendChild(confScript);
             state.id = GEO_ID;
             doc.body.appendChild(state);
