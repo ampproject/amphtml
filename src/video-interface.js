@@ -223,7 +223,7 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
-  ROT82X: 'rotate-to-fullscreen',
+  R82_FULLSCREEN: 'rotate-to-fullscreen',
 };
 
 

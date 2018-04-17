@@ -151,8 +151,9 @@ export class VideoManager {
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
-    /** @public @const {function():!Rot82xManager} */
-    this.getRot82xManager = once(() => this.createRot82xManager_());
+    /** @public @const {function():!R82FullscreenManager} */
+    this.getR82FullscreenManager =
+        once(() => this.createR82FullscreenManager_());
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -176,9 +177,9 @@ export class VideoManager {
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
-  /** @private @return {!Rot82xManager} */
-  createRot82xManager_() {
-    return new Rot82xManager(this.ampdoc);
+  /** @private @return {!R82FullscreenManager} */
+  createR82FullscreenManager_() {
+    return new R82FullscreenManager(this.ampdoc);
   }
 
   /**
@@ -463,8 +464,8 @@ class VideoEntry {
     // appropriately each time.
     this.signal_(VideoEvents.REGISTERED);
 
-    if (this.hasFullscreenOnLandscape_()) {
-      this.manager_.getRot82xManager().register(element, this);
+    if (this.hasRotateToFullscreen_()) {
+      this.manager_.getR82FullscreenManager().register(element, this);
     }
 
     this.updateVisibility();
@@ -477,9 +478,9 @@ class VideoEntry {
    * @retun {boolean}
    * @private
    */
-  hasFullscreenOnLandscape_() {
+  hasRotateToFullscreen_() {
     const {element} = this.video;
-    return element.hasAttribute(VideoAttributes.ROT82X);
+    return element.hasAttribute(VideoAttributes.R82_FULLSCREEN);
   }
 
   /**
@@ -923,17 +924,30 @@ class VideoEntry {
 }
 
 
+
 /**
  * @struct @typedef {{
  *  entry: !VideoEntry,
  *  impl: !../video-interface.VideoInterface,
  * }}
  */
-let Rot82xEntryDef;
+let R82FullscreenEntryDef;
+
+
+/** @private @const {string} */
+const R82_FULLSCREEN_ID_ATTR = 'data-r82Fullscreen-id';
+
+
+/**
+ * Class indicating that an element is the "best centered" element in the page
+ * for R82Fullscreen.
+ * @private @const {string}
+ */
+const CENTERED = 'i-amphtml-portrait-centered';
 
 
 /** Manages rotate-to-fullscreen video. */
-class Rot82xManager {
+class R82FullscreenManager {
 
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
@@ -951,12 +965,12 @@ class Rot82xManager {
     /** @private @const {!./timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private {?Rot82xEntryDef} */
+    /** @private {?R82FullscreenEntryDef} */
     this.currently_ = null;
 
     /**
      * Maps FOL id to entry.
-     * @private @const {!Object<string, !Rot82xEntryDef>}
+     * @private @const {!Object<string, !R82FullscreenEntryDef>}
      */
     this.entries_ = {};
 
@@ -979,7 +993,7 @@ class Rot82xManager {
   register(element, entry) {
     const id = this.nextId_++;
 
-    element.setAttribute('data-amp-fol-id', id);
+    element.setAttribute(R82_FULLSCREEN_ID_ATTR, id);
 
     element.getImpl().then(impl => {
       this.entries_[id.toString()] = {entry, impl};
@@ -1022,22 +1036,21 @@ class Rot82xManager {
       return;
     }
     const root = this.ampdoc_.getRootNode();
-    const centeredVideoSelector = `.i-amphtml-fol-centered.${BLESSED}`;
+    const centeredVideoSelector = `.${CENTERED}.${BLESSED}`;
     const video = root.querySelector(centeredVideoSelector);
     if (!video) {
       return;
     }
-    console.log('enter fullscreen', video);
     const id = this.getId_(video);
     this.enter_(dev().assert(this.entries_[id]));
   }
 
   /**
-   * @param {!Rot82xEntryDef} folEntry
+   * @param {!R82FullscreenEntryDef} r82fullscreenEntry
    * @private
    */
-  enter_(folEntry) {
-    const {impl, entry} = folEntry;
+  enter_(r82fullscreenEntry) {
+    const {impl, entry} = r82fullscreenEntry;
 
     if (entry.getPlayingState() == PlayingStates.PAUSED) {
       return;
@@ -1045,7 +1058,7 @@ class Rot82xManager {
 
     const platform = Services.platformFor(this.win_);
 
-    this.currently_ = folEntry;
+    this.currently_ = r82fullscreenEntry;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
@@ -1055,20 +1068,22 @@ class Rot82xManager {
     }
 
     const {video} = entry;
-    this.maybeScrollTo_(video).then(() => impl.fullscreenEnter());
+    this.scrollIntoIfNotVisible_(video)
+        .then(() => impl.fullscreenEnter());
   }
 
   /**
-   * @param {!Rot82xEntryDef} folEntry
+   * @param {!R82FullscreenEntryDef} r82fullscreenEntry
    * @private
    */
-  exit_(folEntry) {
+  exit_(r82fullscreenEntry) {
     this.currently_ = null;
 
-    const {entry, impl} = folEntry;
+    const {entry, impl} = r82fullscreenEntry;
     const {video} = entry;
 
-    this.maybeScrollTo_(video).then(() => impl.fullscreenExit());
+    this.scrollIntoIfNotVisible_(video)
+        .then(() => impl.fullscreenExit());
   }
 
   /**
@@ -1076,69 +1091,43 @@ class Rot82xManager {
    * @param {!../video-interface.VideoInterface} impl
    * @private
    */
-  maybeScrollTo_(impl) {
+  scrollIntoIfNotVisible_(impl) {
     const {element} = impl;
-    let stillInView = false;
+    const implForVsync = /** @type {!../base-element.BaseElement} */ (impl);
+
+    const viewport = this.getViewport_();
+
+    const duration = 300;
+    const curve = 'ease-in';
+    let pos; // 'top' or 'bottom'
+
+    let shouldScroll = true;
+
     return this.onceOrientationChanges_().then(() =>
-      (/** @type {!../base-element.BaseElement} */ (impl))
-          .measureMutateElement(() => {
-            const {top, bottom} = element.getBoundingClientRect();
-            // TODO(alanorozco): Use viewport service
-            stillInView = top >= 0 && bottom <= this.win_.innerHeight;
-          }, () => {
-            if (!stillInView) {
-              return this.scrollTo_(element);
-            }
-          }));
+      new Promise(resolve => {
+        implForVsync.measureMutateElement(() => {
+          const {top, bottom} = element./*OK*/getBoundingClientRect();
+          const vh = viewport.getSize().height;
+          if (top >= 0 && bottom <= vh) {
+            shouldScroll = false;
+            return;
+          }
+          pos = (bottom > vh) ? 'bottom' : 'top';
+        }, () => {
+          if (!shouldScroll) {
+            resolve();
+            return;
+          }
+          this.getViewport_()
+              .animateScrollIntoView(element, duration, curve, pos)
+              .then(resolve);
+        });
+      }));
   }
 
-  /**
-   * @param {!Element} element
-   * @private
-   */
-  scrollTo_(element) {
-    const pxPerFrame = 24;
-    const timeout = 1000;
-
-    const viewport = Services.viewportForDoc(this.ampdoc_);
-    const rect = element.getBoundingClientRect();
-    const vh = viewport.getSize().height;
-    const scrollY = viewport.getScrollTop();
-    const top = scrollY + rect.top;
-    const {height} = rect;
-
-    const y = top - (vh / 2 - height / 2);
-
-    const delta = Math.abs(scrollY - y);
-
-    const frames = Math.min(Math.floor(delta / pxPerFrame));
-    const direction = y < scrollY ? -1 : 1;
-
-    const scrollPromise = new Promise(resolve => {
-      let nextY = scrollY + direction * pxPerFrame;
-      let curFrame = 0;
-
-      const scroll = () => {
-        const shouldStop =
-            curFrame++ >= frames ||
-            direction > 0 && nextY >= y ||
-            direction < 0 && nextY <= y;
-
-        if (shouldStop) {
-          const magicNumber = 200;
-          this.win_.scrollTo(0, y);
-          this.timer_.delay(resolve, magicNumber);
-          return;
-        }
-
-        this.win_.scrollTo(0, nextY);
-        nextY += direction * pxPerFrame;
-        requestAnimationFrame(scroll);
-      };
-      scroll();
-    });
-
-    return this.timer_.timeoutPromise(timeout, /* race */ scrollPromise);
+  /** @private */
+  getViewport_() {
+    return Services.viewportForDoc(this.ampdoc_);
   }
 
   /** @private @return {!Promise} */
@@ -1181,7 +1170,7 @@ class Rot82xManager {
           // Best centered element that is fully in-view is be considered
           // in range.
           const inRange = entry.intersectionRatio >= 1 && i == 0;
-          entry.target.classList.toggle('i-amphtml-fol-centered', inRange);
+          entry.target.classList.toggle(CENTERED, inRange);
         });
   }
 
@@ -1225,7 +1214,7 @@ class Rot82xManager {
    * @private
    */
   getId_(element) {
-    return dev().assertString(element.getAttribute('data-amp-fol-id'));
+    return dev().assertString(element.getAttribute(R82_FULLSCREEN_ID_ATTR));
   }
 }
 
