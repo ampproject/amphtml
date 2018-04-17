@@ -43,8 +43,8 @@ The `amp-geo` component provides country-level geolocation. The `amp-geo` compon
 In the following example, we determine if the user is in Canada, and if so, we display a maple leaf for their background.
 
 ```html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {  }
   </script>
 </amp-geo>
@@ -75,8 +75,8 @@ If the `amp-iso-country-XX` class is applied to the `body` element, where 'XX' i
 Optionally, configuring groups of country codes via the “ISOCountryCodes” key allows selection by groups of countries.
 
 ```html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
     “ISOCountryGroups”: {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -100,8 +100,8 @@ Example: Generated CSS classes
 In the following example, we determine if the user is in a "soccer" country and display a "football" message for those users.
 
 ````html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
     “ISOCountryGroups”: {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -134,8 +134,8 @@ The game is called <span class='football'>!
 If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information.  Using the football example above, set the  `AMPBind` flag to true to enable `amp-bind` integration.
 
 ````html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
    "AMPBind": true,
     “ISOCountryGroups”: {
