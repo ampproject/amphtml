@@ -76,6 +76,12 @@ describes.realWin('amp-geo', {
     }
   }
 
+  it('should not throw on empty config', () => {
+    expect(() => {
+      geo.buildCallback();
+    }).to.not.throw();
+  });
+
   it('should not throw on valid config', () => {
     expect(() => {
       addConfigElement('script');
@@ -176,14 +182,14 @@ describes.realWin('amp-geo', {
     });
   });
 
-  it('should throw if it has multiple child elements', () => {
+  it('should throw if it has multiple script child elements', () => {
     expect(() => {
       addConfigElement('script');
       addConfigElement('script');
       allowConsoleError(() => {
         geo.buildCallback();
       });
-    }).to.throw(/should have exactly one <script> child​​​/);
+    }).to.throw(/can only have one <script type="application\/json"> child​​​/);
   });
 
   it('should throw if the child element is not a <script> element', () => {
@@ -207,6 +213,16 @@ describes.realWin('amp-geo', {
   it('should throw if the child script element has non-JSON content', () => {
     expect(() => {
       addConfigElement('script', 'application/json', '{not json}');
+      allowConsoleError(() => {
+        geo.buildCallback();
+      });
+    }).to.throw();
+  });
+
+  it('should throw if the group name is not valid', () => {
+    expect(() => {
+      addConfigElement('script', 'application/json',
+          {'ISOCountryGroups': {'foo<': ['us']}});
       allowConsoleError(() => {
         geo.buildCallback();
       });

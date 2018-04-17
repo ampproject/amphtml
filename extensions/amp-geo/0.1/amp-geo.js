@@ -36,10 +36,10 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {childElementsByTag, isJsonScriptTag} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+import {isJsonScriptTag} from '../../../src/dom';
 import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {registerServiceBuilder} from '../../../src/service';
@@ -96,19 +96,20 @@ export class AmpGeo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // All geo config within the amp-geo component. There will be only
-    // one single amp-geo allowed in page.
-    const scripts = childElementsByTag(this.element, 'script');
-    user().assert(scripts.length == 1,
-        `${TAG} should have exactly one <script> child`);
-    const script = scripts[0];
-    user().assert(isJsonScriptTag(script),
-        `${TAG} consent instance config should be put in a <script>` +
-        'tag with type= "application/json"');
-    const config = parseJson(script.textContent);
+    // All geo config within the amp-geo component.
+    // The validator only allows one amp-geo per page
+    const children = this.element.children;
+
+    if (children.length) {
+      user().assert(children.length === 1 &&
+        isJsonScriptTag(children[0]),
+      `${TAG} can only have one <script type="application/json"> child`);
+    }
 
     /** @private @const {!Promise<!Object<string, (string|Array<string>)>>} */
-    const geo = this.addToBody_(config);
+    const geo = this.addToBody_(
+        children.length ?
+          parseJson(children[0].textContent) : {});
 
     registerServiceBuilder(this.win, 'geo', function() {
       return geo;
@@ -152,24 +153,25 @@ export class AmpGeo extends AMP.BaseElement {
    */
   matchCountryGroups_(config) {
     /* ISOCountryGroups are optional but if specified at least one must exist  */
-    if (config.ISOCountryGroups) {
+    /** @private @const {!Object<string, Array<string>>} */
+    const ISOCountryGroups = config.ISOCountryGroups;
+    const errorPrefix = '<amp-geo> ISOCountryGroups'; // code size
+    if (ISOCountryGroups) {
       user().assert(
-          isObject(config.ISOCountryGroups),
-          '<amp-geo> ISOCountryGroups must be an Object');
-      const groups = Object.keys(config.ISOCountryGroups);
-      for (let i = 0; i < groups.length; i++) {
+          isObject(ISOCountryGroups),
+          `${errorPrefix} must be an object`);
+      Object.keys(ISOCountryGroups).forEach(group => {
         user().assert(
-            /[a-z]+[a-z0-9]*/i.test(groups[i]) &&
-            !/^amp/.test(groups[i]),
-            '<amp-geo> ISOCountryGroups[' + groups[i] + '] name is invalid');
+            /^[a-z]+[a-z0-9]*$/i.test(group) &&
+            !/^amp/.test(group),
+            `${errorPrefix}[${group}] name is invalid`);
         user().assert(
-            isArray(config.ISOCountryGroups[groups[i]]),
-            '<amp-geo> ISOCountryGroups[' + groups[i] + '] must be an array'
-        );
-        if (config.ISOCountryGroups[groups[i]].indexOf(this.country_) >= 0) {
-          this.matchedGroups_.push(groups[i]);
+            isArray(ISOCountryGroups[group]),
+            `${errorPrefix}[${group}] must be an array`);
+        if (ISOCountryGroups[group].includes(this.country_)) {
+          this.matchedGroups_.push(group);
         }
-      }
+      });
     }
   }
 
@@ -225,15 +227,16 @@ export class AmpGeo extends AMP.BaseElement {
           doc.body.classList.add(COUNTRY_PREFIX + this.country_);
           states.ISOCountryGroups = self.matchedGroups_;
 
-          // Add the AMP state to the doc
-          const state = doc.createElement('amp-state');
-          state./*OK*/innerHTML = '<script type="application/json">' +
-          JSON.stringify(/** @type {!JsonObject} */(states)) + '</script>';
-          state.id = GEO_ID;
-
           // Only include amp state if user requests it to avoid validator issue
           // with missing amp-bind js
           if (config.AmpBind) {
+            const state = doc.createElement('amp-state');
+            const confScript = doc.createElement('script');
+            confScript.setAttribute('type', 'application/json');
+            confScript.textContent =
+                JSON.stringify(/** @type {!JsonObject} */(states)) ;
+            state.appendChild(confScript);
+            state.id = GEO_ID;
             doc.body.appendChild(state);
           }
           break;
