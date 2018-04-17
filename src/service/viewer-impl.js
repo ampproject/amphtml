@@ -279,7 +279,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isCctEmbedded_ = !this.isIframed_ &&
-        parseQueryString(this.win.location.search)['amp_agsa'] === '1';
+        parseQueryString(this.win.location.search)['amp_gsa'] === '1';
 
     const url = parseUrl(this.ampdoc.win.location.href);
     /**
