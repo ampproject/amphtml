@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from '../log';
+
 /**
  * A bit like Array#filter, but removes elements that filter false from the
  * array. Returns the filtered items.
