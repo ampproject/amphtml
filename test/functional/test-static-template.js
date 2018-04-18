@@ -80,7 +80,7 @@ describe('Static Template', () => {
     it('rejects multiple root elements', () => {
       expect(() => {
         allowConsoleError(() => {
-          const div = htmlFor(document)`<div></div><div></div>`;
+          htmlFor(document)`<div></div><div></div>`;
         });
       }).to.throw('template');
     });
@@ -88,7 +88,7 @@ describe('Static Template', () => {
     it('rejects non-existent root', () => {
       expect(() => {
         allowConsoleError(() => {
-          const div = htmlFor(document)``;
+          htmlFor(document)``;
         });
       }).to.throw('template');
     });
@@ -96,7 +96,7 @@ describe('Static Template', () => {
     it('rejects dynamic templates', () => {
       expect(() => {
         allowConsoleError(() => {
-          const div = htmlFor(document)`<div>${"text"}</div>`;
+          htmlFor(document)`<div>${'text'}</div>`;
         });
       }).to.throw('template');
     });
