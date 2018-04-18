@@ -1136,15 +1136,30 @@ export class AutoFullscreenManager {
    * @return {number}
    */
   compareIntersectionEntries_(a, b) {
-    return compareByPredicates(a, b,
-        (a, b) => a.intersectionRatio > b.intersectionRatio,
-        (a, b) => {
-          const viewport = Services.viewportForDoc(this.ampdoc_);
-          const aCenter = centerDist(viewport, a.boundingClientRect);
-          const bCenter = centerDist(viewport, b.boundingClientRect);
-          return aCenter > bCenter;
-        },
-        (a, b) => a.boundingClientRect.top < b.boundingClientRect.top);
+    const prioritizeThosePlaying = (unusedA, b) => {
+      const entry = this.getEntryForElement_(b);
+      return entry.getPlayingState() != PlayingStates.PLAYING_MANUAL;
+    };
+
+    const prioritizeByPortionVisible = (a, b) =>
+      a.intersectionRatio > b.intersectionRatio;
+
+    const prioritizeByCenterDistance = (a, b) => {
+      const viewport = Services.viewportForDoc(this.ampdoc_);
+      const aCenter = centerDist(viewport, a.boundingClientRect);
+      const bCenter = centerDist(viewport, b.boundingClientRect);
+      return aCenter > bCenter;
+    };
+
+    const prioritizeHighest = (a, b) =>
+      a.boundingClientRect.top < b.boundingClientRect.top;
+
+    return compareByPredicates(a, b, [
+      prioritizeThosePlaying,
+      prioritizeByPortionVisible,
+      prioritizeByCenterDistance,
+      prioritizeHighest,
+    ]);
   }
 
   /**
@@ -1163,10 +1178,11 @@ export class AutoFullscreenManager {
  * Compare for sorting by a chain of predicates.
  * @param {!T} a
  * @param {!T} b
- * @param {...function(T, T):boolean} predicates
+ * @param {!Array<function(T, T):boolean>} predicates
  * @return {number}
+ * @template T
  */
-function compareByPredicates(a, b, ...predicates) {
+function compareByPredicates(a, b, predicates) {
   for (var i = 0; i < predicates.length; i++) {
     const predicate = predicates[i];
     if (predicate(a, b)) {
