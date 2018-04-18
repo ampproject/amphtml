@@ -15,6 +15,8 @@
  */
 'use strict';
 
+const COMMON_CHROME_FLAGS = ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'];
+
 /**
  * @param {!Object} config
  */
@@ -114,16 +116,16 @@ module.exports = {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
+      flags: ['--no-sandbox'].concat(COMMON_CHROME_FLAGS),
     },
     Chrome_no_extensions: {
       base: 'Chrome',
       // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
+      flags: COMMON_CHROME_FLAGS,
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
+      flags: COMMON_CHROME_FLAGS,
     },
     // SauceLabs configurations.
     // New configurations can be created here:
