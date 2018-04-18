@@ -1,3 +1,5 @@
+go/amp-consent-readme
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,7 +23,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Collects and stores a user's consent. It can also block other components based on the user's decision.</td>
+    <td>Enables collection through UI and storage of a user's consent. It can also block other components based on the user's decision.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -43,7 +45,8 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <a href="https://ampbyexample.com">TODO Replace with example link</a>
+      <li><a href="https://ampbyexample.com/user_consent/basic_user_consent_flow/">Basic user consent flow</a></li>
+      <li><a href="https://ampbyexample.com/user_consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
     </td>
   </tr>
 </table>
@@ -119,7 +122,7 @@ Currently, AMP will not show consent prompt with a known consent state (i.e. the
 
 #### promptUI
 
-`promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. How a user interacts with the prompt UI will be covered in the following. (TODO add link)
+`promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. How a user interacts with the prompt UI will be covered in the following [section](#prompt-ui).
 
 
 ## Consent Management
@@ -132,7 +135,7 @@ The `<amp-consent>` element is set to `position: fixed` after layout occurs (def
 
 By default, all UI elements contained within `amp-consent` have `display:none` and have `display` set to `display:block` when it is shown. No two UI elements are shown at the same time. When displayed, the UI element is fixed to the bottom of the page by default.
 
-### Prompt UI (optional)
+### Prompt UI
 
 Prompt UI is defined within the consent instance config. The `promptUI` refers to an child element of `<amp-consent>` by its `id`.
 ```
@@ -163,9 +166,9 @@ There are three types of user actions that are associated with the consent promp
 To enable the user to choose a consent state and hide the prompt UI, add an `on` attribute to a button with the
 following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
-* `accept`: instructs AMP to store the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
+* `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
 
-* `reject`: instructs AMP to store the reject decision to the consent, cancels `buildCallback` of components waiting for the consent, and hides the prompt UI.
+* `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
 * `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
@@ -212,3 +215,6 @@ To block components, add the `data-block-on-consent` attribute to the AMP compon
 AMP may support customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
+
+
+
