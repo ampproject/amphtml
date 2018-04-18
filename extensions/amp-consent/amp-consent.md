@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Enables collection through UI and storage of a user's consent. It can also block other components based on the user's decision.</td>
+    <td>Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -33,7 +33,6 @@ limitations under the License.
       <div>
         <code>&lt;script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js">&lt;/script></code>
       </div>
-      <small>Note: The"amp-consent" script is required.</small>
     </td>
   </tr>
   <tr>
@@ -59,7 +58,7 @@ You can use the <amp-consent> component to implement user controls. The componen
 
 ## Usage
 
-Only one single `<amp-consent>` element is allowed on the page, and that element must specify a unique `id`.
+Only a single `<amp-consent>` element is allowed on the page, and that element must specify a unique `id`.
 
 If you also include an `<amp-user-notification>` element on the page, the UI associated with the `<amp-consent>` and `<amp-user-notification>` will not be deterministic. Avoid using `<amp-consent>` with `<amp-user-notification>` if this would be problematic.
 
@@ -136,7 +135,7 @@ By default, all UI elements contained within `amp-consent` have `display:none` a
 
 ### Prompt UI
 
-The prompt UI is defined within the consent instance config. The `promptUI` attribute refers to an child element of `<amp-consent>` by its `id`.
+The prompt UI is defined within the consent instance config. The `promptUI` attribute refers to a child element of `<amp-consent>` by its `id`.
 
 *Example*: Displays a prompt user interface 
 
@@ -171,14 +170,16 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 * `accept`: publisher instructs AMP to remember the accept decision to the consent, unblocks components waiting for the consent, and hides the prompt UI.
 
-* `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` of components waiting for the consent, and hides the prompt UI.
+* `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
 * `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
 
 ### Post-prompt UI (optional)
 
-Post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+
+When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 
 ```html
 <amp-consent layout="nodisplay" id="consent-element">
@@ -197,13 +198,11 @@ Post-prompt UI is defined with the `<amp-consent>` JSON configuration object. Th
      ...
   </div>
   <div id="post-consent-ui">
-     <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+     <button on="tap:consent-element.dismiss" role="button">Settings</button>
   </div>
 
 </amp-consent>
 ```
-
-When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 
 #### Post-prompt action
 
@@ -211,7 +210,7 @@ The post-prompt UI provides one user action type that can be used to allow the u
 
 ## Blocking behaviors
 
-The `<amp-consent>` element can be used to block any other AMP components on the page (except `<amp-consent>` itself).
+The `<amp-consent>` element can be used to block any other AMP components on the page (except `<amp-consent>` itself). "For example, don't load a video until the user consents."
 
 To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response when consent is unknown.
 
