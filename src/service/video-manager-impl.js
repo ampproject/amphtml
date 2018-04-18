@@ -138,7 +138,7 @@ export class VideoManager {
 
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
-        once(() => this.createAutoFullscreenManager_());
+        once(() => new AutoFullscreenManager(this.ampdoc));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -160,11 +160,6 @@ export class VideoManager {
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
-  }
-
-  /** @private @return {!AutoFullscreenManager} */
-  createAutoFullscreenManager_() {
-    return new AutoFullscreenManager(this.ampdoc);
   }
 
   /**
