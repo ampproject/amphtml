@@ -17,6 +17,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as sinon from 'sinon';
 import {
   AmpA4A,
+  EXPERIMENT_FEATURE_HEADER_NAME,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -35,6 +36,7 @@ import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
 import {
   MANUAL_EXPERIMENT_ID,
 } from '../../../../ads/google/a4a/traffic-experiments';
+import {SignatureVerifier} from '../../../amp-a4a/0.1/signature-verifier';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dev} from '../../../../src/log';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -264,8 +266,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     function generateNonSraXhrMockCall(impl, creative) {
       // Start with nameframe method, SRA will override to use safeframe.
-      const headers = {};
-      headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
+      const headers = {
+        [RENDERING_TYPE_HEADER]: XORIGIN_MODE.NAMEFRAME,
+        [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
+      };
       const iu = encodeURIComponent(impl.element.getAttribute('data-slot'));
       const urlRegexp = new RegExp(
           '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
@@ -300,8 +304,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
      * @param {!Array<number|{{
      *    networkId:number,
      *    instances:number,
-     *    xhrFail:boolean|undefined,
-     *    invalidInstances:number}}>} items
+     *    xhrFail:(boolean|undefined),
+     *    invalidInstances:number,
+     *    nestHeaders:(boolean|undefined)}}>} items
      */
     function executeTest(items) {
       // Store if XHR will fail by networkId.
@@ -309,6 +314,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       // Store if all elements for a given network are invalid.
       const networkValidity = {};
       const doubleclickInstances = [];
+      const networkNestHeaders = [];
       const attemptCollapseSpy =
         sandbox.spy(BaseElement.prototype, 'attemptCollapse');
       let expectedAttemptCollapseCalls = 0;
@@ -332,6 +338,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         networkValidity[network.networkId] =
           network.invalidInstances && !network.instances;
         networkXhrFailure[network.networkId] = !!network.xhrFail;
+        networkNestHeaders[network.networkId] = network.nestHeaders;
         expectedAttemptCollapseCalls += network.xhrFail ? network.instances : 0;
       });
       const grouping = {};
@@ -355,6 +362,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             expect(impl.iframe).to.not.be.ok;
             return;
           }
+          expect(impl.postAdResponseExperimentFeatures['foo']).to.equal('bar');
           expect(impl.iframe).to.be.ok;
           const name = impl.iframe.getAttribute('name');
           if (isSra) {
@@ -375,7 +383,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
         validInstances.forEach(impl => {
           const creative = `slot${idx++}`;
           if (isSra) {
-            sraResponses.push({creative, headers: {slot: idx}});
+            let headers = {
+              slot: idx,
+              [EXPERIMENT_FEATURE_HEADER_NAME]: 'foo=bar',
+            };
+            if (networkNestHeaders[networkId]) {
+              headers = {'nested': headers};
+            }
+            sraResponses.push({creative, headers});
           } else {
             generateNonSraXhrMockCall(impl, creative);
           }
@@ -395,18 +410,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     beforeEach(() => {
       xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-      const xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
       sandbox.stub(AmpA4A.prototype,
           'getSigningServiceNames').returns(['google']);
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {
-            mode: 'cors',
-            method: 'GET',
-            ampCors: false,
-            credentials: 'omit',
-          }).returns(
-          Promise.resolve({keys: []}));
+      sandbox.stub(SignatureVerifier.prototype, 'loadKeyset')
+          .callsFake(() => {});
     });
 
     afterEach(() => {
@@ -420,6 +427,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     it('should correctly use SRA for multiple slots',
         () => executeTest([1234, 1234]));
+
+    it('should correctly handle SRA response with nested headers', () =>
+      executeTest([{networkId: 1234, instances: 2, nestHeaders: true}]));
 
     it('should not send SRA request if slots are invalid',
         () => executeTest([{networkId: 1234, invalidInstances: 2}]));
