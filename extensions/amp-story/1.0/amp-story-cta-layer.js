@@ -30,7 +30,9 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {addAttributesToElement} from '../../../src/dom';
 import {matches, removeElement} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
 import {user} from '../../../src/log';
 
 /**
@@ -66,13 +68,20 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   setOrOverwriteAttributes_() {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
-      ctaLinks[i].setAttribute('target', '_blank');
-      ctaLinks[i].setAttribute('role', 'link');
+      addAttributesToElement(ctaLinks[i],
+          /** @type {!JsonObject} */ (parseJson({'target': '_blank'})));
+      if (!ctaLinks[i].getAttribute('role')) {
+        addAttributesToElement(ctaLinks[i],
+            /** @type {!JsonObject} */ (parseJson({'role': 'link'})));
+      }
     }
 
     const ctaButtons = this.element.querySelectorAll('button');
     for (let i = 0; i < ctaButtons.length; i++) {
-      ctaButtons[i].setAttribute('role', 'button');
+      if (!ctaButtons[i].getAttribute('role')) {
+        addAttributesToElement(ctaButtons[i],
+            /** @type {!JsonObject} */ (parseJson({'role': 'button'})));
+      }
     }
   }
 
