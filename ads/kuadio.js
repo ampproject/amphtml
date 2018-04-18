@@ -38,5 +38,5 @@ export function kuadio(global, data) {
   e.setAttribute('data-ref', window.context.canonicalUrl);
   global.document.getElementById('c').appendChild(e);
 
-  loadScript(global, 'http://api.pvmax.net/v1.0/pvmax.js');
+  loadScript(global, 'https://api.pvmax.net/v1.0/pvmax.js');
 }
