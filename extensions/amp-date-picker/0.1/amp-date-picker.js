@@ -35,10 +35,6 @@ import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-<<<<<<< HEAD
-=======
-import {sanitizeHtmlTags} from '../../../src/sanitizer';
->>>>>>> fix unused import from merge
 
 
 /**
