@@ -995,8 +995,7 @@ export class AutoFullscreenManager {
       if (!this.currentlyCentered_) {
         return;
       }
-      const id = this.getId_(this.currentlyCentered_);
-      this.enter_(dev().assert(this.entries_[id]));
+      this.enter_(this.getEntryForElement_(this.currentlyCentered_));
       return;
     }
 
@@ -1085,14 +1084,6 @@ export class AutoFullscreenManager {
   }
 
   /**
-   * @return {string}
-   * @private
-   */
-  getId_(element) {
-    return dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
-  }
-
-  /**
    * @param {!AmpElement} element
    * @private
    */
@@ -1154,6 +1145,16 @@ export class AutoFullscreenManager {
           return aCenter > bCenter;
         },
         (a, b) => a.boundingClientRect.top < b.boundingClientRect.top);
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!VideoEntry}
+   * @private
+   */
+  getEntryForElement_(element) {
+    const id = dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
+    return dev().assert(this.entries_[id]);
   }
 }
 
