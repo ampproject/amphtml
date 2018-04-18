@@ -1124,7 +1124,8 @@ export class AutoFullscreenManager {
           if (entry.intersectionRatio >= 0.8 && i == 0) {
             this.currentlyCentered_ = entry.target;
           }
-        });
+        })
+    return this.currentlyCentered_;
   }
 
   /**
@@ -1135,8 +1136,8 @@ export class AutoFullscreenManager {
    */
   compareIntersectionEntries_(a, b) {
     // Prioritize videos that are playing
-    const aPlayingState = this.getEntryForElement_(a).getPlayingState;
-    const bPlayingState = this.getEntryForElement_(b).getPlayingState;
+    const aPlayingState = this.getEntryForElement_(a.target).getPlayingState();
+    const bPlayingState = this.getEntryForElement_(b.target).getPlayingState();
     if (aPlayingState == PlayingStates.PLAYING_MANUAL &&
         bPlayingState != PlayingStates.PLAYING_MANUAL) {
       return -1;

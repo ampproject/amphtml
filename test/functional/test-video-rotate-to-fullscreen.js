@@ -16,6 +16,8 @@
 import {
   AutoFullscreenManager,
 } from '../../src/service/video-manager-impl';
+import {PlayingStates} from '../../src/video-interface';
+import {Services} from '../../src/services';
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   let ampdoc;
@@ -72,5 +74,204 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.onRotation_();
 
     expect(enter).to.not.have.been.called;
+  });
+
+  it('selects the only video playing manually amongst visible', () => {
+    const video1 = createVideo();
+    const video2 = createVideo();
+    const video3 = createVideo();
+
+    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+      width: 1000,
+      height: 1000,
+    });
+
+    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 0,
+        bottom: 200,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 200,
+        bottom: 400,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 400,
+        bottom: 600,
+        width: 300,
+        height: 200,
+      },
+    });
+
+    const entry1 = {video: video1};
+    const entry2 = {video: video2};
+    const entry3 = {video: video3};
+
+    entry1.getPlayingState = () => PlayingStates.PAUSED;
+    entry2.getPlayingState = () => PlayingStates.PLAYING_AUTO;
+    entry3.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+
+    autoFullscreenManager.register(entry1);
+    autoFullscreenManager.register(entry2);
+    autoFullscreenManager.register(entry3);
+
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
+        .to.equal(video3.element);
+  });
+
+  it('selects center-most video among those visible and playing', () => {
+    const video1 = createVideo();
+    const video2 = createVideo();
+    const video3 = createVideo();
+
+    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+      width: 1000,
+      height: 600,
+    });
+
+    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 0,
+        bottom: 200,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 200,
+        bottom: 400,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 400,
+        bottom: 600,
+        width: 300,
+        height: 200,
+      },
+    });
+
+    const entry1 = {video: video1};
+    const entry2 = {video: video2};
+    const entry3 = {video: video3};
+
+    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    entry3.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+
+    autoFullscreenManager.register(entry1);
+    autoFullscreenManager.register(entry2);
+    autoFullscreenManager.register(entry3);
+
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
+        .to.equal(video2.element);
+  });
+
+  it('selects top-most video if two videos are equally centered', () => {
+    const video1 = createVideo();
+    const video2 = createVideo();
+
+    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+      width: 1000,
+      height: 400,
+    });
+
+    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 0,
+        bottom: 200,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 200,
+        bottom: 400,
+        width: 300,
+        height: 200,
+      },
+    });
+
+    const entry1 = {video: video1};
+    const entry2 = {video: video2};
+
+    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+
+    autoFullscreenManager.register(entry1);
+    autoFullscreenManager.register(entry2);
+
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
+        .to.equal(video1.element);
+  });
+
+  it('selects the highest intersection ratio if two videos are visible', () => {
+    const video1 = createVideo();
+    const video2 = createVideo();
+
+    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+      width: 1000,
+      height: 400,
+    });
+
+    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+      intersectionRatio: 0.9,
+      boundingClientRect: {
+        top: -30,
+        bottom: 170,
+        width: 300,
+        height: 200,
+      },
+    });
+    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+      // Visible:
+      intersectionRatio: 1,
+      boundingClientRect: {
+        top: 200,
+        bottom: 400,
+        width: 300,
+        height: 200,
+      },
+    });
+
+    const entry1 = {video: video1};
+    const entry2 = {video: video2};
+
+    entry1.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+    entry2.getPlayingState = () => PlayingStates.PLAYING_MANUAL;
+
+    autoFullscreenManager.register(entry1);
+    autoFullscreenManager.register(entry2);
+
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
+        .to.equal(video2.element);
   });
 });
