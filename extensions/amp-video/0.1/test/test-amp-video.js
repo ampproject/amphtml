@@ -455,8 +455,10 @@ describes.realWin('amp-video', {
             return listenOncePromise(v, VideoEvents.PAUSE);
           })
           .then(() => {
-            impl.unmute();
-            return listenOncePromise(v, VideoEvents.UNMUTED);
+            // Can NOT test unmute because browsers no longer allow unmutting
+            // without user-interaction :(
+            // impl.unmute();
+            // return listenOncePromise(v, VideoEvents.UNMUTED);
           })
           .then(() => {
             // Should not send the unmute event twice if already sent once.
