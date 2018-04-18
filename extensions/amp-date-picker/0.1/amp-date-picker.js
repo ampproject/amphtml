@@ -35,7 +35,6 @@ import {escapeCssSelectorIdent, isRTL, iterateCursor} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
-import {sanitizeFormattingHtml} from '../../../src/sanitizer';
 
 
 /**
@@ -1296,9 +1295,11 @@ export class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * Render the given template into text with the given data.
-   * The fallback string will be rendered directly into the DOM so it must
-   * not contain unsanitized user-supplied values.
+   * Render the given template with the given data. If the template does not
+   * exist, use a fallback string.
+   * The fallback string will be rendered directly into the DOM. Note that
+   * it is currently just a date or an empty string, but if extended beyond
+   * those cases, it should be sanitized.
    * @param {?Element} template
    * @param {!JsonObject=} opt_data
    * @param {string=} opt_fallback
@@ -1310,7 +1311,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return this.renderTemplateElement_(template, opt_data)
           .then(rendered => this.getRenderedTemplateString_(rendered));
     } else {
-      return Promise.resolve(sanitizeFormattingHtml(opt_fallback));
+      return Promise.resolve(opt_fallback);
     }
   }
 
