@@ -46,17 +46,17 @@ const DECLARED_STICKY_PROP = '__AMP_DECLSTICKY';
 export class FixedLayer {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @param {!./vsync-impl.Vsync} vsync
+   * @param {!./resources-impl.Resources} resources
    * @param {number} borderTop
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
-  constructor(ampdoc, vsync, borderTop, paddingTop, transfer) {
+  constructor(ampdoc, resources, borderTop, paddingTop, transfer) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     /** @private @const */
-    this.vsync_ = vsync;
+    this.resources_ = resources;
 
     /** @const @private {number} */
     this.borderTop_ = borderTop;
@@ -85,7 +85,7 @@ export class FixedLayer {
    */
   setVisible(visible) {
     if (this.transferLayer_) {
-      this.vsync_.mutate(() => {
+      this.resources_.mutateElement(this.transferLayer_, () => {
         setStyle(this.transferLayer_, 'visibility',
             visible ? 'visible' : 'hidden');
       });
@@ -215,7 +215,7 @@ export class FixedLayer {
   removeElement(element) {
     const removed = this.removeElement_(element);
     if (removed.length > 0 && this.transferLayer_) {
-      this.vsync_.mutate(() => {
+      this.resources_.mutateElement(element, () => {
         for (let i = 0; i < removed.length; i++) {
           const fe = removed[i];
           if (fe.position == 'fixed') {
@@ -268,138 +268,139 @@ export class FixedLayer {
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
     // it will be decorated and possibly move to a separate layer.
     let hasTransferables = false;
-    return this.vsync_.runPromise({
-      measure: state => {
-        const elements = this.elements_;
-        const autoTops = [];
-        const win = this.ampdoc.win;
+    const state = {};
+    const body = this.ampdoc.getBody();
+    // TODO(jridgewell): This should be measuring, then mutating if there's a
+    // mutate. Right now, we're invalidating every AMP element in the doc.
+    return this.resources_.measureMutateElement(body, () => {
+      const elements = this.elements_;
+      const autoTops = [];
+      const win = this.ampdoc.win;
 
-        // Notice that this code intentionally breaks vsync contract.
-        // Unfortunately, there's no way to reliably test whether or not
-        // `top` has been set to a non-auto value on all platforms. To work
-        // this around, this code compares `style.top` values with a new
-        // `style.bottom` value.
-        // 1. Unset top from previous mutates and set bottom to an extremely
-        // large value (to catch cases where sticky-tops are in a long way
-        // down inside a scroller).
-        for (let i = 0; i < elements.length; i++) {
-          setImportantStyles(elements[i].element, {
-            top: '',
-            bottom: '-9999vh',
-            transition: 'none',
-          });
-        }
-        // 2. Capture the `style.top` with this new `style.bottom` value. If
-        // this element has a non-auto top, this value will remain constant
-        // regardless of bottom.
-        for (let i = 0; i < elements.length; i++) {
-          autoTops.push(computedStyle(win, elements[i].element).top);
-        }
-        // 3. Cleanup the `style.bottom`.
-        for (let i = 0; i < elements.length; i++) {
-          setStyle(elements[i].element, 'bottom', '');
-        }
+      // Notice that this code intentionally breaks vsync contract.
+      // Unfortunately, there's no way to reliably test whether or not
+      // `top` has been set to a non-auto value on all platforms. To work
+      // this around, this code compares `style.top` values with a new
+      // `style.bottom` value.
+      // 1. Unset top from previous mutates and set bottom to an extremely
+      // large value (to catch cases where sticky-tops are in a long way
+      // down inside a scroller).
+      for (let i = 0; i < elements.length; i++) {
+        setImportantStyles(elements[i].element, {
+          top: '',
+          bottom: '-9999vh',
+          transition: 'none',
+        });
+      }
+      // 2. Capture the `style.top` with this new `style.bottom` value. If
+      // this element has a non-auto top, this value will remain constant
+      // regardless of bottom.
+      for (let i = 0; i < elements.length; i++) {
+        autoTops.push(computedStyle(win, elements[i].element).top);
+      }
+      // 3. Cleanup the `style.bottom`.
+      for (let i = 0; i < elements.length; i++) {
+        setStyle(elements[i].element, 'bottom', '');
+      }
 
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
-          const {element} = fe;
-          const style = computedStyle(win, element);
+      for (let i = 0; i < elements.length; i++) {
+        const fe = elements[i];
+        const {element} = fe;
+        const style = computedStyle(win, element);
 
-          const {offsetWidth, offsetHeight, offsetTop} = element;
-          const {
-            position = '',
-            display = '',
-            bottom,
-            zIndex,
-          } = style;
-          const opacity = parseFloat(style.opacity);
-          const transform = style[getVendorJsPropertyName(style, 'transform')];
-          let {top} = style;
+        const {offsetWidth, offsetHeight, offsetTop} = element;
+        const {
+          position = '',
+          display = '',
+          bottom,
+          zIndex,
+        } = style;
+        const opacity = parseFloat(style.opacity);
+        const transform = style[getVendorJsPropertyName(style, 'transform')];
+        let {top} = style;
 
-          // Element is indeed fixed. Visibility is added to the test to
-          // avoid moving around invisible elements.
-          const isFixed = (
-            position == 'fixed' &&
-              (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
-          // Element is indeed sticky.
-          const isSticky = endsWith(position, 'sticky');
-          const isDisplayed = display !== 'none';
+        // Element is indeed fixed. Visibility is added to the test to
+        // avoid moving around invisible elements.
+        const isFixed = (
+          position == 'fixed' &&
+          (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
+        // Element is indeed sticky.
+        const isSticky = endsWith(position, 'sticky');
+        const isDisplayed = display !== 'none';
 
-          if (!isDisplayed || !(isFixed || isSticky)) {
-            state[fe.id] = {
-              fixed: false,
-              sticky: false,
-              transferrable: false,
-              top: '',
-              zIndex: '',
-            };
-            continue;
-          }
-
-          if (top === 'auto' || autoTops[i] !== top) {
-            if (isFixed &&
-                offsetTop === this.committedPaddingTop_ + this.borderTop_) {
-              top = '0px';
-            } else {
-              top = '';
-            }
-          }
-
-          // Transferability requires element to be fixed and top or bottom to
-          // be styled with `0`. Also, do not transfer transparent
-          // elements - that's a lot of work for no benefit.  Additionally,
-          // transparent elements used for "service" needs and thus
-          // best kept in the original tree. The visibility, however, is not
-          // considered because `visibility` CSS is inherited. Also, the
-          // `height` is constrained to at most 300px. This is to avoid
-          // transfering of more substantial sections for now. Likely to be
-          // relaxed in the future.
-          const isTransferrable = isFixed && (
-            fe.forceTransfer || (
-              opacity > 0 &&
-                  offsetHeight < 300 &&
-                  (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
-          if (isTransferrable) {
-            hasTransferables = true;
-          }
+        if (!isDisplayed || !(isFixed || isSticky)) {
           state[fe.id] = {
-            fixed: isFixed,
-            sticky: isSticky,
-            transferrable: isTransferrable,
-            top,
-            zIndex,
-            transform,
+            fixed: false,
+            sticky: false,
+            transferrable: false,
+            top: '',
+            zIndex: '',
           };
+          continue;
         }
-      },
-      mutate: state => {
-        if (hasTransferables && this.transfer_) {
-          const transferLayer = this.getTransferLayer_();
-          if (transferLayer.className != this.ampdoc.getBody().className) {
-            transferLayer.className = this.ampdoc.getBody().className;
+
+        if (top === 'auto' || autoTops[i] !== top) {
+          if (isFixed &&
+            offsetTop === this.committedPaddingTop_ + this.borderTop_) {
+            top = '0px';
+          } else {
+            top = '';
           }
         }
-        const elements = this.elements_;
-        for (let i = 0; i < elements.length; i++) {
-          const fe = elements[i];
-          const feState = state[fe.id];
 
-          // Fix a bug with Safari. For some reason, you cannot unset
-          // transition when it's important. You can, however, set it to a valid
-          // non-important value, then unset it.
-          setStyle(fe.element, 'transition', 'none');
-          // Note: This MUST be done after measurements are taken.
-          // Transitions will mess up everything and, depending on when paints
-          // happen, mutates of transition and bottom at the same time may be
-          // make the transition active.
-          setStyle(fe.element, 'transition', '');
-
-          if (feState) {
-            this.mutateElement_(fe, i, feState);
-          }
+        // Transferability requires element to be fixed and top or bottom to
+        // be styled with `0`. Also, do not transfer transparent
+        // elements - that's a lot of work for no benefit.  Additionally,
+        // transparent elements used for "service" needs and thus
+        // best kept in the original tree. The visibility, however, is not
+        // considered because `visibility` CSS is inherited. Also, the
+        // `height` is constrained to at most 300px. This is to avoid
+        // transfering of more substantial sections for now. Likely to be
+        // relaxed in the future.
+        const isTransferrable = isFixed && (
+          fe.forceTransfer || (
+            opacity > 0 &&
+            offsetHeight < 300 &&
+            (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
+        if (isTransferrable) {
+          hasTransferables = true;
         }
-      },
-    }, {}).catch(error => {
+        state[fe.id] = {
+          fixed: isFixed,
+          sticky: isSticky,
+          transferrable: isTransferrable,
+          top,
+          zIndex,
+          transform,
+        };
+      }
+    }, () => {
+      if (hasTransferables && this.transfer_) {
+        const transferLayer = this.getTransferLayer_();
+        if (transferLayer.className != body.className) {
+          transferLayer.className = body.className;
+        }
+      }
+      const elements = this.elements_;
+      for (let i = 0; i < elements.length; i++) {
+        const fe = elements[i];
+        const feState = state[fe.id];
+
+        // Fix a bug with Safari. For some reason, you cannot unset
+        // transition when it's important. You can, however, set it to a valid
+        // non-important value, then unset it.
+        setStyle(fe.element, 'transition', 'none');
+        // Note: This MUST be done after measurements are taken.
+        // Transitions will mess up everything and, depending on when paints
+        // happen, mutates of transition and bottom at the same time may be
+        // make the transition active.
+        setStyle(fe.element, 'transition', '');
+
+        if (feState) {
+          this.mutateElement_(fe, i, feState);
+        }
+      }
+    }).catch(error => {
       // Fail silently.
       dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
@@ -524,7 +525,7 @@ export class FixedLayer {
     const removed = [];
     for (let i = 0; i < this.elements_.length; i++) {
       if (this.elements_[i].element == element) {
-        this.vsync_.mutate(() => {
+        this.resources_.mutateElement(element, () => {
           setStyle(element, 'top', '');
         });
         const fe = this.elements_[i];

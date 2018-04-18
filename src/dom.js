@@ -17,6 +17,7 @@
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
+import {negativeIndex} from './utils/array';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -901,6 +902,51 @@ export function isFullscreenElement(element) {
     }
   }
   return false;
+}
+
+/**
+ * Finds the closest common ancestor of all the passed elements.
+ *
+ * @param {...!Element} var_args
+ * @return {!Element}
+ */
+export function commonAncestor(var_args) {
+  dev().assert(arguments.length > 1, 'Need to pass elements!');
+
+  const identity = x => !!x;
+  const allAncestors = new Array(arguments.length);
+  let min = Infinity;
+
+  for (let i = 0; i < arguments.length; i++) {
+    const ae = ancestorElements(arguments[i], identity);
+    const length = ae.length;
+    allAncestors[i] = ae;
+    dev().assert(length > 0, 'You passed an unconnected element');
+    min = Math.min(min, length);
+  }
+
+  // This is guaranteed to run once, because of the length > 0 assertions
+  // above.
+  outer: for (let i = 0; i < min; i++) {
+    const negative = i - min;
+    const common = negativeIndex(allAncestors[0], negative);
+
+    // Now, loop through all the other ancestry trees to see if they share this
+    // "common" parent at this negative index.
+    for (let a = 1; a < allAncestors.length; a++) {
+      const parent = negativeIndex(allAncestors[a], negative);
+      if (common !== parent) {
+        // Common parent is not common to everyone at this point.
+        continue outer;
+      }
+    }
+
+    // We found a common ancestor!
+    return common;
+  }
+
+  throw dev().createError('DOM', 'No common ancestor' +
+      ' Are the elements part of the same doc?');
 }
 
 /**
