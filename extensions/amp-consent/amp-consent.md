@@ -50,11 +50,13 @@ limitations under the License.
 
 ## Overview
 
-You can use the <amp-consent> component to implement user controls. The component allows you to:
+As a publisher, you can use the <amp-consent> component to implement user controls. The component allows you to:
 
 * Determine if the user should be asked to interact with the control.
 * Capture the user’s consent decision.
 * Makes the user’s setting available to elements on the AMP page to modify the page’s behavior.
+
+If you are a vendor that wants to customize your component's behavior based on amp-consent, you can read more [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/customizing-extension-behaviors-on-consent.md).
 
 ## Usage
 
