@@ -37,6 +37,7 @@ describes.realWin('media-tasks 0.1', {}, () => {
     sandbox = sinon.sandbox.create();
     el = document.createElement('video');
     el.muted = true;
+    
     // Mock vsync
     vsyncApi = {
       mutatePromise: () => {},
