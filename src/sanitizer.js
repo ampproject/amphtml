@@ -80,44 +80,36 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
-const WHITELISTED_TEXT_FORMAT_TAGS = [
+const WHITELISTED_TAGS = [
+  'a',
   'b',
   'br',
+  'caption',
+  'colgroup',
   'code',
   'del',
+  'div',
   'em',
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
   'i',
   'ins',
   'mark',
+  'p',
   'q',
   's',
   'small',
+  'span',
   'strong',
   'sub',
   'sup',
-  'time',
-  'u',
-];
-
-/** @const {!Array<string>} */
-const WHITELISTED_TAGS = [
-  'a',
-  'caption',
-  'colgroup',
-  'p',
   'table',
   'tbody',
+  'time',
   'td',
   'th',
   'thead',
   'tfoot',
   'tr',
+  'u',
 ];
 
 /** @const {!Array<string>} */
@@ -355,65 +347,16 @@ export function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes the provided HTML against the white listed text formatting tags.
- *
- * @param {string} html
- * @return {string}
- */
-export function sanitizeTextFormattingHtml(html) {
-  return sanitizeProvidedHtml_(
-      html,
-      false /* opt_skipTextFormat */,
-      true /* opt_skipTag*/);
-}
-
-/**
- * Sanitizes the provided HTML against the white listed text formatting and
- * and html tags.
- *
- * @param {string} html
- * @return {string}
- */
-export function sanitizeTextFormattingAndTagHtml(html) {
-  return sanitizeProvidedHtml_(html);
-}
-
-/**
- * Sanitizes user provided HTML, input to mustache templates or the date picker.
- * Based on the passed flags, it will sanitize the input against the whitelisted
- * text formatting html or standard html tags. If the optional flags aren't
- * provided, it will sanitize against both.
+ * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ * WARNING: This method should not be used elsewhere as we do not strip out
+ * the style attribute in this method for the inline-style experiment.
+ * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
  * @private
  * @param {string} html
- * @param {boolean=} opt_skipTextFormat Whether to skip sanitizing
- *     the provided html against the whitelisted text formatting tags.
- * @param {boolean=} opt_skipTag Whether to skip sanitizing the
- *    provided html against the whitelisted html tags.
  * @return {string}
  */
-function sanitizeProvidedHtml_(
-  html, opt_skipTextFormat, opt_skipTag) {
-
-  const skipSanitizeAsTextFormat = opt_skipTextFormat || false;
-  const skipSanitizeAsTag = opt_skipTag || false;
-
-  /**
-   * Strip out the style attribute and its values.
-   * @param {!Array} attribs collection of attributes and values.
-   * @return {!Array}
-   */
-  const stripOutStyleAttributeAndValues = function(attribs) {
-    if (!isExperimentOn(self, 'inline-styles')) {
-      for (let i = 0; i < attribs.length; i += 2) {
-        if (attribs[i] == 'style') {
-          attribs.splice(i, i + 1);
-        }
-      }
-    }
-    return attribs;
-  };
-
+export function sanitizeTagsForTripleMustache(html) {
   /**
    * Tag policy for handling what is valid html in templates.
    * @type {!Function}
@@ -429,18 +372,13 @@ function sanitizeProvidedHtml_(
         }
       }
     }
-    const isWhitelistedTextFormatTag =
-        WHITELISTED_TEXT_FORMAT_TAGS.includes(tagName);
     const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-    if ((skipSanitizeAsTextFormat && isWhitelistedTextFormatTag)
-        && (skipSanitizeAsTag && isWhitelistedTag)
-        || (skipSanitizeAsTag && skipSanitizeAsTextFormat)
-        || (!isWhitelistedTextFormatTag && !isWhitelistedTag)) {
+    if (!isWhitelistedTag) {
       return null;
     }
     return {
       tagName,
-      attribs: stripOutStyleAttributeAndValues(attribs),
+      attribs,
     };
   };
 
