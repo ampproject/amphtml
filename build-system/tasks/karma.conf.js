@@ -114,16 +114,16 @@ module.exports = {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
-      flags: ['--no-sandbox', '--disable-extensions'],
+      flags: ['--no-sandbox', '--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
     },
     Chrome_no_extensions: {
       base: 'Chrome',
       // Dramatically speeds up iframe creation time.
-      flags: ['--disable-extensions'],
+      flags: ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      flags: ['--disable-extensions'],
+      flags: ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'],
     },
     // SauceLabs configurations.
     // New configurations can be created here:
