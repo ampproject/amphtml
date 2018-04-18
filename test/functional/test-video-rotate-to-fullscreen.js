@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import {
 import {PlayingStates} from '../../src/video-interface';
 import {Services} from '../../src/services';
 
+
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   let ampdoc;
   let autoFullscreenManager;
@@ -37,8 +38,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   }
 
   function mockOrientation(orientation) {
-    env.win.screen = env.win.screen || {orientation};
-    sandbox.stub(env.win.screen, 'orientation').returns(orientation);
+    env.win.screen = env.win.screen || {orientation: {type: ''}};
+    env.win.screen.orientation.type = orientation;
   }
 
   beforeEach(() => {
@@ -74,6 +75,34 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.onRotation_();
 
     expect(enter).to.not.have.been.called;
+  });
+
+  it('should exit fullscreen on rotation', () => {
+    const video = createVideo();
+    const entry = {video};
+    const exit = sandbox.stub(autoFullscreenManager, 'exit_');
+
+    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    autoFullscreenManager.register(entry);
+    autoFullscreenManager.currentlyInFullscreen_ = entry;
+    mockOrientation('portrait');
+    autoFullscreenManager.onRotation_();
+
+    expect(exit).to.have.been.calledOnce;
+  });
+
+  it('should not exit on rotation if no video was in fullscreen', () => {
+    const video = createVideo();
+    const entry = {video};
+    const exit = sandbox.stub(autoFullscreenManager, 'exit_');
+
+    sandbox.stub(autoFullscreenManager, 'updateVisibility_');
+    autoFullscreenManager.register(entry);
+    autoFullscreenManager.currentlyInFullscreen_ = null;
+    mockOrientation('portrait');
+    autoFullscreenManager.onRotation_();
+
+    expect(exit).to.not.have.been.called;
   });
 
   it('selects the only video playing manually amongst visible', () => {

@@ -998,7 +998,6 @@ export class AutoFullscreenManager {
       this.enter_(this.getEntryForElement_(this.currentlyCentered_));
       return;
     }
-
     if (this.currentlyInFullscreen_) {
       this.exit_(this.currentlyInFullscreen_);
     }
@@ -1051,8 +1050,6 @@ export class AutoFullscreenManager {
    */
   scrollIntoIfNotVisible_(video, optPos = null) {
     const {element} = video;
-    const videoForVsync = /** @type {!../base-element.BaseElement} */ (video);
-
     const viewport = this.getViewport_();
 
     const duration = 300;
@@ -1124,7 +1121,7 @@ export class AutoFullscreenManager {
           if (entry.intersectionRatio >= 0.8 && i == 0) {
             this.currentlyCentered_ = entry.target;
           }
-        })
+        });
     return this.currentlyCentered_;
   }
 
@@ -1203,7 +1200,7 @@ function centerDist(viewport, rect) {
  */
 function isLandscape(win) {
   if (win.screen && 'orientation' in win.screen) {
-    return startsWith(screen.orientation.type, 'landscape');
+    return startsWith(win.screen.orientation.type, 'landscape');
   }
   return Math.abs(win.orientation) == 90;
 }
