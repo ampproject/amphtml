@@ -59,6 +59,13 @@ const TAG = 'video-manager';
 let VideoAnalyticsDef; // alias for line length
 
 
+/**
+ * Internal event triggered when a video's visibility changes.
+ * @private @const {string}
+ */
+const VISIBILITY_CHANGED = 'amp:visibilitychanged';
+
+
 /** @interface */
 export class VideoService {
 
@@ -592,7 +599,7 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
-    this.video.element.dispatchCustomEvent('amp:visibilitychanged');
+    this.video.element.dispatchCustomEvent(VISIBILITY_CHANGED);
   }
 
   /**
@@ -888,7 +895,7 @@ const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
 
 
 /** Manages rotate-to-fullscreen video. */
-class AutoFullscreenManager {
+export class AutoFullscreenManager {
 
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
@@ -903,11 +910,14 @@ class AutoFullscreenManager {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!./timer-impl.Timer} */
-    this.timer_ = Services.timerFor(win);
-
     /** @private {?VideoEntry} */
-    this.currently_ = null;
+    this.currentlyInFullscreen_ = null;
+
+    /** @private {?Element} */
+    this.currentlyCentered_ = null;
+
+    /** @private @const {!Array<!Element>} */
+    this.visibleElements_ = [];
 
     /**
      * Maps rotate-to-fullscreen entry id to entry.
@@ -915,12 +925,13 @@ class AutoFullscreenManager {
      */
     this.entries_ = {};
 
-    /** @private @const {function():!CenteredVideoSelector} */
-    this.getCenteredVideoSelector_ =
-      /** @type {function():!CenteredVideoSelector} */ (once(() =>
-        new CenteredVideoSelector(this.ampdoc_)));
+    /** @private @const {function()} */
+    this.trackOnScroll_ = once(() =>
+      Services.viewportForDoc(ampdoc).onScroll(
+          throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 300)));
 
     this.installOrientationObserver_();
+    this.installFullscreenListener_();
   }
 
   /** @param {!VideoEntry} entry */
@@ -932,7 +943,32 @@ class AutoFullscreenManager {
 
     this.entries_[id.toString()] = entry;
 
-    this.getCenteredVideoSelector_().observe(element);
+    listen(element, VISIBILITY_CHANGED, e => {
+      if (isLandscape(this.ampdoc_.win)) {
+        return;
+      }
+      this.updateVisibility_(dev().assertElement(e.target));
+    });
+
+    this.trackOnScroll_();
+
+    // Set always
+    this.updateVisibility_(element);
+  }
+
+  /** @private */
+  installFullscreenListener_() {
+    const root = this.ampdoc_.getRootNode();
+    const exitHandler = () => this.onFullscreenExit_();
+    listen(root, 'webkitfullscreenchange', exitHandler);
+    listen(root, 'mozfullscreenchange', exitHandler);
+    listen(root, 'fullscreenchange', exitHandler);
+    listen(root, 'MSFullscreenChange', exitHandler);
+  }
+
+  /** @private */
+  onFullscreenExit_() {
+    this.currentlyInFullscreen_ = null;
   }
 
   /** @private */
@@ -956,17 +992,16 @@ class AutoFullscreenManager {
   /** @private */
   onRotation_() {
     if (isLandscape(this.ampdoc_.win)) {
-      const video = this.getCenteredVideoSelector_().get();
-      if (!video) {
+      if (!this.currentlyCentered_) {
         return;
       }
-      const id = this.getId_(video);
+      const id = this.getId_(this.currentlyCentered_);
       this.enter_(dev().assert(this.entries_[id]));
       return;
     }
 
-    if (this.currently_) {
-      this.exit_(this.currently_);
+    if (this.currentlyInFullscreen_) {
+      this.exit_(this.currentlyInFullscreen_);
     }
   }
 
@@ -983,7 +1018,7 @@ class AutoFullscreenManager {
 
     const platform = Services.platformFor(this.win_);
 
-    this.currently_ = entry;
+    this.currentlyInFullscreen_ = entry;
 
     if (platform.isAndroid() && platform.isChrome()) {
       // Chrome on Android somehow knows what we're doing and executes a nice
@@ -1001,20 +1036,21 @@ class AutoFullscreenManager {
    * @private
    */
   exit_(entry) {
-    this.currently_ = null;
+    this.currentlyInFullscreen_ = null;
 
     const {video} = entry;
 
-    this.scrollIntoIfNotVisible_(video)
+    this.scrollIntoIfNotVisible_(video, 'center')
         .then(() => video.fullscreenExit());
   }
 
   /**
    * Scrolls to a video if it's not in view.
    * @param {!../video-interface.VideoInterface} video
+   * @param {?string=} optPos
    * @private
    */
-  scrollIntoIfNotVisible_(video) {
+  scrollIntoIfNotVisible_(video, optPos = null) {
     const {element} = video;
     const videoForVsync = /** @type {!../base-element.BaseElement} */ (video);
 
@@ -1022,30 +1058,19 @@ class AutoFullscreenManager {
 
     const duration = 300;
     const curve = 'ease-in';
-    let pos; // 'top' or 'bottom'
 
-    let shouldScroll = true;
-
-    return this.onceOrientationChanges_().then(() =>
-      new Promise(resolve => {
-        videoForVsync.measureMutateElement(() => {
-          const {top, bottom} = element./*OK*/getBoundingClientRect();
-          const vh = viewport.getSize().height;
-          if (top >= 0 && bottom <= vh) {
-            shouldScroll = false;
-            return;
-          }
-          pos = (bottom > vh) ? 'bottom' : 'top';
-        }, () => {
-          if (!shouldScroll) {
-            resolve();
-            return;
-          }
-          this.getViewport_()
-              .animateScrollIntoView(element, duration, curve, pos)
-              .then(resolve);
-        });
-      }));
+    return this.onceOrientationChanges_().then(() => {
+      const {boundingClientRect} = element.getIntersectionChangeEntry();
+      const {top, bottom} = boundingClientRect;
+      const vh = viewport.getSize().height;
+      const fullyVisible = top >= 0 && bottom <= vh;
+      if (fullyVisible) {
+        return Promise.resolve();
+      }
+      const pos = optPos ? dev().assertString(optPos) :
+        bottom > vh ? 'bottom' : 'top';
+      return viewport.animateScrollIntoView(element, duration, curve, pos);
+    });
   }
 
   /** @private */
@@ -1056,7 +1081,7 @@ class AutoFullscreenManager {
   /** @private @return {!Promise} */
   onceOrientationChanges_() {
     const magicNumber = 330;
-    return this.timer_.promise(magicNumber);
+    return Services.timerFor(this.win_).promise(magicNumber);
   }
 
   /**
@@ -1065,59 +1090,6 @@ class AutoFullscreenManager {
    */
   getId_(element) {
     return dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
-  }
-}
-
-
-/**
- * @param {!./viewport/viewport-impl.Viewport} viewport
- * @param {{top: number, height: number}} rect
- * @return {number}
- */
-function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
-  const centerViewport = viewport.getSize().height / 2;
-  return Math.abs(centerY - centerViewport);
-}
-
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-function isLandscape(win) {
-  if (win.screen && 'orientation' in win.screen) {
-    return startsWith(screen.orientation.type, 'landscape');
-  }
-  return Math.abs(win.orientation) == 90;
-}
-
-
-/** Selects a "best centered" video in portrait amongst those observed. */
-class CenteredVideoSelector {
-  constructor(ampdoc) {
-    this.ampdoc_ = ampdoc;
-
-    /** @private @const {!Array<!Element>} */
-    this.visibleElements_ = [];
-
-    this.currently_ = null;
-
-    this.track_ = Services.viewportForDoc(ampdoc).onScroll(
-        throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 200));
-  }
-
-  /** @param {!AmpElement} element */
-  observe(element) {
-    listen(element, 'amp:visibilitychanged', e => {
-      if (isLandscape(this.ampdoc_.win)) {
-        return;
-      }
-      this.updateVisibility_(dev().assertElement(e.target));
-    });
-
-    // Set always
-    this.updateVisibility_(element);
   }
 
   /**
@@ -1157,11 +1129,11 @@ class CenteredVideoSelector {
         .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
         .sort((a, b) => this.compareIntersectionEntries_(a, b));
 
-    this.currently_ = null;
+    this.currentlyCentered_ = null;
 
     sorted.forEach((entry, i) => {
       if (entry.intersectionRatio >= 0.8 && i == 0) {
-        this.currently_ = entry.target;
+        this.currentlyCentered_ = entry.target;
       }
     });
   }
@@ -1203,9 +1175,34 @@ class CenteredVideoSelector {
 
   /** @return {?Element} */
   get() {
-    return this.currently_;
+    return this.currentlyCentered_;
   }
 }
+
+
+/**
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {{top: number, height: number}} rect
+ * @return {number}
+ */
+function centerDist(viewport, rect) {
+  const centerY = rect.top + rect.height / 2;
+  const centerViewport = viewport.getSize().height / 2;
+  return Math.abs(centerY - centerViewport);
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isLandscape(win) {
+  if (win.screen && 'orientation' in win.screen) {
+    return startsWith(screen.orientation.type, 'landscape');
+  }
+  return Math.abs(win.orientation) == 90;
+}
+
 
 
 /**
