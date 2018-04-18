@@ -841,6 +841,10 @@ export const adConfig = {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
+  unruly: {
+    prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
