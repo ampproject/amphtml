@@ -1172,11 +1172,6 @@ export class AutoFullscreenManager {
 
     return 0;
   }
-
-  /** @return {?Element} */
-  get() {
-    return this.currentlyCentered_;
-  }
 }
 
 
