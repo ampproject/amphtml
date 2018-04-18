@@ -32,6 +32,23 @@ amp-date-picker[fullscreen] .i-amphtml-date-picker-container {
   left: 0;
 }
 
+amp-date-picker[fullscreen] .DayPicker_weekHeader {
+  top: 0;
+  padding: 40px 0 5px;
+}
+
+amp-date-picker[fullscreen] .CalendarMonth {
+  margin-bottom: 38px;
+}
+
+amp-date-picker[fullscreen] .CalendarMonth_caption {
+  margin: 0 -30px 10px;
+}
+
+amp-date-picker[fullscreen] .CalendarMonthGrid {
+  padding-top: 70px;
+}
+
 /**
  * Remove duplicate calendar view in Chrome for overlay pickers.
  * To avoid being too opinionated about date inputs in general,
