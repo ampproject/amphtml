@@ -378,16 +378,6 @@ export class VideoManager {
     return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
   }
 
-  /**
-   * Un-registers the currently docked video
-   */
-  unregisterDocked() {
-    this.dockedVideo_ = null;
-    for (let i = 0; i < this.entries_.length; i++) {
-      this.entries_[i].dockPreviouslyInView_ = false;
-    }
-  }
-
   /** @override */
   disable(unusedVideo, ...unusedVarFeatures) {
     // NOOP. Interface only supported under `video-service` experiment.
