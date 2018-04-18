@@ -89,6 +89,12 @@ describes.realWin('amp-facebook', {
     });
   });
 
+  it('adds loading element correctly', () => {
+    return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
+      expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
+    });
+  });
+
   it('adds fb-post element correctly', () => {
     const div = document.createElement('div');
     div.setAttribute('id', 'c');

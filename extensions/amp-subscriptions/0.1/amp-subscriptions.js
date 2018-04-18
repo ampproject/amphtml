@@ -273,7 +273,8 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds);
+      this.platformStore_ = new PlatformStore(serviceIds,
+          this.platformConfig_['score']);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
@@ -300,7 +301,8 @@ export class SubscriptionService {
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
-    this.platformStore_ = new PlatformStore(serviceIds);
+    this.platformStore_ = new PlatformStore(serviceIds,
+        this.platformConfig_['score']);
     this.platformConfig_['services'].forEach(service => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
@@ -345,13 +347,9 @@ export class SubscriptionService {
 
   /** @private */
   selectAndActivatePlatform_() {
-    let preferViewerSupport = true;
-    if ('preferViewerSupport' in this.platformConfig_) {
-      preferViewerSupport = this.platformConfig_['preferViewerSupport'];
-    }
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
-      this.platformStore_.selectPlatform(preferViewerSupport),
+      this.platformStore_.selectPlatform(),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
