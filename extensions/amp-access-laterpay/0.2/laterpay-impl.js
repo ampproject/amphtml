@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
+import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -38,14 +38,13 @@ const CONFIG_URLS = {
 
 const DEFAULT_REGION = 'eu';
 
-const CONFIG_BASE_PATH = '/api/v1/public/amp?' +
+const CONFIG_BASE_PATH = '/api/v2/fetch/amp/?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
                          '&return_url=RETURN_URL';
 const AUTHORIZATION_TIMEOUT = 3000;
 
 const DEFAULT_MESSAGES = {
-  premiumContentTitle: 'Buy only this article',
   payLaterButton: 'Buy Now, Pay Later',
   payNowButton: 'Buy Now',
   defaultButton: 'Buy Now',
@@ -69,27 +68,49 @@ let LaterpayConfigDef;
 
 /**
  * @typedef {{
- *   description: string,
- *   price: !Object<string, number>,
- *   purchase_type: string,
- *   purchase_url: string,
+ *   "amount": number,
+ *   "currency": string,
+ *   "payment_model": string,
+ * }}
+ */
+let PriceDef;
+
+/**
+ * @typedef {{
+ *   "unit": string,
+ *   "value": number,
+ * }}
+ */
+let ExpiryDef;
+
+/**
+ * @typedef {{
  *   title: string,
- *   validity_unit: string,
- *   validity_value: number
+ *   description: string,
+ *   sales_model: string,
+ *   purchase_url: string,
+ *   price: PriceDef,
+ *   expiry: ExpiryDef,
  * }}
  */
 let PurchaseOptionDef;
 
 /**
  * @typedef {{
- *   access: boolean,
- *   apl: string,
- *   premiumcontent: !PurchaseOptionDef,
- *   timepasses: (!Array<PurchaseOptionDef>|undefined),
- *   subscriptions: (!Array<PurchaseOptionDef>|undefined)
+ *   identify_url: string,
+ *   purchase_options: Array<PurchaseOptionDef>,
  * }}
  */
 let PurchaseConfigDef;
+
+/**
+ * @typedef {{
+ *   singlePurchases: Array<PurchaseOptionDef>,
+ *   timepasses: Array<PurchaseOptionDef>,
+ *   subscriptions: Array<PurchaseOptionDef>,
+ * }}
+ */
+let PurchaseOptionsDef;
 
 
 /**
@@ -116,6 +137,9 @@ export class LaterpayVendor {
 
     /** @private {?JsonObject} For shape see PurchaseConfigDef */
     this.purchaseConfig_ = null;
+
+    /** @private {?Object} For shape see PurchaseOptionsDef */
+    this.purchaseOptions_ = null;
 
     /** @private {?Function} */
     this.purchaseButtonListener_ = null;
@@ -152,6 +176,12 @@ export class LaterpayVendor {
       this.purchaseConfigBaseUrl_ +=
         '&article_id=' + encodeURIComponent(articleId);
     }
+    const jwt = this.laterpayConfig_['jwt'];
+    if (jwt) {
+      this.purchaseConfigBaseUrl_ +=
+        '&jwt=' + encodeURIComponent(jwt);
+    }
+
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
@@ -211,6 +241,8 @@ export class LaterpayVendor {
           }
           return response.json().catch(() => undefined).then(responseJson => {
             this.purchaseConfig_ = responseJson;
+            this.purchaseOptions_ = this.parseConfigIntoOptions_(
+                responseJson.purchase_options);
             // empty before rendering, in case authorization is being called again
             // with the same state
             this.emptyContainer_()
@@ -239,6 +271,28 @@ export class LaterpayVendor {
             credentials: 'include',
           })).then(res => res.json());
     });
+  }
+
+  /**
+   * @param {Array<PurchaseOptionDef>} purchaseOptionsList
+   * @return Object
+   * @private
+   */
+  parseConfigIntoOptions_(purchaseOptionsList) {
+    const articleTitle = this.getArticleTitle_();
+    const purchaseOptions = {};
+    purchaseOptions['singlePurchases'] = purchaseOptionsList.filter(
+        option => option['sales_model'] === 'single_purchase'
+    );
+    purchaseOptions['singlePurchases'].forEach(
+        option => option.description = articleTitle);
+    purchaseOptions['timepasses'] = purchaseOptionsList.filter(
+        option => option['sales_model'] === 'timepass'
+    );
+    purchaseOptions['subscriptions'] = purchaseOptionsList.filter(
+        option => option['sales_model'] === 'subscription'
+    );
+    return purchaseOptions;
   }
 
   /**
@@ -315,17 +369,13 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['title'] =
-      this.i18n_['premiumContentTitle'];
-    this.purchaseConfig_['premiumcontent']['description'] =
-        this.getArticleTitle_();
-    listContainer.appendChild(
-        this.createPurchaseOption_(this.purchaseConfig_['premiumcontent'])
-    );
-    this.purchaseConfig_['timepasses'].forEach(timepass => {
+    this.purchaseOptions_['singlePurchases'].forEach(singlePurchase => {
+      listContainer.appendChild(this.createPurchaseOption_(singlePurchase));
+    });
+    this.purchaseOptions_['timepasses'].forEach(timepass => {
       listContainer.appendChild(this.createPurchaseOption_(timepass));
     });
-    this.purchaseConfig_['subscriptions'].forEach(subscription => {
+    this.purchaseOptions_['subscriptions'].forEach(subscription => {
       listContainer.appendChild(this.createPurchaseOption_(subscription));
     });
     const purchaseButton = this.createElement_('button');
@@ -340,7 +390,7 @@ export class LaterpayVendor {
     this.innerContainer_.appendChild(listContainer);
     this.innerContainer_.appendChild(purchaseButton);
     this.innerContainer_.appendChild(
-        this.createAlreadyPurchasedLink_(this.purchaseConfig_['apl']));
+        this.createAlreadyPurchasedLink_(this.purchaseConfig_['identify_url']));
     this.renderTextBlock_('footer');
     dialogContainer.appendChild(this.innerContainer_);
     dialogContainer.appendChild(this.createLaterpayBadge_());
@@ -425,7 +475,7 @@ export class LaterpayVendor {
     radio.type = 'radio';
     radio.id = option['title'];
     radio.value = option['purchase_url'];
-    const purchaseType = option['purchase_type'] === 'ppu' ?
+    const purchaseType = option['price']['payment_model'] === 'pay_later' ?
       'payLater' :
       'payNow';
     const purchaseActionLabel = this.i18n_[purchaseType + 'Button'];
@@ -443,14 +493,13 @@ export class LaterpayVendor {
    * @private
    */
   createPrice_(price) {
-    const currency = Object.keys(price)[0];
-    const formattedPrice = this.formatPrice_(price[currency]);
+    const formattedPrice = this.formatPrice_(price['amount']);
     const valueEl = this.createElement_('span');
     valueEl.className = TAG + '-price';
     valueEl.textContent = formattedPrice;
     const currencyEl = this.createElement_('sup');
     currencyEl.className = TAG + '-currency';
-    currencyEl.textContent = currency;
+    currencyEl.textContent = price['currency'];
     const priceEl = this.createElement_('p');
     priceEl.className = TAG + '-price-container';
     priceEl.appendChild(valueEl);
