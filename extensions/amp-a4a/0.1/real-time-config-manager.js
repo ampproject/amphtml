@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RTC_VENDORS} from './callout-vendors.js';
+import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {
   isSecureUrl,
@@ -31,6 +32,9 @@ const MAX_RTC_CALLOUTS = 5;
 
 /** @type {number} */
 const MAX_URL_LENGTH = 16384;
+
+/** @type {boolean} */
+const ERROR_REPORTING_ENABLED = Math.random() < 0.01;
 
 /**
  * Enum starts at 4 because 1-3 reserved as:
@@ -63,14 +67,43 @@ export const RTC_ERROR_ENUM = {
 /**
  * @param {string} error
  * @param {string} callout
+ * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {number=} opt_rtcTime
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime) {
+function buildErrorResponse_(
+  error, callout, errorReportingUrl, win, ampDoc, opt_rtcTime) {
   dev().warn(TAG, `RTC callout to ${callout} caused ${error}`);
+  if (errorReportingUrl) {
+    sendErrorMessage(error, errorReportingUrl, win, ampDoc);
+  }
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
+}
+
+/**
+ * @param {string} errorType Uses the RTC_ERROR_ENUM above.
+ * @param {string} errorReportingUrl
+ * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
+ */
+export function sendErrorMessage(errorType, errorReportingUrl, win, ampDoc) {
+  if (ERROR_REPORTING_ENABLED || getMode(win).localDev || getMode(win).test) {
+    if (!isSecureUrl(errorReportingUrl)) {
+      dev().warn(TAG, `Insecure RTC errorReportingUrl: ${errorReportingUrl}`);
+      return;
+    }
+    const whitelist = {ERROR_TYPE: true, HREF: true};
+    const macros = {
+      ERROR_TYPE: errorType,
+      HREF: win.location.href,
+    };
+    const url = Services.urlReplacementsForDoc(ampDoc).expandUrlSync(
+        errorReportingUrl, macros, whitelist);
+    new win.Image().src = url;
+  }
 }
 
 /**
@@ -108,20 +141,32 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   const rtcStartTime = Date.now();
   // For each publisher defined URL, inflate the url using the macros,
   // and send the RTC request.
-  (rtcConfig['urls'] || []).forEach(url =>
+  (rtcConfig['urls'] || []).forEach(urlObj => {
+    let url, errorReportingUrl;
+    if (isObject(urlObj)) {
+      url = urlObj['url'];
+      errorReportingUrl = urlObj['errorReportingUrl'];
+    } else if (typeof urlObj == 'string') {
+      url = urlObj;
+    } else {
+      dev().warn(TAG, `Invalid url: ${urlObj}`);
+    }
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         rtcStartTime, customMacros,
-        rtcConfig['timeoutMillis'])
-  );
+        rtcConfig['timeoutMillis'], errorReportingUrl);
+  });
   // For each vendor the publisher has specified, inflate the vendor
   // url if it exists, and send the RTC request.
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
     const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
     const url = vendorObject ? vendorObject.url : '';
+    const errorReportingUrl = vendorObject ?
+      vendorObject['errorReportingUrl'] : '';
     if (!url) {
       return promiseArray.push(
           buildErrorResponse_(
-              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor));
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, errorReportingUrl,
+              a4aElement.win, a4aElement.getAmpDoc()));
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -136,7 +181,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     // The ad network defined macros override vendor defined/pub specifed.
     const macros = Object.assign(validVendorMacros, customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
-        macros, rtcConfig['timeoutMillis'],
+        macros, rtcConfig['timeoutMillis'], errorReportingUrl,
         vendor.toLowerCase());
   });
   return Promise.all(promiseArray);
@@ -150,11 +195,12 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @param {number} rtcStartTime
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
  * @param {number} timeoutMillis
+ * @param {string} errorReportingUrl
  * @param {string=} opt_vendor
  * @private
  */
 export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-  rtcStartTime, macros, timeoutMillis, opt_vendor) {
+  rtcStartTime, macros, timeoutMillis, errorReportingUrl, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   const callout = opt_vendor || getCalloutParam_(url);
@@ -168,22 +214,23 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-          callout);
+          callout, errorReportingUrl, win, ampDoc);
     }
     if (!isSecureUrl(url)) {
       return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-          callout);
+          callout, errorReportingUrl, win, ampDoc);
     }
     if (seenUrls[url]) {
       return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-          callout);
+          callout, errorReportingUrl, win, ampDoc);
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
     return sendRtcCallout_(
-        url, rtcStartTime, win, timeoutMillis, callout);
+        url, rtcStartTime, win, timeoutMillis,
+        callout, errorReportingUrl, ampDoc);
   };
 
   const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
@@ -197,7 +244,7 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     return send(url);
   }).catch(unused => {
     return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
-        callout);
+        callout, errorReportingUrl, win, ampDoc);
   }));
 }
 
@@ -217,11 +264,12 @@ export function truncUrl_(url) {
  * @param {!Window} win
  * @param {number} timeoutMillis
  * @param {string} callout
+ * @param {string} errorReportingUrl
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function sendRtcCallout_(
-  url, rtcStartTime, win, timeoutMillis, callout) {
+  url, rtcStartTime, win, timeoutMillis, callout, errorReportingUrl, ampDoc) {
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -243,7 +291,8 @@ function sendRtcCallout_(
           const response = tryParseJson(text);
           return response ? {response, rtcTime, callout} :
             buildErrorResponse_(
-                RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
+                RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout,
+                errorReportingUrl, win, ampDoc, rtcTime);
         });
       })).catch(error => {
     return buildErrorResponse_(
@@ -253,7 +302,7 @@ function sendRtcCallout_(
         // match here.
         (error.message && error.message.match(/^timeout/)) ?
           RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
-        callout, Date.now() - rtcStartTime);
+        callout, errorReportingUrl, win, ampDoc, Date.now() - rtcStartTime);
   });
 }
 
