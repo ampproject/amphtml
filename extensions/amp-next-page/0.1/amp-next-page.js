@@ -28,6 +28,7 @@ import {
   isJsonScriptTag,
 } from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
+import {getSourceOrigin, isProxyOrigin} from '../../../src/url';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
@@ -200,9 +201,6 @@ export class AmpNextPage extends AMP.BaseElement {
     }
 
     this.element.appendChild(recommendations);
-    this.positionObserver_.observe(recommendations,
-        PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(currentArticle, position));
   }
 
   /**
@@ -221,11 +219,14 @@ export class AmpNextPage extends AMP.BaseElement {
             amp =
                 this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-            if (this.separator_) {
-              const separatorClone = this.separator_.cloneNode(true);
-              separatorClone.removeAttribute('separator');
-              this.element.appendChild(separatorClone);
-            }
+            const separator = this.separator_.cloneNode(true);
+            separator.removeAttribute('separator');
+            this.element.appendChild(separator);
+
+            const page = this.nextArticle_ - 1;
+            this.positionObserver_.observe(separator,
+                PositionObserverFidelity.LOW,
+                position => this.positionUpdate_(page, position));
 
             this.element.appendChild(shadowRoot);
             this.element.appendChild(this.createDivider_());
@@ -233,7 +234,7 @@ export class AmpNextPage extends AMP.BaseElement {
 
             installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
             const body = amp.ampdoc.getBody();
-            body.classList.add('i-amphtml-recommended-document');
+            body.classList.add('i-amphtml-next-page-document');
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
@@ -270,8 +271,16 @@ export class AmpNextPage extends AMP.BaseElement {
     });
 
     const docInfo = Services.documentInfoForDoc(this.element);
-    const host = parseUrl(docInfo.sourceUrl).host;
-    this.config_ = assertConfig(configJson, host);
+    const url = parseUrl(docInfo.sourceUrl);
+
+    this.config_ = assertConfig(configJson, url.host, getSourceOrigin(url));
+
+    if (isProxyOrigin(url)) {
+      const sourceOrigin = getSourceOrigin(url);
+      this.config_.pages.forEach(rec => {
+        rec.ampUrl = rec.ampUrl.replace(sourceOrigin, url.origin);
+      });
+    }
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
     user().assert(separatorElements.length <= 1,
@@ -279,6 +288,8 @@ export class AmpNextPage extends AMP.BaseElement {
 
     if (separatorElements.length == 1) {
       this.separator_ = separatorElements[0];
+    } else {
+      this.separator_ = this.win.document.createElement('div');
     }
 
     this.mutateElement(() => {

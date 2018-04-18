@@ -773,5 +773,3 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
-
-AMP.registerElement('amp-story-page', AmpStoryPage);

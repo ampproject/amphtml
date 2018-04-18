@@ -289,28 +289,28 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
       (getElementServiceIfAvailable(win, 'story-variable', 'amp-story',
           true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story')));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   * @return {!../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreService(win) {
     return getService(win, 'story-store');
@@ -318,7 +318,7 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   * @return {!../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
   static storyRequestService(win) {
     return getService(win, 'story-request');
@@ -326,20 +326,82 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
    */
   static localizationService(win) {
     return getService(win, 'localization');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
+   */
+  static storyVariableServiceForOrNullV01(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
+      (getElementServiceIfAvailable(win, 'story-variable-v01', 'amp-story',
+          true)));
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyStoreServiceForOrNullV01(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      (getElementServiceIfAvailable(win, 'story-store-v01', 'amp-story')));
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
+   */
+  static storyStoreServiceV01(win) {
+    return getService(win, 'story-store-v01');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
+   */
+  static storyRequestServiceV01(win) {
+    return getService(win, 'story-request-v01');
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNullV01(win) {
+    return (
+    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story',
+          true)));
+  }
+
+  /**
+   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
+   * @param {!Window} win
+   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   */
+  static localizationServiceV01(win) {
+    return getService(win, 'localization-v01');
   }
 
   /**

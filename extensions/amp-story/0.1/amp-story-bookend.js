@@ -236,13 +236,13 @@ export class Bookend {
     this.bookendEl_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = Services.storyRequestService(this.win_);
+    this.requestService_ = Services.storyRequestServiceV01(this.win_);
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;

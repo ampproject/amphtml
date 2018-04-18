@@ -72,6 +72,7 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 declareExtension('amp-3q-player', '0.1');
 declareExtension('amp-access', '0.1', {hasCss: true});
 declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.2', {hasCss: true});
 declareExtension('amp-access-scroll', '0.1', {hasCss: true});
 declareExtension('amp-accordion', '0.1');
 declareExtension('amp-ad', '0.1', {hasCss: true});
@@ -83,6 +84,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
@@ -147,6 +149,18 @@ declareExtension('amp-soundcloud', '0.1');
 declareExtension('amp-springboard-player', '0.1');
 declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
 declareExtension('amp-story', '0.1', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
+declareExtension('amp-story', '1.0', {
   hasCss: true,
   cssBinaries: [
     'amp-story-bookend',
@@ -808,14 +822,15 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.79KB' : '334.46KB';
+  const size = compiled ? '76.85KB' : '336.00KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
   if (p.status != 0) {
     log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
         'exceeded its size cap. This is part of a new effort to reduce ' +
-        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+        'AMP\'s binary size (#14392). Please contact @choumx or @jridgewell ' +
+        'for assistance.');
     // Terminate Travis builds on failure.
     if (process.env.TRAVIS) {
       process.exit(p.status);

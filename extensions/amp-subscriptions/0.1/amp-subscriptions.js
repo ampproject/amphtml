@@ -193,14 +193,11 @@ export class SubscriptionService {
   processGrantState_(grantState) {
     this.renderer_.toggleLoading(false);
     this.renderer_.setGrantState(grantState);
-
+    this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
-    } else {
-      this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
     }
-
   }
 
   /**
@@ -273,7 +270,8 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds);
+      this.platformStore_ = new PlatformStore(serviceIds,
+          this.platformConfig_['score']);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
@@ -300,7 +298,8 @@ export class SubscriptionService {
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
-    this.platformStore_ = new PlatformStore(serviceIds);
+    this.platformStore_ = new PlatformStore(serviceIds,
+        this.platformConfig_['score']);
     this.platformConfig_['services'].forEach(service => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
@@ -335,8 +334,10 @@ export class SubscriptionService {
    * @private
    */
   startAuthorizationFlow_(doPlatformSelection = true) {
-    this.platformStore_.getGrantStatus()
-        .then(grantState => {this.processGrantState_(grantState);});
+    this.platformStore_.getGrantStatus().then(grantState => {
+      this.processGrantState_(grantState);
+      this.performPingback_();
+    });
 
     if (doPlatformSelection) {
       this.selectAndActivatePlatform_();
@@ -345,13 +346,9 @@ export class SubscriptionService {
 
   /** @private */
   selectAndActivatePlatform_() {
-    let preferViewerSupport = true;
-    if ('preferViewerSupport' in this.platformConfig_) {
-      preferViewerSupport = this.platformConfig_['preferViewerSupport'];
-    }
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
-      this.platformStore_.selectPlatform(preferViewerSupport),
+      this.platformStore_.selectPlatform(),
     ]);
 
     return requireValuesPromise.then(resolvedValues => {
@@ -359,7 +356,6 @@ export class SubscriptionService {
       const selectedPlatform = resolvedValues[1];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
           selectedPlatform.getServiceId());
-
       /** @type {!RenderState} */
       const renderState = {
         entitlement: selectedEntitlement.json(),
@@ -374,22 +370,27 @@ export class SubscriptionService {
           SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
           selectedPlatform.getServiceId()
       );
-
-      if (this.viewTrackerPromise_) {
-        this.viewTrackerPromise_.then(() => {
-          const localPlatform = this.platformStore_.getLocalPlatform();
-
-          if (selectedPlatform.isPingbackEnabled()) {
-            selectedPlatform.pingback(selectedEntitlement);
-          }
-
-          if (selectedPlatform.getServiceId() !== localPlatform.getServiceId()
-              && localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(selectedEntitlement);
-          }
-        });
-      }
     });
+  }
+
+  /**
+   * Performs pingback on local platform.
+   * @return {?Promise}
+   * @private
+   */
+  performPingback_() {
+    if (this.viewTrackerPromise_) {
+      return this.viewTrackerPromise_.then(() => {
+        return this.platformStore_.getGrantEntitlement();
+      }).then(grantStateEntitlement => {
+        const localPlatform = this.platformStore_.getLocalPlatform();
+        if (localPlatform.isPingbackEnabled()) {
+          localPlatform.pingback(grantStateEntitlement
+              || Entitlement.empty('local'));
+        }
+      });
+    }
+    return null;
   }
 
   /**

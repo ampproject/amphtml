@@ -161,7 +161,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/';
     windowApi.location.hash = '#origin=g.com';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
@@ -172,7 +172,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#test=1';
     windowApi.location.hash = '#origin=g.com&test=1';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
@@ -195,7 +195,7 @@ describe('Viewer', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#click=abc';
     windowApi.location.hash = '#click=abc';
-    windowApi.location.search = '?amp_agsa=1';
+    windowApi.location.search = '?amp_gsa=1';
     const viewer = new Viewer(ampdoc);
     expect(windowApi.history.replaceState).to.be.calledWith({}, '',
         'http://www.example.com');

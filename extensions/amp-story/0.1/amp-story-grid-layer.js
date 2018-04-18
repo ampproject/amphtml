@@ -157,5 +157,3 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     }
   }
 }
-
-AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
