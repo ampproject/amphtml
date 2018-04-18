@@ -357,32 +357,7 @@ export function sanitizeHtml(html) {
  * @return {string}
  */
 export function sanitizeTagsForTripleMustache(html) {
-  /**
-   * Tag policy for handling what is valid html in templates.
-   * @type {!Function}
-   */
-  const tagPolicy = function(tagName, attribs) {
-    if (tagName == 'template') {
-      for (let i = 0; i < attribs.length; i += 2) {
-        if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-          return {
-            tagName,
-            attribs: ['type', 'amp-mustache'],
-          };
-        }
-      }
-    }
-    const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-    if (!isWhitelistedTag) {
-      return null;
-    }
-    return {
-      tagName,
-      attribs,
-    };
-  };
-
-  return htmlSanitizer.sanitizeWithPolicy(html, tagPolicy);
+  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
 }
 
 /**
@@ -547,6 +522,31 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   }
 
   return attrValue;
+}
+
+/**
+ * Tag policy for handling what is valid html in templates.
+ * @type {!Function}
+ */
+function tripleMustacheTagPolicy(tagName, attribs) {
+  if (tagName == 'template') {
+    for (let i = 0; i < attribs.length; i += 2) {
+      if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+        return {
+          tagName,
+          attribs: ['type', 'amp-mustache'],
+        };
+      }
+    }
+  }
+  const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
+  if (!isWhitelistedTag) {
+    return null;
+  }
+  return {
+    tagName,
+    attribs,
+  };
 }
 
 /**
