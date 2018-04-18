@@ -45,3 +45,10 @@ export function convertEasingKeyword(keyword) {
       return keyword;
   }
 }
+
+export function resolvePercentageToNumber(val) {
+  const precentageStrippedVal = parseFloat(val);
+  if (!isNaN(precentageStrippedVal)) {
+    return precentageStrippedVal / 100;
+  }
+}
