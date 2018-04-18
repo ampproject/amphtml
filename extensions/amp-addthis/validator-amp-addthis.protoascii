@@ -15,32 +15,23 @@
 #
 
 tags: {  # amp-addthis
-  attr_lists: "common-extension-attrs"
+  html_format: AMP
+  tag_name: "SCRIPT"
   extension_spec: {
     allowed_versions: "0.1"
     allowed_versions: "latest"
     name: "amp-addthis"
   }
-  html_format: AMP
-  tag_name: "SCRIPT"
+  attr_lists: "common-extension-attrs"
 }
 
 tags: {  # <amp-addthis>
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-  attr_lists: "extended-amp-global"
+  html_format: AMP
+  tag_name: "AMP-ADDTHIS"
+  requires_extension: "amp-addthis"
   attrs: {
     mandatory: true
     name: "data-pub-id"
-  }
-  attrs: {
-    name: "data-share-description"
   }
   attrs: {
     name: "data-share-media"
@@ -50,9 +41,6 @@ tags: {  # <amp-addthis>
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
-  }
-  attrs: {
-    name: "data-share-title"
   }
   attrs: {
     name: "data-share-url"
@@ -67,7 +55,13 @@ tags: {  # <amp-addthis>
     mandatory: true
     name: "data-widget-id"
   }
-  html_format: AMP
-  requires_extension: "amp-addthis"
-  tag_name: "AMP-ADDTHIS"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
 }
