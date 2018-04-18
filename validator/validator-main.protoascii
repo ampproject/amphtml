@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 604
+spec_file_revision: 605
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -120,7 +120,6 @@ tags: {
 tags: {
   tag_name: "TITLE"
   spec_name: "title"
-  attrs: { name: "[text]" }
 }
 # 4.2.3 the base element
 tags: {
@@ -1553,7 +1552,6 @@ tags: {
       allowed_protocol: "threema"
       allowed_protocol: "twitter"
       allowed_protocol: "viber"
-      allowed_protocol: "webcal"
       allowed_protocol: "whatsapp"
     }
     blacklisted_value_regex: "__amp_source_origin"
@@ -3420,58 +3418,6 @@ tags {
   }
 }
 attr_lists: {
-  name: "input-common-attr"
-  attrs: { name: "accept" }
-  attrs: { name: "accesskey" }
-  attrs: { name: "autocomplete" }
-  attrs: { name: "autofocus" }
-  attrs: { name: "checked" }
-  attrs: { name: "disabled" }
-  attrs: { name: "height" }
-  attrs: { name: "inputmode" }
-  attrs: { name: "list" }
-  attrs: { name: "max" }
-  attrs: { name: "maxlength" }
-  attrs: { name: "min" }
-  attrs: { name: "minlength" }
-  attrs: { name: "multiple" }
-  attrs: { name: "pattern" }
-  attrs: { name: "placeholder" }
-  attrs: { name: "readonly" }
-  attrs: { name: "required" }
-  attrs: { name: "selectiondirection" }
-  attrs: { name: "size" }
-  attrs: { name: "spellcheck" }
-  attrs: { name: "step" }
-  attrs: { name: "tabindex" }
-  attrs: { name: "value" }
-  attrs: { name: "width" }
-  # <amp-bind>
-  attrs: { name: "[accept]" }
-  attrs: { name: "[accesskey]" }
-  attrs: { name: "[autocomplete]" }
-  attrs: { name: "[checked]" }
-  attrs: { name: "[disabled]" }
-  attrs: { name: "[height]" }
-  attrs: { name: "[inputmode]" }
-  attrs: { name: "[max]" }
-  attrs: { name: "[maxlength]" }
-  attrs: { name: "[min]" }
-  attrs: { name: "[minlength]" }
-  attrs: { name: "[multiple]" }
-  attrs: { name: "[pattern]" }
-  attrs: { name: "[placeholder]" }
-  attrs: { name: "[readonly]" }
-  attrs: { name: "[required]" }
-  attrs: { name: "[selectiondirection]" }
-  attrs: { name: "[size]" }
-  attrs: { name: "[spellcheck]" }
-  attrs: { name: "[step]" }
-  attrs: { name: "[type]" }
-  attrs: { name: "[value]" }
-  attrs: { name: "[width]" }
-}
-attr_lists: {
   name: "input-name-attr"
   attrs: {
     name: "name"
@@ -3603,6 +3549,29 @@ tags: {
 # 4.10.5 The input element
 tags: {
   tag_name: "INPUT"
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
@@ -3612,23 +3581,33 @@ tags: {
         "password|"
         ")(\\s|$)"
   }
-  attr_lists: "input-common-attr"
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+  # <amp-bind>
+  attrs: { name: "[accept]" }
+  attrs: { name: "[accesskey]" }
+  attrs: { name: "[autocomplete]" }
+  attrs: { name: "[checked]" }
+  attrs: { name: "[disabled]" }
+  attrs: { name: "[height]" }
+  attrs: { name: "[inputmode]" }
+  attrs: { name: "[max]" }
+  attrs: { name: "[maxlength]" }
+  attrs: { name: "[min]" }
+  attrs: { name: "[minlength]" }
+  attrs: { name: "[multiple]" }
+  attrs: { name: "[pattern]" }
+  attrs: { name: "[placeholder]" }
+  attrs: { name: "[readonly]" }
+  attrs: { name: "[required]" }
+  attrs: { name: "[selectiondirection]" }
+  attrs: { name: "[size]" }
+  attrs: { name: "[spellcheck]" }
+  attrs: { name: "[step]" }
+  attrs: { name: "[type]" }
+  attrs: { name: "[value]" }
+  attrs: { name: "[width]" }
   attr_lists: "input-name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
-}
-tags: {
-  html_format: AMP
-  tag_name: "INPUT"
-  spec_name: "INPUT [type=password]"
-  attrs: {
-    name: "type"
-    value_casei: "password"
-    mandatory: true
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attr_lists: "input-common-attr"
-  attr_lists: "input-name-attr"
-  mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
 }
 # 4.10.6 The button element
