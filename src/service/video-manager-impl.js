@@ -40,17 +40,16 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
+import {escapeCssSelectorIdent, removeElement} from '../dom';
 import {getMode} from '../mode';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
-import {
-  maybeInstallIntersectionObserver,
-} from 'intersection-observer/intersection-observer.install';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
 import {setStyles} from '../style';
 import {startsWith} from '../string';
+import {throttle} from '../utils/rate-limit';
+
 
 /** @private @const {string} */
 const TAG = 'video-manager';
@@ -58,20 +57,6 @@ const TAG = 'video-manager';
 
 /** @typedef {../video-interface.VideoAnalyticsDetailsDef} */
 let VideoAnalyticsDef; // alias for line length
-
-
-/**
- * Classname indicating that a video component has been "blessed" via user
- * interaction.
- * @private @const {string}
- */
-const BLESSED = 'i-amphtml-blessed';
-
-
-/** @private @enum {string} */
-const Signals = {
-  BLESSED: 'blessed',
-};
 
 
 /** @interface */
@@ -151,9 +136,9 @@ export class VideoManager {
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
-    /** @private @const {function():!R82FullscreenManager} */
-    this.getR82FullscreenManager_ =
-        once(() => this.createR82FullscreenManager_());
+    /** @private @const {function():!AutoFullscreenManager} */
+    this.getAutoFullscreenManager_ =
+        once(() => this.createAutoFullscreenManager_());
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -177,9 +162,9 @@ export class VideoManager {
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
-  /** @private @return {!R82FullscreenManager} */
-  createR82FullscreenManager_() {
-    return new R82FullscreenManager(this.ampdoc);
+  /** @private @return {!AutoFullscreenManager} */
+  createAutoFullscreenManager_() {
+    return new AutoFullscreenManager(this.ampdoc);
   }
 
   /**
@@ -352,8 +337,8 @@ export class VideoManager {
   }
 
   /** @param {!VideoEntry} entry */
-  registerForRotateToFullscreen(entry) {
-    this.getR82FullscreenManager_().register(entry);
+  registerForAutoFullscreen(entry) {
+    this.getAutoFullscreenManager_().register(entry);
   }
 }
 
@@ -467,8 +452,8 @@ class VideoEntry {
     // appropriately each time.
     this.signal_(VideoEvents.REGISTERED);
 
-    if (this.hasRotateToFullscreen_()) {
-      this.manager_.registerForRotateToFullscreen(this);
+    if (this.hasAutoFullscreen_()) {
+      this.manager_.registerForAutoFullscreen(this);
     }
 
     this.updateVisibility();
@@ -481,13 +466,13 @@ class VideoEntry {
    * @retun {boolean}
    * @private
    */
-  hasRotateToFullscreen_() {
+  hasAutoFullscreen_() {
     const {element} = this.video;
     user().assert(this.video.isInteractive(),
         'Only interactive videos are allowed to enter fullscreen on rotate.',
         'Set the `controls` attribute to enable.',
         this.video);
-    return element.hasAttribute(VideoAttributes.R82_FULLSCREEN);
+    return element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN);
   }
 
   /**
@@ -496,10 +481,6 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
-
-    if (!this.hasAutoplay) {
-      this.markBlessed_();
-    }
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
@@ -618,6 +599,7 @@ class VideoEntry {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
+    this.video.element.dispatchCustomEvent('amp:visibilitychanged');
   }
 
   /**
@@ -628,7 +610,6 @@ class VideoEntry {
     if (!Services.viewerForDoc(this.ampdoc_).isVisible()) {
       return;
     }
-
     this.supportsAutoplay_().then(supportsAutoplay => {
       const canAutoplay = this.hasAutoplay && !this.userInteractedWithAutoPlay_;
 
@@ -714,7 +695,6 @@ class VideoEntry {
         adEnd.bind(this)));
 
     function onInteraction() {
-      this.markBlessed_();
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
@@ -736,13 +716,6 @@ class VideoEntry {
         'display': 'block',
       });
     }
-  }
-
-  /** @private */
-  markBlessed_() {
-    const {element} = this.video;
-    this.signal_(Signals.BLESSED);
-    element.classList.add(BLESSED);
   }
 
   /**
@@ -845,8 +818,7 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    // Measure if video is now in viewport and what percentage of it is visible.
-    const measure = () => {
+    this.video.measureMutateElement(() => {
       if (opt_forceVisible == true) {
         this.isVisible_ = true;
       } else {
@@ -856,18 +828,10 @@ class VideoEntry {
           : change.intersectionRatio * 100;
         this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
       }
-    };
-
-    // Mutate if visibility changed from previous state
-    const mutate = () => {
+    }, () => {
       if (this.isVisible_ != wasVisible) {
         this.videoVisibilityChanged_();
       }
-    };
-
-    this.vsync_.run({
-      measure,
-      mutate,
     });
   }
 
@@ -935,30 +899,12 @@ class VideoEntry {
 }
 
 
-
-/**
- * @struct @typedef {{
- *  videoEntry: !VideoEntry,
- *  video: !../video-interface.VideoInterface,
- * }}
- */
-let R82FullscreenEntryDef;
-
-
 /** @private @const {string} */
-const R82_FULLSCREEN_ID_PROP = '__AMP_R82F_ID__';
-
-
-/** @private @const {string} */
-const CENTERED_PORTRAIT = 'i-amphtml-centered-portrait';
-
-
-/** @private @const {string} */
-const CENTERED_LANDSCAPE = 'i-amphtml-centered-landscape';
+const AUTO_FULLSCREEN_ID_PROP = '__AMP_AUTO_FULLSCREEN_ID__';
 
 
 /** Manages rotate-to-fullscreen video. */
-class R82FullscreenManager {
+class AutoFullscreenManager {
 
   /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
   constructor(ampdoc) {
@@ -985,49 +931,30 @@ class R82FullscreenManager {
      */
     this.entries_ = {};
 
-    /** @private @const {function()} */
-    const installOrientationObserver =
-        this.installOrientationObserver_.bind(this);
-    this.installOrientationObserver_ = once(installOrientationObserver);
-
-    /** @private @const {function():!IntersectionObserver} */
-    const getIntersectionObserver = this.getIntersectionObserver_.bind(this);
-    this.getIntersectionObserver_ =
-      /** @type {function():!IntersectionObserver} */ (
-        once(getIntersectionObserver));
-  }
-
-  /** @param {!VideoEntry} videoEntry */
-  register(videoEntry) {
-    const id = this.nextId_++;
-
-    const {element} = videoEntry.video;
-
-    element[R82_FULLSCREEN_ID_PROP] = id;
-
-    element.getImpl().then(video => {
-      this.entries_[id.toString()] = {videoEntry, video};
-    });
+    /** @private @const {function():!CenteredVideoSelector} */
+    this.getCenteredVideoSelector_ =
+      /** @type {function():!CenteredVideoSelector} */ (once(() =>
+        new CenteredVideoSelector(this.ampdoc_)));
 
     this.installOrientationObserver_();
+  }
 
-    // Wait until the video is "blessed" in order to have fullscreen access.
-    element.signals().whenSignal(Signals.BLESSED).then(() => {
-      this.getIntersectionObserver_().observe(element);
-      if (!this.isLandscape_()) {
-        return;
-      }
-      const {video} = videoEntry;
-      const videoForVsync = /** @type {!../base-element.BaseElement} */ (video);
-      this.updateVisibilityOnBless_(videoForVsync);
-    });
+  /** @param {!VideoEntry} entry */
+  register(entry) {
+    const id = this.nextId_++;
+    const {element} = entry.video;
+
+    element[AUTO_FULLSCREEN_ID_PROP] = id.toString();
+
+    this.entries_[id.toString()] = entry;
+
+    this.getCenteredVideoSelector_().observe(element);
   }
 
   /** @private */
-  // Overridden in constructor
   installOrientationObserver_() {
     // TODO(alanorozco) Update based on support
-    const win = this.win_;
+    const {win} = this.ampdoc_;
     const screen = win.screen;
     // Chrome considers 'orientationchange' to be an untrusted event, but
     // 'change' on screen.orientation is considered a user interaction.
@@ -1044,10 +971,8 @@ class R82FullscreenManager {
 
   /** @private */
   onRotation_() {
-    const root = this.ampdoc_.getRootNode();
-    if (this.isLandscape_()) {
-      const centeredVideoSelector = `.${CENTERED_PORTRAIT}.${BLESSED}`;
-      const video = root.querySelector(centeredVideoSelector);
+    if (isLandscape(this.ampdoc_.win)) {
+      const video = this.getCenteredVideoSelector_().get();
       if (!video) {
         return;
       }
@@ -1056,32 +981,19 @@ class R82FullscreenManager {
       return;
     }
 
-    // Transfer visibility calculated in landscape to match.
-    // Rationale is that if the element is fully in view
-    // in landscape, it's most likely it will still be fully visible after
-    // rotation.
-    // This prevents a bug where videos blessed in landscape won't enter
-    // fullscreen after rotating back.
-    const videoInLandscapeRange = root.querySelector(CENTERED_LANDSCAPE);
-    if (videoInLandscapeRange) {
-      videoInLandscapeRange.classList.remove(CENTERED_LANDSCAPE);
-      videoInLandscapeRange.classList.add(CENTERED_PORTRAIT);
+    if (this.currently_) {
+      this.exit_(this.currently_);
     }
-
-    if (!this.currently_) {
-      return;
-    }
-    this.exit_(this.currently_);
   }
 
   /**
-   * @param {!R82FullscreenEntryDef} entry
+   * @param {!VideoEntry} entry
    * @private
    */
   enter_(entry) {
-    const {video, videoEntry} = entry;
+    const {video} = entry;
 
-    if (!videoEntry.isPlaying()) {
+    if (entry.getPlayingState() !== PlayingStates.PLAYING_MANUAL) {
       return;
     }
 
@@ -1101,7 +1013,7 @@ class R82FullscreenManager {
   }
 
   /**
-   * @param {!R82FullscreenEntryDef} entry
+   * @param {!VideoEntry} entry
    * @private
    */
   exit_(entry) {
@@ -1163,60 +1075,111 @@ class R82FullscreenManager {
     return this.timer_.promise(magicNumber);
   }
 
-  /** @private @return {!IntersectionObserver} */
-  // Overridden in constructor
-  getIntersectionObserver_() {
-    maybeInstallIntersectionObserver(this.win_, this.ampdoc_.getRootNode());
-
-    const threshold = [0, 0.1, 0.2, 0.3, 0.7, 0.8, 0.9, 1];
-    const rootMargin = '0px 0px 25% 0px';
-
-    return new IntersectionObserver(
-        entries => this.onIntersectionChange_(entries),
-        {threshold, rootMargin});
-  }
-
   /**
-   * @param {!Array<!IntersectionObserverEntry>} intersectionEntries
+   * @return {string}
    * @private
    */
-  onIntersectionChange_(intersectionEntries) {
-    const className = this.isLandscape_() ?
-      CENTERED_LANDSCAPE :
-      CENTERED_PORTRAIT;
+  getId_(element) {
+    return dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
+  }
+}
 
-    intersectionEntries
-        .sort((a, b) => this.compareIntersectionEntries_(a, b))
-        .forEach((entry, i) => this.setInRangeAfterSort_(entry, className, i));
+
+/**
+ * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {{top: number, height: number}} rect
+ * @return {number}
+ */
+function centerDist(viewport, rect) {
+  const centerY = rect.top + rect.height / 2;
+  const centerViewport = viewport.getSize().height / 2;
+  return Math.abs(centerY - centerViewport);
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isLandscape(win) {
+  if (win.screen && 'orientation' in win.screen) {
+    return startsWith(screen.orientation.type, 'landscape');
+  }
+  return Math.abs(win.orientation) == 90;
+}
+
+
+/** Selects a "best centered" video in portrait amongst those observed. */
+class CenteredVideoSelector {
+  constructor(ampdoc) {
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!Array<!Element>} */
+    this.visibleElements_ = [];
+
+    this.currently_ = null;
+
+    this.track_ = Services.viewportForDoc(ampdoc).onScroll(
+        throttle(this.ampdoc_.win, () => this.selectOnScroll_(), 200));
   }
 
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  setInRangeAfterSort_(entry, className, i) {
-    // Top-most element that's fully in-view is considered in range.
-    const inRange = entry.intersectionRatio >= 0.8 && i == 0;
-    const element = entry.target;
-    const {video} = this.entries_[this.getId_(element)];
-    return video.mutateElement(() => {
-      element.classList.toggle(className, inRange);
+  /** @param {!AmpElement} element */
+  observe(element) {
+    listen(element, 'amp:visibilitychanged', e => {
+      if (isLandscape(this.ampdoc_.win)) {
+        return;
+      }
+      this.updateVisibility_(e.target);
     });
+
+    // Set always
+    this.updateVisibility_(element);
   }
 
   /**
-   * @param {!../base-element.BaseElement} video
-   * @return {!Promise}
+   * @param {!AmpElement} element
+   * @private
    */
-  updateVisibilityOnBless_(video) {
-    const {element} = video;
-    let isVisible = false;
-    return video.measureMutateElement(() => {
-      const {top, bottom} = element./*OK*/getBoundingClientRect();
-      const vh = this.getViewport_().getSize().height;
-      isVisible = top >= 0 && bottom <= vh;
-    }, () => {
-      element.classList.toggle(CENTERED_PORTRAIT, isVisible);
+  updateVisibility_(element) {
+    const intersectionChangeEntry = element.getIntersectionChangeEntry();
+    const isVisible = intersectionChangeEntry.intersectionRatio > 0.75;
+    const i = this.visibleElements_.indexOf(element);
+
+    if (!isVisible) {
+      if (i >= 0) {
+        this.visibleElements_.splice(i, 1);
+      }
+      element.classList.remove(this.className_);
+      return;
+    }
+
+    if (i < 0) {
+      this.visibleElements_.push(element);
+    }
+
+    this.select_();
+  }
+
+  /** @private */
+  selectOnScroll_() {
+    if (isLandscape(this.ampdoc_.win)) {
+      return;
+    }
+    this.select_();
+  }
+
+  /** @private */
+  select_() {
+    const sorted = this.visibleElements_
+        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
+        .sort((a, b) => this.compareIntersectionEntries_(a, b));
+
+    this.currently_ = null;
+
+    sorted.forEach((entry, i) => {
+      if (entry.intersectionRatio >= 0.8 && i == 0) {
+        this.currently_ = entry.target;
+      }
     });
   }
 
@@ -1255,45 +1218,10 @@ class R82FullscreenManager {
     return 0;
   }
 
-  /**
-   * @return {string}
-   * @private
-   */
-  getId_(element) {
-    return dev().assertString(element[R82_FULLSCREEN_ID_PROP]);
+  /** @return {?Element} */
+  get() {
+    return this.currently_;
   }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isLandscape_() {
-    return isLandscape(this.win_);
-  }
-}
-
-
-/**
- * @param {!./viewport/viewport-impl.Viewport} viewport
- * @param {{top: number, height: number}} rect
- * @return {number}
- */
-function centerDist(viewport, rect) {
-  const centerY = rect.top + rect.height / 2;
-  const centerViewport = viewport.getSize().height / 2;
-  return Math.abs(centerY - centerViewport);
-}
-
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-function isLandscape(win) {
-  if (win.screen && 'orientation' in win.screen) {
-    return startsWith(screen.orientation.type, 'landscape');
-  }
-  return Math.abs(win.orientation) == 90;
 }
 
 
