@@ -80,39 +80,6 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
-const WHITELISTED_TAGS = [
-  'a',
-  'b',
-  'br',
-  'caption',
-  'colgroup',
-  'code',
-  'del',
-  'div',
-  'em',
-  'i',
-  'ins',
-  'mark',
-  'p',
-  'q',
-  's',
-  'small',
-  'span',
-  'strong',
-  'sub',
-  'sup',
-  'table',
-  'tbody',
-  'time',
-  'td',
-  'th',
-  'thead',
-  'tfoot',
-  'tr',
-  'u',
-];
-
-/** @const {!Array<string>} */
 const WHITELISTED_ATTRS = [
   /* AMP-only attributes that don't exist in HTML. */
   'fallback',
@@ -343,45 +310,6 @@ export function sanitizeHtml(html) {
   });
   parser(html);
   return output.join('');
-}
-
-/**
- * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
- * WARNING: This method should not be used elsewhere as we do not strip out
- * the style attribute in this method for the inline-style experiment.
- * We do so in sanitizeHtml which occurs after this initial sanitizing.
- *
- * @private
- * @param {string} html
- * @return {string}
- */
-export function sanitizeTagsForTripleMustache(html) {
-  /**
-   * Tag policy for handling what is valid html in templates.
-   * @type {!Function}
-   */
-  const tagPolicy = function(tagName, attribs) {
-    if (tagName == 'template') {
-      for (let i = 0; i < attribs.length; i += 2) {
-        if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-          return {
-            tagName,
-            attribs: ['type', 'amp-mustache'],
-          };
-        }
-      }
-    }
-    const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-    if (!isWhitelistedTag) {
-      return null;
-    }
-    return {
-      tagName,
-      attribs,
-    };
-  };
-
-  return htmlSanitizer.sanitizeWithPolicy(html, tagPolicy);
 }
 
 /**
