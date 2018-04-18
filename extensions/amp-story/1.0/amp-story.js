@@ -93,8 +93,28 @@ import {registerServiceBuilder} from '../../../src/service';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
+import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsDefault from './_locales/default';
 import LocalizedStringsEn from './_locales/en';
+import LocalizedStringsEnGb from './_locales/en-GB';
+import LocalizedStringsEs from './_locales/es';
+import LocalizedStringsEs419 from './_locales/es-419';
+import LocalizedStringsFr from './_locales/fr';
+import LocalizedStringsFrCa from './_locales/fr-CA';
+import LocalizedStringsHi from './_locales/hi';
+import LocalizedStringsId from './_locales/id';
+import LocalizedStringsIt from './_locales/it';
+import LocalizedStringsJa from './_locales/ja';
+import LocalizedStringsKo from './_locales/ko';
+import LocalizedStringsNl from './_locales/nl';
+import LocalizedStringsNo from './_locales/no';
+import LocalizedStringsPt from './_locales/pt';
+import LocalizedStringsPtBr from './_locales/pt-BR';
+import LocalizedStringsRu from './_locales/ru';
+import LocalizedStringsTr from './_locales/tr';
+import LocalizedStringsVi from './_locales/vi';
+import LocalizedStringsZh from './_locales/zh';
+import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -279,7 +299,29 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsDefault)
-        .registerLocalizedStringBundle('en', LocalizedStringsEn);
+        // TODO(newmuis, #11647): Enable Arabic strings once RTL is supported.
+        // .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('de', LocalizedStringsDe)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn)
+        .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
+        .registerLocalizedStringBundle('es', LocalizedStringsEs)
+        .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
+        .registerLocalizedStringBundle('fr', LocalizedStringsFr)
+        .registerLocalizedStringBundle('fr-CA', LocalizedStringsFrCa)
+        .registerLocalizedStringBundle('hi', LocalizedStringsHi)
+        .registerLocalizedStringBundle('id', LocalizedStringsId)
+        .registerLocalizedStringBundle('it', LocalizedStringsIt)
+        .registerLocalizedStringBundle('ja', LocalizedStringsJa)
+        .registerLocalizedStringBundle('ko', LocalizedStringsKo)
+        .registerLocalizedStringBundle('nl', LocalizedStringsNl)
+        .registerLocalizedStringBundle('no', LocalizedStringsNo)
+        .registerLocalizedStringBundle('pt', LocalizedStringsPt)
+        .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
+        .registerLocalizedStringBundle('ru', LocalizedStringsRu)
+        .registerLocalizedStringBundle('tr', LocalizedStringsTr)
+        .registerLocalizedStringBundle('vi', LocalizedStringsVi)
+        .registerLocalizedStringBundle('zh', LocalizedStringsZh)
+        .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
 
     const enXaPseudoLocaleBundle =
         createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
