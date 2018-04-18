@@ -29,6 +29,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {toArray} from '../../../src/types';
+import {tryFocus} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
@@ -189,36 +190,56 @@ class AmpLightbox extends AMP.BaseElement {
         .then(() => this.finalizeOpen_());
   }
 
+  /**
+   * Any child of the lightbox with the autofocus attribute should be focused
+   * after the lightbox opens.
+   * @private
+   */
+  handleAutofocus_() {
+    const autofocusElement = this.container_.querySelector('[autofocus]');
+    if (autofocusElement) {
+      tryFocus(autofocusElement);
+    }
+  }
+
+  /**
+   * @private
+   */
   finalizeOpen_() {
     if (this.isScrollable_) {
       st.setStyle(this.element, 'webkitOverflowScrolling', 'touch');
     }
-    this.mutateElement(() => {
-      st.setStyles(this.element, {
-        display: '',
-        opacity: 0,
-        // TODO(dvoytenko): use new animations support instead.
-        transition: 'opacity 0.1s ease-in',
-      });
-      Services.vsyncFor(this.win).mutate(() => {
-        st.setStyle(this.element, 'opacity', '');
-      });
-    }).then(() => {
-      const container = dev().assertElement(this.container_);
-      if (!this.isScrollable_) {
-        this.updateInViewport(container, true);
-      } else {
-        this.scrollHandler_();
-        this.updateChildrenInViewport_(this.pos_, this.pos_);
-      }
-      // TODO: instead of laying out children all at once, layout children based
-      // on visibility.
-      this.element.addEventListener('transitionend', this.boundReschedule_);
-      this.element.addEventListener('animationend', this.boundReschedule_);
-      this.scheduleLayout(container);
-      this.scheduleResume(container);
-      this.triggerEvent_(LightboxEvents.OPEN);
+
+    // This should be in a mutateElement block, but focus on iOS won't work
+    // if triggered asynchronously inside a callback.
+    st.setStyles(this.element, {
+      display: '',
+      opacity: 0,
+      // TODO(dvoytenko): use new animations support instead.
+      transition: 'opacity 0.1s ease-in',
     });
+
+    this.handleAutofocus_();
+
+    // TODO (jridgewell): expose an API accomodating this per PR #14676
+    this.mutateElement(() => {
+      st.setStyle(this.element, 'opacity', '');
+    });
+
+    const container = dev().assertElement(this.container_);
+    if (!this.isScrollable_) {
+      this.updateInViewport(container, true);
+    } else {
+      this.scrollHandler_();
+      this.updateChildrenInViewport_(this.pos_, this.pos_);
+    }
+    // TODO: instead of laying out children all at once, layout children based
+    // on visibility.
+    this.element.addEventListener('transitionend', this.boundReschedule_);
+    this.element.addEventListener('animationend', this.boundReschedule_);
+    this.scheduleLayout(container);
+    this.scheduleResume(container);
+    this.triggerEvent_(LightboxEvents.OPEN);
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
