@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {htmlFor} from './static-template';
+
 /** @private @const */
 const LINE_LOADER_ELEMENTS = {
   'AMP-AD': true,
@@ -27,19 +29,14 @@ const LINE_LOADER_ELEMENTS = {
  * @return {!Element}
  */
 export function createLoaderElement(doc, elementName) {
-  const loader = doc.createElement('div');
   if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    loader.classList.add('i-amphtml-loader-line');
-    const line = doc.createElement('div');
-    line.classList.add('i-amphtml-loader-moving-line');
-    loader.appendChild(line);
-  } else {
-    loader.classList.add('i-amphtml-loader');
-    for (let i = 0; i < 3; i++) {
-      const dot = doc.createElement('div');
-      dot.classList.add('i-amphtml-loader-dot');
-      loader.appendChild(dot);
-    }
+    return htmlFor(doc)`<div class="i-amphtml-loader-line">
+          <div class="i-amphtml-loader-moving-line" />
+        </div>`;
   }
-  return loader;
+  return htmlFor(doc)`<div class="i-amphtml-loader">
+        <div class="i-amphtml-loader-dot" />
+        <div class="i-amphtml-loader-dot" />
+        <div class="i-amphtml-loader-dot" />
+      </div>`;
 }

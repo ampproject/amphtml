@@ -16,6 +16,7 @@
 
 import {Services} from '../services';
 import {dev, user} from '../log';
+import {htmlFor} from '../static-template';
 import {isExperimentOn} from '../experiments';
 
 /** @const {number} */
@@ -116,12 +117,13 @@ export class JankMeter {
    * @private
    */
   displayMeterDisplay_(batteryDrop) {
-    const display = this.win_.document.createElement('div');
-    display.classList.add('i-amphtml-jank-meter');
+    const doc = this.win_.document;
+    const display = htmlFor(doc)`
+      <div class="i-amphtml-jank-meter" />`;
     display.textContent =
         `bf:${this.badFrameCnt_}, lts: ${this.longTaskSelf_}, ` +
         `ltc:${this.longTaskChild_}, bd:${batteryDrop}`;
-    this.win_.document.body.appendChild(display);
+    doc.body.appendChild(display);
   }
 
   /**

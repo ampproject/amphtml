@@ -24,6 +24,7 @@ import {
 } from '../style';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {htmlFor} from '../static-template';
 
 const TAG = 'FixedLayer';
 
@@ -618,9 +619,9 @@ export class FixedLayer {
     if (!fe.placeholder) {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
-      fe.placeholder = this.ampdoc.win.document.createElement('i-amphtml-fp');
-      fe.placeholder.setAttribute('i-amphtml-fixedid', fe.id);
-      setStyle(fe.placeholder, 'display', 'none');
+      const placeholder = fe.placeholder = htmlFor(element)`
+          <i-amphtml-fpa style="display: none" />`;
+      placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }
 
     // Calculate z-index based on the declared z-index and DOM position.

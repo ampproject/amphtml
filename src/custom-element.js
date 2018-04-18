@@ -40,6 +40,7 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
@@ -1515,12 +1516,11 @@ function createBaseCustomElementClass(win) {
      */
     prepareLoading_() {
       if (!this.loadingContainer_) {
-        const doc = this.ownerDocument;
+        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
 
-        const container = doc.createElement('div');
-        container.classList.add('i-amphtml-loading-container');
-        container.classList.add('i-amphtml-fill-content');
-        container.classList.add('amp-hidden');
+        const container = htmlFor(doc)`
+            <div class="i-amphtml-loading-container i-amphtml-fill-content
+              amp-hidden" />`;
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);
