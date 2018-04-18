@@ -15,7 +15,7 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {htmlSanitizer} from '../../../third_party/caja/html-sanitizer';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
@@ -23,7 +23,7 @@ import {sanitizeHtml} from '../../../src/sanitizer';
 
 // Configure sanitizer for output of "triple-mustache";a set of allowed tags
 // to be unescaped.
-setUnescapedSanitizier(AmpMustache.sanitizeTagsForTripleMustache_);
+setUnescapedSanitizier(sanitizeTagsForTripleMustache_);
 
 /** @const {!Array<string>} */
 const WHITELISTED_TAGS = [
@@ -66,46 +66,6 @@ const WHITELISTED_TAGS = [
  * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
-
-  /**
-   * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
-   * WARNING: This method should not be used elsewhere as we do not strip out
-   * the style attribute in this method for the inline-style experiment.
-   * We do so in sanitizeHtml which occurs after this initial sanitizing.
-   *
-   * @private
-   * @param {string} html
-   * @return {string}
-   */
-  sanitizeTagsForTripleMustache_(html) {
-    /**
-     * Tag policy for handling what is valid html in templates.
-     * @type {!Function}
-     */
-    const tagPolicy = function(tagName, attribs) {
-      if (tagName == 'template') {
-        for (let i = 0; i < attribs.length; i += 2) {
-          if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-            return {
-              tagName,
-              attribs: ['type', 'amp-mustache'],
-            };
-          }
-        }
-      }
-      const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
-      if (!isWhitelistedTag) {
-        return null;
-      }
-      return {
-        tagName,
-        attribs,
-      };
-    };
-
-    return htmlSanitizer.sanitizeWithPolicy(html, tagPolicy);
-  }
-
   /** @override */
   compileCallback() {
     /** @private @const {!JsonObject} */
@@ -141,6 +101,45 @@ export class AmpMustache extends AMP.BaseTemplate {
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }
+}
+
+/**
+ * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ * WARNING: This method should not be used elsewhere as we do not strip out
+ * the style attribute in this method for the inline-style experiment.
+ * We do so in sanitizeHtml which occurs after this initial sanitizing.
+ *
+ * @private
+ * @param {string} html
+ * @return {string}
+ */
+function sanitizeTagsForTripleMustache_(html) {
+  /**
+   * Tag policy for handling what is valid html in templates.
+   * @type {!Function}
+   */
+  const tagPolicy = function(tagName, attribs) {
+    if (tagName == 'template') {
+      for (let i = 0; i < attribs.length; i += 2) {
+        if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+          return {
+            tagName,
+            attribs: ['type', 'amp-mustache'],
+          };
+        }
+      }
+    }
+    const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
+    if (!isWhitelistedTag) {
+      return null;
+    }
+    return {
+      tagName,
+      attribs,
+    };
+  };
+
+  return htmlSanitizer.sanitizeWithPolicy(html, tagPolicy);
 }
 
 
