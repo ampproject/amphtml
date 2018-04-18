@@ -77,9 +77,9 @@ export const Presets = {
         return;
       }
       const marginStart = element.getAttribute('data-margin-start');
-      user().assert(parseFloat(marginStart) >= 0 && parseFloat(marginStart) < 1,
-          'data-margin-start must be a number and be between 0 and 1 for: %s',
-          element);
+      user().assert(parseFloat(marginStart) >= 0 &&
+        parseFloat(marginStart) < 100, 'data-margin-start must be a number ' +
+          'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
