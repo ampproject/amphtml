@@ -560,4 +560,22 @@ describe('HtmlParser with location', () => {
       ':9:6: endDoc()'
     ]);
   });
+
+  it('Supports SVG with self-closed tags', () => {
+    const handler = new LoggingHandlerWithLocation();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(handler, '<html><body><svg><foo/></svg></body></html>');
+    expect(handler.log).toEqual([
+      ':1:0: startDoc()',
+      ':1:0: startTag(HTML,[])',
+      ':1:6: startTag(BODY,[])',
+      ':1:12: startTag(SVG,[])',
+      ':1:17: startTag(FOO,[])',
+      ':1:23: endTag(FOO)',
+      ':1:23: endTag(SVG)',
+      ':1:36: endTag(BODY)',
+      ':1:36: endTag(HTML)',
+      ':1:42: endDoc()',
+    ]);
+  });
 });
