@@ -390,6 +390,7 @@ export class SubscriptionService {
         }
       });
     }
+    return null;
   }
 
   /**
