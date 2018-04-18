@@ -379,7 +379,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     });
   });
 
-  it('should not reset incremental engaged time after each poll if reset is specified as false', () => {
+  it('should not reset incremental engaged time if reset is false', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
       // don't reset
