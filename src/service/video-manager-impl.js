@@ -1145,33 +1145,37 @@ export class AutoFullscreenManager {
    * @return {number}
    */
   compareIntersectionEntries_(a, b) {
-    if (a.intersectionRatio > b.intersectionRatio) {
-      return -1;
-    }
-    if (a.intersectionRatio < b.intersectionRatio) {
-      return 1;
-    }
-
-    const viewport = Services.viewportForDoc(this.ampdoc_);
-    const aCenter = centerDist(viewport, a.boundingClientRect);
-    const bCenter = centerDist(viewport, b.boundingClientRect);
-
-    if (aCenter > bCenter) {
-      return -1;
-    }
-    if (aCenter < bCenter) {
-      return 1;
-    }
-
-    if (a.boundingClientRect.top < b.boundingClientRect.top) {
-      return -1;
-    }
-    if (a.boundingClientRect.top > b.boundingClientRect.top) {
-      return 1;
-    }
-
-    return 0;
+    return compareByPredicates(a, b,
+        (a, b) => a.intersectionRatio > b.intersectionRatio,
+        (a, b) => {
+          const viewport = Services.viewportForDoc(this.ampdoc_);
+          const aCenter = centerDist(viewport, a.boundingClientRect);
+          const bCenter = centerDist(viewport, b.boundingClientRect);
+          return aCenter > bCenter;
+        },
+        (a, b) => a.boundingClientRect.top < b.boundingClientRect.top);
   }
+}
+
+
+/**
+ * Compare for sorting by a chain of predicates.
+ * @param {!T} a
+ * @param {!T} b
+ * @param {...function(T, T):boolean} predicates
+ * @return {number}
+ */
+function compareByPredicates(a, b, ...predicates) {
+  for (var i = 0; i < predicates.length; i++) {
+    const predicate = predicates[i];
+    if (predicate(a, b)) {
+      return -1;
+    }
+    if (predicate(b, a)) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 
