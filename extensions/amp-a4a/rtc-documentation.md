@@ -86,7 +86,7 @@ The value of `rtc-config` must conform to the following specification:
 *   `urls`
     *   Optional parameter
     *   Type: Array of strings or objects.
-    *   Each value in the array must be a valid RTC endpoint URL, or an object that contains a `url` and an `errorReportingUrl`. The array can be a mix of both of these types, as seen in the example above. In the case that an object is specified, the `url` within this object is treated equivalently as if it had been specified directly within the array, and errors from callouts to that URL are sent to its corresponding **errorReportingUrl**. The URLs specified here are the "custom URLs" mentioned above and throughout this document.
+    *   Each value in the array must be a valid RTC endpoint URL, or an object that contains a `url` and an `errorReportingUrl` as url strings. Note that all url strings must be secure (i.e. start wit HTTPS). The array can be a mix of both of these types, as seen in the example above. In the case that an object is specified, the `url` within this object is treated equivalently as if it had been specified directly within the array, and errors from callouts to that URL are sent to its corresponding **errorReportingUrl**. The URLs specified here are the "custom URLs" mentioned above and throughout this document.
         *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint.
         *   See [RTC Error Pingback](#rtc-error-pingback) section below for information on how errorReportingUrl is used to send sampled RTC errors, and how to specify an errorReportingUrl.
 *   `timeoutMillis`
@@ -98,7 +98,7 @@ While all three parameters of rtc-config are optional, either "vendors" or "urls
 
 ### Vendor URL Specification
 
-To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros that can be substituted into `url`. Vendors may include these macros in their URLs, which publishers can then specify the value for. Additionally, vendors may specify an `errorReportingUrl`. This errorReportingUrl will be sent 1% sampled errors from callouts to their RTC endpoint. For instance:
+To spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js), which maps unique vendor names to an object which includes a URL and a whitelist of macros that can be substituted into `url`. Vendors may include these macros in their URLs, which publishers can then specify the value for. Additionally, vendors may specify an `errorReportingUrl`. This errorReportingUrl will be sent 1% sampled-per-page errors from callouts to their RTC endpoint. For instance:
 
 ```text
 /** amp-a4a/0.1/callout-vendors.js */
@@ -153,7 +153,7 @@ The RTC Response to a GET request must meet the following requirements:
 
 ### RTC Error Pingback
 
-RTC supports sending a 1% sampling of RTC errors to specified errorReportingUrl's. For any given RTC callout URL, a corresponding errorReportingUrl may be specified, which will receive pings for, and only for, errors that resulted from the associated RTC callout. I.e., you can not specify one errorReportingUrl that receives batched pings for all RTC callouts from a page.
+RTC supports sending a 1% per-page sampling of RTC errors to specified errorReportingUrl's. (I.e. 1% of pages will send RTC error pingbacks for all RTC errors that occur on that page). For any given RTC callout URL, a corresponding errorReportingUrl may be specified, which will receive pings for, and only for, errors that resulted from the associated RTC callout. I.e., you can not specify one errorReportingUrl that receives batched pings for all RTC callouts from a page. The errorReportingUrl must be a secure URL that uses HTTPS.
 
 Vendors may specify an errorReportingUrl within their config in callout-vendors.js, e.g.:
 
@@ -192,7 +192,7 @@ In both cases, the requirements for an errorReportingUrl are the same:
 *   Response should be an empty 200.
 *   errorReportingUrl may utilize two available macros that will be substituted in:
     *   **ERROR_TYPE** - Will be sent as an enum value that corresponds to values in `RTC_ERROR_ENUM` found in [real-time-config-manager.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/real-time-config-manager.js).
-    *   **HREF** - The HREF of the page.
+    *   **HREF** - The actual full URL of the page.  Equivalent to historical value of AMP's window.context.location.href.
 
 The error ping will be sent by creating an image pixel in the document. See `sendErrorMessage` in [real-time-config-manager.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/real-time-config-manager.js) for implementation details.
 
