@@ -439,6 +439,7 @@ describes.realWin('amp-video', {
       src: '/examples/av/ForBiggerJoyrides.mp4',
       width: 160,
       height: 90,
+      'muted': '',
     }).then(v => {
       const impl = v.implementation_;
       return Promise.resolve()
