@@ -336,7 +336,7 @@ export class SubscriptionService {
   startAuthorizationFlow_(doPlatformSelection = true) {
     this.platformStore_.getGrantStatus().then(grantState => {
       this.processGrantState_(grantState);
-      this.performPingback();
+      this.performPingback_();
     });
 
     if (doPlatformSelection) {
@@ -373,9 +373,14 @@ export class SubscriptionService {
     });
   }
 
-  performPingback() {
+  /**
+   * Performs pingback on local platform.
+   * @return {?Promise}
+   * @private
+   */
+  performPingback_() {
     if (this.viewTrackerPromise_) {
-      this.viewTrackerPromise_.then(() => {
+      return this.viewTrackerPromise_.then(() => {
         return this.platformStore_.getGrantEntitlement();
       }).then(grantStateEntitlement => {
         const localPlatform = this.platformStore_.getLocalPlatform();
