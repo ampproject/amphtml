@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from '../log';
+
 /**
  * A bit like Array#filter, but removes elements that filter false from the
  * array. Returns the filtered items.
@@ -61,6 +63,24 @@ export function findIndex(array, predicate) {
     }
   }
   return -1;
+}
+
+/**
+ * Returns the element at the negative index (indexing from the end).
+ * `negative` must be a negative integer (>= -1), and its absolute value must
+ * not be equal to or greater than the array's length.
+ *
+ * @param {!Array<T>} array
+ * @param {number} negative
+ * @return {T}
+ * @template T
+ */
+export function negativeIndex(array, negative) {
+  const length = array.length;
+  const index = length - negative;
+  dev().assert(index >= 0 && index < length, 'Overcooked index');
+
+  return array[index];
 }
 
 /**

@@ -133,8 +133,8 @@ export class Viewport {
     /** @private {!../timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
 
-    /** @private {!../vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+    /** @private {!../resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -168,7 +168,7 @@ export class Viewport {
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
         this.ampdoc,
-        this.vsync_,
+        this.resources_,
         this.binding_.getBorderTop(),
         this.paddingTop_,
         this.binding_.requiresFixedLayerTransfer());
@@ -400,7 +400,7 @@ export class Viewport {
 
   /**
    * Returns the rect of the element within the document.
-   * Note that this function should be called in vsync measure. Please consider
+   * Note that this function should be called in measure phase. Please consider
    * using `getLayoutRectAsync` instead.
    * @param {!Element} el
    * @return {!../../layout-rect.LayoutRectDef}
@@ -433,19 +433,19 @@ export class Viewport {
    */
   getClientRectAsync(el) {
     if (this.useLayers_) {
-      return this.vsync_.measurePromise(() => {
+      return this.resources_.measureElement(() => {
         return this.getLayoutRect(el);
       });
     }
 
-    const local = this.vsync_.measurePromise(() => {
+    const local = this.resources_.measureElement(() => {
       return el./*OK*/getBoundingClientRect();
     });
 
     let root = this.binding_.getRootClientRectAsync();
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      root = this.vsync_.measurePromise(() => {
+      root = this.resources_.measureElement(() => {
         return frameElement./*OK*/getBoundingClientRect();
       });
     }
@@ -700,7 +700,7 @@ export class Viewport {
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.binding_.getScrollingElement(), () => {
       this.binding_.disableScroll();
     });
   }
@@ -709,7 +709,7 @@ export class Viewport {
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {
-    this.vsync_.mutate(() => {
+    this.resources_.mutateElement(this.binding_.getScrollingElement(), () => {
       this.binding_.resetScroll();
     });
   }
@@ -961,7 +961,7 @@ export class Viewport {
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
       this.timer_.delay(() => {
-        this.vsync_.measure(() => {
+        this.resources_.measureElement(() => {
           this.throttledScroll_(now, newScrollTop);
         });
       }, 36);
@@ -994,7 +994,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      this.timer_.delay(() => this.vsync_.measure(
+      this.timer_.delay(() => this.resources_.measureElement(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -1006,7 +1006,7 @@ export class Viewport {
   sendScrollMessage_() {
     if (!this.scrollAnimationFrameThrottled_) {
       this.scrollAnimationFrameThrottled_ = true;
-      this.vsync_.measure(() => {
+      this.resources_.measureElement(() => {
         this.scrollAnimationFrameThrottled_ = false;
         this.viewer_.sendMessage('scroll',
             dict({'scrollTop': this.getScrollTop()}),
