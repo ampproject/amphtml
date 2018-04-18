@@ -28,7 +28,7 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, () => {
+describes.realWin('media-tasks 0.1', {}, () => {
   let sandbox;
   let el;
   let vsyncApi;
