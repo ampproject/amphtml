@@ -1,5 +1,3 @@
-go/amp-consent-readme
-
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -63,12 +61,12 @@ You can use the <amp-consent> component to implement user controls. The componen
 
 Only one single `<amp-consent>` element is allowed on the page, and that element must specify a unique `id`.
 
-If you also include `<amp-user-notification>` elements in the page, the UI associated with the `<amp-consent>` and `<amp-user-notification>` will not be deterministic. Avoid using `<amp-consent>` with `<amp-user-notification>` if this would be problematic.
+If you also include an `<amp-user-notification>` element on the page, the UI associated with the `<amp-consent>` and `<amp-user-notification>` will not be deterministic. Avoid using `<amp-consent>` with `<amp-user-notification>` if this would be problematic.
 
 
 ## Consent configuration
 
-The `<amp-consent>` element requires a JSON configuration object that specifies the extension’s behavior. A `consents` object is required within the JSON object.
+The `<amp-consent>` element requires a JSON configuration object that specifies the extension's behavior. A `consents` object is required within the JSON object.
 
 Example:
 
@@ -93,13 +91,14 @@ Example:
 #### Consent instance ID
 
 
-Currently, the `consents` object only supports a single consent instance. A consent instance must have an ID specified within the `consents` object (in the example above, “my-consent” is the id). The consent instance ID is used to generate a key when storing the user consent state.
+Currently, the `consents` object only supports a single consent instance. A consent instance must have an ID specified within the `consents` object (in the example above, "my-consent" is the id). The consent instance ID is used to generate a key when storing the user consent state.
 
 #### checkConsentHref
 `checkConsentHref` (required): Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
 
 ##### Request
 AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
+
 ```html
 {
   "consentInstanceId": "my-consent"
@@ -118,16 +117,16 @@ AMP expects the response to be a JSON object with a `promptIfUnknown` value that
 
 If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set to false, no prompt UI will be displayed on page load.
 
-Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action. Below it is detailed how to enable showing a prompt.
+Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action.  See below for details on how to display a prompt.
 
 #### promptUI
 
-`promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. How a user interacts with the prompt UI will be covered in the following [section](#prompt-ui).
+`promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
 
 
 ## Consent Management
 
-`<amp-consent>` element supports customizing consent prompt UI and post-prompt UI, that can be used to manage consent.
+The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.
 
 ### Styling
 
@@ -137,8 +136,11 @@ By default, all UI elements contained within `amp-consent` have `display:none` a
 
 ### Prompt UI
 
-Prompt UI is defined within the consent instance config. The `promptUI` refers to an child element of `<amp-consent>` by its `id`.
-```
+The prompt UI is defined within the consent instance config. The `promptUI` attribute refers to an child element of `<amp-consent>` by its `id`.
+
+*Example*: Displays a prompt user interface 
+
+```html
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
   {
@@ -157,7 +159,8 @@ Prompt UI is defined within the consent instance config. The `promptUI` refers t
   </div>
 </amp-consent>
 ```
-AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden with any of the three user actions described below.
+
+AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
 #### Prompt Actions
 
