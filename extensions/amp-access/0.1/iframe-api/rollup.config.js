@@ -6,13 +6,12 @@ export default {
   format: 'umd',
   sourceMap: true,
   moduleName: 'amp-access-iframe-api',
-  dest: 'dist/index.js',
+  dest: 'build/index.js',
   plugins: [
     babel({
       babelrc: false,
-      plugins: ['external-helpers'],
-      externalHelpers: true,
+      presets: [['env', {'modules': false}]],
     }),
-    minify({umd: 'dist/index.min.js'}),
+    minify({umd: 'build/index.min.js'}),
   ],
 };
