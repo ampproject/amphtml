@@ -1136,30 +1136,42 @@ export class AutoFullscreenManager {
    * @return {number}
    */
   compareIntersectionEntries_(a, b) {
-    const prioritizeThosePlaying = (unusedA, b) => {
-      const entry = this.getEntryForElement_(b);
-      return entry.getPlayingState() != PlayingStates.PLAYING_MANUAL;
-    };
+    // Prioritize videos that are playing
+    const aPlayingState = this.getEntryForElement_(a).getPlayingState;
+    const bPlayingState = this.getEntryForElement_(b).getPlayingState;
+    if (aPlayingState == PlayingStates.PLAYING_MANUAL &&
+        bPlayingState != PlayingStates.PLAYING_MANUAL) {
+      return -1;
+    }
+    if (aPlayingState != PlayingStates.PLAYING_MANUAL &&
+        bPlayingState == PlayingStates.PLAYING_MANUAL) {
+      return 1;
+    }
 
-    const prioritizeByPortionVisible = (a, b) =>
-      a.intersectionRatio > b.intersectionRatio;
+    // Prioritize by how visible they are, with a tolerance of 10%
+    const ratioTolerance = 0.1;
+    const ratioDelta = (a.intersectionRatio - b.intersectionRatio);
+    if (ratioDelta < -ratioTolerance) {
+      return -1;
+    }
+    if (ratioDelta > ratioTolerance) {
+      return 1;
+    }
 
-    const prioritizeByCenterDistance = (a, b) => {
-      const viewport = Services.viewportForDoc(this.ampdoc_);
-      const aCenter = centerDist(viewport, a.boundingClientRect);
-      const bCenter = centerDist(viewport, b.boundingClientRect);
-      return aCenter > bCenter;
-    };
+    // Prioritize by distance from center.
+    const viewport = Services.viewportForDoc(this.ampdoc_);
+    const aCenter = centerDist(viewport, a.boundingClientRect);
+    const bCenter = centerDist(viewport, b.boundingClientRect);
+    if (aCenter < bCenter) {
+      return -1;
+    }
+    if (aCenter > bCenter) {
+      return 1;
+    }
 
-    const prioritizeHighest = (a, b) =>
-      a.boundingClientRect.top < b.boundingClientRect.top;
-
-    return compareByPredicates(a, b, [
-      prioritizeThosePlaying,
-      prioritizeByPortionVisible,
-      prioritizeByCenterDistance,
-      prioritizeHighest,
-    ]);
+    // Everything else failing, choose the highest element.
+    const topDelta = (a.boundingClientRect.top - b.boundingClientRect.top);
+    return topDelta < 0 ? -1 : (topDelta > 0 ? 1 : 0);
   }
 
   /**
@@ -1171,28 +1183,6 @@ export class AutoFullscreenManager {
     const id = dev().assertString(element[AUTO_FULLSCREEN_ID_PROP]);
     return dev().assert(this.entries_[id]);
   }
-}
-
-
-/**
- * Compare for sorting by a chain of predicates.
- * @param {!T} a
- * @param {!T} b
- * @param {!Array<function(T, T):boolean>} predicates
- * @return {number}
- * @template T
- */
-function compareByPredicates(a, b, predicates) {
-  for (var i = 0; i < predicates.length; i++) {
-    const predicate = predicates[i];
-    if (predicate(a, b)) {
-      return -1;
-    }
-    if (predicate(b, a)) {
-      return 1;
-    }
-  }
-  return 0;
 }
 
 
