@@ -83,6 +83,7 @@ declareExtension('amp-ad-network-triplelift-impl', 0.1);
 declareExtension('amp-ad-network-cloudflare-impl', 0.1);
 declareExtension('amp-ad-network-gmossp-impl', 0.1);
 declareExtension('amp-ad-exit', 0.1);
+declareExtension('amp-addthis', '0.1');
 declareExtension('amp-analytics', '0.1');
 declareExtension('amp-anim', '0.1');
 declareExtension('amp-animation', '0.1');
