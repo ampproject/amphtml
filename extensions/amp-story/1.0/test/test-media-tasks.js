@@ -28,7 +28,7 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, () => {
+describes.realWin('media-tasks 1.0', {}, () => {
   let sandbox;
   let el;
   let vsyncApi;
@@ -36,6 +36,7 @@ describes.realWin('media-tasks', {}, () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     el = document.createElement('video');
+    el.setAttribute('muted', '');
 
     // Mock vsync
     vsyncApi = {
