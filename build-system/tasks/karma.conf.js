@@ -15,7 +15,12 @@
  */
 'use strict';
 
-const COMMON_CHROME_FLAGS = ['--disable-extensions', '--autoplay-policy=no-user-gesture-required'];
+const COMMON_CHROME_FLAGS = [
+  // Dramatically speeds up iframe creation time.
+  '--disable-extensions',
+  // Allows simulating user actions (e.g unmute) which otherwise will be denied.
+  '--autoplay-policy=no-user-gesture-required',
+];
 
 /**
  * @param {!Object} config
@@ -120,7 +125,6 @@ module.exports = {
     },
     Chrome_no_extensions: {
       base: 'Chrome',
-      // Dramatically speeds up iframe creation time.
       flags: COMMON_CHROME_FLAGS,
     },
     Chrome_no_extensions_headless: {
