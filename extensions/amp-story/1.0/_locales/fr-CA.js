@@ -37,7 +37,7 @@ export default {
     string: 'Impossible de copier le lien dans le presse-papier :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié!',
+    string: 'Lien copié !',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'Courriel',
