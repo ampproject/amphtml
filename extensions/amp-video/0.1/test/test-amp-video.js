@@ -434,7 +434,7 @@ describes.realWin('amp-video', {
     });
   });
 
-  it.only('should forward certain events from video to the amp element', () => {
+  it('should forward certain events from video to the amp element', () => {
     return getVideo({
       src: '/examples/av/ForBiggerJoyrides.mp4',
       width: 160,
