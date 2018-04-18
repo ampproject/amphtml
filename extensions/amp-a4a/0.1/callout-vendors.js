@@ -81,6 +81,7 @@ if (getMode().localDev || getMode().test) {
   });
   RTC_VENDORS['fakevendor2'] = /** @type {RtcVendorDef} */({
     url: 'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+    errorReportingUrl: 'https://localhost:8000/examples/ERROR_TYPE',
     disableKeyAppend: true,
   });
 }

@@ -119,7 +119,7 @@ export class SystemLayer {
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = Services.storyStoreService(this.win_);
+    this.storeService_ = Services.storyStoreServiceV01(this.win_);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);

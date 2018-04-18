@@ -158,6 +158,18 @@ declareExtension('amp-story', '0.1', {
     'amp-story-system-layer',
   ],
 });
+declareExtension('amp-story', '1.0', {
+  hasCss: true,
+  cssBinaries: [
+    'amp-story-bookend',
+    'amp-story-hint',
+    'amp-story-unsupported-browser-layer',
+    'amp-story-viewport-warning-layer',
+    'amp-story-share',
+    'amp-story-share-menu',
+    'amp-story-system-layer',
+  ],
+});
 declareExtension('amp-story-auto-ads', '0.1', {hasCss: true});
 declareExtension('amp-selector', '0.1', {hasCss: true});
 declareExtension('amp-web-push', '0.1', {hasCss: true});
@@ -808,14 +820,15 @@ function performBuild(watch) {
  */
 function checkBinarySize(compiled) {
   const file = compiled ? './dist/v0.js' : './dist/amp.js';
-  const size = compiled ? '76.79KB' : '334.46KB';
+  const size = compiled ? '76.85KB' : '336.00KB';
   const cmd = `npx bundlesize -f "${file}" -s "${size}"`;
   log(green('Running ') + cyan(cmd) + green('...\n'));
   const p = exec(cmd);
   if (p.status != 0) {
     log(red('ERROR:'), cyan('bundlesize'), 'found that amp.js/v0.js has ' +
         'exceeded its size cap. This is part of a new effort to reduce ' +
-        'AMP\'s binary size (#14392). Please contact @choumx for assistance.');
+        'AMP\'s binary size (#14392). Please contact @choumx or @jridgewell ' +
+        'for assistance.');
     // Terminate Travis builds on failure.
     if (process.env.TRAVIS) {
       process.exit(p.status);

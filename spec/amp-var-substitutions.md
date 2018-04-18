@@ -247,6 +247,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Background State](#background-state) | `BACKGROUND_STATE` | `${backgroundState}` |
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
+| [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
@@ -615,6 +616,18 @@ Provides the time when the element met visibility conditions for the first time 
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${firstVisibleTime}`
+
+#### Geolocation
+
+Provides the approximate, country level, location of the user provided by the [`amp-geo`](../extensions/amp-geo/amp-geo.md#variable-substitution) extension.
+
+* **platform variable**: AMP_GEO
+  *  Example: <br>
+  ```html
+   <amp-pixel src="https://foo.com/pixel?domInteractiveTime=AMP_GEO"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${ampGeo}`
+  * Example value: `ca`
 
 #### Horizontal Scroll Boundary
 

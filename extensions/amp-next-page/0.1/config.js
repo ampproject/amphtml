@@ -39,27 +39,34 @@ export let AmpNextPageItem;
  * spec.
  *
  * @param {*} config The config to validate.
- * @param {string} host The host of the current document
- *     (document.location.host). All pages must be from the same domain as the
- *     current document so the URL can be updated safely.
- * @return {!./config.AmpNextPageConfig}
+ * @param {string} origin The origin of the current document
+ *     (document.location.origin). All recommendations must be for the same
+ *     origin as the current document so the URL can be updated safely.
+ * @param {string=} sourceOrigin The source origin for the current document, if
+ *     the current document is being served from the cache. Any recommendations
+ *     pointing at {@code sourceOrigin} will be modified to point to the cache.
+ * @return {!AmpNextPageConfig}
  */
-export function assertConfig(config, host) {
+export function assertConfig(config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
-  assertRecos(config.pages, host);
+  assertRecos(config.pages, origin, sourceOrigin);
   return /** @type {!AmpNextPageConfig} */ (config);
 }
 
-function assertRecos(recos, host) {
-  recos.forEach(reco => assertReco(reco, host));
+function assertRecos(recos, origin, sourceOrigin) {
+  recos.forEach(reco => assertReco(reco, origin, sourceOrigin));
 }
 
-function assertReco(reco, host) {
+function assertReco(reco, origin, sourceOrigin) {
   const url = parseUrl(reco.ampUrl);
   user().assert(typeof reco.ampUrl == 'string', 'ampUrl must be a string');
-  user().assert(url.host == host,
-      'pages must be from the same host as the current document');
+  user().assert(url.origin === origin || url.origin === sourceOrigin,
+      'pages must be from the same origin as the current document');
   user().assert(typeof reco.image == 'string', 'image must be a string');
   user().assert(typeof reco.title == 'string', 'title must be a string');
+
+  if (sourceOrigin) {
+    reco.ampUrl = reco.ampUrl.replace(url.origin, origin);
+  }
 }

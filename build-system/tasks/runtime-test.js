@@ -37,6 +37,7 @@ const green = colors.green;
 const yellow = colors.yellow;
 const cyan = colors.cyan;
 const red = colors.red;
+const bold = colors.bold;
 
 const preTestTasks =
     argv.nobuild ? [] : ((argv.unit || argv.a4a) ? ['css'] : ['build']);
@@ -334,20 +335,14 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
-  const server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port: 31862,
-        host: 'localhost',
-        directoryListing: true,
-        middleware: [app],
-      })
-          .on('kill', function() {
-            log(yellow(
-                'Shutting down test responses server on localhost:31862'));
-            process.nextTick(function() {
-              process.exit();
-            });
-          }));
+  const server = gulp.src(process.cwd()).pipe(webserver({
+    port: 31862,
+    host: 'localhost',
+    directoryListing: true,
+    middleware: [app],
+  }).on('kill', function() {
+    log(yellow('Shutting down test responses server on localhost:31862'));
+  }));
   log(yellow(
       'Started test responses server on localhost:31862'));
 
@@ -357,18 +352,26 @@ function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // On Travis, collapse the summary printed by the 'karmaSimpleReporter'
+  // reporter, since it likely contains copious amounts of logs.
+  const shouldCollapseSummary =
+      process.env.TRAVIS && c.reporters.includes('karmaSimpleReporter');
+  const sectionMarker =
+      (argv.saucelabs || argv.saucelabs_lite) ? 'saucelabs' : 'local';
+
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
   new Karma(c, function(exitCode) {
+    if (shouldCollapseSummary) {
+      console./* OK*/log('travis_fold:end:console_errors_' + sectionMarker);
+    }
     server.emit('kill');
     if (exitCode) {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
-      process.exit(exitCode);
-    } else {
-      resolver();
     }
+    resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
       console./* OK*/log(green(
@@ -377,8 +380,14 @@ function runTests() {
     } else {
       console./* OK*/log(green('Running tests locally...'));
     }
+  }).on('run_complete', function() {
+    if (shouldCollapseSummary) {
+      console./* OK*/log(bold(red('Console errors:')),
+          'Expand this section and fix all errors printed by your tests.');
+      console./* OK*/log('travis_fold:start:console_errors_' + sectionMarker);
+    }
   }).on('browser_complete', function(browser) {
-    if (argv.saucelabs || argv.saucelabs_lite) {
+    if (shouldCollapseSummary) {
       const result = browser.lastResult;
       let message = '\n' + browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
