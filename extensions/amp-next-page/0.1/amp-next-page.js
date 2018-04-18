@@ -234,7 +234,7 @@ export class AmpNextPage extends AMP.BaseElement {
 
             installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
             const body = amp.ampdoc.getBody();
-            body.classList.add('i-amphtml-recommended-document');
+            body.classList.add('i-amphtml-next-page-document');
           } catch (e) {
             // TODO(emarchiori): Handle loading errors.
           }
