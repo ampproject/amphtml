@@ -37,6 +37,7 @@
     "amphtml-internal/closure-type-primitives": 2,
     "amphtml-internal/dict-string-keys": 2,
     "amphtml-internal/enforce-private-props": 2,
+    "amphtml-internal/html-template": 2,
     "amphtml-internal/no-array-destructuring": 2,
     "amphtml-internal/no-es2015-number-props": 2,
     "amphtml-internal/no-export-side-effect": 2,

@@ -172,6 +172,7 @@ describe('FixedLayer', () => {
     const children = [];
     const elem = {
       id,
+      ownerDocument: documentApi,
       autoTop: '',
       toString: () => {
         return id;
@@ -304,12 +305,20 @@ describe('FixedLayer', () => {
       cloneNode() {
         return createElement(this.id);
       },
-    };
-    Object.defineProperty(elem, 'offsetTop', {
-      get: () => {
+      get offsetTop() {
         return parseFloat(elem.computedStyle.top);
       },
-    });
+      set innerHTML(html) {
+        if (html === '') {
+          this.firstElementChild = null;
+          return;
+        }
+        // Updating the placeholder means we have to update the tests.
+        expect(html.trim()).to.equal('<i-amphtml-fpa style="display: none" />');
+        this.firstElementChild = createElement('i-amphtml-fpa');
+        this.firstElementChild.style.display = 'none';
+      },
+    };
     return elem;
   }
 
