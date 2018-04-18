@@ -71,6 +71,11 @@ amp-social-share {
   background-color: #25d366;
 }
 
+/* line Styling */
+.amp-social-share-line {
+  background-color: #52b448;
+}
+
 /* SMS Styling */
 .amp-social-share-sms {
   background-color: #CA2B63;
