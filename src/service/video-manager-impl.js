@@ -40,12 +40,12 @@ import {
   listenOncePromise,
 } from '../event-helper';
 import {dev, user} from '../log';
-import {escapeCssSelectorIdent, removeElement} from '../dom';
 import {getMode} from '../mode';
 import {isFiniteNumber} from '../types';
 import {map} from '../utils/object';
 import {once} from '../utils/function';
 import {registerServiceBuilderForDoc} from '../service';
+import {removeElement} from '../dom';
 import {setStyles} from '../style';
 import {startsWith} from '../string';
 import {throttle} from '../utils/rate-limit';
@@ -661,7 +661,7 @@ class VideoEntry {
    */
   autoplayInteractiveVideoBuilt_() {
     const toggleAnimation = playing => {
-      this.vsync_.mutate(() => {
+      this.getVideoForVsync_().mutateElement(() => {
         animation.classList.toggle('amp-video-eq-play', playing);
       });
     };
@@ -672,7 +672,7 @@ class VideoEntry {
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
     const mask = this.createAutoplayMask_();
-    this.vsync_.mutate(() => {
+    this.getVideoForVsync_().mutateElement(() => {
       this.video.element.appendChild(animation);
       this.video.element.appendChild(mask);
     });
@@ -818,7 +818,7 @@ class VideoEntry {
   updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
-    this.video.measureMutateElement(() => {
+    this.getVideoForVsync_().measureMutateElement(() => {
       if (opt_forceVisible == true) {
         this.isVisible_ = true;
       } else {
@@ -833,11 +833,6 @@ class VideoEntry {
         this.videoVisibilityChanged_();
       }
     });
-  }
-
-  /** @return {boolean} */
-  isPlaying() {
-    return this.isPlaying_;
   }
 
   /**
@@ -896,6 +891,11 @@ class VideoEntry {
       };
     });
   }
+
+  /** @return {!BaseElement} */
+  getVideoForVsync_() {
+    return /** @type {!../base-element.BaseElement} */ (this.video);
+  }
 }
 
 
@@ -922,12 +922,12 @@ class AutoFullscreenManager {
     /** @private @const {!./timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private {?R82FullscreenEntryDef} */
+    /** @private {?VideoEntry} */
     this.currently_ = null;
 
     /**
      * Maps rotate-to-fullscreen entry id to entry.
-     * @private @const {!Object<string, !R82FullscreenEntryDef>}
+     * @private @const {!Object<string, !VideoEntry>}
      */
     this.entries_ = {};
 
@@ -1129,7 +1129,7 @@ class CenteredVideoSelector {
       if (isLandscape(this.ampdoc_.win)) {
         return;
       }
-      this.updateVisibility_(e.target);
+      this.updateVisibility_(dev().assertElement(e.target));
     });
 
     // Set always
@@ -1149,7 +1149,6 @@ class CenteredVideoSelector {
       if (i >= 0) {
         this.visibleElements_.splice(i, 1);
       }
-      element.classList.remove(this.className_);
       return;
     }
 
