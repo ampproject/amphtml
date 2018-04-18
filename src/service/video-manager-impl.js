@@ -1103,7 +1103,7 @@ export class AutoFullscreenManager {
       this.visibleElements_.push(element);
     }
 
-    this.select_();
+    this.selectBestCenteredInPortrait_();
   }
 
   /** @private */
@@ -1111,22 +1111,20 @@ export class AutoFullscreenManager {
     if (isLandscape(this.ampdoc_.win)) {
       return;
     }
-    this.select_();
+    this.selectBestCenteredInPortrait_();
   }
 
   /** @private */
-  select_() {
-    const sorted = this.visibleElements_
-        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
-        .sort((a, b) => this.compareIntersectionEntries_(a, b));
-
+  selectBestCenteredInPortrait_() {
     this.currentlyCentered_ = null;
-
-    sorted.forEach((entry, i) => {
-      if (entry.intersectionRatio >= 0.8 && i == 0) {
-        this.currentlyCentered_ = entry.target;
-      }
-    });
+    this.visibleElements_
+        .map(el => Object.assign({target: el}, el.getIntersectionChangeEntry()))
+        .sort((a, b) => this.compareIntersectionEntries_(a, b))
+        .forEach((entry, i) => {
+          if (entry.intersectionRatio >= 0.8 && i == 0) {
+            this.currentlyCentered_ = entry.target;
+          }
+        });
   }
 
   /**
