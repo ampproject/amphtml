@@ -309,6 +309,7 @@ function runTests() {
     c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
+    c.plugins.push('karma-coverage');
     c.reporters = c.reporters.concat(['coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
@@ -335,20 +336,14 @@ function runTests() {
   }
 
   // Run fake-server to test XHR responses.
-  const server = gulp.src(process.cwd())
-      .pipe(webserver({
-        port: 31862,
-        host: 'localhost',
-        directoryListing: true,
-        middleware: [app],
-      })
-          .on('kill', function() {
-            log(yellow(
-                'Shutting down test responses server on localhost:31862'));
-            process.nextTick(function() {
-              process.exit();
-            });
-          }));
+  const server = gulp.src(process.cwd()).pipe(webserver({
+    port: 31862,
+    host: 'localhost',
+    directoryListing: true,
+    middleware: [app],
+  }).on('kill', function() {
+    log(yellow('Shutting down test responses server on localhost:31862'));
+  }));
   log(yellow(
       'Started test responses server on localhost:31862'));
 
@@ -376,10 +371,8 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
-      process.exit(exitCode);
-    } else {
-      resolver();
     }
+    resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
       console./* OK*/log(green(
