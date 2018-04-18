@@ -283,8 +283,13 @@ class AmpAccordion extends AMP.BaseElement {
     // overidden.
     const target = dev().assertElement(event.target);
     const header = dev().assertElement(event.currentTarget);
-    const anchor = closest(target, e => e.tagName == 'A', header);
-    if (anchor === null) {
+    const anchorOrTapTarget = closest(target, e => {
+      return (e.tagName == 'A')
+        || (e.hasAttribute('on')
+          && e.getAttribute('on')./*OK*/matches(/(^|;)\s*tap\s*/));
+    }, header);
+
+    if (anchorOrTapTarget === null) {
       // Don't use clicks on links in header to expand/collapse.
       this.onHeaderPicked_(event);
     }
