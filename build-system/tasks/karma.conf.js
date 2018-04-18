@@ -214,7 +214,6 @@ module.exports = {
     'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
-    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
