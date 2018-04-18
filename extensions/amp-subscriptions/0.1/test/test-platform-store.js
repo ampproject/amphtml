@@ -44,7 +44,8 @@ describes.realWin('Platform store', {}, () => {
   });
 
   it('should call onChange callbacks on every resolve', () => {
-    const cb = sandbox.stub(platformStore.onChangeCallbacks_, 'fire');
+    const cb = sandbox.stub(platformStore.onEntitlementResolvedCallbacks_,
+        'fire');
     platformStore.onChange(cb);
     platformStore.resolveEntitlement('service2',
         new Entitlement('service2', ['product1'], ''));
@@ -294,6 +295,131 @@ describes.realWin('Platform store', {}, () => {
         platformStore.reportPlatformFailure('service2');
       });
       expect(errorSpy).to.be.calledOnce;
+    });
+  });
+
+  describe('getGrantEntitlement', () => {
+    const subscribedMeteredEntitlement = new Entitlement({
+      source: 'local',
+      service: 'local',
+      products: ['local', 'another-product'],
+      subscriptionToken: 'subscribed',
+      loggedIn: false,
+    });
+    it('should resolve with existing entitlement with subscriptions', () => {
+      platformStore.grantStatusEntitlement_ = subscribedMeteredEntitlement;
+      return platformStore.getGrantEntitlement().then(entitlement => {
+        expect(entitlement.json()).to.deep.equal(
+            subscribedMeteredEntitlement.json());
+      });
+    });
+
+    it('should resolve with first entitlement with subscriptions', () => {
+      const meteringEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      platformStore.grantStatusEntitlement_ = meteringEntitlement;
+      platformStore.saveGrantEntitlement_(subscribedMeteredEntitlement);
+      return platformStore.getGrantEntitlement().then(entitlement => {
+        expect(entitlement.json()).to.deep.equal(
+            subscribedMeteredEntitlement.json());
+      });
+    });
+
+    it('should resolve with metered entitlement when no '
+        + 'platform is subscribed', () => {
+      const meteringEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      sandbox.stub(platformStore, 'areAllPlatformsResolved_')
+          .callsFake(() => true);
+      platformStore.saveGrantEntitlement_(meteringEntitlement);
+      return platformStore.getGrantEntitlement().then(entitlement => {
+        expect(entitlement.json()).to.deep.equal(
+            meteringEntitlement.json());
+      });
+    });
+  });
+
+  describe('saveGrantEntitlement_', () => {
+    it('should save first entitlement', () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+    });
+
+    it('should save firther entitlement if new one has subscription '
+        + 'and last one had metering', () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      const nextMeteredEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local', 'another-product'],
+        subscriptionToken: null,
+        loggedIn: false,
+        metering: {
+          'left': 5,
+          'total': 10,
+          'token': 'token',
+        },
+      });
+      const subscribedMeteredEntitlement = new Entitlement({
+        source: 'local',
+        service: 'local',
+        products: ['local', 'another-product'],
+        subscriptionToken: 'subscribed',
+        loggedIn: false,
+      });
+      platformStore.saveGrantEntitlement_(entitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+      platformStore.saveGrantEntitlement_(nextMeteredEntitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(entitlement.json());
+      platformStore.saveGrantEntitlement_(subscribedMeteredEntitlement);
+      expect(platformStore.grantStatusEntitlement_.json())
+          .to.deep.equal(subscribedMeteredEntitlement.json());
     });
   });
 
