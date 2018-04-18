@@ -203,6 +203,11 @@ export class VideoManager {
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
+    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
+    // moment in the element's lifecycle and the promise will resolve
+    // appropriately each time.
+    video.element.signals().signal(VideoEvents.REGISTERED);
+
     // Add a class to element to indicate it implements the video interface.
     video.element.classList.add('i-amphtml-video-interface');
   }
@@ -378,9 +383,6 @@ class VideoEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
-    /** @private @const {!../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
-
     /** @private @const */
     this.actionSessionManager_ = new VideoSessionManager();
 
@@ -433,7 +435,8 @@ class VideoEntry {
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
     listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    element.whenBuilt().then(() => this.onBuilt_());
+    element.signals().whenSignal(VideoEvents.REGISTERED)
+        .then(() => this.onRegister_());
   }
 
   /** Delegates autoplay to a different module. */
@@ -446,12 +449,7 @@ class VideoEntry {
   }
 
   /** @private */
-  onBuilt_() {
-    // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
-    // moment in the element's lifecycle and the promise will resolve
-    // appropriately each time.
-    this.signal_(VideoEvents.REGISTERED);
-
+  onRegister_() {
     if (this.hasAutoFullscreen_()) {
       this.manager_.registerForAutoFullscreen(this);
     }
@@ -719,15 +717,6 @@ class VideoEntry {
   }
 
   /**
-   * @param {string} signal
-   * @private
-   */
-  signal_(signal) {
-    const {element} = this.video;
-    element.signals().signal(signal);
-  }
-
-  /**
    * Called when visibility of a loaded autoplay video changes.
    * @private
    */
@@ -892,7 +881,7 @@ class VideoEntry {
     });
   }
 
-  /** @return {!BaseElement} */
+  /** @return {!../base-element.BaseElement} */
   getVideoForVsync_() {
     return /** @type {!../base-element.BaseElement} */ (this.video);
   }
