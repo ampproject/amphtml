@@ -23,14 +23,14 @@ import {
 } from '../../../src/url';
 import {dict, map} from '../../../src/utils/object';
 import {htmlSanitizer} from '../../../third_party/caja/html-sanitizer';
-import {isExperimentOn} from './experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
-import {urls} from './config';
-import {user} from './log';
+import {urls} from '../../../src/config';
+import {user} from '../../../src/log';
 
 // Configure sanitizer for output of "triple-mustache";a set of allowed tags
 // to be unescaped.
