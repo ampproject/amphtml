@@ -69,10 +69,10 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
       addAttributesToElement(ctaLinks[i],
-          /** @type {!JsonObject} */ (parseJson({'target': '_blank'})));
+          /** @type {!JsonObject} */ (parseJson(`{"target": "_blank"}`)));
       if (!ctaLinks[i].getAttribute('role')) {
         addAttributesToElement(ctaLinks[i],
-            /** @type {!JsonObject} */ (parseJson({'role': 'link'})));
+            /** @type {!JsonObject} */ (parseJson(`{"role": "link"}`)));
       }
     }
 
@@ -80,7 +80,7 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
     for (let i = 0; i < ctaButtons.length; i++) {
       if (!ctaButtons[i].getAttribute('role')) {
         addAttributesToElement(ctaButtons[i],
-            /** @type {!JsonObject} */ (parseJson({'role': 'button'})));
+            /** @type {!JsonObject} */ (parseJson(`{"role": "button"}`)));
       }
     }
   }
