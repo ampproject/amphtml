@@ -452,7 +452,7 @@ describe('amp-mustache template', () => {
             + '<img src="x" onerror="alert(\'XSS\')" />',
       });
       expect(result./*OK*/innerHTML).to.equal(
-        'value = <a target="_top">test</a>');
+          'value = <a target="_top">test</a>');
     });
   });
 
