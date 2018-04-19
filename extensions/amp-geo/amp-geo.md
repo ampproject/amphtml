@@ -123,7 +123,7 @@ Then it's trivial to use CSS select the correct word (i.e., football).
 
 ```html
 <div>
-The game is called <span class='football'>!
+The game is called <span class='football'></span>!
 </div>
 ```
 
