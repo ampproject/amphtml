@@ -219,7 +219,7 @@ To block components, add the `data-block-on-consent` attribute to the AMP compon
 *Example: Blocking the analytics until user accepts consent*
 
 ```html
-<amp-analytics data-block-on-consen
+<amp-analytics data-block-on-consent
   type="googleanalytics">
 </amp-analytics>
 ```
