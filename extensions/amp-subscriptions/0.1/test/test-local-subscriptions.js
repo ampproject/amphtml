@@ -44,6 +44,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     loggedIn,
   };
   const entitlement = Entitlement.parseFromJson(json);
+  entitlement.setCurrentProduct(products[0]);
   const authUrl = 'https://lipsum.com/login/authorize';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
   const serviceConfig = {
@@ -174,10 +175,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       return localSubscriptionPlatform.pingback(entitlement).then(() => {
         expect(urlBuildStub).to.be.calledOnce;
         expect(sendSignalStub).to.be.calledOnce;
-        expect(sendSignalStub.getCall(0).args[0]).to.be
-            .equal(localSubscriptionPlatform.pingbackUrl_);
-        expect(sendSignalStub.getCall(0).args[1].body).to.deep
-            .equal(entitlement.raw);
+        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(
+            localSubscriptionPlatform.pingbackUrl_);
+        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+            JSON.stringify(entitlement.jsonForPingback()));
       });
     });
   });
