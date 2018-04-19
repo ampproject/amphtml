@@ -158,6 +158,9 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
  * rule, while `position:fixed|sticky` is a current runtime limitation since
  * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
  * elements.
+ * TODO(alabiaga): ideally this should also this logic should just be placed
+ * in amp-mustache but we have future plans for this method for usage
+ * elsewhere as well.
  * @const {!RegExp}
  */
 const INVALID_INLINE_STYLE_REGEX =
