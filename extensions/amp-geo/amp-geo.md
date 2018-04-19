@@ -39,13 +39,13 @@ The `amp-geo` component provides country-level geolocation. The `amp-geo` compon
 
 ##### Example: Changing background based on country location
 
-In the following example, we add `<amp-geo>` to determine the user's location so that we can apply the appropriate background for their location.
+In the following example, we add `<amp-geo>` to determine the user's location so that we can display the appropriate flag.
 
 ```html
 <amp-geo layout="nodisplay"></amp-geo>
 ```
 
-If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  We can then use CSS to apply the correct background for Canada:
+If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  We can then use CSS to apply the correct background image for Canada:
 
 ```css
 /* defaults */
@@ -56,7 +56,7 @@ If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-c
 
 ## Operation
 
-The `amp-geo` component uses the country from which the request originated, as an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code. The `amp-geo` component determines this code from the client's IP address. 
+The `amp-geo` component uses the country from which the request originated in the form of an [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code. The `amp-geo` component determines this code from the client's IP address. 
 
 If the country cannot be determined, the value is set to 'unknown'.  If the grouping feature is used at least one group must contain 'unknown'.
 
@@ -123,7 +123,7 @@ Then it's trivial to use CSS select the correct word (i.e., football).
 
 ```html
 <div>
-The game is called <span class='football'>!
+The game is called <span class='football'></span>!
 </div>
 ```
 
@@ -135,7 +135,7 @@ If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-
 <amp-geo layout="nodisplay">
   <script type="application/json">
   {
-   "AMPBind": true,
+    "AMPBind": true,
     "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
       "football": [ "unknown" ]
@@ -166,7 +166,7 @@ The country code is also available via AMP variable substitution:
 
 ### Pre-rendering
 
-The `amp-geo` component supports pre-rendering.  If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` amp-geo respects that value and will not perform any further action, that is, it won't scan country groups or insert `amp-state`.)
+The `amp-geo` component supports pre-rendering.  If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` `amp-geo` respects that value and will not perform any further action, that is, it won't scan country groups or insert `amp-state`.)
 
 However, if the document is served via one of the AMP caches, `amp-geo` removes and replaces any supplied geolocation classes and `amp-state`. This allows publishers to use their own geolocation code when the document is served directly from their origin.
 
