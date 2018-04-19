@@ -27,6 +27,12 @@ export function uzou(global, data) {
   const widgetParams = parseJson(data.widgetParams);
   const placement_code = widgetParams.placement_code;
 
+  const d = global.document.createElement('div');
+  d.className = `uz-${placement_code} uz-ny`;
+
+  const container = global.document.getElementById('c');
+  container.appendChild(d);
+
   global.UzouInjector = {
     url: data['url'] || global.context.canonicalUrl || global.context.sourceUrl,
     ref: data['referrer'] || global.context.referrer,
