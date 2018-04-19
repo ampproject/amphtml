@@ -20,7 +20,7 @@ const path = require('path');
 module.exports = function(context) {
   return {
     MemberExpression: function(node) {
-      const filename = path.basename(context.getFileName());
+      const filename = path.basename(context.getFilename());
       // Ignore specific js files.
       if (/^(keyframes-extractor|fixed-layer|style)\.js/
           .test(filename)) {
