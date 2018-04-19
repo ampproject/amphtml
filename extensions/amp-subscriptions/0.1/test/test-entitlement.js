@@ -92,4 +92,15 @@ describes.realWin('EntitlementClass', {}, () => {
     entitlement.setCurrentProduct('lipsum');
     expect(entitlement.enablesThis()).to.be.false;
   });
+
+  it('should return raw, granStatus and source for pingback', () => {
+    const raw = 'raw';
+    const entitlement = new Entitlement({source, raw, service, products,
+      subscriptionToken, loggedIn});
+    entitlement.setCurrentProduct(products[0]);
+    const pingbackData = entitlement.jsonForPingback();
+    expect(pingbackData.raw).to.be.equal(raw);
+    expect(pingbackData.source).to.be.equal(entitlement.source);
+    expect(pingbackData.grantState).to.be.equal(entitlement.enablesThis());
+  });
 });

@@ -217,7 +217,7 @@ export class LocalSubscriptionPlatform {
         headers: {
           'Content-Type': 'text/plain',
         },
-        body: selectedEntitlement.raw,
+        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
   }

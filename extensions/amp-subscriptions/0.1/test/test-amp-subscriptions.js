@@ -259,9 +259,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
               .callsFake(() => Promise.resolve());
       const selectAndActivateStub =
           sandbox.stub(subscriptionService, 'selectAndActivatePlatform_');
+      const performPingbackStub =
+          sandbox.stub(subscriptionService, 'performPingback_');
       subscriptionService.startAuthorizationFlow_();
       expect(getGrantStatusStub).to.be.calledOnce;
       expect(selectAndActivateStub).to.be.calledOnce;
+      return subscriptionService.platformStore_.getGrantStatus().then(() => {
+        expect(performPingbackStub).to.be.calledOnce;
+      });
     });
 
     it('should not call selectAndActivatePlatform based on param', () => {
@@ -389,6 +394,56 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           () => new SubscriptionPlatform());
       return subscriptionService.initialize_().then(() => {
         expect(fetchEntitlementsStub).to.be.called;
+      });
+    });
+  });
+
+  describe('performPingback_', () => {
+    it('should wait for viewer tracker', () => {
+      const entitlementData = {source: 'local',
+        service: 'local', products, subscriptionToken: 'token'};
+      const entitlement = Entitlement.parseFromJson(entitlementData);
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      subscriptionService.platformStore_.resolvePlatform('local',
+          new SubscriptionPlatform());
+      const entitlementStub = sandbox.stub(subscriptionService.platformStore_,
+          'getGrantEntitlement').callsFake(() => Promise.resolve(entitlement));
+      return subscriptionService.performPingback_().then(() => {
+        expect(entitlementStub).to.be.called;
+      });
+    });
+
+    it('should send pingback with resolved entitlement', () => {
+      const entitlementData = {source: 'local',
+        service: 'local', products, subscriptionToken: 'token'};
+      const entitlement = Entitlement.parseFromJson(entitlementData);
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      const platform = new SubscriptionPlatform();
+      platform.isPingbackEnabled = () => true;
+      subscriptionService.platformStore_.resolvePlatform('local',
+          platform);
+      sandbox.stub(subscriptionService.platformStore_,
+          'getGrantEntitlement').callsFake(() => Promise.resolve(entitlement));
+      const pingbackStub = sandbox.stub(platform, 'pingback');
+      return subscriptionService.performPingback_().then(() => {
+        expect(pingbackStub).to.be.calledWith(entitlement);
+      });
+    });
+
+    it('should send empty pingback if resolved entitlement is null', () => {
+      subscriptionService.viewTrackerPromise_ = Promise.resolve();
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      const platform = new SubscriptionPlatform();
+      platform.isPingbackEnabled = () => true;
+      subscriptionService.platformStore_.resolvePlatform('local',
+          platform);
+      sandbox.stub(subscriptionService.platformStore_,
+          'getGrantEntitlement').callsFake(() => Promise.resolve(null));
+      const pingbackStub = sandbox.stub(platform, 'pingback');
+      return subscriptionService.performPingback_().then(() => {
+        expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
       });
     });
   });
