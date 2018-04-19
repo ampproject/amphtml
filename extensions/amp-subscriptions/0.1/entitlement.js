@@ -88,6 +88,19 @@ export class Entitlement {
   }
 
   /**
+   * Returns json to be used for pingback.
+   *
+   * @return {!JsonObject}
+   */
+  jsonForPingback() {
+    return dict({
+      'raw': this.raw,
+      'source': this.source,
+      'grantState': this.enablesThis(),
+    });
+  }
+
+  /**
    * @param {?string} product
    * @return {boolean}
    */
