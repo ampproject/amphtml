@@ -16,9 +16,10 @@
 
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn, map} from '../../../src/utils/object';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {tryFocus} from '../../../src/dom';
@@ -46,6 +47,12 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {Element} */
     this.sections_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
+
+    /** @private {!Object} */
+    this.shouldHandleClickCache_ = map();
   }
 
   /** @override */
@@ -55,6 +62,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
 
     // sessionStorage key: special created id for this element, this.sessionId_.
@@ -278,21 +286,41 @@ class AmpAccordion extends AMP.BaseElement {
    * Handles clicks on an accordion header to expand/collapse its content.
    */
   clickHandler_(event) {
-    // Need to support clicks on any children of the header except
-    // for on links, which should not have their default behavior
-    // overidden.
-    const target = dev().assertElement(event.target);
-    const header = dev().assertElement(event.currentTarget);
-    const anchorOrTapTarget = closest(target, e => {
-      return (e.tagName == 'A')
-        || (e.hasAttribute('on')
-          && e.getAttribute('on')./*OK*/matches(/(^|;)\s*tap\s*/));
-    }, header);
-
-    if (anchorOrTapTarget === null) {
+    if (this.cachedShouldHandleClick_(event)) {
       // Don't use clicks on links in header to expand/collapse.
       this.onHeaderPicked_(event);
     }
+  }
+
+  cachedShouldHandleClick_(event) {
+    const target = dev().assertElement(event.target);
+    const header = dev().assertElement(event.currentTarget);
+
+    const targetId = target.getAttribute('id');
+    if (targetId) {
+      if (hasOwn(this.shouldHandleClickCache_, targetId)) {
+        this.shouldHandleClickCache_[targetId] =
+          this.shouldHandleClick_(target, header);
+      }
+      return this.shouldHandleClickCache_[targetId];
+    } else {
+      return this.shouldHandleClick_(target, header);
+    }
+  }
+
+  /**
+   * We should support clicks on any children of the header except for on
+   * links or elements with tap targets, which should not have their default
+   * behavior overidden.
+   * @param {!Element} target
+   * @param {!Element} header
+   * @returns {boolean}
+   * @private
+   */
+  shouldHandleClick_(target, header) {
+    const hasAnchor = !!closest(target, e => (e.tagName == 'A'), header);
+    const hasTapAction = this.action_.hasAction(target,'tap', header);
+    return !hasAnchor && !hasTapAction;
   }
 
   /**
