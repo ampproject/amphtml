@@ -30,10 +30,16 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {
+  isProxyOrigin,
+  parseUrl,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/sanitizer';
+import {rewriteAttributeValue} from '../../../src/sanitizer';
+import {urls} from './config';
 
 const TAG = 'amp-bind';
 
@@ -950,6 +956,70 @@ export class Bind {
   }
 
   /**
+   * Non-HTTPs image URLs are rewritten via proxy.
+   * @param {string} attrValue
+   * @param {!Location} baseUrl
+   * @param {boolean} isProxyHost
+   * @return {string}
+   */
+  resolveImageUrlAttr_(attrValue, baseUrl, isProxyHost) {
+    const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
+
+    // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
+    // do not arrive here - already stripped by the sanitizer.
+    if (src.protocol == 'data:' || isProxyOrigin(src) || !isProxyHost) {
+      return src.href;
+    }
+
+    // Rewrite as a proxy URL.
+    return `${urls.cdn}/i/` +
+        (src.protocol == 'https:' ? 's/' : '') +
+        encodeURIComponent(src.host) +
+        src.pathname + (src.search || '') + (src.hash || '');
+  }
+
+  /**
+   * Similar to @code {sanitizer#rewriteAttributeValue()} but actually updates
+   * the element and modifies other related attribute(s) for special cases,
+   * i.e. `target` for <a>.
+   * @param {!Element} element
+   * @param {string} attrName
+   * @param {string} attrValue
+   * @param {!Location=} opt_location
+   * @return {string}
+   */
+  rewriteAttributesForElement_(
+    element, attrName, attrValue, opt_location) {
+    /** @private @const {string} */
+    const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
+    const tag = element.tagName.toLowerCase();
+    const attr = attrName.toLowerCase();
+    const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
+    // When served from proxy (CDN), changing an <a> tag from a hash link to a
+    // non-hash link requires updating `target` attribute per cache modification
+    // rules. @see amp-cache-modifications.md#url-rewrites
+    const isProxy = isProxyOrigin(opt_location || self.location);
+    if (isProxy && tag === 'a' && attr === 'href') {
+      const oldValue = element.getAttribute(attr);
+      const newValueIsHash = rewrittenValue[0] === '#';
+      const oldValueIsHash = oldValue && oldValue[0] === '#';
+      if (newValueIsHash && !oldValueIsHash) {
+        // Save the original value of `target` so it can be restored (if needed).
+        if (!element[ORIGINAL_TARGET_VALUE]) {
+          element[ORIGINAL_TARGET_VALUE] = element.getAttribute('target');
+        }
+        element.removeAttribute('target');
+      } else if (oldValueIsHash && !newValueIsHash) {
+        // Restore the original value of `target` or default to `_top`.
+        element.setAttribute(
+            'target', element[ORIGINAL_TARGET_VALUE] || '_top');
+      }
+    }
+    element.setAttribute(attr, rewrittenValue);
+    return rewrittenValue;
+  }
+
+  /**
    * Performs CDN rewrites for the given mutation and updates the element.
    * Returns the rewrite of `value` on success. Otherwise, returns undefined.
    * @see amp-cache-modifications.md#url-rewrites
@@ -957,14 +1027,14 @@ export class Bind {
    * @param {string} property
    * @param {string} value
    * @return {string|undefined}
-   * @private
    */
   rewriteAttributes_(element, property, value) {
     // Rewrite attributes if necessary. Not done in worker since it relies on
     // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
     let rewrittenValue;
     try {
-      rewrittenValue = rewriteAttributesForElement(element, property, value);
+      rewrittenValue =
+          this.rewriteAttributesForElement_(element, property, value);
     } catch (e) {
       const error = user().createError(`${TAG}: "${value}" is not a ` +
           `valid result for [${property}]`, e);
