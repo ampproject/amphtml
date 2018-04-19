@@ -376,10 +376,10 @@ export class SafeframeHostApi {
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
       'windowCoords_l': 0,
-      'frameCoords_t': ampAdBox.top,
-      'frameCoords_r': ampAdBox.right,
-      'frameCoords_b': ampAdBox.bottom,
-      'frameCoords_l': ampAdBox.left,
+      'frameCoords_t': iframeBox.top,
+      'frameCoords_r': iframeBox.right,
+      'frameCoords_b': iframeBox.bottom,
+      'frameCoords_l': iframeBox.left,
       'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
