@@ -290,6 +290,7 @@ export class AmpConsent extends AMP.BaseElement {
       this.consentStateManager_.registerConsentInstance(instanceId);
 
       let isConsentRequiredPromise;
+
       if (this.consentConfig_[instanceId]['checkConsentHref']) {
         isConsentRequiredPromise = this.getConsentRemote_(instanceId).then(
             response => {
@@ -298,6 +299,9 @@ export class AmpConsent extends AMP.BaseElement {
       } else {
         const geoGroup =
             this.consentConfig_[instanceId]['promptIfUnknownForGeoGroup'];
+        user().assert(geoGroup,
+            'neither checkConsentHref nor ' +
+            'promptIfUnknownForGeoGroup is defined');
         isConsentRequiredPromise = this.isConsentRequiredGeo_(geoGroup).then(
             promptIfUnknown => {
               this.consentRequired_[instanceId] = !!promptIfUnknown;
@@ -320,7 +324,7 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Returns a promise that if user is in the give geoGroup
+   * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
    * @return {Promise<boolean>}
    */
