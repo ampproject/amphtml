@@ -34,3 +34,5 @@ For the widget design or configuration details, please contact your account mana
 
 Supported parameters:
 
+- widget-params
+  - JSON string including your placement code.
