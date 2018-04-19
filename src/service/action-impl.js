@@ -508,8 +508,8 @@ export class ActionService {
     if (this.whitelist_) {
       const id = `${targetType}.${method}`;
       if (!this.whitelist_.includes(id)) {
-        return Promise.reject(user().error(TAG_, `"${id}" is not whitelisted ` +
-            ` (${this.whitelist_}).`));
+        this.error_(`"${id}" is not whitelisted (${this.whitelist_}).`);
+        return null;
       }
     }
 
