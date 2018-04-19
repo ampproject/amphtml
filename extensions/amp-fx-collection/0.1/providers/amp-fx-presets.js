@@ -69,24 +69,17 @@ export const Presets = {
   },
   'fly-in-bottom': {
     isFxTypeSupported(win) {
-      return true;
+      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
+          'amp-fx-fly-in experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin')) {
-        return;
-      }
-      const margin = element.getAttribute('data-margin');
-      user().assert(parseFloat(margin) >= 0 && parseFloat(margin) < 1,
-          'data-margin must be a number and be between 0 and 1 for: %s',
-          element);
     },
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
       // Outside viewport
       if (!entry.positionRect ||
-          entry.positionRect.top >
-            (1 - fxElement.getMarginStart()) * fxElement.adjustedViewportHeight_) {
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -102,7 +95,106 @@ export const Presets = {
         setStyles(fxElement.getElement(), {
           'transition-duration': fxElement.getDuration(),
           'transition-timing-function': fxElement.getEasing(),
-          'transform': 'translateY(-150px)',
+          'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+        });
+      });
+    },
+  },
+  'fly-in-left': {
+    isFxTypeSupported(win) {
+      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
+          'amp-fx-fly-in experiment is not turned on.');
+    },
+    userAsserts(element) {
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+        fxElement.setIsMutateScheduled(false);
+        // Translate the element offset pixels.
+        setStyles(fxElement.getElement(), {
+          'transition-duration': fxElement.getDuration(),
+          'transition-timing-function': fxElement.getEasing(),
+          'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
+        });
+      });
+    },
+  },
+  'fly-in-right': {
+    isFxTypeSupported(win) {
+      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
+          'amp-fx-fly-in experiment is not turned on.');
+    },
+    userAsserts(element) {
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+        fxElement.setIsMutateScheduled(false);
+        // Translate the element offset pixels.
+        setStyles(fxElement.getElement(), {
+          'transition-duration': fxElement.getDuration(),
+          'transition-timing-function': fxElement.getEasing(),
+          'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
+        });
+      });
+    },
+  },
+  'fly-in-top': {
+    isFxTypeSupported(win) {
+      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
+          'amp-fx-fly-in experiment is not turned on.');
+    },
+    userAsserts(element) {
+    },
+    update(entry) {
+      const fxElement = this;
+      dev().assert(fxElement.adjustedViewportHeight_);
+      // Outside viewport
+      if (!entry.positionRect ||
+          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+        return;
+      }
+
+      if (fxElement.isMutateScheduled()) {
+        return;
+      }
+
+      // If above the threshold of trigger-position
+      fxElement.setIsMutateScheduled(true);
+      fxElement.resources_.mutateElement(fxElement.getElement(), function() {
+        fxElement.setIsMutateScheduled(false);
+        // Translate the element offset pixels.
+        setStyles(fxElement.getElement(), {
+          'transition-duration': fxElement.getDuration(),
+          'transition-timing-function': fxElement.getEasing(),
+          'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
         });
       });
     },

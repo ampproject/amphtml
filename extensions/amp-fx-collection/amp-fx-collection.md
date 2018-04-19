@@ -156,6 +156,36 @@ In the below example, the animation is fully dependent on scroll and the `<div>`
   </div>
 ```
 
+### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top (experimental)
+
+The `fly-in` effects allow an element's position to be translated by a specified amount once it is in the viewport.
+
+##### data-duration (optional)
+
+This is the duration over which the animation takes places. The default value is `Xms`.
+
+##### data-easing (optional)
+
+This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
+* “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
+* “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
+* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00) (default)
+* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+or specify a `custom-bezier()` input
+
+##### data-fly-in-distance (optional)
+
+This parameter determines the translation to take place. The value is specified in `<percent>` of viewport. The default value is `X%`.
+
+In the below example, the element is translated along the Y axis across `20%` of the viewport. 
+
+```html
+  <div amp-fx="fly-in-bottom" data-fly-in-distance="20%">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
+
+
 ## Validation
 
 See [amp-fx-collection rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-collection/validator-amp-fx-collection.protoascii) in the AMP validator specification.
