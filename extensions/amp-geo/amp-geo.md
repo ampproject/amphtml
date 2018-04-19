@@ -74,7 +74,7 @@ The `ISOCountryGroups` key allows selections by groups of country codes.
 
 ```html
 <amp-geo layout="nodisplay">
-  <script type="application-json">
+  <script type="application/json">
   {
     "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -99,7 +99,7 @@ In the following example, we determine if the user is in a "soccer" country and 
 
 ```html
 <amp-geo layout="nodisplay">
-  <script type="application-json">
+  <script type="application/json">
   {
     "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -133,7 +133,7 @@ If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-
 
 ```html
 <amp-geo layout="nodisplay">
-  <script type="application-json">
+  <script type="application/json">
   {
    "AMPBind": true,
     "ISOCountryGroups": {
