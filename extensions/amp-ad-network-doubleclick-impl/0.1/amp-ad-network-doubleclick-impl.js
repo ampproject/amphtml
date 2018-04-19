@@ -24,6 +24,7 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
+  INVALID_SPSA_RESPONSE,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
   assignAdUrlToError,
@@ -351,6 +352,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
 
+    /** @private {boolean} */
+    this.isSinglePageStoryAd_ = false;
+
     /** @private {boolean} whether safeframe forced via tag */
     this.forceSafeframe_ = false;
     if ('forceSafeframe' in this.element.dataset) {
@@ -440,6 +444,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       addExperimentIdToElement(sfPreloadExpId, this.element);
       this.preloadSafeframe_ = sfPreloadExpId == '21061135';
     }
+
+    this.isSinglePageStoryAd_ = true || 'ampSpsa' in this.element.dataset;
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
@@ -544,6 +550,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'spsa': this.isSinglePageStoryAd_ ? '1' : null,
     }, googleBlockParameters(this));
   }
 
@@ -1338,6 +1345,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
+  }
+
+  /** @override */
+  getAmpAdMetadata(creative) {
+    const metadata = super.getAmpAdMetadata(creative);
+    if (!this.isSinglePageStoryAd_) {
+      return metadata;
+    }
+    if (metadata && metadata.cta && metadata.outlink) {
+      this.element.setAttribute('data-amp-spsa-cta', metadata.cta);
+      this.element.setAttribute('data-amp-spsa-outlink', metadata.outlink);
+      return metadata;
+    }
+    // Ensure that this fully drops the creative, and halts any further
+    // rendering.
+    Promise.reject(INVALID_SPSA_RESPONSE);
+    return null;
   }
 }
 

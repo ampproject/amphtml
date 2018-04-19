@@ -96,6 +96,9 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 /** @type {string} */
 export const NETWORK_FAILURE = 'NETWORK-FAILURE';
 
+/** @type {string} */
+export const INVALID_SPSA_RESPONSE = 'INVALID-SPSA-RESPONSE';
+
 /** @enum {string} */
 export const XORIGIN_MODE = {
   CLIENT_CACHE: 'client_cache',
