@@ -139,7 +139,7 @@ By default, all UI elements contained within `amp-consent` have `display:none` a
 
 The prompt UI is defined within the consent instance config. The `promptUI` attribute refers to a child element of `<amp-consent>` by its `id`.
 
-*Example*: Displays a prompt user interface 
+*Example*: Displays a prompt user interface
 
 ```html
 <amp-consent layout="nodisplay" id="consent-element">
@@ -216,15 +216,12 @@ The `<amp-consent>` element can be used to block any other AMP components on the
 
 To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
-*Example: Blocking the ad until user accepts consent*
+*Example: Blocking the analytics until user accepts consent*
 
 ```html
-<amp-ad data-block-on-consent
-  data-slot="/30497360/a4a/a4a_native"
-  height="250"
-  type="doubleclick"
-  width="300">
-</amp-ad>
+<amp-analytics data-block-on-consent
+  type="googleanalytics">
+</amp-analytics>
 ```
 
 AMP may support customizing blocking behaviors in the future. Because of this, the value of `data-block-on-consent` is reserved for now, please don't specify a value to the attribute.
