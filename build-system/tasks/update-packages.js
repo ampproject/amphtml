@@ -49,6 +49,19 @@ function patchWebAnimations() {
 }
 
 /**
+ * Installs custom lint rules in build-system/eslint-rules to node_modules.
+ */
+function installCustomEslintRules() {
+  const customRuleDir = 'build-system/eslint-rules';
+  const customRuleName = 'eslint-plugin-amphtml-internal';
+  exec('yarn link', {'stdio': 'ignore', 'cwd': customRuleDir});
+  exec('yarn link ' + customRuleName, {'stdio': 'ignore'});
+  if (!process.env.TRAVIS) {
+    log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
+  }
+}
+
+/**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  * Follows it up with a call to patch web-animations-js if necessary.
  */
@@ -70,6 +83,7 @@ function updatePackages() {
     }
   }
   patchWebAnimations();
+  installCustomEslintRules();
 }
 
 gulp.task(
