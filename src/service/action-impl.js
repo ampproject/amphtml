@@ -406,11 +406,11 @@ export class ActionService {
    * Checks if the given element has registered a particular action type.
    * @param {!Element} target
    * @param {string} actionEventType
-   * @param {!Element=} opt_parent
+   * @param {!Element=} opt_stopAt
    * @returns {boolean}
    */
-  hasAction(target, actionEventType, opt_parent) {
-    return !!this.findAction_(target, actionEventType, opt_parent);
+  hasAction(target, actionEventType, opt_stopAt) {
+    return !!this.findAction_(target, actionEventType, opt_stopAt);
   }
 
   /**
@@ -535,14 +535,14 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
-   * @param {!Element=} opt_parent
+   * @param {!Element=} opt_stopAt
    * @return {?{node: !Element, actionInfos: !Array<!ActionInfoDef>}}
    */
-  findAction_(target, actionEventType, opt_parent) {
+  findAction_(target, actionEventType, opt_stopAt) {
     // Go from target up the DOM tree and find the applicable action.
     let n = target;
     while (n) {
-      if (opt_parent && n == opt_parent) {
+      if (opt_stopAt && n == opt_stopAt) {
         return null;
       }
       const actionInfos = this.matchActionInfos_(n, actionEventType);
