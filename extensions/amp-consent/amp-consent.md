@@ -50,7 +50,7 @@ limitations under the License.
 
 ## Overview
 
-As a publisher, you can use the <amp-consent> component to implement user controls. The component allows you to:
+As a publisher, you can use the `<amp-consent>` component to implement user controls. The component allows you to:
 
 * Determine if the user should be asked to interact with the control.
 * Capture the user’s consent decision.
