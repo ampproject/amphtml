@@ -22,13 +22,13 @@ import {parseJson} from '../src/json';
 * @param {!Object} data
 */
 export function uzou(global, data) {
-  varidateData(data, ['widgetParams'], []);
+  validateData(data, ['widgetParams'], []);
 
-  const widgetParams = parseJson(data.widgetParams);
-  const placement_code = widgetParams.placement_code;
+  const widgetParams = parseJson(data['widgetParams']);
+  const placementCode = widgetParams['placementCode'];
 
   const d = global.document.createElement('div');
-  d.className = `uz-${placement_code} uz-ny`;
+  d.className = `uz-${placementCode} uz-ny`;
 
   const container = global.document.getElementById('c');
   container.appendChild(d);
@@ -36,7 +36,7 @@ export function uzou(global, data) {
   global.UzouInjector = {
     url: data['url'] || global.context.canonicalUrl || global.context.sourceUrl,
     ref: data['referrer'] || global.context.referrer,
-  }
+  };
 
-  loadScript(global, `https://speee-ad.akamaized.net/tag/${placement_code}/js/outer-frame.min.js`);
+  loadScript(global, `https://speee-ad.akamaized.net/tag/${placementCode}/js/outer-frame.min.js`);
 }

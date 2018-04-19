@@ -837,7 +837,7 @@ export const adConfig = {
 
   uzou: {
     preconnect: [
-      'https://speee-ad.akamaized.net'
+      'https://speee-ad.akamaized.net',
     ],
   },
 

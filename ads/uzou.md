@@ -22,7 +22,7 @@ limitations under the License.
 ```html
 <amp-ad witdh="100" height="100"
         type="uzou"
-        data-widget-params='{"placement_code": "your_placement_code"}'
+        data-widget-params='{"placementCode": "your_placement_code"}'
 </amp-ad>
 ```
 
