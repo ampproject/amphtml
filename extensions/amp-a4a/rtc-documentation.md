@@ -179,8 +179,8 @@ For custom URLs specified by a publisher directly on the RTC Config, they specif
               "vendorA": {"SLOT_ID": "1"},
               },
             "urls": [
-              "https://www.AmpPublisher.biz/targetingA", // An RTC callout with no errorReportingUrl
-              {"url": "https://www.AmpPublisher.biz/targetingB", // An RTC callout with corresponding errorReportingUrl
+              "https://www.AmpPublisher.biz/targetingA",
+              {"url": "https://www.AmpPublisher.biz/targetingB",
                "errorReportingUrl": "https://www.AmpPublisher.biz?e=ERROR_TYPE&h=HREF"}
             ],
             "timeoutMillis": 750}'>
