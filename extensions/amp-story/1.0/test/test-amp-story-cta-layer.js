@@ -63,4 +63,36 @@ describes.realWin('amp-story-cta-layer', {
     });
   });
 
+  it('should not allow a cta layer on the first page', () => {
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+
+    const pageElements =
+    win.document.getElementsByTagName('amp-story-page');
+
+    pageElements[0].appendChild(ampStoryCtaLayer.element);
+
+    ampStoryCtaLayer.layoutCallback().then(layer => {
+      allowConsoleError(() => {
+        return expect(layer).to.throw();
+      });
+    });
+  });
+
+  it('should allow a cta layer on the second or third page', () => {
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+
+    const pageElements =
+    win.document.getElementsByTagName('amp-story-page');
+
+    pageElements[1].appendChild(ampStoryCtaLayer.element);
+    pageElements[2].appendChild(ampStoryCtaLayer.element);
+
+    ampStoryCtaLayer.layoutCallback().then(layer => {
+      return expect(layer).to.not.throw();
+    });
+  });
+
 });
