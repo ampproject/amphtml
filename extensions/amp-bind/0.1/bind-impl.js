@@ -38,8 +38,7 @@ import {
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
-import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {urls} from './config';
+import {urls} from '../../../src/config';
 
 const TAG = 'amp-bind';
 
