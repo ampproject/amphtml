@@ -30,6 +30,7 @@ export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
    * @param {!JsonObject} scoreConfig
+   * @param {!./entitlement.Entitlement} fallbackEntitlement
    */
   constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
 
