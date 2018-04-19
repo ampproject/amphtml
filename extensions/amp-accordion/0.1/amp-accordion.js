@@ -19,7 +19,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 import {tryFocus} from '../../../src/dom';
@@ -51,8 +51,6 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {!Object} */
-    this.shouldHandleClickCache_ = map();
   }
 
   /** @override */
@@ -286,25 +284,8 @@ class AmpAccordion extends AMP.BaseElement {
    * Handles clicks on an accordion header to expand/collapse its content.
    */
   clickHandler_(event) {
-    if (this.cachedShouldHandleClick_(event)) {
-      // Don't use clicks on links in header to expand/collapse.
+    if (this.shouldHandleClick_(event)) {
       this.onHeaderPicked_(event);
-    }
-  }
-
-  cachedShouldHandleClick_(event) {
-    const target = dev().assertElement(event.target);
-    const header = dev().assertElement(event.currentTarget);
-
-    const targetId = target.getAttribute('id');
-    if (targetId) {
-      if (hasOwn(this.shouldHandleClickCache_, targetId)) {
-        this.shouldHandleClickCache_[targetId] =
-          this.shouldHandleClick_(target, header);
-      }
-      return this.shouldHandleClickCache_[targetId];
-    } else {
-      return this.shouldHandleClick_(target, header);
     }
   }
 
@@ -312,12 +293,13 @@ class AmpAccordion extends AMP.BaseElement {
    * We should support clicks on any children of the header except for on
    * links or elements with tap targets, which should not have their default
    * behavior overidden.
-   * @param {!Element} target
-   * @param {!Element} header
+   * @param {!Event} event
    * @returns {boolean}
    * @private
    */
-  shouldHandleClick_(target, header) {
+  shouldHandleClick_(event) {
+    const target = dev().assertElement(event.target);
+    const header = dev().assertElement(event.currentTarget);
     const hasAnchor = !!closest(target, e => (e.tagName == 'A'), header);
     const hasTapAction = this.action_.hasAction(target,'tap', header);
     return !hasAnchor && !hasTapAction;
