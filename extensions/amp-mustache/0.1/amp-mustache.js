@@ -18,11 +18,11 @@ import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeTagsForAmpMustache} from '../../../src/sanitizer';
+import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../../src/sanitizer';
 
 // Configure sanitizer for output of "triple-mustache";a set of allowed tags
 // to be unescaped.
-setUnescapedSanitizier(sanitizeTagsForAmpMustache);
+setUnescapedSanitizier(sanitizeTagsForTripleMustache);
 
 
 /**

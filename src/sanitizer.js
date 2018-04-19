@@ -211,8 +211,12 @@ const INVALID_INLINE_STYLE_REGEX =
  * @return {string}
  */
 export function sanitizeHtml(html) {
+<<<<<<< HEAD
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
+=======
+  const tagPolicy = htmlSanitizer.makeTagPolicy();
+>>>>>>> fixes
   const output = [];
   let ignore = 0;
 
