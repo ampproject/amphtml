@@ -37,6 +37,7 @@ describes.realWin('amp-consent', {
   let jsonMockResponses;
   let storageValue;
   let requestBody;
+  let ISOCountryGroups;
 
   beforeEach(() => {
     doc = env.win.document;
@@ -61,6 +62,13 @@ describes.realWin('amp-consent', {
           },
         });
       }};
+    });
+
+    resetServiceForTesting(win, 'geo');
+    registerServiceBuilder(win, 'geo', function() {
+      return Promise.resolve({
+        'ISOCountryGroups': ISOCountryGroups,
+      });
     });
 
     resetServiceForTesting(win, 'storage');
@@ -181,6 +189,43 @@ describes.realWin('amp-consent', {
         'promptIfUnknown': true,
         'prompt': true,
       });
+    });
+  });
+
+  describe('amp-geo integration', () => {
+    let defaultConfig;
+    let ampConsent;
+    beforeEach(() => {
+      defaultConfig = {
+        'consents': {
+          'ABC': {
+            'promptIfUnknownForGeoGroup': 'testGroup',
+          },
+        },
+      };
+      const consentElement = doc.createElement('amp-consent');
+      consentElement.setAttribute('id', 'amp-consent');
+      consentElement.setAttribute('layout', 'nodisplay');
+      const scriptElement = doc.createElement('script');
+      scriptElement.setAttribute('type', 'application/json');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      consentElement.appendChild(scriptElement);
+      doc.body.appendChild(consentElement);
+      ampConsent = new AmpConsent(consentElement);
+    });
+
+    it('in geo group', function* () {
+      ISOCountryGroups = ['unknown', 'testGroup'];
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(true);
+    });
+
+    it('not in geo group', function* () {
+      ISOCountryGroups = ['unknown'];
+      ampConsent.buildCallback();
+      yield macroTask();
+      expect(ampConsent.consentRequired_['ABC']).to.equal(false);
     });
   });
 

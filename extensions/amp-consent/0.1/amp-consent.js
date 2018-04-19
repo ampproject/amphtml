@@ -288,13 +288,32 @@ export class AmpConsent extends AMP.BaseElement {
     for (let i = 0; i < instanceKeys.length; i++) {
       const instanceId = instanceKeys[i];
       this.consentStateManager_.registerConsentInstance(instanceId);
-      const promise = this.getConsentRemote_(instanceId).then(response => {
-        this.parseConsentResponse_(instanceId, response);
+
+      let isConsentRequiredPromise;
+
+      if (this.consentConfig_[instanceId]['checkConsentHref']) {
+        isConsentRequiredPromise = this.getConsentRemote_(instanceId).then(
+            response => {
+              this.parseConsentResponse_(instanceId, response);
+            });
+      } else {
+        const geoGroup =
+            this.consentConfig_[instanceId]['promptIfUnknownForGeoGroup'];
+        user().assert(geoGroup,
+            'neither checkConsentHref nor ' +
+            'promptIfUnknownForGeoGroup is defined');
+        isConsentRequiredPromise = this.isConsentRequiredGeo_(geoGroup).then(
+            promptIfUnknown => {
+              this.consentRequired_[instanceId] = !!promptIfUnknown;
+            });
+      }
+      const handlePromptPromise = isConsentRequiredPromise.then(() => {
         this.handlePromptUI_(instanceId);
       }).catch(unusedError => {
         // TODO: Handle errors
       });
-      initPromptPromises.push(promise);
+
+      initPromptPromises.push(handlePromptPromise);
     }
 
     Promise.all(initPromptPromises).then(() => {
@@ -302,6 +321,19 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.enableInteractions_();
+  }
+
+  /**
+   * Returns a promise that if user is in the given geoGroup
+   * @param {string} geoGroup
+   * @return {Promise<boolean>}
+   */
+  isConsentRequiredGeo_(geoGroup) {
+    return Services.geoForOrNull(this.win).then(geo => {
+      user().assert(geo,
+          'requires <amp-geo> to use promptIfUnknownForGeoGroup');
+      return (geo.ISOCountryGroups.indexOf(geoGroup) >= 0);
+    });
   }
 
   /**
