@@ -72,7 +72,7 @@ export const Presets = {
       user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
           'amp-fx-fly-in experiment is not turned on.');
     },
-    userAsserts(element) {
+    userAsserts(unusedElement) {
     },
     update(entry) {
       const fxElement = this;
@@ -105,7 +105,7 @@ export const Presets = {
       user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
           'amp-fx-fly-in experiment is not turned on.');
     },
-    userAsserts(element) {
+    userAsserts(unusedElement) {
     },
     update(entry) {
       const fxElement = this;
@@ -138,7 +138,7 @@ export const Presets = {
       user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
           'amp-fx-fly-in experiment is not turned on.');
     },
-    userAsserts(element) {
+    userAsserts(unusedElement) {
     },
     update(entry) {
       const fxElement = this;
@@ -171,7 +171,7 @@ export const Presets = {
       user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
           'amp-fx-fly-in experiment is not turned on.');
     },
-    userAsserts(element) {
+    userAsserts(unusedElement) {
     },
     update(entry) {
       const fxElement = this;

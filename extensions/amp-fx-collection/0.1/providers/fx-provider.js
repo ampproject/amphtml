@@ -19,7 +19,9 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
-import {convertEasingKeyword, defaultDurationValues, flyInDistanceValues, installStyles, marginValues, resolvePercentageToNumber} from './amp-fx-presets-utils';
+import {convertEasingKeyword, defaultDurationValues, flyInDistanceValues,
+  installStyles, marginValues, resolvePercentageToNumber}
+  from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
@@ -130,7 +132,8 @@ export class FxElement {
 
       /** @private {string} */
       this.duration_ = element.hasAttribute('data-duration') ?
-        element.getAttribute('data-duration') : defaultDurationValues(this.fxType_);
+        element.getAttribute('data-duration') :
+        defaultDurationValues(this.fxType_);
     }
 
     // Initialize these variables only for fly in animations
@@ -138,7 +141,7 @@ export class FxElement {
       /** @private {number} */
       this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
         parseFloat(element.getAttribute('data-fly-in-distance')) :
-        flyInDistanceValues[this.fxType_];
+        flyInDistanceValues(this.fxType_);
     }
 
     /** @private {boolean} */

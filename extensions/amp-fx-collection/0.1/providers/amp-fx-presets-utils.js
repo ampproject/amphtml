@@ -122,7 +122,7 @@ export function flyInDistanceValues(fxType) {
     case 'fly-in-right':
       return '5';
     default:
-    return '1';
+      return '1';
   }
 }
 
