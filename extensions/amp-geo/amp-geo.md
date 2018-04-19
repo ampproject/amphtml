@@ -39,10 +39,10 @@ The `amp-geo` component provides country-level geolocation. The `amp-geo` compon
 
 ##### Example: Changing background based on country location
 
-In the following example, we add the `<amp-geo>` to determine the user's location so that we can apply the appropriate background for their location.
+In the following example, we add `<amp-geo>` to determine the user's location so that we can apply the appropriate background for their location.
 
 ```html
-<amp-geo></amp-geo>
+<amp-geo layout="nodisplay"></amp-geo>
 ```
 
 If the user is in Canada, the `amp-geo` component applies the `amp-iso-country-ca` CSS class  to the `body` tag.  We can then use CSS to apply the correct background for Canada:
@@ -73,8 +73,8 @@ Optionally, you can include a JSON configuration script in the `amp-geo` tag.
 The `ISOCountryGroups` key allows selections by groups of country codes.
 
 ```html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
     "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -98,8 +98,8 @@ If country groups are specified, `amp-geo` iterates through the groups. For any 
 In the following example, we determine if the user is in a "soccer" country and display a "football" message for those users.
 
 ```html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
     "ISOCountryGroups": {
       "soccer": [ "au", "ca", "ie", "nz", "us", "za" ],
@@ -132,8 +132,8 @@ The game is called <span class='football'>!
 If the `AMPBind` key is present in the configuration, `amp-geo` inserts an `amp-state` tag containing the current country and group information.  Using the football example above, set the  `AMPBind` flag to true to enable `amp-bind` integration.
 
 ```html
-<amp-geo>
-  <script type="application-json">
+<amp-geo layout="nodisplay">
+  <script type="application/json">
   {
    "AMPBind": true,
     "ISOCountryGroups": {
