@@ -1975,11 +1975,10 @@ describes.realWin('amp-analytics', {
 
     this.timeout(400);
 
-    const runResourceTimingTest = function(
-      entries, config, expectedPing, timeout = 100) {
+    const runResourceTimingTest = function(entries, config, expectedPing) {
       sandbox.stub(win.performance, 'getEntriesByType').returns(entries);
       const analytics = getAnalyticsTag(config);
-      return waitForSendRequest(analytics, timeout, 2).then(() => {
+      return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
       });
     };

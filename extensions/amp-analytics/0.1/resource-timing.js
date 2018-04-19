@@ -74,18 +74,6 @@ function yieldThread(fn) {
 }
 
 /**
- * @param {!Window} win
- * @return {number} A timestamp relative to navigationStart with sub-millisecond
- *     precision if the navigation timing API is supported (so the value is no
- *     necessarily an integer). If the nav timing API is not supported, this
- *     will return 0.
- */
-function performanceTimestamp(win) {
-  return win.performance && win.performance.now
-    ? win.performance.now() : 0;
-}
-
-/**
  * Checks whether the given object is a valid resource timing spec.
  * @param {!JsonObject} spec
  * @return {boolean}
@@ -123,9 +111,6 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  if (!win.performance || !win.performance.getEntriesByType) {
-    return [];
-  }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
     win.performance.getEntriesByType('resource'));
 }
@@ -275,7 +260,10 @@ function serialize(entries, resourceTimingSpec, win) {
  * @return {!Promise<string>}
  */
 export function serializeResourceTiming(win, resourceTimingSpec) {
-  if (resourceTimingSpec['done'] ||
+  // Check that the performance timing API exists before and that the spec is
+  // valid before proceeding. If not, we simply return an empty string.
+  if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
+      !win.performance.getEntriesByType ||
       !validateResourceTimingSpec(resourceTimingSpec)) {
     resourceTimingSpec['done'] = true;
     return Promise.resolve('');
@@ -291,7 +279,7 @@ export function serializeResourceTiming(win, resourceTimingSpec) {
   // Update responseAfter for next time to avoid reporting the same resource
   // multiple times.
   resourceTimingSpec['responseAfter'] =
-      Math.max(responseAfter, performanceTimestamp(win));
+      Math.max(responseAfter, win.performance.now());
 
   // Filter resources that are too early.
   entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
