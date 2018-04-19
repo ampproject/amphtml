@@ -35,9 +35,9 @@ export const Presets = {
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -45,7 +45,6 @@ export const Presets = {
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
       const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
-      const top = entry.positionRect.top;
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
@@ -205,22 +204,21 @@ export const Presets = {
           'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin-start')) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      if (!marginStart) {
         return;
       }
-      const marginStart = element.getAttribute('data-margin-start');
-      user().assert(parseFloat(marginStart) >= 0 &&
-        parseFloat(marginStart) < 100, 'data-margin-start must be a number ' +
+      user().assert(marginStart >= 0 && marginStart < 100,
+          'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
     },
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top >
-            (1 - fxElement.getMarginStart()) *
-              fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -247,31 +245,30 @@ export const Presets = {
           'amp-fx-fade-in-scroll experiment is not turned on.');
     },
     userAsserts(element) {
-      if (!element.hasAttribute('data-margin-start') &&
-        !element.hasAttribute('data-margin-end')) {
+      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      const marginEnd = parseFloat(element.getAttribute('data-margin-end'));
+
+      if (!marginStart && !marginEnd) {
         return;
       }
-      const marginStart = element.getAttribute('data-margin-start');
-      user().assert(parseFloat(marginStart) >= 0 &&
-        parseFloat(marginStart) < 100, 'data-margin-start must be a number ' +
+      user().assert(marginStart >= 0 && marginStart < 100,
+          'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
-      const marginEnd = element.getAttribute('data-margin-end');
-      user().assert(parseFloat(marginEnd) >= 0 &&
-        parseFloat(marginEnd) < 100, 'data-margin-start must be a number ' +
+      user().assert(marginEnd >= 0 && marginEnd < 100,
+          'data-margin-start must be a percentage value ' +
           'and be between 0% and 100% for: %s', element);
 
-      user().assert(parseFloat(marginEnd) > parseFloat(marginStart),
+      user().assert(marginEnd > marginStart,
           'data-margin-end must be greater than data-margin-start for: %s',
           element);
     },
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
-      if (!entry.positionRect ||
-          (entry.positionRect.top >
-            (1 - fxElement.getMarginStart()) *
-              fxElement.adjustedViewportHeight_)) {
+      if (!top || (top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_)) {
         return;
       }
 
@@ -284,7 +281,6 @@ export const Presets = {
         return;
       }
       // Translate the element offset pixels.
-      const top = entry.positionRect.top;
       const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.

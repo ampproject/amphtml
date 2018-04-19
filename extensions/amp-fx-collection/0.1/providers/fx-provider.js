@@ -280,6 +280,9 @@ export class FxElement {
   }
 
   /**
+   * Boolean dictating whether or not the amp-fx preset has the `repeat`
+   * attribute set. The `repeat` attribute allows the animation to be fully
+   * dependent on scroll.
    * @returns {boolean}
    */
   hasRepeat() {
