@@ -26,6 +26,7 @@ import {
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  INVALID_SPSA_RESPONSE,
   XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -1260,6 +1261,62 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       element.setAttribute('data-force-safeframe', '1');
       expect(new AmpAdNetworkDoubleclickImpl(element)
           .getNonAmpCreativeRenderingMethod()).to.equal(XORIGIN_MODE.SAFEFRAME);
+    });
+  });
+
+  describe('#getAmpAdMetadata', () => {
+    let sandbox;
+    let baseMetadata = {customElementExtensions: ['amp-foo']};
+    const outlink = 'http://www.myadlandingpage.com/1234';
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+      });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      baseMetadata = {customElementExtensions: ['amp-foo']};
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => sandbox.restore());
+
+    it('should pass the same object as given by super', () => {
+      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+          unusedCreative => baseMetadata);
+      expect(impl.getAmpAdMetadata('unusedCreative'))
+          .to.deep.equal(baseMetadata);
+    });
+
+    it('should throw due to missing CTA', () => {
+      baseMetadata.outlink = outlink;
+      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+          unusedCreative => baseMetadata);
+      impl.isSinglePageStoryAd_ = true;
+      expect(impl.getAmpAdMetadata('unusedCreative'))
+          .to.throw(INVALID_SPSA_RESPONSE);
+    });
+
+    it('should throw due to missing outlink', () => {
+      baseMetadata.cta = '0';
+      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+          unusedCreative => baseMetadata);
+      impl.isSinglePageStoryAd_ = true;
+      expect(impl.getAmpAdMetadata('unusedCreative'))
+          .to.throw(INVALID_SPSA_RESPONSE);
+    });
+
+    it('should set appropriate attributes and return metadata object', () => {
+      baseMetadata.outlink = outlink;
+      baseMetadata.cta = '0';
+      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+          unusedCreative => baseMetadata);
+      impl.isSinglePageStoryAd_ = true;
+      expect(impl.getAmpAdMetadata('unusedCreative'))
+          .to.deep.equal(baseMetadata);
+      expect(element.dataset.ampSpsaCta).to.equal('0');
+      expect(element.dataset.ampSpsaOutlink).to.equal(outlink);
     });
   });
 });

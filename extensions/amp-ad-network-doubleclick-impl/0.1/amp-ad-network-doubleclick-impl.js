@@ -445,7 +445,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.preloadSafeframe_ = sfPreloadExpId == '21061135';
     }
 
-    this.isSinglePageStoryAd_ = true || 'ampSpsa' in this.element.dataset;
+    this.isSinglePageStoryAd_ = 'ampSpsa' in this.element.dataset;
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
@@ -1360,8 +1360,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     // Ensure that this fully drops the creative, and halts any further
     // rendering.
-    Promise.reject(INVALID_SPSA_RESPONSE);
-    return null;
+    throw new Error(INVALID_SPSA_RESPONSE);
   }
 }
 

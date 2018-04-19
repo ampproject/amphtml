@@ -809,8 +809,9 @@ export class AmpA4A extends AMP.BaseElement {
           return creativeMetaDataDef;
         })
         .catch(error => {
-          switch (error) {
+          switch (error.message || error) {
             case NETWORK_FAILURE: return null;
+            case INVALID_SPSA_RESPONSE:
             case NO_CONTENT_RESPONSE: return {
               minifiedCreative: '',
               customElementExtensions: [],
