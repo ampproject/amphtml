@@ -468,11 +468,13 @@ class VideoEntry {
    */
   hasAutoFullscreen_() {
     const {element} = this.video;
-    user().assert(this.video.isInteractive(),
+    if (!element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN)) {
+      return false;
+    }
+    return user().assert(this.video.isInteractive(),
         'Only interactive videos are allowed to enter fullscreen on rotate.',
-        'Set the `controls` attribute to enable.',
-        this.video);
-    return element.hasAttribute(VideoAttributes.ROTATE_TO_FULLSCREEN);
+        'Set the `controls` attribute on %s to enable.',
+        element);
   }
 
   /**
