@@ -30,8 +30,9 @@ export class PlatformStore {
   /**
    * @param {!Array<string>} expectedServiceIds
    * @param {!JsonObject} scoreConfig
+   * @param {!./entitlement.Entitlement} fallbackEntitlement
    */
-  constructor(expectedServiceIds, scoreConfig) {
+  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -62,6 +63,9 @@ export class PlatformStore {
 
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
+
+    /** @private @canst {!./entitlement.Entitlement} */
+    this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign({
@@ -381,7 +385,10 @@ export class PlatformStore {
     }
 
     if (this.failedPlatforms_.length == this.serviceIds_.length) {
-      user().error(TAG, 'All platforms have failed to resolve');
+      user().warn(TAG, 'All platforms have failed to resolve, '
+          + 'using fallback entitlement for local platform');
+      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
+          this.fallbackEntitlement_);
     }
   }
 }

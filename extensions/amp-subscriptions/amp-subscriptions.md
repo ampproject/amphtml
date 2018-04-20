@@ -141,12 +141,19 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
   ],
   "score": {
     "supportsViewer": 10,
+  },
+  "fallbackEntitlement": {
+    "source": "fallback",
+    "service": "local",
+    "products": ["norcal_tribune.com:basic",...],
+    "subscriptionToken": "subscription-token",
+    "loggedIn": true/false,
   }
 }
 </script>
 ```
 
-The key is the `services` property that contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+The `services` property contains an array of service configurations. There must be one "local" service and zero or more vendor services.
 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
@@ -157,6 +164,9 @@ So if no platforms are selected, we compete all the platforms based on platforms
 1. Does the platform support the Viewer
 
 You can add `"baseScore"` < 100 key in any service configuration in case you want to increase `"baseScore"` of any platform so that it wins over other score evaluation factors.
+
+## Error fallback
+In case if all configured platforms fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` platform. The document's unblocking will be based on this fallback entitlement.
 
 ### The "local" service configuration
 

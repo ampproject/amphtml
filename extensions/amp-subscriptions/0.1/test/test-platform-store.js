@@ -32,11 +32,19 @@ describes.realWin('Platform store', {}, () => {
     products: ['product3'], subscriptionToken: '', loggedIn: false});
   entitlementsForService1.setCurrentProduct(currentProduct);
   entitlementsForService2.setCurrentProduct(currentProduct);
+  const fallbackEntitlement = new Entitlement({
+    source: 'local',
+    raw: 'raw',
+    service: 'local',
+    products: [currentProduct],
+    subscriptionToken: 'token',
+    loggedIn: false,
+  });
 
   beforeEach(() => {
     platformStore = new PlatformStore(serviceIds, {
       supportsViewer: 9,
-    });
+    }, fallbackEntitlement);
   });
 
   it('should instantiate with the service ids', () => {
@@ -286,15 +294,19 @@ describes.realWin('Platform store', {}, () => {
   describe('reportPlatformFailure_', () => {
     let errorSpy;
     beforeEach(() => {
-      errorSpy = sandbox.spy(user(), 'error');
+      errorSpy = sandbox.spy(user(), 'warn');
     });
 
-    it('should report fatal error if all platforms fail', () => {
+    it('should report warning if all platforms fail and resolve '
+        + 'local with fallbackEntitlement', () => {
+      const platform = new SubscriptionPlatform();
+      sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+      sandbox.stub(platformStore, 'getLocalPlatform').callsFake(() => platform);
       platformStore.reportPlatformFailure('service1');
-      allowConsoleError(() => {
-        platformStore.reportPlatformFailure('service2');
-      });
+      platformStore.reportPlatformFailure('local');
       expect(errorSpy).to.be.calledOnce;
+      expect(platformStore.entitlements_['local'].json())
+          .to.deep.equal(fallbackEntitlement.json());
     });
   });
 
@@ -378,7 +390,7 @@ describes.realWin('Platform store', {}, () => {
           .to.deep.equal(entitlement.json());
     });
 
-    it('should save firther entitlement if new one has subscription '
+    it('should save further entitlement if new one has subscription '
         + 'and last one had metering', () => {
       const entitlement = new Entitlement({
         source: 'local',

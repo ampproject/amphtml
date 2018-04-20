@@ -54,6 +54,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         serviceId: 'google.subscription',
       },
     ],
+    fallbackEntitlement: {
+      source: 'local',
+      products,
+      subscriptionToken: 'token',
+      loggedIn: false,
+      meteringData: null,
+    },
   };
 
   beforeEach(() => {
@@ -445,6 +452,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return subscriptionService.performPingback_().then(() => {
         expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
       });
+    });
+  });
+
+  describe('initializePlatformStore_', () => {
+    it('should initialize platform store with the given ids', () => {
+      subscriptionService.platformConfig_ = serviceConfig;
+      const entitlement = Entitlement.parseFromJson(
+          serviceConfig.fallbackEntitlement);
+      subscriptionService.initializePlatformStore_(['local']);
+      expect(subscriptionService.platformStore_.serviceIds_)
+          .to.be.deep.equal(['local']);
+      expect(subscriptionService.platformStore_.fallbackEntitlement_.json())
+          .to.be.deep.equal(entitlement.json());
     });
   });
 });
