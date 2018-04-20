@@ -223,7 +223,6 @@ export class AmpImg extends BaseElement {
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
- * @return {undefined}
  */
 export function installImg(win) {
   registerElement(win, 'amp-img', AmpImg);
