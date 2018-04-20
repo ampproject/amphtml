@@ -857,7 +857,6 @@ describe('Resource idleRenderOutsideViewport', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox = sinon.sandbox.create();
     idleRenderOutsideViewport = sandbox.stub();
     element = {
       idleRenderOutsideViewport,
