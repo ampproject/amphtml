@@ -29,7 +29,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
-    registerServiceBuilder(env.win, 'story-store-v01', () => storeService);
+    registerServiceBuilder(env.win, 'story-store', () => storeService);
     hasBookend = false;
     navigationState = new NavigationState(env.win,
         // Not using `Promise.resolve` since we need synchronicity.

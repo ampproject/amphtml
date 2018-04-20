@@ -36,7 +36,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store-v01', () => storeService);
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     isSystemShareSupported = false;
 

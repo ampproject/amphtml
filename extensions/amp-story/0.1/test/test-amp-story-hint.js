@@ -30,7 +30,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     win = env.win;
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store-v01', () => storeService);
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     sandbox.stub(Services, 'vsyncFor').callsFake(
         () => ({mutate: task => task()}));
