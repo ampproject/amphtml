@@ -238,7 +238,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
-      return '';
+      return Promise.resolve('');
     }
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.

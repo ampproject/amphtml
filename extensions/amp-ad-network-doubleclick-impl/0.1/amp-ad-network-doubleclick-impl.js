@@ -510,8 +510,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * @param {?CONSENT_POLICY_STATE} consentState
    * @return {!Object<string,string|boolean|number>}
+   * @visibleForTesting
    */
-  getPageParameters_(consentState) {
+  getPageParameters(consentState) {
     return {
       'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
           consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
@@ -614,11 +615,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
         this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
-      return '';
+      return Promise.resolve('');
     }
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
-      return '';
+      return Promise.resolve('');
     }
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
@@ -641,7 +642,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
-                  this.getPageParameters_(consentState), rtcParams));
+                  this.getPageParameters(consentState), rtcParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -1407,7 +1408,7 @@ export function constructSRARequest_(win, doc, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters_(instances[0].consentState_)),
+                instances[0].getPageParameters(instances[0].consentState_)),
             startTime);
       });
 }
@@ -1415,7 +1416,7 @@ export function constructSRARequest_(win, doc, instances) {
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Object<string, *>}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function constructSRABlockParameters(instances) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};

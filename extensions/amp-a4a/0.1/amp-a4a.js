@@ -16,7 +16,7 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {
-  CONSENT_POLICY_STATE,
+  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
   getConsentPolicyState,
 } from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
@@ -662,17 +662,21 @@ export class AmpA4A extends AMP.BaseElement {
             return this.getResource().whenWithinRenderOutsideViewport();
           }
         })
-        // This block returns the ad URL, if one is available.
-        /** @return {!Promise<?string>} */
+        // Possibly block on amp-consent.
+        /** @return {!Promise<?CONSENT_POLICY_STATE>} */
         .then(() => {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
-          const consentPromise = consentPolicyId ?
+          return consentPolicyId ?
             getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
             Promise.resolve();
-          return /** @type {!Promise<?string>} */(
-            consentPromise.then(consentState => this.getAdUrl(
-                consentState, this.tryExecuteRealTimeConfig_(consentState))));
+        })
+        // This block returns the ad URL, if one is available.
+        /** @return {!Promise<?string>} */
+        .then(consentState => {
+          checkStillCurrent();
+          return /** @type {!Promise<?string>} */(this.getAdUrl(
+              consentState, this.tryExecuteRealTimeConfig_(consentState)));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1746,15 +1750,11 @@ export class AmpA4A extends AMP.BaseElement {
    */
   tryExecuteRealTimeConfig_(consentState) {
     if (!!AMP.maybeExecuteRealTimeConfig) {
-      if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
-        user().info(TAG, 'RTC suppressed due to insufficient consentState');
-      } else {
-        try {
-          return AMP.maybeExecuteRealTimeConfig(
-              this, this.getCustomRealTimeConfigMacros_(), consentState);
-        } catch (err) {
-          user().error(TAG, 'Could not perform Real Time Config.', err);
-        }
+      try {
+        return AMP.maybeExecuteRealTimeConfig(
+            this, this.getCustomRealTimeConfigMacros_(), consentState);
+      } catch (err) {
+        user().error(TAG, 'Could not perform Real Time Config.', err);
       }
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(TAG, 'RTC not supported for ad network ' +

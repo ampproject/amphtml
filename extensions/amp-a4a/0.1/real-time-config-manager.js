@@ -142,7 +142,8 @@ export function maybeExecuteRealTimeConfig_(
   // still allowed.
   if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
       consentState == CONSENT_POLICY_STATE.UNKNOWN) {
-    user().info(TAG, 'RTC suppressed due to insufficient consentState');
+    user().info(
+        TAG, 'RTC suppressed due to unknown or insufficient consentState');
     return;
   }
   customMacros['TIMEOUT'] = () => rtcConfig['timeoutMillis'];
