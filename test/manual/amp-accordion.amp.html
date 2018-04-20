@@ -19,7 +19,9 @@
   }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+
 </head>
 <body>
   <h1>AMP #0</h1>
@@ -61,5 +63,32 @@
     </section>
   </amp-accordion>
 
+<h1>amp-image-lightbox in accordion header test</h1>
+  <amp-accordion>
+    <section expanded>
+      <header>
+        <h4>Section 1</h4>
+        <amp-img
+           on="tap:lightbox1"
+           role="button"
+           tabindex="0"
+           src="https://picsum.photos/1600/900"
+           alt="Picture of a dog"
+           layout="fixed"
+           width="400" height="300">
+        </amp-img>
+      </header>
+      <div>
+        <p>Bunch of awesome content.</p>
+      </div>
+    </section>
+    <section>
+      <div>
+        <h4>Section 2</h4>
+      </div>
+      <div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
+    </section>
+   </amp-accordion>
+   <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 </body>
 </html>
