@@ -137,7 +137,7 @@ describes.realWin('amp-youtube', {
     it('should pass data-param-* attributes to the iframe src', () => {
       return getYt({
         'data-videoid': datasource,
-        'data-param-autoplay': '1',
+        'autoplay': '1',
         'data-param-my-param': 'hello world',
       }).then(yt => {
         const iframe = yt.querySelector('iframe');
