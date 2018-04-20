@@ -170,10 +170,9 @@ The `amp-geo` JavaScript file is served with a 30 minute cache lifetime ( `Cache
 
 ### Pre-rendering 
 
-The `amp-geo` component supports pre-rendering. If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` `amp-geo` respects that value. `amp-geo` will use the supplied country and configuration to supply data to cooperating AMP extensions (e.g. `amp-consent`).
-If a pre-rendered country code is detected the document will not be modified by  `amp-geo` to add classes for country group or `amp-state`.
+The `amp-geo` component supports pre-rendering. If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` `amp-geo` respects that value. `amp-geo` will use the supplied country and configuration to supply data to cooperating AMP extensions (e.g. `amp-consent`). If a pre-rendered country code is detected the document will not be modified by  `amp-geo` to add classes for country group or `amp-state`.
 
-However, if the document is served via one of the AMP caches, `amp-geo` removes and replaces any supplied geolocation classes and `amp-state`. This allows publishers to use their own geolocation code when the document is served directly from their origin while retaining dynamic configuration when served from a cache.
+However, if the document is served via one of the [AMP caches](https://github.com/ampproject/amphtml/blob/master/caches.json), `amp-geo` removes and replaces any supplied geolocation classes and `amp-state`. This allows publishers to use their own geolocation code when the document is served directly from their origin while retaining dynamic configuration when served from a cache.
 
 Caches that wish to pre-render `amp-geo` should open an issue to be removed from the pre-render override.
 
@@ -183,7 +182,7 @@ Publishers and caches that re-host AMP javascript files must implement server si
 
 The file served from `cdn.ampproject.org` should not be used as a base for patching as it will have already been patched when downloaded. Instead the base `./dist/v0/amp-geo-0.1.js` file should be used.
 
-The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` should be replaced at serving time with the 2 letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code corresponding to the requesting IP address.   This value should be padded to match the original length to avoid breaking the `amp-geo-0.1.max.js.map` file. If the country cannot be determined "unknown" country can be indicated by either leaving the file un-patched or patching with a string of spaces of equal length.
+The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with the lowercase 2 letter [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2 "ISO 3166-1 alpha-2 ") country code corresponding to the requesting IP address. This value should be padded to match the original length to avoid breaking the `amp-geo-0.1.max.js.map` file. If the country cannot be determined "unknown" country can be indicated by either leaving the file un-patched or patching with a string of spaces of equal length.
 
 ### Debugging
 
