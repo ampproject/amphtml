@@ -43,10 +43,19 @@ export class PlatformStore {
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
-    this.onChangeCallbacks_ = new Observable();
+    this.onEntitlementResolvedCallbacks_ = new Observable();
 
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
+
+    /** @private @const {Observable} */
+    this.onGrantStateResolvedCallbacks_ = new Observable();
+
+    /** @private {?Entitlement} */
+    this.grantStatusEntitlement_ = null;
+
+    /** @private {?Promise<?Entitlement>} */
+    this.grantStatusEntitlementPromise_ = null;
 
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
@@ -111,7 +120,7 @@ export class PlatformStore {
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
-    this.onChangeCallbacks_.add(callback);
+    this.onEntitlementResolvedCallbacks_.add(callback);
   }
 
   /**
@@ -129,7 +138,7 @@ export class PlatformStore {
       this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
     }
     // Call all onChange callbacks.
-    this.onChangeCallbacks_.fire({serviceId, entitlement});
+    this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
   }
 
   /**
@@ -157,6 +166,7 @@ export class PlatformStore {
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
         if (entitlement.enablesThis()) {
+          this.saveGrantEntitlement_(entitlement);
           return resolve(true);
         }
       }
@@ -168,6 +178,7 @@ export class PlatformStore {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
           if (entitlement.enablesThis()) {
+            this.saveGrantEntitlement_(entitlement);
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
             resolve(false);
@@ -177,6 +188,49 @@ export class PlatformStore {
     });
 
     return this.grantStatusPromise_;
+  }
+
+  /**
+   * Checks and saves the entitlement for grant status
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  saveGrantEntitlement_(entitlement) {
+    // The entitlement will be stored either if its the first one
+    // or last one was metered and new one has full subscription.
+    if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
+      && (this.grantStatusEntitlement_.metering
+          && entitlement.subscriptionToken))) {
+      this.grantStatusEntitlement_ = entitlement;
+      this.onGrantStateResolvedCallbacks_.fire();
+    }
+  }
+
+  /**
+   * Returns the entitlement which unlocked the document
+   * @returns {!Promise<?Entitlement>}
+   */
+  getGrantEntitlement() {
+    if (this.grantStatusEntitlementPromise_) {
+      return (this.grantStatusEntitlementPromise_);
+    }
+
+    this.grantStatusEntitlementPromise_ = new Promise(resolve => {
+      if ((this.grantStatusEntitlement_
+          && this.grantStatusEntitlement_.subscriptionToken)
+          || this.areAllPlatformsResolved_()) {
+        resolve(this.grantStatusEntitlement_);
+      } else {
+        this.onGrantStateResolvedCallbacks_.add(() => {
+          if (this.grantStatusEntitlement_.subscriptionToken
+              || this.areAllPlatformsResolved_()) {
+            resolve(this.grantStatusEntitlement_);
+          }
+        });
+      }
+    });
+
+    return this.grantStatusEntitlementPromise_;
   }
 
   /**

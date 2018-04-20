@@ -227,7 +227,6 @@ export class Log {
    * Reports an error message.
    * @param {string} tag
    * @param {...*} var_args
-   * @return {!Error|undefined}
    */
   error(tag, var_args) {
     const error = this.error_.apply(this, arguments);

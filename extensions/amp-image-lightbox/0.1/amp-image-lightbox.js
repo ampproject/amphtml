@@ -229,6 +229,36 @@ export class ImageViewer {
   }
 
   /**
+   * @param {!Element} sourceElement
+   * @param {?Element} sourceImage
+   * @return {number}
+   * @private
+   */
+  getSourceWidth_(sourceElement, sourceImage) {
+    if (sourceElement.hasAttribute('width')) {
+      return parseInt(sourceElement.getAttribute('width'), 10);
+    } else {
+      return sourceImage ? sourceImage.naturalWidth
+        : sourceElement./*OK*/offsetWidth;
+    }
+  }
+
+  /**
+   * @param {!Element} sourceElement
+   * @param {?Element} sourceImage
+   * @return {number}
+   * @private
+   */
+  getSourceHeight_(sourceElement, sourceImage) {
+    if (sourceElement.hasAttribute('height')) {
+      return parseInt(sourceElement.getAttribute('height'), 10);
+    } else {
+      return sourceImage ? sourceImage.naturalHeight
+        : sourceElement./*OK*/offsetHeight;
+    }
+  }
+
+  /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
@@ -236,8 +266,8 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
+    this.sourceWidth_ = this.getSourceWidth_(sourceElement, sourceImage);
+    this.sourceHeight_ = this.getSourceHeight_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
     Object.keys(this.ariaAttributes_).forEach(key => {
