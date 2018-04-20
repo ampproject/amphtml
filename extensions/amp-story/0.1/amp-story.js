@@ -231,7 +231,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
-        this.win, 'story-variable-v01', () => this.variableService_.get());
+        this.win, 'story-variable', () => this.variableService_.get());
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
