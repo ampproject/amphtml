@@ -1,5 +1,3 @@
-diff --git a/third_party/caja/html-sanitizer.js b/third_party/caja/html-sanitizer.js
-index d8a2a955a..31401ef49 100644
 --- a/third_party/caja/html-sanitizer.js
 +++ b/third_party/caja/html-sanitizer.js
 @@ -990,6 +990,7 @@ html4.ATTRIBS = {
