@@ -27,7 +27,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {dev, user} from '../../../src/log';
@@ -144,7 +143,8 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.measure());
+      this.loadPromise_.then(() => this.measure())
+          .then(() => this.unregisterPanningGesture_());
     }
   }
 
@@ -156,7 +156,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
     this.loadPromise_ = this.sourceAmpImage_.signals()
         .whenSignal(CommonSignals.LOAD_END).then(() => {
-          return this.vsync_.mutatePromise(() => {
+          return this.mutateElement(() => {
             if (!this.image_) {
               this.image_ = this.element.ownerDocument.createElement('img');
               this.image_.classList.add('i-amphtml-image-viewer-image');
@@ -318,47 +318,48 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @return {!Promise}
    */
   measure() {
-    return this.vsync_.runPromise({
-      measure: () => {
-        this.elementBox_ = layoutRectFromDomRect(this.element
-            ./*OK*/getBoundingClientRect());
+    return this.measureElement(
+        () => {
+          this.elementBox_ = layoutRectFromDomRect(this.element
+              ./*OK*/getBoundingClientRect());
 
-        const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
-        let height = Math.min(this.elementBox_.width / sourceAspectRatio,
-            this.elementBox_.height);
-        let width = Math.min(this.elementBox_.height * sourceAspectRatio,
-            this.elementBox_.width);
+          const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+          let height = Math.min(this.elementBox_.width / sourceAspectRatio,
+              this.elementBox_.height);
+          let width = Math.min(this.elementBox_.height * sourceAspectRatio,
+              this.elementBox_.width);
 
-        if (Math.abs(width - this.sourceWidth_) <= 16
+          if (Math.abs(width - this.sourceWidth_) <= 16
           && Math.abs(height - this.sourceHeight_ <= 16)) {
-          width = this.sourceWidth_;
-          height = this.sourceHeight_;
-        }
+            width = this.sourceWidth_;
+            height = this.sourceHeight_;
+          }
 
-        this.imageBox_ = layoutRectLtwh(
-            Math.round((this.elementBox_.width - width) / 2),
-            Math.round((this.elementBox_.height - height) / 2),
-            Math.round(width),
-            Math.round(height));
+          this.imageBox_ = layoutRectLtwh(
+              Math.round((this.elementBox_.width - width) / 2),
+              Math.round((this.elementBox_.height - height) / 2),
+              Math.round(width),
+              Math.round(height));
 
-        // Adjust max scale to at least fit the screen.
-        const elementBoxRatio = this.elementBox_.width
+          // Adjust max scale to at least fit the screen.
+          const elementBoxRatio = this.elementBox_.width
           / this.elementBox_.height;
-        const maxScale = Math.max(
-            elementBoxRatio / sourceAspectRatio,
-            sourceAspectRatio / elementBoxRatio
-        );
-        this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+          const maxScale = Math.max(
+              elementBoxRatio / sourceAspectRatio,
+              sourceAspectRatio / elementBoxRatio
+          );
+          this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
-        // Reset zoom and pan.
-        this.startScale_ = this.scale_ = 1;
-        this.startX_ = this.posX_ = 0;
-        this.startY_ = this.posY_ = 0;
-        this.updatePanZoomBounds_(this.scale_);
-      },
-      mutate: () => {
+          // Reset zoom and pan.
+          this.startScale_ = this.scale_ = 1;
+          this.startX_ = this.posX_ = 0;
+          this.startY_ = this.posY_ = 0;
+          this.updatePanZoomBounds_(this.scale_);
+        }).then(() => {
+      const image = dev().assertElement(this.image_);
+      return this.mutateElement(() => {
         // Set the actual dimensions of the image
-        st.setStyles(dev().assertElement(this.image_), {
+        st.setStyles(image, {
           top: st.px(this.imageBox_.top),
           left: st.px(this.imageBox_.left),
           width: st.px(this.imageBox_.width),
@@ -367,7 +368,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
         // Update translation and scaling
         this.updatePanZoom_();
-      },
+      },image);
     }).then(() => this.updateSrc_());
   }
 
@@ -391,9 +392,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return Services.timerFor(this.win).promise(1).then(() => {
+    return this.mutateElement(() => {
       this.image_.setAttribute('src', src);
-      return this.image_;
     });
   }
 
