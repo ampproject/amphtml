@@ -598,6 +598,46 @@ describe('Action findAction', () => {
   });
 });
 
+describe('Action hasAction', () => {
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = actionService();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('returns true if the target element has the target action', () => {
+    const element = document.createElement('div');
+    element.setAttribute('on', 'event1:action1');
+    expect(action.hasAction(element, 'event1')).to.equal(true);
+  });
+
+  it('returns true if an intermediate element has target action', () => {
+    const child = document.createElement('div');
+    const element = document.createElement('div');
+    element.appendChild(child);
+    element.setAttribute('on', 'event1:action1');
+    const parent = document.createElement('div');
+    parent.appendChild(element);
+    parent.setAttribute('on', 'event2:action2');
+    expect(action.hasAction(element, 'event1', parent)).to.equal(true);
+    expect(action.hasAction(element, 'event2', parent)).to.equal(false);
+  });
+
+  it('returns false if the target element does not have the target action',
+      () => {
+        const element = document.createElement('div');
+        element.setAttribute('on', 'event1:action1');
+        expect(action.hasAction(element, 'event2')).to.equal(false);
+      });
+
+});
+
 
 describe('Action method', () => {
   let sandbox;
