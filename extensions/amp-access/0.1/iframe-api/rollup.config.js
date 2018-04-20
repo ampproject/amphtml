@@ -6,7 +6,7 @@ export default {
   entry: './amp-iframe-api-export.js',
   format: 'umd',
   sourceMap: true,
-  moduleName: 'amp-access-iframe-api',
+  moduleName: 'AmpAccessIframeApi',
   dest: 'build/index.js',
   plugins: [
     babel({

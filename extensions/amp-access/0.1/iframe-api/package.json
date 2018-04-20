@@ -6,6 +6,9 @@
   "license": "Apache-2.0",
   "main": "build/index.min.js",
   "jsnext:main": "amp-iframe-api-export.js",
+  "scripts": {
+    "build": "./node_modules/.bin/rollup -c rollup.config.js && cp ./build/index.js ../../../../dist.3p/current/amp-iframe-api-export.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api/"
