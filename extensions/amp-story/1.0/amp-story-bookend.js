@@ -57,8 +57,9 @@ const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 
-// TODO(#14591): Clean when bookend API v1 is deprecated.
-const BOOKEND_VERSION_2 = 'v2.0';
+// TODO(#14591): Clean when bookend API v0.1 is deprecated.
+const BOOKEND_VERSION_1 = 'v1.0';
+const BOOKEND_VERSION_0 = 'v0.1';
 const BOOKEND_VERSION_KEY = 'bookend-version';
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -253,6 +254,9 @@ export class Bookend {
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
   }
 
   /**
@@ -373,17 +377,17 @@ export class Bookend {
           if (!response) {
             return null;
           }
-          // TODO(#14591): Clean when bookend API v1 is deprecated.
-          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_2) {
+          // TODO(#14591): Clean when bookend API v0.1 is deprecated.
+          if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
             this.config_ = {
-              [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_2,
+              [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
               components: BookendComponent
                   .buildFromJson(response['components']),
             };
           } else {
-            // TODO(#14667): Write doc regarding amp-story bookend v2.0.
-            console.warn('Version 1 of the amp-story bookend is deprecated. ' +
-                'Use version 2.');
+            // TODO(#14667): Write doc regarding amp-story bookend v1.0.
+            console.warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
+            `-bookend is deprecated. Use ${BOOKEND_VERSION_1}.`);
             this.config_ = {
               shareProviders: response['share-providers'],
               relatedArticles:
@@ -499,10 +503,10 @@ export class Bookend {
     this.assertBuilt_();
     this.isConfigRendered_ = true;
 
-    if (bookendConfig[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_2) {
+    if (bookendConfig[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
       this.renderComponents_(bookendConfig.components);
     } else {
-      // TODO(#14591): Remove when bookend API v1 is deprecated.
+      // TODO(#14591): Remove when bookend API v0.1 is deprecated.
       this.setRelatedArticles_(bookendConfig.relatedArticles);
     }
   }
@@ -524,11 +528,19 @@ export class Bookend {
    * @private
    */
   renderComponents_(components) {
-    this.vsync_.mutate(() => {
-      this.getInnerContainer_().appendChild(
-          renderSimpleTemplate(this.win_.document,
-              BookendComponent.buildTemplates(components)));
-    });
+    let container;
+
+    const measureContainer = () => {
+      container = this.getInnerContainer_();
+    };
+
+    const mutateContainer = () => {
+      container.appendChild(
+          BookendComponent.buildTemplates(components, this.win_.document));
+    };
+
+    this.resources_.measureMutateElement(
+        this.bookendEl_, measureContainer, mutateContainer);
   }
 
   /** @return {!Element} */

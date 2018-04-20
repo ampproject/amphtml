@@ -322,21 +322,25 @@ export class ShareWidget {
   }
 
   /**
-   * TODO(#14591): Remove when bookend API v1 is deprecated.
-   * If using the bookend API v2, converts the contents to match with the bookend API v1.
-   * @param {*} providers
-   * @return {!Array<!JsonObject|string>} providers
+   * TODO(#14591): Remove when bookend API v0.1 is deprecated.
+   * If using the bookend API v1.0, converts the contents to match with the bookend API v0.1.
+   * @param {!Array<!Object|string>} providers
+   * @return {!Object<string, boolean|!Object<string, string>>}
    */
   parseToClassicApi_(providers) {
-    const providerObjs = {};
-    providers.map(currentProvider => {
-      if (isObject(currentProvider) && currentProvider['facebook']) {
-        providerObjs['facebook'] = ({'app_id': currentProvider['facebook']});
+    const providersMap = {};
+
+    providers.forEach(currentProvider => {
+      if (isObject(currentProvider) && currentProvider.provider == 'facebook') {
+        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
+      } else if (isObject(currentProvider)) {
+        providersMap[currentProvider.provider] = true;
       } else {
-        providerObjs[currentProvider] = true;
+        providersMap[currentProvider] = true;
       }
     });
-    return providerObjs;
+
+    return providersMap;
   }
 
   /**
@@ -345,7 +349,7 @@ export class ShareWidget {
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
-    // TODO(#14591): Check if using bookend API v2 and convert it to be v1 compatible if so.
+    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
     if (Array.isArray(providers)) {
       providers = this.parseToClassicApi_(providers);
     }

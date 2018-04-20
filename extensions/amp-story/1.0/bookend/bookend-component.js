@@ -18,7 +18,7 @@ import {ArticleComponent, ArticleTitle, BookendArticleComponentDef, BookendArtic
 
 /**
  * @typedef {{
- *   bookend-vesion: string,
+ *   bookend-version: string,
  *   components: !Array<!BookendComponentDef>,
  * }}
  */
@@ -56,7 +56,9 @@ export class BookendComponent {
     return components
         .map(component => {
           if (component.type && componentsMap[component.type]) {
-            return componentsMap[component.type].build(component);
+            if (componentsMap[component.type].isValid(component)) {
+              return componentsMap[component.type].build(component);
+            }
           }
         })
         .filter(valid => !!valid);
@@ -66,16 +68,17 @@ export class BookendComponent {
    * Delegates components to their corresponding template builder.
    * class.
    * @param {!BookendComponentDef} components
-   * @return {!Array<!./simple-template.ElementDef>}
+   * @param {!Document} doc
+   * @return {!Element}
    */
-  static buildTemplates(components) {
-    return components
-        .map(component => {
-          if (component.type && componentsMap[component.type]) {
-            return componentsMap[component.type]
-                .buildTemplate(component);
-          }
-        })
-        .filter(valid => !!valid);
+  static buildTemplates(components, doc) {
+    const fragment = doc.createDocumentFragment();
+    components.forEach(component => {
+      if (component.type && componentsMap[component.type]) {
+        fragment.appendChild(componentsMap[component.type]
+            .buildTemplate(component, doc));
+      }
+    });
+    return fragment;
   }
 }

@@ -21,8 +21,17 @@
 export class AbstractBookendComponent {
 
   /**
+   * Checks if the component is valid.
+   * @param {BookendComponentDef} componentJson
+   * @return {boolean}
+   * @abstract
+   */
+  static isValid() {}
+
+  /**
    * Builds the component.
    * @param {BookendComponentDef} componentJson
+   * @return {BookendComponentDef}
    * @abstract
    */
   static build() {}
@@ -30,7 +39,8 @@ export class AbstractBookendComponent {
   /**
    * Builds the template for the component.
    * @param {BookendComponentDef} componentJson
-   * @return {!../../simple-template.ElementDef}
+   * @param {!Document} doc
+   * @return {!Element}
    * @abstract
    */
   static buildTemplate() {}

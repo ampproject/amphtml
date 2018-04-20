@@ -1401,7 +1401,7 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.bookend_.loadConfig(false /** applyConfig */).then(
         config => {
-          // TODO(#14591): Remove when bookend API v1 is deprecated.
+          // TODO(#14591): Remove config.relatedArticles references when bookend API v0.1 is deprecated.
           return !!(config && (config.relatedArticles &&
             config.relatedArticles.length) ||
             (config.components && config.components.length));
