@@ -87,9 +87,6 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
 import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
@@ -962,8 +959,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
-      installAnchorClickInterceptor(
-          this.getAmpDoc(), this.iframe.contentWindow);
+      Services.ampdocServiceFor(self).installAnchorClickInterceptor(
+          this.getAmpDoc, this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
