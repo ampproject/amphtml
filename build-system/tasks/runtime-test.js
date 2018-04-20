@@ -371,6 +371,7 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
+      process.exitCode = exitCode;
     }
     resolver();
   }).on('run_start', function() {

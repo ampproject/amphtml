@@ -1151,7 +1151,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   (creative, headersObj, done) => {
                     checkStillCurrent();
                     const headerNames = Object.keys(headersObj);
-                    if (headerNames.length == 1 && isObject(headerNames[0])) {
+                    if (headerNames.length == 1 &&
+                        isObject(headersObj[headerNames[0]])) {
                       // TODO(keithwrightbos) - fix upstream so response does
                       // not improperly place headers under key.
                       headersObj =

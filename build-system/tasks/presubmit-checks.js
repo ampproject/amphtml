@@ -530,12 +530,6 @@ const forbiddenTerms = {
       'src/runtime.js',
     ],
   },
-  'style\\.\\w+ = ': {
-    message: 'Use setStyle instead!',
-    whitelist: [
-      'testing/iframe.js',
-    ],
-  },
   'AMP_CONFIG': {
     message: 'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
         'and getMode() to access config',

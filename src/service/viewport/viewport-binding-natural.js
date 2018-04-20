@@ -51,9 +51,6 @@ export class ViewportBindingNatural_ {
     /** @const {!../../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private {!../../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
-
     /** @private @const {!../viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
