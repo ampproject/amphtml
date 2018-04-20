@@ -15,7 +15,6 @@ limitations under the License.
 -->
 # Colombia
 
-
 ## Example
 
 ```html

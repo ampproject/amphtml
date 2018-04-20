@@ -24,7 +24,7 @@
  *   remoteHTMLDisabled: (boolean|undefined),
  *   fullWidthHeightRatio: (number|undefined),
  * }}
- */ 
+ */
 export const adPrefetch = {
   doubleclick: [
     'https://www.googletagservices.com/tag/js/gpt.js',
@@ -58,6 +58,7 @@ export const adPrefetch = {
 };
 
 let AdNetworkConfigDef;
+
 
 /**
  * The config of each ad network.

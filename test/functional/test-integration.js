@@ -16,6 +16,7 @@
 
 // Tests integration.js
 // Most coverage through test-3p-frame
+
 import {
   draw3p,
   ensureFramed,
