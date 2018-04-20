@@ -27,6 +27,7 @@ import {ActionTrust} from '../../src/action-trust';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {setParentWindow} from '../../src/service';
 
 
@@ -698,7 +699,7 @@ describe('Action method', () => {
     allowConsoleError(() => { expect(() => {
       action.invoke_(new ActionInvocation(document.createElement('img'),
           'method1', /* args */ null, 'source1', 'event1'));
-    }).to.throw(/Target element does not support provided action/); });
+    }).to.throw(/doesn't support "method1" action/); });
     expect(onEnqueue).to.have.not.been.called;
   });
 
@@ -765,9 +766,11 @@ describe('installActionHandler', () => {
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tap', ActionTrust.LOW));
-    expect(handlerSpy).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
+          'button', 'button', 'tap', ActionTrust.LOW));
+      expect(handlerSpy).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
         'button', 'button', 'tap', ActionTrust.HIGH));
@@ -1003,9 +1006,11 @@ describe('Action common handler', () => {
     const handler = sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
-    action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
-        'source1', 'caller1', 'event1', ActionTrust.LOW));
-    expect(handler).to.not.be.called;
+    allowConsoleError(() => {
+      action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
+          'source1', 'caller1', 'event1', ActionTrust.LOW));
+      expect(handler).to.not.be.called;
+    });
 
     action.invoke_(new ActionInvocation(target, 'foo', /* args */ null,
         'source1', 'caller1', 'event1', ActionTrust.HIGH));
@@ -1318,6 +1323,44 @@ describes.fakeWin('Core events', {amp: true}, env => {
           });
         }
       }
+    });
+  });
+});
+
+describes.realWin('whitelist', {
+  amp: {
+    ampdoc: 'single',
+  },
+}, env => {
+  let action;
+  let target;
+
+  beforeEach(() => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, AMP.setState',
+    });
+    env.win.document.head.appendChild(meta);
+
+    action = new ActionService(env.ampdoc, env.win.document);
+    target = createExecElement('foo', sandbox.spy());
+  });
+
+  it('should allow whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'setState', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    action.invoke_(i);
+    expect(target.enqueAction).to.be.calledWithExactly(i);
+  });
+
+  it('should not allow non-whitelisted actions', () => {
+    const i = new ActionInvocation(target, 'print', /* args */ null,
+        'source', 'caller', 'event', 0, 'AMP');
+    sandbox.stub(action, 'error_');
+    allowConsoleError(() => {
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWith('"AMP.print" is not whitelisted ' +
+          '(AMP.pushState,AMP.setState).');
     });
   });
 });
