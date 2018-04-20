@@ -132,7 +132,7 @@ export function marginValues(fxType) {
       return {
         'start': 0.05,
       };
-    case 'fade-in':
+    case 'fade-in-scroll':
       return {
         'start': 0,
         'end': 0.5,
