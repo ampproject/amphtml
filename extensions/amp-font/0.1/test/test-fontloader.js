@@ -37,7 +37,7 @@ describes.repeated('', {
 
   /** @private @const {!FontConfig} */
   const FONT_CONFIG = {
-    style: 'normal',
+    fontStyle: 'normal',
     variant: 'normal',
     weight: '400',
     size: 'medium',
@@ -46,7 +46,7 @@ describes.repeated('', {
 
   /** @private @const {!FontConfig} */
   const FAILURE_FONT_CONFIG = {
-    style: 'normal',
+    fontStyle: 'normal',
     variant: 'normal',
     weight: '400',
     size: 'medium',
