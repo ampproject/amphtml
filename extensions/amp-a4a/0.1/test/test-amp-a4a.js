@@ -1893,7 +1893,7 @@ describe('amp-a4a', () => {
         });
       });
 
-      it('should wait on consent if no policy', () => {
+      it('should not wait on consent if no policy', () => {
         sandbox.stub(AMP.BaseElement.prototype, 'getConsentPolicy')
             .returns(null);
         const consentServiceSpy =
