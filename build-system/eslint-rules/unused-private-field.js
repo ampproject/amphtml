@@ -16,43 +16,49 @@
 'use strict';
 
 module.exports = function(context) {
-  const regex = /\.(\w+_) =/g;
   return {
-    MethodDefinition(node) {
+    MemberExpression(node) {
       if (/test-/.test(context.getFilename())) {
         return;
       }
 
-      if (node.kind !== 'constructor') {
+      const { property } = node;
+      if (property.type !== 'Identifier') {
         return;
+      }
+
+      const { name } = property;
+      if (!name.endsWith('_')) {
+        return;
+      }
+
+      const comments = context.getCommentsBefore(node);
+      const testing = comments.some(comment => {
+        return comment.value.includes('@visibleForTesting');
+      });
+      if (testing) {
+        return;
+      }
+
+      const ancestors = context.getAncestors(node);
+      const constructor = ancestors.reverse().find(node => {
+        return node.type === 'MethodDefinition' && node.kind === 'constructor';
+      });
+
+      if (!constructor) {
+        return
       }
 
       // Yah, I know, we're not using the AST anymore.
       // But there's no good way to do inner traversals, so this is all we got.
       const source = context.getSourceCode();
-      const constructor = source.getText(node);
-      const body = source.getText(node.parent).replace(constructor, '');
+      const body = source.getText(constructor.parent).replace(
+          source.getText(constructor), '');
 
-      let match;
-      while ((match = regex.exec(constructor))) {
-        const name = match[1];
-        const member = context.getNodeByRangeIndex(node.range[0] + match.index);
-
-        if (member) {
-          const comments = context.getCommentsBefore(member);
-          const testing = comments.some(comment => {
-            return comment.value.includes('@visibleForTesting');
-          });
-          if (testing) {
-            continue;
-          }
-        }
-
-        if (!body.includes(name)) {
-          context.report(member || node, `Unused private variable "${name}".` +
-              ' If this is used for testing, annotate with "@visibleForTesting".');
-        }
+      if (!body.includes(name)) {
+        context.report(node, `Unused private variable "${name}".` +
+          ' If this is used for testing, annotate with "@visibleForTesting".');
       }
-    }
+    },
   };
 };
