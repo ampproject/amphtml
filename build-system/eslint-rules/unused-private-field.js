@@ -16,9 +16,59 @@
 'use strict';
 
 module.exports = function(context) {
+  function stripComments(text) {
+    // Multi-line comments
+    text = text.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+      // Preserve the newlines
+      const newlines = [];
+      for (let i = 0; i < match.length; i++) {
+        if (match[i] === '\n') {
+          newlines.push('\n');
+        }
+      }
+      return newlines.join('');
+    });
+    // Single line comments either on its own line or following a space,
+    // semi-colon, or closing brace
+    return text.replace(/( |}|;|^) *\/\/.*/g, '$1');
+  }
+
+  function checkClassUse(node, name) {
+    if (!name.endsWith('_')) {
+      return;
+    }
+
+    const comments = context.getCommentsBefore(node);
+    const testing = comments.some(comment => {
+      return comment.value.includes('@visibleForTesting');
+    });
+    if (testing) {
+      return;
+    }
+
+    const ancestors = context.getAncestors(node);
+    const body = ancestors.reverse().find(node => node.type === 'ClassBody');
+
+    if (!body) {
+      return
+    }
+
+    // Yah, I know, we're not using the AST anymore.
+    // But there's no good way to do inner traversals, so this is all we got.
+    const source = context.getSourceCode();
+    const bodyText = stripComments(source.getText(body));
+
+    // Requires two uses of the name to qualify;
+    const index = bodyText.indexOf(name);
+    if (!bodyText.includes(name, index + 1)) {
+      context.report(node, `Unused private "${name}".` +
+        ' If this is used for testing, annotate with "@visibleForTesting".');
+    }
+  }
+
   return {
     MemberExpression(node) {
-      if (/test-/.test(context.getFilename())) {
+      if (/\btest\b/.test(context.getFilename())) {
         return;
       }
 
@@ -28,37 +78,21 @@ module.exports = function(context) {
       }
 
       const { name } = property;
-      if (!name.endsWith('_')) {
-        return;
-      }
-
-      const comments = context.getCommentsBefore(node);
-      const testing = comments.some(comment => {
-        return comment.value.includes('@visibleForTesting');
-      });
-      if (testing) {
-        return;
-      }
-
-      const ancestors = context.getAncestors(node);
-      const constructor = ancestors.reverse().find(node => {
-        return node.type === 'MethodDefinition' && node.kind === 'constructor';
-      });
-
-      if (!constructor) {
-        return
-      }
-
-      // Yah, I know, we're not using the AST anymore.
-      // But there's no good way to do inner traversals, so this is all we got.
-      const source = context.getSourceCode();
-      const body = source.getText(constructor.parent).replace(
-          source.getText(constructor), '');
-
-      if (!body.includes(name)) {
-        context.report(node, `Unused private variable "${name}".` +
-          ' If this is used for testing, annotate with "@visibleForTesting".');
-      }
+      checkClassUse(node, name);
     },
+
+    MethodDefinition(node) {
+      if (/\btest\b/.test(context.getFilename())) {
+        return;
+      }
+
+      const { computed, key } = node;
+      if (computed) {
+        return;
+      }
+
+      const { name } = key;
+      checkClassUse(node, name);
+    }
   };
 };
