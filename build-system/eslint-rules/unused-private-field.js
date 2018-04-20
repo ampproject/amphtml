@@ -40,7 +40,7 @@ module.exports = function(context) {
 
     const comments = context.getCommentsBefore(node);
     const testing = comments.some(comment => {
-      return comment.value.includes('@visibleForTesting');
+      return /@(visibleForTesting|protected|override)\b/.test(comment.value);
     });
     if (testing) {
       return;
@@ -50,7 +50,7 @@ module.exports = function(context) {
     const body = ancestors.reverse().find(node => node.type === 'ClassBody');
 
     if (!body) {
-      return
+      return;
     }
 
     // Yah, I know, we're not using the AST anymore.
@@ -61,8 +61,11 @@ module.exports = function(context) {
     // Requires two uses of the name to qualify;
     const index = bodyText.indexOf(name);
     if (!bodyText.includes(name, index + 1)) {
-      context.report(node, `Unused private "${name}".` +
-        ' If this is used for testing, annotate with "@visibleForTesting".');
+      context.report(node, `Unused private "${name}".\n` +
+        '\tIf this is used for testing, annotate with "@visibleForTesting"\n' +
+        '\tIf this is a protected definition in a base class,' +
+        ' annotate with "@protected"\n' +
+        '\tIf this is an override of a protected, annotate with "@override"\n');
     }
   }
 
@@ -72,12 +75,12 @@ module.exports = function(context) {
         return;
       }
 
-      const { property } = node;
+      const {property} = node;
       if (property.type !== 'Identifier') {
         return;
       }
 
-      const { name } = property;
+      const {name} = property;
       checkClassUse(node, name);
     },
 
@@ -86,13 +89,13 @@ module.exports = function(context) {
         return;
       }
 
-      const { computed, key } = node;
+      const {computed, key} = node;
       if (computed) {
         return;
       }
 
-      const { name } = key;
+      const {name} = key;
       checkClassUse(node, name);
-    }
+    },
   };
 };
