@@ -24,7 +24,6 @@
 
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
-
 import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,

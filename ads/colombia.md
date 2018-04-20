@@ -15,6 +15,7 @@ limitations under the License.
 -->
 # Colombia
 
+
 ## Example
 
 ```html
@@ -32,7 +33,6 @@ limitations under the License.
 For semantics of configuration, please see ad network documentation.For support contact care@timesadcenter.com
 
 Supported parameters:
-
 - data-clmb_slot : Ad Slot
 - data-clmb_position : Ad Position
 - data-clmb_section : Ad Sections

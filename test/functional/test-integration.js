@@ -16,7 +16,6 @@
 
 // Tests integration.js
 // Most coverage through test-3p-frame
-
 import {
   draw3p,
   ensureFramed,
@@ -61,7 +60,6 @@ describe('3p integration.js', () => {
       expect(registrations, `Missing registration for [${adType}]`)
           .to.contain.key(adType);
     });
-
   });
 
   it('should not throw validateParentOrigin without ancestorOrigins', () => {
