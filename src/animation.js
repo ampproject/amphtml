@@ -170,10 +170,10 @@ class AnimationPlayer {
     this.startTime_ = 0;
 
     /** @private {./time.normtimeDef} */
-    this.normLinearTime_ = 0;
+    // this.normLinearTime_ = 0;
 
     /** @private {./time.normtimeDef} */
-    this.normTime_ = 0;
+    // this.normTime_ = 0;
 
     /** @private {boolean} */
     this.running_ = false;
