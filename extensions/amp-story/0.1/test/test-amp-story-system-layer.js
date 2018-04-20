@@ -31,7 +31,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store-v01', () => ({
+    registerServiceBuilder(win, 'story-store', () => ({
       get: NOOP,
       subscribe: NOOP,
     }));
