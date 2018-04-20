@@ -402,7 +402,13 @@ describe('Activity getIncrementalEngagedTime', () => {
       clock.tick(10000);
       // more engaged time, don't reset
       const fifth = activity.getIncrementalEngagedTime('tests', 'false');
-      return expect(fifth).to.equal(5);
+      expect(fifth).to.equal(5);
+      // reset with default value
+      const sixth = activity.getIncrementalEngagedTime('tests');
+      expect(sixth).to.equal(5);
+      // should be reset
+      const seventh = activity.getIncrementalEngagedTime('tests', 'false');
+      return expect(seventh).to.equal(0);
     });
   });
 
