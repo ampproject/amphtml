@@ -120,6 +120,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
+
     /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
     this.elementsMetadata_ = {
       default: [],
@@ -187,6 +190,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
+    this.action_ = Services.actionServiceForDoc(this.element);
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
       this.container_ = this.win.document.createElement('div');
@@ -584,22 +588,24 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Check to see if the triggering click happened on something that is a button
-   * or any other element that should consume the event.
+   * We should not try to toggle controls or otherwise handle a click on
+   * the lightbox if the click has already been handled by a link, a button,
+   * or an existing tap action handler.
    * @param {!Event} e
    * @return {boolean}
    */
-  shouldTriggerClick_(e) {
+  shouldHandleClick_(e) {
     const target = dev().assertElement(e.target);
     const consumingElement = closest(target, element => {
       return element.tagName == 'BUTTON'
         || element.tagName == 'A'
-        || element.getAttribute('role') == 'button'
-        || (element.hasAttribute('on')
-        && element.getAttribute('on')./*OK*/matches(/(^|;)\s*tap\s*/));
+        || element.getAttribute('role') == 'button';
     }, this.container_);
 
-    return consumingElement == null;
+    const clickConsumed = consumingElement !== null;
+    const hasTap = this.action_.hasAction(target, 'tap',
+        dev().assertElement(this.container_));
+    return !(clickConsumed || hasTap);
   }
 
   /**
@@ -608,13 +614,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   onToggleControls_(e) {
-    if (!this.shouldTriggerClick_(e)) {
-      return;
-    }
-    if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
-      this.showControls_();
-    } else if (!this.container_.hasAttribute('gallery-view')) {
-      this.hideControls_();
+    if (this.shouldHandleClick_(e)) {
+      if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
+        this.showControls_();
+      } else if (!this.container_.hasAttribute('gallery-view')) {
+        this.hideControls_();
+      }
     }
   }
 
