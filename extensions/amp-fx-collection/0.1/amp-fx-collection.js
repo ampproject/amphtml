@@ -32,6 +32,7 @@ const TAG = 'amp-fx-collection';
 const FxType = {
   PARALLAX: 'parallax',
   FADE_IN: 'fade-in',
+  FADE_IN_SCROLL: 'fade-in-scroll',
 };
 
 /**

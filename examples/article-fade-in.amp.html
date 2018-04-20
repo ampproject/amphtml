@@ -105,6 +105,28 @@
       <div class="overflow-window">
           <amp-img amp-fx="fade-in" data-easing="ease-out" layout=responsive width=900 height=1600 src="https://picsum.photos/900/1600?image=736"></amp-img>
       </div>
+      <div class="spacer"></div>
+      <div class="overlay-container" amp-fx="fade-in-scroll">
+          <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+          <h1 class="overlay-top" >
+              <span class="title">Default margin-start, margin-end<span>
+          </h1>
+      </div>
+      <div class="spacer"></div>
+      <div class="overlay-container" amp-fx="fade-in-scroll" data-margin-start='20%' data-margin-end='80%'>
+          <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+          <h1 class="overlay-top">
+              <span class="title">Specified margin-start and margin-end<span>
+          </h1>
+      </div>
+      <div class="spacer"></div>
+      <div class="overlay-container" amp-fx="fade-in-scroll" data-repeat>
+          <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+          <h1 class="overlay-top">
+              <span class="title">Repeat animation</span>
+          </h1>
+      </div>
+      <div class="spacer"></div>
     </article>
   </main>
 </body>

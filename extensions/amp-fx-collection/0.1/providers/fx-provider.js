@@ -33,9 +33,26 @@ const installStyles = {
   'fade-in': {
     'will-change': 'opacity',
     'opacity': 0,
-
+  },
+  'fade-in-scroll': {
+    'will-change': 'opacity',
+    'opacity': 0,
   },
 };
+
+const marginValues = {
+  'parallax': {
+    'start': 0,
+  },
+  'fade-in': {
+    'start': 0.05,
+  },
+  'fade-in-scroll': {
+    'start': 0,
+    'end': 0.5,
+  },
+};
+
 
 /**
  * Class that implements the various preset animation providers.
@@ -122,7 +139,12 @@ export class FxElement {
     /** @private {number} */
     this.marginStart_ = element.hasAttribute('data-margin-start') ?
       resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
-      0.05;
+      marginValues[this.fxType_]['start'];
+
+    /** @private {number} */
+    this.marginEnd_ = element.hasAttribute('data-margin-end') ?
+      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
+      marginValues[this.fxType_]['end'];
 
     /** @private {string} */
     this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
@@ -131,6 +153,10 @@ export class FxElement {
     /** @private {string} */
     this.duration_ = element.hasAttribute('data-duration') ?
       element.getAttribute('data-duration') : '1000ms';
+
+    /** @private {boolean} */
+    this.hasRepeat_ = element.hasAttribute('data-repeat');
+
   }
 
   /**
@@ -208,6 +234,13 @@ export class FxElement {
   }
 
   /**
+   * @returns {number}
+   */
+  getMarginEnd() {
+    return this.marginEnd_;
+  }
+
+  /**
    * @returns {string}
    */
   getEasing() {
@@ -247,6 +280,16 @@ export class FxElement {
    */
   isMutateScheduled() {
     return this.mutateScheduled_;
+  }
+
+  /**
+   * Boolean dictating whether or not the amp-fx preset has the `repeat`
+   * attribute set. The `repeat` attribute allows the animation to be fully
+   * dependent on scroll.
+   * @returns {boolean}
+   */
+  hasRepeat() {
+    return this.hasRepeat_;
   }
 
   /**

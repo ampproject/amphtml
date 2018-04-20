@@ -124,6 +124,37 @@ In the below example, the animation doesn't start until the element has crossed 
   </div>
 ```
 
+### fade-in-scroll (experimental)
+
+The `fade-in-scroll` effect allows you to change the opacity of an element as it scrolls within the viewport. This creates a scroll dependent fade animation. By default once the element is fully visible we don't animate the opacity anymore. 
+
+##### data-margin-start (optional)
+
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `0%`
+
+##### data-margin-end (optional)
+
+This parameter determines when to stop the animation. The value specified in `<percent>` dictates that the animation should have finished when the specified amount of the element being targetted is visible. The default value is `50%`
+
+In the below example, the `<div>` is fully visible by the time it has crossed 80% of the viewport from the bottom. 
+
+```html
+  <div amp-fx="fade-in" data-margin-end="80%">
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
+
+##### data-repeat (optional)
+
+By default once the element is fully visible we don't animate the opacity anymore. If you want the opacity to change with the scroll, even when the element has fully loaded, specify this variable on the animation. 
+
+In the below example, the animation is fully dependent on scroll and the `<div>` fades in and out as the user scrolls. 
+
+```html
+  <div amp-fx="fade-in-scroll" data-repeat>
+    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
+  </div>
+```
 
 ## Validation
 
