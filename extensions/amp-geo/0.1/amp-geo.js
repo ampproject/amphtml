@@ -129,7 +129,10 @@ export class AmpGeo extends AMP.BaseElement {
     } else {
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = COUNTRY.trim();
-      // If the length isn't 2 then the country is unknown.
+      // If we got a country code it will be 2 characters
+      // If the lengths is 0 the country is unknown
+      // If the length is > 2 we didn't get patched
+      // (probably local dev) so we treat it as unknown.
       if (this.country_.length !== 2) {
         this.country_ = 'unknown';
       }
