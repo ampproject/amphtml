@@ -349,18 +349,6 @@ export class Services {
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>}
-   */
-  static storyVariableServiceForOrNullV01(win) {
-    return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable-v01', 'amp-story',
-          true)));
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
    * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
    */
   static storyStoreServiceV01(win) {
