@@ -579,13 +579,7 @@ function createBaseCustomElementClass(win) {
           layoutBox.top >= 0) {
           // Few top elements will also be pre-initialized with a loading
           // element.
-          getVsync(this).mutate(() => {
-            // Repeat "loading enabled" check because it could have changed while
-            // waiting for vsync.
-            if (this.isLoadingEnabled_()) {
-              this.prepareLoading_();
-            }
-          });
+          this.mutateOrInvoke_(() => this.prepareLoading_());
         }
       }
     }
@@ -673,11 +667,9 @@ function createBaseCustomElementClass(win) {
         // preserved.
         this.sizerElement = null;
         setStyle(sizer, 'paddingTop', '0');
-        if (this.resources_) {
-          this.resources_.mutateElement(this, () => {
-            dom.removeElement(sizer);
-          });
-        }
+        this.mutateOrInvoke_(() => {
+          dom.removeElement(sizer);
+        });
       }
       if (newHeight !== undefined) {
         setStyle(this, 'height', newHeight, 'px');
@@ -1515,6 +1507,9 @@ function createBaseCustomElementClass(win) {
      * @private @this {!Element}
      */
     prepareLoading_() {
+      if (!this.isLoadingEnabled_()) {
+        return;
+      }
       if (!this.loadingContainer_) {
         const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
 
@@ -1558,7 +1553,7 @@ function createBaseCustomElementClass(win) {
         return;
       }
 
-      getVsync(this).mutate(() => {
+      this.mutateOrInvoke_(() => {
         let state = this.loadingState_;
         // Repeat "loading enabled" check because it could have changed while
         // waiting for vsync.
@@ -1580,7 +1575,7 @@ function createBaseCustomElementClass(win) {
           const loadingContainer = this.loadingContainer_;
           this.loadingContainer_ = null;
           this.loadingElement_ = null;
-          this.getResources().mutateElement(this, () => {
+          this.mutateOrInvoke_(() => {
             dom.removeElement(loadingContainer);
           });
         }
@@ -1639,9 +1634,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            this.getResources(). /*OK*/ changeSize(
-                this, requestedHeight, requestedWidth);
-            getVsync(this).mutate(() => {
+            const resources = this.getResources();
+            resources./*OK*/changeSize(this, requestedHeight, requestedWidth);
+            resources.mutateElement(this, () => {
               this.overflowCallback(
                   /* overflown */ false, requestedHeight, requestedWidth);
             });
@@ -1649,6 +1644,20 @@ function createBaseCustomElementClass(win) {
         } else {
           this.overflowElement_.onclick = null;
         }
+      }
+    }
+
+    /**
+     * Mutates the element using resources if available.
+     *
+     * @param {function()} mutator
+     * @param {?Element=} opt_element
+     */
+    mutateOrInvoke_(mutator, opt_element) {
+      if (this.resources_) {
+        this.getResources().mutateElement(opt_element || this, mutator);
+      } else {
+        mutator();
       }
     }
   }
@@ -1667,16 +1676,6 @@ function assertNotTemplate(element) {
   dev().assert(!element.isInTemplate_, 'Must never be called in template');
 }
 
-
-/**
- * @param {!Element} element
- * @return {!./service/vsync-impl.Vsync}
- */
-function getVsync(element) {
-  // TODO(dvoytenko, #9177): consider removing this and always resolving via
-  // `createCustomElementClass(win)` object.
-  return Services.vsyncFor(toWin(element.ownerDocument.defaultView));
-}
 
 /**
  * Whether the implementation is a stub.

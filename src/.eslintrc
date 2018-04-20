@@ -1,5 +1,6 @@
 {
   "rules": {
-    "amphtml-internal/no-global": 2
+    "amphtml-internal/no-global": 2,
+    "amphtml-internal/vsync": 1
   }
 }
