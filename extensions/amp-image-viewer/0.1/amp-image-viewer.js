@@ -143,7 +143,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.measure())
+      this.loadPromise_.then(() => this.resetImageDimensions_())
           .then(() => this.unregisterPanningGesture_());
     }
   }
@@ -167,7 +167,7 @@ export class AmpImageViewer extends AMP.BaseElement {
             }
           });
         }).then(() => {
-          return this.measure();
+          return this.resetImageDimensions_();
         }).then(() => {
           this.setupGestures_();
         });
@@ -180,7 +180,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      this.measure();
+      this.resetImageDimensions_();
       this.cleanupGestures_();
     });
   }
@@ -315,47 +315,53 @@ export class AmpImageViewer extends AMP.BaseElement {
    * Measures the image viewer and image sizes and positioning.
    * This must be called AFTER the source element has already been
    * laid out.
+   * @private
+   */
+  measure_() {
+    this.elementBox_ = layoutRectFromDomRect(this.element
+        ./*OK*/getBoundingClientRect());
+
+    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+    let height = Math.min(this.elementBox_.width / sourceAspectRatio,
+        this.elementBox_.height);
+    let width = Math.min(this.elementBox_.height * sourceAspectRatio,
+        this.elementBox_.width);
+
+    if (Math.abs(width - this.sourceWidth_) <= 16
+    && Math.abs(height - this.sourceHeight_ <= 16)) {
+      width = this.sourceWidth_;
+      height = this.sourceHeight_;
+    }
+
+    this.imageBox_ = layoutRectLtwh(
+        Math.round((this.elementBox_.width - width) / 2),
+        Math.round((this.elementBox_.height - height) / 2),
+        Math.round(width),
+        Math.round(height));
+
+    // Adjust max scale to at least fit the screen.
+    const elementBoxRatio = this.elementBox_.width
+    / this.elementBox_.height;
+    const maxScale = Math.max(
+        elementBoxRatio / sourceAspectRatio,
+        sourceAspectRatio / elementBoxRatio
+    );
+    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+
+    // Reset zoom and pan.
+    this.startScale_ = this.scale_ = 1;
+    this.startX_ = this.posX_ = 0;
+    this.startY_ = this.posY_ = 0;
+    this.updatePanZoomBounds_(this.scale_);
+  }
+
+  /**
+   * Measures and resets the image dimensions, after the element
+   * dimensions changes.
    * @return {!Promise}
    */
-  measure() {
-    return this.measureElement(
-        () => {
-          this.elementBox_ = layoutRectFromDomRect(this.element
-              ./*OK*/getBoundingClientRect());
-
-          const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
-          let height = Math.min(this.elementBox_.width / sourceAspectRatio,
-              this.elementBox_.height);
-          let width = Math.min(this.elementBox_.height * sourceAspectRatio,
-              this.elementBox_.width);
-
-          if (Math.abs(width - this.sourceWidth_) <= 16
-          && Math.abs(height - this.sourceHeight_ <= 16)) {
-            width = this.sourceWidth_;
-            height = this.sourceHeight_;
-          }
-
-          this.imageBox_ = layoutRectLtwh(
-              Math.round((this.elementBox_.width - width) / 2),
-              Math.round((this.elementBox_.height - height) / 2),
-              Math.round(width),
-              Math.round(height));
-
-          // Adjust max scale to at least fit the screen.
-          const elementBoxRatio = this.elementBox_.width
-          / this.elementBox_.height;
-          const maxScale = Math.max(
-              elementBoxRatio / sourceAspectRatio,
-              sourceAspectRatio / elementBoxRatio
-          );
-          this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
-
-          // Reset zoom and pan.
-          this.startScale_ = this.scale_ = 1;
-          this.startX_ = this.posX_ = 0;
-          this.startY_ = this.posY_ = 0;
-          this.updatePanZoomBounds_(this.scale_);
-        }).then(() => {
+  resetImageDimensions_() {
+    return this.measureElement(() => this.measure_()).then(() => {
       const image = dev().assertElement(this.image_);
       return this.mutateElement(() => {
         // Set the actual dimensions of the image
@@ -394,7 +400,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // and then naturally upgrade to a higher quality image.
     return this.mutateElement(() => {
       this.image_.setAttribute('src', src);
-    });
+    }, this.image_);
   }
 
   /** @private */
