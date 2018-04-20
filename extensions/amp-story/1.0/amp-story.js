@@ -354,6 +354,10 @@ export class AmpStory extends AMP.BaseElement {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
+
+    // Disallow all actions in a (standalone) story.
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    actions.setWhitelist([]);
   }
 
 
