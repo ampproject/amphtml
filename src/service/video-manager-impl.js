@@ -353,7 +353,7 @@ export class VideoManager {
   disable(unusedVideo, ...unusedVarFeatures) {
     // NOOP. Interface only supported under `video-service` experiment.
   }
-    
+
   /** @param {!VideoEntry} entry */
   registerForAutoFullscreen(entry) {
     this.getAutoFullscreenManager_().register(entry);
