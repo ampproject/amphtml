@@ -20,7 +20,6 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {toWin} from '../../../src/types';
 
 const TAG = 'amp-access-scroll-elt';
 
@@ -93,8 +92,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               'amp-story[standalone]');
           if (response && response.scroll && !isStory) {
             new ScrollElement(this.ampdoc).show(this.accessService_);
-            addAnalytics(this.ampdoc.getBody(),
-                this.accessSource_.getAdapterConfig());
+            addAnalytics(this.ampdoc, this.accessSource_.getAdapterConfig());
           }
           return response;
         });
@@ -167,18 +165,22 @@ class ScrollElement {
 
 /**
  * Add analytics for Scroll to page.
- * @param {!Element} parentElement
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} vendorConfig
  */
-function addAnalytics(parentElement, vendorConfig) {
-  const doc = /** @type {!Document} */ (parentElement.ownerDocument);
-  const analyticsElem = createElementWithAttributes(
-      doc,
-      'amp-analytics', dict({
-        'trigger': 'immediate',
-        'dataConsentId': vendorConfig['dataConsentId'] || null,
-      }));
+function addAnalytics(ampdoc, vendorConfig) {
+  if (vendorConfig['disableAnalytics']) {
+    return;
+  }
 
+  // Create analytics element
+  const doc = /** @type {!Document} */ (ampdoc.win.document);
+  const attributes = dict({'trigger': 'immediate'});
+  if (vendorConfig['dataConsentId']) {
+    attributes['data-block-on-consent'] = '';
+  }
+  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics',
+      attributes);
   const scriptElem = createElementWithAttributes(
       doc,
       'script', dict({
@@ -188,11 +190,10 @@ function addAnalytics(parentElement, vendorConfig) {
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = ANALYTICS_CONFIG;
 
-  // Get Extensions service and force load analytics extension.
-  const extensions =
-    Services.extensionsFor(toWin(parentElement.ownerDocument.defaultView));
-  const ampdoc = Services.ampdoc(parentElement);
+  // Get extensions service and force load analytics extension
+  const extensions = Services.extensionsFor(ampdoc.win);
   extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
 
-  parentElement.appendChild(analyticsElem);
+  // Append
+  ampdoc.getBody().appendChild(analyticsElem);
 }
