@@ -118,8 +118,6 @@ export class ViewportBindingIosEmbedWrapper_ {
       get: () => body,
     });
 
-    // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
-
     // Make sure the scroll position is adjusted correctly.
     this.onScrolled_();
   }
