@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   IframeTransportClient, IframeTransportContext,
 } from '../../../../3p/iframe-transport-client';

@@ -16,7 +16,6 @@
 
 import * as lolex from 'lolex';
 import * as service from '../../src/service';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {
   hasRenderDelayingServices,

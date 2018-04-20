@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
   TapzoomRecognizer} from '../../src/gesture-recognizers';
 import {Gestures} from '../../src/gesture';

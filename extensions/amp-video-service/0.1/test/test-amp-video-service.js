@@ -21,7 +21,6 @@
  * it gets automatically inserted by the runtime when required.
  */
 
-import * as sinon from 'sinon';
 import {Observable} from '../../../../src/observable';
 import {Services} from '../../../../src/services';
 import {VideoEntry} from '../amp-video-service';

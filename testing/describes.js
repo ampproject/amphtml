@@ -114,7 +114,6 @@ import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';

@@ -19,7 +19,6 @@
  *               because it requires building web-worker binary.
  */
 
-import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   CustomEventReporterBuilder,

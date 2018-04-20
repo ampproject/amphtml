@@ -15,7 +15,6 @@
  */
 
 import * as _3p from '../../../3p/3p';
-import * as sinon from 'sinon';
 import {
   AD_TYPE,
   callbackWithBackfill,

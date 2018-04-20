@@ -24,7 +24,6 @@ import '../../../amp-ad/0.1/amp-ad';
 // methods in tests.
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
-import * as sinon from 'sinon';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {
   AmpA4A,

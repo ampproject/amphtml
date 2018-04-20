@@ -15,7 +15,6 @@
  */
 
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {DocumentState} from '../../src/service/document-state';
 
 

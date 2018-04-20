@@ -15,7 +15,6 @@
  */
 
 import '../amp-carousel';
-import * as sinon from 'sinon';
 
 
 describes.realWin('SlideScroll', {

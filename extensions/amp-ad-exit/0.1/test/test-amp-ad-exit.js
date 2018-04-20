@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   ANALYTICS_IFRAME_TRANSPORT_CONFIG,
 } from '../../../amp-analytics/0.1/vendors';

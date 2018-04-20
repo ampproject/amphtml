@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import {Services} from '../../src/services';
 import {

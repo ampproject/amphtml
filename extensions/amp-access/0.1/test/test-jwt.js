@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {JwtHelper} from '../jwt';
 import {pemToBytes} from '../../../../src/utils/pem';
 

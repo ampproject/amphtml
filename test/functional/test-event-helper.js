@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Observable} from '../../src/observable';
 import {
   createCustomEvent,

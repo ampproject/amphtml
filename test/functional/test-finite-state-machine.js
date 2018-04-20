@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {FiniteStateMachine} from '../../src/finite-state-machine';
 
 describe('Finite State Machine', () => {

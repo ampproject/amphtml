@@ -16,7 +16,6 @@
 
 import * as lolex from 'lolex';
 import * as mode from '../../../../src/mode';
-import * as sinon from 'sinon';
 import {AccessClientAdapter} from '../amp-access-client';
 
 

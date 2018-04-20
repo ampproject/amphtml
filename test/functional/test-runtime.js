@@ -16,7 +16,6 @@
 
 import * as dom from '../../src/dom';
 import * as ext from '../../src/service/extensions-impl';
-import * as sinon from 'sinon';
 import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';

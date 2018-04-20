@@ -16,7 +16,6 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as sinon from 'sinon';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,

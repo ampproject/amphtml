@@ -16,7 +16,6 @@
 
 import * as docready from '../../src/document-ready';
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {
   AmpDocService,
   AmpDocShadow,

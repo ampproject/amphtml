@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {install} from '../../src/polyfills/domtokenlist-toggle';
 import {toArray} from '../../src/types';
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-
 /**
  * Cache SW has some side-effects, so we've got to do a little jig to test.
  */

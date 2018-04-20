@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 

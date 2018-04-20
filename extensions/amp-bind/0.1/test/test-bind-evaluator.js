@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {BindEvaluator, BindingDef} from '../bind-evaluator';
 import {BindExpression} from '../bind-expression';
 
