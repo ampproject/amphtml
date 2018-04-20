@@ -1,0 +1,33 @@
+{
+  "items": [{
+    "land-see-category": [
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Popular producer.",
+            "width": 409, "height": 305, "layout": "responsive",
+            "src": "../../img/land-see/content/shoe-designer-2-resize-medium.jpg"
+          }
+        ],
+        "post-classes": "land-see-pre-animate land-see-post-item land-see-post-item-wide land-see-post-featured col land-see-story",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Arts & Culture",
+        "post-category-url": "stories.amp.html?category=arts-culture#land-see-arts-culture",
+        "post-title": "The Artist Behind Your Favorite Songs",
+        "post-copy": "This Los Angeles based producer is the creative genius behind many Top-40 songs."
+      }
+    ]
+  },
+  {
+    "land-see-category": [{"post-classes": "hide"}],
+    "land-see-paging": {
+      "classes": "land-see-hide-widescreen",
+      "page-nav": [{
+        "classes": "land-see-prev-page mt2 ml2 relative left",
+        "button-text": "Previous",
+        "action": "tap:AMP.pushState({height: 1650, mobile_height: 2750, src: './api/arts-culture-page-1.json', selectedCategory: 'arts-culture', selectedContainerClass: 'land-see-categories-nav center mb2 mx1 fit relative'})"
+      }]
+    }
+  }]
+}

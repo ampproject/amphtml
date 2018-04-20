@@ -1,0 +1,38 @@
+{
+  "items": [{
+    "land-see-category": [
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Studio Serif, interior.",
+            "width": 196, "height": 249, "layout": "responsive",
+            "src": "../../img/land-see/content/studio-310px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Design",
+        "post-category-url": "stories.amp.html?category=design#land-see-design",
+        "post-title": "Office Tour: Studio Serif",
+        "post-copy": "In the heart of the southeast, Studio Serif stands out among its competitors for its complex mixture of hand-drawn and computer-generated art coming together in beautifully, cohesive designs."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Epression of aesthetics.",
+            "width": 196, "height": 187, "layout": "responsive",
+            "src": "../../img/land-see/content/timeless-design-310px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Design",
+        "post-category-url": "stories.amp.html?category=design#land-see-design",
+        "post-title": "Timeless Design: A History of Watches",
+        "post-copy": "A fashionable timepiece is as much a bold statement of one’s individuality, an expression of aesthetics, as it is an implement of progress."
+      }
+    ]
+  }]
+}
