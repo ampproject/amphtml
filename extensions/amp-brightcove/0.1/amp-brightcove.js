@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
-import {removeElement} from '../../../src/dom';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
   /** @override */
-  createdCallback() {
+  preconnectCallback() {
     this.preconnect.url('https://players.brightcove.net');
   }
 
@@ -35,26 +41,38 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
     this.iframe_ = null;
   }
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const account = user.assert(
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = this.getIframeSrc_();
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getIframeSrc_() {
+    const account = user().assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
     const playerid = (this.element.getAttribute('data-player') ||
-      this.element.getAttribute('data-player-id') ||
-      'default');
+        this.element.getAttribute('data-player-id') ||
+        'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
-    const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
-    const params = {};
 
+    let src = `https://players.brightcove.net/${encodeURIComponent(account)}`
+        + `/${encodeURIComponent(playerid)}`
+        + `_${encodeURIComponent(embed)}/index.html`;
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
       src += this.encodeId_(this.element.getAttribute('data-playlist-id'));
@@ -62,28 +80,25 @@ class AmpBrightcove extends AMP.BaseElement {
       src += '?videoId=';
       src += this.encodeId_(this.element.getAttribute('data-video-id'));
     }
-
     // Pass through data-param-* attributes as params for plugin use
-    for (let i = 0; i < this.element.attributes.length; i++) {
-      const attr = this.element.attributes[i];
-      const matches = attr.nodeName.match(/^data-param-(.+)/);
-      if (matches) {
-        const param = dashToCamelCase(matches[1]);
-        params[param] = attr.nodeValue;
+    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
+    return src;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const account = mutations['data-account'];
+    const playerId = mutations['data-player'] || mutations['data-player-id'];
+    const embed = mutations['data-embed'];
+    const playlistId = mutations['data-playlist-id'];
+    const videoId = mutations['data-video-id'];
+    if (account !== undefined || playerId !== undefined
+        || playlistId !== undefined || embed !== undefined
+        || videoId !== undefined) {
+      if (this.iframe_) {
+        this.iframe_.src = this.getIframeSrc_();
       }
     }
-
-    src = addParamsToUrl(src, params);
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = src;
-    this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
-    this.element.appendChild(iframe);
-    /** @private {?Element} */
-    this.iframe_ = iframe;
-    return loadPromise(iframe);
   }
 
   /** @private */
@@ -136,6 +151,9 @@ class AmpBrightcove extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-brightcove', AmpBrightcove);
+
+AMP.extension('amp-brightcove', '0.1', AMP => {
+  AMP.registerElement('amp-brightcove', AmpBrightcove);
+});

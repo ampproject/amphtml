@@ -24,17 +24,35 @@
     }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="../../dist/amp.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
   <h1>amp-video</h1>
 
   <amp-video
-      src="https://r4---sn-o097zue6.googlevideo.com/videoplayback?id=6b10510c0e8038e9&itag=18&source=picasa&begin=0&requiressl=yes&pl=48&mime=video/mp4&lmt=1455660326331274&ip=2620:0:1000:1610:a8e8:8246:77ba:d85f&ipbits=48&expire=1455689238&sparams=expire,id,ip,ipbits,itag,lmt,mime,mm,mn,ms,mv,pl,requiressl,source&signature=50D0BD531F86D64452291BB8C86FC135DACEBBFC.4739415326A1005097CC5A502B7D60DBC574AD67&key=cms1&cpn=oBQBJe26Kpptfdtd&c=WEB&cver=html5&redirect_counter=1&req_id=191cbd6a5216a3ee&cms_redirect=yes&mm=26&mn=sn-o097zue6&ms=tsu&mt=1455660378&mv=m"
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
       width="358"
       height="204"
       layout="responsive"
       controls>
+    <div placeholder>
+      This is a placeholder
+    </div>
+    <div fallback>
+      This is a fallback
+    </div>
+  </amp-video>
+
+  <amp-video
+      width="358"
+      height="204"
+      layout="responsive"
+      controls>
+    <source
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      type="video/mp4">
+    </source>
     <div placeholder>
       This is a placeholder
     </div>

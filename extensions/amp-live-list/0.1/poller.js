@@ -15,9 +15,9 @@
  */
 
 
-import {exponentialBackoffClock, getJitter,}
-    from '../../../src/exponential-backoff';
-import {timer} from '../../../src/timer';
+import {Services} from '../../../src/services';
+import {exponentialBackoffClock, getJitter}
+  from '../../../src/exponential-backoff';
 
 
 /**
@@ -26,7 +26,7 @@ import {timer} from '../../../src/timer';
 export class Poller {
 
   constructor(win, wait, work) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private {number} */
@@ -35,7 +35,7 @@ export class Poller {
     /** @private {function(): !Promise} */
     this.work_ = work;
 
-    /** @private {?number} */
+    /** @private {number|string|null} */
     this.lastTimeoutId_ = null;
 
     /** @private {boolean} */
@@ -45,8 +45,8 @@ export class Poller {
     this.backoffClock_ = null;
 
     /**
-     * Mostly for testing purposes.
-     * @private {!Promise}
+     * For testing purposes.
+     * @private {?Promise}
      */
     this.lastWorkPromise_ = null;
   }
@@ -72,14 +72,16 @@ export class Poller {
 
   /**
    * Initalize any work needed to start polling.
+   * @param {boolean=} opt_immediate execute current work instead of queueing
+   *     it in a timeout.
    */
-  start() {
+  start(opt_immediate) {
     if (this.isRunning_) {
       return;
     }
 
     this.isRunning_ = true;
-    this.poll_();
+    this.poll_(opt_immediate);
   }
 
   /**
@@ -99,7 +101,7 @@ export class Poller {
    */
   clear_() {
     if (this.lastTimeoutId_) {
-      timer.cancel(this.lastTimeoutId_);
+      Services.timerFor(this.win).cancel(this.lastTimeoutId_);
       this.lastTimeoutId_ = null;
     }
   }
@@ -107,14 +109,16 @@ export class Poller {
   /**
    * Queues a timeout that executes the work and recursively calls
    * itself on success.
+   * @param {boolean=} opt_immediate execute current work instead of queueing
+   *     it in a timeout.
    * @private
    */
-  poll_() {
+  poll_(opt_immediate) {
     if (!this.isRunning_) {
       return;
     }
 
-    this.lastTimeoutId_ = timer.delay(() => {
+    const work = () => {
       this.lastWorkPromise_ = this.work_()
           .then(() => {
             if (this.backoffClock_) {
@@ -131,6 +135,13 @@ export class Poller {
               throw err;
             }
           });
-    }, this.getTimeout_());
+    };
+
+    if (opt_immediate) {
+      work();
+    } else {
+      this.lastTimeoutId_ =
+          Services.timerFor(this.win).delay(work, this.getTimeout_());
+    }
   }
 }

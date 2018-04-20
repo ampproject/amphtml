@@ -1,0 +1,11 @@
+{
+  "templates": [{
+    "id": "spooky",
+    "dates": [
+      "2018-02-10", "2017-11-03", "2017-11-05", "2017-11-06",
+      "FREQ=WEEKLY;DTSTART=20180201T150000Z;COUNT=30;WKST=MO;BYDAY=TU,SA"
+    ]
+  }, {
+    "id": "default"
+  }]
+}

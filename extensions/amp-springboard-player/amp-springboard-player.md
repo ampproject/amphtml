@@ -19,66 +19,28 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-springboard-player</code> displays the Springboard Player used in <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, flex-item, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/springboard-player.amp.html">springboard-player.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
+  </tr>
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-springboard-player` tag
-(see also `amp-springboard-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-springboard-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-site-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-mode</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-content-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-player-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-domain</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-items</code> attribute is missing.</td>
-  </tr>
-  
-</table>
+[TOC]
 
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
-
-Examples:
 
 ```html
 <amp-springboard-player
@@ -94,26 +56,34 @@ Examples:
 
 ## Attributes
 
-**data-site-id**
+##### data-site-id (required)
 
-The SpringBoard site id. Specific to every partner.
+The SpringBoard site ID. Specific to every partner.
 
-**data-mode**
+##### data-mode (required)
 
-The SpringBoard player mode (video|playlist).
+The SpringBoard player mode: `video` or `playlist`.
 
-**data-content-id**
+##### data-content-id (required)
 
-The SpringBoard player content id (video or playlist id).
+The SpringBoard player content ID (video or playlist ID).
 
-**data-player-id**
+##### data-player-id (required)
 
 The Springboard player ID.
 
-**data-domain**
+##### data-domain (required)
 
 The Springboard partner domain.
 
-**data-items**
+##### data-items (required)
 
-The number of videos in playlist
+The number of videos in the playlist.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.

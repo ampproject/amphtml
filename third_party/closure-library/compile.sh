@@ -19,16 +19,18 @@ java -jar $1 \
     --js "$2/goog/array/array.js" \
     --js "$2/goog/asserts/asserts.js" \
     --js "$2/goog/crypt/crypt.js" \
-    --js "base64.js" \
     --js "$2/goog/crypt/hash.js" \
     --js "$2/goog/crypt/sha2_64bit.js" \
     --js "$2/goog/crypt/sha384.js" \
     --js "$2/goog/debug/error.js" \
     --js "$2/goog/dom/nodetype.js" \
     --js "$2/goog/math/long.js" \
+    --js "$2/goog/reflect/reflect.js" \
     --js "$2/goog/string/string.js" \
     --js_output_file "sha384-generated.js" \
-    --output_wrapper "/* Generated from closure library commit $GIT_COMMIT */%output%;export function sha384Base64(input) { return ampSha384(input) }" \
+    --output_wrapper "/* Generated from closure library commit $GIT_COMMIT
+*/%output%;exports.base64=function base64(input) { return ampBase64(input) };
+exports.sha384=function sha384(input) { return ampSha384Digest(input) };" \
     --manage_closure_dependencies \
     --process_closure_primitives \
     --use_types_for_optimization \

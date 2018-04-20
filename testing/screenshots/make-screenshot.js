@@ -24,7 +24,7 @@
  * ```
  * phantomjs --ssl-protocol=any --ignore-ssl-errors=true --load-images=true \
  *     make-screenshot.js "http://localhost:8000" \
- *     "/examples.build/everything.amp.max.html" \
+ *     "/examples/everything.amp.html" \
  *     "everything.png" "iPhone6+"
  * ```
  */
@@ -224,6 +224,7 @@ page.open(url, function() {
       resources.forEach(function(resource) {
         log('Resource started: ' + resource.debugid);
         prepareResource(resource);
+        // Note: forceAll is no longer available.
         resource.forceAll().then(function() {
           completeResource(resource);
         }, function(reason) {

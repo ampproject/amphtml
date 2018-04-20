@@ -24,19 +24,19 @@ export class FiniteStateMachine {
   /**
    * Constructs a FSM using the bits defined in initialState as changeable
    * states.
-   * @param {!STATE} initialState
+   * @param {STATE} initialState
    */
   constructor(initialState) {
     /**
      * The current state of the FSM
-     * @type {!STATE}
+     * @private {STATE}
      */
     this.state_ = initialState;
 
     /**
      * Callbacks that are invoked when transitioning from an old state
      * to the new.
-     * @type {Object<string, function()>}
+     * @private {Object<string, function()>}
      */
     this.transitions_ = Object.create(null);
   }
@@ -44,15 +44,15 @@ export class FiniteStateMachine {
   /**
    * Adds a transition callback that will be called when the oldState
    * transitions to the newState.
-   * @param {!STATE} oldState
-   * @param {!STATE} newState
+   * @param {STATE} oldState
+   * @param {STATE} newState
    * @param {function()} callback
    */
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
-    dev.assert(
-      !this.transitions_[transition],
-      'cannot define a duplicate transition callback'
+    dev().assert(
+        !this.transitions_[transition],
+        'cannot define a duplicate transition callback'
     );
     this.transitions_[transition] = callback;
   }
@@ -60,7 +60,7 @@ export class FiniteStateMachine {
   /**
    * Transitions to the newState and invokes the registered transition
    * callback, if one is defined.
-   * @param {!STATE} newState
+   * @param {STATE} newState
    */
   setState(newState) {
     const oldState = this.state_;
@@ -77,8 +77,8 @@ export class FiniteStateMachine {
   /**
    * Transforms the state transition into a key which identifies a callback.
    * @private
-   * @param {!STATE} oldState
-   * @param {!STATE} newState
+   * @param {STATE} oldState
+   * @param {STATE} newState
    * @return {string}
    */
   statesToTransition_(oldState, newState) {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {sendRequest, sendRequestUsingIframe, Transport} from '../transport';
+import * as sinon from 'sinon';
+import {Transport, sendRequest, sendRequestUsingIframe} from '../transport';
 import {adopt} from '../../../../src/runtime';
 import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 
 adopt(window);
 
@@ -39,7 +39,7 @@ describe('amp-analytics.transport', () => {
   }
 
   function assertCallCounts(
-      expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
+    expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
     expect(Transport.sendRequestUsingBeacon.callCount,
         'sendRequestUsingBeacon call count').to.equal(expectedBeaconCalls);
     expect(Transport.sendRequestUsingXhr.callCount,
@@ -72,6 +72,14 @@ describe('amp-analytics.transport', () => {
     assertCallCounts(0, 0, 1);
   });
 
+  it('falls back to image setting suppressWarnings to true', () => {
+    setupStubs(true, true);
+    sendRequest(window, 'https://example.com/test', {
+      beacon: false, xhrpost: false, image: {suppressWarnings: true},
+    });
+    assertCallCounts(0, 0, 1);
+  });
+
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
@@ -98,21 +106,24 @@ describe('amp-analytics.transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    beaconRetval = false;
-    xhrRetval = false;
     sendRequest(window, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });
 
   it('asserts that urls are https', () => {
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       sendRequest(window, 'http://example.com/test');
-    }).to.throw(/https/);
+    }).to.throw(/https/); });
+  });
+
+  it('should NOT allow __amp_source_origin', () => {
+    allowConsoleError(() => { expect(() => {
+      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/); });
   });
 
   describe('sendRequestUsingIframe', () => {
-    const url = 'http://iframe.localhost:9876/base/test/' +
-        'fixtures/served/iframe.html';
+    const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
     it('should create and delete an iframe', () => {
       const clock = sandbox.useFakeTimers();
       const iframe = sendRequestUsingIframe(window, url);
@@ -129,18 +140,17 @@ describe('amp-analytics.transport', () => {
     });
 
     it('iframe asserts that urls are https', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         sendRequestUsingIframe(window, 'http://example.com/test');
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
 
     it('forbids same origin', () => {
-      expect(() => {
-        sendRequestUsingIframe(window, 'http://localhost:9876/base/');
+      allowConsoleError(() => { expect(() => {
+        sendRequestUsingIframe(window, 'http://localhost:9876/');
       }).to.throw(
-          /Origin of iframe request must not be equal to the document origin./
-      );
+          /Origin of iframe request must not be equal to the document origin./);
+      });
     });
   });
 });
-

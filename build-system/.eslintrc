@@ -1,0 +1,10 @@
+{
+  "env": {
+    "node": true
+  },
+  "globals": {
+    "require": false,
+    "process": false,
+    "exports": false
+  }
+}

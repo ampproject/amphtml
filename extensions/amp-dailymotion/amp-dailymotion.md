@@ -22,18 +22,20 @@ limitations under the License.
     <td> Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-dailymotion" src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-dailymotion/">amp-dailymotion.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/dailymotion.amp.html">dailymotion.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-dailymotion/">Annotated code example for amp-dailymotion</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -46,102 +48,84 @@ With responsive layout, the width and height from the example should yield corre
     width="480" height="270"></amp-dailymotion>
 ```
 
-## Required attributes
+## Attributes
 
-**data-videoid**
+##### autoplay
 
-The Dailymotion video id found in every video page URL.
+If this attribute is present, and the browser supports autoplay:
 
-E.g. in https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation `"x2m8jpp"` is the video id.
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
 
-## Optional attributes
+##### data-videoid (required)
 
-**data-mute**
+The Dailymotion video id found in every video page URL. For example, `"x2m8jpp"` is the video id for `https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation`.
 
-Whether to mute the video or not.
+##### data-mute (optional)
 
-Value: `"true"` or `"false"`
+Indicates whether to mute the video.
 
-Default value: `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"false"`
 
-**data-endscreen-enable**
+##### data-endscreen-enable (optional)
 
-Whether to enable the end screen or not.
+Indicates whether to enable the end screen.
 
-Value: `"true"` or `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Default value: `"true"`
+##### data-sharing-enable (optional)
 
-**data-sharing-enable**
+Indicates whether to display the sharing button.
 
-Whether to display the sharing button or not.
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Value: `"true"` or `"false"`
+##### data-start (optional)
 
-Default value: `"true"`
+Specifies the time (in seconds) from which the video should start playing.
 
-**data-start**
+* Value: integer (number of seconds). For example, `data-start=45`.
+* Default value: `0`
 
-Specifies the time (in seconds) from which the video should start playing. 
-
-Value: integer (number of seconds). E.g. `data-start=45`
-
-Default value: `0`
-
-**data-ui-highlight**
+##### data-ui-highlight (optional)
 
 Change the default highlight color used in the controls.
 
-Value: Hexadecimal color value (without the leading #). E.g. `data-ui-highlight="e540ff"`
+* Value: Hexadecimal color value (without the leading #). For example, `data-ui-highlight="e540ff"`.
 
-**data-ui-logo**
+##### data-ui-logo (optional)
 
-Whether to display the Dailymotion logo or not.
+Indicates whether to display the Dailymotion logo.
 
-Value: `"true"` or `"false"`
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Default value: `"true"`
+##### data-info (optional)
 
-**data-info**
+Indicates whether to show video information (title and owner) on the start screen.
 
-Whether to show video information (title and owner) on the start screen.
+* Value: `"true"` or `"false"`
+* Default value: `"true"`
 
-Value: `"true"` or `"false"`
+##### data-param-* (optional)
 
-Default value: `"true"`
+All data-param-* attributes are added as query parameters to the src value of the embedded Dailymotion iframe. You can use this attribute to pass custom values not explicitly declared.
 
-## Validation errors
+Keys and values will be URI encoded.
 
-The following lists validation errors specific to the `amp-dailymotion` tag
-(see also `amp-dailymotion` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/0.1/validator-amp-dailymotion.protoascii)):
+* `data-param-origin="example.com"`
 
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-dailymotion</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-videoid</code> attribute missing.</td>
-  </tr>
-    <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the <code>data-videoid</code> attribute is invalid.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types.</td>
-  </tr>
-</table>
+Please read [Dailymotion\'s video player documentation](https://developer.dailymotion.com/player#player-parameters) to know more about parameters and options.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-dailymotion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/validator-amp-dailymotion.protoascii) in the AMP validator specification.

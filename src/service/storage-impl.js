@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
-import {getSourceOrigin} from '../url';
+import {Services} from '../services';
 import {dev} from '../log';
-import {recreateNonProtoObject} from '../json';
-import {timer} from '../timer';
-import {viewerFor} from '../viewer';
+import {dict} from '../utils/object';
+import {getSourceOrigin} from '../url';
+import {parseJson, recreateNonProtoObject} from '../json';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @const */
 const TAG = 'Storage';
@@ -41,22 +41,22 @@ const MAX_VALUES_PER_ORIGIN = 8;
 export class Storage {
 
   /**
-   * @param {!Window} win
-   * @param {!Viewer} viewer
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../service/viewer-impl.Viewer} viewer
    * @param {!StorageBindingDef} binding
    */
-  constructor(win, viewer, binding) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, viewer, binding) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
 
     /** @const @private {string} */
-    this.origin_ = getSourceOrigin(this.win.location);
+    this.origin_ = getSourceOrigin(this.ampdoc.win.location);
 
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
@@ -76,7 +76,6 @@ export class Storage {
    * key.
    * @param {string} name
    * @return {!Promise<*>}
-   * @override
    */
   get(name) {
     return this.getStore_().then(store => store.get(name));
@@ -88,10 +87,9 @@ export class Storage {
    * @param {string} name
    * @param {*} value
    * @return {!Promise}
-   * @override
    */
   set(name, value) {
-    dev.assert(typeof value == 'boolean', 'Only boolean values accepted');
+    dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
     return this.saveStore_(store => store.set(name, value));
   }
 
@@ -100,7 +98,6 @@ export class Storage {
    * the operation completes.
    * @param {string} name
    * @return {!Promise}
-   * @override
    */
   remove(name) {
     return this.saveStore_(store => store.remove(name));
@@ -113,9 +110,9 @@ export class Storage {
   getStore_() {
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
-          .then(blob => blob ? JSON.parse(atob(blob)) : {})
+          .then(blob => blob ? parseJson(atob(blob)) : {})
           .catch(reason => {
-            dev.error(TAG, 'Failed to load store: ', reason);
+            dev().expectedError(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));
@@ -143,7 +140,7 @@ export class Storage {
     this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-storage-reset' &&
               message['origin'] == this.origin_) {
-        dev.fine(TAG, 'Received reset message');
+        dev().fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
     });
@@ -151,11 +148,11 @@ export class Storage {
 
   /** @private */
   broadcastReset_() {
-    dev.fine(TAG, 'Broadcasted reset message');
-    this.viewer_.broadcast({
+    dev().fine(TAG, 'Broadcasted reset message');
+    this.viewer_.broadcast(/** @type {!JsonObject} */ ({
       'type': 'amp-storage-reset',
       'origin': this.origin_,
-    });
+    }));
   }
 }
 
@@ -177,17 +174,17 @@ export class Storage {
  */
 export class Store {
   /**
-   * @param {!JSONObject} obj
+   * @param {!JsonObject} obj
    * @param {number=} opt_maxValues
    */
   constructor(obj, opt_maxValues) {
-    /** @const {!JSONObject} */
-    this.obj = recreateNonProtoObject(obj);
+    /** @const {!JsonObject} */
+    this.obj = /** @type {!JsonObject} */ (recreateNonProtoObject(obj));
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
-    /** @private @const {!Object<string, !JSONObject>} */
+    /** @private @const {!Object<string, !JsonObject>} */
     this.values_ = this.obj['vv'] || Object.create(null);
     if (!this.obj['vv']) {
       this.obj['vv'] = this.values_;
@@ -197,7 +194,6 @@ export class Store {
   /**
    * @param {string} name
    * @return {*|undefined}
-   * @private
    */
   get(name) {
     // The structure is {key: {v: *, t: time}}
@@ -208,18 +204,20 @@ export class Store {
   /**
    * @param {string} name
    * @param {*} value
-   * @private
    */
   set(name, value) {
-    dev.assert(name != '__proto__' && name != 'prototype',
+    dev().assert(name != '__proto__' && name != 'prototype',
         'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];
       item['v'] = value;
-      item['t'] = timer.now();
+      item['t'] = Date.now();
     } else {
-      this.values_[name] = {'v': value, 't': timer.now()};
+      this.values_[name] = dict({
+        'v': value,
+        't': Date.now(),
+      });
     }
 
     // Purge old values.
@@ -242,7 +240,6 @@ export class Store {
 
   /**
    * @param {string} name
-   * @private
    */
   remove(name) {
     // The structure is {key: {v: *, t: time}}
@@ -288,6 +285,36 @@ export class LocalStorageBinding {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {boolean} */
+    this.isLocalStorageSupported_ = this.checkIsLocalStorageSupported_();
+
+    if (!this.isLocalStorageSupported_) {
+      const error = new Error('localStorage not supported.');
+      dev().expectedError(TAG, error);
+    }
+  }
+
+  /**
+   * Determines whether localStorage API is supported by ensuring it is declared
+   * and does not throw an exception when used.
+   * @return {boolean}
+   * @private
+   */
+  checkIsLocalStorageSupported_() {
+    try {
+      if (!('localStorage' in this.win)) {
+        return false;
+      }
+
+      // We do not care about the value fetched from local storage; we only care
+      // whether the call throws an exception or not.  As such, we can look up
+      // any arbitrary key.
+      this.win.localStorage.getItem('test');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
@@ -302,6 +329,10 @@ export class LocalStorageBinding {
   /** @override */
   loadBlob(origin) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve(null);
+        return;
+      }
       resolve(this.win.localStorage.getItem(this.getKey_(origin)));
     });
   }
@@ -309,6 +340,10 @@ export class LocalStorageBinding {
   /** @override */
   saveBlob(origin, blob) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve();
+        return;
+      }
       this.win.localStorage.setItem(this.getKey_(origin), blob);
       resolve();
     });
@@ -324,41 +359,41 @@ export class LocalStorageBinding {
 export class ViewerStorageBinding {
 
   /**
-   * @param {!Viewer} viewer
+   * @param {!../service/viewer-impl.Viewer} viewer
    */
   constructor(viewer) {
-    /** @private @const {!Viewer} */
+    /** @private @const {!../service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
   }
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessage('loadStore', {
-      'origin': origin,
-    }, true).then(response => response['blob']);
+    return this.viewer_.sendMessageAwaitResponse('loadStore',
+        dict({'origin': origin})).then(response => response['blob']);
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return this.viewer_.sendMessage('saveStore', {
-      'origin': origin,
-      'blob': blob,
-    }, true);
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'saveStore', dict({'origin': origin, 'blob': blob})));
   }
 }
 
 
 /**
- * @param {!Window} window
- * @return {!Storage}
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
-export function installStorageService(window) {
-  return getService(window, 'storage', () => {
-    const viewer = viewerFor(window);
-    const overrideStorage = parseInt(viewer.getParam('storage'), 10);
-    const binding = overrideStorage ?
-        new ViewerStorageBinding(viewer) :
-        new LocalStorageBinding(window);
-    return new Storage(window, viewer, binding).start_();
-  });
-};
+export function installStorageServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(
+      ampdoc,
+      'storage',
+      function() {
+        const viewer = Services.viewerForDoc(ampdoc);
+        const overrideStorage = parseInt(viewer.getParam('storage'), 10);
+        const binding = overrideStorage ?
+          new ViewerStorageBinding(viewer) :
+          new LocalStorageBinding(ampdoc.win);
+        return new Storage(ampdoc, viewer, binding).start_();
+      },
+      /* opt_instantiate */ true);
+}

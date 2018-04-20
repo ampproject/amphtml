@@ -15,20 +15,56 @@
  */
 
 
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
-import {listen} from '../../../src/iframe-helper';
+import {dashToUnderline} from '../../../src/string';
+import {getData, listen} from '../../../src/event-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getMode} from '../../../src/mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-
+import {isObject} from '../../../src/types';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 
 class AmpFacebook extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+
+    /** @private @const {string} */
+    this.dataLocale_ = element.hasAttribute('data-locale') ?
+      element.getAttribute('data-locale') :
+      dashToUnderline(window.navigator.language);
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
+
+    /** @private {number} */
+    this.toggleLoadingCounter_ = 0;
+
+  }
+
   /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://facebook.com', onLayout);
+  renderOutsideViewport() {
+    // We are conservative about loading heavy embeds.
+    // This will still start loading before they become visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.prefetch(
-        'https://connect.facebook.net/en_US/sdk.js', 'script');
-    prefetchBootstrap(this.getWin());
+    this.preconnect.preload(
+        'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js', 'script');
+    preloadBootstrap(this.win, this.preconnect);
   }
 
   /** @override */
@@ -38,21 +74,65 @@ class AmpFacebook extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'facebook');
+    const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', data => {
-      iframe.height = data.height;
-      iframe.width = data.width;
-      const amp = iframe.parentElement;
-      amp.setAttribute('height', data.height);
-      amp.setAttribute('width', data.width);
-      this./*OK*/changeHeight(data.height);
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
-    return loadPromise(iframe);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+    );
+    this.toggleLoading(true);
+    if (getMode().test) {
+      this.toggleLoadingCounter_++;
+    }
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
-};
 
-AMP.registerElement('amp-facebook', AmpFacebook);
+  /** @private */
+  handleFacebookMessages_(event) {
+    if (this.iframe_ && event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    const eventData = getData(event);
+    if (!eventData) {
+      return;
+    }
+
+    const parsedEventData = isObject(eventData) ?
+      eventData : tryParseJson(eventData);
+    if (!parsedEventData) {
+      return;
+    }
+    if (eventData['action'] == 'ready') {
+      this.toggleLoading(false);
+      if (getMode().test) {
+        this.toggleLoadingCounter_++;
+      }
+    }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+}
+
+
+AMP.extension('amp-facebook', '0.1', AMP => {
+  AMP.registerElement('amp-facebook', AmpFacebook);
+});

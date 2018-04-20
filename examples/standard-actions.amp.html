@@ -1,0 +1,101 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>Hide/Show/Toggle Examples in AMP</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style type="text/css">
+    /* Styles for example */
+    body {
+      font: 14px/1 sans-serif;
+    }
+    .button-set {
+      padding: 0 10px;
+      margin: 10px 0;
+    }
+    button {
+      background: transparent;
+      cursor: pointer;
+      border: 2px solid #000;
+      border-width: 0 0 2px;
+      padding: 4px 0;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 14px;
+      display: inline-block;
+      margin: 0;
+      width: 140px;
+    }
+    #normal-element {
+      background: #f0f0f0;
+      padding: 10px;
+    }
+    .spacer {
+      height: 100vh;
+    }
+    </style>
+</head>
+<body>
+
+<div class="button-set">
+  <h3>AMP.navigateTo()</h3>
+  <button on="tap:AMP.navigateTo(url='http://google.com')">google.com</button>
+
+  <select on="change:AMP.navigateTo(url=event.value)">
+    <option value="http://google.com">google.com</option>
+    <option value="http://yahoo.com">yahoo.com</option>
+    <option value="http://bing.com">bing.com</option>
+  </select>
+</div>
+
+<div class="button-set">
+  <h3>AMP.print()</h3>
+  <button on="tap:AMP.print">Print</button>
+</div>
+
+<div class="button-set">
+  <h3>amp-img:</h3>
+  <button on="tap:img-on-viewport.show">Show</button>
+  <button on="tap:img-on-viewport.hide">Hide</button>
+  <button on="tap:img-on-viewport.toggleVisibility">Toggle Visibility</button>
+</div>
+
+<div class="button-set">
+  <h3>Normal element:</h3>
+  <button on="tap:normal-element.show">Show</button>
+  <button on="tap:normal-element.hide">Hide</button>
+  <button on="tap:normal-element.toggleVisibility">Toggle Visibility</button>
+  <button on="tap:normal-element2.scrollTo">ScrollTo</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'bottom')">ScrollTo Bottom</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'center')">ScrollTo Center</button>
+  <button on="tap:normal-element2.scrollTo('duration' = 5000)">ScrollTo Slowly</button>
+  <button on="tap:input-element.focus">Focus</button>
+  <button on="tap:normal-element2.scrollTo('position' = 'top'), input-element.focus">ScrollTo and Focus</button>
+</div>
+
+<amp-img src="https://ampbyexample.com/img/amp.jpg" layout="responsive" width="1080" height="610" id="img-on-viewport"></amp-img>
+
+<div id="normal-element" hidden>
+  I was initially hidden.
+</div>
+
+<div class="spacer">
+</div>
+
+<div id="normal-element2">
+  You have to scroll to see me.
+</div>
+
+
+<input type="text" id="input-element">
+
+<div class="spacer">
+</div>
+
+
+</html>

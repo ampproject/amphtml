@@ -19,102 +19,63 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays an instagram embed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Displays an Instagram embed.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-instagram">amp-instagram.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/instagram.amp.html">instagram.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-instagram/">Annotated code example for amp-instagram</a></td>
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
-The `width` and `height` attributes are special for the instagram embed.
-These should be the actual width and height of the instagram image.
-The system automatically adds space for the "chrome" that instagram adds around the image.
+The `width` and `height` attributes are special for the Instagram embed.
+These should be the actual width and height of the Instagram image.
+The system automatically adds space for the "chrome" that Instagram adds around the image.
 
-Many instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
+Many Instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
 
 Example:
 ```html
 <amp-instagram
     data-shortcode="fBwFP"
+    data-captioned
     width="400"
     height="400"
     layout="responsive">
 </amp-instagram>
 ```
 
-If the instagram is not square you will need to enter the actual dimensions of the image.
+If the Instagram is not square you will need to enter the actual dimensions of the image.
 
 When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
 
 ## Attributes
 
-<!---
-`src` attribute hasn't been documented. Should it be?
-Also, can the tag include both data-shortcode and src or are they mutually exclusive?
--->
+##### data-shortcode
 
-**data-shortcode**
+The instagram data-shortcode is found in every instagram photo URL.
 
-The instagram data-shortcode found in every instagram photo URL.
+For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
 
-E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
+##### data-captioned
 
-## Validation errors
+Include the Instagram caption.  `amp-instagram` will attept to resize to the correct hight including the caption.
 
-The following lists validation errors specific to the `amp-instagram` tag
-(see also `amp-instagram` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii)):
+##### common attributes
 
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-instagram</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The tag 'example1' is missing a mandatory attribute - pick one of example2.</a></td>
-    <td>Error thrown when neither <code>data-shortcode</code> or <code>src</code> is included. One of these attributes is mandatory.</td>
-  </tr>
-  </tr>
-    <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-shortcode</code> or <code>src</code> is missing its URL.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-shortcode</code> or <code>src</code> URL is invalid.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown <code>data-shortcode</code> or <code>src</code> URL is <code>http</code>; <code>https</code> protocol required.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#deprecated-attribute">The attribute 'example1' in tag 'example2' is deprecated - use 'example3' instead.</a></td>
-    <td>The attribute <code>shortcode </code>is deprecated - use <code>data-shortcode</code> instead.</td>
-  </tr>
-</table>
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.

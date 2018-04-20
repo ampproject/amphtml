@@ -1,0 +1,52 @@
+{
+  "name": "amp-validator-webui",
+  "version": "0.1.0",
+  "description": "Web UI for Validator for AMP HTML (www.ampproject.org)",
+  "engines": {
+    "node": "^4.0.0"
+  },
+  "author": "The AMP HTML Authors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml.git"
+  },
+  "dependencies": {
+    "@polymer/font-roboto": "0.0.3",
+    "@polymer/iron-a11y-announcer": "0.0.3",
+    "@polymer/iron-a11y-keys-behavior": "0.0.3",
+    "@polymer/iron-behaviors": "0.0.3",
+    "@polymer/iron-dropdown": "0.0.3",
+    "@polymer/iron-fit-behavior": "0.0.3",
+    "@polymer/iron-flex-layout": "0.0.3",
+    "@polymer/iron-form-element-behavior": "0.0.3",
+    "@polymer/iron-icon": "0.0.3",
+    "@polymer/iron-icons": "0.0.3",
+    "@polymer/iron-iconset-svg": "0.0.3",
+    "@polymer/iron-input": "0.0.3",
+    "@polymer/iron-menu-behavior": "0.0.3",
+    "@polymer/iron-meta": "0.0.3",
+    "@polymer/iron-overlay-behavior": "0.0.3",
+    "@polymer/iron-resizable-behavior": "0.0.3",
+    "@polymer/iron-selector": "0.0.3",
+    "@polymer/iron-validatable-behavior": "0.0.3",
+    "@polymer/neon-animation": "0.0.3",
+    "@polymer/paper-behaviors": "0.0.3",
+    "@polymer/paper-button": "0.0.3",
+    "@polymer/paper-dropdown-menu": "0.0.3",
+    "@polymer/paper-input": "0.0.3",
+    "@polymer/paper-item": "0.0.3",
+    "@polymer/paper-listbox": "0.0.3",
+    "@polymer/paper-material": "0.0.3",
+    "@polymer/paper-menu-button": "0.0.3",
+    "@polymer/paper-ripple": "0.0.3",
+    "@polymer/paper-styles": "0.0.3",
+    "@polymer/paper-toast": "0.0.3",
+    "@polymer/paper-toolbar": "0.0.3",
+    "@polymer/polymer": "1.2.5-npm-test.2",
+    "codemirror": "5.15.2",
+    "vulcanize": "1.14.8",
+    "webcomponents.js": "^0.7.22",
+    "web-animations-js": "2.2.2"
+  }
+}

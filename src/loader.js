@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
+import {htmlFor} from './static-template';
+
+/** @private @const */
+const LINE_LOADER_ELEMENTS = {
+  'AMP-AD': true,
+};
 
 /**
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.
  * @param {!Document} doc
+ * @param {string} elementName
  * @return {!Element}
  */
-export function createLoaderElement(doc) {
-  const loader = doc.createElement('div');
-  loader.classList.add('-amp-loader');
-  for (let i = 0; i < 3; i++) {
-    const dot = doc.createElement('div');
-    dot.classList.add('-amp-loader-dot');
-    loader.appendChild(dot);
+export function createLoaderElement(doc, elementName) {
+  if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
+    return htmlFor(doc)`<div class="i-amphtml-loader-line">
+          <div class="i-amphtml-loader-moving-line" />
+        </div>`;
   }
-  return loader;
+  return htmlFor(doc)`<div class="i-amphtml-loader">
+        <div class="i-amphtml-loader-dot" />
+        <div class="i-amphtml-loader-dot" />
+        <div class="i-amphtml-loader-dot" />
+      </div>`;
 }

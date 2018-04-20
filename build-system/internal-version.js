@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var crypto = require('crypto');
+const argv = require('minimist')(process.argv.slice(2));
+const crypto = require('crypto');
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
-exports.VERSION = String(new Date().getTime());
+exports.VERSION = argv.version ?
+  String(argv.version) : String(Date.now());
 
 // A token that changes its value each time we release AMP. This is intended
 // to verify that two iframes of AMP have the same version of AMP. It is
@@ -27,7 +30,7 @@ exports.VERSION = String(new Date().getTime());
 exports.TOKEN = getToken();
 
 function getToken() {
-  var task = process.argv[2];
+  const task = process.argv[2];
   // For tests build parent and child frame can get out of sync because
   // we do not version lock them. To fix this we use a fixed token.
   if (!task || task == 'build' || task == 'test') {

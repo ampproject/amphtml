@@ -13,127 +13,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 /**
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-var app = require('connect')();
-var bodyParser = require('body-parser');
-var clr = require('connect-livereload');
-var finalhandler = require('finalhandler');
-var path = require('path');
-var url = require('url');
-var request = require('request');
-var serveIndex = require('serve-index');
-var serveStatic = require('serve-static');
+const app = require(require.resolve('./app.js'));
+const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
+const isRunning = require('is-running');
+const log = require('fancy-log');
+const morgan = require('morgan');
+const webserver = require('gulp-webserver');
 
-var args = Array.prototype.slice.call(process.argv, 2, 4);
-var paths = args[0];
-var port = args[1];
+const host = process.env.SERVE_HOST;
+const port = process.env.SERVE_PORT;
+const useHttps = process.env.SERVE_USEHTTPS == 'true';
+const gulpProcess = process.env.SERVE_PROCESS_ID;
+const quiet = process.env.SERVE_QUIET == 'true';
+const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const header = require('connect-header');
 
-app.use(bodyParser.json());
-
-app.use('/examples', function(req, res, next) {
-  // Redirect physical dir to build dir that has versions belonging to
-  // local AMP.
-  if (req.url == '/' || req.url == '') {
-    res.writeHead(302, {
-      'Location': '../examples.build/'
-    });
-    res.end();
-    return;
+// Exit if the port is in use.
+process.on('uncaughtException', function(err) {
+  if (err.errno === 'EADDRINUSE') {
+    log(colors.red('Port', port, 'in use, shutting down server'));
+  } else {
+    log(colors.red(err));
   }
-  next();
+  process.kill(gulpProcess, 'SIGINT');
+  process.exit(1);
 });
 
-app.use('/api/show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
-    showNotification: true
+// Exit in the event of a crash in the parent gulp process.
+setInterval(function() {
+  if (!isRunning(gulpProcess)) {
+    process.exit(1);
+  }
+}, 1000);
+
+const middleware = [];
+if (!quiet) {
+  middleware.push(morgan('dev'), app);
+}
+if (sendCachingHeaders) {
+  middleware.push(header({
+    'cache-control': ' max-age=600',
   }));
-});
-
-app.use('/api/dont-show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
-    showNotification: false
-  }));
-});
-
-app.use('/api/echo/post', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(req.body, null, 2));
-});
-
-// Fetches an AMP document from the AMP proxy and replaces JS
-// URLs, so that they point to localhost.
-function proxyToAmpProxy(req, res, minify) {
-  res.setHeader('Content-Type', 'text/html');
-  var url = 'https://cdn.ampproject.org/c' + req.url;
-  request(url, function (error, response, body) {
-    body = body
-        // Unversion URLs.
-        .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-            'https://cdn.ampproject.org/')
-        // <base> href pointing to the proxy, so that images, etc. still work.
-        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
-        .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
-        .replace('https://cdn.ampproject.org/v0.max.js',
-            'http://localhost:8000/dist/amp.js')
-        .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
-            'http://localhost:8000/dist/v0/');
-    if (minify) {
-      body = body.replace(/\.max\.js/g, '.js')
-          .replace('/dist/amp.js', '/dist/v0.js');
-    }
-    res.statusCode = response.statusCode;
-    res.end(body);
-  });
 }
 
-// Proxy with unminified JS.
-// Example:
-// http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/max/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ false);
-});
+// Start gulp webserver
+gulp.src(process.cwd())
+    .pipe(webserver({
+      port,
+      host,
+      directoryListing: true,
+      https: useHttps,
+      middleware,
+    }));
 
-// Proxy with minified JS.
-// Example:
-// http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/min/', function(req, res) {
-  proxyToAmpProxy(req, res, /* minify */ true);
-});
-
-app.use(clr());
-
-function setAMPAccessControlHeader(res, path) {
-  var curUrl = url.parse(path, true);
-  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        'http://localhost:' + port);
-  }
-}
-
-paths.split(',').forEach(function(pth) {
-  // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth),
-        {setHeaders: setAMPAccessControlHeader}));
-  // Serve directory listings
-  app.use(serveIndex(path.join(process.cwd(), pth),
-    {'icons':true,'view':'details'}));
-});
-
-// 404 everything else
-app.use(function notFound(req, res) {
-  var done = finalhandler(req,res);
-  var err = new Error('File Not Found');
-  err.status = 404;
-  done(err);
-});
-
-// Start up the server
-app.listen(port, function () {
-  console./*OK*/log('serving %s at http://localhost:%s', paths, port);
-});

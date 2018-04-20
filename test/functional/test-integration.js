@@ -20,15 +20,15 @@
 import {
   draw3p,
   ensureFramed,
-  validateParentOrigin,
+  parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
-  parseFragment,
+  validateParentOrigin,
 } from '../../3p/integration';
-import {registrations, register} from '../../src/3p';
+import {getRegistrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
-
+  const registrations = getRegistrations();
   afterEach(() => {
     delete registrations.testAction;
   });
@@ -56,14 +56,19 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('yieldbot');
     expect(registrations).to.include.key('adstir');
     expect(registrations).to.include.key('colombia');
+
+    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+      expect(registrations, `Missing registration for [${adType}]`)
+          .to.contain.key(adType);
+    });
+
   });
 
-  it('should validateParentOrigin without ancestorOrigins', () => {
+  it('should not throw validateParentOrigin without ancestorOrigins', () => {
     let parent = {};
     validateParentOrigin({
       location: {},
     }, parent);
-    expect(parent.originValidated).to.be.false;
 
     parent = {};
     validateParentOrigin({
@@ -71,7 +76,6 @@ describe('3p integration.js', () => {
         ancestorOrigins: [],
       },
     }, parent);
-    expect(parent.originValidated).to.be.false;
   });
 
   it('should validateParentOrigin with correct ancestorOrigins', () => {
@@ -83,53 +87,51 @@ describe('3p integration.js', () => {
         ancestorOrigins: ['abc', 'xyz'],
       },
     }, parent);
-
-    expect(parent.originValidated).to.be.true;
   });
 
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
-    () => {
-      const parent = {
-        origin: 'abc',
-      };
-      expect(() => {
-        validateParentOrigin({
-          location: {
-            ancestorOrigins: ['xyz'],
-          },
-        }, parent);
-      }).to.throw(/Parent origin mismatch/);
-    });
+      () => {
+        const parent = {
+          origin: 'abc',
+        };
+        allowConsoleError(() => { expect(() => {
+          validateParentOrigin({
+            location: {
+              ancestorOrigins: ['xyz'],
+            },
+          }, parent);
+        }).to.throw(/Parent origin mismatch/); });
+      });
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +
         '"height":50,' +
         '"type":"twitter","_context":{"referrer":"http://localhost:8000/' +
-        'examples.build/","canonicalUrl":"http://localhost:8000/' +
-        'examples.build/amps.html","location":{"href":"http://' +
-        'localhost:8000/examples.build/twitter.amp.max.html"},' +
+        'examples/","canonicalUrl":"http://localhost:8000/' +
+        'examples/amps.html","location":{"href":"http://' +
+        'localhost:8000/examples/twitter.amp.html"},' +
         '"mode":{"localDev":true,"development":false,"minified":false}}}';
     const data = parseFragment(unencoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
-        'http://localhost:8000/examples.build/twitter.amp.max.html');
+        'http://localhost:8000/examples/twitter.amp.html');
   });
 
   it('should parse JSON from fragment encoded (Firefox)', () => {
     const encoded = '#{%22tweetid%22:%22638793490521001985%22,%22width' +
         '%22:390,%22height%22:50,%22initialWindowWidth%22:1290,%22initial' +
         'WindowHeight%22:165,%22type%22:%22twitter%22,%22_context%22:{%22' +
-        'referrer%22:%22http://localhost:8000/examples.build/%22,%22canoni' +
-        'calUrl%22:%22http://localhost:8000/examples.build/amps.html%22,%22' +
-        'location%22:{%22href%22:%22http://localhost:8000/examples.build/t' +
-        'witter.amp.max.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
+        'referrer%22:%22http://localhost:8000/examples/%22,%22canoni' +
+        'calUrl%22:%22http://localhost:8000/examples/amps.html%22,%22' +
+        'location%22:{%22href%22:%22http://localhost:8000/examples/t' +
+        'witter.amp.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
         'ment%22:false,%22minified%22:false}}}';
     const data = parseFragment(encoded);
-    expect(data).to.be.object;
+    expect(data).to.be.an('object');
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
-        'http://localhost:8000/examples.build/twitter.amp.max.html');
+        'http://localhost:8000/examples/twitter.amp.html');
   });
 
   it('should be ok with empty fragment', () => {
@@ -146,7 +148,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -169,7 +171,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -200,31 +202,16 @@ describe('3p integration.js', () => {
     };
     const win = {
       context: {
-        location: {},
-        data: data,
-      },
-    };
-    expect(() => {
-      draw3p(win, data);
-    }).to.throw(/Origin should have been validated/);
-  });
-
-  it('should throw if origin was never validated', () => {
-    const data = {
-      type: 'testAction',
-    };
-    const win = {
-      context: {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
         tagName: 'AMP-EMBED',
       },
     };
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       draw3p(win, data);
-    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/); });
   });
 
   it('should allow all types on localhost', () => {
@@ -262,9 +249,9 @@ describe('3p integration.js', () => {
     validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
     validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
   });
 
   it('should validate types on custom host', () => {
@@ -276,12 +263,12 @@ describe('3p integration.js', () => {
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');
     validateAllowedTypes(defaultHost, 'doubleclick');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       validateAllowedTypes(defaultHost, 'not present');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
-    expect(() => {
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
+    allowConsoleError(() => { expect(() => {
       validateAllowedTypes(defaultHost, 'adtech');
-    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/); });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });
 
@@ -296,9 +283,9 @@ describe('3p integration.js', () => {
       },
     };
     win.parent = win;
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       ensureFramed(win);
-    }).to.throw(/Must be framed: sentinel/);
+    }).to.throw(/Must be framed: sentinel/); });
   });
 
   it('should validateAllowedEmbeddingOrigins: non-cache', () => {
@@ -311,7 +298,9 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      expect(fn).to.throw(/Invalid embedding hostname/);
+      allowConsoleError(() => {
+        expect(fn).to.throw(/Invalid embedding hostname/);
+      });
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['foo.net', 'foo.com']);
@@ -331,7 +320,9 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      expect(fn).to.throw(/Invalid embedding hostname/);
+      allowConsoleError(() => {
+        expect(fn).to.throw(/Invalid embedding hostname/);
+      });
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
@@ -351,7 +342,9 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      expect(fn).to.throw(/Invalid embedding hostname/);
+      allowConsoleError(() => {
+        expect(fn).to.throw(/Invalid embedding hostname/);
+      });
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
@@ -369,7 +362,9 @@ describe('3p integration.js', () => {
       },
     };
     function invalid(fn) {
-      expect(fn).to.throw(/Invalid embedding hostname/);
+      allowConsoleError(() => {
+        expect(fn).to.throw(/Invalid embedding hostname/);
+      });
     }
     validateAllowedEmbeddingOrigins(win, ['foo.com']);
     validateAllowedEmbeddingOrigins(win, ['www.foo.com']);

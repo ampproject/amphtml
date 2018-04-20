@@ -15,7 +15,6 @@
  */
 
 import {loadScript, validateDataExists} from '../src/3p';
-
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -30,7 +29,7 @@ export function colombia(global, data) {
     clmbposition: data.clmb_position,
     clmbsection: data.clmb_section,
   });
-// install observation on entering/leaving the view
+  // install observation on entering/leaving the view
   global.context.observeIntersection(function(newrequest) {
     newrequest.forEach(function(d) {
       if (d.intersectionRect.height > 0) {

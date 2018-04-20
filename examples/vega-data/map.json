@@ -1,0 +1,32 @@
+{
+  "width": 740,
+  "height": 500,
+  "padding": 0,
+  "data": [
+    {
+      "name": "world",
+      "url": "vega-data/world-110m.json",
+      "format": {"type": "topojson", "feature": "countries"},
+      "transform": [{
+        "type": "geopath",
+        "projection": "winkel3",
+        "scale": 170,
+        "translate": [350, 250]
+      }]
+    }
+  ],
+  "marks": [
+    {
+      "type": "path",
+      "from": {"data": "world"},
+      "properties": {
+        "enter": {
+          "stroke": {"value": "#fff"},
+          "path": {"field": "layout_path"}
+        },
+        "update": {"fill": {"value": "#ccc"}},
+        "hover": {"fill": {"value": "pink"}}
+      }
+    }
+  ]
+}

@@ -13,147 +13,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {user} from '../../../src/log';
+
+import {dict} from '../../../src/utils/object';
 
 /**
  * Get social share configurations by supported type.
- * @param  {!string}
+ * @param  {string} type
  * @return {!Object}
  */
 export function getSocialConfig(type) {
-  user.assert(type in BUILTINS,
-    'Unknown social share type ' + type);
   return BUILTINS[type];
 }
 
 /**
- * @type {Object<string, Object>}
+ * @type {!JsonObject}
  */
-const BUILTINS = {
+const BUILTINS = dict({
   'twitter': {
-    'url': 'https://twitter.com/intent/tweet',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'url': {
-        'param': 'url',
-        'required': false,
-        'type': 'url',
-        'maxlength': 1024,
-      },
-      'text': {
-        'param': 'text',
-        'required': false,
-        'type': 'text',
-        'maxlength': 140,
-      },
-      'attribution': {
-        'param': 'via',
-        'required': false,
-        'type': 'text',
-        'maxlength': 20,
-      },
+    'shareEndpoint': 'https://twitter.com/intent/tweet',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
     },
   },
   'facebook': {
-    'url': 'https://www.facebook.com/dialog/share',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'url': {
-        'param': 'href',
-        'required': false,
-        'type': 'url',
-        'maxlength': 1024,
-      },
-      'attribution': {
-        'param': 'app_id',
-        'required': true,
-        'type': 'text',
-        'maxlength': 128,
-      },
+    'shareEndpoint': 'https://www.facebook.com/dialog/share',
+    'defaultParams': {
+      'href': 'CANONICAL_URL',
     },
   },
   'pinterest': {
-    'url': 'https://www.pinterest.com/pin/create/button/',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'url': {
-        'param': 'url',
-        'required': false,
-        'type': 'url',
-        'maxlength': 1024,
-      },
-      'text': {
-        'param': 'description',
-        'required': false,
-        'type': 'text',
-        'maxlength': 140,
-      },
-      'image': {
-        'param': 'media',
-        'required': false,
-        'type': 'url',
-        'maxlength': 1024,
-      },
+    'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
+      'description': 'TITLE',
     },
   },
   'linkedin': {
-    'url': 'https://www.linkedin.com/shareArticle',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'url': {
-        'param': 'url',
-        'required': true,
-        'type': 'url',
-        'maxlength': 1024,
-      },
-      'text': {
-        'param': 'title',
-        'required': false,
-        'type': 'text',
-        'maxlength': 200,
-      },
-      'attribution': {
-        'param': 'source',
-        'required': false,
-        'type': 'text',
-        'maxlength': 200,
-      },
-      'mini': {
-        'param': 'mini',
-        'required': false,
-        'type': 'fixed',
-        'value': 'true',
-      },
+    'shareEndpoint': 'https://www.linkedin.com/shareArticle',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
+      'mini': 'true',
     },
   },
   'gplus': {
-    'url': 'https://plus.google.com/share',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'url': {
-        'param': 'url',
-        'required': true,
-        'type': 'url',
-        'maxlength': 1024,
-      },
+    'shareEndpoint': 'https://plus.google.com/share',
+    'defaultParams': {
+      'url': 'CANONICAL_URL',
     },
   },
   'email': {
-    'url': 'mailto:',
-    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
-    'params': {
-      'text': {
-        'param': 'subject',
-        'required': true,
-        'type': 'text',
-        'maxlength': 1024,
-      },
-      'url': {
-        'param': 'body',
-        'required': true,
-        'type': 'url',
-        'maxlength': 1024,
-      },
+    'bindings': ['recipient'],
+    'shareEndpoint': 'mailto:RECIPIENT',
+    'defaultParams': {
+      'subject': 'TITLE',
+      'body': 'CANONICAL_URL',
+      'recipient': '',
     },
   },
-};
+  'tumblr': {
+    'shareEndpoint': 'https://www.tumblr.com/share/link',
+    'defaultParams': {
+      'name': 'TITLE',
+      'url': 'CANONICAL_URL',
+    },
+  },
+  'whatsapp': {
+    'shareEndpoint': 'https://api.whatsapp.com/send',
+    'defaultParams': {
+      'text': 'TITLE - CANONICAL_URL',
+    },
+  },
+  'sms': {
+    'shareEndpoint': 'sms:',
+    'defaultParams': {
+      'body': 'TITLE - CANONICAL_URL',
+    },
+  },
+  'system': {
+    'shareEndpoint': 'navigator-share:',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    },
+  },
+});

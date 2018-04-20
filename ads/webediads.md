@@ -16,57 +16,64 @@ limitations under the License.
 
 # Webedia Adserver
 
-## 1. Introduction
-
 Private ad system deployed for all Webedia websites.
 
-## 2. One call method
+## One call method
 
 This method allow you to call one ad position with a specific configuration.
 
-### a. Basic Example
+### Basic example
 
-```
-<amp-ad width=300
-        height=250
-        type="webediads"
-        data-site="allocine"
-        data-page="fichefilm"
-        data-position="middle"
-        data-query="">
+```html
+<amp-ad width="300" height="250"
+    type="webediads"
+    data-site="site_test"
+    data-page="amp"
+    data-position="middle"
+    data-query="">
 </amp-ad>
 ```
 
-### b. Query Example
+### Query example
 
-```
-<amp-ad width=300
-        height=250
-        type="webediads"
-        data-sitename="allocine"
-        data-pagename="fichefilm"
-        data-position="middle"
-        data-query="movie=28765&genre=13008|13009">
+```html
+<amp-ad width="300" height="250"
+    type="webediads"
+    data-site="site_test"
+    data-page="amp"
+    data-position="middle"
+    data-query="amptest=1">
 </amp-ad>
 ```
 
-## 3. Supported Parameters
+### Placeholder and fallback example
 
-### "data" Parameters
+```html
+<amp-ad width="300" height="250"
+    type="webediads"
+    data-site="site_test"
+    data-page="amp"
+    data-position="middle"
+    data-query="amptest=1">
+    <div placeholder>Loading...</div>
+    <div fallback>No ad</div>
+</amp-ad>
+```
+
+## Configuration
+
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
+
+### Supported parameters
 
 All parameters are mandatory, only "query" can be empty.
 
-- ```data-site``` (String, non-empty)
-- ```data-page``` (String, non-empty)
-- ```data-position``` (String, non-empty)
-- ```data-query``` (String)
-  - ```key``` are separated with ```&```
-  - ```value``` are separted with ```|```
-
-__Example__
-  - ```key1=value1|value2|value3&key2=value4&key3=value5|value6```
+- `data-site` (String, non-empty)
+- `data-page` (String, non-empty)
+- `data-position` (String, non-empty)
+- `data-query` (String)
+    - `key` are separated with `&`
+    - `value` are separted with `|`
+    - **Example**: `key1=value1|value2|value3&key2=value4&key3=value5|value6`
 
 
-## 5. Support
-
-/╲/\╭༼ : ❛ ◡ ❛ : ༽╮/\╱\

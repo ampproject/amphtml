@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../src/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,12 +23,22 @@ import {loadScript, checkData, validateDataExists} from '../src/3p';
 export function teads(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global._teads_amp = {
-    allowed_data: ['pid'],
-    data: data,
+    allowed_data: ['pid', 'tag'],
+    mandatory_data: ['pid'],
+    mandatory_tag_data: ['tta', 'ttp'],
+    data,
   };
 
-  validateDataExists(data, global._teads_amp.allowed_data);
-  checkData(data, global._teads_amp.allowed_data);
+  validateData(data,
+      global._teads_amp.mandatory_data, global._teads_amp.allowed_data);
 
-  loadScript(global, 'https://a.teads.tv/page/' + encodeURIComponent(data.pid) + '/tag');
+  if (data.tag) {
+    validateData(data.tag, global._teads_amp.mandatory_tag_data);
+    global._tta = data.tag.tta;
+    global._ttp = data.tag.ttp;
+
+    loadScript(global, 'https://cdn.teads.tv/media/format/' + encodeURI(data.tag.js || 'v3/teads-format.min.js'));
+  } else {
+    loadScript(global, 'https://a.teads.tv/page/' + encodeURIComponent(data.pid) + '/tag');
+  }
 }

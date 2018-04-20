@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../src/3p';
+import {loadScript} from '../3p/3p';
+
+/* global PubMatic: false */
 
 /**
  * @param {!Window} global

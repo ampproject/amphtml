@@ -1,0 +1,134 @@
+<!--
+  ## Introduction
+
+  [amp-position-observer](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-position-observer)
+  combined with [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) can be used to
+  implement a scroll to top button. This pattern is often used in e-commerce pages where the user has to scroll
+  through a long list of items.
+
+-->
+
+<!-- -->
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--  Import amp-position-observer extension -->
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+
+  <!--  Import amp-animation extension -->
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+
+  <link rel="canonical" href="https://ampbyexample.com/visual_effects/scroll_to_top/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <!--
+    ## Styles
+
+    The CSS used for these samples are included here for reference.
+
+    These rules are simply needed to make the samples work but are not fundamental
+    to the concepts covered here.
+  -->
+  <style amp-custom>
+
+    .scrollToTop {
+      color: #fafafa;
+      font-size: 1.4em;
+      box-shadow: 0 1px 1.5px 0 rgba(0,0,0,.12), 0 1px 1px 0 rgba(0,0,0,.24);
+      width: 50px;
+      height: 50px;
+      border-radius: 100px;
+      border: none;
+      outline: none;
+      background: #E91E63;
+      z-index: 9999;
+      bottom: 10px;
+      right: 10px;
+      position: fixed;
+      opacity: 0;
+      visibility: hidden;
+    }
+    #marker {
+      position: absolute;
+      top: 100px;
+      width: 0px;
+      height: 0px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ## Scroll to top
+
+  We add an element with id `top-page` that we can reference later for scrolling.-->
+  <div id="top-page"></div>
+
+  <!--
+  We use 2 `amp-animation` elements to trigger the visibility of the button.
+  The first one is for making the button visible...
+  -->
+  <amp-animation id="showAnim" layout="nodisplay">
+    <script type="application/json">
+      {
+        "duration": "200ms",
+         "fill": "both",
+         "iterations": "1",
+         "direction": "alternate",
+         "animations": [
+           {
+             "selector": "#scrollToTopButton",
+             "keyframes": [
+               { "opacity": "1", "visibility": "visible" }
+             ]
+           }
+         ]
+      }
+    </script>
+  </amp-animation>
+  <!-- ... and the second one is for adding the button.-->
+  <amp-animation id="hideAnim" layout="nodisplay">
+   <script type="application/json">
+     {
+       "duration": "200ms",
+         "fill": "both",
+         "iterations": "1",
+         "direction": "alternate",
+         "animations": [
+           {
+             "selector": "#scrollToTopButton",
+             "keyframes": [
+               { "opacity": "0", "visibility": "hidden" }
+             ]
+           }
+         ]
+     }
+   </script>
+ </amp-animation>
+  <!-- We use `amp-position-observer` to start the animation when the user starts to scroll. -->
+ <div id="marker">
+   <amp-position-observer
+      on="enter:hideAnim.start; exit:showAnim.start"
+      layout="nodisplay">
+    </amp-position-observer>
+  </div>
+  <!-- -->
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sollicitudin tempor viverra. Vivamus mauris erat, euismod et viverra sed, pellentesque ut ipsum. Duis felis neque, interdum eu eros sed, egestas porttitor magna. Mauris nibh elit, pellentesque id suscipit a, fermentum id massa. Aliquam viverra ipsum lacus, eget dapibus magna scelerisque ut. Cras id augue et lacus varius laoreet. Curabitur tincidunt orci ut ex consectetur lacinia. Etiam fringilla, orci sit amet congue sollicitudin, erat purus pharetra tortor, eget efficitur nibh odio quis augue.
+
+    Etiam sed quam orci. Maecenas consectetur, libero id pharetra bibendum, turpis dolor euismod sapien, quis lacinia mi orci volutpat eros. Morbi rutrum faucibus eros eget congue. In ac efficitur ex. Morbi elementum tempor mauris lobortis tempor. Praesent lacus augue, ultrices vitae ante in, commodo accumsan odio. Cras fringilla tristique lacus, sit amet sodales leo porttitor eget. Nunc molestie sollicitudin lorem, at mollis magna elementum vel.
+
+    Aliquam tincidunt, quam nec fermentum viverra, orci dolor hendrerit ex, at suscipit tellus quam eu enim. Phasellus mollis dapibus nunc, vel sollicitudin dui consectetur id. Aliquam erat volutpat. Nunc arcu massa, fermentum in mauris sit amet, pulvinar feugiat tellus. Nam pretium tempus tortor sit amet venenatis. Aliquam hendrerit porta augue. Sed velit enim, rutrum vitae posuere at, suscipit in turpis. Sed porta diam sed arcu semper sollicitudin. Ut ac leo ut orci malesuada lobortis nec ac lorem. Cras nec turpis tellus. Nam vestibulum egestas ligula. Aliquam leo tortor, varius a iaculis vel, laoreet et neque. Vivamus sed mauris at sapien varius ultrices. Aliquam aliquam tincidunt ante, semper gravida nisl maximus vitae. In consectetur eleifend magna eu tincidunt.
+
+  </p>
+  <!-- We use the `scrollTo` action to scroll the page when the button is tapped. Find more about actions [here](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md).-->
+  <button id="scrollToTopButton" on="tap:top-page.scrollTo(duration=200)" class="scrollToTop">⌃</button>
+
+</body>
+
+</html>

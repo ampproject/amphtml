@@ -1,0 +1,64 @@
+<!--
+  ## Introduction
+
+  How to display Ads in your AMP HTML files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-ad</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-ad` component in the header. -->
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-ad/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    `amp-ad` requires `width` and `height` values. Select an ad network via the type argument.
+  -->
+  <amp-ad width="300" height="250"
+                type="a9"
+                data-aax_size="300x250"
+                data-aax_pubname="test123"
+                data-aax_src="302">
+  </amp-ad>
+
+  <!-- ## Using Placeholders -->
+  <!--
+    Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported
+    by the ad network, this element is shown until the ad is available for viewing.
+  -->
+  <amp-ad width="300" height="200"
+                type="doubleclick"
+                data-slot="/4119129/doesnt-exist">
+    <div placeholder>
+      <b>Placeholder here!!!</b>
+    </div>
+  </amp-ad>
+
+  <!-- ## Using Fallbacks -->
+  <!--
+    `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad
+    network, this element is shown if no ad is available for this slot.
+  -->
+  <amp-ad width="300" height="200"
+                type="doubleclick"
+                data-slot="/4119129/doesnt-exist">
+    <div fallback>
+      <p>Thank you for trying AMP!</p>
+      <p>You got lucky! We have no ad to show to you!</p>
+    </div>
+  </amp-ad>
+
+  <!-- For more amp-ad samples, check out the [DFP ad test page](https://dfp-amp-testing-1185.appspot.com/). -->
+
+</body>
+</html>

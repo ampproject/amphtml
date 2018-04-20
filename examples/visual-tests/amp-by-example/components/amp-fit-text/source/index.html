@@ -1,0 +1,58 @@
+<!-- ## Introduction -->
+<!--
+  [amp-fit-text](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-fit-text) enables you to manage the size and fit of text within a given area.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+
+  <!-- ## Setup -->
+  <!--
+    Include the `amp-fit-text` component.
+  -->
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <meta charset="utf-8">
+  <title>amp-fit-text</title>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-fit-text/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    div.fixedblock {
+      margin: 8px 0;
+      height: 200px;
+      width:  200px;
+      background-color: yellow;
+    }
+  </style>
+</head>
+<body>
+  <!-- ## Basic Usage -->
+  <!--
+    In each of these examples, the `<amp-fit-text>` element is nested within in a 200x200 grey div block to demonstrate differences in attributes and layout values.
+
+    When `amp-fit-text` is used with a given `height`, `width`, and `layout="responsive"` attribute, the text will scale responsively in the ratio provided but not exceed the size of its parent.
+  -->
+  <!--
+    Aspect ratio: 1.5:1 (3:2)
+  -->
+    <div class="fixedblock"><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+ <!--
+    Aspect ratio: 1:1
+  -->
+    <div class="fixedblock"><amp-fit-text width="200" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  <!--
+    The `min-font-size` attribute dictates a minimum size for the text.  In this case, we've dictated a minimum of 30, which will cause it to exceed the size of its fixed block parent and be truncated to fit as appropriate.
+  -->
+  <div class="fixedblock"><amp-fit-text width="300" height="200" layout="responsive" min-font-size="30">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  <!--
+    The `max-font-size` attribute dictates a maximum size for the text.  In this case, we've dictated a maximum of 10, ensuring it won't fill the size of its parent element.
+  -->
+  <div class="fixedblock"><amp-fit-text width="300" height="200" layout="responsive" max-font-size="10">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  <!--
+    When `amp-fit-text` is used with a given `height` and `layout="fixed-height"` attribute, it will fit to the size of its given height (200), and adjust the width as needed to stay within the bounds of its parent container.
+  -->
+  <div class="fixedblock"><amp-fit-text height="200" layout="fixed-height">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+tags: {  # amp-live-list
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "SCRIPT"
+  mandatory_parent: "HEAD"
+  unique_warning: true
+  extension_spec: {
+    name: "amp-live-list"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    requires_usage: GRANDFATHERED
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-live-list>
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "AMP-LIVE-LIST"
+  requires_extension: "amp-live-list"
+  attrs: {
+    name: "data-max-items-per-page"
+    mandatory: true
+    value_regex: "\\d+"
+  }
+  attrs: {
+    name: "data-poll-interval"
+    value_regex: "\\d{5,}"
+  }
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  attrs: {
+    name: "sort"
+    value_regex: "ascending"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [update]"
+    mandatory: true
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [items]"
+    mandatory: true
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [pagination]"
+    unique: true
+  }
+  amp_layout: {
+    supported_layouts: CONTAINER
+    supported_layouts: FIXED_HEIGHT
+  }
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [update]"
+  attrs: { name: "update" mandatory: true }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#update"
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-LIVE-LIST [items]"
+  attrs: { name: "items" mandatory: true }
+  reference_points: {
+    tag_spec_name: "AMP-LIVE-LIST [items] item"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [pagination]"
+  attrs: { name: "pagination" mandatory: true }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#pagination"
+}
+tags: {
+  html_format: AMP
+  html_format: EXPERIMENTAL
+  tag_name: "$REFERENCE_POINT"
+  spec_name : "AMP-LIVE-LIST [items] item"
+  attrs: { name: "id" mandatory: true }
+  attrs: { name: "data-sort-time" mandatory: true }
+  attrs: { name: "data-update-time" }
+  attrs: { name: "data-tombstone" }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-live-list#items"
+}

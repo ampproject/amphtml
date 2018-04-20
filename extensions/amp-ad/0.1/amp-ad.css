@@ -1,0 +1,81 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Force the layout box of the ad iframe to be exactly as big as the actual
+ * iframe. The `amp-ad` tag itself can be freely styled.
+ */
+amp-ad iframe,
+amp-embed iframe {
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.i-amphtml-ad-default-holder {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(200, 200, 200, 0.05);
+}
+
+.i-amphtml-ad-default-holder:after {
+  content: "Ad";
+  content: attr(data-ad-holder-text);
+  background-color: transparent;
+  border-radius: 2px;
+  color: #696969;
+  font-size: 10px;
+  line-height: 1;
+  font-family: Arial, sans-serif;
+  padding: 3px 4px 1px;
+  border: 1px, solid, #696969;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[type="adsense"] > iframe {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+[dir=rtl] amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+[dir=rtl] amp-ad[type="adsense"] > iframe {
+  left: 0 !important;
+  right: 50% !important;
+  transform: translate(50%, -50%);
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-ad[data-a4a-upgrade-type="amp-ad-network-adsense-impl"] > iframe {
+  min-height: 0;
+  min-width: 0;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] > iframe {
+  height: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] {
+  width: 100% !important;
+}

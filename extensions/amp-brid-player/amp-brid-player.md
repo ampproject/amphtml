@@ -22,56 +22,20 @@ limitations under the License.
     <td>An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/brid-player.amp.html">brid-player.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-brid-player/"> Annotated code example for amp-brid-player</a></td>
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-brid-player` tag
-(see also `amp-brid-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/0.1/validator-amp-brid-player.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
-    <td>Error thrown when required <code>amp-brid-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
-    <td>Error thrown when <code>data-partner</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
-      <td>Error thrown when <code>data-player</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ONEOF_ATTR_MISSING</a></td>
-      <td>Error thrown when either the <code>data-video</code> or <code>data-playlist</code> attributes are missing.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
-  </tr>
-</table>
+[TOC]
 
 ## Example
 
@@ -91,18 +55,40 @@ Examples:
 
 ## Attributes
 
-**data-partner**
+##### autoplay
+
+If this attribute is present, and the browser supports autoplay:
+
+* the video is automatically muted before autoplay starts
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* when the user taps the video, the video is unmuted
+* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+
+##### data-partner
 
 The Brid.tv partner id.
 
-**data-player**
+##### data-player
 
 The Brid.tv player id. Specific to every partner.
 
-**data-video**
+##### data-video
 
 The Brid.tv video ID.
 
-**data-playlist**
+##### data-playlist
 
-The Brid.tv playlist ID. Embed must either have video or playlist attribute.
+The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.
+
+##### data-outstream
+
+The Brid.tv outstream unit ID.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.
