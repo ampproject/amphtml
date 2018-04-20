@@ -62,7 +62,9 @@ describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
   });
 
   it('should respect media queries', () => {
-    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(function() {
+    return fixture.awaitEvent(AmpEvents.LOAD_START, 3).then(() => {
+      return new Promise(res => setTimeout(res, 1));
+    }).then(function() {
       const smallScreen = fixture.doc.getElementById('img3');
       const largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className)

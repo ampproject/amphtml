@@ -47,6 +47,7 @@
     "amphtml-internal/no-style-property-setting": 2,
     "amphtml-internal/query-selector": 2,
     "amphtml-internal/todo-format": 0,
+    "amphtml-internal/vsync": 0,
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
