@@ -136,6 +136,7 @@ import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
+import {gltfViewer} from './3d-gltf';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -265,6 +266,7 @@ if (getMode().test || getMode().localDev) {
 
 // Keep the list in alphabetic order
 register('24smi', _24smi);
+register('3d-gltf', gltfViewer);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);

@@ -1,13 +1,10 @@
-/* global THREE */
-
-export default function declareOrbitControls() {
-  /**
-   * @author qiao / https://github.com/qiao
-   * @author mrdoob / http://mrdoob.com
-   * @author alteredq / http://alteredqualia.com/
-   * @author WestLangley / http://github.com/WestLangley
-   * @author erich666 / http://erichaines.com
-   */
+/**
+ * @author qiao / https://github.com/qiao
+ * @author mrdoob / http://mrdoob.com
+ * @author alteredq / http://alteredqualia.com/
+ * @author WestLangley / http://github.com/WestLangley
+ * @author erich666 / http://erichaines.com
+ */
 
 // This set of controls performs orbiting, dollying (zooming), and panning.
 // Unlike TrackballControls, it maintains the "up" direction object.up (+Y by default).
@@ -16,8 +13,9 @@ export default function declareOrbitControls() {
 //    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
 //    Pan - right mouse, or arrow keys / touch: three finger swipe
 
+export default function declareOrbitControls(T) {
   /** @constructor */
-  THREE.OrbitControls = function(object, domElement) {
+  T.OrbitControls = function(object, domElement) {
 
     this.object = object;
 
@@ -27,7 +25,7 @@ export default function declareOrbitControls() {
     this.enabled = true;
 
     // "target" sets the location of focus, where the object orbits around
-    this.target = new THREE.Vector3();
+    this.target = new T.Vector3();
 
     // How far you can dolly in and out ( PerspectiveCamera only )
     this.minDistance = 0;
@@ -74,9 +72,9 @@ export default function declareOrbitControls() {
 
     // Mouse buttons
     this.mouseButtons = {
-      ORBIT: THREE.MOUSE.LEFT,
-      ZOOM: THREE.MOUSE.MIDDLE,
-      PAN: THREE.MOUSE.RIGHT,
+      ORBIT: T.MOUSE.LEFT,
+      ZOOM: T.MOUSE.MIDDLE,
+      PAN: T.MOUSE.RIGHT,
     };
 
     // for reset
@@ -126,16 +124,16 @@ export default function declareOrbitControls() {
     // this method is exposed, but perhaps it would be better if we can make it private...
     this.update = (function() {
 
-      const offset = new THREE.Vector3();
+      const offset = new T.Vector3();
 
       // so camera.up is the orbit axis
-      const quat = new THREE.Quaternion()
-          .setFromUnitVectors(object.up, new THREE.Vector3(0, 1, 0));
+      const quat = new T.Quaternion()
+          .setFromUnitVectors(object.up, new T.Vector3(0, 1, 0));
 
       const quatInverse = quat.clone().inverse();
 
-      const lastPosition = new THREE.Vector3();
-      const lastQuaternion = new THREE.Quaternion();
+      const lastPosition = new T.Vector3();
+      const lastQuaternion = new T.Quaternion();
 
       return function update() {
 
@@ -244,7 +242,7 @@ export default function declareOrbitControls() {
       document.removeEventListener('mousemove', onMouseMove, false);
       document.removeEventListener('mouseup', onMouseUp, false);
 
-      window.removeEventListener('keydown', onKeyDown, false);
+      global.removeEventListener('keydown', onKeyDown, false);
 
     };
 
@@ -273,24 +271,24 @@ export default function declareOrbitControls() {
     const EPS = 0.000001;
 
     // current position in spherical coordinates
-    const spherical = new THREE.Spherical();
-    const sphericalDelta = new THREE.Spherical();
+    const spherical = new T.Spherical();
+    const sphericalDelta = new T.Spherical();
 
     let scale = 1;
-    const panOffset = new THREE.Vector3();
+    const panOffset = new T.Vector3();
     let zoomChanged = false;
 
-    const rotateStart = new THREE.Vector2();
-    const rotateEnd = new THREE.Vector2();
-    const rotateDelta = new THREE.Vector2();
+    const rotateStart = new T.Vector2();
+    const rotateEnd = new T.Vector2();
+    const rotateDelta = new T.Vector2();
 
-    const panStart = new THREE.Vector2();
-    const panEnd = new THREE.Vector2();
-    const panDelta = new THREE.Vector2();
+    const panStart = new T.Vector2();
+    const panEnd = new T.Vector2();
+    const panDelta = new T.Vector2();
 
-    const dollyStart = new THREE.Vector2();
-    const dollyEnd = new THREE.Vector2();
-    const dollyDelta = new THREE.Vector2();
+    const dollyStart = new T.Vector2();
+    const dollyEnd = new T.Vector2();
+    const dollyDelta = new T.Vector2();
 
     function getAutoRotationAngle() {
 
@@ -318,7 +316,7 @@ export default function declareOrbitControls() {
 
     const panLeft = (function() {
 
-      const v = new THREE.Vector3();
+      const v = new T.Vector3();
 
       return function panLeft(distance, objectMatrix) {
 
@@ -333,7 +331,7 @@ export default function declareOrbitControls() {
 
     const panUp = (function() {
 
-      const v = new THREE.Vector3();
+      const v = new T.Vector3();
 
       return function panUp(distance, objectMatrix) {
 
@@ -349,15 +347,15 @@ export default function declareOrbitControls() {
     // deltaX and deltaY are in pixels; right and down are positive
     const pan = (function() {
 
-      const offset = new THREE.Vector3();
+      const offset = new T.Vector3();
 
       return function pan(dx, dy) {
 
         const el = _.domElement === document
-          ? _.domElement.body
-          : _.domElement;
+            ? _.domElement.body
+            : _.domElement;
 
-        if (_.object instanceof THREE.PerspectiveCamera) {
+        if (_.object instanceof T.PerspectiveCamera) {
 
           // perspective
           const position = _.object.position;
@@ -388,7 +386,7 @@ export default function declareOrbitControls() {
 
     function dollyIn(dollyScale) {
 
-      if (_.object instanceof THREE.PerspectiveCamera) {
+      if (_.object instanceof T.PerspectiveCamera) {
 
         scale /= dollyScale;
 
@@ -401,7 +399,7 @@ export default function declareOrbitControls() {
 
     function dollyOut(dollyScale) {
 
-      if (_.object instanceof THREE.PerspectiveCamera) {
+      if (_.object instanceof T.PerspectiveCamera) {
 
         scale *= dollyScale;
 
@@ -448,8 +446,8 @@ export default function declareOrbitControls() {
       rotateDelta.subVectors(rotateEnd, rotateStart);
 
       const element = _.domElement === document
-        ? _.domElement.body
-        : _.domElement;
+          ? _.domElement.body
+          : _.domElement;
 
       // rotating across whole screen goes 360 degrees around
       rLeft(2 * Math.PI * rotateDelta.x / element.clientWidth * _.rotateSpeed);
@@ -583,8 +581,8 @@ export default function declareOrbitControls() {
       rotateDelta.subVectors(rotateEnd, rotateStart);
 
       const element = _.domElement === document
-        ? _.domElement.body
-        : _.domElement;
+          ? _.domElement.body
+          : _.domElement;
 
       // rotating across whole screen goes 360 degrees around
       rLeft(2 * Math.PI * rotateDelta.x / element.clientWidth * _.rotateSpeed);
@@ -902,7 +900,7 @@ export default function declareOrbitControls() {
     _.domElement.addEventListener('touchend', onTouchEnd, false);
     _.domElement.addEventListener('touchmove', onTouchMove, false);
 
-    window.addEventListener('keydown', onKeyDown, false);
+    global.addEventListener('keydown', onKeyDown, false);
 
     // force an update at start
 
@@ -910,7 +908,7 @@ export default function declareOrbitControls() {
 
   };
 
-  THREE.OrbitControls.prototype =
-      Object.create(THREE.EventDispatcher.prototype);
-  THREE.OrbitControls.prototype.constructor = THREE.OrbitControls;
+  T.OrbitControls.prototype =
+      Object.create(T.EventDispatcher.prototype);
+  T.OrbitControls.prototype.constructor = T.OrbitControls;
 }

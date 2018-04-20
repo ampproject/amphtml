@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {addQueryHandler, listen, query, willReceiveNotification} from './3d/ipc';
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import makeViewerIframe from './3d/iframe';
+import {isObject} from '../../../src/types';
+import {parseJson} from '../../../src/json';
+import {removeElement} from '../../../src/dom';
+import {startsWith} from '../../../src/string';
 
 export class Amp3dPlayer extends AMP.BaseElement {
 
@@ -24,122 +30,178 @@ export class Amp3dPlayer extends AMP.BaseElement {
     super(element);
 
     /** @private {?Element} */
-    this.container_ = null;
+    this.iframe_ = null;
 
-    /** @private {?Window} */
-    this.viewerWindow_ = null;
+    /** @private {?Function} */
+    this.willBeReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.willBeLoadedResolver_ = null;
 
     /** @private {!Promise} */
-    this.willBeReady_ = new Promise(() => {});
+    this.willBeReady_ = new Promise(resolve => {
+      this.willBeReadyResolver_ = resolve;
+    });
 
     /** @private {!Promise} */
-    this.willBeStarted_ = new Promise(() => {});
+    this.willBeLoaded_ = new Promise(resolve => {
+      this.willBeLoadedResolver_ = resolve;
+    });
 
-    /** @private {!Function} */
-    this.releaseIframe_ = () => {};
+    /** @private {!JsonObject} */
+    this.context_ = dict();
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    preloadBootstrap(this.win, this.preconnect);
+    this.preconnect.url('https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js', opt_onLayout);
   }
 
   /** @override */
   unlayoutCallback() {
-    this.releaseIframe_();
-    return false;
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    /** @private {!Promise} */
+    this.willBeReady_ = new Promise(resolve => {
+      this.willBeReadyResolver_ = resolve;
+    });
+
+    /** @private {!Promise} */
+    this.willBeLoaded_ = new Promise(resolve => {
+      this.willBeLoadedResolver_ = resolve;
+    });
+    
+    return true;
   }
 
   /** @override */
   buildCallback() {
-    const {iframe, release} = makeViewerIframe(this.win, this.element);
-    this.container_ = iframe;
+    const getOption = (name, fmt, dflt) => {
+      return this.element.hasAttribute(name)
+        ? fmt(this.element.getAttribute(name))
+        : dflt;
+    };
 
-    this.releaseIframe_ = release;
+    const bool = x => x !== 'false';
+    const string = x => x;
+    const number = x => parseFloat(x);
 
-    this.viewerWindow_ = this.container_.contentWindow;
-    this.willBeReady_ =
-        willReceiveNotification(this.viewerWindow_, 'heartbeat', () => true)
-            .then(() => query(this.viewerWindow_, 'ready', null));
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    this.context_ = dict({
+      'src': getOption('src', string, ''),
+      'renderer': {
+        'alpha': getOption('alpha', bool, false),
+        'antialias': getOption('antialiasing', bool, true),
+      },
+      'maxPixelRatio':
+          getOption('maxPixelRatio', number, devicePixelRatio || 1),
+      'controls': {
+        'enableZoom': getOption('enableZoom', bool, true),
+        'autoRotate': getOption('autoRotate', bool, false),
+      },
+      'hostUrl': this.win.location.href,
+    });
   }
 
   /** @override */
   layoutCallback() {
-    this.willBeStarted_ = this.willBeReady_
-        .then(() => {
-          const getOption = (name, fmt, dflt) => {
-            return this.element.hasAttribute(name)
-              ? fmt(this.element.getAttribute(name))
-              : dflt;
-          };
 
-          const bool = x => x !== 'false';
-          const string = x => x;
-          const number = x => parseFloat(x);
+    const iframe = getIframe(
+        this.win, this.element, '3d-gltf', this.context_
+    );
 
-          return query(this.viewerWindow_, 'setOptions', {
-            src: getOption('src', string, ''),
-            renderer: {
-              alpha: getOption('alpha', bool, false),
-              antialias: getOption('antialiasing', bool, true),
-            },
-            maxPixelRatio:
-                getOption('maxPixelRatio', number, devicePixelRatio || 1),
-            controls: {
-              enableZoom: getOption('enableZoom', bool, true),
-              autoRotate: getOption('autoRotate', bool, false),
-            },
-          });
+    return Services.vsyncFor(this.win)
+        .mutatePromise(() => {
+          this.applyFillContent(iframe, true);
+          this.unlistenMessage_ = listen(
+              this.win,
+              'message',
+              this.handleGltfViewerMessage_.bind(this)
+          );
+
+          this.element.appendChild(iframe);
+          this.iframe_ = iframe;
         })
-        .then(() => {
-          return new Promise((resolve, reject) => {
-            const disposeAll = () => {
-              disposeReadyHandler();
-              disposeProgressHandler();
-              disposeErrorHandler();
-            };
-            const disposeReadyHandler = addQueryHandler(
-                this.viewerWindow_, 'loaded', () => {
-                  disposeAll();
-                  resolve();
-                });
-            const disposeErrorHandler = addQueryHandler(
-                this.viewerWindow_, 'error', text => {
-                  disposeAll();
-                  reject(new Error(text));
-                });
-            const disposeProgressHandler = listen(
-                this.viewerWindow_, 'progress', ({loaded, total}) => {
-                  console.log(loaded, total);
-                });
-          });
-        })
-        .catch(err => {
-          console.error(err);
+        .then(() => this.willBeLoaded_);
+  }
+
+  /** @private */
+  handleGltfViewerMessage_(event) {
+    if (this.iframe_ && event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+      return; // Doesn't look like JSON.
+    }
+
+    /** @const {?JsonObject} */
+    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
+      ? getData(event)
+      : parseJson(getData(event)));
+    if (eventData === undefined) {
+      return; // We only process valid JSON.
+    }
+    if (eventData['action'] === 'ready') {
+      this.willBeReadyResolver_();
+    }
+
+    if ('notify' in eventData) {
+      switch (eventData['notify']) {
+        case 'loaded':
+          this.willBeLoadedResolver_();
+          break;
+        case 'progress':
+          //todo
+          console.log(eventData['loaded'], eventData['total']);
+          break;
+        case 'error':
           this.toggleFallback(true);
-        });
+          break;
+      }
+    }
+  }
 
-    return this.willBeStarted_;
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} action
+   * @param {JsonObject=} args
+   * @private
+   * */
+  sendCommand_(action, args) {
+    this.willBeReady_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        const message = JSON.stringify(dict({
+          'action': action,
+          'args': args,
+        }));
+        this.iframe_.contentWindow.postMessage(message, '*');
+      }
+    });
   }
 
   /** @override */
   viewportCallback(inViewport) {
-    this.willBeStarted_
-        .then(
-            () => query(this.viewerWindow_, 'toggleAMPViewport', inViewport)
-        );
+    this.sendCommand_('toggleAmpViewport', inViewport);
   }
 
   /** @override */
   pauseCallback() {
-    this.willBeStarted_
-        .then(
-            () => query(this.viewerWindow_, 'toggleAMPPlay', false)
-        );
+    this.sendCommand_('toggleAmpPlay', false);
   }
 
   /** @override */
   resumeCallback() {
-    this.willBeStarted_
-        .then(
-            () => query(this.viewerWindow_, 'toggleAMPPlay', true)
-        );
+    this.sendCommand_('toggleAmpPlay', true);
   }
 
   /** @override */
