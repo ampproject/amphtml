@@ -270,8 +270,7 @@ export class SubscriptionService {
       const serviceIds = this.platformConfig_['services'].map(service =>
         service['serviceId'] || 'local');
 
-      this.platformStore_ = new PlatformStore(serviceIds,
-          this.platformConfig_['score']);
+      this.initializePlatformStore_(serviceIds);
 
       this.platformConfig_['services'].forEach(service => {
         this.initializeLocalPlatforms_(service);
@@ -289,6 +288,19 @@ export class SubscriptionService {
   }
 
   /**
+   * Initializes the PlatformStore with the service ids.
+   * @param {!Array<string>} serviceIds
+   */
+  initializePlatformStore_(serviceIds) {
+    const fallbackEntitlement = this.platformConfig_['fallbackEntitlement'] ?
+      Entitlement.parseFromJson(this.platformConfig_['fallbackEntitlement']) :
+      Entitlement.empty('local');
+    this.platformStore_ = new PlatformStore(serviceIds,
+        this.platformConfig_['score'],
+        fallbackEntitlement);
+  }
+
+  /**
    * Delegates authentication to viewer
    */
   delegateAuthToViewer_() {
@@ -298,8 +310,8 @@ export class SubscriptionService {
         this.pageConfig_.getProductId(),
         'Product id is null'
     ));
-    this.platformStore_ = new PlatformStore(serviceIds,
-        this.platformConfig_['score']);
+
+    this.initializePlatformStore_(serviceIds);
     this.platformConfig_['services'].forEach(service => {
       if ((service['serviceId'] || 'local') == 'local') {
         const viewerPlatform = new ViewerSubscriptionPlatform(
