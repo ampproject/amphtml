@@ -134,16 +134,14 @@ export function getCalloutParam_(url) {
  */
 export function maybeExecuteRealTimeConfig_(
   a4aElement, customMacros, consentState) {
-  const rtcConfig = validateRtcConfig_(a4aElement.element);
-  if (!rtcConfig) {
-    return;
-  }
   // TODO(keithwrightbos) - allow pub to override such that some callouts are
   // still allowed.
   if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
       consentState == CONSENT_POLICY_STATE.UNKNOWN) {
-    user().info(
-        TAG, 'RTC suppressed due to unknown or insufficient consentState');
+    return;
+  }
+  const rtcConfig = validateRtcConfig_(a4aElement.element);
+  if (!rtcConfig) {
     return;
   }
   customMacros['TIMEOUT'] = () => rtcConfig['timeoutMillis'];
