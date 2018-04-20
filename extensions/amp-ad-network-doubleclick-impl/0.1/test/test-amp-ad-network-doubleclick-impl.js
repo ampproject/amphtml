@@ -1266,7 +1266,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
   describe('#getAmpAdMetadata', () => {
     let sandbox;
-    let baseMetadata = {customElementExtensions: ['amp-foo']};
+    let baseMetadata;
     const outlink = 'http://www.myadlandingpage.com/1234';
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1283,7 +1283,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     afterEach(() => sandbox.restore());
 
     it('should pass the same object as given by super', () => {
-      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+      sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           unusedCreative => baseMetadata);
       expect(impl.getAmpAdMetadata('unusedCreative'))
           .to.deep.equal(baseMetadata);
@@ -1291,26 +1291,26 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should throw due to missing CTA', () => {
       baseMetadata.outlink = outlink;
-      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+      sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           unusedCreative => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
-      expect(impl.getAmpAdMetadata('unusedCreative'))
-          .to.throw(INVALID_SPSA_RESPONSE);
+      expect(() => impl.getAmpAdMetadata('unusedCreative'))
+          .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
     it('should throw due to missing outlink', () => {
       baseMetadata.cta = '0';
-      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+      sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           unusedCreative => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
-      expect(impl.getAmpAdMetadata('unusedCreative'))
-          .to.throw(INVALID_SPSA_RESPONSE);
+      expect(() => impl.getAmpAdMetadata('unusedCreative'))
+          .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
     it('should set appropriate attributes and return metadata object', () => {
       baseMetadata.outlink = outlink;
       baseMetadata.cta = '0';
-      sandbox.stub(impl.prototype, 'getAmpAdMetadata').callsFake(
+      sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           unusedCreative => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
       expect(impl.getAmpAdMetadata('unusedCreative'))
