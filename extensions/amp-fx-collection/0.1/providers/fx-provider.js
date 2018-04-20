@@ -19,40 +19,14 @@ import {
 } from '../../../../src/service/position-observer/position-observer-worker';
 import {Presets} from './amp-fx-presets';
 import {Services} from '../../../../src/services';
-import {convertEasingKeyword, resolvePercentageToNumber} from './amp-fx-presets-utils';
+import {convertEasingKeyword, defaultDurationValues, flyInDistanceValues,
+  installStyles, marginValues, resolvePercentageToNumber}
+  from './amp-fx-presets-utils';
 import {getServiceForDoc} from '../../../../src/service';
 import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
 import {setStyles} from '../../../../src/style';
-
-const installStyles = {
-  'parallax': {
-    'will-change': 'transform',
-  },
-  'fade-in': {
-    'will-change': 'opacity',
-    'opacity': 0,
-  },
-  'fade-in-scroll': {
-    'will-change': 'opacity',
-    'opacity': 0,
-  },
-};
-
-const marginValues = {
-  'parallax': {
-    'start': 0,
-  },
-  'fade-in': {
-    'start': 0.05,
-  },
-  'fade-in-scroll': {
-    'start': 0,
-    'end': 0.5,
-  },
-};
-
 
 /**
  * Class that implements the various preset animation providers.
@@ -87,11 +61,12 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    setStyles(element, installStyles[this.fxType_]);
-    const parallaxElement = new FxElement(
+    const fxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.fxType_);
-    parallaxElement.initialize_();
+    setStyles(element, installStyles(this.ampdoc_, element, this.fxType_,
+        fxElement.getFlyInDistance()));
+    fxElement.initialize_();
   }
 }
 
@@ -136,23 +111,38 @@ export class FxElement {
     /** @private {number} */
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
-    /** @private {number} */
-    this.marginStart_ = element.hasAttribute('data-margin-start') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
-      marginValues[this.fxType_]['start'];
+    // Initialize these variables only for fade in animations
+    if (this.fxType_.startsWith('fade-in')) {
+      /** @private {number} */
+      this.marginStart_ = element.hasAttribute('data-margin-start') ?
+        resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
+        marginValues(this.fxType_)['start'];
 
-    /** @private {number} */
-    this.marginEnd_ = element.hasAttribute('data-margin-end') ?
-      resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
-      marginValues[this.fxType_]['end'];
+      /** @private {number} */
+      this.marginEnd_ = element.hasAttribute('data-margin-end') ?
+        resolvePercentageToNumber(element.getAttribute('data-margin-end')) :
+        marginValues(this.fxType_)['end'];
+    }
 
-    /** @private {string} */
-    this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
-      element.getAttribute('data-easing') : 'ease-in');
+    // Initialize these variables only for scroll dependent animations
+    if (!this.fxType_.endsWith('scroll')) {
+      /** @private {string} */
+      this.easing_ = convertEasingKeyword(element.hasAttribute('data-easing') ?
+        element.getAttribute('data-easing') : 'ease-in');
 
-    /** @private {string} */
-    this.duration_ = element.hasAttribute('data-duration') ?
-      element.getAttribute('data-duration') : '1000ms';
+      /** @private {string} */
+      this.duration_ = element.hasAttribute('data-duration') ?
+        element.getAttribute('data-duration') :
+        defaultDurationValues(this.fxType_);
+    }
+
+    // Initialize these variables only for fly in animations
+    if (this.fxType_.startsWith('fly-in')) {
+      /** @private {number} */
+      this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
+        parseFloat(element.getAttribute('data-fly-in-distance')) :
+        flyInDistanceValues(this.fxType_);
+    }
 
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
@@ -238,6 +228,13 @@ export class FxElement {
    */
   getMarginEnd() {
     return this.marginEnd_;
+  }
+
+  /**
+   * @returns {number}
+   */
+  getFlyInDistance() {
+    return this.flyInDistance_;
   }
 
   /**

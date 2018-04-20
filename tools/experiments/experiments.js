@@ -306,6 +306,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/14150',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
   },
+  {
+    id: 'amp-fx-fly-in',
+    name: 'Enables amp-fx="fly-in-{bottom,top,left,right}" - ' +
+      'scroll triggered timed fly in animations',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
 ];
 
 if (getMode().localDev) {
