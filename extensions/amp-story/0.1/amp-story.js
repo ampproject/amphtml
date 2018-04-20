@@ -24,7 +24,7 @@
  * </amp-story>
  * </code>
  */
-import './amp-story-auto-ads';
+import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {
@@ -35,7 +35,11 @@ import {
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
 import {AmpStoryBackground} from './background';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryPage} from './amp-story-page';
+import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
@@ -58,6 +62,7 @@ import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
+import {ShareMenu} from './amp-story-share-menu';
 import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
@@ -117,7 +122,6 @@ const AUTO_ADVANCE_TO_ATTR = 'auto-advance-to';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTR = 'ad-showing';
-
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -181,17 +185,29 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+    registerServiceBuilder(
+        this.win, 'story-store', () => this.storeService_);
+
+    /** @private @const {!AmpStoryRequestService} */
+    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
+    registerServiceBuilder(
+        this.win, 'story-request-v01', () => this.requestService_);
 
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(this.win, () => this.hasBookend_());
+
+    /** @private {!AmpStoryAnalytics} */
+    this.analytics_ = new AmpStoryAnalytics(this.win, this.element);
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
+
+    /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
+    this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
@@ -271,8 +287,8 @@ export class AmpStory extends AMP.BaseElement {
     this.localizationService_
         .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
 
-    registerServiceBuilder(this.win, 'localization',
-        () => this.localizationService_);
+    registerServiceBuilder(
+        this.win, 'localization-v01', () => this.localizationService_);
   }
 
 
@@ -293,11 +309,10 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(Action.TOGGLE_DESKTOP, true);
     }
 
-    this.navigationState_.observe(stateChangeEvent =>
-      (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
-
-    this.navigationState_.observe(stateChangeEvent =>
-      this.variableService_.onStateChange(stateChangeEvent));
+    this.navigationState_.observe(stateChangeEvent => {
+      this.variableService_.onNavigationStateChange(stateChangeEvent);
+      this.analytics_.onNavigationStateChange(stateChangeEvent);
+    });
   }
 
 
@@ -325,7 +340,6 @@ export class AmpStory extends AMP.BaseElement {
     this.updateAudioIcon_();
   }
 
-
   /** @private */
   initializeListeners_() {
     this.element.addEventListener(EventType.NEXT_PAGE, () => {
@@ -338,7 +352,14 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
       this.onMutedStateUpdate_(isMuted);
+      this.variableService_.onMutedStateChange(isMuted);
     }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
+      // We do not want to trigger an analytics event for the initialization of
+      // the muted state.
+      this.analytics_.onMutedStateChange(isMuted);
+    }, false /** callToInitialize */);
 
     this.storeService_.subscribe(
         StateProperty.SUPPORTED_BROWSER_STATE, isBrowserSupported => {
@@ -528,12 +549,6 @@ export class AmpStory extends AMP.BaseElement {
         this.shareWidget_.build(this.getAmpDoc()),
         shareLabelEl);
 
-    this.bookend_.loadConfig(false /** applyConfig */).then(bookendConfig => {
-      if (bookendConfig !== null) {
-        this.shareWidget_.setProviders(bookendConfig.shareProviders);
-      }
-    });
-
     return container;
   }
 
@@ -562,7 +577,14 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(initialPageId))
-        .then(() => this.preloadPagesByDistance_());
+        .then(() => this.preloadPagesByDistance_())
+        .then(() => {
+          // Preloads and prerenders the share menu if mobile, where the share
+          // button is visible.
+          if (!this.storeService_.get(StateProperty.DESKTOP_STATE)) {
+            this.shareMenu_.build();
+          }
+        });
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
@@ -927,6 +949,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   setHistoryStatePageId_(pageId) {
+    // Never save ad pages to history as they are unique to each visit.
+    const page = this.getPageById(pageId);
+    if (page.isAd()) {
+      return;
+    }
+
     const history = this.win.history;
     if (history.replaceState && this.getHistoryStatePageId_() !== pageId) {
       history.replaceState({
@@ -995,6 +1023,10 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element, /* initial */ true);
       }
     } else {
+      // Preloads and prerenders the share menu as the share button gets visible
+      // on the mobile UI. No-op if already built.
+      this.shareMenu_.build();
+
       this.vsync_.mutate(() => {
         this.element.removeAttribute('desktop');
       });
@@ -1572,4 +1604,7 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '0.1', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
+  AMP.registerElement('amp-story-page', AmpStoryPage);
+  AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
+  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
 });

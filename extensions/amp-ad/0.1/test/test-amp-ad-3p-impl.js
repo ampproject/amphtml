@@ -143,7 +143,9 @@ describes.realWin('amp-ad-3p-impl', {
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should throw on parent being position:fixed', () => {
@@ -154,7 +156,9 @@ describes.realWin('amp-ad-3p-impl', {
       adContainerElement.appendChild(ad3p.element);
 
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should allow position:fixed with whitelisted ad container', () => {

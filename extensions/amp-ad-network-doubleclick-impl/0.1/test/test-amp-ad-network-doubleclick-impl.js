@@ -26,6 +26,7 @@ import {
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
@@ -33,7 +34,6 @@ import {
   AmpAdNetworkDoubleclickImpl,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
-  SAFEFRAME_ORIGIN,
   getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
@@ -44,6 +44,8 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {Layout} from '../../../../src/layout';
+import {Preconnect} from '../../../../src/preconnect';
 import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
@@ -272,57 +274,66 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
-    it('injects amp analytics', () => {
-      impl.ampAnalyticsConfig_ = {
-        transport: {beacon: false, xhrpost: false},
-        requests: {
-          visibility1: 'https://foo.com?hello=world',
-          visibility2: 'https://bar.com?a=b',
-        },
-        triggers: {
-          continuousVisible: {
-            on: 'visible',
-            request: ['visibility1', 'visibility2'],
-            visibilitySpec: {
+    [true, false].forEach(exp => {
+      it('injects amp analytics' +
+        (exp ? ', trigger immediate disable exp' : ''), () => {
+        impl.ampAnalyticsConfig_ = {
+          transport: {beacon: false, xhrpost: false},
+          requests: {
+            visibility1: 'https://foo.com?hello=world',
+            visibility2: 'https://bar.com?a=b',
+          },
+          triggers: {
+            continuousVisible: {
+              on: 'visible',
+              request: ['visibility1', 'visibility2'],
+              visibilitySpec: {
+                selector: 'amp-ad',
+                selectionMethod: 'closest',
+                visiblePercentageMin: 50,
+                continuousTimeMin: 1000,
+              },
+            },
+            continuousVisibleIniLoad: {
+              on: 'ini-load',
               selector: 'amp-ad',
               selectionMethod: 'closest',
-              visiblePercentageMin: 50,
-              continuousTimeMin: 1000,
+            },
+            continuousVisibleRenderStart: {
+              on: 'render-start',
+              selector: 'amp-ad',
+              selectionMethod: 'closest',
             },
           },
-          continuousVisibleIniLoad: {
-            on: 'ini-load',
-            selector: 'amp-ad',
-            selectionMethod: 'closest',
+        };
+        // To placate assertion.
+        impl.responseHeaders_ = {
+          get: function(name) {
+            if (name == 'X-QQID') {
+              return 'qqid_string';
+            }
           },
-          continuousVisibleRenderStart: {
-            on: 'render-start',
-            selector: 'amp-ad',
-            selectionMethod: 'closest',
+          has: function(name) {
+            if (name == 'X-QQID') {
+              return true;
+            }
           },
-        },
-      }; // To placate assertion.
-      impl.responseHeaders_ = {
-        get: function(name) {
-          if (name == 'X-QQID') {
-            return 'qqid_string';
-          }
-        },
-        has: function(name) {
-          if (name == 'X-QQID') {
-            return true;
-          }
-        },
-      };
-      impl.onCreativeRender(false);
-      const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
-      expect(ampAnalyticsElement).to.be.ok;
-      expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
-      expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');
-      expect(impl.ampAnalyticsElement_).to.be.ok;
-      // Exact format of amp-analytics element covered in
-      // test/functional/test-analytics.js.
-      // Just ensure extensions is loaded, and analytics element appended.
+        };
+        if (exp) {
+          impl.postAdResponseExperimentFeatures['avr_disable_immediate'] = '1';
+        }
+        impl.onCreativeRender(false);
+        const ampAnalyticsElement = impl.element.querySelector('amp-analytics');
+        expect(ampAnalyticsElement).to.be.ok;
+        expect(ampAnalyticsElement.CONFIG).jsonEqual(impl.ampAnalyticsConfig_);
+        expect(ampAnalyticsElement.getAttribute('sandbox')).to.equal('true');
+        expect(ampAnalyticsElement.getAttribute('trigger')).to.equal(
+            exp ? '' : 'immediate');
+        expect(impl.ampAnalyticsElement_).to.be.ok;
+        // Exact format of amp-analytics element covered in
+        // test/functional/test-analytics.js.
+        // Just ensure extensions is loaded, and analytics element appended.
+      });
     });
 
     it('should register click listener', () => {
@@ -475,6 +486,37 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then(url => {
         expect(url).to.match(/&tfcd=1&/);
+      });
+    });
+
+    describe('data-force-safeframe', () => {
+      const fsfRegexp = /(\?|&)fsf=1(&|$)/;
+      it('handles default', () => expect(
+          new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+          .to.eventually.not.match(fsfRegexp));
+
+      it('case insensitive attribute name', () => {
+        element.setAttribute('data-FORCE-SafeFraMe', '1');
+        return expect(
+            new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+            .to.eventually.match(fsfRegexp);
+      });
+
+      ['tRuE', 'true', 'TRUE', '1'].forEach(val => {
+        it(`valid attribute: ${val}`, () => {
+          element.setAttribute('data-force-safeframe', val);
+          return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+              .to.eventually.match(fsfRegexp);
+        });
+      });
+
+      ['aTrUe', 'trueB', '0', '01', '10', 'false', '', ' true', 'true ',
+        ' true '].forEach(val => {
+        it(`invalid attribute: ${val}`, () => {
+          element.setAttribute('data-force-safeframe', val);
+          return expect(new AmpAdNetworkDoubleclickImpl(element).getAdUrl())
+              .to.eventually.not.match(fsfRegexp);
+        });
       });
     });
 
@@ -1088,6 +1130,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   describe('#disable safeframe preload experiment', () => {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
+    let preloadSpy;
 
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1097,6 +1140,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
     });
 
     it('should not preload SafeFrame', () => {
@@ -1105,7 +1149,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.false;
       expect(isInExperiment(element, '21061136')).to.be.true;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com']);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.not.be.called;
     });
 
     it('should preload SafeFrame', () => {
@@ -1114,7 +1159,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061135')).to.be.true;
       expect(isInExperiment(element, '21061136')).to.be.false;
       expect(impl.getPreconnectUrls()).to.deep.equal(
-          ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
+          ['https://securepubads.g.doubleclick.net/']);
+      expect(preloadSpy).to.be.calledOnce;
+      expect(preloadSpy.args[0]).to.match(/safeframe/);
     });
   });
 
@@ -1188,6 +1235,31 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       };
       impl.win = env.win;
       expect(impl.postTroubleshootMessage()).to.be.null;
+    });
+  });
+
+  describe('#getNonAmpCreativeRenderingMethod', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(element);
+    });
+
+    it('should return safeframe if fluid', () => {
+      impl.isLayoutSupported(Layout.FLUID);
+      expect(impl.getNonAmpCreativeRenderingMethod()).to
+          .equal(XORIGIN_MODE.SAFEFRAME);
+    });
+
+    it('should return safeframe if force safeframe', () => {
+      element.setAttribute('data-force-safeframe', '1');
+      expect(new AmpAdNetworkDoubleclickImpl(element)
+          .getNonAmpCreativeRenderingMethod()).to.equal(XORIGIN_MODE.SAFEFRAME);
     });
   });
 });
@@ -1423,6 +1495,28 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           return impl.renderNonAmpCreative().then(() => {
             expect(Date.now() - startTime).to.be.at.most(50);
           });
+        });
+      });
+
+      describe('#preconnect', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          doc.body.appendChild(element);
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should preload safeframe', () => {
+          const preloadSpy = sandbox.stub(Preconnect.prototype, 'preload');
+          // Note that this causes preconnection to tpc.googlesyndication.com
+          // due to preloading safeframe.
+          expect(impl.getPreconnectUrls()).to.deep.equal(
+              ['https://securepubads.g.doubleclick.net/']);
+          expect(preloadSpy).to.be.calledOnce;
+          expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
       });
     });

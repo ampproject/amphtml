@@ -16,6 +16,10 @@
 
 import * as dom from './dom';
 import {AmpEvents} from './amp-events';
+import {
+  CONSENT_POLICY_STATE,
+  getConsentPolicyState,
+} from './consent-state';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
 import {
@@ -29,15 +33,16 @@ import {LayoutDelayMeter} from './layout-delay-meter';
 import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
+import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {htmlFor} from './static-template';
 import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
-import {reportError} from './error';
 import {setStyle} from './style';
 import {toWin} from './types';
 
@@ -473,8 +478,21 @@ function createBaseCustomElementClass(win) {
       if (this.buildingPromise_) {
         return this.buildingPromise_;
       }
-      return this.buildingPromise_ = new Promise(resolve => {
-        resolve(this.implementation_.buildCallback());
+      return this.buildingPromise_ = new Promise((resolve, reject) => {
+        const policyId = this.implementation_.getConsentPolicy();
+        if (!policyId) {
+          resolve(this.implementation_.buildCallback());
+        } else {
+          getConsentPolicyState(this.getAmpDoc(), policyId).then(state => {
+            if (state == CONSENT_POLICY_STATE.INSUFFICIENT ||
+                state == CONSENT_POLICY_STATE.UNKNOWN) {
+              // Need to change after support more policy state
+              reject(blockedByConsentError());
+            } else {
+              resolve(this.implementation_.buildCallback());
+            }
+          });
+        }
       }).then(() => {
         this.preconnect(/* onLayout */false);
         this.built_ = true;
@@ -499,7 +517,9 @@ function createBaseCustomElementClass(win) {
       }, reason => {
         this.signals_.rejectSignal(CommonSignals.BUILT,
             /** @type {!Error} */ (reason));
-        reportError(reason, this);
+        if (!isBlockedByConsent(reason)) {
+          reportError(reason, this);
+        }
         throw reason;
       });
     }
@@ -1496,12 +1516,11 @@ function createBaseCustomElementClass(win) {
      */
     prepareLoading_() {
       if (!this.loadingContainer_) {
-        const doc = this.ownerDocument;
+        const doc = /** @type {!Document} */(dev().assert(this.ownerDocument));
 
-        const container = doc.createElement('div');
-        container.classList.add('i-amphtml-loading-container');
-        container.classList.add('i-amphtml-fill-content');
-        container.classList.add('amp-hidden');
+        const container = htmlFor(doc)`
+            <div class="i-amphtml-loading-container i-amphtml-fill-content
+              amp-hidden" />`;
 
         const element = createLoaderElement(doc, this.elementName());
         container.appendChild(element);

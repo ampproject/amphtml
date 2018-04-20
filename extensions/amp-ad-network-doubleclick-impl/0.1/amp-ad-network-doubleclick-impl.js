@@ -93,6 +93,7 @@ import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {isObject} from '../../../src/types';
 import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -127,9 +128,6 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
  * @visibileForTesting
  */
 export const TFCD = 'tagForChildDirectedTreatment';
-
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /** @private {?Promise} */
 let sraRequests = null;
@@ -196,7 +194,7 @@ const BLOCK_SRA_COMBINERS_ = [
   },
   instances => {
     return {'prev_iu_szs': instances.map(instance =>
-      `${instance.initialSize_.width}x${instance.initialSize_.height}`).join()};
+      instance.parameterSize_).join()};
   },
   // Although declared at a block-level, this is actually page level so
   // return true if ANY indicate TFCD.
@@ -228,11 +226,24 @@ const BLOCK_SRA_COMBINERS_ = [
       if (currEids) {
         currEids.split(',').forEach(eid => eids[eid] = 1);
       }
+      const deid = /(?:#|,)deid=(\d+)/i.exec(instance.win.location.hash);
+      if (deid) {
+        eids[deid[1]] = 1;
+      }
     });
     return Object.keys(eids).length ? {'eid': Object.keys(eids).join()} : null;
   },
   instances => getFirstInstanceValue_(instances,
       instance => instance.buildIdentityParams_()),
+  instances => {
+    let safeframeForced = false;
+    const forceSafeframes = [];
+    instances.forEach(instance => {
+      safeframeForced = safeframeForced || instance.forceSafeframe_;
+      forceSafeframes.push(Number(instance.forceSafeframe_));
+    });
+    return safeframeForced ? {'fsfs': forceSafeframes.join(',')} : null;
+  },
 ];
 
 
@@ -268,6 +279,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?LayoutRectOrDimsDef} */
     this.initialSize_ = null;
 
+    /** @private {?string} */
+    this.parameterSize_ = null;
+
     /** @private {?{width: number, height: number}} */
     this.returnedSize_ = null;
 
@@ -280,7 +294,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {number} */
     this.adKey_ = 0;
 
-    // TODO(keithwrightbos) - how can pub enable?
     /** @protected @const {boolean} */
     this.useSra = getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
         this.win.location.search) ||
@@ -337,6 +350,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
+
+    /** @private {boolean} whether safeframe forced via tag */
+    this.forceSafeframe_ = false;
+    if ('forceSafeframe' in this.element.dataset) {
+      if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
+        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
+            this.element.dataset['forceSafeframe']);
+      } else {
+        this.forceSafeframe_ = true;
+      }
+    }
   }
 
   /** @override */
@@ -497,31 +521,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getBlockParameters_() {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
-    let sizeStr = this.isFluid_ ?
-      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
-    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
-    if (multiSizeDataStr) {
-      if (this.element.getAttribute('layout') == 'responsive') {
-        // TODO(levitzky) Define the behavior and remove this warning.
-        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
-            'currently not well defined. Proceed with caution.');
-      }
-      const multiSizeValidation = this.element
-          .getAttribute('data-multi-size-validation') || 'true';
-      // The following call will check all specified multi-size dimensions,
-      // verify that they meet all requirements, and then return all the valid
-      // dimensions in an array.
-      const dimensions = getMultiSizeDimensions(
-          multiSizeDataStr,
-          this.initialSize_.width,
-          this.initialSize_.height,
-          multiSizeValidation == 'true',
-          this.isFluid_);
-      sizeStr += '|' + dimensions
-          .map(dimension => dimension.join('x'))
-          .join('|');
-    }
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
@@ -530,19 +530,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'co': this.jsonTargeting_ &&
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
-      'sz': sizeStr,
+      'sz': this.parameterSize_,
       'output': 'html',
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
       'adtest': isInManualExperiment(this.element) ? 'on' : null,
-      'scp': serializeTargeting_(
-          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
-          (this.jsonTargeting_ &&
-            this.jsonTargeting_['categoryExclusions']) || null),
       'ifi': this.ifi_,
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
+      'fsf': this.forceSafeframe_ ? '1' : null,
+      'scp': serializeTargeting_(
+          (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
+          (this.jsonTargeting_ &&
+            this.jsonTargeting_['categoryExclusions']) || null),
     }, googleBlockParameters(this));
   }
 
@@ -564,6 +565,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
         `${this.initialSize_.width}x${this.initialSize_.height}`);
+    this.parameterSize_ = this.isFluid_ ?
+      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+    const multiSizeDataStr = this.element.getAttribute('data-multi-size');
+    if (multiSizeDataStr) {
+      if (this.element.getAttribute('layout') == 'responsive') {
+        // TODO(levitzky) Define the behavior and remove this warning.
+        user().warn(TAG, 'Behavior of multi-size and responsive layout is ' +
+            'currently not well defined. Proceed with caution.');
+      }
+      const multiSizeValidation = this.element
+          .getAttribute('data-multi-size-validation') || 'true';
+      // The following call will check all specified multi-size dimensions,
+      // verify that they meet all requirements, and then return all the valid
+      // dimensions in an array.
+      const dimensions = getMultiSizeDimensions(
+          multiSizeDataStr,
+          this.initialSize_.width,
+          this.initialSize_.height,
+          multiSizeValidation == 'true',
+          this.isFluid_);
+      this.parameterSize_ += '|' + dimensions
+          .map(dimension => dimension.join('x'))
+          .join('|');
+    }
   }
 
   /** @override */
@@ -680,6 +705,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
+      REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
         JSON.stringify(
             (tryParseJson(
@@ -697,6 +723,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
+  }
+
+  /**
+   * Returns the referrer or undefined if the referrer is not resolved
+   * before the given timeout
+   * @param {number=} opt_timeout
+   * @return {!(Promise<string>|Promise<undefined>)} A promise with a referrer or undefined
+   * if timed out
+   * @private
+   */
+  getReferrer_(opt_timeout) {
+    const timeoutInt = parseInt(opt_timeout, 10);
+    const referrerPromise = Services.viewerForDoc(this.getAmpDoc())
+        .getReferrerUrl();
+    if (isNaN(timeoutInt) || timeoutInt < 0) {
+      return referrerPromise;
+    }
+    return Services.timerFor(this.win)
+        .timeoutPromise(timeoutInt, referrerPromise)
+        .catch(() => undefined);
   }
 
   /**
@@ -794,6 +840,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.jsonTargeting_ = null;
     this.isAmpCreative_ = null;
     this.isIdleRender_ = false;
+    this.parameterSize_ = null;
+    this.returnedSize_ = null;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -900,8 +948,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
     if (this.isRefreshing) {
       dev().assert(this.refreshManager_);
@@ -1101,6 +1150,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               const slotCallback = metaJsonCreativeGrouper(
                   (creative, headersObj, done) => {
                     checkStillCurrent();
+                    const headerNames = Object.keys(headersObj);
+                    if (headerNames.length == 1 &&
+                        isObject(headersObj[headerNames[0]])) {
+                      // TODO(keithwrightbos) - fix upstream so response does
+                      // not improperly place headers under key.
+                      headersObj =
+                        /** @type {!Object} */(headersObj)[headerNames[0]];
+                      headersObj = Object.keys(headersObj).reduce(
+                          (newObj, key) => {
+                            newObj[key.toLowerCase()] = headersObj[key];
+                            return newObj;
+                          }, {});
+                    }
                     // Force safeframe rendering method.
                     headersObj[RENDERING_TYPE_HEADER.toLowerCase()] =
                         XORIGIN_MODE.SAFEFRAME;
@@ -1109,7 +1171,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                     const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
-                    get: name => headersObj[name.toLowerCase()],
+                    get: name => {
+                      // TODO(keithwrightbos) - fix upstream so response writes
+                      // all metadata values as strings.
+                      let header = headersObj[name.toLowerCase()];
+                      if (header && typeof header != 'string') {
+                        header = JSON.stringify(header);
+                      }
+                      return header;
+                    },
                     has: name => !!headersObj[name.toLowerCase()],
                   });
                     const fetchResponse =
@@ -1174,17 +1244,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         });
   }
 
+  /** @override */
   getPreconnectUrls() {
-    const urls = ['https://partner.googleadservices.com'];
+    // Note that this getter actually changes state by preloading safeframe.
+    // Plan to cleanup this API as part of generate amp-a4a modularization
+    // refactor.
     if (this.preloadSafeframe_) {
-      urls.push(SAFEFRAME_ORIGIN);
+      this.preconnect.preload(this.getSafeframePath());
     }
-    return urls;
+    return ['https://securepubads.g.doubleclick.net/'];
   }
 
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
-    return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
+    return this.forceSafeframe_ || this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
@@ -1318,6 +1391,7 @@ export function constructSRARequest_(win, doc, instances) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
+ * @return {!Object<string, *>}
  * @visibileForTesting
  */
 export function constructSRABlockParameters(instances) {

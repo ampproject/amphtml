@@ -126,11 +126,15 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       form.setAttribute('action-xhr', 'http://example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr must start with/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr must start with/);
+      });
       form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr should not be on AMP CDN/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr should not be on AMP CDN/);
+      });
       form.setAttribute('action-xhr', 'https://example.com');
       expect(() => new AmpForm(form)).to.not.throw;
       document.body.removeChild(form);
@@ -144,8 +148,10 @@ describes.repeated('', {
       illegalInput.setAttribute('name', '__amp_source_origin');
       illegalInput.value = 'https://example.com';
       form.appendChild(illegalInput);
-      expect(() => new AmpForm(form)).to.throw(
-          /Illegal input name, __amp_source_origin found/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /Illegal input name, __amp_source_origin found/);
+      });
       document.body.removeChild(form);
     });
 
@@ -231,7 +237,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      });
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
@@ -291,7 +299,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      });
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
     });
@@ -1673,6 +1683,27 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+
+      it('should not execute form submit with password field present', () => {
+        const form = getForm();
+        const input = document.createElement('input');
+        input.type = 'password';
+        form.appendChild(input);
+
+        return getAmpForm(form).then(ampForm => {
+          const form = ampForm.form_;
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitAction_(/* invocation */ {}))
+                .to.throw('input[type=password]');
+          });
+          expect(form.submit).to.have.not.been.called;
+        });
+      });
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1681,9 +1712,9 @@ describes.repeated('', {
         form.id = 'registration';
 
         const passwordInput = document.createElement('input');
-        passwordInput.setAttribute('name', 'password');
-        passwordInput.setAttribute('type', 'password');
-        passwordInput.setAttribute('value', 'god');
+        passwordInput.setAttribute('name', 'email');
+        passwordInput.setAttribute('type', 'email');
+        passwordInput.setAttribute('value', 'j@hnmiller.com');
         form.appendChild(passwordInput);
 
         const unnamedInput = document.createElement('input');
@@ -1701,7 +1732,7 @@ describes.repeated('', {
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
-          'formFields[password]': 'god',
+          'formFields[email]': 'j@hnmiller.com',
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(

@@ -257,8 +257,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
-    id: 'amp-document-recommendations',
-    name: 'Docment level recommendations and infinte scroll',
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
@@ -277,9 +277,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13716',
   },
   {
-    id: 'amp-list-load-more',
-    name: 'Enables load-more related functionality in amp-list',
-    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+    id: 'no-sync-xhr-in-ads',
+    name: 'Disables syncronous XHR requests in 3p iframes.',
+    spec: 'TODO',
+    cleanupIssue: 'TODO',
   },
   {
     id: 'video-service',
@@ -292,6 +293,23 @@ const EXPERIMENTS = [
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
+  {
+    id: 'amp-fx-fade-in',
+    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
+  {
+    id: 'amp-fx-fade-in-scroll',
+    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
 ];
 

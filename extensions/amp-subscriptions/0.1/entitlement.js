@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
@@ -89,6 +88,19 @@ export class Entitlement {
   }
 
   /**
+   * Returns json to be used for pingback.
+   *
+   * @return {!JsonObject}
+   */
+  jsonForPingback() {
+    return dict({
+      'raw': this.raw,
+      'source': this.source,
+      'grantState': this.enablesThis(),
+    });
+  }
+
+  /**
    * @param {?string} product
    * @return {boolean}
    */
@@ -103,7 +115,10 @@ export class Entitlement {
    * @return {boolean}
    */
   enablesThis() {
-    dev().assert(this.product_, 'Current product is not set');
+    if (this.products.length === 0) {
+      return false;
+    }
+    dev().assert(this.product_, 'Current Product is not set');
     return this.enables(this.product_);
   }
 
@@ -117,13 +132,14 @@ export class Entitlement {
 
   /**
    * @param {?JsonObject} json
+   * @param {?string} rawData
    * @return {!Entitlement}
    */
-  static parseFromJson(json) {
+  static parseFromJson(json, rawData = null) {
     if (!json) {
       json = dict();
     }
-    const raw = JSON.stringify(json);
+    const raw = rawData || JSON.stringify(json);
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];

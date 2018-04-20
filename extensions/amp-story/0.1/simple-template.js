@@ -80,7 +80,7 @@ function renderSingle(doc, elementDef) {
 
   if (elementDef.localizedStringId) {
     const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNull(win).then(localizationService => {
+    Services.localizationServiceForOrNullV01(win).then(localizationService => {
       dev().assert(localizationService,
           'Could not retrieve LocalizationService.');
       el.textContent = localizationService

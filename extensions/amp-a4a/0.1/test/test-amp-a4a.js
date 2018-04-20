@@ -55,6 +55,7 @@ import {
   resetScheduledElementForTesting,
 } from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
+import {toggleExperiment} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
@@ -608,6 +609,26 @@ describe('amp-a4a', () => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL,
               false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('shouldn\'t set feature policy for sync-xhr with exp off-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
+        });
+      });
+
+      it('should set feature policy for sync-xhr with exp on-a4a', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
+          expect(a4a.iframe.getAttribute('allow'))
+              .to.equal('sync-xhr \'none\';');
         });
       });
     });
@@ -1171,6 +1192,7 @@ describe('amp-a4a', () => {
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
         }
+        a4a.promiseErrorHandler_ = () => {};
         if (opt_failAmpRender) {
           sandbox.stub(a4a, 'renderAmpCreative_').returns(
               Promise.reject('amp render failure'));
@@ -1295,6 +1317,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
+        a4a.promiseErrorHandler_ = () => {};
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'onNetworkFailure')
             .withArgs(sinon.match(val =>
@@ -1362,11 +1385,19 @@ describe('amp-a4a', () => {
     [
       {
         name: '204',
-        fn: () => adResponse.status = 204,
+        fn: () => {
+          adResponse.status = 204;
+          // Response constructor requires null body for non 200 responses.
+          adResponse.body = null;
+        },
       },
       {
         name: '500',
-        fn: () => adResponse.status = 500,
+        fn: () => {
+          adResponse.status = 500;
+          // Response constructor requires null body for non 200 responses.
+          adResponse.body = null;
+        },
       },
       {
         name: 'empty body',
@@ -1540,7 +1571,7 @@ describe('amp-a4a', () => {
   });
 
   describe('#preconnectCallback', () => {
-    it('validate adsense', () => {
+    it('validate', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
@@ -1551,16 +1582,9 @@ describe('amp-a4a', () => {
         a4a.preconnectCallback(false);
         return Promise.resolve().then(() => {
           const preconnects = doc.querySelectorAll('link[rel=preconnect]');
-          expect(preconnects).to.have.lengthOf(3);
-          // SafeFrame origin.
-          expect(preconnects[0]).to.have.property(
-              'href', 'https://tpc.googlesyndication.com/');
-          // NameFrame origin (in testing mode).  Use a substring match here to
-          // be agnostic about localhost server port.
-          expect(preconnects[1]).to.have.property('href')
-              .that.has.string('http://ads.localhost');
+          expect(preconnects).to.have.lengthOf(1);
           // AdSense origin.
-          expect(preconnects[2]).to.have.property(
+          expect(preconnects[0]).to.have.property(
               'href', 'https://googleads.g.doubleclick.net/');
         });
       });
@@ -1891,9 +1915,9 @@ describe('amp-a4a', () => {
     });
 
     it('should rethrow cancellation', () => {
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         a4a.promiseErrorHandler_(cancellation());
-      }).to.throw(/CANCELLED/);
+      }).to.throw(/CANCELLED/); });
     });
 
     it('should create an error if needed', () => {

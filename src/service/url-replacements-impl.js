@@ -46,6 +46,7 @@ import {isProtocolValid} from '../url';
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
@@ -339,6 +340,18 @@ export class GlobalVariableSource extends VariableSource {
       }, 'VARIANTS');
     }));
 
+    // Returns assigned geo value for geoType or all groups.
+    this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
+      return this.getGeo_(geos => {
+        if (geoType) {
+          user().assert(geoType === 'ISOCountry',
+              'The value passed to AMP_GEO() is not valid name:' + geoType);
+          return /** @type {string} */ (geos[geoType] || 'unknown');
+        }
+        return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
+      }, 'AMP_GEO');
+    }));
+
     // Returns incoming share tracking fragment.
     this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
       () => {
@@ -541,7 +554,7 @@ export class GlobalVariableSource extends VariableSource {
           root.getElementById(/** @type {string} */ (id)),
           `Could not find an element with id="${id}" for VIDEO_STATE`);
       return Services.videoManagerForDoc(this.ampdoc)
-          .getVideoAnalyticsDetails(video)
+          .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
 
@@ -636,6 +649,24 @@ export class GlobalVariableSource extends VariableSource {
           expr);
       return getter(variants);
     });
+  }
+
+  /**
+   * Resolves the value via geo service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getGeo_(getter, expr) {
+    return Services.geoForOrNull(this.ampdoc.win)
+        .then(geo => {
+          user().assert(geo,
+              'To use variable %s, amp-geo should be configured',
+              expr);
+          return getter(geo);
+        });
   }
 
   /**

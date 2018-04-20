@@ -16,10 +16,13 @@
 
 
 import {dashToUnderline} from '../../../src/string';
+import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
 
 class AmpFacebookComments extends AMP.BaseElement {
 
@@ -34,6 +37,9 @@ class AmpFacebookComments extends AMP.BaseElement {
     this.dataLocale_ = element.hasAttribute('data-locale') ?
       element.getAttribute('data-locale') :
       dashToUnderline(window.navigator.language);
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /** @override */
@@ -69,9 +75,35 @@ class AmpFacebookComments extends AMP.BaseElement {
     listenFor(iframe, 'embed-size', data => {
       this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true);
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleFacebookMessages_.bind(this)
+    );
+    this.toggleLoading(true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
+  }
+
+  /** @private */
+  handleFacebookMessages_(event) {
+    if (this.iframe_ && event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    const eventData = getData(event);
+    if (!eventData) {
+      return;
+    }
+
+    const parsedEventData = isObject(eventData) ?
+      eventData : tryParseJson(eventData);
+    if (!parsedEventData) {
+      return;
+    }
+    if (eventData['action'] == 'ready') {
+      this.toggleLoading(false);
+    }
   }
 
   /** @override */

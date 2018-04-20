@@ -280,7 +280,8 @@ const forbiddenTerms = {
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js',
+      'extensions/amp-next-page/0.1/amp-next-page.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
     ],
   },
@@ -318,6 +319,7 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
@@ -338,7 +340,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
-      'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
     ],
   },
@@ -527,12 +529,6 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
-    ],
-  },
-  'style\\.\\w+ = ': {
-    message: 'Use setStyle instead!',
-    whitelist: [
-      'testing/iframe.js',
     ],
   },
   'AMP_CONFIG': {
