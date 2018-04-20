@@ -53,43 +53,6 @@ limitations under the License.
 </head>
   <body class="land-see">
 
-    <amp-animation id="recommendedSlideIn" layout="nodisplay">
-      <script type="application/json">
-        {
-          "duration": ".4s",
-          "easing": "ease-in",
-          "fill": "both",
-          "direction": "alternate",
-          "animations": [
-            {
-              "selector": ".land-see-recommended",
-              "delay": "calc(100ms * index())",
-              "keyframes": [
-                {"transform": "translateY(0)", "opacity": 1}
-              ]
-            }
-          ]
-        }
-      </script>
-    </amp-animation>
-    <amp-animation id="subscribeBGParallax" layout="nodisplay">
-      <script type="application/json">
-        {
-        "duration": "1s",
-        "fill": "both",
-        "direction": "alternate",
-        "animations": [
-          {
-            "selector": ".land-see-subscribe-bg",
-            "keyframes": [
-              { "transform": "translateY(calc(height('.land-see-subscribe') * -0.4))" }
-            ]
-          }
-        ]
-      }
-      </script>
-    </amp-animation>
-
   <!-- Start Navbar -->
   <header class="ampstart-headerbar fixed flex justify-start items-center top-0 left-0 right-0 pl2 pr4 ">
     <div role="button" aria-label="open sidebar" on="tap:header-sidebar.toggle" tabindex="0" class="ampstart-navbar-trigger md-hide lg-hide pr2  ">☰
@@ -228,7 +191,7 @@ limitations under the License.
           </amp-fx-flying-carpet>
           <div class="land-see-image-attribution ampstart-byline left-align mx-auto max-width-3 px4 pt1">Photo by: Jaccob Herman</div>
         </div>
-        <blockquote class="land-see-blockquote max-width-3 mx-auto py4 px4 relative">
+        <blockquote class="land-see-blockquote max-width-3 mx-auto py4 px4 relative" amp-fx="fly-in-left" data-duration="800ms" data-fly-in-distance="50%">
           <p class="bold mb1 pl4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque maximus efficitur lacus non fringilla.</p>
           <cite class="pl4">Dorian Grey</cite>
         </blockquote>

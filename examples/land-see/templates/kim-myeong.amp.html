@@ -93,23 +93,6 @@ limitations under the License.
         }
       </script>
     </amp-animation>
-    <amp-animation id="subscribeBGParallax" layout="nodisplay">
-      <script type="application/json">
-        {
-        "duration": "1s",
-        "fill": "both",
-        "direction": "alternate",
-        "animations": [
-          {
-            "selector": ".land-see-subscribe-bg",
-            "keyframes": [
-              { "transform": "translateY(calc(height('.land-see-subscribe') * -0.4))" }
-            ]
-          }
-        ]
-      }
-      </script>
-    </amp-animation>
 
   <!-- Start Navbar -->
   <header class="ampstart-headerbar fixed flex justify-start items-center top-0 left-0 right-0 pl2 pr4 ">
@@ -438,9 +421,7 @@ limitations under the License.
   </fieldset>
 </form>
   </div>
-  <amp-position-observer on="scroll:subscribeBGParallax.seekTo(percent=event.percent)" layout="nodisplay">
-  </amp-position-observer>
-  <amp-img alt="A view of the sea, see?" class="land-see-subscribe-bg cover" layout="fixed-height" height="679" src="../img/land-see/content/khatam-tadayon-107740.jpg">
+  <amp-img alt="A view of the sea, see?" class="land-see-subscribe-bg cover" layout="fixed-height" height="679" amp-fx="parallax" data-parallax-factor="1.2" src="../img/land-see/content/khatam-tadayon-107740.jpg">
 
 </amp-img></div>
 
