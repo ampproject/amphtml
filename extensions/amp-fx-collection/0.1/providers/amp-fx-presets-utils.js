@@ -130,10 +130,6 @@ export function marginValues(fxType) {
   switch (fxType) {
     case 'fade-in':
       return {
-        'start': 0.05,
-      };
-    case 'fade-in':
-      return {
         'start': 0,
         'end': 0.5,
       };
