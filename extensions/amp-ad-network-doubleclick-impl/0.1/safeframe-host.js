@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {getStyle} from '../../../src/style';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
@@ -379,7 +380,7 @@ export class SafeframeHostApi {
       'frameCoords_r': iframeBox.right,
       'frameCoords_b': iframeBox.bottom,
       'frameCoords_l': iframeBox.left,
-      'styleZIndex': this.baseInstance_.element.style.zIndex,
+      'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
       'allowedExpansion_r': viewportSize.width -

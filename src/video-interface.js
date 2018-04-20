@@ -212,7 +212,7 @@ export const VideoAttributes = {
    */
   DOCK: 'dock',
   /**
-   * fullscreen-on-landscape
+   * rotate-to-fullscreen
    *
    * If enabled, this automatically expands the currently visible video and
    * playing to fullscreen when the user changes the device's orientation to
@@ -223,7 +223,7 @@ export const VideoAttributes = {
    * http://caniuse.com/#feat=screen-orientation
    * and http://caniuse.com/#feat=fullscreen
    */
-  FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+  ROTATE_TO_FULLSCREEN: 'rotate-to-fullscreen',
 };
 
 
