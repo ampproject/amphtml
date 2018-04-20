@@ -1,5 +1,6 @@
 import babel from 'rollup-plugin-babel';
 import minify from 'rollup-plugin-minify';
+import path from 'path';
 
 export default {
   entry: './amp-iframe-api-export.js',
@@ -13,5 +14,8 @@ export default {
       presets: [['env', {'modules': false}]],
     }),
     minify({umd: 'build/index.min.js'}),
+  ],
+  external: [
+    path.resolve('../../../../src/polyfills.js'),
   ],
 };
