@@ -240,7 +240,7 @@ limitations under the License.
         </p>
         <div class="land-see-flying-carpet display-none">
           <amp-fx-flying-carpet height="300px">
-            <amp-img alt="Designer Kim Myeong." class="cover" width="704" height="598" layout="fixed" src="../img/land-see/content/shoe-designer-centered.jpg">
+            <amp-img alt="Designer Kim Myeong." class="cover" width="704" height="598" layout="fixed" lightbox src="../img/land-see/content/shoe-designer-centered.jpg">
             </amp-img>
           </amp-fx-flying-carpet>
           <div class="land-see-image-attribution ampstart-byline left-align mx-auto max-width-3 px4 pt1">Photo by: Jaccob Herman</div>
@@ -311,38 +311,9 @@ limitations under the License.
       </p>
     </section>
 
-    <amp-next-page>
-      <div separator>
-          Next article
-      </div>
-      <script type='application/json'>
-        {
-          "pages": [
-            {
-              "image": "/examples/img/hero@1x.jpg",
-              "title": "This is yet another article",
-              "ampUrl": "/examples/land-see/templates/adventure.amp.html"
-            },
-            {
-              "image": "/examples/img/hero@1x.jpg",
-              "title": "This is yet another article",
-              "ampUrl": "/examples/land-see/templates/adventure.amp.html"
-            },
-            {
-              "image": "/examples/img/hero@1x.jpg",
-              "title": "This is yet another article",
-              "ampUrl": "/examples/land-see/templates/adventure.amp.html"
-            }
-          ]
-        }
-      </script>
-    </amp-next-page>
-
-    <section class="land-see-story-nav mx-auto center px1 relative z2">
+     <section class="land-see-story-nav mx-auto center px1 relative z2">
       <div class="land-see-paging land-see-page-navigation mb4 flex flex-wrap">
-        <div class="sm-col sm-col-3 col-6 left-align"><a href="#" class="land-see-prev-page mt2 ml2 inline-block relative">Previous Story</a></div>
         <div class="land-see-story-social flex flex-auto align-top pt1 justify-center">
-
 
     <h3 class="land-see-story-social-share-heading">share:</h3>
 <ul class="ampstart-social-follow list-reset flex justify-around items-center flex-wrap m0 mb4">
@@ -363,9 +334,27 @@ limitations under the License.
     </li>
 </ul>
         </div>
-        <div class="sm-col sm-col-3 col-6 right-align"><a href="#" class="land-see-next-page mt2 mr2 inline-block relative">Next Story</a></div>
       </div>
     </section>
+
+    <amp-next-page>
+      <div separator>
+          Next article
+      </div>
+      <script type='application/json'>
+        {
+          "pages": [
+            {
+              "image": "/examples/img/hero@1x.jpg",
+              "title": "This is yet another article",
+              "ampUrl": "/examples/land-see/templates/adventure.amp.html"
+            }
+          ]
+        }
+      </script>
+    </amp-next-page>
+
+
 
 
 
