@@ -1268,6 +1268,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     let sandbox;
     let baseMetadata;
     const outlink = 'http://www.myadlandingpage.com/1234';
+
     beforeEach(() => {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'width': '200',
@@ -1284,26 +1285,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should pass the same object as given by super', () => {
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
-          unusedCreative => baseMetadata);
-      expect(impl.getAmpAdMetadata('unusedCreative'))
-          .to.deep.equal(baseMetadata);
+          () => baseMetadata);
+      expect(impl.getAmpAdMetadata()).to.deep.equal(baseMetadata);
     });
 
     it('should throw due to missing CTA', () => {
       baseMetadata.outlink = outlink;
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
-          unusedCreative => baseMetadata);
+          () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
-      expect(() => impl.getAmpAdMetadata('unusedCreative'))
+      expect(() => impl.getAmpAdMetadata())
           .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
     it('should throw due to missing outlink', () => {
       baseMetadata.cta = '0';
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
-          unusedCreative => baseMetadata);
+          () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
-      expect(() => impl.getAmpAdMetadata('unusedCreative'))
+      expect(() => impl.getAmpAdMetadata())
           .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
@@ -1311,12 +1311,55 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       baseMetadata.outlink = outlink;
       baseMetadata.cta = '0';
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
-          unusedCreative => baseMetadata);
+          () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
-      expect(impl.getAmpAdMetadata('unusedCreative'))
+      expect(impl.getAmpAdMetadata())
           .to.deep.equal(baseMetadata);
       expect(element.dataset.ampSpsaCta).to.equal('0');
       expect(element.dataset.ampSpsaOutlink).to.equal(outlink);
+    });
+  });
+
+  describe('#maybeValidateAmpCreative', () => {
+    let sandbox;
+
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+      });
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      sandbox = sinon.sandbox.create();
+    });
+
+    afterEach(() => sandbox.restore());
+
+    it('should pass same return value as given by super -- no SPSA', () => {
+      sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative').callsFake(
+          () => Promise.resolve('foo'));
+      return impl.maybeValidateAmpCreative().then(result => {
+        expect(result).to.equal('foo');
+      });
+    });
+
+    it('should pass same return value as given by super -- with SPSA', () => {
+      sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative').callsFake(
+          () => Promise.resolve('foo'));
+      impl.isSinglePageStoryAd_ = true;
+      return impl.maybeValidateAmpCreative().then(result => {
+        expect(result).to.equal('foo');
+      });
+    });
+
+    it('should throw due to invalid AMP creative', () => {
+      sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative').callsFake(
+          () => Promise.resolve(null));
+      impl.isSinglePageStoryAd_ = true;
+      return impl.maybeValidateAmpCreative().catch(error => {
+        expect(error.message).to.equal(INVALID_SPSA_RESPONSE);
+      });
     });
   });
 });

@@ -1348,6 +1348,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    const validationPromise = super.maybeValidateAmpCreative(bytes, headers);
+    if (!this.isSinglePageStoryAd_) {
+      return validationPromise;
+    }
+    return validationPromise.then(result => {
+      if (result) {
+        return result;
+      }
+      throw new Error(INVALID_SPSA_RESPONSE);
+    });
+  }
+
+  /** @override */
   getAmpAdMetadata(creative) {
     const metadata = super.getAmpAdMetadata(creative);
     if (!this.isSinglePageStoryAd_) {
@@ -1358,8 +1372,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.element.setAttribute('data-amp-spsa-outlink', metadata.outlink);
       return metadata;
     }
-    // Ensure that this fully drops the creative, and halts any further
-    // rendering.
     throw new Error(INVALID_SPSA_RESPONSE);
   }
 }
