@@ -64,7 +64,7 @@ export class PlatformStore {
     /** @private {!Array<string>} */
     this.failedPlatforms_ = [];
 
-    /** @private @canst {!!./entitlement.Entitlement} */
+    /** @private @canst {!./entitlement.Entitlement} */
     this.fallbackEntitlement_ = fallbackEntitlement;
 
     /** @private @const {!Object<string, number>} */
