@@ -18,8 +18,8 @@ import {
   resolveUrlAttr,
   rewriteAttributeValue,
   rewriteAttributesForElement,
-  sanitizeFormattingHtml,
   sanitizeHtml,
+  sanitizeHtmlTags,
 } from '../../src/sanitizer';
 import {toggleExperiment} from '../../src/experiments';
 
@@ -391,33 +391,54 @@ describe('resolveUrlAttr', () => {
 });
 
 
-describe('sanitizeFormattingHtml', () => {
+describe('sanitizeHtmlTags', () => {
 
   it('should output basic text', () => {
-    expect(sanitizeFormattingHtml('abc')).to.be.equal('abc');
+    expect(sanitizeHtmlTags('abc')).to.be.equal('abc');
   });
 
   it('should output valid markup', () => {
-    expect(sanitizeFormattingHtml('<b>abc</b>')).to.be.equal('<b>abc</b>');
-    expect(sanitizeFormattingHtml('<b>ab<br>c</b>')).to.be.equal(
+    expect(sanitizeHtmlTags('<b>abc</b>'))
+        .to.be.equal('<b>abc</b>');
+    expect(sanitizeHtmlTags('<b>ab<br>c</b>')).to.be.equal(
         '<b>ab<br>c</b>');
-    expect(sanitizeFormattingHtml('<b>a<i>b</i>c</b>')).to.be.equal(
+    expect(sanitizeHtmlTags('<b>a<i>b</i>c</b>')).to.be.equal(
         '<b>a<i>b</i>c</b>');
+    const markupWithClassAttribute = '<p class="some-class">heading</p>';
+    expect(sanitizeHtmlTags(markupWithClassAttribute))
+        .to.be.equal(markupWithClassAttribute);
+    const markupWithClassesAttribute =
+        '<div class="some-class another"><span>heading</span></div>';
+    expect(sanitizeHtmlTags(markupWithClassesAttribute))
+        .to.be.equal(markupWithClassesAttribute);
+    const markupParagraph = '<p class="valid-class">paragraph</p>';
+    expect(sanitizeHtmlTags(markupParagraph))
+        .to.be.equal(markupParagraph);
   });
 
   it('should NOT output non-whitelisted markup', () => {
-    expect(sanitizeFormattingHtml('a<div>b</div>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<style>b</style>c')).to.be.equal('ac');
-    expect(sanitizeFormattingHtml('a<img>c')).to.be.equal('ac');
+    expect(sanitizeHtmlTags('a<style>b</style>c'))
+        .to.be.equal('ac');
+    expect(sanitizeHtmlTags('a<img>c'))
+        .to.be.equal('ac');
   });
 
-  it('should NOT output attributes', () => {
-    expect(sanitizeFormattingHtml('<b color=red style="color: red">abc</b>'))
-        .to.be.equal('<b>abc</b>');
+  it('should NOT output style attributes', () => {
+    expect(sanitizeHtmlTags(
+        '<b color=red style="color: red">abc</b>'))
+        .to.be.equal('<b color="red">abc</b>');
+  });
+
+  it('should output style attributes if inline styles enabled', () => {
+    toggleExperiment(self, 'inline-styles', true,
+        /* opt_transientExperiment */ true);
+    expect(sanitizeHtmlTags(
+        '<b style="color: red">abc</b>'))
+        .to.be.equal('<b style="color: red">abc</b>');
   });
 
   it('should compensate for broken markup', () => {
-    expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
+    expect(sanitizeHtmlTags('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
   });
 

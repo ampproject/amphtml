@@ -394,8 +394,25 @@ describe('amp-mustache template', () => {
     templateElement.content.textContent = 'value = {{{value}}}';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
-    const result = template.render({value: '<b>abc</b><img><div>def</div>'});
-    expect(result./*OK*/innerHTML).to.equal('value = <b>abc</b>');
+
+    const result = template.render({
+      value: '<b>abc</b><img><div>def</div>'
+          + '<table class="valid-class">'
+          + '<thead><tr><th colspan="2">header</th></tr></thead>'
+          + '<tbody><tr><td>'
+          + '<a href="http://www.google.com">google</a>'
+          + '</td></tr></tbody>'
+          + '</table>',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'value = <b>abc</b><div>def</div>'
+        + '<table class="valid-class">'
+        + '<thead><tr><th colspan="2">header</th></tr></thead>'
+        + '<tbody><tr><td>'
+        + '<a href="http://www.google.com/" target="_top">google</a>'
+        + '</td></tr></tbody>'
+        + '</table>'
+    );
   });
 
   it('should unwrap output', () => {
