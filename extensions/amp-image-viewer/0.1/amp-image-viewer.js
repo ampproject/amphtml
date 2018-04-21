@@ -63,9 +63,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.image_ = null;
 
-    /** @private {?../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = null;
-
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
 
@@ -126,7 +123,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.vsync_ = this.getVsync();
     this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
 
@@ -155,22 +151,10 @@ export class AmpImageViewer extends AMP.BaseElement {
     }
     this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
     this.loadPromise_ = this.sourceAmpImage_.signals()
-        .whenSignal(CommonSignals.LOAD_END).then(() => {
-          return this.mutateElement(() => {
-            if (!this.image_) {
-              this.image_ = this.element.ownerDocument.createElement('img');
-              this.image_.classList.add('i-amphtml-image-viewer-image');
-
-              this.init_();
-              this.element.appendChild(this.image_);
-              st.toggle(dev().assertElement(this.sourceAmpImage_), false);
-            }
-          });
-        }).then(() => {
-          return this.resetImageDimensions_();
-        }).then(() => {
-          this.setupGestures_();
-        });
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => this.init())
+        .then(() => this.resetImageDimensions_())
+        .then(() => this.setupGestures_());
     return this.loadPromise_;
   }
 
@@ -261,30 +245,28 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * @return {number}
+   * Sets the source width and height based on the user-defined
+   * dimensions of the amp-img if exists, the natural dimensions
+   * of the source image if loaded, and the offset dimensions of
+   * amp-img element if not.
+   * @param {!Element}
    * @private
    */
-  getSourceWidth_() {
-    if (this.sourceAmpImage_.hasAttribute('width')) {
-      return parseInt(this.sourceAmpImage_.getAttribute('width'), 10);
+  setSourceDimensions_(ampImg) {
+    let width, height;
+    if ((width = ampImg.getAttribute('width'))
+        && (height = ampImg.getAttribute('height'))) {
+      this.sourceWidth_ = width;
+      this.sourceHeight_ = height;
     } else {
-      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
-          'img');
-      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
-    }
-  }
-
-  /**
-   * @return {number}
-   * @private
-   */
-  getSourceHeight_() {
-    if (this.sourceAmpImage_.hasAttribute('height')) {
-      return parseInt(this.sourceAmpImage_.getAttribute('height'), 10);
-    } else {
-      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
-          'img');
-      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
+      const img = elementByTag(ampImg, 'img');
+      if (img && (width = img.naturalWidth) && (height = img.naturalHeight)) {
+        this.sourceWidth_ = width;
+        this.sourceHeight_ = height;
+      } else {
+        this.sourceWidth_ = ampImg./*OK*/offsetWidth;
+        this.sourceHeight_ = ampImg./*OK*/offsetHeight;
+      }
     }
   }
 
@@ -292,22 +274,34 @@ export class AmpImageViewer extends AMP.BaseElement {
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
+   * @returns {!Promise}
    */
   init_() {
-    this.sourceWidth_ = this.getSourceWidth_();
-    this.sourceHeight_ = this.getSourceHeight_();
-    this.srcset_ = srcsetFromElement(dev().assertElement(this.sourceAmpImage_));
+    if (this.image_) {
+      return Promise.resolve();
+    }
 
-    ARIA_ATTRIBUTES.forEach(key => {
-      if (this.sourceAmpImage_.hasAttribute(key)) {
-        this.image_.setAttribute(key, this.sourceAmpImage_.getAttribute(key));
-      }
-    });
-    st.setStyles(dev().assertElement(this.image_), {
-      top: st.px(0),
-      left: st.px(0),
-      width: st.px(0),
-      height: st.px(0),
+    this.image_ = this.element.ownerDocument.createElement('img');
+    this.image_.classList.add('i-amphtml-image-viewer-image');
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    this.setSourceDimensions_(ampImg);
+    this.srcset_ = srcsetFromElement(ampImg);
+
+    return this.mutateElement(() => {
+      ARIA_ATTRIBUTES.forEach(key => {
+        let k;
+        if ((k = this.sourceAmpImage_.getAttribute(key))) {
+          this.image_.setAttribute(key, k);
+        }
+      });
+      st.setStyles(dev().assertElement(this.image_), {
+        top: st.px(0),
+        left: st.px(0),
+        width: st.px(0),
+        height: st.px(0),
+      });
+      st.toggle(ampImg, false);
+      this.element.appendChild(this.image_);
     });
   }
 
