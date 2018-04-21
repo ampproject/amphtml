@@ -38,9 +38,12 @@ describes.realWin('NameFrameRenderer', realWinConfig, env => {
       requestUrl: 'http://www.google.com',
       win: env.win,
       applyFillContent: () => {},
+      sentinel: 's-1234',
+    };
+
+    creativeData = {
       crossDomainData: {
         rawCreativeBytes: utf8Encode(minifiedCreative),
-        sentinel: 's-1234',
         additionalContextMetadata: {},
       },
     };

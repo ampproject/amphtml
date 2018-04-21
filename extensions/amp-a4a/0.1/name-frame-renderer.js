@@ -27,8 +27,8 @@ import {utf8Decode} from '../../../src/utils/bytes';
  */
 export class NameFrameRenderer extends Renderer {
   /** @override */
-  render(context, element, unusedCreativeData) {
-    const crossDomainData = context.crossDomainData;
+  render(context, element, creativeData) {
+    const crossDomainData = creativeData.crossDomainData;
     dev().assert(crossDomainData, 'CrossDomain data undefined!');
 
     const creative = utf8Decode(crossDomainData.rawCreativeBytes);
@@ -37,7 +37,7 @@ export class NameFrameRenderer extends Renderer {
     const contextMetadata = getContextMetadata(
         context.win,
         element,
-        crossDomainData.sentinel,
+        context.sentinel,
         crossDomainData.additionalContextMetadata);
     contextMetadata['creative'] = creative;
     const attributes = dict({
