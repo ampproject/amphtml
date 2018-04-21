@@ -669,7 +669,7 @@ export class AmpA4A extends AMP.BaseElement {
           const consentPolicyId = super.getConsentPolicy();
           return consentPolicyId ?
             getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
-            Promise.resolve();
+            Promise.resolve(null);
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
