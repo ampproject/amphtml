@@ -810,13 +810,15 @@ export class AmpA4A extends AMP.BaseElement {
         })
         .catch(error => {
           switch (error.message || error) {
-            case NETWORK_FAILURE: return null;
+            case NETWORK_FAILURE:
+              return null;
             case INVALID_SPSA_RESPONSE:
-            case NO_CONTENT_RESPONSE: return {
-              minifiedCreative: '',
-              customElementExtensions: [],
-              customStylesheets: [],
-            };
+            case NO_CONTENT_RESPONSE:
+              return {
+                minifiedCreative: '',
+                customElementExtensions: [],
+                customStylesheets: [],
+              };
           }
           // If error in chain occurs, report it and return null so that
           // layoutCallback can render via cross domain iframe assuming ad

@@ -1289,8 +1289,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(impl.getAmpAdMetadata()).to.deep.equal(baseMetadata);
     });
 
-    it('should throw due to missing CTA', () => {
-      baseMetadata.outlink = outlink;
+    it('should throw due to missing CTA type', () => {
+      baseMetadata.ctaUrl = outlink;
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
@@ -1299,7 +1299,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should throw due to missing outlink', () => {
-      baseMetadata.cta = '0';
+      baseMetadata.ctaType = '0';
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
@@ -1308,15 +1308,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should set appropriate attributes and return metadata object', () => {
-      baseMetadata.outlink = outlink;
-      baseMetadata.cta = '0';
+      baseMetadata.ctaUrl = outlink;
+      baseMetadata.ctaType = '0';
       sandbox.stub(AmpA4A.prototype, 'getAmpAdMetadata').callsFake(
           () => baseMetadata);
       impl.isSinglePageStoryAd_ = true;
       expect(impl.getAmpAdMetadata())
           .to.deep.equal(baseMetadata);
-      expect(element.dataset.ampSpsaCta).to.equal('0');
-      expect(element.dataset.ampSpsaOutlink).to.equal(outlink);
+      expect(element.dataset.varsCtatype).to.equal('0');
+      expect(element.dataset.varsCtaurl).to.equal(outlink);
     });
   });
 

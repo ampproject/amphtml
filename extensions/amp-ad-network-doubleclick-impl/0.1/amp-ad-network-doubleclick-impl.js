@@ -445,7 +445,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.preloadSafeframe_ = sfPreloadExpId == '21061135';
     }
 
-    this.isSinglePageStoryAd_ = 'ampSpsa' in this.element.dataset;
+    this.isSinglePageStoryAd_ = 'ampStory' in this.element.dataset;
 
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
@@ -1367,9 +1367,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.isSinglePageStoryAd_) {
       return metadata;
     }
-    if (metadata && metadata.cta && metadata.outlink) {
-      this.element.setAttribute('data-amp-spsa-cta', metadata.cta);
-      this.element.setAttribute('data-amp-spsa-outlink', metadata.outlink);
+    if (metadata && metadata.ctaType && metadata.ctaUrl) {
+      this.element.setAttribute('data-vars-ctatype', metadata.ctaType);
+      this.element.setAttribute('data-vars-ctaurl', metadata.ctaUrl);
       return metadata;
     }
     throw new Error(INVALID_SPSA_RESPONSE);
