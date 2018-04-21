@@ -50,7 +50,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -1237,11 +1236,19 @@ export class Resources {
     // the overflow callbacks are called.
     const now = Date.now();
     const viewportRect = this.viewport_.getRect();
-    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
-    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
+    /**
+     * @param {!../layout-rect.LayoutRectDef} layoutBox
+     * @param {!../layout-rect.LayoutRectDef} initialLayoutBox
+     * @returns True if element is within 15% and 1000px of document bottom.
+     */
+    const elementNearBottom = (layoutBox, initialLayoutBox) => {
+      const contentHeight = this.viewport_.getContentHeight();
+      const threshold = Math.max(contentHeight * 0.85, contentHeight - 1000);
+      return layoutBox.bottom >= threshold ||
+          initialLayoutBox.bottom >= threshold;
+    };
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1335,8 +1342,7 @@ export class Resources {
             this.requestsChangeSize_.push(request);
           }
           continue;
-        } else if (iniBox.bottom >= docBottomOffset ||
-                      box.bottom >= docBottomOffset) {
+        } else if (elementNearBottom(box, iniBox)) {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
