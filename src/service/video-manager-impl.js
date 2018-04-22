@@ -87,6 +87,12 @@ export class VideoService {
    *    If provided, video will be played or paused when this observable fires.
    */
   delegateAutoplay(unusedVideo, opt_unusedObservable) {}
+
+  /**
+   * @param {!AmpElement} unusedVideo
+   * @param {...number} unusedVarFeatures
+   */
+  disable(unusedVideo, ...unusedVarFeatures) {}
 }
 
 
@@ -341,6 +347,11 @@ export class VideoManager {
    */
   userInteractedWithAutoPlay(video) {
     return this.getEntryForVideo_(video).userInteractedWithAutoPlay();
+  }
+
+  /** @override */
+  disable(unusedVideo, ...unusedVarFeatures) {
+    // NOOP. Interface only supported under `video-service` experiment.
   }
 
   /** @param {!VideoEntry} entry */

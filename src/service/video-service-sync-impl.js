@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {VideoEvents} from '../video-interface';
 import {dev} from '../log';
 import {getAmpdoc} from '../service';
 import {getElementServiceForDoc} from '../element-service';
@@ -23,6 +24,10 @@ import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
 const EXTENSION = 'amp-video-service';
+
+
+/** @private @const {string} */
+const DISABLED_FEATURES = '__AMP_VIDEO_DISABLED__';
 
 
 /**
@@ -99,5 +104,12 @@ export class VideoServiceSync {
   getAnalyticsDetails(video) {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
+  }
+
+  /** @override */
+  disable(element, ...varFeatures) {
+    dev().assert(!element.signals().get(VideoEvents.REGISTERED));
+    element[DISABLED_FEATURES] =
+        (element[DISABLED_FEATURES] || []).concat(varFeatures);
   }
 }

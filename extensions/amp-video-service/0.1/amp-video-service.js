@@ -27,7 +27,8 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 
@@ -36,8 +37,19 @@ import {listen} from '../../../src/event-helper';
 const TAG = 'amp-video-service';
 
 
+/** @enum {number} */
+export const VideoFeatures = {
+  ACTIONS: 0,
+  MEDIA_SESSION: 1,
+};
+
+
 /** @private @const {string} */
 const ENTRY_PROP = '__AMP_VIDEO_ENTRY__';
+
+
+/** @private @const {string} */
+const DISABLED_FEATURES = '__AMP_VIDEO_DISABLED__';
 
 
 /**
@@ -145,11 +157,23 @@ export class VideoService {
   }
 
   /**
-   * @param {!AmpElement} unusedVideo
-   * @param {!Observable<boolean>} unusedObservable
+   * @param {!AmpElement} video
+   * @param {!Observable<boolean>} observable
    */
-  delegateAutoplay(unusedVideo, unusedObservable) {
-    warnUnimplemented('Autoplay delegation');
+  delegateAutoplay(video, observable) {
+    this.whenRegistered_(video).then(() => {
+      const entry = dev().assert(this.getEntryOrNull(video));
+      entry.delegateAutoplay(observable);
+    });
+  }
+
+  /**
+   * @param {!AmpElement} video
+   * @return {!Promise}
+   * @private
+   */
+  whenRegistered_(video) {
+    return video.signals().whenSignal(VideoEvents.REGISTERED);
   }
 }
 
@@ -178,6 +202,10 @@ export class VideoEntry {
 
     /** @private {boolean} */
     this.isPlaying_ = false;
+
+    /** @private @const {!Object<!VideoFeatures, boolean>} */
+    this.disabledFeatures_ = {};
+    this.setDisabledFeatures_();
   }
 
   /**
@@ -191,6 +219,23 @@ export class VideoEntry {
     // methods before install.
     entry.install();
     return entry;
+  }
+
+  /** @private */
+  setDisabledFeatures_() {
+    (this.video_.element[DISABLED_FEATURES] || []).forEach(feature => {
+      dev().assert(feature in VideoFeatures);
+      this.disabledFeatures_[feature] = true;
+    });
+  }
+
+  /**
+   * @param {!VideoFeatures} feature
+   * @return {boolean}
+   * @private
+   */
+  isDisabled_(feature) {
+    return feature in this.disabledFeatures_;
   }
 
   /** @param {function()} handler */
@@ -221,6 +266,11 @@ export class VideoEntry {
     signals.whenSignal(CommonSignals.LOAD_START)
         .then(() => this.onLoadStart_());
   }
+
+  /**
+   * @param {!Observable<boolean>} unusedToObservable
+   */
+  delegateAutoplay(unusedToObservable) {}
 
   /** @private */
   onBuilt_() {
@@ -257,16 +307,31 @@ export class VideoEntry {
    */
   registerCommonActions_() {
     const video = this.video_;
+    this.registerCommonAction_('play', () => video.play(/* isAuto */ false));
+    this.registerCommonAction_('pause', () => video.pause());
+    this.registerCommonAction_('mute', () => video.mute());
+    this.registerCommonAction_('unmute', () => video.unmute());
+    this.registerCommonAction_('fullscreen', () => video.fullscreenEnter());
+  }
+
+  /** @private */
+  registerCommonAction_(name, callback) {
+    const video = this.video_;
 
     // Only require ActionTrust.LOW for video actions to defer to platform
     // specific handling (e.g. user gesture requirement for unmuted playback).
     const trust = ActionTrust.LOW;
 
-    video.registerAction('play', () => video.play(/* isAuto */ false), trust);
-    video.registerAction('pause', () => video.pause(), trust);
-    video.registerAction('mute', () => video.mute(), trust);
-    video.registerAction('unmute', () => video.unmute(), trust);
-    video.registerAction('fullscreen', () => video.fullscreenEnter(), trust);
+    video.registerAction(name, () => {
+      if (!this.isDisabled_(VideoFeatures.ACTIONS)) {
+        callback();
+        return;
+      }
+      if (getMode().development) {
+        user().warn(TAG, `Action '${name}' is disabled for this element:`,
+            this.getElementStr_());
+      }
+    }, trust);
   }
 
   /**
@@ -277,6 +342,9 @@ export class VideoEntry {
    * @private
    */
   triggerTimeUpdate_() {
+    if (this.isDisabled_(VideoFeatures.ACTIONS)) {
+      return;
+    }
     this.onPlaybackTick(() => {
       const video = this.video_;
       const time = video.getCurrentTime();
@@ -296,6 +364,16 @@ export class VideoEntry {
       const event = createCustomEvent(win, `${TAG}.${name}`, {time, percent});
       actions.trigger(element, name, event, ActionTrust.LOW);
     });
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getElementStr_() {
+    const {element} = this.video_;
+    const {id} = element;
+    return element.tagName.toLowerCase() + (id ? `#${id}` : '');
   }
 }
 
