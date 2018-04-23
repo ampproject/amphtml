@@ -14,69 +14,12 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {getIframe} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {AmpEmbedlyCard, TAG} from './amp-embedly-card-impl';
+import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
+import {EmbedlyService, SERVICE_NAME} from './embedly-service';
 
-/** @const {string} */
-export const TAG = 'amp-embedly-card';
-
-/**
- * Implementation of the amp-embedly-card component.
- * See {@link ../amp-embedly-card.md} for the spec.
- */
-export class AmpEmbedlyCard extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?HTMLIFrameElement} */
-    this.iframe_ = null;
-  }
-
-  /** @override */
-  buildCallback() {
-    user().assert(
-        this.element.getAttribute('data-url'),
-        `The data-url attribute is required for <${TAG}> %s`,
-        this.element
-    );
-  }
-
-  /** @override */
-  layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'embedly');
-
-    const opt_is3P = true;
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
-    }, opt_is3P);
-
-    this.applyFillContent(iframe);
-    this.getVsync().mutate(() => this.element.appendChild(iframe));
-
-    this.iframe_ = iframe;
-
-    return this.loadPromise(iframe);
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-
-    return true;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
-  }
-}
-
-AMP.registerElement(TAG, AmpEmbedlyCard);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(SERVICE_NAME, EmbedlyService);
+  AMP.registerElement(TAG, AmpEmbedlyCard);
+  AMP.registerElement(KEY_TAG, AmpEmbedlyKey);
+});
