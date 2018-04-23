@@ -1021,7 +1021,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it.only('should run end-to-end and render in friendly iframe', () => {
+    it('should run end-to-end and render in friendly iframe', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
