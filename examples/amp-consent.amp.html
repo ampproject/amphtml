@@ -141,7 +141,8 @@
       margin: 0;
     }
   </style>
-   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -222,6 +223,13 @@
             Maecenas sollicitudin felis aliquam tortor vulputate,
             ac posuere velit semper.
           </p>
+          <amp-ad width="320" height="50"
+                  data-block-on-consent
+                  type="doubleclick"
+                  data-slot="/4119129/mobile_ad_banner"
+                  rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1", "https://localhost:4443/abc?timeout=true", "https://broken.zzzzzz", "https://localhost:4443/zqq?slot_id=1"], "timeoutMillis": 500}'
+                  json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+          </amp-ad>
           <p>
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
             Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus

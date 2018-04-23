@@ -36,6 +36,7 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {FetchMock, networkFailure} from './fetch-mock';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -1054,10 +1055,10 @@ describe('amp-a4a', () => {
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, {})).to.be.true;
+              a4a, {}, null)).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
-          expect(getAdUrlSpy.calledWith(rtcResponse)).to.be.true;
+          expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
           expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           expect(doc.querySelector('link[rel=preload]' +
@@ -1855,6 +1856,72 @@ describe('amp-a4a', () => {
       });
     });
 
+    describe('consent integration', () => {
+      let fixture, a4aElement, a4a;
+      beforeEach(() => createIframePromise().then(f => {
+        fixture = f;
+        setupForAdTesting(fixture);
+        fetchMock.getOnce(
+            TEST_URL + '&__amp_source_origin=about%3Asrcdoc', () => adResponse,
+            {name: 'ad'});
+        a4aElement = createA4aElement(fixture.doc);
+        a4a = new MockA4AImpl(a4aElement);
+        toggleExperiment(a4a.win, 'amp-consent', true);
+        return fixture;
+      }));
+
+      it('should delay ad url by getConsentPolicyState', () => {
+        sandbox.stub(AMP.BaseElement.prototype, 'getConsentPolicy')
+            .returns('default');
+        let inResolver;
+        const policyPromise = new Promise(resolver => inResolver = resolver);
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+            .returns(Promise.resolve({
+              whenPolicyResolved: () => policyPromise,
+            }));
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        // allow ad promise to start execution, unfortunately timer is only way.
+        return Services.timerFor(a4a.win).promise(50).then(() => {
+          expect(getAdUrlSpy).to.not.be.called;
+          inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
+          return a4a.layoutCallback().then(() => {
+            expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
+                .calledOnce;
+          });
+        });
+      });
+
+      it('should not wait on consent if no policy', () => {
+        sandbox.stub(AMP.BaseElement.prototype, 'getConsentPolicy')
+            .returns(null);
+        const consentServiceSpy =
+          sandbox.spy(Services, 'consentPolicyServiceForDocOrNull');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() =>
+          expect(consentServiceSpy).to.not.be.called);
+      });
+
+      it('should pass consent state to getAdUrl', () => {
+        sandbox.stub(AMP.BaseElement.prototype, 'getConsentPolicy')
+            .returns('default');
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
+            .returns(Promise.resolve({
+              whenPolicyResolved: () =>
+                Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
+            }));
+        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
+              .calledOnce;
+        });
+      });
+    });
+
     describe('protectFunctionWrapper', () => {
       it('works properly with no error', () => {
         let errorCalls = 0;
@@ -2213,7 +2280,8 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     it('should log user error if RTC Config set but RTC not supported', () => {
       element.setAttribute('rtc-config',
           JSON.stringify({'urls': ['https://a.com']}));
-      expect(a4a.tryExecuteRealTimeConfig_()).to.be.undefined;
+      expect(allowConsoleError(() => a4a.tryExecuteRealTimeConfig_()))
+          .to.be.undefined;
       expect(errorSpy.calledOnce).to.be.true;
       expect(errorSpy.calledWith(
           'amp-a4a',
@@ -2223,14 +2291,15 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       const macros = {'SLOT_ID': 2};
       AMP.maybeExecuteRealTimeConfig = sandbox.stub();
       sandbox.stub(a4a, 'getCustomRealTimeConfigMacros_').returns(macros);
-      a4a.tryExecuteRealTimeConfig_();
+      a4a.tryExecuteRealTimeConfig_(CONSENT_POLICY_STATE.UNKNOWN);
       expect(AMP.maybeExecuteRealTimeConfig.called).to.be.true;
-      expect(AMP.maybeExecuteRealTimeConfig.calledWith(a4a, macros)).to.be.true;
+      expect(AMP.maybeExecuteRealTimeConfig.calledWith(
+          a4a, macros, CONSENT_POLICY_STATE.UNKNOWN)).to.be.true;
     });
     it('should catch error in maybeExecuteRealTimeConfig', () => {
       const err = new Error('Test');
       AMP.maybeExecuteRealTimeConfig = sandbox.stub().throws(err);
-      a4a.tryExecuteRealTimeConfig_();
+      allowConsoleError(() => a4a.tryExecuteRealTimeConfig_());
       expect(errorSpy.calledOnce).to.be.true;
       expect(errorSpy.calledWith(
           'amp-a4a', 'Could not perform Real Time Config.', err)).to.be.true;

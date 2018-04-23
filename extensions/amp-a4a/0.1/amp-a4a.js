@@ -15,6 +15,10 @@
  */
 
 import {A4AVariableSource} from './a4a-variable-source';
+import {
+  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  getConsentPolicyState,
+} from '../../../src/consent-state';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -658,12 +662,21 @@ export class AmpA4A extends AMP.BaseElement {
             return this.getResource().whenWithinRenderOutsideViewport();
           }
         })
-        // This block returns the ad URL, if one is available.
-        /** @return {!Promise<?string>} */
+        // Possibly block on amp-consent.
+        /** @return {!Promise<?CONSENT_POLICY_STATE>} */
         .then(() => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(
-            this.getAdUrl(this.tryExecuteRealTimeConfig_()));
+          const consentPolicyId = super.getConsentPolicy();
+          return consentPolicyId ?
+            getConsentPolicyState(this.getAmpDoc(), consentPolicyId) :
+            Promise.resolve(null);
+        })
+        // This block returns the ad URL, if one is available.
+        /** @return {!Promise<?string>} */
+        .then(consentState => {
+          checkStillCurrent();
+          return /** @type {!Promise<?string>} */(this.getAdUrl(
+              consentState, this.tryExecuteRealTimeConfig_(consentState)));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1136,10 +1149,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+   * @param {?CONSENT_POLICY_STATE} unusedConsentState
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl(opt_rtcResponsesPromise) {
+  getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1731,13 +1745,14 @@ export class AmpA4A extends AMP.BaseElement {
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn.
+   * @param {?CONSENT_POLICY_STATE} consentState
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_() {
+  tryExecuteRealTimeConfig_(consentState) {
     if (!!AMP.maybeExecuteRealTimeConfig) {
       try {
         return AMP.maybeExecuteRealTimeConfig(
-            this, this.getCustomRealTimeConfigMacros_());
+            this, this.getCustomRealTimeConfigMacros_(), consentState);
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }

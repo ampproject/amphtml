@@ -32,6 +32,7 @@ import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
@@ -639,6 +640,26 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return expect(impl.getAdUrl()).to.eventually
           .match(/pwprc=package_code(&|$)/);
     });
+
+    it('should return empty string if unknown consentState', () => expect(
+        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should include npa=1 if unknown consent & explicit npa', () => {
+      impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
+      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/);
+    });
+
+    it('should include npa=1 if insufficient consent', () =>
+      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/));
+
+    [CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
+      it(`should not include npa=1 if ${consentState}`, () =>
+        expect(impl.getAdUrl(consentState)).to.eventually.not
+            .match(/(\?|&)npa=1(&|$)/));
+    });
   });
 
   describe('#unlayoutCallback', () => {
@@ -932,5 +953,10 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(preloadSpy).to.be.calledOnce;
       expect(preloadSpy.args[0]).to.match(/nameframe/);
     });
+  });
+
+  describe('#getConsentPolicy', () => {
+    it('should return null', () =>
+      expect(AmpAdNetworkAdsenseImpl.prototype.getConsentPolicy()).to.be.null);
   });
 });
