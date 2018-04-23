@@ -557,12 +557,13 @@ export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
   if (consentResolved) {
-    if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
-      adsRequest.adTagUrl += '&npa=1';
-      adsLoader.requestAds(adsRequest);
-    } else if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
       imaLoadAllowed = false;
+      return;
+    } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
+      adsRequest.adTagUrl += '&npa=1';
     }
+    adsLoader.requestAds(adsRequest);
   } else {
     requestAdsOnUserConsent = true;
   }

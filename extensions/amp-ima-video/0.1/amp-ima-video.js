@@ -107,13 +107,6 @@ class AmpImaVideo extends AMP.BaseElement {
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
 
-    // Send consent state to the player once it resolves.
-    getConsentPolicyState(this.getAmpDoc(), this.getConsentPolicy()).then(
-        resolution => {
-          debugger;
-          this.sendCommand_('consentResolved', {'consentState': resolution});
-    });
-
     // Handle <source> and <track> children
     const sourceElements = childElementsByTag(this.element, 'SOURCE');
     const trackElements = childElementsByTag(this.element, 'TRACK');
@@ -173,6 +166,15 @@ class AmpImaVideo extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     this.iframe_ = iframe;
+
+    // Send consent state to the player once it resolves.
+    // This needs to be here because sendCommand will fail if this.iframe_ is
+    // not set, so I can't put it in the buildCallback where (I think) it should
+    // be.
+    getConsentPolicyState(this.getAmpDoc(), super.getConsentPolicy()).then(
+        resolution => {
+          this.sendCommand_('consentResolved', {'consentState': resolution});
+    });
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -383,7 +385,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   getConsentPolicy() {
-    return 'default';
+    return null;
   }
 }
 
