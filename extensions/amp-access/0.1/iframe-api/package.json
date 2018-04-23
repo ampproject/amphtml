@@ -7,13 +7,14 @@
   "main": "build/index.min.js",
   "jsnext:main": "amp-iframe-api-export.js",
   "scripts": {
-    "build": "./node_modules/.bin/rollup -c rollup.config.js && cp ./build/index.js ../../../../dist.3p/current/amp-iframe-api-export.js"
+    "build": "./node_modules/.bin/rollup -c rollup.config.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api/"
   },
   "dependencies": {
+    "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-minify": "^1.0.3"
   },
