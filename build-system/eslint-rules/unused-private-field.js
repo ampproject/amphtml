@@ -71,12 +71,12 @@ module.exports = function(context) {
 
   return {
     MemberExpression(node) {
-      if (/\btest\b/.test(context.getFilename())) {
+      if (/\b(test|examples)\b/.test(context.getFilename())) {
         return;
       }
 
-      const {property} = node;
-      if (property.type !== 'Identifier') {
+      const {object, property} = node;
+      if (object.type !== 'ThisExpression' || property.type !== 'Identifier') {
         return;
       }
 
