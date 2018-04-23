@@ -423,12 +423,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
       event.preventDefault();
-      let newScale;
-      if (this.scale_ == 1) {
-        newScale = this.maxScale_;
-      } else {
-        newScale = this.minScale_;
-      }
+      const newScale = this.scale_ == 1 ? this.maxScale_ : this.minScale_;
       const deltaX = this.elementBox_.width / 2 - e.data.clientX;
       const deltaY = this.elementBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
