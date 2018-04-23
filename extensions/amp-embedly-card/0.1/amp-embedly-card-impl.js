@@ -50,7 +50,6 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return getEmbedlyServiceForDoc(this.element).then(service => {
-debugger;
       if (service.key) {
         this.element.setAttribute('data-key', service.key);
       }

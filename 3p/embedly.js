@@ -35,6 +35,25 @@ const RESIZE_EVENT_NAME = 'card.resize';
 const CARD_CSS_CLASS = 'embedly-card';
 
 /**
+ * Customizable card options.
+ *
+ * @see {@link http://docs.embed.ly/docs/cards#customize}
+ * @const @enum {string}
+ */
+const CardOptions = {
+  VIA: 'data-card-via',
+  CHROME: 'data-card-chrome',
+  THEME: 'data-card-theme',
+  IMAGE: 'data-card-image',
+  EMBED: 'data-card-embed',
+  CONTROLS: 'data-card-controls',
+  WIDTH: 'data-card-width',
+  ALIGN: 'data-card-align',
+  RECOMMEND: 'data-card-recommend',
+  KEY: 'data-card-key',
+};
+
+/**
  * Loads embedly card SDK that is consumed by this 3p integration.
  *
  * @param {!Window} global
@@ -57,6 +76,10 @@ export function embedly(global, data) {
 
   card.href = data.url;
   card.classList.add(CARD_CSS_CLASS);
+
+  if (data.key) {
+    card.setAttribute(CardOptions.KEY, data.key);
+  }
 
   global.document.getElementById('c').appendChild(card);
 
