@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getConsentPolicyState} from '../../../src/consent-state';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -105,6 +106,13 @@ class AmpImaVideo extends AMP.BaseElement {
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
             'https');
+
+    // Send consent state to the player once it resolves.
+    getConsentPolicyState(this.getAmpDoc(), this.getConsentPolicy()).then(
+        resolution => {
+          debugger;
+          this.sendCommand_('consentResolved', {'consentState': resolution});
+    });
 
     // Handle <source> and <track> children
     const sourceElements = childElementsByTag(this.element, 'SOURCE');
@@ -371,6 +379,11 @@ class AmpImaVideo extends AMP.BaseElement {
   /** @override */
   getPlayedRanges() {
     return this.playerData_.playedRanges;
+  }
+
+  /** @override */
+  getConsentPolicy() {
+    return 'default';
   }
 }
 
