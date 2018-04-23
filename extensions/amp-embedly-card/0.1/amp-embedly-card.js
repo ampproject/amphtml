@@ -15,6 +15,8 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {getIframe} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 
 export class AmpEmbedlyCard extends AMP.BaseElement {
 
@@ -22,18 +24,23 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = 'hello world';
-
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    const iframe = getIframe(this.win, this.element, 'embedly');
+
+    this.applyFillContent(iframe);
+
+    listenFor(iframe, 'embed-size', data => {
+      this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
+
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 
   /** @override */
