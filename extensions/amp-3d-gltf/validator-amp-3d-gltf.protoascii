@@ -14,19 +14,19 @@
 # limitations under the license.
 #
 
-tags: {  # amp-3d-player
+tags: {  # amp-3d-gltf
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-3d-player"
+    name: "amp-3d-gltf"
     allowed_versions: "0.1"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-3d-player>
+tags: {  # <amp-3d-gltf>
   html_format: AMP
-  tag_name: "AMP-3D-PLAYER"
-  requires_extension: "amp-3d-player"
+  tag_name: "AMP-3D-GLTF"
+  requires_extension: "amp-3d-gltf"
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

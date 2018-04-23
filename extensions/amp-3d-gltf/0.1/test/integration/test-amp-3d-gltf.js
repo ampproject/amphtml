@@ -16,13 +16,13 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe('amp-3d-player', function() {
-  describes.integration('amp-3d-player iframe renders', {
-    body: '<amp-3d-player layout="fixed"' +
-                        ' width="200"' +
-                        ' height="200"' +
-                        ' src="/123"></amp-3d-player>',
-    extensions: ['amp-3d-player'],
+describe('amp-3d-gltf', function() {
+  describes.integration('amp-3d-gltf iframe renders', {
+    body: '<amp-3d-gltf layout="fixed"' +
+                      ' width="200"' +
+                      ' height="200"' +
+                      ' src="/123"></amp-3d-gltf>',
+    extensions: ['amp-3d-gltf'],
   }, () => {
 
     it('iframe renders', () => {

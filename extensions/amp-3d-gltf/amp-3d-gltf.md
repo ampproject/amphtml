@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-3d-player`"></a> `amp-3d-player`
+# <a name="`amp-3d-gltf`"></a> `amp-3d-gltf`
 
 <table>
   <tr>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-3d-player-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -37,13 +37,13 @@ limitations under the License.
 
 ## Example
 ```html
-<amp-3d-player
+<amp-3d-gltf
     layout="responsive"
     width="320"
     height="240"
     alpha="true"
     antialiasing="true"
-    src="path/to/model.glb"></amp-3d-player>
+    src="path/to/model.glb"></amp-3d-gltf>
 ```
 
 ## Limitations
@@ -75,4 +75,4 @@ Turn on/off zoom
 
 
 ## Validation
-See [amp-3d-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-player/validator-amp-3d-player.protoascii) in the AMP validator specification.
+See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.

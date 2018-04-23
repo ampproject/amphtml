@@ -23,7 +23,7 @@ import {parseJson} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 
-export class Amp3dPlayer extends AMP.BaseElement {
+export class Amp3dGltf extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -210,4 +210,4 @@ export class Amp3dPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-3d-player', Amp3dPlayer);
+AMP.registerElement('amp-3d-gltf', Amp3dGltf);
