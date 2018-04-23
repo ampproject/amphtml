@@ -185,6 +185,9 @@ In the below example, the element is translated along the Y axis across `20%` of
   </div>
 ```
 
+##### data-margin-start (optional)
+
+This parameter determines when to trigger the timed animation. The value specified in `<percent>` dictates that the animation should be triggered when the element has crossed that percentage of the viewport. The default value is `X%`.
 
 ## Validation
 

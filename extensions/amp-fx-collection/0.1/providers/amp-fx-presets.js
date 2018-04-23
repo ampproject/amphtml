@@ -75,10 +75,12 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
+      console.log(fxElement.getMarginStart())
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -109,9 +111,10 @@ export const Presets = {
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -142,9 +145,10 @@ export const Presets = {
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_) {
         return;
       }
 
@@ -175,9 +179,10 @@ export const Presets = {
     update(entry) {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
+      const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        fxElement.adjustedViewportHeight_) {
         return;
       }
 
