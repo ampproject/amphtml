@@ -1088,7 +1088,7 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 #### Incremental Engaged Time
 
-Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+Provides the time (in seconds) the user has been engaged with the page since the last time it was reset. It takes two arguments. The first is the name of the timer, the second is whether or not to reset it (it is optional and defaults to true). Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 * **platform variable**: `INCREMENTAL_ENGAGED_TIME`
 * **amp-analytics variable**: `${incrementalEngagedTime(foo,false)}`

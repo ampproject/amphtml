@@ -383,31 +383,31 @@ describe('Activity getIncrementalEngagedTime', () => {
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
       // don't reset
-      const first = activity.getIncrementalEngagedTime('tests', 'false');
+      const first = activity.getIncrementalEngagedTime('tests', false);
       expect(first).to.equal(0);
       mousedownObservable.fire();
       clock.tick(10000);
       // more engaged time, don't reset
-      const second = activity.getIncrementalEngagedTime('tests', 'false');
+      const second = activity.getIncrementalEngagedTime('tests', false);
       expect(second).to.equal(5);
       mousedownObservable.fire();
       clock.tick(10000);
       // more engaged time, don't reset
-      const third = activity.getIncrementalEngagedTime('tests', 'false');
+      const third = activity.getIncrementalEngagedTime('tests', false);
       expect(third).to.equal(10);
       // more engaged time, reset
-      const fourth = activity.getIncrementalEngagedTime('tests', 'true');
+      const fourth = activity.getIncrementalEngagedTime('tests', true);
       expect(fourth).to.equal(10);
       mousedownObservable.fire();
       clock.tick(10000);
       // more engaged time, don't reset
-      const fifth = activity.getIncrementalEngagedTime('tests', 'false');
+      const fifth = activity.getIncrementalEngagedTime('tests', false);
       expect(fifth).to.equal(5);
       // reset with default value
       const sixth = activity.getIncrementalEngagedTime('tests');
       expect(sixth).to.equal(5);
       // should be reset
-      const seventh = activity.getIncrementalEngagedTime('tests', 'false');
+      const seventh = activity.getIncrementalEngagedTime('tests', false);
       return expect(seventh).to.equal(0);
     });
   });
