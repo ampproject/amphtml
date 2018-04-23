@@ -165,7 +165,9 @@ const CALENDAR_CONTAINER_CSS = 'i-amphtml-date-picker-container';
 
 const PRIVATE_CALENDAR_CONTAINER_CSS = 'amp-date-picker-calendar-container';
 
-const INFO_TEMPLATE_AREA_CSS = 'i-amphtml-amp-date-picker-info';
+const INFO_TEMPLATE_AREA_CSS = 'i-amphtml-date-picker-info';
+
+const FULLSCREEN_CSS = 'i-amphtml-date-picker-fullscreen';
 
 export class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -451,6 +453,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.element.classList.toggle(
           DEFAULT_WEEK_DAY_FORMAT_CSS,
           this.weekDayFormat_ == DEFAULT_WEEK_DAY_FORMAT);
+      this.element.classList.toggle(FULLSCREEN_CSS, this.fullscreen_);
       this.element.appendChild(this.container_);
     });
 
