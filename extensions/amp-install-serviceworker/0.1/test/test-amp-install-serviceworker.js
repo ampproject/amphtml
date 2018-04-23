@@ -225,7 +225,9 @@ describes.realWin('amp-install-serviceworker', {
         return returnedValue;
       });
       implementation.buildCallback();
-      expect(mutateElement).to.have.been.calledOnce;
+      return whenVisible.then(() => {
+        expect(mutateElement).to.have.been.calledOnce;
+      });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',
