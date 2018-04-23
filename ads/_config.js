@@ -692,6 +692,10 @@ export const adConfig = {
 
   pubexchange: {},
 
+  pubguru: {
+    renderStartImplemented: true,
+  },
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
