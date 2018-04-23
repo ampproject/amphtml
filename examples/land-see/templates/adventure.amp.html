@@ -38,10 +38,10 @@ limitations under the License.
 <script custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js" async=""></script>
 <script custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js" async=""></script>
 <script custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js" async=""></script>
-<script custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js" async=""></script>
+<script custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js" async=""></script>
 <script custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js" async=""></script>
 <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
-
+<script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
 
 <script custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js" async=""></script>
 
@@ -175,7 +175,7 @@ limitations under the License.
         <p class="land-see-hero-caption ampstart-caption mx-auto max-width-3 pt1 px2 mb3">
           A beautiful sunset across mountains and oceans, Fairyland is your ideal vacation location.
         </p>
-        <amp-img media="(min-width: 25.06rem)" class="cover max-width-4 mx-auto mt2" alt="Landscape sunset." width="1000" height="532" layout="responsive" src="../img/land-see/content/landscape-vertical.jpg">
+        <amp-img lightbox media="(min-width: 25.06rem)" class="cover max-width-4 mx-auto mt2" alt="Landscape sunset." width="1000" height="532" layout="responsive" src="../img/land-see/content/landscape-vertical.jpg">
         </amp-img>
         <div class="land-see-image-attribution ampstart-byline left-align mx-auto max-width-3 px4 pt1">Photo by: Jaccob Herman</div>
       </div>
@@ -186,21 +186,24 @@ limitations under the License.
         </p>
         <div class="land-see-flying-carpet display-none">
           <amp-fx-flying-carpet height="300px">
-            <amp-img alt="Sunset landscape." class="cover" width="704" height="598" layout="fixed" lightbox src="../img/land-see/content/landscape-vertical.jpg">
+            <amp-img alt="Sunset landscape." class="cover" width="704" height="598" layout="fixed" src="../img/land-see/content/landscape-vertical.jpg">
             </amp-img>
           </amp-fx-flying-carpet>
           <div class="land-see-image-attribution ampstart-byline left-align mx-auto max-width-3 px4 pt1">Photo by: Jaccob Herman</div>
         </div>
-        <blockquote class="land-see-blockquote max-width-3 mx-auto py4 px4 relative" amp-fx="fly-in-left" data-duration="800ms" data-fly-in-distance="50%">
-          <p class="bold mb1 pl4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque maximus efficitur lacus non fringilla.</p>
-          <cite class="pl4">Dorian Grey</cite>
-        </blockquote>
         <p class="land-see-story-copy max-width-3 mx-auto py2 px4">
           Quisque tempor imperdiet eros, non luctus nisi suscipit in. Sed ex nisi, imperdiet eu odio vitae, congue fermentum est. Phasellus id justo et sem fermentum tincidunt quis vel lacus. Integer dapibus non ligula nec mollis. In at urna nec dui malesuada pharetra. Phasellus non enim sed ipsum pulvinar semper in ac neque. Morbi bibendum lorem sed lectus luctus lacinia.
         </p>
 
       <div class="land-see-image-gallery mx-auto">
-
+          <amp-video
+            autoplay
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+            width="720"
+            height="405"
+            layout="responsive"
+            controls>
+          </amp-video>
       </div>
 
       <p class="land-see-story-copy max-width-3 mx-auto pt1 pb3 px4">

@@ -265,13 +265,9 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   getSourceWidth_() {
-    if (this.sourceAmpImage_.hasAttribute('width')) {
-      return parseInt(this.sourceAmpImage_.getAttribute('width'), 10);
-    } else {
-      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+    const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
           'img');
       return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
-    }
   }
 
   /**
@@ -279,13 +275,9 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   getSourceHeight_() {
-    if (this.sourceAmpImage_.hasAttribute('height')) {
-      return parseInt(this.sourceAmpImage_.getAttribute('height'), 10);
-    } else {
-      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
-          'img');
-      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
-    }
+    const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+    'img');
+    return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
   }
 
   /**
