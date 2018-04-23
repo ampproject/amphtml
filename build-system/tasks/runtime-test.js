@@ -371,7 +371,10 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
-      process.exitCode = exitCode;
+      // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+      setTimeout(() => {
+        process.exit(exitCode);
+      }, 5000);
     }
     resolver();
   }).on('run_start', function() {
