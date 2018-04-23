@@ -140,8 +140,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   onLayoutMeasure() {
     // TODO: refactor resize logic to go in onMeasureChange when exposed
     if (this.loadPromise_) {
-      this.loadPromise_.then(() => this.resetImageDimensions_())
-          .then(() => this.unregisterPanningGesture_());
+      this.loadPromise_.then(() => this.resetImageDimensions_());
     }
   }
 
@@ -249,7 +248,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * Sets the source width and height based on the user-defined dimensions of
    * the amp-img if exists, the natural dimensions of the source image if
    * loaded, and the offset dimensions of amp-img element if not.
-   * @param {!Element}
+   * @param {!Element} ampImg
    * @private
    */
   setSourceDimensions_(ampImg) {
@@ -261,7 +260,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     } else {
       const img = elementByTag(ampImg, 'img');
       if (img) {
-        this.sourceWidth_ =  img.naturalWidth || ampImg./*OK*/offsetWidth;
+        this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
         this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
       } else {
         this.sourceWidth_ = ampImg./*OK*/offsetWidth;
@@ -289,7 +288,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       ARIA_ATTRIBUTES.forEach(key => {
-        let k;
+        let k; // inline assignment for reducing binary size
         if ((k = this.sourceAmpImage_.getAttribute(key))) {
           this.image_.setAttribute(key, k);
         }
