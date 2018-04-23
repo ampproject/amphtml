@@ -25,25 +25,13 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
-  masterSelection,
 } from './ampcontext-integration';
-import {MessageType} from '../src/3p-frame-messaging';
-import {
-  computeInMasterFrame,
-  nextTick,
-  register,
-  run,
-  setExperimentToggles,
-} from './3p';
 import {dict} from '../src/utils/object.js';
 import {endsWith} from '../src/string';
 import {
   getAmpConfig,
-  getAttributeData,
-  getContextState,
   getEmbedType,
   getLocation,
 } from './frame-metadata';
@@ -56,9 +44,12 @@ import {
   user,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {parseJson} from '../src/json';
+import {
+  register,
+  run,
+  setExperimentToggles,
+} from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
