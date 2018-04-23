@@ -85,9 +85,8 @@ export class FxProvider {
    */
   installOn(element) {
     setStyles(element, installStyles[this.fxType_]);
-    const parallaxElement = new FxElement(
-        element, this.positionObserver_, this.viewport_, this.resources_,
-        this.fxType_);
+    new FxElement(element, this.positionObserver_, this.viewport_,
+        this.resources_, this.fxType_);
   }
 }
 
