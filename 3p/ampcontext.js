@@ -356,7 +356,7 @@ export class AbstractAmpContext {
 }
 
 export class AmpContext extends AbstractAmpContext {
-  /** @return {boolean} */
+  /** @override */
   isAbstractImplementation_() {
     return false;
   }
