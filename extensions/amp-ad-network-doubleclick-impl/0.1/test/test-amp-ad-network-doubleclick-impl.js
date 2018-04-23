@@ -37,6 +37,7 @@ import {
   getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
@@ -665,6 +666,39 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
             regexp => expect(url).to.match(regexp));
       });
+    });
+    it('should return empty string if unknown consentState', () => expect(
+        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(''));
+
+    it('should include npa=1 if unknown consent & explicit npa', () => {
+      impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
+      return expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/);
+    });
+
+    it('should include npa=1 if insufficient consent', () =>
+      expect(impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT)).to.eventually
+          .match(/(\?|&)npa=1(&|$)/));
+
+    [CONSENT_POLICY_STATE.SUFFICIENT,
+      CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED].forEach(consentState => {
+      it(`should not include npa=1 if ${consentState}`, () =>
+        expect(impl.getAdUrl(consentState)).to.eventually.not
+            .match(/(\?|&)npa=1(&|$)/));
+    });
+  });
+
+  describe('#getPageParameters', () => {
+    it('should include npa=1 for insufficient consent', () => {
+      const element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'doubleclick',
+        height: 320,
+        width: 50,
+        'data-slot': '/1234/abc/def',
+      });
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      expect(impl.getPageParameters(
+          CONSENT_POLICY_STATE.INSUFFICIENT).npa).to.equal(1);
     });
   });
 
@@ -1518,5 +1552,11 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(preloadSpy).to.be.calledOnce;
           expect(preloadSpy.args[0]).to.match(/safeframe/);
         });
+      });
+
+      describe('#getConsentPolicy', () => {
+        it('should return null', () => expect(
+            AmpAdNetworkDoubleclickImpl.prototype.getConsentPolicy())
+            .to.be.null);
       });
     });

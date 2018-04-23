@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {RTC_VENDORS} from './callout-vendors';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
@@ -127,10 +128,18 @@ export function getCalloutParam_(url) {
  * @param {!AMP.BaseElement} a4aElement
  * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
+ * @param {?CONSENT_POLICY_STATE} consentState
  * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @visibleForTesting
  */
-export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
+export function maybeExecuteRealTimeConfig_(
+  a4aElement, customMacros, consentState) {
+  // TODO(keithwrightbos) - allow pub to override such that some callouts are
+  // still allowed.
+  if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+      consentState == CONSENT_POLICY_STATE.UNKNOWN) {
+    return;
+  }
   const rtcConfig = validateRtcConfig_(a4aElement.element);
   if (!rtcConfig) {
     return;

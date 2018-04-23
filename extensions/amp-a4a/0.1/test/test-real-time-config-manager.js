@@ -20,6 +20,7 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpA4A} from '../amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   RTC_ERROR_ENUM,
   getCalloutParam_,
@@ -447,6 +448,27 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         calloutCount, expectedCalloutUrls: urls, expectedRtcArray,
         failXhr: true});
     });
+    for (const consentState in CONSENT_POLICY_STATE) {
+      it(`should handle consentState ${consentState}`, () => {
+        setRtcConfig({urls: ['https://foo.com']});
+        const rtcResult = maybeExecuteRealTimeConfig_(
+            a4aElement, {}, CONSENT_POLICY_STATE[consentState]);
+        switch (CONSENT_POLICY_STATE[consentState]) {
+          case CONSENT_POLICY_STATE.SUFFICIENT:
+          case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+            expect(rtcResult).to.be.ok;
+            return rtcResult.then(() =>
+              expect(fetchJsonStub).to.be.calledOnce);
+          case CONSENT_POLICY_STATE.UNKNOWN:
+          case CONSENT_POLICY_STATE.INSUFFICIENT:
+            expect(rtcResult).to.not.be.ok;
+            expect(fetchJsonStub).to.not.be.called;
+            break;
+          default:
+            throw new Error(`unknown consent state ${consentState}`);
+        }
+      });
+    }
   });
 
   describe('#validateRtcConfig', () => {
