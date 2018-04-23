@@ -109,10 +109,7 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
-    const ampdocService = Services.ampdocServiceFor(win);
-    /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ =
-        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
+    this.ampdocService = Services.ampdocServiceFor(win);
   }
 
   /**
@@ -125,15 +122,17 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (!this.ampdocService.isSingleDoc()) {
+      Promise.resolve();
+    }
+    const ampdocSingle = this.ampdocService.getAmpDoc();
     if (!getMode().test &&
-        this.ampdocSingle_ &&
+        ampdocSingle &&
         Math.random() < 0.01 &&
-        parseUrl(input).origin != this.win.location.origin &&
-        !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
-      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+        parseUrl(input).origin != this.win.location.origin) {
+      dev().error('XHR', 'attempted to fetch URL from different origin',
           input);
     }
-
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -141,27 +140,30 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-
-    return this.maybeIntercept_(input, init).then(interceptorResponse => {
-      if (interceptorResponse) {
-        return interceptorResponse;
-      }
-
-      // After this point, both the native `fetch` and the `fetch` polyfill will
-      // expect a native `FormData` object in the `body` property, so the native
-      // `FormData` object needs to be unwrapped.
-      if (isFormDataWrapper(init.body)) {
-        init.body = init.body.getFormData();
-      }
-      // Fallback to xhr polyfill since `fetch` api does not support
-      // responseType = 'document'. We do this so we don't have to do any
-      // parsing and document construction on the UI thread which would be
-      // expensive.
-      if (init.responseType == 'document') {
-        return fetchPolyfill(input, init);
-      }
-      return (this.win.fetch || fetchPolyfill).apply(null, arguments);
-    });
+    return Services.viewerForDoc(ampdocSingle).whenFirstVisible().then(
+        () => {
+          return this.maybeIntercept_(input, init, ampdocSingle)
+              .then(interceptorResponse => {
+                if (interceptorResponse) {
+                  return interceptorResponse;
+                }
+                // After this point, both the native `fetch` and the `fetch` polyfill will
+                // expect a native `FormData` object in the `body` property, so the native
+                // `FormData` object needs to be unwrapped.
+                if (isFormDataWrapper(init.body)) {
+                  init.body = init.body.getFormData();
+                }
+                // Fallback to xhr polyfill since `fetch` api does not support
+                // responseType = 'document'. We do this so we don't have to do any
+                // parsing and document construction on the UI thread which would be
+                // expensive.
+                if (init.responseType == 'document') {
+                  return fetchPolyfill(input, init);
+                }
+                return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+              });
+        }
+    );
   }
 
   /**
@@ -170,30 +172,27 @@ export class Xhr {
    * XHRs are intercepted if all of the following are true:
    * - The AMP doc is in single doc mode
    * - The viewer has the `xhrInterceptor` capability
-   * - The Viewer is a trusted viewer or AMP is currently in developement mode
+   * - The Viewer is a trusted viewer or ApMP is currently in developement mode
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
    *   `allow-xhr-interception` attribute)
    *
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
    *     intercepted.
+   * @param {!./ampdoc-impl.AmpDoc} ampdocSingle The single doc amp viewer.
    * @return {!Promise<!FetchResponse|!Response|undefined>}
    *     A response returned by the interceptor if XHR is intercepted or
    *     `Promise<undefined>` otherwise.
    * @private
    */
-  maybeIntercept_(input, init) {
-    if (!this.ampdocSingle_) {
-      return Promise.resolve();
-    }
-
-    const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+  maybeIntercept_(input, init, ampdocSingle) {
+    const htmlElement = ampdocSingle.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     if (!docOptedIn) {
       return Promise.resolve();
     }
 
-    const viewer = Services.viewerForDoc(this.ampdocSingle_);
+    const viewer = Services.viewerForDoc(ampdocSingle);
     if (!viewer.hasCapability('xhrInterceptor')) {
       return Promise.resolve();
     }
