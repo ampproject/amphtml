@@ -482,6 +482,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
+    it('handles Single Page Story Ad parameter', () => {
+      const impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.isSinglePageStoryAd_ = true;
+      expect(impl.getAdUrl()).to.eventually.match(/(\?|&)spsa=\d+x\d+(&|$)/);
+    });
+
     it('handles tagForChildDirectedTreatment', () => {
       element.setAttribute('json', '{"tagForChildDirectedTreatment": 1}');
       new AmpAd(element).upgradeCallback();
