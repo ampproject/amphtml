@@ -1051,7 +1051,6 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(promiseResult => {
           expect(promiseResult).to.be.ok;
           expect(promiseResult.minifiedCreative).to.be.ok;
-          debugger;
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
