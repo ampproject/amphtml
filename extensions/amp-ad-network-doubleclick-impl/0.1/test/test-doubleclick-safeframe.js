@@ -718,27 +718,27 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     /**
-     * Send a message requesting a shrink.
-     * @param {number} height Pixels to shrink height by.
-     * @param {number} width Pixels to shrink width by.
+     * Send a message requesting a resize.
+     * @param {number} height Pixels to resize height by.
+     * @param {number} width Pixels to resize width by.
      */
-    function sendShrinkMessage(top, bottom, left, right) {
-      const shrinkMessage = {};
-      shrinkMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
-      shrinkMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
-      shrinkMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.SHRINK_REQUEST;
-      shrinkMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+    function sendResizeMessage(top, bottom, left, right) {
+      const resizeMessage = {};
+      resizeMessage[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+      resizeMessage[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+      resizeMessage[MESSAGE_FIELDS.SERVICE] = SERVICE.RESIZE_REQUEST;
+      resizeMessage[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
         'uid': 0.623462509818004,
-        'shrink_t': top,
-        'shrink_r': right,
-        'shrink_b': bottom,
-        'shrink_l': left,
+        'resize_t': top,
+        'resize_r': right,
+        'resize_b': bottom,
+        'resize_l': left,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(shrinkMessage);
+      receiveMessage(resizeMessage);
     }
 
-    it('should shrink safeframe on amp-ad resize success', () => {
+    it('should resize safeframe on amp-ad resize success', () => {
       safeframeHost.isCollapsed_ = false;
       // Sneaky hack to do a synchronous mock of attemptChangeSize
       // Resize the ampAd to simulate a success.
@@ -749,7 +749,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         return {'catch': () => {}};
       };
       attemptChangeSizeStub.returns({then});
-      sendShrinkMessage(5, 5, 5, 5);
+      sendResizeMessage(-5, -5, -5, -5);
 
       return Services.timerFor(env.win).promise(100).then(() => {
         expect(resizeSafeframeSpy).to.be.calledOnce;
@@ -757,7 +757,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(safeframeMock.style.height).to.equal('240px');
         expect(safeframeMock.style.width).to.equal('290px');
         expect(sendResizeResponseSpy).to.be.calledWith(
-            true, SERVICE.SHRINK_RESPONSE);
+            true, SERVICE.RESIZE_RESPONSE);
         expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
       });
     });

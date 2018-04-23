@@ -66,12 +66,12 @@ import {urls} from '../src/config';
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
+import {beopinion} from './beopinion';
 import {bodymovinanimation} from './bodymovinanimation';
 import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
-import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -189,6 +189,7 @@ import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
 import {pubexchange} from '../ads/pubexchange';
+import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -393,6 +394,7 @@ register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
 register('pubexchange', pubexchange);
+register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
