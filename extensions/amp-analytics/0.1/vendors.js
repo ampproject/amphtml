@@ -1478,11 +1478,11 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'cnt=${cntId}&' +
           'lang=${language}&' +
           'ref=${documentReferrer}&' +
-          'id=${clientId(piStatsDEVICEID)}&',
-          'ua=${userAgent}&',
-          'ctype=web&',
-          'blang=${browserLanguage}&',
-          'v=2.0&',
+          'id=${clientId(piStatsDEVICEID)}&'+
+          'ua=${userAgent}&'+
+          'ctype=web&'+
+          'blang=${browserLanguage}&'+
+          'v=2.0&'+
           'dist=Javascript'
       },
       'triggers': {
