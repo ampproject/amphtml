@@ -25,6 +25,9 @@ export function gltfViewer(global) {
         })), '*');
       },
       onprogress: e => {
+        if (!e.lengthComputable) {
+          return;
+        }
         global.parent.postMessage(JSON.stringify(dict({
           'notify': 'progress',
           'total': e.total,
