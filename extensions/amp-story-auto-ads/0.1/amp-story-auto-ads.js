@@ -107,7 +107,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {Object<string, string>} */
     this.config_ = {};
 
-    /** @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService} */
+    /**
+     * Version of the story store service depends on which version of amp-story
+     * the publisher is loading. They all have the same implementation.
+     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|
+     *           ?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+     */
     this.storeService_ = null;
   }
 

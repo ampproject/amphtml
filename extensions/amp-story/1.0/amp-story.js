@@ -354,6 +354,10 @@ export class AmpStory extends AMP.BaseElement {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
       this.analytics_.onNavigationStateChange(stateChangeEvent);
     });
+
+    // Disallow all actions in a (standalone) story.
+    const actions = Services.actionServiceForDoc(this.getAmpDoc());
+    actions.setWhitelist([]);
   }
 
 
@@ -454,13 +458,10 @@ export class AmpStory extends AMP.BaseElement {
       this.onDesktopStateUpdate_(isDesktop);
     });
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-        canShowButtons => {
-          this.mutateElement(() => {
-            this.topBar_.classList
-                .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
-          });
-        }, true /* callToInitialize */);
+    this.storeService_.subscribe(
+        StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS, canShowButtons => {
+          this.onCanShowSystemLayerButtonsUpdate_(canShowButtons);
+        });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
@@ -579,6 +580,9 @@ export class AmpStory extends AMP.BaseElement {
     this.topBar_.appendChild(this.buildTopBarShare_());
 
     this.element.insertBefore(this.topBar_, this.element.firstChild);
+
+    this.onCanShowSystemLayerButtonsUpdate_(
+        !!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS));
   }
 
   /**
@@ -1050,6 +1054,22 @@ export class AmpStory extends AMP.BaseElement {
         this.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, state.isLandscape);
       },
     }, {});
+  }
+
+  /**
+   * Reacts to system layer buttons display state.
+   * @param {boolean} canShowButtons
+   * @private
+   */
+  onCanShowSystemLayerButtonsUpdate_(canShowButtons) {
+    if (!this.topBar_) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      this.topBar_.classList
+          .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
+    });
   }
 
   /**

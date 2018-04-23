@@ -279,7 +279,7 @@ const forbiddenTerms = {
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-next-page/0.1/amp-next-page.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
     ],
@@ -528,12 +528,6 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
-    ],
-  },
-  'style\\.\\w+ = ': {
-    message: 'Use setStyle instead!',
-    whitelist: [
-      'testing/iframe.js',
     ],
   },
   'AMP_CONFIG': {
