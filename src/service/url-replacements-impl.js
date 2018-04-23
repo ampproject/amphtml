@@ -513,9 +513,9 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('INCREMENTAL_ENGAGED_TIME', (name, reset) => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
         if (reset === 'false') {
-            reset = false;
+          reset = false;
         } else {
-            reset = true;
+          reset = true;
         }
         return activity.getIncrementalEngagedTime(name, reset);
       });
