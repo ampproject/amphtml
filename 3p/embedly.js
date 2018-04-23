@@ -20,7 +20,13 @@ import {loadScript} from './3p';
  * Embedly platform library url to create cards.
  * @const {string}
  */
-const EMBEDLY_CARD_LIBRARY_URL = 'https://cdn.embedly.com/widgets/platform.js';
+const EMBEDLY_SDK_URL = 'https://cdn.embedly.com/widgets/platform.js';
+
+/**
+ * Event name emitted by embedly's SDK.
+ * @type {string}
+ */
+const RESIZE_EVENT_NAME = 'card.resize';
 
 /**
  * Css class expected by embedly library to style card.
@@ -29,18 +35,20 @@ const EMBEDLY_CARD_LIBRARY_URL = 'https://cdn.embedly.com/widgets/platform.js';
 const CARD_CSS_CLASS = 'embedly-card';
 
 /**
- * TODO: Description
+ * Loads embedly card SDK that is consumed by this 3p integration.
+ *
  * @param {!Window} global
  * @param {function(!Object)} callback
  */
 function getEmbedly(global, callback) {
-  loadScript(global, EMBEDLY_CARD_LIBRARY_URL, function() {
+  loadScript(global, EMBEDLY_SDK_URL, function() {
     callback();
   });
 }
 
 /**
- * TODO: Description
+ * Creates embedly card using sdk.
+ *
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -57,6 +65,12 @@ export function embedly(global, data) {
     delete data.width;
     delete data.height;
 
-    // TODO: Update dimensions.
+    // Use embedly SDK to listen to resize event from loaded card
+    global.window.embedly('on', RESIZE_EVENT_NAME, function(iframe) {
+      context.requestResize(
+          iframe./*OK*/offsetWidth,
+          iframe./*OK*/offsetHeight
+      );
+    });
   });
 }
