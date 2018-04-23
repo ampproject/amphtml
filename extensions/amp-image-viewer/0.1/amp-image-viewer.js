@@ -152,7 +152,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
     this.loadPromise_ = this.sourceAmpImage_.signals()
         .whenSignal(CommonSignals.LOAD_END)
-        .then(() => this.init())
+        .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
         .then(() => this.setupGestures_());
     return this.loadPromise_;
@@ -389,9 +389,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
-    // Notice that we will wait until the next event cycle to set the "src".
-    // This ensures that the already available image will show immediately
-    // and then naturally upgrade to a higher quality image.
     return this.mutateElement(() => {
       this.image_.setAttribute('src', src);
     }, this.image_);
