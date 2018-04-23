@@ -55,8 +55,8 @@ export const SERVICE = {
   REGISTER_DONE: 'register_done',
   COLLAPSE_REQUEST: 'collapse_request',
   COLLAPSE_RESPONSE: 'collapse_response',
-  SHRINK_REQUEST: 'shrink_request',
-  SHRINK_RESPONSE: 'shrink_response',
+  RESIZE_REQUEST: 'resize_request',
+  RESIZE_RESPONSE: 'resize_response',
 };
 
 /** @private {string} */
@@ -457,8 +457,8 @@ export class SafeframeHostApi {
       case SERVICE.COLLAPSE_REQUEST:
         this.handleCollapseRequest_();
         break;
-      case SERVICE.SHRINK_REQUEST:
-        this.handleShrinkRequest_(payload);
+      case SERVICE.RESIZE_REQUEST:
+        this.handleResizeRequest_(payload);
       default:
         break;
     }
@@ -567,7 +567,7 @@ export class SafeframeHostApi {
         height <= this.slotSize_.height) {
       this.resizeSafeframe(height, width, messageType);
     } else {
-      this.resizeAmpAdAndSafeframe(height, width, messageType);
+      this.resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse);
     }
   }
 
@@ -575,25 +575,25 @@ export class SafeframeHostApi {
    * @param {!JsonObject} payload
    * @private
    */
-  handleShrinkRequest_(payload) {
+  handleResizeRequest_(payload) {
     if (!this.isRegistered_) {
       return;
     }
-    const shrinkHeight = Number(this.creativeSize_.height) -
-          (payload['shrink_b'] + payload['shrink_t']);
-    const shrinkWidth = Number(this.creativeSize_.width) -
-          (payload['shrink_r'] + payload['shrink_l']);
+    const resizeHeight = Number(this.creativeSize_.height) +
+          (payload['resize_b'] + payload['resize_t']);
+    const resizeWidth = Number(this.creativeSize_.width) +
+          (payload['resize_r'] + payload['resize_l']);
 
-    // Make sure we are actually shrinking here.
-    if (isNaN(shrinkWidth) || isNaN(shrinkHeight) ||
-        shrinkWidth > this.creativeSize_.width ||
-        shrinkHeight > this.creativeSize_.height) {
-      dev().error(TAG, 'Invalid shrink values.');
+    // Make sure we are actually resizing here.
+    if (isNaN(resizeWidth) || isNaN(resizeHeight) ||
+        resizeWidth > this.creativeSize_.width ||
+        resizeHeight > this.creativeSize_.height) {
+      dev().error(TAG, 'Invalid resize values.');
       return;
     }
 
-    this.resizeAmpAdAndSafeframe(shrinkHeight, shrinkWidth,
-        SERVICE.SHRINK_RESPONSE);
+    this.resizeAmpAdAndSafeframe(resizeHeight, resizeWidth,
+        SERVICE.RESIZE_RESPONSE, true);
   }
 
   /**
@@ -626,8 +626,9 @@ export class SafeframeHostApi {
    * @param {number} height
    * @param {number} width
    * @param {string} messageType
+   * @param {boolean=} opt_isShrinking True if collapsing or resizing smaller.
    */
-  resizeAmpAdAndSafeframe(height, width, messageType) {
+  resizeAmpAdAndSafeframe(height, width, messageType, opt_isShrinking) {
     // First, attempt to resize the Amp-Ad that is the parent of the
     // safeframe
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
@@ -645,9 +646,8 @@ export class SafeframeHostApi {
       // to execute upon the next user interaction. We don't want
       // that for safeframe, so we reset it here.
       this.baseInstance_.getResource().resetPendingChangeSize();
-      if (messageType == SERVICE.COLLAPSE_RESPONSE ||
-          messageType == SERVICE.SHRINK_RESPONSE) {
-        // If this is a collapse or shrink request, then even if resizing
+      if (opt_isShrinking) {
+        // If this is a collapse or resize request, then even if resizing
         // the amp-ad failed, still resize the iframe.
         // resizeSafeframe also sends the resize response.
         // Only register as collapsed if explicitly a collapse request.
