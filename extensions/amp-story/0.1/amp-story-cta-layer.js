@@ -29,14 +29,9 @@
  * ...
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
-export class AmpStoryCtaLayer extends AMP.BaseElement {
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
-  }
+export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
 
   /** @override */
   prerenderAllowed() {
@@ -48,6 +43,21 @@ export class AmpStoryCtaLayer extends AMP.BaseElement {
      */
     return false;
   }
-}
 
-AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
+  /** @override */
+  buildCallback() {
+    super.buildCallback();
+    this.setOrOverwriteTargetAttribute_();
+  }
+
+  /**
+   * Overwrite or set target attribute to _blank in call-to-action links.
+   * @private
+   */
+  setOrOverwriteTargetAttribute_() {
+    const ctaLinks = this.element.querySelectorAll('a');
+    for (let i = 0; i < ctaLinks.length; i++) {
+      ctaLinks[i].setAttribute('target', '_blank');
+    }
+  }
+}

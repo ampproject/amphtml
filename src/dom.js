@@ -198,6 +198,11 @@ export function createElementWithAttributes(doc, tagName, attributes) {
  * @see https://dom.spec.whatwg.org/#connected
  */
 export function isConnectedNode(node) {
+  const connected = node.isConnected;
+  if (connected !== undefined) {
+    return connected;
+  }
+
   // "An element is connected if its shadow-including root is a document."
   let n = node;
   do {
@@ -319,8 +324,14 @@ export function matches(el, selector) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  const elements = element.getElementsByTagName(tagName);
-  return elements[0] || null;
+  let elements;
+  // getElementsByTagName() is not supported on ShadowRoot.
+  if (typeof element.getElementsByTagName === 'function') {
+    elements = element.getElementsByTagName(tagName);
+  } else {
+    elements = element./*OK*/querySelectorAll(tagName);
+  }
+  return (elements && elements[0]) || null;
 }
 
 

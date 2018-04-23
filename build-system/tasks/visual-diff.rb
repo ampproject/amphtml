@@ -42,8 +42,9 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 AMP_3P_FRAME_FILE = 'dist.3p/current/integration.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
-BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10
+BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5 # Poll every 5 seconds
+BUILD_PROCESSING_PROGRESS_POLLS = 12 # Print a message every minute
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10 # Wait for up to 10 minutes
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
@@ -150,6 +151,11 @@ def wait_for_build_completion(build_id)
       (status = get_build_status(build_id))['state'])
     sleep(BUILD_PROCESSING_POLLING_INTERVAL_SECS)
     tries += 1
+    if tries % BUILD_PROCESSING_PROGRESS_POLLS == 0
+      log('info',
+          'Still waiting for Percy build ' + cyan("#{build_id}") +
+          ' to be processed...')
+    end
     break if tries > (
         BUILD_PROCESSING_TIMEOUT_SECS / BUILD_PROCESSING_POLLING_INTERVAL_SECS)
   end
@@ -225,21 +231,8 @@ def load_visual_tests_config_json
 end
 
 
-# Make the visual tests more resilient to Selenium read timeouts. See #13700.
-def configure_browser_timeout
-  RSpec.configure do |config|
-    if ARGV.include? '--chrome_debug'
-      config.verbose_retry = true
-    end
-    config.default_retry_count = 2
-    config.exceptions_to_retry = [Net::ReadTimeout]
-  end
-end
-
-
 # Configures the Chrome browser (optionally in headless mode)
 def configure_browser
-  configure_browser_timeout
   if ARGV.include? '--headless'
     chrome_args = %w[--no-sandbox --disable-extensions --headless --disable-gpu]
   else
@@ -258,10 +251,15 @@ def configure_browser
     }
   )
   Capybara.register_driver :chrome do |app|
+    http_client = Selenium::WebDriver::Remote::Http::Default.new
+    http_client.read_timeout = 120
+
     Capybara::Selenium::Driver.new(
       app,
       browser: :chrome,
-      options: options
+      http_client: http_client,
+      options: options,
+      driver_opts: {log_path: 'chromedriver.log'}
     )
   end
   Capybara.default_driver = :chrome

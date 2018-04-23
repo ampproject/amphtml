@@ -107,7 +107,7 @@ export function setImportantStyles(element, styles) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {Element} element
+ * @param {?Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
@@ -172,9 +172,17 @@ export function toggle(element, opt_display) {
  * @return {string}
  */
 export function px(value) {
-  return value + 'px';
+  return `${value}px`;
 }
 
+/**
+ * Returns a degree value.
+ * @param {number} value
+ * @return {string}
+ */
+export function deg(value) {
+  return `${value}deg`;
+}
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -216,6 +224,18 @@ export function translate(x, opt_y) {
  */
 export function scale(value) {
   return `scale(${value})`;
+}
+
+/**
+ * Returns a "rotate" for CSS "transform" property.
+ * @param {number|string} value
+ * @return {string}
+ */
+export function rotate(value) {
+  if (typeof value == 'number') {
+    value = deg(value);
+  }
+  return `rotate(${value})`;
 }
 
 /**

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 
 /**
  * This interface is intended to be implemented by Subscription platforms to
@@ -30,30 +28,44 @@ export class SubscriptionPlatform {
    * Returns the service Id.
    * @returns {string}
    */
-  getServiceId() {
-  }
+  getServiceId() {}
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
+   * @return {!Promise<?./entitlement.Entitlement>}
    */
-  getEntitlements() {
-  }
+  getEntitlements() {}
 
   /**
    * Activates the subscription platform and hands over the control for rendering.
+   * @param {!./amp-subscriptions.RenderState} unusedRenderState
    */
-  activate() {
-  }
-}
+  activate(unusedRenderState) {}
 
+  /**
+   * Returns if pingback is enabled for this platform.
+   * @returns {boolean}
+   */
+  isPingbackEnabled() {}
 
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+  /**
+   * Performs the pingback to the subscription platform.
+   * @param {!./entitlement.Entitlement} unusedSelectedPlatform
+   * @returns {!Promise|undefined}
+   */
+  pingback(unusedSelectedPlatform) {}
+
+  /**
+   * Tells if this platform supports the current viewer.
+   * @returns {boolean}
+   */
+  supportsCurrentViewer() {}
+
+  /**
+   * Returns the base score configured for the platform.
+   * @returns {number}
+   */
+  getBaseScore() {}
 }
 
 /**

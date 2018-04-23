@@ -119,6 +119,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adincube: {
+    renderStartImplemented: true,
+  },
+
   adition: {},
 
   adman: {},
@@ -127,7 +131,19 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  admixer: {
+    renderStartImplemented: true,
+    preconnect: [
+      'https://inv-nets.admixer.net',
+      'https://cdn.admixer.net',
+    ],
+  },
+
   adocean: {},
+
+  adpicker: {
+    renderStartImplemented: true,
+  },
 
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
@@ -255,6 +271,16 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  beopinion: {
+    prefetch: 'https://widget.beopinion.com/sdk.js',
+    preconnect: [
+      'https://t.beopinion.com',
+      'https://s.beopinion.com',
+      'https://data.beopinion.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   bidtellect: {},
 
   brainy: {},
@@ -290,6 +316,10 @@ export const adConfig = {
       'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
     ],
     preconnect: 'https://ad.caprofitx.adtdp.com',
+  },
+
+  cedato: {
+    renderStartImplemented: true,
   },
 
   chargeads: {},
@@ -449,7 +479,6 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
   imonomy: {
-    prefetch: 'https://srv.imonomy.com/amp/amp.js',
     renderStartImplemented: true,
   },
   improvedigital: {},
@@ -492,6 +521,8 @@ export const adConfig = {
     prefetch: 'https://cdn.kixer.com/ad/load.js',
     renderStartImplemented: true,
   },
+
+  kuadio: {},
 
   ligatus: {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
@@ -716,6 +747,10 @@ export const adConfig = {
 
   rubicon: {},
 
+  sekindo: {
+    renderStartImplemented: true,
+  },
+
   sharethrough: {
     renderStartImplemented: true,
   },
@@ -805,6 +840,10 @@ export const adConfig = {
   trugaze: {
     clientIdScope: '__tg_amp',
     renderStartImplemented: true,
+  },
+
+  uas: {
+    prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
   },
 
   valuecommerce: {

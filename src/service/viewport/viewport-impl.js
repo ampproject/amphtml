@@ -461,6 +461,14 @@ export class Viewport {
   }
 
   /**
+   * Whether the binding supports fix-positioned elements.
+   * @return {boolean}
+   */
+  supportsPositionFixed() {
+    return this.binding_.supportsPositionFixed();
+  }
+
+  /**
    * Whether the element is declared as fixed in any of the user's stylesheets.
    * Will include any matches, not necessarily currently fixed elements.
    * @param {!Element} element

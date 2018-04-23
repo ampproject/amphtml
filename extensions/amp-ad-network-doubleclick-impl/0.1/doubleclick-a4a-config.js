@@ -23,6 +23,7 @@ import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
   getExperimentBranch,
+  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {
@@ -55,7 +56,12 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  DF_DEP_HOLDBACK_CONTROL: '21061787',
+  DF_DEP_HOLDBACK_EXPERIMENT: '21061788',
 };
+
+/** @const {string} */
+export const dfDepRollbackExperiment = 'rollback-delayed-fetch-deprecation';
 
 /** @const @enum{string} */
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
@@ -70,6 +76,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
+  // Delayed Fetch Deprecation Launch Holdback
+  '5': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_CONTROL,
+  '6': DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -128,8 +137,8 @@ export class DoubleclickA4aEligibility {
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
     const warnDeprecation = feature => user().warn(
-        TAG, `${feature} will no longer ` +
-          'be supported starting on March 29, 2018. Please refer to ' +
+        TAG, `${feature} is no longer supported for DoubleClick.` +
+          'Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
           'for more information');
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
@@ -141,11 +150,8 @@ export class DoubleclickA4aEligibility {
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
-    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
-      return false;
-    }
     let experimentId;
-    const urlExperimentId = extractUrlExperimentId(win, element);
+    const urlExperimentId = extractUrlExperimentId(win, element) || '';
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
       if (urlExperimentId == -1 &&
@@ -163,18 +169,36 @@ export class DoubleclickA4aEligibility {
         }
         return false;
       }
+
     } else {
-      // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        // For SRA experiments, do not include pages that are using refresh.
+        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL ||
+          experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.SRA) &&
+          (win.document.querySelector('meta[name=amp-ad-enable-refresh]') ||
+           win.document.querySelector(
+               'amp-ad[type=doubleclick][data-enable-refresh]'))) {
+          experimentId = undefined;
+        } else {
+          dev().info(
+              TAG,
+              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        }
       }
     }
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
+    }
+
+    // If we need to rollback the launch, or we are in the launch's holdback experiment,
+    // still use Delayed Fetch if USDRUD or custom remote.html in use
+    if (isExperimentOn(win, dfDepRollbackExperiment) ||
+        experimentId ==
+        DOUBLECLICK_EXPERIMENT_FEATURE.DF_DEP_HOLDBACK_EXPERIMENT) {
+      return !!element.getAttribute('rtc-config') ||
+          !(hasUSDRD || useRemoteHtml);
     }
     return true;
   }

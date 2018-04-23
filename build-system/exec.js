@@ -36,22 +36,26 @@ function spawnProcess(cmd, options) {
 }
 
 /**
- * Executes the provided command.
+ * Executes the provided command with the given options, returning the process
+ * object.
  *
  * @param {string} cmd Command line to execute.
+ * @param {<Object>} options
+ * @return {<Object>} Process info.
  */
-exports.exec = function(cmd) {
-  spawnProcess(cmd, {'stdio': 'inherit'});
+exports.exec = function(cmd, options) {
+  options = options || {'stdio': 'inherit'};
+  return spawnProcess(cmd, options);
 };
 
 /**
- * Executes the provided command in an asynchronous process.
+ * Executes the provided shell script in an asynchronous process.
  *
- * @param {string} cmd
+ * @param {string} script
  * @param {<Object>} options
  */
-exports.execAsync = function(cmd, options) {
-  return childProcess.spawn(shellCmd, [shellFlag, cmd], options);
+exports.execScriptAsync = function(script, options) {
+  return childProcess.spawn('sh', ['-c', script], options);
 };
 
 /**

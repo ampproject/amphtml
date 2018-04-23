@@ -571,7 +571,6 @@ export class MultidocManager {
             const body = importShadowBody(
                 shadowRoot, doc.body, /* deep */ true);
             body.classList.add('amp-shadow');
-            shadowRoot.appendChild(body);
             shadowDocHasBody(ampdoc, body);
           }
 
@@ -617,7 +616,6 @@ export class MultidocManager {
                 dev().assertElement(doc.body),
                 /* deep */ false);
             body.classList.add('amp-shadow');
-            shadowRoot.appendChild(body);
             shadowDocHasBody(ampdoc, body);
             return body;
           });

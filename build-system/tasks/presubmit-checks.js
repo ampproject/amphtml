@@ -279,7 +279,8 @@ const forbiddenTerms = {
     whitelist: [
       'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
-      'extensions/amp-fx-collection/0.1/providers/parallax.js',
+      'extensions/amp-next-page/0.1/amp-next-page.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'src/service/video-manager-impl.js',
     ],
   },
@@ -317,6 +318,7 @@ const forbiddenTerms = {
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
 
       // iframe-messaging-client.sendMessage
@@ -337,6 +339,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
     ],
   },
@@ -386,6 +389,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
   'localStorage': {
@@ -394,6 +398,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/storage-impl.js',
       'testing/fake-dom.js',
+      'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
     ],
@@ -401,6 +406,7 @@ const forbiddenTerms = {
   'sessionStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-accordion/0.1/amp-accordion.js',
     ],
   },
@@ -489,8 +495,8 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
     ],
   },
-  '\\.updatePriority\\(': {
-    message: 'updatePriority is a restricted API.',
+  '\\.updateLayoutPriority\\(': {
+    message: 'updateLayoutPriority is a restricted API.',
     whitelist: [
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'src/base-element.js',
@@ -522,12 +528,6 @@ const forbiddenTerms = {
       'src/chunk.js',
       'src/inabox/amp-inabox.js',
       'src/runtime.js',
-    ],
-  },
-  'style\\.\\w+ = ': {
-    message: 'Use setStyle instead!',
-    whitelist: [
-      'testing/iframe.js',
     ],
   },
   'AMP_CONFIG': {
@@ -591,7 +591,7 @@ const forbiddenTerms = {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
       'viewer-api/swipe-api.js',
-      'dist.3p/current/integration.js',
+      'extensions/amp-access/0.1/iframe-api/access-controller.js',
     ],
   },
 };

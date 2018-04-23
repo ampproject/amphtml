@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
-import {dict} from '../../../src/utils/object';
+import {Entitlement} from './entitlement';
+import {Services} from '../../../src/services';
 import {evaluateExpr} from './expr';
 
 /**
@@ -26,48 +26,108 @@ export class LocalSubscriptionPlatformRenderer {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!./dialog.Dialog} dialog
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, dialog) {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
     this.rootNode_ = ampdoc.getRootNode();
 
+    /** @private @const {!./dialog.Dialog} */
+    this.dialog_ = dialog;
+
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(ampdoc.win);
   }
 
   /**
    *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  render(entitlements) {
-    this.renderActions_(entitlements);
+  render(renderState) {
+    return Promise.all([
+      this.renderActions_(renderState),
+      this.renderDialog_(/** @type {!JsonObject} */(renderState)),
+    ]);
   }
 
   /**
-   *
-   * @param {Entitlements} entitlements
+   * @param {!./amp-subscriptions.RenderState} renderState
    */
-  renderActions_(entitlements) {
+  renderActions_(renderState) {
+    this.renderActionsInNode_(renderState, this.rootNode_);
+  }
+
+  /**
+   * @param {!JsonObject} authResponse
+   * @return {!Promise<boolean>}
+   */
+  renderDialog_(authResponse) {
+    // Make sure the document is fully parsed.
     return this.ampdoc_.whenReady().then(() => {
       // Find the first matching dialog.
-      const actionCandidates =
-          this.rootNode_.querySelectorAll('[subscriptions-action]');
+      const candidates = this.ampdoc_.getRootNode()
+          .querySelectorAll('[subscriptions-dialog][subscriptions-display]');
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        const expr = candidate.getAttribute('subscriptions-display');
+        if (expr && evaluateExpr(expr, authResponse)) {
+          return candidate;
+        }
+      }
+    }).then(candidate => {
+      if (!candidate) {
+        return;
+      }
+      if (candidate.tagName == 'TEMPLATE') {
+        return this.templates_.renderTemplate(candidate, authResponse)
+            .then(element => {
+              const renderState =
+                  /** @type {!./amp-subscriptions.RenderState} */(authResponse);
+              return this.renderActionsInNode_(
+                  renderState,
+                  element);
+            });
+      }
+      const clone = candidate.cloneNode(true);
+      clone.removeAttribute('subscriptions-dialog');
+      clone.removeAttribute('subscriptions-display');
+      return clone;
+    }).then(element => {
+      if (!element) {
+        return;
+      }
+      return this.dialog_.open(element, /* showCloseButton */ true);
+    });
+  }
+
+  /**
+   * Renders actions inside a given node according to an authResponse
+   * @param {!./amp-subscriptions.RenderState} renderState
+   * @param {!Node} rootNode
+   * @return {!Promise<Node>}
+   * @private
+   */
+  renderActionsInNode_(renderState, rootNode) {
+    return this.ampdoc_.whenReady().then(() => {
+      // Find the matching actions and sections and make them visible if evalutes to true.
+      const querySelectors =
+          '[subscriptions-action], [subscriptions-section="actions"],'
+              + ' [subscriptions-actions]';
+      const actionCandidates = rootNode.querySelectorAll(querySelectors);
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-
-        // TODO(@prateekbh): cleanup this forloop with Entitlements Wrapper
-        const entitlementsJson = entitlements.json();
-        /** @type {!JsonObject} */
-        const evaluationJson = dict();
-        for (const key in entitlementsJson) {
-          evaluationJson[key] = entitlementsJson[key];
-        }
-        if (expr && evaluateExpr(expr, evaluationJson)) {
-          candidate.setAttribute('i-amphtml-subs-display', '');
+        if (expr && evaluateExpr(expr,
+            /** @type {!JsonObject} */(renderState))) {
+          candidate.classList.add('i-amphtml-subs-display');
+        } else {
+          candidate.classList.remove('i-amphtml-subs-display');
         }
       }
+      return rootNode;
     });
   }
 }
@@ -76,6 +136,6 @@ export class LocalSubscriptionPlatformRenderer {
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
  * @package @VisibleForTesting
  */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
+export function getEntitlementClassForTesting() {
+  return Entitlement;
 }

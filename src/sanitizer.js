@@ -23,6 +23,7 @@ import {
 } from './url';
 import {dict, map} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {isExperimentOn} from './experiments';
 import {parseSrcset} from './srcset';
 import {startsWith} from './string';
 import {urls} from './config';
@@ -100,16 +101,23 @@ const WHITELISTED_FORMAT_TAGS = [
 
 /** @const {!Array<string>} */
 const WHITELISTED_ATTRS = [
+  /* AMP-only attributes that don't exist in HTML. */
   'fallback',
-  'href',
   'on',
-  'placeholder',
   'option',
+  'placeholder',
   'submit-success',
   'submit-error',
-  /* Attributes added for amp-bind */
-  // TODO(kmh287): Add more whitelisted attributes for bind?
+  /* HTML attributes that are scrubbed by Caja but we handle specially. */
+  'href',
+  'style',
+  /* Attributes for amp-bind that exist in "[foo]" form. */
   'text',
+  /* Attributes for amp-subscriptions. */
+  'subscriptions-action',
+  'subscriptions-actions',
+  'subscriptions-section',
+  'subscriptions-display',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
@@ -131,7 +139,7 @@ const WHITELISTED_ATTRS_BY_TAGS = dict({
 });
 
 /** @const {!RegExp} */
-const WHITELISTED_ATTR_PREFIX_REGEX = /^data-/i;
+const WHITELISTED_ATTR_PREFIX_REGEX = /^(data-|aria-)|^role$/i;
 
 /** @const {!Array<string>} */
 const WHITELISTED_TARGETS = ['_top', '_blank'];
@@ -148,7 +156,7 @@ const BLACKLISTED_ATTR_VALUES = [
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': /(?:image|file|password|button)/i,
+    'type': /(?:image|file|button)/i,
   },
 });
 
@@ -168,6 +176,16 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'textarea': BLACKLISTED_FIELDS_ATTR,
   'select': BLACKLISTED_FIELDS_ATTR,
 });
+
+/**
+ * Test for invalid `style` attribute values. `!important` is a general AMP
+ * rule, while `position:fixed|sticky` is a current runtime limitation since
+ * FixedLayer only scans the amp-custom stylesheet for potential fixed/sticky
+ * elements.
+ * @const {!RegExp}
+ */
+const INVALID_INLINE_STYLE_REGEX =
+    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Sanitizes the provided HTML.
@@ -199,8 +217,8 @@ export function sanitizeHtml(html) {
         return;
       }
       const isBinding = map();
-      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
-      // brackets before custom validation and readding them afterwards.
+      // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
+      // brackets before custom validation and restoring them afterwards.
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
@@ -220,7 +238,7 @@ export function sanitizeHtml(html) {
         } else {
           attribs = scrubbed.attribs;
           // Restore some of the attributes that AMP is directly responsible
-          // for, such as "on"
+          // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
             const attrib = attribs[i];
             if (WHITELISTED_ATTRS.includes(attrib)) {
@@ -360,6 +378,9 @@ export function isValidAttr(tagName, attrName, attrValue) {
 
   // Inline styles are not allowed.
   if (attrName == 'style') {
+    if (isExperimentOn(self, 'inline-styles')) {
+      return !INVALID_INLINE_STYLE_REGEX.test(attrValue);
+    }
     return false;
   }
 
@@ -499,12 +520,8 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
       user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
-    const sources = srcset.getSources();
-    for (let i = 0; i < sources.length; i++) {
-      sources[i].url = resolveImageUrlAttr(
-          sources[i].url, baseUrl, isProxyHost);
-    }
-    return srcset.stringify();
+    return srcset.stringify(url => resolveImageUrlAttr(url, baseUrl,
+        isProxyHost));
   }
 
   return attrValue;

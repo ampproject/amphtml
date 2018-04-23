@@ -499,6 +499,7 @@ export class AmpSelector extends AMP.BaseElement {
       const el = this.selectedOptions_.pop();
       this.clearSelection_(el);
     }
+    this.setInputs_();
   }
 
   /**

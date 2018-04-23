@@ -41,6 +41,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './css-expr';
+import {setStyles} from '../../../src/style';
 
 
 /** @const {string} */
@@ -125,11 +126,8 @@ export class WebAnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        for (const k in request.vars) {
-          request.target.style.setProperty(k, String(request.vars[k]));
-        }
+        setStyles(request.target, request.vars);
       }
-
       const player = request.target.animate(request.keyframes, request.timing);
       player.pause();
       return player;
@@ -162,7 +160,9 @@ export class WebAnimationRunner {
     dev().assert(this.players_);
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
-      player.pause();
+      if (player.playState == WebAnimationPlayState.RUNNING) {
+        player.pause();
+      }
     });
   }
 
@@ -170,13 +170,18 @@ export class WebAnimationRunner {
    */
   resume() {
     dev().assert(this.players_);
-    if (this.playState_ == WebAnimationPlayState.RUNNING) {
+    const oldRunnerPlayState = this.playState_;
+    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
-    this.runningCount_ = this.players_.length;
+    this.runningCount_ = 0;
     this.players_.forEach(player => {
-      player.play();
+      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+          player.playState == WebAnimationPlayState.PAUSED) {
+        player.play();
+        this.runningCount_++;
+      }
     });
   }
 
