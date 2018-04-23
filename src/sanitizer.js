@@ -198,7 +198,8 @@ const INVALID_INLINE_STYLE_REGEX =
  * @return {string}
  */
 export function sanitizeHtml(html) {
-  const tagPolicy = htmlSanitizer.makeTagPolicy();
+  const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
+    parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
   let ignore = 0;
 
