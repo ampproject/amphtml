@@ -47,7 +47,7 @@ function getEmbedly(global, callback) {
 export function embedly(global, data) {
   const card = global.document.createElement('a');
 
-  card.href = 'http://twitter.com/juanlizarazog'; // TODO: Receive from params
+  card.href = data.url;
   card.classList.add(CARD_CSS_CLASS);
 
   global.document.getElementById('c').appendChild(card);
