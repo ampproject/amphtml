@@ -197,7 +197,6 @@ class AnimationPlayer {
       mutate: this.stepMutate_.bind(this),
     });
 
-
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
     } else {
