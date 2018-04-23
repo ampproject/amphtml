@@ -62,7 +62,7 @@ export function startupChunk(nodeOrAmpDoc, fn) {
     return;
   }
   const service = getChunkServiceForDoc_(nodeOrAmpDoc);
-  service.runForStartup_(fn);
+  service.runForStartup(fn);
 }
 
 /**
@@ -169,7 +169,7 @@ class Task {
    * Executes the wrapped function.
    * @param {?IdleDeadline} idleDeadline
    * @throws {Error}
-   * @private
+   * @protected
    */
   runTask_(idleDeadline) {
     if (this.state == TaskState.RUN) {
@@ -186,7 +186,7 @@ class Task {
 
   /**
    * @return {string}
-   * @private
+   * @protected
    */
   getName_() {
     return this.fn_.displayName || this.fn_.name;
@@ -204,7 +204,7 @@ class Task {
   /**
    * Returns true if this task should be run without delay.
    * @return {boolean}
-   * @private
+   * @protected
    */
   immediateTriggerCondition_() {
     // By default, there are no immediate trigger conditions.
@@ -215,7 +215,7 @@ class Task {
    * Returns true if this task should be scheduled using `requestIdleCallback`.
    * Otherwise, task is scheduled as macro-task on next event loop.
    * @return {boolean}
-   * @private
+   * @protected
    */
   useRequestIdleCallback_() {
     // By default, always use requestIdleCallback.
@@ -305,8 +305,6 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
-    /** @private @const */
-    this.ampDoc_ = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -337,9 +335,8 @@ class Chunks {
   /**
    * Run a fn that's part of AMP's startup sequence as a "chunk".
    * @param {function(?IdleDeadline)} fn
-   * @private
    */
-  runForStartup_(fn) {
+  runForStartup(fn) {
     const t = new StartupTask(fn, this.win_, this.viewerPromise_);
     this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
