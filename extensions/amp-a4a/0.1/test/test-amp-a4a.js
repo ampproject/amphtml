@@ -1021,7 +1021,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should run end-to-end and render in friendly iframe', () => {
+    it.only('should run end-to-end and render in friendly iframe', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1051,14 +1051,15 @@ describe('amp-a4a', () => {
         return a4a.adPromise_.then(promiseResult => {
           expect(promiseResult).to.be.ok;
           expect(promiseResult.minifiedCreative).to.be.ok;
+          debugger;
           expect(a4a.isVerifiedAmpCreative_).to.be.true;
           expect(tryExecuteRealTimeConfigSpy.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledOnce).to.be.true;
           expect(AMP.maybeExecuteRealTimeConfig.calledWith(
-              a4a, {})).to.be.true;
+              a4a, {}, null)).to.be.true;
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
-          expect(getAdUrlSpy.calledWith(undefined, rtcResponse)).to.be.true;
+          expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
           expect(fetchMock.called('ad')).to.be.true;
           expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
           expect(doc.querySelector('link[rel=preload]' +
