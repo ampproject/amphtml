@@ -24,7 +24,6 @@ import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
-  INVALID_SPSA_RESPONSE,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
   assignAdUrlToError,
@@ -352,9 +351,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
 
-    /** @private {boolean} */
-    this.isSinglePageStoryAd_ = false;
-
     /** @private {boolean} whether safeframe forced via tag */
     this.forceSafeframe_ = false;
     if ('forceSafeframe' in this.element.dataset) {
@@ -445,8 +441,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.preloadSafeframe_ = sfPreloadExpId == '21061135';
     }
 
-    this.isSinglePageStoryAd_ = 'ampStory' in this.element.dataset;
-
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.onVisibilityChanged(() => {
       if (viewer.getVisibilityState() != VisibilityState.PAUSED ||
@@ -531,7 +525,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
-    const pageLayoutBox = this.isSinglePageStoryAd_ ?
+    const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
@@ -552,7 +546,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
-      'spsa': this.isSinglePageStoryAd_ ?
+      'spsa': this.isSinglePageStoryAd ?
         `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
     }, googleBlockParameters(this));
   }
@@ -1348,34 +1342,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
-  }
-
-  /** @override */
-  maybeValidateAmpCreative(bytes, headers) {
-    const validationPromise = super.maybeValidateAmpCreative(bytes, headers);
-    if (!this.isSinglePageStoryAd_) {
-      return validationPromise;
-    }
-    return validationPromise.then(result => {
-      if (result) {
-        return result;
-      }
-      throw new Error(INVALID_SPSA_RESPONSE);
-    });
-  }
-
-  /** @override */
-  getAmpAdMetadata(creative) {
-    const metadata = super.getAmpAdMetadata(creative);
-    if (!this.isSinglePageStoryAd_) {
-      return metadata;
-    }
-    if (metadata && metadata.ctaType && metadata.ctaUrl) {
-      this.element.setAttribute('data-vars-ctatype', metadata.ctaType);
-      this.element.setAttribute('data-vars-ctaurl', metadata.ctaUrl);
-      return metadata;
-    }
-    throw new Error(INVALID_SPSA_RESPONSE);
   }
 }
 

@@ -124,6 +124,8 @@ export let SizeInfoDef;
       customElementExtensions: !Array<string>,
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
+      ctaType: (string|undefined),
+      ctaUrl: (string|undefined),
     }} */
 export let CreativeMetaDataDef;
 
@@ -399,6 +401,12 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?Element}
      */
     this.a4aAnalyticsElement_ = null;
+
+    /**
+     * Indicates that this slot is a single page ad within an AMP story.
+     * @type {boolean}
+     */
+    this.isSinglePageStoryAd = false;
   }
 
   /** @override */
@@ -452,6 +460,8 @@ export class AmpA4A extends AMP.BaseElement {
       this.a4aAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
+
+    this.isSinglePageStoryAd = 'ampStory' in this.element.dataset;
   }
 
   /** @override */
@@ -858,22 +868,27 @@ export class AmpA4A extends AMP.BaseElement {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
           });
+          let result = null;
           switch (status) {
             case VerificationStatus.OK:
-              return bytes;
-            case VerificationStatus.UNVERIFIED:
-              return null;
+              result = bytes;
+              break;
             case VerificationStatus.CRYPTO_UNAVAILABLE:
-              return this.shouldPreferentialRenderWithoutCrypto() ?
+              result = this.shouldPreferentialRenderWithoutCrypto() ?
                 bytes : null;
+              break;
             // TODO(@taymonbeal, #9274): differentiate between these
             case VerificationStatus.ERROR_KEY_NOT_FOUND:
             case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
               user().error(
                   TAG, this.element.getAttribute('type'),
                   'Signature verification failed');
-              return null;
+            case VerificationStatus.UNVERIFIED:
           }
+          if (this.isSinglePageStoryAd && !result) {
+            throw new Error(INVALID_SPSA_RESPONSE);
+          }
+          return result;
         });
   }
 
@@ -1633,6 +1648,13 @@ export class AmpA4A extends AMP.BaseElement {
         // Load maximum of 5 images.
         metaData.images = metaDataObj['images'].splice(0, 5);
       }
+      if (this.isSinglePageStoryAd) {
+        if (!metaDataObj['ctaUrl'] || !metaDataObj['ctaType']) {
+          throw new Error(INVALID_SPSA_RESPONSE);
+        }
+        this.element.setAttribute('data-vars-ctatype', metaDataObj['ctaType']);
+        this.element.setAttribute('data-vars-ctaurl', metaDataObj['ctaUrl']);
+      }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
       metaData.minifiedCreative =
@@ -1644,6 +1666,9 @@ export class AmpA4A extends AMP.BaseElement {
       dev().warn(
           TAG, this.element.getAttribute('type'), 'Invalid amp metadata: %s',
           creative.slice(metadataStart + metadataString.length, metadataEnd));
+      if (this.isSinglePageStoryAd) {
+        throw err;
+      }
       return null;
     }
   }
