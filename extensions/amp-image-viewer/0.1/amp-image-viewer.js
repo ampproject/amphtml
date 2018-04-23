@@ -138,6 +138,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    // TODO: refactor resize logic to go in onMeasureChange when exposed
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_())
           .then(() => this.unregisterPanningGesture_());
@@ -245,24 +246,23 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Sets the source width and height based on the user-defined
-   * dimensions of the amp-img if exists, the natural dimensions
-   * of the source image if loaded, and the offset dimensions of
-   * amp-img element if not.
+   * Sets the source width and height based on the user-defined dimensions of
+   * the amp-img if exists, the natural dimensions of the source image if
+   * loaded, and the offset dimensions of amp-img element if not.
    * @param {!Element}
    * @private
    */
   setSourceDimensions_(ampImg) {
-    let width, height;
-    if ((width = ampImg.getAttribute('width'))
-        && (height = ampImg.getAttribute('height'))) {
+    const width = ampImg.getAttribute('width');
+    const height = ampImg.getAttribute('height');
+    if (width && height) {
       this.sourceWidth_ = width;
       this.sourceHeight_ = height;
     } else {
       const img = elementByTag(ampImg, 'img');
-      if (img && (width = img.naturalWidth) && (height = img.naturalHeight)) {
-        this.sourceWidth_ = width;
-        this.sourceHeight_ = height;
+      if (img) {
+        this.sourceWidth_ =  img.naturalWidth || ampImg./*OK*/offsetWidth;
+        this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
       } else {
         this.sourceWidth_ = ampImg./*OK*/offsetWidth;
         this.sourceHeight_ = ampImg./*OK*/offsetHeight;
