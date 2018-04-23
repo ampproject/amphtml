@@ -442,6 +442,12 @@ data.item;
 data.geo;
 data.categories;
 
+// pubguru.js
+data.height;
+data.publisher;
+data.slot;
+data.width;
+
 // pubmatic.js
 data.kadpageurl;
 
