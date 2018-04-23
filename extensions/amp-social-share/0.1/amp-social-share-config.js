@@ -84,6 +84,13 @@ const BUILTINS = dict({
       'text': 'TITLE - CANONICAL_URL',
     },
   },
+  'line': {
+    'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
+    'defaultParams': {
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    },
+  },
   'sms': {
     'shareEndpoint': 'sms:',
     'defaultParams': {
