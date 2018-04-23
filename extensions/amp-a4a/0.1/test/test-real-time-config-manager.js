@@ -330,8 +330,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         vendors, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
-    // TODO(jeffkaufman, #13422): this test was silently failing
-    it.skip('should favor publisher URLs over vendor URLs', () => {
+
+    it('should favor publisher URLs over vendor URLs', () => {
       const urls = generateUrls(3,2);
       const vendors = {
         'fAkeVeNdOR': {SLOT_ID: 0, PAGE_ID: 1},
@@ -342,7 +342,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.2.com/',
         'https://www.3.com/?slot_id=1',
         'https://www.4.com/?slot_id=1&page_id=2',
-        'https://localhost:8000/examples/rtcE1.json?slot_id=1&page_id=2&foo_id=3',
       ];
       const rtcCalloutResponses = generateCalloutResponses(6);
       const customMacros = {
@@ -357,10 +356,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       }
       expectedRtcArray.push(
           rtcEntry(null, Object.keys(vendors)[0].toLowerCase(),
-              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED));
+              RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED, true));
       const calloutCount = 5;
       return executeTest({
-        urls, vendors, customMacros, inflatedUrls, rtcCalloutResponses,
+        urls, vendors, customMacros, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
     it('should not send more than one RTC callout to the same url', () => {
