@@ -434,6 +434,17 @@ data.dfpSlot;
 data.nc;
 data.auid;
 
+// pixels.js
+var pixelsAd;
+var pixelsAMPAd;
+var pixelsAMPTag;
+pixelsAMPTag.renderAmp;
+data.origin;
+data.sid;
+data.tag;
+data.clickTracker;
+data.viewability;
+
 // plista.js
 data.widgetname;
 data.publickey;
