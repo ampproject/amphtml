@@ -291,6 +291,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Nokta](../../ads/nokta.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
+- [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
