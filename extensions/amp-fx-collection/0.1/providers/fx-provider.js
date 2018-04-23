@@ -113,7 +113,7 @@ export class FxElement {
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
     // Initialize these variables only for fade in animations
-    if (startsWith(this.fxType_, 'fade-in')) {
+    if (startsWith(this.fxType_, 'fade-in') || startsWith(this.fxType_, 'fly-in')) {
       /** @private {number} */
       this.marginStart_ = element.hasAttribute('data-margin-start') ?
         resolvePercentageToNumber(element.getAttribute('data-margin-start')) :

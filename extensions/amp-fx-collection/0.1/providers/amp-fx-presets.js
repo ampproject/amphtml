@@ -77,8 +77,9 @@ export const Presets = {
       const fxElement = this;
       dev().assert(fxElement.adjustedViewportHeight_);
       // Outside viewport
-      if (!entry.positionRect ||
-          entry.positionRect.top > fxElement.adjustedViewportHeight_) {
+      const top = entry.positionRect ? entry.positionRect.top : null;
+      if (!top || top > (1 - fxElement.getMarginStart()) *
+        entry.positionRect.top > fxElement.adjustedViewportHeight_) {
         return;
       }
 
