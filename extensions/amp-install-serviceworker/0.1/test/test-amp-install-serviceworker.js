@@ -86,7 +86,6 @@ describes.realWin('amp-install-serviceworker', {
     expect(implementation).to.exist;
     install.setAttribute('src', 'https://example.com/sw.js');
     implementation.win = {
-      complete: true,
       location: {
         href: 'https://example.com/some/path',
       },
@@ -104,7 +103,6 @@ describes.realWin('amp-install-serviceworker', {
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
     implementation.win = {
-      complete: true,
       location: {
         href: 'https://example.com/some/path',
       },
@@ -128,7 +126,6 @@ describes.realWin('amp-install-serviceworker', {
     let calledSrc;
     const p = new Promise(() => {});
     implementation.win = {
-      complete: true,
       location: {
         href: 'https://cdn.ampproject.org/some/path',
       },
@@ -164,7 +161,6 @@ describes.realWin('amp-install-serviceworker', {
       calledSrc = undefined;
       const p = new Promise(() => {});
       const win = {
-        complete: true,
         location: {
           href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         },
@@ -219,16 +215,17 @@ describes.realWin('amp-install-serviceworker', {
       const mutateElement = sandbox.stub(implementation, 'mutateElement');
       mutateElement.callsFake(fn => {
         expect(iframe).to.be.undefined;
-        fn();
+        const returnedValue = fn();
         expect(iframe).to.exist;
         expect(calledSrc).to.undefined;
         expect(install.style.display).to.equal('none');
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('sandbox')).to.equal(
             'allow-same-origin allow-scripts');
+        return returnedValue;
       });
       implementation.buildCallback();
-      expect(mutateElement).to.be.calledOnce;
+      expect(mutateElement).to.have.been.calledOnce;
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',

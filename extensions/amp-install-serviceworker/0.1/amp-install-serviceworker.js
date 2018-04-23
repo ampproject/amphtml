@@ -62,11 +62,24 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     assertHttpsUrl(src, this.element);
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
-      this.loadPromise(this.win).then(() => {
+      const iframeSrc = this.element.getAttribute('data-iframe-src');
+      if (iframeSrc) {
+        assertHttpsUrl(iframeSrc, this.element);
+        const origin = parseUrl(iframeSrc).origin;
+        const docInfo = Services.documentInfoForDoc(this.element);
+        const sourceUrl = parseUrl(docInfo.sourceUrl);
+        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+        user().assert(
+            origin == sourceUrl.origin ||
+            origin == canonicalUrl.origin,
+            'data-iframe-src (%s) should be a URL on the same origin as the ' +
+            'source (%s) or canonical URL (%s) of the AMP-document.',
+            origin, sourceUrl.origin, canonicalUrl.origin);
+        this.iframeSrc_ = iframeSrc;
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
           return this.insertIframe_();
         });
-      });
+      }
     } else if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       this.loadPromise(this.win).then(() => {
         return install(this.win, src);
@@ -84,29 +97,13 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   insertIframe_() {
-    const iframeSrc = this.element.getAttribute('data-iframe-src');
-    if (iframeSrc) {
-      assertHttpsUrl(iframeSrc, this.element);
-      const origin = parseUrl(iframeSrc).origin;
-      const docInfo = Services.documentInfoForDoc(this.element);
-      const sourceUrl = parseUrl(docInfo.sourceUrl);
-      const canonicalUrl = parseUrl(docInfo.canonicalUrl);
-      user().assert(
-          origin == sourceUrl.origin ||
-          origin == canonicalUrl.origin,
-          'data-iframe-src (%s) should be a URL on the same origin as the ' +
-          'source (%s) or canonical URL (%s) of the AMP-document.',
-          origin, sourceUrl.origin, canonicalUrl.origin);
-      this.iframeSrc_ = iframeSrc;
-      this.mutateElement(() => {
-        setStyle(this.element, 'display', 'none');
-        const iframe = this.win.document.createElement('iframe');
-        iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
-        iframe.src = this.iframeSrc_;
-        this.element.appendChild(iframe);
-      });
-    }
-    return Promise.resolve();
+    return this.mutateElement(() => {
+      setStyle(this.element, 'display', 'none');
+      const iframe = this.win.document.createElement('iframe');
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+      iframe.src = this.iframeSrc_;
+      this.element.appendChild(iframe);
+    });
   }
 
   /** @private */
