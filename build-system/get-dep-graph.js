@@ -26,6 +26,86 @@ const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const through = require('through2');
 const TopologicalSort = require('topological-sort');
+const glob = Promise.promisify(require('glob'));
+const minimatch = require('minimatch');
+
+const srcs = [
+  '3p/3p.js',
+  // Ads config files.
+  'ads/_*.js',
+  'ads/alp/**/*.js',
+  'ads/google/**/*.js',
+  'ads/inabox/**/*.js',
+  // Files under build/. Should be sparse.
+  'build/css.js',
+  'build/*.css.js',
+  'build/fake-module/**/*.js',
+  //'build/patched-module/**/*.js',
+  'build/experiments/**/*.js',
+  // Strange access/login related files.
+  'build/all/v0/*.js',
+  // A4A has these cross extension deps.
+  'extensions/amp-ad-network*/**/*-config.js',
+  'extensions/amp-ad/**/*.js',
+  'extensions/amp-a4a/**/*.js',
+  // Currently needed for crypto.js and visibility.js.
+  // Should consider refactoring.
+  //'extensions/amp-audio-1/**/*.js',
+  'extensions/amp-analytics/**/*.js',
+  // Needed for WebAnimationService
+  'extensions/amp-animation/**/*.js',
+  // For amp-bind in the web worker (ww.js).
+  'extensions/amp-bind/**/*.js',
+  // Needed to access form impl from other extensions
+  'extensions/amp-form/**/*.js',
+  // Needed for AccessService
+  'extensions/amp-access/**/*.js',
+  // Needed for AmpStoryVariableService
+  'extensions/amp-story/**/*.js',
+  // Needed for SubscriptionsService
+  'extensions/amp-subscriptions/**/*.js',
+  // Needed to access UserNotificationManager from other extensions
+  'extensions/amp-user-notification/**/*.js',
+  'src/*.js',
+  'src/!(inabox)*/**/*.js',
+  // Exclude since it's not part of the runtime/extension binaries.
+  '!extensions/amp-access/0.1/amp-login-done.js',
+  'builtins/**.js',
+  'third_party/caja/html-sanitizer.js',
+  'third_party/closure-library/sha384-generated.js',
+  'third_party/css-escape/css-escape.js',
+  'third_party/mustache/**/*.js',
+  'third_party/timeagojs/**/*.js',
+  'third_party/vega/**/*.js',
+  'third_party/d3/**/*.js',
+  'third_party/subscriptions-project/*.js',
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/rrule/rrule.js',
+  'third_party/react-dates/bundle.js',
+  'node_modules/document-register-element/build/document-register-element.node.js',
+  'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/activity-ports.js',
+  "web-animations-js/web-animations.install.js",
+];
+
+const excludes = [
+  'node_modules/core-js/modules/library/**.js',
+  // Don't include tests.
+  '**_test.js',
+  '**/test-*.js',
+  '**/*.extern.js',
+  'third_party/babel/custom-babel-helpers.js',
+  'third_party/subscriptions-project/**/*.js',
+  'extensions/amp-subscriptions/**/*.js',
+];
+
+const promises = srcs.map(x => glob(x));
+const all = Promise.all(promises).then(files => {
+  return [].concat.apply([], files).filter(file => {
+    console.log(file);
+    return !excludes.some(pattern => minimatch(file, pattern));
+  });
+});
 
 const knownExtensions = {
   js: true,
@@ -79,7 +159,7 @@ exports.getGraph = function(entryModules, config) {
         presets: ['env'],
         plugins: [
           require.resolve('./babel-plugins/add-module-export/src'),
-          require.resolve('./babel-plugins/collect-type-paths/src'),
+          //require.resolve('./babel-plugins/collect-type-paths/src'),
         ],
       });
 
@@ -200,6 +280,7 @@ exports.getGraph = function(entryModules, config) {
 };
 
 function unifyPath(id) {
+  // g2g ttyl
   return id.split(path.sep).join('/');
 }
 
@@ -319,118 +400,53 @@ exports.getFlags = function(config) {
     }
   });
 
-  return exports.getGraph(config.modules, {}).then(function(g) {
-    return flagsArray.concat(
-        exports.getBundleFlags(g, flagsArray));
+  return all.then(function(files) {
+    return exports.getGraph(config.modules, {}).then(function(g) {
+      return flagsArray.concat(
+          exports.getBundleFlags(g, files));
+    });
   });
 };
 
-exports.getBundleFlags = function(g) {
-  //console.log(g);
+exports.getBundleFlags = function(g, files) {
   var flagsArray = [];
-
-  // Write all the packages (directories with a package.json) as --js
-  // inputs to the flags. Closure compiler reads the packages to resolve
-  // non-relative module names.
-  var packageCount = 0;
-  //Object.keys(g.packages).sort().forEach(function(package) {
-    //flagsArray.push('--js', package);
-    //packageCount++;
+  //files.forEach(x => {
+    //flagsArray.push('--js', x);
   //});
-  // Build up the weird flag structure that closure compiler calls
-  // modules and we call bundles.
-  var bundleKeys = Object.keys(g.bundles);
-  bundleKeys.sort().forEach(function(name) {
-    var isBase = name == '_base';
-    var extraModules = 0;
-    var bundle = g.bundles[name];
-    //if (isBase || bundleKeys.length == 1) {
-      //flagsArray.push('--js', relativePath(process.cwd(),
-          //require.resolve('./base.js')));
-      //extraModules++;
-      //Object.keys(g.browserMask).sort().forEach(function(mask) {
-        //flagsArray.push('--js', mask);
-        //extraModules++;
-      //});
-    //}
-    //console.log(bundle.modules);
-    // In each bundle, first list JS files that belong into it.
-    bundle.modules.forEach(function(js) {
-      if (g.transformed[js]) {
-        js = g.transformed[js];
-      }
-      flagsArray.push('--js', js);
+  Object.keys(g.bundles).sort().forEach(bundleName => {
+    if (bundleName == '_base') {
+      return;
+    }
+    const bundle = g.bundles[bundleName];
+    const deps = bundle.modules;
+    deps.forEach(x => {
+      flagsArray.push('--js', x);
     });
-    if (!isBase && bundleKeys.length > 1) {
-      flagsArray.push('--js', bundleTrailModule(bundle.name));
-      extraModules++;
-    }
-    // The packages count as inputs to the first module.
-    if (packageCount) {
-      extraModules += packageCount;
-      packageCount = 0;
-    }
-    // Replace directory separator with - in bundle filename
-    var name = bundle.name
-        .replace(/\.js$/g, '')
-        .replace(/[\/\\]/g, '-');
-    // And now build --module $name:$numberOfJsFiles:$bundleDeps
-    var cmd = name + ':' + (bundle.modules.length + extraModules);
-    // All non _base bundles depend on _base.
-    if (!isBase && g.bundles._base) {
-      cmd += ':_base';
-    }
-    flagsArray.push('--module', cmd);
-    if (bundleKeys.length > 1) {
-      if (isBase) {
-        flagsArray.push('--module_wrapper', name + ':' +
-            exports.baseBundleWrapper);
-      } else {
-        flagsArray.push('--module_wrapper', name + ':' +
-            exports.bundleWrapper);
-      }
-    } else {
-      flagsArray.push('--module_wrapper', name + ':' +
-            exports.defaultWrapper);
-    }
+    //const depslist = bundleName == '_base' ? '' : ':_base';
+    //const depslist = bundleName == '_base' ? '' : ':_base';
+    const name = bundleName.replace(/\.js$/g, '').replace(/[\/\\]/g, '-');
+    //flagsArray.push('--module', 'hello:' + bundle.modules.length + ':' + deps.join(','));
+    flagsArray.push('--module', `${name}:${bundle.modules.length}`);
+    //flagsArray.push('--module', `${name}:${bundle.modules.length}${depslist}`);
   });
   flagsArray.push('--js_module_root', './');
+  flagsArray.push('--js_module_root', 'node_modules/');
+  //console.log(flagsArray);
+  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
+  console.log('done');
   return flagsArray;
 }
 
-    let externs = [
-      'build-system/amp.extern.js',
-      //'third_party/closure-compiler/externs/intersection_observer.js',
-      'third_party/closure-compiler/externs/performance_observer.js',
-      //'third_party/closure-compiler/externs/shadow_dom.js',
-      //'third_party/closure-compiler/externs/streams.js',
-      'third_party/closure-compiler/externs/web_animations.js',
-      'third_party/moment/moment.extern.js',
-      'third_party/react-externs/externs.js',
-    ];
-exports.getFlags({
-  modules: Array.apply(null, Array(10)).map((x, i) => {
-      return `./extensions/amp-audio-${i + 1}/0.1/amp-audio-${i + 1}.js`;
-    }),
-  writeTo: './sample/out/',
-  externs: externs,
-}).then(function(flagsArray) {
-  return new Promise(function(resolve, reject) {
-    //console.log(flagsArray);
-    new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
-      if (exitCode == 0) {
-        resolve({
-          warnings: null,
-        });
-      } else {
-        reject(
-            new Error('Closure compiler compilation of bundles failed.\n' +
-                stdOut + '\n' +
-                stdErr));
-      }
-    });
-  })
-});
+let externs = [
+  'build-system/amp.extern.js',
+  //'third_party/closure-compiler/externs/intersection_observer.js',
+  'third_party/closure-compiler/externs/performance_observer.js',
+  //'third_party/closure-compiler/externs/shadow_dom.js',
+  //'third_party/closure-compiler/externs/streams.js',
+  'third_party/closure-compiler/externs/web_animations.js',
+  'third_party/moment/moment.extern.js',
+  'third_party/react-externs/externs.js',
+];
 
 var systemImport =
     // Polyfill and/or monkey patch System.import.
@@ -498,3 +514,34 @@ function bundleTrailModule(name) {
   fs.writeFileSync(tmp.name, js, 'utf8');
   return relativePath(process.cwd(), tmp.name);
 }
+
+
+exports.getFlags({
+  //modules: Array.apply(null, Array(10)).map((x, i) => {
+      //return `./extensions/amp-audio-${i + 1}/0.1/amp-audio-${i + 1}.js`;
+    //}),
+  modules: [
+    './extensions/amp-audio-1/0.1/amp-audio-1.js',
+    './extensions/amp-live-list/0.1/amp-live-list.js',
+    //'./src/amp.js',
+  ],
+  writeTo: './sample/out/',
+  externs: externs,
+}).then(function(flagsArray) {
+  return new Promise(function(resolve, reject) {
+    //console.log(flagsArray);
+    new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
+      if (exitCode == 0) {
+        resolve({
+          warnings: null,
+        });
+      } else {
+        reject(
+            new Error('Closure compiler compilation of bundles failed.\n' +
+                stdOut + '\n' +
+                stdErr));
+      }
+    });
+  })
+});
+

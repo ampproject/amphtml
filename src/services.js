@@ -29,7 +29,7 @@ import {
   getElementServiceIfAvailableForDocInEmbedScope,
 } from './element-service';
 
-/** @typedef {!../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+/** @type {Object} */
 export let SubscriptionService;
 
 export class Services {
