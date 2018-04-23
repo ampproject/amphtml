@@ -37,20 +37,23 @@ const CARD_CSS_CLASS = 'embedly-card';
 /**
  * Customizable card options.
  *
+ * - Key is in camel case as received in "data".
+ * - The value is in the format expected by embedly.
+ *
  * @see {@link http://docs.embed.ly/docs/cards#customize}
  * @const @enum {string}
  */
-const CardOptions = {
-  VIA: 'data-card-via',
-  CHROME: 'data-card-chrome',
-  THEME: 'data-card-theme',
-  IMAGE: 'data-card-image',
-  EMBED: 'data-card-embed',
-  CONTROLS: 'data-card-controls',
-  WIDTH: 'data-card-width',
-  ALIGN: 'data-card-align',
-  RECOMMEND: 'data-card-recommend',
-  KEY: 'data-card-key',
+export const CardOptions = {
+  cardVia: 'card-via',
+  cardChrome: 'card-chrome',
+  cardTheme: 'card-theme',
+  cardImage: 'card-image',
+  cardEmbed: 'card-embed',
+  cardControls: 'card-controls',
+  cardWith: 'card-width',
+  cardAlign: 'card-align',
+  cardRecommend: 'card-recommend',
+  cardKey: 'card-key',
 };
 
 /**
@@ -58,6 +61,7 @@ const CardOptions = {
  *
  * @param {!Window} global
  * @param {function(!Object)} callback
+ * @VisibleForTesting
  */
 function getEmbedly(global, callback) {
   loadScript(global, EMBEDLY_SDK_URL, function() {
@@ -77,8 +81,15 @@ export function embedly(global, data) {
   card.href = data.url;
   card.classList.add(CARD_CSS_CLASS);
 
-  if (data.key) {
-    card.setAttribute(CardOptions.KEY, data.key);
+  // Add whitelisted data attributes and values to card
+  // when these are provided by component.
+  for (const key in CardOptions) {
+    if (
+      CardOptions.hasOwnProperty(key) &&
+      typeof data[key] !== 'undefined'
+    ) {
+      card.setAttribute(`data-${CardOptions[key]}`, data[key]);
+    }
   }
 
   global.document.getElementById('c').appendChild(card);

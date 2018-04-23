@@ -21,8 +21,17 @@ import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
-/** @const {string} */
+/**
+ * Component tag identifier.
+ * @const {string}
+ */
 export const TAG = 'amp-embedly-card';
+
+/**
+ * Attribute name used to set api key.
+ * @const {string}
+ */
+export const API_KEY_ATTR_NAME = 'data-card-key';
 
 /**
  * Implementation of the amp-embedly-card component.
@@ -50,8 +59,10 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return getEmbedlyServiceForDoc(this.element).then(service => {
+      // Add optional paid api key attribute if provided
+      // to remove embedly branding.
       if (service.key) {
-        this.element.setAttribute('data-key', service.key);
+        this.element.setAttribute(API_KEY_ATTR_NAME, service.key);
       }
 
       const iframe = getIframe(this.win, this.element, 'embedly');
