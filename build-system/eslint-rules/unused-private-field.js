@@ -75,11 +75,13 @@ module.exports = function(context) {
           return;
         }
 
-        context.report(node, `Unused private "${name}".\n` +
-          '\tIf this is used for testing, annotate with @visibleForTesting\n' +
-          '\tIf this is a protected definition in a base class,' +
-          ' annotate with @protected\n' +
-          '\tIf this is an override of a protected, annotate with @override');
+        context.report(node, [
+          `Unused private "${name}".`,
+          'If this is used for testing, annotate with `@visibleForTesting`.',
+          'If this is used in a subclass, annotate with `@protected`.',
+          'If this is an override of a protected, annotate with `@override`.',
+          'If none of these exceptions applies, please contact @jridgewell.',
+        ].join('\n\t'));
       });
     },
 
