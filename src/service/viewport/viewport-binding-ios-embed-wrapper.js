@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../../observable';
-import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -54,9 +53,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
-
-    /** @private {!../../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -117,8 +113,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     Object.defineProperty(doc, 'body', {
       get: () => body,
     });
-
-    // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
 
     // Make sure the scroll position is adjusted correctly.
     this.onScrolled_();

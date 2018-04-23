@@ -186,7 +186,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
     registerServiceBuilder(
-        this.win, 'story-store-v01', () => this.storeService_);
+        this.win, 'story-store', () => this.storeService_);
 
     /** @private @const {!AmpStoryRequestService} */
     this.requestService_ = new AmpStoryRequestService(this.win, this.element);
@@ -231,7 +231,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
     registerServiceBuilder(
-        this.win, 'story-variable-v01', () => this.variableService_.get());
+        this.win, 'story-variable', () => this.variableService_.get());
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
