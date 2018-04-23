@@ -34,10 +34,10 @@ module.exports = function(context) {
   }
 
 
-  function shouldCheckMember(node) {
+  function shouldCheckMember(node, needsThis = true) {
     const {computed, object, property} = node;
     if (computed ||
-        object.type !== 'ThisExpression' ||
+        (needsThis && object.type !== 'ThisExpression') ||
         property.type !== 'Identifier') {
       return false;
     }
@@ -116,7 +116,7 @@ module.exports = function(context) {
 
     'ClassBody MemberExpression': function(node) {
       if (shouldIgnoreFile() ||
-         !shouldCheckMember(node) ||
+         !shouldCheckMember(node, false) ||
          isAssignment(node)) {
         return;
       }
