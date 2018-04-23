@@ -1,21 +1,23 @@
 import babel from 'rollup-plugin-babel';
-import minify from 'rollup-plugin-minify';
+import cleanup from 'rollup-plugin-cleanup';
 import path from 'path';
 
 export default {
-  entry: './amp-iframe-api-export.js',
-  format: 'umd',
-  sourceMap: true,
-  moduleName: 'AmpAccessIframeApi',
-  dest: 'build/index.js',
+  input: './amp-iframe-api-export.js',
+  output: {
+    name: 'AmpAccessIframeApi',
+    format: 'umd',
+    file: 'build/index.js',
+    sourceMap: true,
+  },
   plugins: [
     babel({
       babelrc: false,
       presets: [['env', {'modules': false}]],
     }),
-    minify({umd: 'build/index.min.js'}),
+    cleanup(),
   ],
   external: [
-    path.resolve('../../../../src/polyfills.js'),
+    path.resolve('../../../../src/polyfills.js')
   ],
 };
