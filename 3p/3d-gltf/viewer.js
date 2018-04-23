@@ -68,6 +68,14 @@ export default function makeViewer(options, handlers) {
               .forEach(child => {
                 viewer.scene.add(child);
               });
+          Object.assign(viewer.renderer.domElement.style, {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+          });
+
           document.body.appendChild(viewer.renderer.domElement);
           viewer.animationLoop.needsUpdate = true;
           onload();
