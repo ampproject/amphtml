@@ -266,8 +266,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   getSourceWidth_() {
     const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
-          'img');
-      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
+        'img');
+    return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
   }
 
   /**
@@ -276,7 +276,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   getSourceHeight_() {
     const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
-    'img');
+        'img');
     return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
   }
 

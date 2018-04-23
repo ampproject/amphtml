@@ -27,6 +27,7 @@ import {
   installPositionObserverServiceForDoc,
 } from '../../../../src/service/position-observer/position-observer-impl';
 import {setStyles} from '../../../../src/style';
+import {startsWith} from '../../../../src/string';
 
 /**
  * Class that implements the various preset animation providers.
@@ -112,7 +113,7 @@ export class FxElement {
     this.factor_ = parseFloat(element.getAttribute('data-parallax-factor'));
 
     // Initialize these variables only for fade in animations
-    if (this.fxType_.startsWith('fade-in')) {
+    if (startsWith(this.fxType_, 'fade-in')) {
       /** @private {number} */
       this.marginStart_ = element.hasAttribute('data-margin-start') ?
         resolvePercentageToNumber(element.getAttribute('data-margin-start')) :
@@ -137,7 +138,7 @@ export class FxElement {
     }
 
     // Initialize these variables only for fly in animations
-    if (this.fxType_.startsWith('fly-in')) {
+    if (startsWith(this.fxType_, 'fly-in')) {
       /** @private {number} */
       this.flyInDistance_ = element.hasAttribute('data-fly-in-distance') ?
         parseFloat(element.getAttribute('data-fly-in-distance')) :

@@ -55,10 +55,8 @@ import {
 import {isFiniteNumber} from '../types';
 import {isRTL, removeElement} from '../dom';
 import {map} from '../utils/object';
-import {once} from '../utils/function';
-import {registerServiceBuilderForDoc} from '../service';
-import {removeElement} from '../dom';
 import {mapRange} from '../utils/math';
+import {once} from '../utils/function';
 import {setStyles} from '../style';
 import {startsWith} from '../string';
 import {throttle} from '../utils/rate-limit';
@@ -362,25 +360,18 @@ export class VideoManager {
    * @param {VideoEntry} entry
    * @private
    */
-  maybeInstallOrientationObserver_(entry) {
-    // The orientation observer is only useful for automatically putting videos
-    // in fullscreen.
-    if (!entry.hasFullscreenOnLandscape) {
-      return;
-    }
-
+  maybeInstallOrientationObserver_(opt_entry) {
     // TODO(@wassgha) Check support status for orientation API and update
     // this as needed.
     const win = this.ampdoc.win;
     const screen = win.screen;
     const handleOrientationChange = () => {
-      let isLandscape;
+      // let isLandscape;
       if (screen && 'orientation' in screen) {
         isLandscape = startsWith(screen.orientation.type, 'landscape');
       } else {
         isLandscape = win.orientation == -90 || win.orientation == 90;
       }
-      entry.orientationChanged_(isLandscape);
     };
     // Chrome apparently considers 'orientationchange' to be an untrusted
     // event, while 'change' on screen.orientation is considered a user
@@ -574,6 +565,9 @@ class VideoEntry {
 
     /** @private @const */
     this.actionSessionManager_ = new VideoSessionManager();
+
+    /** @private {!./vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     this.actionSessionManager_.onSessionEnd(
         () => analyticsEvent(this, VideoAnalyticsEvents.SESSION));
@@ -1329,7 +1323,7 @@ class VideoEntry {
     const scaledWidth = DOCK_SCALE * this.inlineVidRect_.width;
     const offsetXRight = vw - scaledWidth - DOCK_MARGIN;
     // Calculate offsetYTop
-    const offsetYTop = DOCK_MARGIN;
+    const offsetYTop = 80; // prototype hack
     // Calculate offsetYBottom
     const scaledHeight = DOCK_SCALE * this.inlineVidRect_.height;
     const offsetYBottom = vh - scaledHeight - DOCK_MARGIN;
