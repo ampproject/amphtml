@@ -17,6 +17,7 @@
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().run('amp-image-lightbox', function() {
+  this.timeout(5000);
   const extensions = ['amp-image-lightbox'];
   const imageLightboxBody = `
   <figure>
@@ -48,8 +49,7 @@ describe.configure().run('amp-image-lightbox', function() {
       win = env.win;
     });
 
-    // TODO(cathyxz, #13458): Find out why this is flaky on master.
-    it.skip('should activate on tap of source image', () => {
+    it('should activate on tap of source image', () => {
       const lightbox = win.document.getElementById('image-lightbox-1');
       expect(lightbox.style.display).to.equal('none');
       const ampImage = win.document.getElementById('img0');
