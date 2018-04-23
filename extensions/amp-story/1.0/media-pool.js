@@ -76,6 +76,13 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 
+/**
+ * Single page ads may be injected later. If the original story contains 0 media
+ * elements the mediaPool will not be able to handle the injected audio/video
+ * Therefore we preallocate a minimum here.
+ * @const {number}
+ */
+const MINIMUM_MEDIA_ELEMENTS = 1;
 
 /**
  * The name for a string attribute that represents the ID of a media element
@@ -204,9 +211,9 @@ export class MediaPool {
   initializeMediaPool_(maxCounts) {
     this.forEachMediaType_(key => {
       const type = MediaType[key];
-      const count = maxCounts[type] || 0;
+      const count = maxCounts[type] || MINIMUM_MEDIA_ELEMENTS;
 
-      if (count <= 0) {
+      if (type === MediaType.UNSUPPORTED || count <= 0) {
         return;
       }
 
