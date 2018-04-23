@@ -64,9 +64,6 @@ export class FxProvider {
    */
   constructor(ampdoc, fxType) {
 
-    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -91,7 +88,6 @@ export class FxProvider {
     const parallaxElement = new FxElement(
         element, this.positionObserver_, this.viewport_, this.resources_,
         this.fxType_);
-    parallaxElement.initialize_();
   }
 }
 
@@ -157,14 +153,6 @@ export class FxElement {
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
 
-  }
-
-  /**
-   * Handles initializations such as getting initial positions and listening to
-   * events.
-   * @private
-   */
-  initialize_() {
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
       this.adjustedViewportHeight_ = adjustedViewportHeight;
 
