@@ -130,6 +130,13 @@ const DateFieldType = {
 };
 
 /** @enum {string} */
+const DateFieldNameByType = {
+  [DateFieldType.DATE]: 'date',
+  [DateFieldType.START_DATE]: 'start-date',
+  [DateFieldType.END_DATE]: 'end-date',
+};
+
+/** @enum {string} */
 const DatePickerEvent = {
   /**
    * Triggered when the overlay opens or when the static date picker should
@@ -624,15 +631,16 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   getHiddenInputId_(form, type) {
     const id = this.element.id;
+    const name = DateFieldNameByType[type];
     if (form) {
-      const alternativeName = `${id}-${type}`;
-      if (!form.elements[type]) {
-        return type;
+      const alternativeName = `${id}-${name}`;
+      if (!form.elements[name]) {
+        return name;
       } else if (id && !form.elements[alternativeName]) {
-        return `${id}-${type}`;
+        return alternativeName;
       } else {
         user().error(TAG,
-            `Multiple date-pickers with implicit ${type} fields` +
+            `Multiple date-pickers with implicit ${name} fields ` +
             'need to have IDs');
         return '';
       }
@@ -652,6 +660,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.listen_(root, 'click', this.handleClick_.bind(this));
     }
     this.listen_(root, 'input', this.handleInput_.bind(this));
+    // TODO(cvializ): Add aria message to use down arrow to trigger calendar.
     this.listen_(root, 'focusin', this.handleFocus_.bind(this));
     this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
