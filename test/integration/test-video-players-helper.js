@@ -88,8 +88,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().ifNewChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    // TODO(cvializ, #14827): Fails on Chrome 66.
-    it.skip('should support mute, play, pause, unmute actions', function() {
+    it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
@@ -139,8 +138,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    // TODO(cvializ, #14827): Fails on Chrome 66.
-    it.skip('should trigger play analytics when the video plays', function() {
+    it('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
@@ -243,8 +241,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(cvializ, #14827): Fails on Chrome 66.
-    it.skip('should include current time, play state, etc.', function() {
+    it('should include current time, play state, etc.', function() {
       let playButton;
       let pauseButton;
 
