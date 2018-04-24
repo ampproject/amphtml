@@ -63,16 +63,6 @@ config.run('amp-position-observer', function() {
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
         });
-
-      // window.setTimeout(() => {
-      //   expect(getOpacity(win)).to.equal(1);
-      // }, 6000);
-      // return waitForScroll(win, getViewportHeight(win)).then(() => {
-      //   expect(win.document.body.scrollTop).to.equal(getViewportHeight(win) * 2);
-      // });
-      // Not visible yet as animation hasn't started, opacity = 0;
-      // expect(getOpacity(win)).to.equal(0);
-      // expect(getOpacity(win)).to.equal(1);
     });
   });
 });
@@ -90,13 +80,3 @@ function timeout(ms) {
   return () => new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-function waitForScroll(win, factor) {
-  console.log('waitforscroll')
-  return poll('wait for scrollTop to equal: ' + factor, () => {
-    console.log('hello');
-    return win.document.body.scrollTop === factor;
-  }, () => {
-    console.log('oops')
-  }, 10000);
-}
