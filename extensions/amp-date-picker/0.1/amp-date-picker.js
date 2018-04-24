@@ -129,7 +129,6 @@ const DateFieldType = {
   END_DATE: 'end-input',
 };
 
-/** @enum {string} */
 const DateFieldNameByType = {
   [DateFieldType.DATE]: 'date',
   [DateFieldType.START_DATE]: 'start-date',
