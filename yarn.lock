@@ -1820,58 +1820,6 @@ browserify@16.1.1:
     vm-browserify "~0.0.1"
     xtend "^4.0.0"
 
-browserify@^14.5.0:
-  version "14.5.0"
-  resolved "https://registry.yarnpkg.com/browserify/-/browserify-14.5.0.tgz#0bbbce521acd6e4d1d54d8e9365008efb85a9cc5"
-  dependencies:
-    JSONStream "^1.0.3"
-    assert "^1.4.0"
-    browser-pack "^6.0.1"
-    browser-resolve "^1.11.0"
-    browserify-zlib "~0.2.0"
-    buffer "^5.0.2"
-    cached-path-relative "^1.0.0"
-    concat-stream "~1.5.1"
-    console-browserify "^1.1.0"
-    constants-browserify "~1.0.0"
-    crypto-browserify "^3.0.0"
-    defined "^1.0.0"
-    deps-sort "^2.0.0"
-    domain-browser "~1.1.0"
-    duplexer2 "~0.1.2"
-    events "~1.1.0"
-    glob "^7.1.0"
-    has "^1.0.0"
-    htmlescape "^1.1.0"
-    https-browserify "^1.0.0"
-    inherits "~2.0.1"
-    insert-module-globals "^7.0.0"
-    labeled-stream-splicer "^2.0.0"
-    module-deps "^4.0.8"
-    os-browserify "~0.3.0"
-    parents "^1.0.1"
-    path-browserify "~0.0.0"
-    process "~0.11.0"
-    punycode "^1.3.2"
-    querystring-es3 "~0.2.0"
-    read-only-stream "^2.0.0"
-    readable-stream "^2.0.2"
-    resolve "^1.1.4"
-    shasum "^1.0.0"
-    shell-quote "^1.6.1"
-    stream-browserify "^2.0.0"
-    stream-http "^2.0.0"
-    string_decoder "~1.0.0"
-    subarg "^1.0.0"
-    syntax-error "^1.1.1"
-    through2 "^2.0.0"
-    timers-browserify "^1.0.1"
-    tty-browserify "~0.0.0"
-    url "~0.11.0"
-    util "~0.10.1"
-    vm-browserify "~0.0.1"
-    xtend "^4.0.0"
-
 browserify@^16.1.0:
   version "16.1.0"
   resolved "https://registry.yarnpkg.com/browserify/-/browserify-16.1.0.tgz#00b86844f89482bbd0d5d1b584b324762ef3f698"
@@ -2563,7 +2511,7 @@ concat-stream@^1.4.6, concat-stream@^1.6.0, concat-stream@~1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-concat-stream@~1.5.0, concat-stream@~1.5.1:
+concat-stream@~1.5.1:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.5.2.tgz#708978624d856af41a5a741defdd261da752c266"
   dependencies:
@@ -3272,13 +3220,6 @@ detect-newline@2.X:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-2.1.0.tgz#f41f1c10be4b00e87b5f13da680759f2c5bfd3e2"
 
-detective@^4.0.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/detective/-/detective-4.7.0.tgz#6276e150f9e50829ad1f90ace4d9a2304188afcf"
-  dependencies:
-    acorn "^5.2.1"
-    defined "^1.0.0"
-
 detective@^5.0.2:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/detective/-/detective-5.0.2.tgz#84ec2e1c581e74211e2ae4ffce1edf52c3263f84"
@@ -3335,10 +3276,6 @@ dom-serialize@^2.2.0:
 domain-browser@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.2.0.tgz#3d31f50191a6749dd1375a7f522e823d42e54eda"
-
-domain-browser@~1.1.0:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/domain-browser/-/domain-browser-1.1.7.tgz#867aa4b093faa05f1de08c06f4d7b21fdf8698bc"
 
 domexception@^1.0.0:
   version "1.0.0"
@@ -3676,7 +3613,7 @@ escope@^3.6.0:
     estraverse "^4.1.1"
 
 "eslint-plugin-amphtml-internal@file:build-system/eslint-rules":
-  version "0.1.1"
+  version "0.1.0"
 
 eslint-plugin-chai-expect@1.1.1:
   version "1.1.1"
@@ -3950,10 +3887,6 @@ eventemitter3@1.x.x:
 events@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/events/-/events-2.0.0.tgz#cbbb56bf3ab1ac18d71c43bb32c86255062769f2"
-
-events@~1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/events/-/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
 
 evp_bytestokey@^1.0.0, evp_bytestokey@^1.0.3:
   version "1.0.3"
@@ -6364,13 +6297,12 @@ karma-super-dots-reporter@0.1.0:
     chalk "^0.5.1"
     log-symbols "^1.0.1"
 
-karma@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-2.0.0.tgz#a02698dd7f0f05ff5eb66ab8f65582490b512e58"
+karma@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-2.0.2.tgz#4d2db9402850a66551fa784b0164fb0824ed8c4b"
   dependencies:
     bluebird "^3.3.0"
     body-parser "^1.16.1"
-    browserify "^14.5.0"
     chokidar "^1.4.1"
     colors "^1.1.0"
     combine-lists "^1.0.0"
@@ -6395,7 +6327,7 @@ karma@2.0.0:
     socket.io "2.0.4"
     source-map "^0.6.1"
     tmp "0.0.33"
-    useragent "^2.1.12"
+    useragent "2.2.1"
 
 karma@^0.12.36:
   version "0.12.37"
@@ -7316,26 +7248,6 @@ mocha@5.0.1:
     he "1.1.1"
     mkdirp "0.5.1"
     supports-color "4.4.0"
-
-module-deps@^4.0.8:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/module-deps/-/module-deps-4.1.1.tgz#23215833f1da13fd606ccb8087b44852dcb821fd"
-  dependencies:
-    JSONStream "^1.0.3"
-    browser-resolve "^1.7.0"
-    cached-path-relative "^1.0.0"
-    concat-stream "~1.5.0"
-    defined "^1.0.0"
-    detective "^4.0.0"
-    duplexer2 "^0.1.2"
-    inherits "^2.0.1"
-    parents "^1.0.0"
-    readable-stream "^2.0.2"
-    resolve "^1.1.3"
-    stream-combiner2 "^1.1.1"
-    subarg "^1.0.0"
-    through2 "^2.0.0"
-    xtend "^4.0.0"
 
 module-deps@^6.0.0:
   version "6.0.0"
@@ -9517,7 +9429,7 @@ resolve@1.1.7, resolve@1.1.x:
   version "1.1.7"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.1.7.tgz#203114d82ad2c5ed9e8e0411b3932875e889e97b"
 
-resolve@^1.1.3, resolve@^1.1.4, resolve@^1.1.6, resolve@^1.1.7, resolve@^1.4.0:
+resolve@^1.1.4, resolve@^1.1.6, resolve@^1.1.7, resolve@^1.4.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.5.0.tgz#1f09acce796c9a762579f31b2c1cc4c3cddf9f36"
   dependencies:
@@ -10754,10 +10666,6 @@ tty-browserify@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.1.tgz#3f05251ee17904dfd0677546670db9651682b811"
 
-tty-browserify@~0.0.0:
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
-
 tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"
@@ -11012,7 +10920,7 @@ user-home@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/user-home/-/user-home-1.1.1.tgz#2b5be23a32b63a7c9deb8d0f28d485724a3df190"
 
-useragent@^2.1.12, useragent@^2.1.6:
+useragent@2.2.1, useragent@^2.1.6:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/useragent/-/useragent-2.2.1.tgz#cf593ef4f2d175875e8bb658ea92e18a4fd06d8e"
   dependencies:
