@@ -843,6 +843,7 @@ export const adConfig = {
 
   unruly: {
     prefetch: 'https://video.unrulymedia.com/amp-demo/native-loader.js',
+    renderStartImplemented: true,
   },
 
   valuecommerce: {
