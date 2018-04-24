@@ -1371,14 +1371,12 @@ describes.repeated('', {
       expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
     });
 
-    it.only('should remove all form state classes when form is cleared', () => {
+    it('should remove all form state classes when form is cleared', () => {
       const form = getForm();
       form.setAttribute('method', 'GET');
       document.body.appendChild(form);
 
-      const ampForm = new AmpForm(form);
-      ampForm.form_
-          .setAttribute('custom-validation-reporting', 'show-all-on-submit');
+      form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
 
       const fieldset = document.createElement('fieldset');
       const usernameInput = document.createElement('input');
@@ -1402,30 +1400,32 @@ describes.repeated('', {
       validationMessage.setAttribute('validation-for', 'email1');
       fieldset.appendChild(validationMessage);
 
-      ampForm.form_.appendChild(fieldset);
+      form.appendChild(fieldset);
 
-      // trigger form validations
-      ampForm.checkValidity_();
-      const formValidator = getFormValidator(form);
-      // show validity message
-      formValidator.report();
+      return getAmpForm(form).then(ampForm => {
+        // trigger form validations
+        ampForm.checkValidity_();
+        const formValidator = ampForm.validator_;
+        // show validity message
+        formValidator.report();
 
-      expect(usernameInput.className).to.contain('user-valid');
-      expect(emailInput.className).to.contain('user-invalid');
-      expect(emailInput.className).to.contain('valueMissing');
-      expect(fieldset.className).to.contain('user-valid');
-      expect(ampForm.form_.className).to.contain('user-invalid');
-      // This one is passing ONLY in debug mode
-      expect(validationMessage.className).to.contain('visible');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('valueMissing');
+        expect(fieldset.className).to.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('user-invalid');
+        // This one is passing ONLY in debug mode
+        expect(validationMessage.className).to.contain('visible');
 
-      ampForm.handleClearAction_();
+        ampForm.handleClearAction_();
 
-      expect(usernameInput.className).to.not.contain('user-valid');
-      expect(emailInput.className).to.not.contain('user-invalid');
-      expect(emailInput.className).to.not.contain('valueMissing');
-      expect(fieldset.className).to.not.contain('user-valid');
-      expect(ampForm.form_.className).to.contain('amp-form-initial');
-      expect(validationMessage.className).to.not.contain('visible');
+        expect(usernameInput.className).to.not.contain('user-valid');
+        expect(emailInput.className).to.not.contain('user-invalid');
+        expect(emailInput.className).to.not.contain('valueMissing');
+        expect(fieldset.className).to.not.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('amp-form-initial');
+        expect(validationMessage.className).to.not.contain('visible');
+      });
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
