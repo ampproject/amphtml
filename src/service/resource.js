@@ -18,6 +18,7 @@ import {AmpEvents} from '../amp-events';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
+import {isBlockedByConsent} from '../error';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
@@ -327,7 +328,9 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
-      dev().error(TAG, 'failed to build:', this.debugid, reason);
+      if (!isBlockedByConsent(reason)) {
+        dev().error(TAG, 'failed to build:', this.debugid, reason);
+      }
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
       throw reason;

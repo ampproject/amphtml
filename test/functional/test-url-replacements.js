@@ -108,6 +108,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
+        if (opt_options.withViewerIntegrationVariableService) {
+          markElementScheduledForTesting(iframe.win, 'amp-viewer-integration');
+          registerServiceBuilder(iframe.win, 'viewer-integration-variable',
+              function() {
+                return Promise.resolve(
+                    opt_options.withViewerIntegrationVariableService);
+              });
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -479,6 +487,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace TIMEZONE_CODE', () => {
+    return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
+      expect(res).to.match(/tz_code=\w+|^$/);
+    });
+  });
+
   it('should replace SCROLL_TOP', () => {
     return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       expect(res).to.match(/scrollTop=\d+/);
@@ -606,12 +620,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'videoManagerForDoc')
-        .returns({
-          getVideoAnalyticsDetails(unusedVideo) {
-            return Promise.resolve({currentTime: 1.5});
-          },
-        });
+    sandbox.stub(Services, 'videoManagerForDoc').returns({
+      getAnalyticsDetails() {
+        return Promise.resolve({currentTime: 1.5});
+      },
+    });
     sandbox.stub(win.document, 'getElementById')
         .withArgs('video')
         .returns(document.createElement('video'));
@@ -805,6 +818,30 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace ANCESTOR_ORIGIN', () => {
+    return expect(
+        expandUrlAsync('ANCESTOR_ORIGIN/recipes',
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
+              ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
+              fragmentParam: (param, defaultValue) => {
+                return param == 'ice_cream' ? '2' : defaultValue;
+              },
+            }}))
+        .to.eventually.equal('http://margarine-paradise.com/recipes');
+  });
+
+  it('should replace FRAGMENT_PARAM with 2', () => {
+    return expect(
+        expandUrlAsync('?sh=FRAGMENT_PARAM(ice_cream)&s',
+            /*opt_bindings*/ undefined, {withViewerIntegrationVariableService: {
+              ancestorOrigin: () => { return 'http://margarine-paradise.com'; },
+              fragmentParam: (param, defaultValue) => {
+                return param == 'ice_cream' ? '2' : defaultValue;
+              },
+            }}))
+        .to.eventually.equal('?sh=2&s');
+  });
+
   it('should accept $expressions', () => {
     return expandUrlAsync('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
@@ -844,9 +881,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
     const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually
         .equal('?a=');
-    expect(() => {
+    allowConsoleError(() => { expect(() => {
       clock.tick(1);
-    }).to.throw(/boom/);
+    }).to.throw(/boom/); });
     return p;
   });
 
@@ -859,9 +896,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expect(replacements.expandUrlAsync('?a=ONE'))
         .to.eventually.equal('?a=')
         .then(() => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             clock.tick(1);
-          }).to.throw(/boom/);
+          }).to.throw(/boom/); });
         });
   });
 
@@ -1119,10 +1156,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should reject javascript protocol', () => {
       const win = getFakeWindow();
       const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         /*eslint no-script-url: 0*/
         urlReplacements.expandUrlSync('javascript://example.com/?r=RANDOM');
-      }).to.throw('invalid protocol');
+      }).to.throw('invalid protocol'); });
     });
   });
 
@@ -1433,8 +1470,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('textarea');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 
@@ -1444,8 +1483,10 @@ describes.sandboxed('UrlReplacements', {}, () => {
       const input = document.createElement('input');
       input.value = 'RANDOM';
       input.setAttribute('data-amp-replace', 'RANDOM');
-      expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
-          /Input value expansion only works on hidden input fields/);
+      allowConsoleError(() => {
+        expect(() => urlReplacements.expandInputValueSync(input)).to.throw(
+            /Input value expansion only works on hidden input fields/);
+      });
       expect(input.value).to.equal('RANDOM');
     });
 

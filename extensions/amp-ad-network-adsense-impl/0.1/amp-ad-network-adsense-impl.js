@@ -23,6 +23,7 @@
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   QQID_HEADER,
   ValidAdContainerTypes,
@@ -36,7 +37,6 @@ import {
   googleAdUrl,
   isReportingEnabled,
   maybeAppendErrorParameter,
-  setNameframeExperimentConfigs,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
 import {clamp} from '../../../src/utils/math';
@@ -46,11 +46,11 @@ import {
   setStyles,
 } from '../../../src/style';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {getMode} from '../../../src/mode';
 import {
   googleLifecycleReporterFactory,
@@ -152,12 +152,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
-
-    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
-    this.nameframeExperimentConfig_ = {
-      instantLoad: false,
-      writeInBody: false,
-    };
   }
 
   /**
@@ -180,7 +174,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     if (this.isResponsive_()) {
       if (!this.element.hasAttribute('data-full-width')) {
-        user().error(TAG,
+        user().warn(TAG,
             'Responsive AdSense ad units require the attribute ' +
             'data-full-width.');
         return false;
@@ -189,14 +183,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const height = this.element.getAttribute('height');
       const width = this.element.getAttribute('width');
       if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
-        user().error(TAG,
+        user().warn(TAG,
             `Specified height ${height} in <amp-ad> tag is not equal to the ` +
             `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
             'responsive AdSense ad units.');
         return false;
       }
       if (width != '100vw') {
-        user().error(TAG,
+        user().warn(TAG,
             `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
             'Width must be 100vw.');
         return false;
@@ -233,7 +227,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
+  getConsentPolicy() {
+    // Ensure that build is not blocked by need for consent (delay will occur
+    // prior to ad URL construction).
+    return null;
+  }
+
+  /** @override */
+  getAdUrl(consentState) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+        this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
+      user().info(TAG, 'Ad request suppressed due to unknown consent');
+      return Promise.resolve('');
+    }
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -280,6 +286,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
@@ -300,6 +308,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
       'pfx': pfx ? '1' : '0',
+      // Package code (also known as URL group) that was used to
+      // create ad.
+      'pwprc': this.element.getAttribute('data-package'),
     };
 
     const experimentIds = [];
@@ -342,16 +353,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-    setNameframeExperimentConfigs(responseHeaders,
-        this.nameframeExperimentConfig_);
     return this.size_;
-  }
-
-  /** @override */
-  getAdditionalContextMetadata() {
-    const attributes = dict({});
-    Object.assign(attributes, this.nameframeExperimentConfig_);
-    return attributes;
   }
 
   /**
@@ -422,8 +424,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
-      this.ampAnalyticsElement_ =
-          insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      this.ampAnalyticsElement_ = insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
+          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
     }
 
     this.lifecycleReporter_.addPingsForVisibility(this.element);
@@ -500,6 +503,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
+    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
     return ['https://googleads.g.doubleclick.net'];
   }
 

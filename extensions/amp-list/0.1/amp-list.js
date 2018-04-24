@@ -71,8 +71,11 @@ export class AmpList extends AMP.BaseElement {
      */
     this.layoutCompleted_ = false;
 
-    /** @const @private {string} */
-    this.initialSrc_ = element.getAttribute('src');
+    /**
+     * The `src` attribute's initial value.
+     * @private {?string}
+     */
+    this.initialSrc_ = null;
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
@@ -88,6 +91,10 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Store this in buildCallback() because `this.element` sometimes
+    // is missing attributes in the constructor.
+    this.initialSrc_ = this.element.getAttribute('src');
+
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -259,7 +266,6 @@ export class AmpList extends AMP.BaseElement {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
         this.renderPass_.schedule(1); // Allow paint frame before next render.
-        user().error(TAG, 'New renderItems_, continuing render pass...');
       } else {
         this.renderItems_ = null;
       }

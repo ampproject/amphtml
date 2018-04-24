@@ -21,6 +21,7 @@ import {
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
+import {toggleExperiment} from '../../src/experiments';
 
 
 describe('sanitizeHtml', () => {
@@ -240,6 +241,18 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
         .to.equal('<div subscriptions-dialog="">link</div>');
   });
+
+  it('should allow source::src with vaild protocol', () => {
+    expect(sanitizeHtml('<source src="https://www.foo.com/">'))
+        .to.equal('<source src="https://www.foo.com/">');
+  });
+
+  it('should not allow source::src with invaild protocol', () => {
+    expect(sanitizeHtml('<source src="http://www.foo.com">'))
+        .to.equal('<source src="">');
+    expect(sanitizeHtml('<source src="<script>bad()</script>">'))
+        .to.equal('<source src="">');
+  });
 });
 
 
@@ -302,10 +315,9 @@ describe('rewriteAttributeValue', () => {
 describe('resolveUrlAttr', () => {
 
   it('should throw if __amp_source_origin is set', () => {
-    expect(() => resolveUrlAttr('a', 'href',
+    allowConsoleError(() => { expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
-        'http://acme.org/doc1'))
-        .to.throw(/Source origin is not allowed in/);
+        'http://acme.org/doc1')).to.throw(/Source origin is not allowed in/); });
   });
 
   it('should be called by sanitizer', () => {
@@ -416,8 +428,40 @@ describe('sanitizeFormattingHtml', () => {
         .to.be.equal('<b>abc</b>');
   });
 
-  it('should compentsate for broken markup', () => {
+  it('should compensate for broken markup', () => {
     expect(sanitizeFormattingHtml('<b>a<i>b')).to.be.equal(
         '<b>a<i>b</i></b>');
+  });
+
+  describe('should sanitize `style` attribute', () => {
+    before(() => {
+      toggleExperiment(self, 'inline-styles', true,
+          /* opt_transientExperiment */ true);
+    });
+
+    after(() => {
+      toggleExperiment(self, 'inline-styles', false,
+          /* opt_transientExperiment */ true);
+    });
+
+    it('should allow valid styles',() => {
+      expect(sanitizeHtml('<div style="color:blue">Test</div>'))
+          .to.equal('<div style="color:blue">Test</div>');
+    });
+
+    it('should ignore styles containing `!important`',() => {
+      expect(sanitizeHtml('<div style="color:blue!important">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:fixed`', () => {
+      expect(sanitizeHtml('<div style="position:fixed">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
+
+    it('should ignore styles containing `position:sticky`', () => {
+      expect(sanitizeHtml('<div style="position:sticky">Test</div>'))
+          .to.equal('<div>Test</div>');
+    });
   });
 });

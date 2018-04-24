@@ -74,7 +74,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     });
 
     function isDisplayed(el) {
-      return el.hasAttribute('i-amphtml-subs-display');
+      return el.classList.contains('i-amphtml-subs-display');
     }
 
     function displayed(array) {

@@ -20,10 +20,10 @@
  */
 
 import {dev, user} from './log';
+import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles} from './style';
 import {startsWith} from './string';
-
 
 /**
  * @enum {string}
@@ -38,6 +38,19 @@ export const Layout = {
   FLEX_ITEM: 'flex-item',
   FLUID: 'fluid',
   INTRINSIC: 'intrinsic',
+};
+
+
+/**
+ * Layout priorities to use with BaseElement#getLayoutPriority() and
+ * BaseElement#updateLayoutPriority().
+ * @enum {number}
+ */
+export const LayoutPriority = {
+  CONTENT: 0,
+  METADATA: 1,
+  ADS: 2,
+  BACKGROUND: 3,
 };
 
 
@@ -310,7 +323,7 @@ export function applyStaticLayout(element) {
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (dev().assert(
         parseLayout(completedLayoutAttr)));
-    if ((layout == Layout.RESPONSIVE || layout === Layout.INTRINSIC)
+    if ((layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC)
       && element.firstElementChild) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
@@ -432,14 +445,15 @@ export function applyStaticLayout(element) {
   } else if (layout == Layout.INTRINSIC) {
     // Intrinsic uses an svg inside the sizer element rather than the padding trick
     // Note a naked svg won't work becasue other thing expect the i-amphtml-sizer element
-    const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
-    const intrinsicSizer = element.ownerDocument.createElement('img');
-    sizer.classList.add('i-amphtml-sizer');
-    intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+    const sizer = htmlFor(element)`
+      <i-amphtml-sizer class="i-amphtml-sizer">
+        <img class="i-amphtml-intrinsic-sizer" />
+      </i-amphtml-sizer>`;
+    const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute('src',
-        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"></svg>`);
-    sizer.appendChild(intrinsicSizer);
+        `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
+    // TODO(jpettitt): sizer is leaked and can't be cleaned up.
     element.sizerElement = intrinsicSizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.

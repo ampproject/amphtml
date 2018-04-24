@@ -78,23 +78,23 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
     it('should fail if config is invalid: authorization', () => {
       delete validConfig['authorization'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"authorization" URL must be specified/);
+      }).to.throw(/"authorization" URL must be specified/); });
     });
 
     it('should fail if config is invalid: publicKeyUrl', () => {
       delete validConfig['publicKeyUrl'];
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/);
+      }).to.throw(/"publicKey" or "publicKeyUrl" must be specified/); });
     });
 
     it('should fail if config is invalid: http publicKeyUrl', () => {
       validConfig['publicKeyUrl'] = 'http://acme.com/pk';
-      expect(() => {
+      allowConsoleError(() => { expect(() => {
         new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      }).to.throw(/https/);
+      }).to.throw(/https/); });
     });
 
     it('should support either publicKey or publicKeyUrl', () => {
@@ -589,23 +589,23 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should fail w/o exp', () => {
         delete jwt['exp'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"exp" field must be specified/);
+        }).to.throw(/"exp" field must be specified/); });
       });
 
       it('should fail w/invalid exp', () => {
         jwt['exp'] = 'invalid';
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw();
+        }).to.throw(); });
       });
 
       it('should fail when expired', () => {
         jwt['exp'] = Math.floor((Date.now() - 10000) / 1000);
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/token has expired/);
+        }).to.throw(/token has expired/); });
       });
 
       it('should succeed with array aud', () => {
@@ -621,23 +621,23 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should fail w/o aud', () => {
         delete jwt['aud'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" field must be specified/);
+        }).to.throw(/"aud" field must be specified/); });
       });
 
       it('should fail w/non-AMP aud', () => {
         jwt['aud'] = 'other.org';
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/);
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
 
       it('should fail w/non-AMP aud array', () => {
         jwt['aud'] = ['another.org', 'other.org'];
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "ampproject.org"/);
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
     });
 

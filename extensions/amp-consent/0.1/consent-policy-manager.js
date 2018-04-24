@@ -15,21 +15,16 @@
  */
 
 import {CONSENT_ITEM_STATE} from './consent-state-manager';
-import {dev} from '../../../src/log';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {dev, user} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {hasOwn, map} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
 
+export const MULTI_CONSENT_EXPERIMENT = 'multi-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
-/**
- * Possible consent policy state to proceed with.
- * @enum {number}
- */
-export const CONSENT_POLICY_STATE = {
-  SUFFICIENT: 0,
-  INSUFFICIENT: 1,
-  UNKNOWN: 2,
-};
 
 export class ConsentPolicyManager {
   constructor(ampdoc) {
@@ -37,13 +32,13 @@ export class ConsentPolicyManager {
     this.ampdoc_ = ampdoc;
 
     /** @private {!Object<string, ?Promise>} */
-    this.policyInstancePromise_ = {};
+    this.policyInstancePromises_ = map();
 
     /** @private {!Object<string, ?function()>} */
-    this.policyInstancePromiseResolver_ = {};
+    this.policyInstancePromiseResolvers_ = map();
 
     /** @private {!Object<string, ConsentPolicyInstance>} */
-    this.instances_ = {};
+    this.instances_ = map();
 
     /** @private {!Promise} */
     this.ConsentStateManagerPromise_ =
@@ -55,8 +50,8 @@ export class ConsentPolicyManager {
    * Example policy config format:
    * {
    *   "waitFor": {
-   *     "consentABC": undefined,
-   *     "consentDEF": undefined
+   *     "consentABC": [], // Can't support array now. All items will be treated as an empty array
+   *     "consentDEF": []
    *   }
    * }
    *
@@ -74,10 +69,10 @@ export class ConsentPolicyManager {
 
     this.instances_[policyId] = instance;
 
-    if (this.policyInstancePromiseResolver_[policyId]) {
-      this.policyInstancePromiseResolver_[policyId]();
-      this.policyInstancePromiseResolver_[policyId] = null;
-      this.policyInstancePromise_[policyId] = null;
+    if (this.policyInstancePromiseResolvers_[policyId]) {
+      this.policyInstancePromiseResolvers_[policyId]();
+      this.policyInstancePromiseResolvers_[policyId] = null;
+      this.policyInstancePromises_[policyId] = null;
     }
 
     this.ConsentStateManagerPromise_.then(manager => {
@@ -96,11 +91,21 @@ export class ConsentPolicyManager {
   /**
    * Used to wait for policy to resolve;
    * @param {string} policyId
-   * @return {!Promise}
+   * @return {!Promise<CONSENT_POLICY_STATE>}
    */
   whenPolicyResolved(policyId) {
+    if (!isExperimentOn(this.ampdoc_.win, MULTI_CONSENT_EXPERIMENT)) {
+      // If customized policy is not supported
+      if (policyId != 'default') {
+        user().error(TAG, 'can not find policy, do not set value to ' +
+            'data-block-on-consent');
+        return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
+      }
+    }
     return this.whenPolicyInstanceReady_(policyId).then(() => {
-      return this.instances_[policyId].getReadyPromise();
+      return this.instances_[policyId].getReadyPromise().then(() => {
+        return this.instances_[policyId].getCurrentPolicyStatus();
+      });
     });
   }
 
@@ -113,19 +118,20 @@ export class ConsentPolicyManager {
     if (this.instances_[policyId]) {
       return Promise.resolve();
     }
-    if (!this.policyInstancePromise_[policyId]) {
-      this.policyInstancePromise_[policyId] = new Promise(resolve => {
-        this.policyInstancePromiseResolver_[policyId] = resolve;
+    if (!this.policyInstancePromises_[policyId]) {
+      this.policyInstancePromises_[policyId] = new Promise(resolve => {
+        this.policyInstancePromiseResolvers_[policyId] = resolve;
       });
     }
-    return /** @type {!Promise} */ (this.policyInstancePromise_[policyId]);
+    return /** @type {!Promise} */ (this.policyInstancePromises_[policyId]);
   }
 }
 
 export class ConsentPolicyInstance {
   constructor(pendingItems) {
-    /** @private {!Array<string>} */
-    this.pendingItems_ = pendingItems;
+
+    /** @private {!Object<string, ?CONSENT_ITEM_STATE>} */
+    this.itemToConsentState_ = map();
 
     /** @private {?function()} */
     this.readyPromiseResolver_ = null;
@@ -134,6 +140,19 @@ export class ConsentPolicyInstance {
     this.readyPromise_ = new Promise(resolve => {
       this.readyPromiseResolver_ = resolve;
     });
+
+    /** @private {CONSENT_POLICY_STATE} */
+    this.status_ = CONSENT_POLICY_STATE.UNKNOWN;
+    this.init_(pendingItems);
+  }
+
+  /**
+   * @param {!Array<string>} pendingItems
+   */
+  init_(pendingItems) {
+    for (let i = 0; i < pendingItems.length; i++) {
+      this.itemToConsentState_[pendingItems[i]] = null;
+    }
   }
 
   /**
@@ -144,38 +163,89 @@ export class ConsentPolicyInstance {
   consentStateChangeHandler(consentId, state) {
     // TODO: Keeping an array can have performance issue, change to using a map
     // if necessary.
-    if (state == CONSENT_ITEM_STATE.GRANTED) {
-      const index = this.pendingItems_.indexOf(consentId);
-      if (index > -1) {
-        this.pendingItems_.splice(index, 1);
-      }
+    dev().assert(hasOwn(this.itemToConsentState_, consentId),
+        `cannot find ${consentId} in policy state`);
+
+    if (state == CONSENT_ITEM_STATE.UNKNOWN) {
+      // consent state has not been resolved yet.
+      return;
     }
 
-    if (state == CONSENT_ITEM_STATE.REJECTED) {
-      const index = this.pendingItems_.indexOf(consentId);
-      if (index == -1) {
-        this.pendingItems_.push(consentId);
+
+    if (state == CONSENT_ITEM_STATE.NOT_REQUIRED) {
+      const shouldOverwrite =
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.GRANTED &&
+          this.itemToConsentState_[consentId] != CONSENT_ITEM_STATE.REJECTED;
+      // Ignore the consent item state and overwrite state value.
+      if (shouldOverwrite) {
+        this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.NOT_REQUIRED;
       }
+    } else if (state == CONSENT_ITEM_STATE.DISMISSED) {
+      // When dismissed, use the old value
+      if (this.itemToConsentState_[consentId] === null) {
+        this.itemToConsentState_[consentId] = CONSENT_ITEM_STATE.UNKNOWN;
+      }
+    } else {
+      this.itemToConsentState_[consentId] = state;
     }
 
-    // We don't need to move around state UNKNOWN because it will be in pending
-    // list at first.
     this.evaluate_();
   }
 
 
   evaluate_() {
-    if (this.pendingItems_.length == 0) {
+    // All consent instances need to be granted
+    let isSufficient = true;
+
+    // All consent instances need to be granted or ignored
+    let isIgnored = true;
+
+    // A single consent instance is unknown
+    let isUnknown = false;
+
+    // Decide to traverse item list every time instead of keeping reject/pending counts
+    // Performance should be OK since we expect item list to be small.
+    const items = Object.keys(this.itemToConsentState_);
+    for (let i = 0; i < items.length; i++) {
+      const consentId = items[i];
+      if (this.itemToConsentState_[consentId] === null) {
+        return;
+      }
+
+      if (this.itemToConsentState_[consentId] ==
+          CONSENT_ITEM_STATE.NOT_REQUIRED) {
+        isSufficient = false;
+      }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.REJECTED) {
+        isSufficient = false;
+        isIgnored = false;
+      }
+
+      if (this.itemToConsentState_[consentId] == CONSENT_ITEM_STATE.UNKNOWN) {
+        isSufficient = false;
+        isIgnored = false;
+        isUnknown = true;
+      }
+    }
+
+    let state = null;
+
+    if (isSufficient) {
+      state = CONSENT_POLICY_STATE.SUFFICIENT;
+    } else if (isIgnored) {
+      state = CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
+    } else if (isUnknown) {
+      state = CONSENT_POLICY_STATE.UNKNOWN;
+    } else {
+      state = CONSENT_POLICY_STATE.INSUFFICIENT;
+    }
+
+    this.status_ = state;
+
+    if (this.readyPromiseResolver_) {
       this.readyPromiseResolver_();
       this.readyPromiseResolver_ = null;
-    } else {
-      // It's possible user toggle state. And ready promise needs to be reset
-      // TODO: Do not reset ready promise in case of timeout
-      if (!this.readyPromiseResolver_) {
-        this.readyPromise_ = new Promise(resolve => {
-          this.readyPromiseResolver_ = resolve;
-        });
-      }
     }
   }
 
@@ -186,5 +256,13 @@ export class ConsentPolicyInstance {
    */
   getReadyPromise() {
     return this.readyPromise_;
+  }
+
+  /**
+   * Returns the current consent policy state
+   * @return {CONSENT_POLICY_STATE}
+   */
+  getCurrentPolicyStatus() {
+    return this.status_;
   }
 }

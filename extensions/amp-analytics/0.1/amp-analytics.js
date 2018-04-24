@@ -27,6 +27,7 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
+import {LayoutPriority} from '../../../src/layout';
 import {
   RequestHandler,
   expandConfigRequest,
@@ -127,7 +128,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? 0 : 1;
+    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
   }
 
   /** @override */
@@ -624,7 +625,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
           requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
+              this.element, request, this.preconnect,
               this.sendRequest_.bind(this),
               this.isSandbox_);
         }

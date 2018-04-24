@@ -16,6 +16,7 @@
 
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {CommonSignals} from '../../../src/common-signals';
+import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
@@ -58,7 +59,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Since this is AMPHTML we are trusting that it will load responsibly
-    return 0;
+    return LayoutPriority.CONTENT;
   }
 
   /** @override **/

@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlement';
 import {Observable} from '../../../src/observable';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+
 
 /** @typedef {{serviceId: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
 
+/** @const */
+const TAG = 'amp-subscriptions';
 
 export class PlatformStore {
   /**
-   *
    * @param {!Array<string>} expectedServiceIds
+   * @param {!JsonObject} scoreConfig
+   * @param {!./entitlement.Entitlement} fallbackEntitlement
    */
-  constructor(expectedServiceIds) {
+  constructor(expectedServiceIds, scoreConfig, fallbackEntitlement) {
 
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = dict();
@@ -39,14 +44,33 @@ export class PlatformStore {
     this.entitlements_ = {};
 
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
-    this.onChangeCallbacks_ = new Observable();
+    this.onEntitlementResolvedCallbacks_ = new Observable();
 
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
+    /** @private @const {Observable} */
+    this.onGrantStateResolvedCallbacks_ = new Observable();
+
+    /** @private {?Entitlement} */
+    this.grantStatusEntitlement_ = null;
+
+    /** @private {?Promise<?Entitlement>} */
+    this.grantStatusEntitlementPromise_ = null;
+
     /** @private {?Promise<!Array<!./entitlement.Entitlement>>} */
     this.allResolvedPromise_ = null;
 
+    /** @private {!Array<string>} */
+    this.failedPlatforms_ = [];
+
+    /** @private @canst {!./entitlement.Entitlement} */
+    this.fallbackEntitlement_ = fallbackEntitlement;
+
+    /** @private @const {!Object<string, number>} */
+    this.scoreConfig_ = Object.assign({
+      'supportsViewer': 10,
+    }, scoreConfig);
   }
 
   /**
@@ -100,7 +124,7 @@ export class PlatformStore {
    * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
-    this.onChangeCallbacks_.add(callback);
+    this.onEntitlementResolvedCallbacks_.add(callback);
   }
 
   /**
@@ -112,10 +136,13 @@ export class PlatformStore {
     if (entitlement) {
       entitlement.service = serviceId;
     }
-
     this.entitlements_[serviceId] = entitlement;
+    // Remove this serviceId as a failed platform now
+    if (this.failedPlatforms_.indexOf(serviceId) != -1) {
+      this.failedPlatforms_.splice(this.failedPlatforms_.indexOf(serviceId));
+    }
     // Call all onChange callbacks.
-    this.onChangeCallbacks_.fire({serviceId, entitlement});
+    this.onEntitlementResolvedCallbacks_.fire({serviceId, entitlement});
   }
 
   /**
@@ -143,6 +170,7 @@ export class PlatformStore {
       for (const key in this.entitlements_) {
         const entitlement = (this.entitlements_[key]);
         if (entitlement.enablesThis()) {
+          this.saveGrantEntitlement_(entitlement);
           return resolve(true);
         }
       }
@@ -154,6 +182,7 @@ export class PlatformStore {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlement}) => {
           if (entitlement.enablesThis()) {
+            this.saveGrantEntitlement_(entitlement);
             resolve(true);
           } else if (this.areAllPlatformsResolved_()) {
             resolve(false);
@@ -163,6 +192,49 @@ export class PlatformStore {
     });
 
     return this.grantStatusPromise_;
+  }
+
+  /**
+   * Checks and saves the entitlement for grant status
+   * @param {!Entitlement} entitlement
+   * @private
+   */
+  saveGrantEntitlement_(entitlement) {
+    // The entitlement will be stored either if its the first one
+    // or last one was metered and new one has full subscription.
+    if ((!this.grantStatusEntitlement_) || (this.grantStatusEntitlement_
+      && (this.grantStatusEntitlement_.metering
+          && entitlement.subscriptionToken))) {
+      this.grantStatusEntitlement_ = entitlement;
+      this.onGrantStateResolvedCallbacks_.fire();
+    }
+  }
+
+  /**
+   * Returns the entitlement which unlocked the document
+   * @returns {!Promise<?Entitlement>}
+   */
+  getGrantEntitlement() {
+    if (this.grantStatusEntitlementPromise_) {
+      return (this.grantStatusEntitlementPromise_);
+    }
+
+    this.grantStatusEntitlementPromise_ = new Promise(resolve => {
+      if ((this.grantStatusEntitlement_
+          && this.grantStatusEntitlement_.subscriptionToken)
+          || this.areAllPlatformsResolved_()) {
+        resolve(this.grantStatusEntitlement_);
+      } else {
+        this.onGrantStateResolvedCallbacks_.add(() => {
+          if (this.grantStatusEntitlement_.subscriptionToken
+              || this.areAllPlatformsResolved_()) {
+            resolve(this.grantStatusEntitlement_);
+          }
+        });
+      }
+    });
+
+    return this.grantStatusEntitlementPromise_;
   }
 
   /**
@@ -262,14 +334,17 @@ export class PlatformStore {
       const entitlement =
           this.getResolvedEntitlementFor(platform.getServiceId());
 
-      // Subscriber, gains weight 10
+      // Subscriber wins immediatly.
       if (!!entitlement.subscriptionToken) {
-        weight += 10;
+        weight += 100000;
       }
+
+      // Add the base score
+      weight += platform.getBaseScore();
 
       // If supports the current viewer, gains weight 9
       if (platform.supportsCurrentViewer()) {
-        weight += 9;
+        weight += this.scoreConfig_['supportsViewer'];
       }
 
       platformWeights.push({
@@ -296,5 +371,24 @@ export class PlatformStore {
     }
 
     return localPlatform;
+  }
+
+  /**
+   * Records a platform failure and logs error if all platforms have failed.
+   * @param {string} serviceId
+   */
+  reportPlatformFailure(serviceId) {
+    if (this.failedPlatforms_.indexOf(serviceId) == -1) {
+      const entitlement = Entitlement.empty(serviceId);
+      this.resolveEntitlement(serviceId, entitlement);
+      this.failedPlatforms_.push(serviceId);
+    }
+
+    if (this.failedPlatforms_.length == this.serviceIds_.length) {
+      user().warn(TAG, 'All platforms have failed to resolve, '
+          + 'using fallback entitlement for local platform');
+      this.resolveEntitlement(this.getLocalPlatform().getServiceId(),
+          this.fallbackEntitlement_);
+    }
   }
 }

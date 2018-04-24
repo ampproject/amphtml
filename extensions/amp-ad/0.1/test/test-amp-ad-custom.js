@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
+import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
 import {
   createElementWithAttributes,
@@ -133,7 +134,7 @@ describe('Amp custom ad', () => {
       it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(0);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
 
@@ -145,7 +146,7 @@ describe('Amp custom ad', () => {
       it('should return priority of 0', () => {
         const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(0);
+        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
       });
     });
   });
@@ -207,26 +208,28 @@ describe('Amp custom ad', () => {
       removeChildren(elem);
       const ad = new AmpAdCustom(elem);
       ad.buildCallback();
-      expect(() => {
-        ad.handleTemplateData_({
-          'data': {
-            'a': '1',
-            'b': '2',
-          },
-          'vars': {
-            'abc': '456',
-          },
-        });
-      }).to.throw('TemplateId not specified');
+      allowConsoleError(() => {
+        expect(() => {
+          ad.handleTemplateData_({
+            'data': {
+              'a': '1',
+              'b': '2',
+            },
+            'vars': {
+              'abc': '456',
+            },
+          });
+        }).to.throw('TemplateId not specified');
 
-      expect(() => {
-        ad.handleTemplateData_({
-          'templateId': '1',
-          'vars': {
-            'abc': '456',
-          },
-        });
-      }).to.throw('Template data not specified');
+        expect(() => {
+          ad.handleTemplateData_({
+            'templateId': '1',
+            'vars': {
+              'abc': '456',
+            },
+          });
+        }).to.throw('Template data not specified');
+      });
     });
   });
 });

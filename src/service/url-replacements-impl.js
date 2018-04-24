@@ -46,8 +46,13 @@ import {isProtocolValid} from '../url';
 const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
+const GEO_DELIM = ',';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
+
+/** A whitelist for replacements whose values should not be %-encoded. */
+/** @private @const {Object<string, boolean>} */
+const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** @const {string} */
 export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
@@ -243,6 +248,17 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
+    // Returns the value of the given field name in the fragment query string.
+    // Second parameter is an optional default value.
+    // For example, if location is 'pub.com/amp.html?x=1#y=2' then
+    // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
+    this.setAsync('FRAGMENT_PARAM',
+        this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM'));
+
+    // Returns the first item in the ancestorOrigins array, if available.
+    this.setAsync('ANCESTOR_ORIGIN',
+        this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN'));
+
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -324,6 +340,18 @@ export class GlobalVariableSource extends VariableSource {
       }, 'VARIANTS');
     }));
 
+    // Returns assigned geo value for geoType or all groups.
+    this.setAsync('AMP_GEO', /** @type {AsyncResolverDef} */(geoType => {
+      return this.getGeo_(geos => {
+        if (geoType) {
+          user().assert(geoType === 'ISOCountry',
+              'The value passed to AMP_GEO() is not valid name:' + geoType);
+          return /** @type {string} */ (geos[geoType] || 'unknown');
+        }
+        return /** @type {string} */ (geos.ISOCountryGroups.join(GEO_DELIM));
+      }, 'AMP_GEO');
+    }));
+
     // Returns incoming share tracking fragment.
     this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
       () => {
@@ -348,6 +376,18 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
+
+    // Returns the IANA timezone code
+    this.set('TIMEZONE_CODE', () => {
+      let tzCode;
+      if ('Intl' in this.ampdoc.win &&
+        'DateTimeFormat' in this.ampdoc.win.Intl) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+
+      return tzCode || '';
+    });
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.set('SCROLL_TOP', viewportMethod(viewport, 'getScrollTop'));
@@ -514,7 +554,7 @@ export class GlobalVariableSource extends VariableSource {
           root.getElementById(/** @type {string} */ (id)),
           `Could not find an element with id="${id}" for VIDEO_STATE`);
       return Services.videoManagerForDoc(this.ampdoc)
-          .getVideoAnalyticsDetails(video)
+          .getAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
 
@@ -612,6 +652,24 @@ export class GlobalVariableSource extends VariableSource {
   }
 
   /**
+   * Resolves the value via geo service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getGeo_(getter, expr) {
+    return Services.geoForOrNull(this.ampdoc.win)
+        .then(geo => {
+          user().assert(geo,
+              'To use variable %s, amp-geo should be configured',
+              expr);
+          return getter(geo);
+        });
+  }
+
+  /**
    * Resolves the value via amp-share-tracking's service.
    * @param {function(!ShareTrackingFragmentsDef):T} getter
    * @param {string} expr
@@ -648,6 +706,26 @@ export class GlobalVariableSource extends VariableSource {
         return storyVariables[property];
       });
     };
+  }
+
+  /**
+   * Resolves the value via amp-viewer-integration's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getViewerIntegrationValue_(property, name) {
+    return /** @type {!AsyncResolverDef} */ (
+      (param, defaultValue = '') => {
+        const service =
+            Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
+        return service.then(viewerIntegrationVariables => {
+          user().assert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
+          return viewerIntegrationVariables[property](param, defaultValue);
+        });
+      });
   }
 }
 
@@ -890,7 +968,7 @@ export class UrlReplacements {
     // additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended.
     // #2: If the expansion function is not whitelisted:
-    // addionalUrlParamters will not be expanded,
+    // additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
@@ -986,7 +1064,8 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          replacement = replacement.replace(match, encodeValue(v));
+          replacement = replacement.replace(match,
+              NOENCODE_WHITELIST[match] ? v : encodeValue(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -1001,7 +1080,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return NOENCODE_WHITELIST[match] ? val : encodeValue(val);
     });
 
     if (replacementPromise) {

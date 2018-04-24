@@ -34,6 +34,10 @@ tags: {  # <amp-bodymovin-animation>
     value_regex_casei: "(false|number|true)"
   }
   attrs: {
+    name: "noautoplay"
+    value: ""
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value_url: {

@@ -19,6 +19,7 @@ import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {LayoutPriority} from '../../../../src/layout';
 import {adConfig} from '../../../../ads/_config';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -142,7 +143,9 @@ describes.realWin('amp-ad-3p-impl', {
     it('should throw on position:fixed', () => {
       ad3p.element.style.position = 'fixed';
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should throw on parent being position:fixed', () => {
@@ -153,7 +156,9 @@ describes.realWin('amp-ad-3p-impl', {
       adContainerElement.appendChild(ad3p.element);
 
       ad3p.onLayoutMeasure();
-      expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      allowConsoleError(() => {
+        expect(() => ad3p.layoutCallback()).to.throw('position:fixed');
+      });
     });
 
     it('should allow position:fixed with whitelisted ad container', () => {
@@ -533,7 +538,7 @@ describe('#getLayoutPriority', () => {
   }, env => {
     it('should return priority of 1', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getLayoutPriority()).to.equal(1);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
     });
   });
 
@@ -544,7 +549,7 @@ describe('#getLayoutPriority', () => {
   }, env => {
     it('should return priority of 2', () => {
       const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-      expect(ad3p.getLayoutPriority()).to.equal(2);
+      expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
     });
   });
 });
