@@ -35,17 +35,16 @@ config.run('amp-position-observer', function() {
 
   const extensions = ['amp-fx-collection'];
 
-  const scrollboundBody = `
+  const defaultBody = `
     <div class="spacer"></div>
     <div id="animTarget"
-      amp-fx="fade-in"
-      data-margin-start='0%'>
+      amp-fx="fade-in">
     </div>
     <div class="spacer"></div>
   `;
 
   describes.integration("amp-fx='fade-in'", {
-    body: scrollboundBody,
+    body: defaultBody,
     css,
     extensions,
   }, env => {
@@ -55,14 +54,80 @@ config.run('amp-position-observer', function() {
       win = env.win;
     });
 
-    it('runs fade in animation with scroll', () => {
+    it.only('runs fade-in animation', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, getViewportHeight(win));
-      return Promise.resolve().then(timeout(6000))
+      win.scrollTo(0, 1.05*getViewportHeight(win));
+      return Promise.resolve().then(timeout(1500))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
         });
+    });
+  });
+
+const marginSpecific = `
+    <div class="spacer"></div>
+    <div id="animTarget"
+      amp-fx="fade-in"
+      data-margin-start='50%'>
+    </div>
+    <div class="spacer"></div>
+  `;
+
+  describes.integration("amp-fx='fade-in'", {
+    body: marginSpecific,
+    css,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    it('margin-start specified', () => {
+      // Not visible yet, opacity = 0;
+      expect(getOpacity(win)).to.equal(0);
+      win.scrollTo(0, 1.5*getViewportHeight(win));
+      return Promise.resolve().then(timeout(1500))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(1);
+        });
+    });
+  });
+
+  const durationSpecific = `
+    <div class="spacer"></div>
+    <div id="animTarget"
+      amp-fx="fade-in"
+      data-duration='2000ms'>
+    </div>
+    <div class="spacer"></div>
+  `;
+
+  describes.integration("amp-fx='fade-in'", {
+    body: durationSpecific,
+    css,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    it('duration specified', () => {
+      // Not visible yet, opacity = 0;
+      expect(getOpacity(win)).to.equal(0);
+      win.scrollTo(0, getViewportHeight(win));
+      Promise.resolve().then(timeout(1000))
+        .then(() => {
+          expect(getOpacity(win) > 0).to.be.true;
+          expect(getOpacity(win) < 1).to.be.true;
+      }).then(timeout(1000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(1);
+      });
     });
   });
 });
