@@ -122,9 +122,6 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (!this.ampdocService.isSingleDoc()) {
-      Promise.resolve();
-    }
     const ampdocSingle = this.ampdocService.getAmpDoc();
     if (!getMode().test &&
         ampdocSingle &&
@@ -140,30 +137,28 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-    return Services.viewerForDoc(ampdocSingle).whenFirstVisible().then(
-        () => {
-          return this.maybeIntercept_(input, init, ampdocSingle)
-              .then(interceptorResponse => {
-                if (interceptorResponse) {
-                  return interceptorResponse;
-                }
-                // After this point, both the native `fetch` and the `fetch` polyfill will
-                // expect a native `FormData` object in the `body` property, so the native
-                // `FormData` object needs to be unwrapped.
-                if (isFormDataWrapper(init.body)) {
-                  init.body = init.body.getFormData();
-                }
-                // Fallback to xhr polyfill since `fetch` api does not support
-                // responseType = 'document'. We do this so we don't have to do any
-                // parsing and document construction on the UI thread which would be
-                // expensive.
-                if (init.responseType == 'document') {
-                  return fetchPolyfill(input, init);
-                }
-                return (this.win.fetch || fetchPolyfill).apply(null, arguments);
-              });
-        }
-    );
+    return Services.viewerForDoc(ampdocSingle).whenFirstVisible()
+        .then(() => {
+          return this.maybeIntercept_(input, init, ampdocSingle);
+        }).then(interceptorResponse => {
+          if (interceptorResponse) {
+            return interceptorResponse;
+          }
+          // After this point, both the native `fetch` and the `fetch` polyfill will
+          // expect a native `FormData` object in the `body` property, so the native
+          // `FormData` object needs to be unwrapped.
+          if (isFormDataWrapper(init.body)) {
+            init.body = init.body.getFormData();
+          }
+          // Fallback to xhr polyfill since `fetch` api does not support
+          // responseType = 'document'. We do this so we don't have to do any
+          // parsing and document construction on the UI thread which would be
+          // expensive.
+          if (init.responseType == 'document') {
+            return fetchPolyfill(input, init);
+          }
+          return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+        });
   }
 
   /**
@@ -186,6 +181,9 @@ export class Xhr {
    * @private
    */
   maybeIntercept_(input, init, ampdocSingle) {
+    if (!this.ampdocService.isSingleDoc()) {
+      return Promise.resolve();
+    }
     const htmlElement = ampdocSingle.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     if (!docOptedIn) {

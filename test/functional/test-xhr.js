@@ -30,7 +30,9 @@ import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 describe.configure().skipSafari().run('XHR', function() {
   let sandbox;
   let ampdocServiceForStub;
+  let ampdocViewerStub;
   let xhrCreated;
+  let viewer;
 
   const location = {href: 'https://acme.com/path'};
   const nativeWin = {
@@ -73,7 +75,17 @@ describe.configure().skipSafari().run('XHR', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-    ampdocServiceForStub.returns({isSingleDoc: () => false});
+    ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
+    ampdocViewerStub.returns({
+      whenFirstVisible: () => {
+        return Promise.resolve();
+      },
+    });
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => false,
+      getAmpDoc: () => { return ampdocViewerStub; },
+    });
+
     location.href = 'https://acme.com/path';
   });
 
@@ -83,14 +95,15 @@ describe.configure().skipSafari().run('XHR', function() {
 
   scenarios.forEach(test => {
     let xhr;
-
+    beforeEach(() => {
+      xhr = xhrServiceForTesting(test.win);
+    });
     // Since if it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
       describe('#XHR', () => {
         beforeEach(() => {
-          xhr = xhrServiceForTesting(test.win);
           setupMockXhr();
         });
 
@@ -253,7 +266,9 @@ describe.configure().skipSafari().run('XHR', function() {
     }
 
     describe('AMP-Same-Origin', () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
+      });
 
       it('should not be set for cross origin requests', () => {
         const init = {};
@@ -289,7 +304,9 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     describe(test.desc, () => {
-      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
+      });
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
@@ -765,9 +782,8 @@ describe.configure().skipSafari().run('XHR', function() {
     const origin = 'https://acme.com';
 
     let interceptionEnabledWin;
-    let viewer;
+    let optedInDoc;
     let sendMessageStub;
-
     function getDefaultResponseOptions() {
       return {
         headers: [
@@ -781,23 +797,24 @@ describe.configure().skipSafari().run('XHR', function() {
     }
 
     beforeEach(() => {
-      const optedInDoc = window.document.implementation.createHTMLDocument('');
+      optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
         getAmpDoc: () => ({getRootNode: () => optedInDoc}),
       });
-
       viewer = {
         hasCapability: () => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: getDefaultResponsePromise,
+        whenFirstVisible: () => {
+          return Promise.resolve();
+        },
       };
       sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-
+      ampdocViewerStub.returns(viewer);
       interceptionEnabledWin = {
         location: {
           href: `${origin}/path`,
@@ -808,7 +825,10 @@ describe.configure().skipSafari().run('XHR', function() {
     });
 
     it('should not intercept if AMP doc is not single', () => {
-      ampdocServiceForStub.returns({isSingleDoc: () => false});
+      ampdocServiceForStub.returns({
+        isSingleDoc: () => false,
+        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      });
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
       return xhr.fetch('https://cdn.ampproject.org')
