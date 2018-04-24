@@ -2151,6 +2151,25 @@ describe('amp-a4a', () => {
         })).to.be.calledOnce;
       });
     });
+
+    it('should set isSinglePageStoryAd to false', () => {
+      return createIframePromise().then(fixture => {
+        const element = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(element);
+        a4a.buildCallback();
+        expect(a4a.isSinglePageStoryAd).to.be.false;
+      });
+    });
+
+    it('should set isSinglePageStoryAd to true', () => {
+      return createIframePromise().then(fixture => {
+        const element = createA4aElement(fixture.doc);
+        element.setAttribute('amp-story', 1);
+        const a4a = new MockA4AImpl(element);
+        a4a.buildCallback();
+        expect(a4a.isSinglePageStoryAd).to.be.true;
+      });
+    });
   });
 
   describe('canonical AMP', () => {

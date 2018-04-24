@@ -461,7 +461,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
 
-    this.isSinglePageStoryAd = 'ampStory' in this.element.dataset;
+    this.isSinglePageStoryAd = !!this.element.getAttribute('amp-story');
   }
 
   /** @override */
