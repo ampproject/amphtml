@@ -24,8 +24,18 @@ import {parseJson} from '../src/json';
 export function uzou(global, data) {
   validateData(data, ['widgetParams'], []);
 
+  const akamaiHost = 'speee-ad.akamaized.net';
+  const prefixMap = {
+    test: 'dev-',
+    development: 'dev-',
+    staging: 'staging-',
+    production: '',
+  };
+
   const widgetParams = parseJson(data['widgetParams']);
   const placementCode = widgetParams['placementCode'];
+  const mode = widgetParams['mode'] || 'production';
+  const entryPoint = `https://${prefixMap[mode]}${akamaiHost}/tag/${placementCode}/js/outer-frame.min.js`:
 
   const d = global.document.createElement('div');
   d.className = `uz-${placementCode} uz-ny`;
@@ -33,10 +43,14 @@ export function uzou(global, data) {
   const container = global.document.getElementById('c');
   container.appendChild(d);
 
-  global.UzouInjector = {
-    url: data['url'] || global.context.canonicalUrl || global.context.sourceUrl,
-    ref: data['referrer'] || global.context.referrer,
+  const uzouInjector = {
+    url: widgetParams['url'] || global.context.canonicalUrl || global.context.sourceUrl,
+    referer: widgetParams['referer'] || global.context.referrer,
   };
+  ['adServerHost', 'akamaiHost', 'iframeSrcPath'].forEach(function(elem) {
+    if (widgetParams[elem]) uzouInjector[elem] = widgetParams[elem];
+  });
+  global.UzouInjector = uzouInjector;
 
-  loadScript(global, `https://speee-ad.akamaized.net/tag/${placementCode}/js/outer-frame.min.js`);
+  loadScript(global, entryPoint);
 }
