@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {computedStyle} from '../../../../../src/style';
+
 const config = describe.configure().ifNewChrome();
 config.run('amp-fx-collection', function() {
   this.timeout(100000);
@@ -27,7 +29,7 @@ config.run('amp-fx-collection', function() {
 
     #animTarget {
       opacity: 0;
-      height: 100px;
+      height: 100vh;
       width: 100%;
       background-color: green;
     }
@@ -38,12 +40,12 @@ config.run('amp-fx-collection', function() {
   const defaultBody = `
     <div class="spacer"></div>
     <div id="animTarget"
-      amp-fx="fade-in">
+      amp-fx="fade-in-scroll">
     </div>
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='fade-in'", {
+  describes.integration("amp-fx='fade-in-scroll'", {
     body: defaultBody,
     css,
     extensions,
@@ -54,28 +56,47 @@ config.run('amp-fx-collection', function() {
       win = env.win;
     });
 
-    it.only('runs fade-in animation', () => {
+    it('runs fade-in-scroll animation with default parameters', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 1.05*getViewportHeight(win));
-      return Promise.resolve().then(timeout(1500))
+      win.scrollTo(0, 0.1*getViewportHeight(win));
+      return Promise.resolve().then(timeout(2000))
+        .then(() => {
+          // Since the animation is spread over 50% of the viewport,
+          // scrolling 10% of the viewport should change the opacity by 20%
+          expect(getOpacity(win)).to.equal(0.2);
+          win.scrollTo(0, 0.4*getViewportHeight(win));
+        }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(0.8);
+          win.scrollTo(0, 0.5*getViewportHeight(win));
+      }).then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
-        });
+          win.scrollTo(0, 0.7*getViewportHeight(win));
+      }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(1);
+          win.scrollTo(0, 0.4*getViewportHeight(win));
+      }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(1);
+      });
     });
   });
 
-const marginSpecific = `
+  const marginSpecifiedBody = `
     <div class="spacer"></div>
     <div id="animTarget"
-      amp-fx="fade-in"
-      data-margin-start='50%'>
+      amp-fx="fade-in-scroll"
+      data-margin-start='20%'
+      data-margin-end='70%'>
     </div>
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='fade-in'", {
-    body: marginSpecific,
+  describes.integration("amp-fx='fade-in-scroll'", {
+    body: marginSpecifiedBody,
     css,
     extensions,
   }, env => {
@@ -85,46 +106,23 @@ const marginSpecific = `
       win = env.win;
     });
 
-    it('margin-start specified', () => {
+    it.only('runs fade-in-scroll animation with specified parameters', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 1.5*getViewportHeight(win));
-      return Promise.resolve().then(timeout(1500))
+      win.scrollTo(0, 0.1*getViewportHeight(win));
+      return Promise.resolve().then(timeout(2000))
         .then(() => {
-          expect(getOpacity(win)).to.equal(1);
-        });
-    });
-  });
-
-  const durationSpecific = `
-    <div class="spacer"></div>
-    <div id="animTarget"
-      amp-fx="fade-in"
-      data-duration='2000ms'>
-    </div>
-    <div class="spacer"></div>
-  `;
-
-  describes.integration("amp-fx='fade-in'", {
-    body: durationSpecific,
-    css,
-    extensions,
-  }, env => {
-
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('duration specified', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, getViewportHeight(win));
-      Promise.resolve().then(timeout(1000))
+          expect(getOpacity(win)).to.equal(0);
+          win.scrollTo(0, 0.2*getViewportHeight(win));
+        }).then(timeout(2000))
         .then(() => {
-          expect(getOpacity(win) > 0).to.be.true;
-          expect(getOpacity(win) < 1).to.be.true;
-      }).then(timeout(1000))
+          expect(getOpacity(win)).to.equal(0);
+          win.scrollTo(0, 0.4*getViewportHeight(win));
+      }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(0.4);
+          win.scrollTo(0, getViewportHeight(win));
+      }).then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
       });
