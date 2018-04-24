@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   unruly,
 } from '../../../ads/unruly';
@@ -40,12 +39,15 @@ describe('unruly', () => {
 
   it('should call loadScript', () => {
     const mockGlobal = {};
-    const scriptLoader = sinon.spy();
-    expect(scriptLoader).to.not.have.been.called;
+    let expectedGlobal;
+    let expectedUrl;
+    const scriptLoader = (...args) => {
+      expectedGlobal = args[0];
+      expectedUrl = args[1];
+    };
     unruly(mockGlobal, {}, scriptLoader);
-    expect(scriptLoader).to.have.been.calledWithExactly(
-        mockGlobal, 'https://video.unrulymedia.com/amp-demo/native-loader.js'
-    );
+    expect(expectedGlobal).to.equal(mockGlobal);
+    expect(expectedUrl).to.equal('https://video.unrulymedia.com/amp-demo/native-loader.js');
   });
 
 
