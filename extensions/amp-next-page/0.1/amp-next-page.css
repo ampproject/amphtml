@@ -35,6 +35,10 @@
   background: #FFFFFF;
 }
 
+.i-amphtml-next-page-document {
+  overflow-y: hidden;
+}
+
 .i-amphtml-next-page > *[separator] {
   display: none;
 }
