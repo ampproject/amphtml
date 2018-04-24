@@ -167,7 +167,7 @@ export class Xhr {
    * XHRs are intercepted if all of the following are true:
    * - The AMP doc is in single doc mode
    * - The viewer has the `xhrInterceptor` capability
-   * - The Viewer is a trusted viewer or ApMP is currently in developement mode
+   * - The Viewer is a trusted viewer or AMP is currently in developement mode
    * - The AMP doc is opted-in for XHR interception (`<html>` tag has
    *   `allow-xhr-interception` attribute)
    *
