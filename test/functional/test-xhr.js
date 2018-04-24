@@ -83,7 +83,7 @@ describe.configure().skipSafari().run('XHR', function() {
     });
     ampdocServiceForStub.returns({
       isSingleDoc: () => false,
-      getAmpDoc: () => { return ampdocViewerStub; },
+      getAmpDoc: () => ampdocViewerStub,
     });
 
     location.href = 'https://acme.com/path';
