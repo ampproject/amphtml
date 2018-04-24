@@ -30,13 +30,8 @@ describes.realWin('Creates the relevant fx presets correctly', {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    toggleExperiment(win, 'amp-fx-fade-in', true);
-    toggleExperiment(win, 'amp-fx-fade-in-scroll', true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(win, 'amp-fx-fade-in', false);
-    toggleExperiment(win, 'amp-fx-fade-in-scroll', false);
+    toggleExperiment(win, 'amp-fx-fade-in', true, false);
+    toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
   });
 
   function createAmpFx(fxType, opt_attrs) {
@@ -54,24 +49,20 @@ describes.realWin('Creates the relevant fx presets correctly', {
     return ampFxCollection;
   }
 
-  it('creates amp-fx=`parallax` correctly', () => {
-    const ampFx = createAmpFx('parallax', {
+  it('creates amp-fx components correctly', () => {
+    let ampFx = createAmpFx('parallax', {
       'data-parallax-factor': 1.2,
     });
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;
-  });
 
-  it('creates amp-fx=`fade-in` correctly', () => {
     expect(isExperimentOn(win, 'amp-fx-fade-in')).to.be.true;
-    const ampFx = createAmpFx('fade-in');
+    ampFx = createAmpFx('fade-in');
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;
-  });
 
-  it('creates amp-fx=`fade-in-scroll` correctly', () => {
     expect(isExperimentOn(win, 'amp-fx-fade-in-scroll')).to.be.true;
-    const ampFx = createAmpFx('fade-in-scroll');
+    ampFx = createAmpFx('fade-in-scroll');
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;
   });
