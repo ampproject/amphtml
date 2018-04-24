@@ -57,7 +57,6 @@ config.run('amp-fx-collection', function() {
     });
 
     it('runs fade-in-scroll animation with default parameters', () => {
-      // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
       win.scrollTo(0, 0.1*getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
@@ -106,8 +105,7 @@ config.run('amp-fx-collection', function() {
       win = env.win;
     });
 
-    it.only('runs fade-in-scroll animation with specified parameters', () => {
-      // Not visible yet, opacity = 0;
+    it('runs fade-in-scroll animation with specified parameters', () => {
       expect(getOpacity(win)).to.equal(0);
       win.scrollTo(0, 0.1*getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
@@ -121,10 +119,52 @@ config.run('amp-fx-collection', function() {
       }).then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(0.4);
-          win.scrollTo(0, getViewportHeight(win));
+      });
+    });
+  });
+
+  const repeatSpecifiedBody = `
+    <div class="spacer"></div>
+    <div id="animTarget"
+      amp-fx="fade-in-scroll"
+      data-repeat>
+    </div>
+    <div class="spacer"></div>
+  `;
+
+  describes.integration("amp-fx='fade-in-scroll'", {
+    body: repeatSpecifiedBody,
+    css,
+    extensions,
+  }, env => {
+
+    let win;
+    beforeEach(() => {
+      win = env.win;
+    });
+
+    it('runs fade-in-scroll animation with repeat specified', () => {
+      expect(getOpacity(win)).to.equal(0);
+      win.scrollTo(0, 0.1*getViewportHeight(win));
+      return Promise.resolve().then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(0.2);
+          win.scrollTo(0, 0.4*getViewportHeight(win));
+        }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(0.8);
+          win.scrollTo(0, 0.5*getViewportHeight(win));
       }).then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
+          win.scrollTo(0, 0.7*getViewportHeight(win));
+      }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(1);
+          win.scrollTo(0, 0.4*getViewportHeight(win));
+      }).then(timeout(2000))
+        .then(() => {
+          expect(getOpacity(win)).to.equal(0.8);
       });
     });
   });
