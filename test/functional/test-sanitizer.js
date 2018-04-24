@@ -241,6 +241,18 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('<div subscriptions-dialog="">link</div>'))
         .to.equal('<div subscriptions-dialog="">link</div>');
   });
+
+  it('should allow source::src with vaild protocol', () => {
+    expect(sanitizeHtml('<source src="https://www.foo.com/">'))
+        .to.equal('<source src="https://www.foo.com/">');
+  });
+
+  it('should not allow source::src with invaild protocol', () => {
+    expect(sanitizeHtml('<source src="http://www.foo.com">'))
+        .to.equal('<source src="">');
+    expect(sanitizeHtml('<source src="<script>bad()</script>">'))
+        .to.equal('<source src="">');
+  });
 });
 
 

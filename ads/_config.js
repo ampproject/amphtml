@@ -673,6 +673,12 @@ export const adConfig = {
     ],
   },
 
+  pixels: {
+    prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
+    clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
   plista: {},
 
   polymorphicads: {
@@ -691,6 +697,10 @@ export const adConfig = {
   postquare: {},
 
   pubexchange: {},
+
+  pubguru: {
+    renderStartImplemented: true,
+  },
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',

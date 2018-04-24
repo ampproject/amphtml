@@ -47,6 +47,7 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
@@ -361,6 +362,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.forceSafeframe_ = true;
       }
     }
+
+    /** @private {?CONSENT_POLICY_STATE} */
+    this.consentState_ = null;
   }
 
   /** @override */
@@ -503,9 +507,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {resolver, rejector, promise};
   }
 
-  /** @return {!Object<string,string|boolean|number>} */
-  getPageParameters_() {
+  /**
+   * @param {?CONSENT_POLICY_STATE} consentState
+   * @return {!Object<string,string|boolean|number>}
+   * @visibleForTesting
+   */
+  getPageParameters(consentState) {
     return {
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -549,9 +559,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
+   * @param {?CONSENT_POLICY_STATE} consentState
    * @visibileForTesting
    */
-  populateAdUrlState() {
+  populateAdUrlState(consentState) {
+    this.consentState_ = consentState;
     // Allow for pub to override height/width via override attribute.
     const width = Number(this.element.getAttribute('data-override-width')) ||
       Number(this.element.getAttribute('width'));
@@ -592,16 +604,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(opt_rtcResponsesPromise) {
+  getConsentPolicy() {
+    // Ensure that build is not blocked by need for consent (delay will occur
+    // prior to RTC & ad URL construction).
+    return null;
+  }
+
+  /** @override */
+  getAdUrl(consentState, opt_rtcResponsesPromise) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+        this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
+      user().info(TAG, 'Ad request suppressed due to unknown consent');
+      return Promise.resolve('');
+    }
     if (this.iframe && !this.isRefreshing) {
       dev().warn(TAG, `Frame already exists, sra: ${this.useSra}`);
-      return '';
+      return Promise.resolve('');
     }
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     // TODO(keithwrightbos): SRA blocks currently unnecessarily generate full
     // ad url.  This could be optimized however non-SRA ad url is required to
     // fallback to non-SRA if single block.
-    this.populateAdUrlState();
+    this.populateAdUrlState(consentState);
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
@@ -618,7 +642,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), this.buildIdentityParams_(),
-                  this.getPageParameters_(), rtcParams));
+                  this.getPageParameters(consentState), rtcParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -852,6 +876,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.sraResponseRejector = sraInitializer.rejector;
     this.sraResponsePromise_ = sraInitializer.promise;
     this.qqid_ = null;
+    this.consentState_ = null;
   }
 
   /** @override */
@@ -1384,7 +1409,7 @@ export function constructSRARequest_(win, doc, instances) {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
             Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters_()),
+                instances[0].getPageParameters(instances[0].consentState_)),
             startTime);
       });
 }
@@ -1392,7 +1417,7 @@ export function constructSRARequest_(win, doc, instances) {
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Object<string, *>}
- * @visibileForTesting
+ * @visibleForTesting
  */
 export function constructSRABlockParameters(instances) {
   const parameters = {'output': 'ldjh', 'impl': 'fifs'};
