@@ -1131,7 +1131,7 @@ function createViewport(ampdoc) {
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
-    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    binding = new ViewportBindingNatural_(ampdoc);
   }
   return new Viewport(ampdoc, binding, viewer);
 }
