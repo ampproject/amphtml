@@ -107,7 +107,7 @@
     "jison": "0.4.18",
     "jsdom": "11.6.2",
     "json-stable-stringify": "1.0.1",
-    "karma": "2.0.0",
+    "karma": "2.0.2",
     "karma-babel-preprocessor": "7.0.0",
     "karma-browserify": "5.2.0",
     "karma-chai": "0.1.0",
