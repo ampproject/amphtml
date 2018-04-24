@@ -35,7 +35,7 @@ const RESIZE_EVENT_NAME = 'card.resize';
 const CARD_CSS_CLASS = 'embedly-card';
 
 /**
- * Customizable card options.
+ * Whitelisted card options.
  *
  * - Key is in camel case as received in "data".
  * - The value is in the format expected by embedly.
@@ -48,9 +48,7 @@ export const CardOptions = {
   cardChrome: 'card-chrome',
   cardTheme: 'card-theme',
   cardImage: 'card-image',
-  cardEmbed: 'card-embed',
   cardControls: 'card-controls',
-  cardWith: 'card-width',
   cardAlign: 'card-align',
   cardRecommend: 'card-recommend',
   cardKey: 'card-key',
