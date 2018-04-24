@@ -66,7 +66,7 @@ export class Entitlement {
     /** @const {boolean} */
     this.loggedIn = loggedIn;
     /** @const {string} */
-    this.detail_ = detail;
+    this.detail = detail;
     /** @const {?MeteringData} */
     this.metering = metering;
     /** @private {?string} */
@@ -84,7 +84,7 @@ export class Entitlement {
       'service': this.service,
       'products': this.products,
       'loggedIn': this.loggedIn,
-      'detail': this.detail_,
+      'detail': this.detail,
       'subscriptionToken': this.subscriptionToken,
       'metering': this.metering,
     });

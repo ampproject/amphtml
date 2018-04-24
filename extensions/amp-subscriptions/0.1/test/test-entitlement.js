@@ -31,10 +31,11 @@ describes.realWin('EntitlementClass', {}, () => {
     durationUnit: 'days',
     token: 'token',
   };
+  const detail = 'sku-id';
   it('should give json representation of the object', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn, metering});
+      subscriptionToken, detail, loggedIn, metering});
     expect(entitlement.json()).to.deep.equal({
       service,
       source,
@@ -42,6 +43,7 @@ describes.realWin('EntitlementClass', {}, () => {
       products,
       subscriptionToken,
       loggedIn,
+      detail,
       metering,
     });
   });
@@ -53,6 +55,7 @@ describes.realWin('EntitlementClass', {}, () => {
       products,
       subscriptionToken,
       loggedIn,
+      detail,
       metering,
     };
     const entitlement = Entitlement.parseFromJson(json);
@@ -62,6 +65,7 @@ describes.realWin('EntitlementClass', {}, () => {
     expect(entitlement.raw).to.be.equal(JSON.stringify(json));
     expect(entitlement.loggedIn).to.be.equal(loggedIn);
     expect(entitlement.metering).to.deep.equal(metering);
+    expect(entitlement.detail).to.equal(detail);
   });
 
   it('should be able to parse raw from json', () => {
@@ -71,6 +75,7 @@ describes.realWin('EntitlementClass', {}, () => {
       products,
       subscriptionToken,
       loggedIn,
+      detail,
       metering,
     };
     const rawValue = 'rawValue';
@@ -79,6 +84,7 @@ describes.realWin('EntitlementClass', {}, () => {
     expect(entitlement.products).to.be.equal(products);
     expect(entitlement.subscriptionToken).to.be.equal(subscriptionToken);
     expect(entitlement.raw).to.equal(rawValue);
+    expect(entitlement.detail).to.equal(detail);
     expect(entitlement.loggedIn).to.be.equal(loggedIn);
     expect(entitlement.metering).to.deep.equal(metering);
   });
@@ -86,7 +92,7 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should tell if current product is enabled', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn});
+      subscriptionToken, detail, loggedIn});
     entitlement.setCurrentProduct(products[0]);
     expect(entitlement.enablesThis()).to.be.true;
     entitlement.setCurrentProduct('lipsum');
@@ -96,7 +102,7 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should return raw, granStatus and source for pingback', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, products,
-      subscriptionToken, loggedIn});
+      subscriptionToken, detail, loggedIn});
     entitlement.setCurrentProduct(products[0]);
     const pingbackData = entitlement.jsonForPingback();
     expect(pingbackData.raw).to.be.equal(raw);
