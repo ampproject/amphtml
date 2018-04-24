@@ -23,6 +23,7 @@
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   QQID_HEADER,
   ValidAdContainerTypes,
@@ -226,7 +227,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl() {
+  getConsentPolicy() {
+    // Ensure that build is not blocked by need for consent (delay will occur
+    // prior to ad URL construction).
+    return null;
+  }
+
+  /** @override */
+  getAdUrl(consentState) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+        this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
+      user().info(TAG, 'Ad request suppressed due to unknown consent');
+      return Promise.resolve('');
+    }
     // TODO: Check for required and allowed parameters. Probably use
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
@@ -273,6 +286,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'w': this.size_.width,
       'h': this.size_.height,
       'iu': slotname,
+      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
       'adtest': adTestOn ? 'on' : null,
       adk,
       'output': 'html',
