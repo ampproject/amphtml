@@ -88,26 +88,6 @@ describes.realWin('media-pool', {}, env => {
     expect(getElements(mediaPool.allocated).length).to.equal(0);
   });
 
-  it('should preallocate exactly two elements if none exist', () => {
-    mediaPool = new MediaPool(win, /* maxCounts */ 0);
-    expect(getElements(mediaPool.unallocated).length).to.equal(2);
-  });
-
-  it('should preallocate one audio element', () => {
-    mediaPool = new MediaPool(win, /* maxCounts */ 0);
-    expect(mediaPool.unallocated.audio.length).to.equal(1);
-  });
-
-  it('should preallocate one video element', () => {
-    mediaPool = new MediaPool(win, /* maxCounts */ 0);
-    expect(mediaPool.unallocated.video.length).to.equal(1);
-  });
-
-  it('should not preallocate any unsupported types', () => {
-    mediaPool = new MediaPool(win, /* maxCounts */ 0);
-    expect(mediaPool.unallocated.unsupported).to.be.undefined;
-  });
-
   it('should allocate element on play', () => {
     mediaPool = new MediaPool(win, {'video': 2}, unusedEl => 0);
 
