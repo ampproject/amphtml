@@ -16,86 +16,114 @@
 'use strict';
 
 module.exports = function(context) {
-  function stripComments(text) {
-    // Multi-line comments
-    text = text.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
-      // Preserve the newlines
-      const newlines = [];
-      for (let i = 0; i < match.length; i++) {
-        if (match[i] === '\n') {
-          newlines.push('\n');
-        }
-      }
-      return newlines.join('');
-    });
-    // Single line comments either on its own line or following a space,
-    // semi-colon, or closing brace
-    return text.replace(/( |}|;|^) *\/\/.*/g, '$1');
+  const stack = [];
+  function current() {
+    return stack[stack.length - 1];
   }
 
-  function checkClassUse(node, name) {
-    if (!name.endsWith('_')) {
-      return;
-    }
+  function shouldIgnoreFile() {
+    return /\b(test|examples)\b/.test(context.getFilename());
+  }
 
+  function shouldIgnoreDueToAnnotation(node) {
     const comments = context.getCommentsBefore(node);
-    const testing = comments.some(comment => {
+    const annotated = comments.some(comment => {
       return /@(visibleForTesting|protected|override)\b/.test(comment.value);
     });
-    if (testing) {
-      return;
+    return annotated;
+  }
+
+
+  function shouldCheckMember(node, needsThis = true) {
+    const {computed, object, property} = node;
+    if (computed ||
+        (needsThis && object.type !== 'ThisExpression') ||
+        property.type !== 'Identifier') {
+      return false;
     }
 
-    const ancestors = context.getAncestors(node);
-    const body = ancestors.reverse().find(node => node.type === 'ClassBody');
+    return isPrivateName(property);
+  }
 
-    if (!body) {
-      return;
-    }
+  function isAssignment(node) {
+    const {parent} = node;
+    return parent.type === 'AssignmentExpression' && parent.left === node;
+  }
 
-    // Yah, I know, we're not using the AST anymore.
-    // But there's no good way to do inner traversals, so this is all we got.
-    const source = context.getSourceCode();
-    const bodyText = stripComments(source.getText(body));
-
-    // Requires two uses of the name to qualify;
-    const index = bodyText.indexOf(name);
-    if (!bodyText.includes(name, index + 1)) {
-      context.report(node, `Unused private "${name}".\n` +
-        '\tIf this is used for testing, annotate with "@visibleForTesting"\n' +
-        '\tIf this is a protected definition in a base class,' +
-        ' annotate with "@protected"\n' +
-        '\tIf this is an override of a protected, annotate with "@override"\n');
-    }
+  function isPrivateName(node) {
+    return node.name.endsWith('_');
   }
 
   return {
-    MemberExpression(node) {
-      if (/\btest\b/.test(context.getFilename())) {
+    ClassBody() {
+      if (shouldIgnoreFile()) {
         return;
       }
 
-      const {property} = node;
-      if (property.type !== 'Identifier') {
-        return;
-      }
-
-      const {name} = property;
-      checkClassUse(node, name);
+      stack.push({used: new Set(), declared: new Map()});
     },
 
-    MethodDefinition(node) {
-      if (/\btest\b/.test(context.getFilename())) {
+    'ClassBody:exit': function() {
+      if (shouldIgnoreFile()) {
+        return;
+      }
+
+      const {used, declared} = stack.pop();
+
+      declared.forEach((node, name) => {
+        if (used.has(name)) {
+          return;
+        }
+
+        context.report(node, [
+          `Unused private "${name}".`,
+          'If this is used for testing, annotate with `@visibleForTesting`.',
+          'If this is used in a subclass, annotate with `@protected`.',
+          'If this is an override of a protected, annotate with `@override`.',
+          'If none of these exceptions applies, please contact @jridgewell.',
+        ].join('\n\t'));
+      });
+    },
+
+    'ClassBody > MethodDefinition': function(node) {
+      if (shouldIgnoreFile()) {
         return;
       }
 
       const {computed, key} = node;
-      if (computed) {
+      if (computed ||
+          !isPrivateName(key) ||
+          shouldIgnoreDueToAnnotation(node)) {
         return;
       }
 
-      const {name} = key;
-      checkClassUse(node, name);
+      const {name} = node.key;
+      const {declared} = current();
+      declared.set(name, node);
+    },
+
+    'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
+      if (shouldIgnoreFile() ||
+         !shouldCheckMember(node) ||
+         !isAssignment(node)) {
+        return;
+      }
+
+      const {name} = node.property;
+      const {declared} = current();
+      declared.set(name, node);
+    },
+
+    'ClassBody MemberExpression': function(node) {
+      if (shouldIgnoreFile() ||
+         !shouldCheckMember(node, false) ||
+         isAssignment(node)) {
+        return;
+      }
+
+      const {name} = node.property;
+      const {used} = current();
+      used.add(name);
     },
   };
 };

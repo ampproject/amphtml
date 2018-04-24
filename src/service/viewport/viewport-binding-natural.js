@@ -39,9 +39,8 @@ export class ViewportBindingNatural_ {
 
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../viewer-impl.Viewer} viewer
    */
-  constructor(ampdoc, viewer) {
+  constructor(ampdoc) {
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -50,9 +49,6 @@ export class ViewportBindingNatural_ {
 
     /** @const {!../../service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
-
-    /** @private @const {!../viewer-impl.Viewer} */
-    this.viewer_ = viewer;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
