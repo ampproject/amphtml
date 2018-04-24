@@ -87,7 +87,7 @@ export class AmpGeo extends AMP.BaseElement {
     this.country_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
-    /** @private {?Promise} */
+    /** @private {?function()} */
     this.res_ = null;
     /** @private {!Promise<!Object<string, (string|Array<string>)>>} */
     this.geoPromise_ = new Promise(resolve => {
