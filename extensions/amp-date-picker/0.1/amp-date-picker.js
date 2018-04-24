@@ -606,19 +606,20 @@ export class AmpDatePicker extends AMP.BaseElement {
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc().getRootNode().querySelector(
         fieldSelector);
-    const form = this.element.closest('form');
-
     if (existingField) {
       return existingField;
-    } else if (this.mode_ == DatePickerMode.STATIC && form) {
+    }
+
+    const form = this.element.closest('form');
+    if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
       hiddenInput.name = this.getHiddenInputId_(form, type);
       this.element.appendChild(hiddenInput);
       return hiddenInput;
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   /**
