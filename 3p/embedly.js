@@ -63,7 +63,7 @@ export const CardOptions = {
  */
 function getEmbedly(global, callback) {
   loadScript(global, EMBEDLY_SDK_URL, function() {
-    callback();
+    callback(global);
   });
 }
 
@@ -98,7 +98,7 @@ export function embedly(global, data) {
     delete data.height;
 
     // Use embedly SDK to listen to resize event from loaded card
-    global.window.embedly('on', RESIZE_EVENT_NAME, function(iframe) {
+    global.window['embedly']('on', RESIZE_EVENT_NAME, function(iframe) {
       context.requestResize(
           iframe./*OK*/width,
           parseInt(iframe./*OK*/height, 10) + /* margin */ 5
