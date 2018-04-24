@@ -76,7 +76,7 @@ module.exports = function(context) {
         }
 
         context.report(node, [
-          `Unused private "${name}".`,
+          `Unused private "${name}".`.padEnd(80), // Padding for alignment
           'If this is used for testing, annotate with `@visibleForTesting`.',
           'If this is used in a subclass, annotate with `@protected`.',
           'If this is an override of a protected, annotate with `@override`.',
