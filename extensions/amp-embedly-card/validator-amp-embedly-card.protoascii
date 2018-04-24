@@ -57,6 +57,10 @@ tags: {  # <amp-embedly-card>
   tag_name: "AMP-EMBEDLY-CARD"
   satisfies: "amp-embedly-card"
   requires: "amp-embedly-card extension .js script"
+  attrs: {
+    name: "data-url"
+    mandatory: true
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
   amp_layout: {
