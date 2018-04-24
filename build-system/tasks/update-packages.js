@@ -63,9 +63,8 @@ function installCustomEslintRules() {
 
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
- * Follows it up with a call to patch web-animations-js if necessary.
  */
-function updatePackages() {
+function runYarnCheck() {
   const integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
     log(colors.yellow('WARNING:'), 'The packages in',
@@ -77,13 +76,21 @@ function updatePackages() {
     const yarnCmd = 'yarn';
     exec(yarnCmd);
   } else {
-    if (!process.env.TRAVIS) {
-      log(colors.green('All packages in'),
-          colors.cyan('node_modules'), colors.green('are up to date.'));
-    }
+    log(colors.green('All packages in'),
+        colors.cyan('node_modules'), colors.green('are up to date.'));
+  }
+}
+
+/**
+ * Installs custom lint rules, updates node_modules (for local dev), and patches
+ * web-animations-js if necessary.
+ */
+function updatePackages() {
+  installCustomEslintRules();
+  if (!process.env.TRAVIS) {
+    runYarnCheck();
   }
   patchWebAnimations();
-  installCustomEslintRules();
 }
 
 gulp.task(
