@@ -54,11 +54,11 @@ config.run('amp-fx-collection', function() {
       win = env.win;
     });
 
-    it.only('runs fade-in animation', () => {
+    it('runs fade-in animation with default parameters', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 1.05*getViewportHeight(win));
-      return Promise.resolve().then(timeout(1500))
+      win.scrollTo(0, 0.2*getViewportHeight(win));
+      return Promise.resolve().then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
         });
@@ -88,8 +88,8 @@ const marginSpecific = `
     it('margin-start specified', () => {
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 1.5*getViewportHeight(win));
-      return Promise.resolve().then(timeout(1500))
+      win.scrollTo(0, 0.5*getViewportHeight(win));
+      return Promise.resolve().then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
         });
@@ -120,11 +120,11 @@ const marginSpecific = `
       // Not visible yet, opacity = 0;
       expect(getOpacity(win)).to.equal(0);
       win.scrollTo(0, getViewportHeight(win));
-      Promise.resolve().then(timeout(1000))
+      Promise.resolve().then(timeout(2000))
         .then(() => {
           expect(getOpacity(win) > 0).to.be.true;
           expect(getOpacity(win) < 1).to.be.true;
-      }).then(timeout(1000))
+      }).then(timeout(2000))
         .then(() => {
           expect(getOpacity(win)).to.equal(1);
       });
