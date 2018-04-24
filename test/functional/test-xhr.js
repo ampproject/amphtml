@@ -77,9 +77,7 @@ describe.configure().skipSafari().run('XHR', function() {
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
     ampdocViewerStub.returns({
-      whenFirstVisible: () => {
-        return Promise.resolve();
-      },
+      whenFirstVisible: () => Promise.resolve(),
     });
     ampdocServiceForStub.returns({
       isSingleDoc: () => false,
@@ -808,9 +806,7 @@ describe.configure().skipSafari().run('XHR', function() {
         hasCapability: () => true,
         isTrustedViewer: () => Promise.resolve(true),
         sendMessageAwaitResponse: getDefaultResponsePromise,
-        whenFirstVisible: () => {
-          return Promise.resolve();
-        },
+        whenFirstVisible: () => Promise.resolve(),
       };
       sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
