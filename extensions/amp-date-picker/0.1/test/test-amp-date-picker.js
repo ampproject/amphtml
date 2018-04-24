@@ -248,7 +248,7 @@ describes.realWin('amp-date-picker', {
         });
       });
 
-      it('should name one of the inputs `${id}-date` when another ' +
+      it('should name an input `${id}-(start|end)-date` when another ' +
           '#(start|end)-date input exists', () => {
         const form = document.createElement('form');
         const startDateInput = document.createElement('input');
@@ -267,7 +267,7 @@ describes.realWin('amp-date-picker', {
         });
       });
 
-      it('should name both of the inputs `${id}-date` when other ' +
+      it('should name both inputs `${id}-(start|end)-date` when other ' +
           '#start-date and #end-date inputs exists', () => {
         const form = document.createElement('form');
         const startDateInput = document.createElement('input');
