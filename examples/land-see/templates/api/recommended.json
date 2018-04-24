@@ -45,7 +45,7 @@
                 "classes": "cover",
                 "alt-text": "Good eats.",
                 "width": 196, "height": 249, "layout": "responsive",
-                "src": "../../img/land-see/content/burger-200px.jpg"
+                "src": "../img/land-see/content/burger-200px.jpg"
               }
             ],
             "post-classes": "land-see-pre-animate land-see-post-item land-see-recommended",
