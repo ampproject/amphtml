@@ -16,7 +16,7 @@
 
 import {AmpFxCollection} from '../amp-fx-collection';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Creates the relevant fx presets correctly', {
   amp: {
@@ -30,6 +30,8 @@ describes.realWin('Creates the relevant fx presets correctly', {
   beforeEach(() => {
     win = env.win;
     ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+    toggleExperiment(win, 'amp-fx-fade-in', true, false);
+    toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
   });
 
   function createAmpFx(fxType, opt_attrs) {
@@ -56,14 +58,14 @@ describes.realWin('Creates the relevant fx presets correctly', {
   });
 
   it('creates amp-fx=`fade-in` correctly', () => {
-    toggleExperiment(win, 'amp-fx-fade-in', true, true);
+    expect(isExperimentOn('amp-fx-fade-in')).to.be.true;
     const ampFx = createAmpFx('fade-in');
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;
   });
 
   it('creates amp-fx=`fade-in-scroll` correctly', () => {
-    toggleExperiment(win, 'amp-fx-fade-in-scroll', true, true);
+    expect(isExperimentOn('amp-fx-fade-in-scroll')).to.be.true;
     const ampFx = createAmpFx('fade-in-scroll');
     expect(ampFx).to.not.be.null;
     expect(ampFx.getFxProvider_()).to.not.be.null;

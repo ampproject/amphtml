@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {toggleExperiment} from '../../../../../src/experiments';
+
 const config = describe.configure().ifNewChrome();
 config.run('amp-fx-collection', function() {
   this.timeout(100000);
@@ -52,6 +54,7 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in', true, false);
     });
 
     it('runs fade-in animation with default parameters', () => {
@@ -83,6 +86,7 @@ const marginSpecific = `
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in', true, false);
     });
 
     it('margin-start specified', () => {
@@ -114,6 +118,7 @@ const marginSpecific = `
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in', true, false);
     });
 
     it('duration specified', () => {

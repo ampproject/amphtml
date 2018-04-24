@@ -68,7 +68,8 @@ export const Presets = {
   },
   'fade-in': {
     isFxTypeSupported(win) {
-      return true;
+      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
+          'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -108,7 +109,8 @@ export const Presets = {
   },
   'fade-in-scroll': {
     isFxTypeSupported(win) {
-      return true;
+      user().assert(isExperimentOn(win, 'amp-fx-fade-in-scroll'),
+          'amp-fx-fade-in experiment is not turned on.');
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));

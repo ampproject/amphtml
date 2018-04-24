@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../../../src/style';
+import {toggleExperiment} from '../../../../../src/experiments';
 
 const config = describe.configure().ifNewChrome();
 config.run('amp-fx-collection', function() {
@@ -54,6 +54,7 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
     it('runs fade-in-scroll animation with default parameters', () => {
@@ -103,9 +104,10 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
-    it('runs fade-in-scroll animation with specified parameters', () => {
+    it('runs fade-in-scroll animation with margins specified', () => {
       expect(getOpacity(win)).to.equal(0);
       win.scrollTo(0, 0.1*getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
@@ -141,6 +143,7 @@ config.run('amp-fx-collection', function() {
     let win;
     beforeEach(() => {
       win = env.win;
+      toggleExperiment(win, 'amp-fx-fade-in-scroll', true, false);
     });
 
     it('runs fade-in-scroll animation with repeat specified', () => {

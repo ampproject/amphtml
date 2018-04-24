@@ -294,6 +294,18 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
     cleanupissue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
+  {
+    id: 'amp-fx-fade-in',
+    name: 'Enables amp-fx="fade-in" - scroll triggered timed fade in animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
+  {
+    id: 'amp-fx-fade-in-scroll',
+    name: 'Enables amp-fx="fade-in-scroll" - a scroll dependent fade animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/14150',
+    cleanupissue: 'https://github.com/ampproject/amphtml/issues/14325',
+  },
 ];
 
 if (getMode().localDev) {
