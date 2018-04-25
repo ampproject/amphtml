@@ -216,14 +216,20 @@ export class NextPageService {
 
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
-          .then(doc => this.resources_.mutateElement(container,
-              () => {
+          .then(doc => new Promise((resolve, reject) => {
+            this.resources_.mutateElement(container, () => {
+              try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
 
                 setStyle(documentRef.recUnit, 'display', 'none');
                 this.documentQueued_ = false;
-              }),
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            });
+          }),
           e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
           .catch(e => dev().error(TAG,
               `failed to attach shadow document for ${next.ampUrl}`, e));
