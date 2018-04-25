@@ -74,6 +74,10 @@
   z-index: 100001 !important;
 }
 
+[ad-showing] .i-amphtml-story-progress-bar {
+  visibility: hidden !important;
+}
+
 .i-amphtml-story-page-progress-bar {
   background: rgba(255, 255, 255, 0.4) !important;
   border-radius: 1px !important;

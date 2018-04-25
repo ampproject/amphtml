@@ -307,13 +307,14 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    if (!!process.env.SAUCE_USERNAME) {
-      // A subset of unit tests on other browsers via sauce labs
-      cmd = cmd + ' --saucelabs_lite';
-      startSauceConnect();
-      timedExecOrDie(cmd);
-      stopSauceConnect();
-    }
+    // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
+    // if (!!process.env.SAUCE_USERNAME) {
+    //   // A subset of unit tests on other browsers via sauce labs
+    //   cmd = cmd + ' --saucelabs_lite';
+    //   startSauceConnect();
+    //   timedExecOrDie(cmd);
+    //   stopSauceConnect();
+    // }
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up

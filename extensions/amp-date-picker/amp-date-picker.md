@@ -90,7 +90,7 @@ By specifying `mode="static"`, the `amp-date-picker` renders a static calendar v
 
 For a static date picker, you must specify a size-defined layout, which can be one of: `fixed`, `fixed-height`, `responsive`, `fill` or `flex-item`.
 
-When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector-[optional]), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `input` or `start-input` and `end-input`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
+When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector-[optional]), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
 
 *Example: static date picker in a form field*
 
@@ -114,14 +114,14 @@ This example demonstrates using a static date picker in a form, where the user c
       layout="fixed-height"
       height="360">
     <!-- automatically generates hidden input fields:
-    <input type="hidden" name="start-input">
-    <input type="hidden" name="end-input"> -->
+    <input type="hidden" name="start-date">
+    <input type="hidden" name="end-date"> -->
   </amp-date-picker>
   <input type="submit" value="Subscribe">
 </fieldset>
 <div submit-success>
 <template type="amp-mustache">
-  Success! Thanks {{name}} for choosing {{start-input}} and {{end-input}}.
+  Success! Thanks {{name}} for choosing {{start-date}} and {{end-date}}.
 </template>
 </div>
 </form>
@@ -220,7 +220,7 @@ Specifies the selection type for the date picker. Allowed values are:
 
 A query selector for a single date picker's input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
-a name of `input` or `${id}-input` using the date picker's id. If either of these conflict
+a name of `date` or `${id}-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
 ```html
@@ -237,7 +237,7 @@ with an existing element in the form, an error is emitted.
 
 A query selector for a date range picker's start date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
-a name of `start-input` or `${id}-start-input` using the date picker's id. If either of these conflict
+a name of `start-date` or `${id}-start-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
 ```html
@@ -253,7 +253,7 @@ with an existing element in the form, an error is emitted.
 
 A query selector for a date range picker's end date input. If this is omitted,
 the date picker automatically generates a hidden input field, and assigns it
-a name of `end-input` or `${id}-end-date` using the date picker's id. If either of these conflict
+a name of `end-date` or `${id}-end-date` using the date picker's id. If either of these conflict
 with an existing element in the form, an error is emitted.
 
 ```html
