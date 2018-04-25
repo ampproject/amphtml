@@ -99,4 +99,18 @@ export class VideoUtils {
   static resetIsAutoplaySupported() {
     setIsAutoplaySupported();
   }
+
+  /**
+   * @param {!HTMLMediaElement} element
+   * @return {!Array<!Array<number>>}
+   */
+  static getPlayedRanges(element) {
+    const {played} = element;
+    const {length} = played;
+    const ranges = [];
+    for (let i = 0; i < length; i++) {
+      ranges.push([played.start(i), played.end(i)]);
+    }
+    return ranges;
+  }
 }

@@ -241,6 +241,16 @@ export class Services {
   }
 
   /**
+   * @param {!Node} node
+   * @return {!Promise<!../extensions/amp-story/0.1/media-pool.MediaPoolService>}
+   */
+  static mediaPoolFor(node) {
+    return (
+      /** @type {!Promise<!../extensions/amp-story/0.1/media-pool.MediaPoolService>} */
+      (getElementServiceForDoc(node, 'mediapool', 'amp-story')));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */

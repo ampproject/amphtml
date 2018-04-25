@@ -100,4 +100,5 @@ export class VideoServiceSync {
     return this.asyncImpl_.then(impl =>
       impl.getAnalyticsDetails(video));
   }
+
 }

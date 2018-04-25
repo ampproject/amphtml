@@ -30,10 +30,13 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
-import {ampMediaElementFor} from './utils';
+import {VideoUtils} from '../../../src/utils/video';
+import {closest, isConnectedNode} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {isConnectedNode} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
+import {registerServiceBuilderForDoc} from '../../../src/service';
 import {toWin} from '../../../src/types';
 
 
@@ -42,6 +45,62 @@ export const MediaType = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
+};
+
+
+/** @enum {string} */
+export const MediaPoolEvents = {
+  ALLOCATED: 'amp:pool:allocated',
+  DEALLOCATED: 'amp:pool:deallocated',
+};
+
+
+/**
+ * Playback events to bubble.
+ * By default, these don't bubble. We need to re-dispatch so that components
+ * can listen to these events without access to the underlying media element.
+ * @private @const {!Array<string>}
+ */
+const EVENTS_TO_FORWARD = [
+  'canplay',
+  'canplaythrough',
+  'durationchange',
+  'emptied',
+  'ended',
+  'loadeddata',
+  'loadedmetadata',
+  'pause',
+  'play',
+  'playing',
+  'ratechange',
+  'seeked',
+  'seeking',
+  'stalled',
+  'suspend',
+  'timeupdate',
+  'volumechange',
+  'waiting',
+];
+
+
+/**
+ * @struct
+ * @typedef {{
+ *   duration: number,
+ *   currentTime: number,
+ *   paused: boolean,
+ *   playedRanges: (!Array<!Array<number>>|undefined),
+ * }}
+ */
+export let MediaInfoDef;
+
+
+/** @const {!MediaInfoDef} */
+export const EMPTY_MEDIA_INFO = {
+  duration: 0,
+  currentTime: 0,
+  paused: true,
+  playedRanges: [],
 };
 
 
@@ -229,6 +288,7 @@ export class MediaPool {
               // Use seed element at end of set to prevent wasting it.
               (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
           const sources = this.getDefaultSource_(type);
+          this.bubbleEvents_(mediaEl);
           mediaEl.setAttribute('pool-element', elId++);
           this.enqueueMediaElementTask_(mediaEl,
               new UpdateSourcesTask(sources, this.vsync_));
@@ -241,6 +301,36 @@ export class MediaPool {
     });
   }
 
+  /**
+   * @param {!HTMLMediaElement} mediaEl
+   * @private
+   */
+  bubbleEvents_(mediaEl) {
+    // TODO(alanorozco): Keep track of unlisteners for disposal.
+    const forwardEvent = this.forwardEvent_.bind(this, mediaEl);
+    EVENTS_TO_FORWARD.forEach(type =>
+      listen(mediaEl, type, forwardEvent.bind(this, type)));
+  }
+
+  /**
+   * @param {!HTMLMediaElement} mediaEl
+   * @param {string} type
+   * @param {!Event} sourceEvent
+   * @private
+   */
+  forwardEvent_(mediaEl, type, sourceEvent) {
+    if (sourceEvent.bubbles) {
+      // In case of platform differences.
+      return;
+    }
+    if (!mediaEl.parentNode) {
+      return;
+    }
+    const {parentNode} = mediaEl;
+    const detail = Object.assign({}, sourceEvent.detail);
+    const event = createCustomEvent(this.win_, type, detail, {bubbles: true});
+    parentNode.dispatchEvent(event);
+  }
 
   /**
    * @param {!MediaType} mediaType The media type whose source should be
@@ -384,7 +474,11 @@ export class MediaPool {
 
     // De-allocate a media element.
     const poolMediaEl = allocatedEls.pop();
+
     this.unallocated[mediaType].push(poolMediaEl);
+
+    this.triggerAllocationEvent_(poolMediaEl, /* isAllocated */ false);
+
     return poolMediaEl;
   }
 
@@ -457,41 +551,63 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
-    const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
-    const ampMediaForDomEl = ampMediaElementFor(domMediaEl);
+    const swapIntoDom = new SwapIntoDomTask(domMediaEl, this.vsync_);
+
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
-    return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl, this.vsync_))
-        .then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-          this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources, this.vsync_));
-          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-        }, () => {
-          this.forceDeallocateMediaElement_(poolMediaEl);
-        });
-  }
+    return this.enqueueMediaElementTask_(poolMediaEl, swapIntoDom).then(() => {
+      this.enqueueMediaElementTask_(poolMediaEl,
+          new UpdateSourcesTask(sources, this.vsync_));
 
+      this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()).then(() => {
+        // Technically, this event is not triggered strictly on allocation.
+        // From a client's perspective this doesn't matter, and it's better
+        // to trigger the event once the allocated media is in a valid state
+        // (i.e. all sources loaded.)
+        this.triggerAllocationEvent_(poolMediaEl, /* isAllocated */ true);
+      });
+    }, () => {
+      this.forceDeallocateMediaElement_(poolMediaEl);
+    });
+  }
 
   /**
-   * @param {?Element} componentEl
+   * @param {!Element} element
+   * @param {boolean} isAllocated
    * @private
    */
-  maybeResetAmpMedia_(componentEl) {
-    if (!componentEl) {
-      return;
-    }
-
-    if (componentEl.tagName.toLowerCase() == 'amp-audio') {
-      // TODO(alanorozco): Implement reset for amp-audio
-      return;
-    }
-
-    componentEl.getImpl().then(impl => impl.resetOnDomChange());
+  triggerAllocationEvent_(element, isAllocated) {
+    const {parentNode} = element;
+    const event = this.createAllocationEvent_(element, isAllocated);
+    dev().assertElement(parentNode).dispatchEvent(event);
   }
 
+  /**
+   * @param {!Element} element
+   * @param {boolean} isAllocated
+   * @return {!Event}
+   * @private
+   */
+  createAllocationEvent_(element, isAllocated) {
+    const win = this.win_;
+    if (isAllocated) {
+      const type = MediaPoolEvents.ALLOCATED;
+      return createCustomEvent(win, type, /* detail */ null, {bubbles: true});
+    }
+    const type = MediaPoolEvents.DEALLOCATED;
+    const detail = this.getDeallocationDetail_(element);
+    return createCustomEvent(win, type, detail, {bubbles: true});
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!MediaInfoDef}
+   * @private
+   */
+  getDeallocationDetail_(element) {
+    const {currentTime, duration} = element;
+    return {currentTime, duration, paused: true};
+  }
 
   /**
    * @param {!HTMLMediaElement} poolMediaEl The element whose source should be
@@ -718,7 +834,6 @@ export class MediaPool {
         });
   }
 
-
   /**
    * Rewinds a specified media element in the DOM to 0.
    * @param {!HTMLMediaElement} domMediaEl The media element to be rewound.
@@ -861,16 +976,42 @@ export class MediaPool {
 
 
   /**
+   * @param {!HTMLMediaElement} domMediaEl
+   * @param {string} property
+   * @return T
+   * @template T
+   */
+  getMediaInfo(domMediaEl, property) {
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    dev().assert(poolMediaEl);
+
+    switch (property) {
+      case 'currentTime': return poolMediaEl.currentTime;
+      case 'duration': return poolMediaEl.duration;
+      case 'paused': return poolMediaEl.paused;
+      case 'muted': return poolMediaEl.muted;
+      case 'playedRanges':
+        return VideoUtils.getPlayedRanges(
+            /** @type {!HTMLMediaElement} */ (poolMediaEl));
+    }
+
+    dev().error('MEDIA-POOL', 'Unknown media info property', property);
+  }
+
+
+  /**
    * @param {!MediaPoolRoot} root
    * @return {!MediaPool}
    */
   static for(root) {
     const element = root.getElement();
-    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
-    const hasInstanceAllocated = existingId && instances[existingId];
+    const existingInstance = MediaPool.forElementOrNull(element);
 
-    if (hasInstanceAllocated) {
-      return instances[existingId];
+    if (existingInstance) {
+      return dev().assert(existingInstance);
     }
 
     const newId = String(nextInstanceId++);
@@ -881,6 +1022,49 @@ export class MediaPool {
         element => root.getElementDistance(element));
 
     return instances[newId];
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?MediaPool}
+   */
+  static forElementOrNull(element) {
+    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+    return existingId && instances[existingId] || null;
+  }
+}
+
+
+/** Provides Mediapools. */
+export class MediaPoolService {
+
+  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+  }
+
+  /**
+   * Traverses up the DOM tree to find a media pool.
+   * @param {!Element} el
+   * @return {?MediaPool}
+   */
+  poolForOrNull(el) {
+    // This optimization comes from the cache.
+    if (el.classList.contains('i-amphtml-no-media-pool')) {
+      return null;
+    }
+    const owner = closest(el, el => !!el[POOL_MEDIA_ELEMENT_PROPERTY_NAME]);
+    return owner && MediaPool.forElementOrNull(owner);
+  }
+
+  /**
+   * Traverses up the DOM tree to find a media pool, otherwise fails.
+   * @param {!Element} el
+   * @return {!MediaPool}
+   */
+  poolFor(el) {
+    return /** @type {!MediaPool} */ (dev().assert(this.poolForOrNull(el)));
   }
 }
 
@@ -914,4 +1098,8 @@ export class MediaPoolRoot {
    *     type to allow within this element.
    */
   getMaxMediaElementCounts() {}
+}
+
+export function installMediaPoolServiceForDoc(nodeOrDoc) {
+  registerServiceBuilderForDoc(nodeOrDoc, 'mediapool', MediaPoolService);
 }
