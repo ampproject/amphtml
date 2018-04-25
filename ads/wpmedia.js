@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { validateData, writeScript } from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -26,7 +26,7 @@ export function wpmedia(global, data) {
   // const url = 'http://localhost/wpjslib.js';
   const url = 'https://std.wpcdn.pl/wpjslib/amp/wpjslib-amp-debug.js';
 
-  writeScript(global, url, function () {
-    run(data); 
+  writeScript(global, url, function() {
+    window.run(data);
   });
 }
