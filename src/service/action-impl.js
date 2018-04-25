@@ -60,8 +60,6 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit', 'clear'],
-<<<<<<< HEAD
-=======
 };
 
 /**
@@ -88,7 +86,6 @@ export const TAPPABLE_ARIA_ROLES = {
   'switch': true,
   'tab': true,
   'treeitem': true,
->>>>>>> 3892a9aa9f2030ce9e0408ae57c56b463ff2f74a
 };
 
 /**
