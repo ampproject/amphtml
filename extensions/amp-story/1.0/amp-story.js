@@ -864,10 +864,12 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     if (targetPage.isAd()) {
+      this.storeService_.dispatch(Action.TOGGLE_AD, true);
       this.vsync_.mutate(() => {
         this.element.setAttribute(AD_SHOWING_ATTR, '');
       });
     } else {
+      this.storeService_.dispatch(Action.TOGGLE_AD, false);
       this.vsync_.mutate(() => {
         this.element.removeAttribute(AD_SHOWING_ATTR);
       });
