@@ -1,0 +1,38 @@
+{
+  "items": [{
+    "land-see-category": [
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Birdhouse metaphor.",
+            "width": 196, "height": 249, "layout": "responsive",
+            "src": "../../img/land-see/content/tiny-houses-200px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Interiors",
+        "post-category-url": "stories.amp.html?category=interiors#land-see-interiors",
+        "post-title": "Interior Design for Tiny Homes",
+        "post-copy": "Rampant materialism is a no-no for the tiny home owner, but this doesn’t strand these minimalists in the design desert."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Through the mist.",
+            "width": 196, "height": 187, "layout": "responsive",
+            "src": "../../img/land-see/content/maine-200px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Interiors",
+        "post-category-url": "stories.amp.html?category=interiors#land-see-interiors",
+        "post-title": "Bold Coast Cottage in Main",
+        "post-copy": "My travels in Main have taken me to many destinations not in the standard visitor’s guide."
+      }
+    ]
+  }]
+}

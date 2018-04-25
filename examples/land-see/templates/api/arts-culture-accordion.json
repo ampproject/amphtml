@@ -1,0 +1,70 @@
+{
+  "items": [{
+    "land-see-category": [
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Good eats.",
+            "width": 196, "height": 249, "layout": "responsive",
+            "src": "../../img/land-see/content/burger-200px.jpg"
+          }
+        ],
+        "post-classes": "land-see-pre-animate land-see-post-item land-see-arts-culture-anim",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Arts & Culture",
+        "post-category-url": "stories.amp.html?category=arts-culture#land-see-arts-culture",
+        "post-title": "Quick Bites in the Bay Area",
+        "post-copy": "From Sonoma to Santa Clara, we've found the best spots for quick and delicious bites."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Creating with clay.",
+            "width": 196, "height": 187, "layout": "responsive",
+            "src": "../../img/land-see/content/kaneko-200px.jpg"
+          }
+        ],
+        "post-classes": "land-see-pre-animate land-see-post-item land-see-arts-culture-anim",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Arts & Culture",
+        "post-category-url": "stories.amp.html?category=arts-culture#land-see-arts-culture",
+        "post-title": "The New Exhibit of Jun Kaneko",
+        "post-copy": "Out of three warehouses, Jun Kaneko's dream of an interdisciplinary cultural organization came to life. KANEKO focuses on exploring the act of creating."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Silhouettes.",
+            "width": 196, "height": 249, "layout": "responsive",
+            "src": "../../img/land-see/content/black-white-2-250px.jpg"
+          }
+        ],
+        "post-classes": "land-see-pre-animate land-see-post-item land-see-arts-culture-anim xs-hide",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Arts & Culture",
+        "post-category-url": "stories.amp.html?category=arts-culture#land-see-arts-culture",
+        "post-title": "Finding the Essence in Black & White",
+        "post-copy": "Stripped of color, these small glimpses of life more powerfully capture the moment."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Fall colors.",
+            "width": 196, "height": 187, "layout": "responsive",
+            "src": "../../img/land-see/content/fall-festivals-200px.jpg"
+          }
+        ],
+        "post-classes": "land-see-pre-animate land-see-post-item land-see-arts-culture-anim xs-hide sm-hide",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Arts & Culture",
+        "post-category-url": "stories.amp.html?category=arts-culture#land-see-arts-culture",
+        "post-title": "Fall Festivals Around the U.S.",
+        "post-copy": "For those of us sad to see the summer leave, autumn has some surprising delights with its creative festivals from one end of the U.S. to the other."
+      }
+    ]
+  }]
+}

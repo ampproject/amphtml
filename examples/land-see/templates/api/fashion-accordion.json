@@ -1,0 +1,38 @@
+{
+  "items": [{
+    "land-see-category": [
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Build a killer outfit.",
+            "width": 196, "height": 249, "layout": "responsive",
+            "src": "../../img/land-see/content/retail-shop-370px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Fashion",
+        "post-category-url": "stories.amp.html?category=fashion#land-see-fashion",
+        "post-title": "New Textile & Basics Shop Opens in Soho",
+        "post-copy": "Everyone’s wardrobe needs the well-fitting, structured, and neutral basics to provide the start for the building of a killer outfit."
+      },
+      {
+        "image": [
+          {
+            "classes": "cover",
+            "alt-text": "Feel the sand on your feet, not your wardrobe weight.",
+            "width": 196, "height": 187, "layout": "responsive",
+            "src": "../../img/land-see/content/travel-accessories-outfits-2-400px.jpg"
+          }
+        ],
+        "post-classes": "land-see-post-item",
+        "post-url": "kim-myeong.amp.html",
+        "post-category": "Fashion",
+        "post-category-url": "stories.amp.html?category=fashion#land-see-fashion",
+        "post-title": "How to Pack Light When Traveling",
+        "post-copy": "Whether it’s a short weekend getaway or an extended holiday, choosing carefully from your accessories can help lighten your load while expanding your repertory."
+      }
+    ]
+  }]
+}

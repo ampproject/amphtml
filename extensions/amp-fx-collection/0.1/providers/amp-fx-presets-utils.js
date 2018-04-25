@@ -19,6 +19,7 @@
  * presets.
  */
 
+import {computedStyle} from '../../../../src/style';
 import {startsWith} from '../../../../src/string';
 import {user} from '../../../../src/log';
 
@@ -50,5 +51,92 @@ export function resolvePercentageToNumber(val) {
   const precentageStrippedVal = parseFloat(val);
   if (!isNaN(precentageStrippedVal)) {
     return precentageStrippedVal / 100;
+  }
+}
+
+export function installStyles(ampdoc, element, fxType, flyInDistance) {
+  const style = computedStyle(ampdoc.win, element);
+  switch (fxType) {
+    case 'parallax':
+      return {
+        'will-change': 'transform',
+      };
+    case 'fade-in':
+      return {
+        'will-change': 'opacity',
+        'opacity': 0,
+      };
+    case 'fade-in-scroll':
+      return {
+        'will-change': 'opacity',
+        'opacity': 0,
+      };
+    case 'fly-in-bottom':
+      return {
+        'will-change': 'transform',
+        'top': 'calc(' + style.top + ' + ' + flyInDistance + 'vh)',
+      };
+    case 'fly-in-top':
+      return {
+        'will-change': 'transform',
+        'top': 'calc(' + style.top + ' - ' + flyInDistance + 'vh)',
+      };
+    case 'fly-in-left':
+      return {
+        'will-change': 'transform',
+        'left': 'calc(' + style.left + ' - ' + flyInDistance + 'vw)',
+      };
+    case 'fly-in-right':
+      return {
+        'will-change': 'transform',
+        'left': 'calc(' + style.left + ' + ' + flyInDistance + 'vw)',
+      };
+  }
+}
+
+export function defaultDurationValues(fxType) {
+  switch (fxType) {
+    case 'fade-in':
+      return '1000ms';
+    case 'fly-in-bottom':
+      return '400ms';
+    case 'fly-in-top':
+      return '400ms';
+    case 'fly-in-left':
+      return '400ms';
+    case 'fly-in-right':
+      return '400ms';
+    default:
+      return '1ms';
+  }
+}
+
+export function flyInDistanceValues(fxType) {
+  switch (fxType) {
+    case 'fly-in-bottom':
+      return '10';
+    case 'fly-in-top':
+      return '10';
+    case 'fly-in-left':
+      return '5';
+    case 'fly-in-right':
+      return '5';
+    default:
+      return '1';
+  }
+}
+
+export function marginValues(fxType) {
+  switch (fxType) {
+    case 'fade-in':
+      return {
+        'start': 0,
+        'end': 0.5,
+      };
+    default:
+      return {
+        'start': 0,
+        'end': 1,
+      };
   }
 }
