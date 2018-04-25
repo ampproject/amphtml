@@ -880,7 +880,7 @@ export const adConfig = {
   widespace: {},
 
   wpmedia: {
-    prefetch: 'https://std.wpcdn.pl/wpjslib/amp/wpjslib-amp-debug.js',
+    prefetch: 'https://std.wpcdn.pl/wpjslib/amp/wpjslib-amp.js',
   },
 
   xlift: {
