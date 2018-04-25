@@ -36,7 +36,7 @@ describe.configure().retryOnSaucelabs().run('amp-ad 3P', () => {
     });
   });
 
-  it('create an iframe with APIs', () => {
+  it('create an iframe with APIs', function() {
     this.timeout(20000);
     let iframe;
     let lastIO = null;

@@ -251,12 +251,6 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
 };
 
-
-// Need to cache iframeName as it will be potentially overwritten by
-// masterSelection, as per below.
-const iframeName = window.name;
-
-
 init(window);
 
 
