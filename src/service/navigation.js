@@ -133,7 +133,7 @@ export class Navigation {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Window} win
    */
-  installAnchorClickInterceptor(ampdoc, win) {
+  static installAnchorClickInterceptor(ampdoc, win) {
     win.document.documentElement.addEventListener('click',
         maybeExpandUrlParams.bind(null, ampdoc), /* capture */ true);
   }
