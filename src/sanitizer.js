@@ -80,22 +80,35 @@ const SELF_CLOSING_TAGS = dict({
 });
 
 /** @const {!Array<string>} */
-const WHITELISTED_FORMAT_TAGS = [
+const WHITELISTED_TAGS = [
+  'a',
   'b',
   'br',
+  'caption',
+  'colgroup',
   'code',
   'del',
+  'div',
   'em',
   'i',
   'ins',
   'mark',
+  'p',
   'q',
   's',
   'small',
+  'span',
   'strong',
   'sub',
   'sup',
+  'table',
+  'tbody',
   'time',
+  'td',
+  'th',
+  'thead',
+  'tfoot',
+  'tr',
   'u',
 ];
 
@@ -334,38 +347,21 @@ export function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes the provided formatting HTML. Only the most basic inline tags are
- * allowed, such as <b>, <i>, etc.
+ * Sanitizes user provided HTML to mustache templates, used in amp-mustache.
+ * WARNING: This method should not be used elsewhere as we do not strip out
+ * the style attribute in this method for the inline-style experiment.
+ * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
+ * @private
  * @param {string} html
  * @return {string}
  */
-export function sanitizeFormattingHtml(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, attribs) {
-        if (tagName == 'template') {
-          for (let i = 0; i < attribs.length; i += 2) {
-            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
-              return {
-                tagName,
-                attribs: ['type', 'amp-mustache'],
-              };
-            }
-          }
-        }
-        if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
-          return null;
-        }
-        return {
-          tagName,
-          attribs: [],
-        };
-      }
-  );
+export function sanitizeTagsForTripleMustache(html) {
+  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
 }
 
 /**
- * Whether the attribute/value are valid.
+ * Whether the attribute/value is valid.
  * @param {string} tagName
  * @param {string} attrName
  * @param {string} attrValue
@@ -526,6 +522,31 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
   }
 
   return attrValue;
+}
+
+/**
+ * Tag policy for handling what is valid html in templates.
+ * @type {!Function}
+ */
+function tripleMustacheTagPolicy(tagName, attribs) {
+  if (tagName == 'template') {
+    for (let i = 0; i < attribs.length; i += 2) {
+      if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+        return {
+          tagName,
+          attribs: ['type', 'amp-mustache'],
+        };
+      }
+    }
+  }
+  const isWhitelistedTag = WHITELISTED_TAGS.includes(tagName);
+  if (!isWhitelistedTag) {
+    return null;
+  }
+  return {
+    tagName,
+    attribs,
+  };
 }
 
 /**
