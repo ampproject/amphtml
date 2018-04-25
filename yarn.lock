@@ -6200,9 +6200,9 @@ karma-simple-reporter@2.0.0:
     colors "^0.6.2"
     karma "^0.12.36"
 
-karma-sinon-chai@1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/karma-sinon-chai/-/karma-sinon-chai-1.3.3.tgz#a597e5b4a1369fe7b3d7d76c09ed2061a38e747f"
+karma-sinon-chai@1.3.4:
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/karma-sinon-chai/-/karma-sinon-chai-1.3.4.tgz#56c82674a5618ee9a4063cfbd57fc01da37f1495"
   dependencies:
     lolex "^1.6.0"
 
