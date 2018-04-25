@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {computedStyle} from '../../../../../src/style';
-
 const config = describe.configure().ifNewChrome();
 config.run('amp-fx-collection', function() {
   this.timeout(100000);
@@ -61,9 +59,9 @@ config.run('amp-fx-collection', function() {
       expect(getTop(win)).to.equal(getViewportHeight(win));
       win.scrollTo(0, 0.1 * getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
-        .then(() => {
-          expect(getTop(win)).to.equal(0.9 * getViewportHeight(win));
-        });
+          .then(() => {
+            expect(getTop(win)).to.equal(0.9 * getViewportHeight(win));
+          });
     });
   });
 
@@ -91,9 +89,9 @@ config.run('amp-fx-collection', function() {
       expect(getTop(win)).to.equal(getViewportHeight(win));
       win.scrollTo(0, 0.1 * getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
-        .then(() => {
-          expect(getTop(win)).to.be.below(0.9 * getViewportHeight(win));
-        });
+          .then(() => {
+            expect(getTop(win)).to.be.below(0.9 * getViewportHeight(win));
+          });
     });
   });
 
@@ -121,9 +119,9 @@ config.run('amp-fx-collection', function() {
       expect(getTop(win)).to.equal(getViewportHeight(win));
       win.scrollTo(0, 0.1 * getViewportHeight(win));
       return Promise.resolve().then(timeout(2000))
-        .then(() => {
-          expect(getTop(win)).to.be.above(0.9 * getViewportHeight(win));
-        });
+          .then(() => {
+            expect(getTop(win)).to.be.above(0.9 * getViewportHeight(win));
+          });
     });
   });
 });

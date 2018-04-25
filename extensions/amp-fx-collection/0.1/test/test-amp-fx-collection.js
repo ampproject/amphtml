@@ -15,7 +15,6 @@
  */
 
 import {AmpFxCollection} from '../amp-fx-collection';
-import {Services} from '../../../../src/services';
 import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Creates the relevant fx presets correctly', {
