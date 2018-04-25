@@ -65,6 +65,7 @@ const AD_STATE = {
 /** @const */
 const ALLOWED_AD_TYPES = map({
   'custom': true,
+  'doubleclick': true,
 });
 
 
