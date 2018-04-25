@@ -213,8 +213,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
-    /** @private @const {?SystemLayer} */
-    this.systemLayer_ = null;
+    /** @private @const {!SystemLayer} */
+    this.systemLayer_ = new SystemLayer(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -360,7 +360,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_() {
     const pageIds = this.pages_.map(page => page.element.id);
-    this.systemLayer_ = new SystemLayer(this.win, this.getAmpDoc());
     this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
   }

@@ -23,6 +23,7 @@ import {ShareWidget} from './amp-story-share';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
@@ -114,13 +115,14 @@ const SHARE_WIDGET_PILL_CONTAINER = {
 export class SystemLayer {
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    */
-  constructor(win, ampdoc) {
-    /** @private {!Window} */
+  constructor(win, parentEl) {
+    /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    /** @private @const {!Element} */
+    this.parentEl_ = parentEl;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -390,7 +392,7 @@ export class SystemLayer {
 
     this.sharePillContainerNode_
         .querySelector('.i-amphtml-story-share-pill')
-        .appendChild(shareWidget.build(this.ampdoc_));
+        .appendChild(shareWidget.build(getAmpdoc(this.parentEl_)));
 
     this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
   }
