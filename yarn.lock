@@ -2358,11 +2358,11 @@ commander@2.11.0:
   version "2.11.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.11.0.tgz#157152fd1e7a6c8d98a5b715cf376df928004563"
 
-commander@^2.11.0:
+commander@^2.11.0, commander@^2.15.1:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
 
-commander@^2.12.2, commander@^2.9.0, commander@~2.12.1:
+commander@^2.9.0, commander@~2.12.1:
   version "2.12.2"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.12.2.tgz#0f5946c427ed9ec0d91a46bb9def53e54650e555"
 
@@ -6717,6 +6717,10 @@ lodash@^4.0.0, lodash@^4.1.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lo
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
+lodash@^4.17.5:
+  version "4.17.5"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.5.tgz#99a92d65c0272debe8c96b6057bc8fbfa3bed511"
+
 lodash@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-1.0.2.tgz#8f57560c83b59fc270bd3d561b690043430e2551"
@@ -6885,18 +6889,18 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markdown-link-check@3.1.6:
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.1.6.tgz#436cba78a1690871bb1afa4ec8f8245b0714dca9"
+markdown-link-check@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/markdown-link-check/-/markdown-link-check-3.2.0.tgz#c4aa35f4a216b6dfd7d5014c61d08f6c48aef316"
   dependencies:
     async "^2.6.0"
-    chalk "^2.3.0"
-    commander "^2.12.2"
+    chalk "^2.3.2"
+    commander "^2.15.1"
     link-check "^4.3.3"
-    lodash "^4.17.4"
+    lodash "^4.17.5"
     markdown-link-extractor "^1.1.1"
     progress "^2.0.0"
-    request "^2.83.0"
+    request "^2.85.0"
 
 markdown-link-extractor@^1.1.1:
   version "1.1.1"
@@ -9078,7 +9082,7 @@ request-promise-native@^1.0.5:
     stealthy-require "^1.1.0"
     tough-cookie ">=2.3.3"
 
-request@2:
+request@2, request@^2.85.0:
   version "2.85.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.85.0.tgz#5a03615a47c61420b3eb99b7dba204f83603e1fa"
   dependencies:
