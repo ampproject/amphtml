@@ -63,6 +63,271 @@ mathjax.Hub
 mathjax.Hub.Queue
 window.MathJax
 
+//3d-gltf/index.js
+var THREE;
+
+THREE.LoaderUtils
+THREE.LoaderUtils.decodeText
+THREE.LoaderUtils.extractUrlBase
+
+/** @constructor 
+ * @param {JsonObject=} opts
+ * */
+THREE.WebGLRenderer = function WebGLRenderer(opts) {};
+THREE.WebGLRenderer.prototype.domElement
+THREE.WebGLRenderer.prototype.setSize
+THREE.WebGLRenderer.prototype.setPixelRatio
+
+THREE.Light = class extends THREE.Object3D {};
+THREE.Light.prototype.distance
+THREE.Light.prototype.decay
+THREE.Light.prototype.angle
+THREE.Light.prototype.intensity
+THREE.PointLight = class extends THREE.Light {};
+THREE.SpotLight = class extends THREE.Light {};
+THREE.DirectionalLight = class extends THREE.Light {};
+THREE.AmbientLight = class extends THREE.Light {};
+
+THREE.Box3 = class {};
+THREE.Box3.prototype.getSize
+THREE.Box3.prototype.getCenter
+THREE.Box3.prototype.setFromObject
+THREE.Box3.prototype.min
+THREE.Box3.prototype.max
+
+THREE.EventDispatcher = class {};
+THREE.EventDispatcher.prototype.dispatchEvent;
+
+THREE.Quaternion = class {};
+THREE.Quaternion.prototype.copy
+THREE.Quaternion.prototype.dot
+THREE.Quaternion.prototype.setFromUnitVectors
+
+THREE.MOUSE
+THREE.MOUSE.LEFT
+THREE.MOUSE.RIGHT
+THREE.MOUSE.MIDDLE
+
+THREE.Vector3 = class {
+  /** @param {number=} opt_x
+   * @param {number=} opt_y
+   * @param {number=} opt_z */
+  constructor(opt_x, opt_y, opt_z) {}
+};
+THREE.Vector3.prototype.lerpVectors
+THREE.Vector3.prototype.copy
+THREE.Vector3.prototype.clone
+THREE.Vector3.prototype.subVectors
+THREE.Vector3.prototype.multiplyScalar
+THREE.Vector3.prototype.setFromMatrixColumn
+THREE.Vector3.prototype.add
+THREE.Vector3.prototype.set
+THREE.Vector3.prototype.applyQuaternion
+THREE.Vector3.prototype.setFromSpherical
+THREE.Vector3.prototype.distanceToSquared
+THREE.Vector3.prototype.length
+THREE.Vector3.prototype.fromArray
+
+THREE.ShaderLib;
+
+THREE.Spherical = class {};
+THREE.Spherical.prototype.phi
+THREE.Spherical.prototype.theta
+THREE.Spherical.prototype.radius
+
+THREE.Spherical.prototype.set
+THREE.Spherical.prototype.setFromVector3
+THREE.Spherical.prototype.makeSafe
+
+THREE.Vector2 = class {};
+THREE.Vector2.prototype.copy
+THREE.Vector2.prototype.x
+THREE.Vector2.prototype.y
+THREE.Vector2.prototype.set
+THREE.Vector2.prototype.subVectors
+
+THREE.Object3D = class {
+  constructor() {
+    this.name = '';
+    this.uuid = '';
+    this.matrix = new THREE.Matrix4();
+    this.matrixWorld = new THREE.Matrix4();
+    this.position = new THREE.Vector3(0, 0, 0);
+    this.scale = new THREE.Vector3(0, 0, 0);
+    this.quaternion = new THREE.Quaternion();
+    this.up = new THREE.Vector3();
+    this.material = new THREE.Material();
+    this.isMesh = false;
+    this.isGroup = false;
+    this.children = [];
+    this.onBeforeRender = () => {};}};
+
+THREE.Object3D.prototype.applyMatrix
+THREE.Object3D.prototype.add
+THREE.Object3D.prototype.updateMatrixWorld
+THREE.Object3D.prototype.lookAt
+THREE.Object3D.prototype.clone
+
+THREE.Scene = class extends THREE.Object3D {};
+THREE.Group = class extends THREE.Object3D {};
+THREE.Points = class extends THREE.Object3D {};
+
+THREE.Mesh = class extends THREE.Object3D {
+  constructor(opt_geom, opt_mat) {
+    super();
+    /** @type {Array<number>} */
+    this.morphTargetInfluences = [];
+    /** @type {Object.<string, number>} */
+    this.morphTargetDictionary = {};
+    this.geometry = new THREE.BufferGeometry();}};
+THREE.Mesh.prototype.updateMorphTargets;
+THREE.SkinnedMesh = class extends THREE.Mesh {};
+
+THREE.BufferGeometry = class {
+  constructor() {
+    /** @type {Object.<string, THREE.BufferAttribute>} */ this.attributes = {};
+    /** @type {Object.<string, THREE.BufferAttribute>} */ this.morphAttributes = {};}};
+THREE.BufferGeometry.prototype.addAttribute
+THREE.BufferGeometry.prototype.setIndex
+
+THREE.BufferAttribute = class {
+  constructor() {
+    this.count = 0;
+    this.itemSize = 0;
+    this.array = [];
+    this.normalized = false;
+    this.isInterleavedBufferAttribute = false;}};
+THREE.BufferAttribute.prototype.setXYZ
+THREE.BufferAttribute.prototype.setArray
+THREE.BufferAttribute.prototype.getX
+THREE.BufferAttribute.prototype.setX
+THREE.BufferAttribute.prototype.getY
+THREE.BufferAttribute.prototype.setY
+THREE.BufferAttribute.prototype.getZ
+THREE.BufferAttribute.prototype.setZ
+THREE.BufferAttribute.prototype.getW
+THREE.BufferAttribute.prototype.setW
+THREE.BufferAttribute.prototype.clone
+
+THREE.InterleavedBuffer = class {};
+THREE.InterleavedBufferAttribute = class extends THREE.BufferAttribute {};
+
+THREE.Uniform = class {};
+THREE.Uniform.prototype.value
+
+THREE.AnimationClip
+THREE.Bone
+THREE.Skeleton
+
+THREE.Camera = class extends THREE.Object3D {
+  constructor() {
+    super();
+    this.fov = 0;
+    this.aspect = 0;
+    this.zoom = 0;}
+  updateProjectionMatrix() {}};
+
+THREE.Camera.prototype.setFromUnitVectors
+
+THREE.PerspectiveCamera = class extends THREE.Camera {};
+THREE.OrthographicCamera = class extends THREE.Camera {};
+
+THREE.Material = class {
+  constructor() {
+    this.morphTargets = false;
+    this.morphNormals = false;
+    this.isGLTFSpecularGlossinessMaterial = false;}};
+THREE.PointsMaterial = class extends THREE.Material {};
+THREE.MeshBasicMaterial = class extends THREE.Material {};
+THREE.MeshStandardMaterial = class extends THREE.Material {};
+THREE.ShaderMaterial = class extends THREE.Material {};
+THREE.LineBasicMaterial = class extends THREE.Material {};
+
+THREE.LineLoop = class {};
+THREE.Line = class {};
+THREE.LineSegments = class {};
+
+THREE.NufferGeometry = class {};
+
+THREE.Color = class {};
+THREE.Color.prototype.fromArray
+THREE.Color.prototype.setHex
+
+THREE.VertexColors
+THREE.TriangleStripDrawMode
+THREE.TriangleFanDrawMode
+
+THREE.PropertyBinding
+THREE.PropertyBinding.sanitizeNodeName
+
+THREE.Skeleton
+THREE.Matrix4
+
+THREE.DefaultLoadingManager
+THREE.Loader
+THREE.Loader.Handlers
+THREE.FileLoader = class {};
+THREE.FileLoader.prototype.setResponseType
+THREE.TextureLoader = class extends THREE.FileLoader {};
+
+THREE.NearestFilter
+THREE.LinearFilter
+THREE.NearestMipMapFilter
+THREE.NearestMipMapLinearFilter
+THREE.NearestMipMapNearestFilter
+THREE.LinearMipMapNearestFilter
+THREE.LinearMipMapLinearFilter
+
+THREE.ClampToEdgeWrapping
+THREE.MirroredRepeatWrapping
+THREE.RepeatWrapping
+
+THREE.AlphaFormat
+THREE.RGBAFormat
+THREE.RGBFormat
+THREE.LuminanceFormat
+THREE.LuminanceAlphaFormat
+
+THREE.UnsignedByteType
+THREE.UnsignedShort4444Type
+THREE.UnsignedShort5551Type
+THREE.UnsignedShort565Type
+
+THREE.InterpolateLinear
+THREE.InterpolateDiscrete
+
+THREE.sRGBEncoding
+
+THREE.FrontSide
+THREE.BackSide
+THREE.DoubleSide
+
+THREE.KeyframeTrack = class {
+  constructor() {
+    this.times = 0;}};
+THREE.KeyframeTrack.prototype.getValueSize;
+THREE.VectorKeyframeTrack = class extends THREE.KeyframeTrack {};
+THREE.QuaternionKeyframeTrack = class extends THREE.KeyframeTrack {};
+THREE.NumberKeyframeTrack = class extends THREE.KeyframeTrack {};
+
+THREE.AnimationUtils
+THREE.AnimationUtils.arraySlice
+
+THREE.Math
+THREE.Math.radToDeg
+
+THREE.UniformsUtils
+THREE.UniformsUtils.clone
+
+THREE.Interpolant = class {
+  constructor() {
+    this.sampleValues = [];
+  }};
+THREE.Interpolant.prototype.resultBuffer
+THREE.Interpolant.prototype.valueSize
+
+THREE.InterpolateSmooth
+
 // Under ads/google folder
 
 // adsense.js

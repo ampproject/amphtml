@@ -50,6 +50,9 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     /** @private {!JsonObject} */
     this.context_ = dict();
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -71,16 +74,14 @@ export class Amp3dGltf extends AMP.BaseElement {
       this.unlistenMessage_();
     }
 
-    /** @private {!Promise} */
     this.willBeReady_ = new Promise(resolve => {
       this.willBeReadyResolver_ = resolve;
     });
 
-    /** @private {!Promise} */
     this.willBeLoaded_ = new Promise(resolve => {
       this.willBeLoadedResolver_ = resolve;
     });
-    
+
     return true;
   }
 
@@ -174,7 +175,7 @@ export class Amp3dGltf extends AMP.BaseElement {
   /**
    * Sends a command to the player through postMessage.
    * @param {string} action
-   * @param {JsonObject=} args
+   * @param {(JsonObject|boolean)=} args
    * @private
    * */
   sendCommand_(action, args) {

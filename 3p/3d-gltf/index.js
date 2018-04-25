@@ -45,10 +45,10 @@ export function gltfViewer(global) {
     global.addEventListener('message', e => {
       const msg = parseJson(getData(e));
       if (viewer) {
-        viewer[msg.action](msg.args);
+        viewer[msg['action']](msg['args']);
       } else {
         console.warn(
-            `cannot perform action=${msg.action}, viewer is not started`
+            `cannot perform action=${msg['action']}, viewer is not started`
         );
       }
     }, false);

@@ -4,9 +4,14 @@ import AnimationLoop from './AnimationLoop';
 import declareGLTFLoader from './gltfLoader';
 import declareOrbitControls from './orbit';
 
+/**
+ * @param {JsonObject} options
+ * @param {{onerror: Function, onprogress: Function, onload: Function}} handlers
+ * @returns {*}
+ */
 export default function makeViewer(options, handlers) {
-  declareGLTFLoader(THREE);
-  declareOrbitControls(THREE);
+  declareGLTFLoader();
+  declareOrbitControls();
 
 
   const makeLight = () => {
@@ -44,15 +49,15 @@ export default function makeViewer(options, handlers) {
   };
 
 
-  const loadObject = (viewer, src, {onload, onprogress, onerror}) => {
+  const loadObject = (viewer, src) => {
     const baseUrl = THREE.LoaderUtils.extractUrlBase(
-        options.hostUrl
+        options['hostUrl']
     );
 
     const resolvedUrl = resolveURL(src, baseUrl);
 
     if (resolvedUrl === '') {
-      return onerror(new Error('invalid url'));
+      return handlers.onerror(new Error('invalid url'));
     }
 
     const loader = new THREE.GLTFLoader();
@@ -78,10 +83,10 @@ export default function makeViewer(options, handlers) {
 
           document.body.appendChild(viewer.renderer.domElement);
           viewer.animationLoop.needsUpdate = true;
-          onload();
+          handlers.onload();
         },
-        onprogress,
-        onerror
+        handlers.onprogress,
+        handlers.onerror
     );
   };
 
@@ -97,15 +102,15 @@ export default function makeViewer(options, handlers) {
   }
 
 
-  const renderer = new THREE.WebGLRenderer(options.renderer);
-  renderer.setPixelRatio(Math.min(options.maxPixelRatio, devicePixelRatio));
+  const renderer = new THREE.WebGLRenderer(options['renderer']);
+  renderer.setPixelRatio(Math.min(options['maxPixelRatio'], devicePixelRatio));
 
   const scene = new THREE.Scene();
   scene.add(makeLight());
 
   const camera = new THREE.PerspectiveCamera();
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  Object.assign(controls, options.controls);
+  Object.assign(controls, options['controls']);
 
   controls.addEventListener('change', () => {
     animationLoop.needsUpdate = true;
@@ -147,7 +152,7 @@ export default function makeViewer(options, handlers) {
     },
   };
 
-  loadObject(viewer, options.src, handlers);
+  loadObject(viewer, options['src']);
   global.viewer = viewer;
 
   let ampInViewport = true;

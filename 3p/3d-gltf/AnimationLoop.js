@@ -8,8 +8,7 @@ export default class AnimationLoop {
     /** @public {number} */
     this.fpsLimit = 0;
 
-    /** @function
-     * @private */
+    /** @private */
     this.task_ = task;
 
     /** @private {boolean} */
@@ -22,8 +21,7 @@ export default class AnimationLoop {
     /** @public {boolean} */
     this.needsUpdate = true;
 
-    /** @function
-     * @private */
+    /** @private */
     this.loop_ = this.loop_.bind(this);
   }
 
@@ -52,7 +50,7 @@ export default class AnimationLoop {
     this.currentRAF_ = requestAnimationFrame(this.loop_);
   }
 
-  /** @private {boolean} */
+  /** @private */
   get isNeedToRender_() {
     if (!this.needsUpdate) {
       return false;
