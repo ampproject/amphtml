@@ -80,11 +80,12 @@ function getConfig() {
         'SL_Chrome_latest',
         'SL_Chrome_45',
         'SL_Firefox_latest',
-        'SL_Safari_latest',
-        'SL_Safari_10',
-        'SL_Safari_9',
-        'SL_iOS_latest',
-        'SL_iOS_10_0',
+        // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
+        // 'SL_Safari_latest',
+        // 'SL_Safari_10',
+        // 'SL_Safari_9',
+        // 'SL_iOS_latest',
+        // 'SL_iOS_10_0',
         // TODO(rsimha, #14374): Re-enable these after upgrading wd.
         // 'SL_Edge_latest',
         // 'SL_IE_11',
@@ -371,17 +372,19 @@ function runTests() {
       log(
           red('ERROR:'),
           yellow('Karma test failed with exit code ' + exitCode));
-      process.exitCode = exitCode;
-      self.emitAsync('exit');
     }
+    // TODO(rsimha, 14814): Remove after Karma / Sauce ticket is resolved.
+    setTimeout(() => {
+      process.exit(exitCode);
+    }, 5000);
     resolver();
   }).on('run_start', function() {
     if (argv.saucelabs || argv.saucelabs_lite) {
-      console./* OK*/log(green(
+      log(green(
           'Running tests in parallel on ' + c.browsers.length +
           ' Sauce Labs browser(s)...'));
     } else {
-      console./* OK*/log(green('Running tests locally...'));
+      log(green('Running tests locally...'));
     }
   }).on('run_complete', function() {
     if (shouldCollapseSummary) {
@@ -392,7 +395,7 @@ function runTests() {
   }).on('browser_complete', function(browser) {
     if (shouldCollapseSummary) {
       const result = browser.lastResult;
-      let message = '\n' + browser.name + ': ';
+      let message = browser.name + ': ';
       message += 'Executed ' + (result.success + result.failed) +
           ' of ' + result.total + ' (Skipped ' + result.skipped + ') ';
       if (result.failed === 0) {
@@ -401,7 +404,8 @@ function runTests() {
         message += red(result.failed + ' FAILED');
       }
       message += '\n';
-      console./* OK*/log(message);
+      console./* OK*/log('\n');
+      log(message);
     }
   }).start();
   return deferred.then(() => exitCtrlcHandler(handlerProcess));
