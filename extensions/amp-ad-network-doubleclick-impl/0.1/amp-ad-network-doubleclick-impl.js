@@ -55,6 +55,7 @@ import {
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   RefreshManager, // eslint-disable-line no-unused-vars
@@ -959,8 +960,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       dev().assert(this.iframe);
-      Services.ampdocServiceFor(self).installAnchorClickInterceptor(
-          this.getAmpDoc, this.iframe.contentWindow);
+      Navigation.installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
     }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
