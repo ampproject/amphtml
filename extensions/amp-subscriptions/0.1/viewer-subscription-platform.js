@@ -64,9 +64,6 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {string} */
     this.origin_ = origin;
-
-    /** @private {?Entitlement}*/
-    this.entitlement_ = null;
   }
 
   /** @override */
@@ -86,9 +83,6 @@ export class ViewerSubscriptionPlatform {
         return Entitlement.empty('local');
       }
       return this.verifyAuthToken_(authData);
-    }).then(entitlement => {
-      this.entitlement_ = entitlement;
-      return entitlement;
     }).catch(reason => {
       this.sendAuthTokenErrorToViewer_(reason.message);
       throw reason;
