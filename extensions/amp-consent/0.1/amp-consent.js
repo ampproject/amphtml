@@ -20,7 +20,6 @@ import {
   ConsentPolicyManager,
   MULTI_CONSENT_EXPERIMENT,
 } from './consent-policy-manager';
-import {Layout} from '../../../src/layout';
 import {
   NOTIFICATION_UI_MANAGER,
   NotificationUiManager,
@@ -272,11 +271,6 @@ export class AmpConsent extends AMP.BaseElement {
     }
     // Hide current dialog
     this.hide_();
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**

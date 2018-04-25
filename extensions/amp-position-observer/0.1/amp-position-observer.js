@@ -16,13 +16,6 @@
 
 import {ActionTrust} from '../../../src/action-trust';
 import {
-  Layout,
-  assertLength,
-  getLengthNumeral,
-  getLengthUnits,
-  parseLength,
-} from '../../../src/layout';
-import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {
@@ -31,6 +24,12 @@ import {
   layoutRectsRelativePos,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {getServiceForDoc} from '../../../src/service';
@@ -94,11 +93,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {number} */
     this.scrollProgress_ = 0;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
