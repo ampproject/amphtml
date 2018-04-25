@@ -1349,26 +1349,28 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
 
-      const ampForm = new AmpForm(form);
       const emailInput = document.createElement('input');
       emailInput.setAttribute('name', 'email');
       emailInput.setAttribute('id', 'email');
       emailInput.setAttribute('type', 'email');
       emailInput.setAttribute('value', 'jack@poc.com');
-      ampForm.form_.appendChild(emailInput);
-      const initalFormValues = ampForm.getFormAsObject_();
+      form.appendChild(emailInput);
 
-      ampForm.form_.elements.name.value = 'Jack Sparrow';
+      return getAmpForm(form).then(ampForm => {
+        const initalFormValues = ampForm.getFormAsObject_();
 
-      sandbox.spy(ampForm, 'handleClearAction_');
-      ampForm.actionHandlerLow_({method: 'anything'});
-      expect(ampForm.handleClearAction_).to.have.not.been.called;
+        ampForm.form_.elements.name.value = 'Jack Sparrow';
 
-      expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-      ampForm.actionHandlerLow_({method: 'clear'});
-      expect(ampForm.handleClearAction_).to.have.been.called;
+        sandbox.spy(ampForm, 'handleClearAction_');
+        ampForm.actionHandlerLow_({method: 'anything'});
+        expect(ampForm.handleClearAction_).to.have.not.been.called;
 
-      expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
+        expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
+        ampForm.actionHandlerLow_({method: 'clear'});
+        expect(ampForm.handleClearAction_).to.have.been.called;
+
+        expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
+      });
     });
 
     it('should remove all form state classes when form is cleared', () => {

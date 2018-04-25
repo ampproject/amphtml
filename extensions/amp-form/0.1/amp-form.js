@@ -239,9 +239,6 @@ export class AmpForm {
         this.handleSubmitAction_(invocation);
       });
     }
-    else if (invocation.method === 'clear') {
-      this.handleClearAction_();
-    }
     return null;
   }
 
