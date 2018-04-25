@@ -171,11 +171,7 @@ export class LocalSubscriptionPlatform {
     });
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {

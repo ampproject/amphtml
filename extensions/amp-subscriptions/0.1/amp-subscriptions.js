@@ -437,17 +437,7 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.platformStore_.getLocalPlatform(),
-          'Local platform is not registered'));
-    // TODO: add which service is passing this event
-    this.subscriptionAnalytics_.event(
-        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-        {
-          action,
-        }
-    );
-    return localPlatform.executeAction(action);
+    this.delegateActionToService(action, 'local');
   }
 
   /**
@@ -457,7 +447,17 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId) {
-
+    const platform = /** @type {LocalSubscriptionPlatform} */ (
+      dev().assert(this.platformStore_.getPlatform(serviceId),
+          'Local platform is not registered'));
+    this.subscriptionAnalytics_.event(
+        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+        {
+          action,
+          serviceId,
+        }
+    );
+    return platform.executeAction(action);
   }
 }
 
