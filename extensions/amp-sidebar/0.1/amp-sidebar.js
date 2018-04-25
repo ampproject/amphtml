@@ -17,7 +17,6 @@
 import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, isRTL, tryFocus} from '../../../src/dom';
@@ -96,11 +95,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {number} */
     this.initialScrollTop_ = 0;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */

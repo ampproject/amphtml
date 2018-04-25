@@ -27,7 +27,6 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
@@ -756,11 +755,6 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     /** @private {function(this:AmpImageLightbox, Event)} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**

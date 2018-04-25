@@ -20,7 +20,6 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {computedStyle, setImportantStyles} from '../../../src/style';
@@ -96,11 +95,6 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.registerAction('open', this.activate.bind(this));
     this.registerAction('close', this.close.bind(this));
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**

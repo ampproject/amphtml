@@ -15,7 +15,6 @@
  */
 
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -42,11 +41,6 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
     /** @protected {boolean} */
     this.canShowBuiltinBanner_ = false;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**

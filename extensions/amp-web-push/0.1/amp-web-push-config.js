@@ -15,7 +15,6 @@
  */
 
 import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
-import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
@@ -58,11 +57,6 @@ export class WebPushConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /**
