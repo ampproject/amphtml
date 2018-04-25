@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {
   ImaPlayerData,
 } from './ima-player-data';
@@ -186,6 +187,15 @@ let adsRequested;
 
 // Flag that tracks if the user tapped and dragged on the big play button.
 let userTappedAndDragged;
+
+// User consent state.
+let consentState;
+
+// Flag that tracks if the user consent promise has resolved.
+let consentResolved;
+
+// Flag that tracks if requesting ads was delayed for user consent resolution.
+let requestAdsOnUserConsent;
 
 /**
  * The business.
@@ -466,10 +476,8 @@ function onImaLoadSuccess(global, data) {
 
   if (!data['delayAdRequest']) {
     requestAds();
-  } else {
-    // Let amp-ima-video know that we are done set-up.
-    window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
   }
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 function onImaLoadFail() {
@@ -548,11 +556,21 @@ function onBigPlayTouchMove() {
 export function requestAds() {
   adsRequested = true;
   adRequestFailed = false;
-  adsLoader.requestAds(adsRequest);
+  if (consentResolved) {
+    if (consentState == CONSENT_POLICY_STATE.UNKNOWN) {
+      imaLoadAllowed = false;
+      return;
+    } else if (consentState == CONSENT_POLICY_STATE.INSUFFICIENT) {
+      adsRequest.adTagUrl += '&npa=1';
+    }
+    adsLoader.requestAds(adsRequest);
+  } else {
+    requestAdsOnUserConsent = true;
+  }
 }
 
 /**
- * Starts ad playback. If the ad request has not yte resolved, calls itself
+ * Starts ad playback. If the ad request has not yet resolved, calls itself
  * again after 250ms.
  *
  * @visibleForTesting
@@ -626,7 +644,6 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
 }
 
 /**
@@ -636,10 +653,6 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
-  // Send this message to trigger auto-play for failed pre-roll requests -
-  // failing to load an ad is just as good as loading one as far as starting
-  // playback is concerned because our content will be ready to play.
-  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
   if (playbackStarted) {
     videoPlayer.addEventListener(interactEvent, showControls);
     playVideo();
@@ -1050,6 +1063,13 @@ function onMessage(global, event) {
       case 'onFirstScroll':
       case 'onAdRequestDelayTimeout':
         if (!adsRequested && imaLoadAllowed) {
+          requestAds();
+        }
+        break;
+      case 'consentResolved':
+        consentResolved = true;
+        consentState = msg.args.consentState;
+        if (requestAdsOnUserConsent) {
           requestAds();
         }
         break;

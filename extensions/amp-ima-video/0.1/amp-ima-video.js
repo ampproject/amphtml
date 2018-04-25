@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getConsentPolicyState} from '../../../src/consent-state';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
@@ -165,6 +166,15 @@ class AmpImaVideo extends AMP.BaseElement {
     this.applyFillContent(iframe);
 
     this.iframe_ = iframe;
+
+    // Send consent state to the player once it resolves.
+    // This needs to be here because sendCommand will fail if this.iframe_ is
+    // not set, so I can't put it in the buildCallback where (I think) it should
+    // be.
+    getConsentPolicyState(this.getAmpDoc(), super.getConsentPolicy()).then(
+        resolution => {
+          this.sendCommand_('consentResolved', {'consentState': resolution});
+    });
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -371,6 +381,11 @@ class AmpImaVideo extends AMP.BaseElement {
   /** @override */
   getPlayedRanges() {
     return this.playerData_.playedRanges;
+  }
+
+  /** @override */
+  getConsentPolicy() {
+    return null;
   }
 }
 
