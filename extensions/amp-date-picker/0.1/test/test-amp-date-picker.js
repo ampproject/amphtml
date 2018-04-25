@@ -20,7 +20,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-date-picker', {
   amp: {
-    runtimeOn: true,
+    runtimeOn: false,
     extensions: ['amp-date-picker'],
   },
 }, env => {
@@ -45,19 +45,23 @@ describes.realWin('amp-date-picker', {
     height: '360',
   };
 
-  function createDatePicker(opt_attrs) {
+  function createDatePicker(opt_attrs, opt_parent = document.body) {
     const element = document.createElement('amp-date-picker');
     const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
     for (const key in attrs) {
       element.setAttribute(key, attrs[key]);
     }
 
-    document.body.appendChild(element);
+    opt_parent.appendChild(element);
     const picker = new AmpDatePicker(element);
 
     return {
       element,
       picker,
+      layoutCallback() {
+        return Promise.resolve(picker.buildCallback())
+            .then(() => picker.layoutCallback());
+      },
     };
   }
 
@@ -97,12 +101,12 @@ describes.realWin('amp-date-picker', {
   });
 
   it('should render in the simplest case', () => {
-    const {picker} = createDatePicker({
+    const {picker, layoutCallback} = createDatePicker({
       layout: 'fixed-height',
       height: 360,
     });
 
-    return picker.layoutCallback().then(() => {
+    return layoutCallback().then(() => {
       const container = picker.container_;
       expect(container.children.length).to.be.greaterThan(0);
     });
@@ -154,7 +158,7 @@ describes.realWin('amp-date-picker', {
         const defaultTemplate = createDateTemplate('{{val}}', {
           id: 'defaultTemplate',
         });
-        const {picker, element} = createDatePicker();
+        const {element, picker} = createDatePicker();
         element.appendChild(template);
         element.appendChild(defaultTemplate);
 
@@ -165,6 +169,142 @@ describes.realWin('amp-date-picker', {
         expect(srcTemplates[0].dates.contains('2018-01-03')).to.be.true;
         expect(srcTemplates[0].template).to.equal(template);
         expect(srcDefaultTemplate).to.equal(defaultTemplate);
+      });
+    });
+
+    describe('hidden inputs in single date picker in forms', () => {
+      it('should not create hidden inputs outside of forms', () => {
+        const {element} = createDatePicker();
+
+        expect(element.querySelector('input[type="hidden"]')).to.be.null;
+      });
+
+      it('should create a hidden input when inside a form', () => {
+        const form = document.createElement('form');
+        document.body.appendChild(form);
+        const {element, layoutCallback} = createDatePicker({}, form);
+
+        return layoutCallback().then(() => {
+          const input = element.querySelector('input[type="hidden"]');
+          expect(input).to.not.be.null;
+          expect(input.name).to.equal('date');
+        });
+      });
+
+      it('should name the input `${id}-date` when another ' +
+          '#date input exists', () => {
+        const form = document.createElement('form');
+        const dateInput = document.createElement('input');
+        dateInput.type = 'hidden';
+        dateInput.name = 'date';
+        form.appendChild(dateInput);
+        document.body.appendChild(form);
+        const {element, layoutCallback} =
+            createDatePicker({id: 'delivery'}, form);
+
+        return layoutCallback().then(() => {
+          const input = element.querySelector('input[type="hidden"]');
+          expect(input).to.not.be.null;
+          expect(input.name).to.equal('delivery-date');
+        });
+      });
+
+      it('should error if the input when another ' +
+          '#date input exists and the picker has no ID', () => {
+        const form = document.createElement('form');
+        const dateInput = document.createElement('input');
+        dateInput.type = 'hidden';
+        dateInput.name = 'date';
+        form.appendChild(dateInput);
+        document.body.appendChild(form);
+
+        const {layoutCallback} = createDatePicker({}, form);
+
+        allowConsoleError(() => {
+          expect(layoutCallback()).to.be.rejectedWith(
+              'another #date input exists');
+        });
+      });
+    });
+
+    describe('hidden inputs in range date picker in forms', () => {
+      it('should not create hidden inputs outside of forms', () => {
+        const {element} = createDatePicker({type: 'range'});
+
+        expect(element.querySelector('input[type="hidden"]')).to.be.null;
+      });
+
+      it('should create a hidden input when inside a form', () => {
+        const form = document.createElement('form');
+        document.body.appendChild(form);
+        const {element, layoutCallback} =
+            createDatePicker({type: 'range'}, form);
+
+        return layoutCallback().then(() => {
+          const inputs = element.querySelectorAll('input[type="hidden"]');
+          expect(inputs.length).to.equal(2);
+          expect(inputs[0].name).to.equal('start-date');
+          expect(inputs[1].name).to.equal('end-date');
+        });
+      });
+
+      it('should name an input `${id}-(start|end)-date` when another ' +
+          '#(start|end)-date input exists', () => {
+        const form = document.createElement('form');
+        const startDateInput = document.createElement('input');
+        startDateInput.type = 'hidden';
+        startDateInput.name = 'start-date';
+        form.appendChild(startDateInput);
+        document.body.appendChild(form);
+        const {element, layoutCallback} =
+            createDatePicker({type: 'range', id: 'delivery'}, form);
+
+        return layoutCallback().then(() => {
+          const inputs = element.querySelectorAll('input[type="hidden"]');
+          expect(inputs.length).to.equal(2);
+          expect(inputs[0].name).to.equal('delivery-start-date');
+          expect(inputs[1].name).to.equal('end-date');
+        });
+      });
+
+      it('should name both inputs `${id}-(start|end)-date` when other ' +
+          '#start-date and #end-date inputs exists', () => {
+        const form = document.createElement('form');
+        const startDateInput = document.createElement('input');
+        startDateInput.type = 'hidden';
+        startDateInput.name = 'start-date';
+        form.appendChild(startDateInput);
+        const endDateInput = document.createElement('input');
+        endDateInput.type = 'hidden';
+        endDateInput.name = 'end-date';
+        form.appendChild(endDateInput);
+        document.body.appendChild(form);
+        const {element, layoutCallback} =
+            createDatePicker({type: 'range', id: 'delivery'}, form);
+
+        return layoutCallback().then(() => {
+          const inputs = element.querySelectorAll('input[type="hidden"]');
+          expect(inputs.length).to.equal(2);
+          expect(inputs[0].name).to.equal('delivery-start-date');
+          expect(inputs[1].name).to.equal('delivery-end-date');
+        });
+      });
+
+      it('should error if the input when another ' +
+          '#date input exists and the picker has no ID', () => {
+        const form = document.createElement('form');
+        const dateInput = document.createElement('input');
+        dateInput.type = 'hidden';
+        dateInput.name = 'start-date';
+        form.appendChild(dateInput);
+        document.body.appendChild(form);
+
+        const {layoutCallback} = createDatePicker({type: 'range'}, form);
+
+        allowConsoleError(() => {
+          expect(layoutCallback()).to.be.rejectedWith(
+              'another #start-date input exists');
+        });
       });
     });
   });
