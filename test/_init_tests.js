@@ -257,7 +257,7 @@ function warnForConsoleError(runner) {
   const testName = runner.currentTest.fullTitle();
 
   function record(var_args) {
-    const errorMessage = Array.prototype.slice.call(arugments).join(' ')
+    const errorMessage = Array.prototype.slice.call(arguments).join(' ')
         .split('\n', 1)[0]; // First line.
     const helpMessage = '    The test "' + testName + '"' +
         ' resulted in a call to console.error.\n' +
@@ -333,7 +333,7 @@ afterEach(function() {
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
 
-  consoleSandbox.restore();;
+  consoleSandbox.restore();
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
