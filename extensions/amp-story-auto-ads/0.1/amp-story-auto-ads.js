@@ -288,6 +288,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const requiredAttrs = {
       'class': 'i-amphtml-story-ad',
       'layout': 'fill',
+      'amp-story': '',
     };
 
     const configAttrs = this.config_['ad-attributes'];
