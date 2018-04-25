@@ -156,45 +156,24 @@ export class NextPageService {
 
   /**
    * Attach a ShadowDoc using the given document.
-   * @param {!Document} doc
-   * @return {!Promise<?Object>} Promise resolved with the return value of
-   *     {@link MultidocManager#attachShadowDoc}
+   * @param {!Element} shadowRoot Root element to attach the shadow document to.
+   * @param {!Document} doc Document to attach.
+   * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
    */
-  attachShadowDoc_(doc) {
-    const container = this.win_.document.createElement('div');
+  attachShadowDoc_(shadowRoot, doc) {
+    try {
+      const amp =
+          this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+      installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
 
-    const separator = this.separator_.cloneNode(true);
-    separator.removeAttribute('separator');
-    container.appendChild(separator);
+      const body = amp.ampdoc.getBody();
+      body.classList.add('i-amphtml-next-page-document');
 
-    const page = this.nextArticle_ - 1;
-    this.positionObserver_.observe(separator,
-        PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(page, position));
-
-    const articleLinks = this.createArticleLinks_(this.nextArticle_);
-    container.appendChild(articleLinks);
-
-    const shadowRoot = this.win_.document.createElement('div');
-    container.appendChild(shadowRoot);
-
-    let amp = null;
-    return this.appendPageHandler_(container)
-        .then(() => {
-          return this.resources_.mutateElement(container, () => {
-            try {
-              amp = this.multidocManager_.attachShadowDoc(
-                  shadowRoot, doc, '', {});
-              installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
-
-              const body = amp.ampdoc.getBody();
-              body.classList.add('i-amphtml-next-page-document');
-            } catch (e) {
-              // TODO(emarchiori): Handle loading errors.
-            }
-          });
-        })
-        .then(() => amp);
+      return amp;
+    } catch (e) {
+      // TODO(emarchiori): Handle loading errors.
+    }
+    return null;
   }
 
   /**
@@ -218,15 +197,34 @@ export class NextPageService {
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
-      // TODO(emarchiori): ampUrl needs to be updated to point to
-      // the cache or same domain, otherwise this is a CORS request.
+      const container = this.win_.document.createElement('div');
+
+      const separator = this.separator_.cloneNode(true);
+      separator.removeAttribute('separator');
+      container.appendChild(separator);
+
+      const page = this.nextArticle_ - 1;
+      this.positionObserver_.observe(separator,
+          PositionObserverFidelity.LOW,
+          position => this.positionUpdate_(page, position));
+
+      const articleLinks = this.createArticleLinks_(this.nextArticle_);
+      container.appendChild(articleLinks);
+
+      const shadowRoot = this.win_.document.createElement('div');
+      container.appendChild(shadowRoot);
+
+      this.appendPageHandler_(container);
+
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
-          .then(doc => this.attachShadowDoc_(doc), () => {})
-          .then(amp => {
-            documentRef.amp = amp;
-            this.documentQueued_ = false;
-          });
+          .then(doc => this.resources_.mutateElement(container,
+              () => {
+                const amp = this.attachShadowDoc_(shadowRoot, doc);
+                documentRef.amp = amp;
+                this.documentQueued_ = false;
+              }),
+          () => {});
     }
   }
 
