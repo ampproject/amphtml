@@ -16,7 +16,6 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {Layout} from '../../../src/layout';
 import {computedStyle, toggle} from '../../../src/style';
 import {dev,user} from '../../../src/log';
 import {
@@ -51,11 +50,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.adReadyPromise_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
