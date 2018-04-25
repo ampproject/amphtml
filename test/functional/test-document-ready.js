@@ -30,7 +30,7 @@ describe('documentReady', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'loading',

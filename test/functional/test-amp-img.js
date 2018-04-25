@@ -26,7 +26,7 @@ describe('amp-img', () => {
   let windowWidth;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     screenWidth = 320;
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'isInViewport')

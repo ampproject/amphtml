@@ -36,7 +36,7 @@ describes.realWin('amp-live-list', {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(win);
     elem = document.createElement('amp-live-list');
     elem.getAmpDoc = () => ampdoc;

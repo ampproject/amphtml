@@ -74,7 +74,7 @@ describe('GoogleAdLifecycleReporter', () => {
   let emitPingSpy;
   let iframe;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     emitPingSpy = sandbox.spy(GoogleAdLifecycleReporter.prototype, 'emitPing_');
     iframe = createIframePromise(false).then(iframeFixture => {
       const win = iframeFixture.win;

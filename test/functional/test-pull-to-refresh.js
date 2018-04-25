@@ -25,7 +25,7 @@ describe('PullToRefreshBlocker', () => {
   let blocker;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     eventListeners = {};
     const documentApi = {

@@ -47,7 +47,7 @@ describe('IntersectionObserverApi', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
@@ -146,7 +146,7 @@ describe('IntersectionObserverApi', () => {
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
@@ -192,7 +192,7 @@ describe('getIntersectionChangeEntry', () => {
 describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 

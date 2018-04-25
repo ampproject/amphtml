@@ -42,7 +42,7 @@ describes.realWin('analytics', {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       triggerEventSpy = sandbox.spy();

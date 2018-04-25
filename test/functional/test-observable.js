@@ -22,7 +22,7 @@ describe('Observable', () => {
   let observable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     observable = new Observable();
   });
 

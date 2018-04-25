@@ -41,10 +41,7 @@ import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
-let consoleErrorSandbox;
-let consoleErrorStub;
-let consoleInfoLogWarnSandbox;
-let testName;
+let consoleSandbox;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -254,33 +251,14 @@ it.configure = function() {
   return new TestConfig(it);
 };
 
-// Used to check if an unrestored sandbox exists
-const sandboxes = [];
-const create = sinon.sandbox.create;
-sinon.sandbox.create = function(config) {
-  const sandbox = create.call(sinon.sandbox, config);
-  sandboxes.push(sandbox);
-
-  const restore = sandbox.restore;
-  sandbox.restore = function() {
-    const i = sandboxes.indexOf(sandbox);
-    if (i > -1) {
-      sandboxes.splice(i, 1);
-    }
-    return restore.call(sandbox);
-  };
-  return sandbox;
-};
-
 // Used during normal test execution, to detect unexpected console errors.
-function warnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
-  }
-  consoleErrorSandbox = sinon.sandbox.create();
-  const originalConsoleError = console/*OK*/.error;
-  consoleErrorSandbox.stub(console, 'error').callsFake((...messages) => {
-    const errorMessage = messages.join(' ').split('\n', 1)[0]; // First line.
+function warnForConsoleError(runner) {
+  const originalConsoleError = console./*OK*/error;
+  const testName = runner.currentTest.fullTitle();
+
+  function record(var_args) {
+    const errorMessage = Array.prototype.slice.call(arugments).join(' ')
+        .split('\n', 1)[0]; // First line.
     const helpMessage = '    The test "' + testName + '"' +
         ' resulted in a call to console.error.\n' +
         '    ⤷ If this is not expected, fix the code that generated ' +
@@ -291,60 +269,45 @@ function warnForConsoleError() {
             'error> });';
     // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
     originalConsoleError(errorMessage + '\'\n' + helpMessage);
-  });
+  }
+
+  const stub = consoleSandbox.stub(console, 'error').callsFake(record);
   this.allowConsoleError = function(func) {
-    dontWarnForConsoleError();
+    stub.reset();
+    stub.callsFake(() => {});
     func();
+
     try {
-      expect(consoleErrorStub).to.have.been.called;
+      expect(stub).to.have.been.called;
     } catch (e) {
       const helpMessage =
           'The test "' + testName + '" contains an "allowConsoleError" block ' +
           'that didn\'t result in a call to console.error.';
       // TODO(rsimha, #14432): Throw an error here after all tests are fixed.
       originalConsoleError(helpMessage);
+    } finally {
+      stub.callsFake(record);
     }
-    warnForConsoleError();
   };
-}
-
-// Used during sections of tests where an error is expected.
-function dontWarnForConsoleError() {
-  if (consoleErrorSandbox) {
-    consoleErrorSandbox.restore();
-  }
-  consoleErrorSandbox = sinon.sandbox.create();
-  consoleErrorStub =
-      consoleErrorSandbox.stub(console, 'error').callsFake(() => {});
-}
-
-// Used to restore error level logging after each test.
-function restoreConsoleError() {
-  consoleErrorSandbox.restore();
 }
 
 // Used to silence info, log, and warn level logging during each test.
 function stubConsoleInfoLogWarn() {
-  if (consoleInfoLogWarnSandbox) {
-    consoleInfoLogWarnSandbox.restore();
-  }
-  consoleInfoLogWarnSandbox = sinon.sandbox.create();
-  consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
-  consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
+  consoleSandbox = sinon.createSandbox();
+  consoleSandbox.stub(console, 'info').callsFake(() => {});
+  consoleSandbox.stub(console, 'log').callsFake(() => {});
+  consoleSandbox.stub(console, 'warn').callsFake(() => {});
 }
 
-// Used to restore info, log, and warn level logging after each test.
-function restoreConsoleInfoLogWarn() {
-  consoleInfoLogWarnSandbox.restore();
+if (!sinon.sandbox) {
+  sinon.sandbox = sinon.createSandbox();
 }
 
 beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
-  testName = this.currentTest.fullTitle();
   stubConsoleInfoLogWarn();
-  warnForConsoleError();
+  warnForConsoleError(this);
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
 });
@@ -369,8 +332,8 @@ function beforeTest() {
 afterEach(function() {
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
-  restoreConsoleError();
-  restoreConsoleInfoLogWarn();
+
+  consoleSandbox.restore();;
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
   if (!Services.platformFor(window).isSafari()) {
@@ -406,19 +369,6 @@ afterEach(function() {
         delete global[globalState[i]];
       }
     }
-  }
-  const forgotGlobal = !!global.sandbox;
-  if (forgotGlobal) {
-    // The error will be thrown later to give possibly other sandboxes a
-    // chance to restore themselves.
-    delete global.sandbox;
-  }
-  if (sandboxes.length > 0) {
-    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
-    throw new Error('You forgot to restore your sandbox!');
-  }
-  if (forgotGlobal) {
-    throw new Error('You forgot to clear global sandbox!');
   }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +

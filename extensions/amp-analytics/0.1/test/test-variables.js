@@ -31,7 +31,7 @@ describe('amp-analytics.VariableService', function() {
   let variables, sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     installVariableService(window);
     variables = variableServiceFor(window);
   });

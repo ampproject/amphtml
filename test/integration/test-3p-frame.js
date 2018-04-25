@@ -44,7 +44,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   let preconnect;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);

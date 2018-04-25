@@ -35,7 +35,7 @@ describe('FixedLayer', () => {
   let allRules;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     allRules = {};
 

@@ -28,7 +28,7 @@ describe('3p ampcontext.js', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {

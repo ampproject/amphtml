@@ -27,7 +27,7 @@ describe('alp-handler', () => {
   let image;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     image = undefined;
     win = {
       location: {},

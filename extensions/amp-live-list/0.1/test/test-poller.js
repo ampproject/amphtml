@@ -27,7 +27,7 @@ describe('Poller', () => {
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     const obj = {
       work() {},

@@ -99,7 +99,7 @@ describe('amp-sidebar - toolbar', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {

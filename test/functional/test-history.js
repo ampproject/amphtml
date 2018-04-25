@@ -398,7 +398,7 @@ describe('HistoryBindingVirtual', () => {
   let viewer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;

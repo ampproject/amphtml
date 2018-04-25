@@ -30,7 +30,7 @@ describe('HTMLDocument.contains', () => {
   let disconnectedChild;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     fakeWinWithContains = {
       HTMLDocument: class {

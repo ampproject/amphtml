@@ -1153,7 +1153,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,

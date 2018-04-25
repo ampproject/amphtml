@@ -22,7 +22,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -93,7 +93,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 

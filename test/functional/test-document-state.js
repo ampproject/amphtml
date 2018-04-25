@@ -27,7 +27,7 @@ describe('DocumentState', () => {
   let docState;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'complete',

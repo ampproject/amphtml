@@ -86,7 +86,7 @@ describe('a4a_config', () => {
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     rand = sandbox.stub(Math, 'random');
     win = {
       AMP_MODE: {
@@ -310,7 +310,7 @@ describe('a4a_config hash param parsing', () => {
   let element;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     win = {
       AMP_MODE: {
         localDev: true,

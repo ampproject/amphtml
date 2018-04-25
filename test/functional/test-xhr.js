@@ -70,7 +70,7 @@ describe.configure().skipSafari().run('XHR', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocServiceForStub.returns({isSingleDoc: () => false});
     location.href = 'https://acme.com/path';

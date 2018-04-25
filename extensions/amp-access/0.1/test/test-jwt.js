@@ -34,7 +34,7 @@ describe('JwtHelper', () => {
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
   });
 

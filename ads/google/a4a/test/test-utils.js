@@ -234,7 +234,7 @@ describe('Google A4A utils', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {
@@ -737,7 +737,7 @@ describe('Google A4A utils', () => {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {

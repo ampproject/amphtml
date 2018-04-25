@@ -24,7 +24,7 @@ describe('TaskQueue', () => {
   let queue;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     queue = new TaskQueue();
   });

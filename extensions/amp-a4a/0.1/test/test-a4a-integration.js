@@ -88,7 +88,7 @@ describe('integration test: a4a', () => {
   let a4aElement;
   let a4aRegistry;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     a4aRegistry = getA4ARegistry();
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {

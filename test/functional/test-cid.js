@@ -65,7 +65,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;

@@ -28,7 +28,7 @@ describe('TapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -120,7 +120,7 @@ describe('DoubletapRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
@@ -227,7 +227,7 @@ describe('SwipeXYRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -414,7 +414,7 @@ describe('TapzoomRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {
@@ -595,7 +595,7 @@ describe('PinchRecognizer', () => {
   let gesturesMock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     element = {

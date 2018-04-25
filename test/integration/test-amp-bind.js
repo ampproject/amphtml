@@ -30,7 +30,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
   let numTemplated;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     numSetStates = 0;
     numTemplated = 0;
   });

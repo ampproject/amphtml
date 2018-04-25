@@ -43,7 +43,7 @@ describes.realWin('extension-analytics', {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
@@ -98,7 +98,7 @@ describes.realWin('extension-analytics', {
     let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       parent = document.createElement('div');
       builder = new CustomEventReporterBuilder(parent);
     });
@@ -193,7 +193,7 @@ describes.realWin('extension-analytics', {
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       triggerEventSpy = sandbox.spy();
       resetServiceForTesting(env.win, 'amp-analytics-instrumentation');
       registerServiceBuilderForDoc(

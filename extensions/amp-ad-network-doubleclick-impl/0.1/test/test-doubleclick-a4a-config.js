@@ -40,7 +40,7 @@ describe('doubleclick-a4a-config', () => {
   let testFixture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockWin = {
       location: parseUrl('https://nowhere.org/a/place/page.html?s=foo&q=bar'),
       crypto: {

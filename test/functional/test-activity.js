@@ -48,7 +48,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0
@@ -251,7 +251,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     // start at something other than 0

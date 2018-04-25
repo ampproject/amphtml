@@ -27,7 +27,7 @@ describe('ie-media-bug', () => {
   let devErrorStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     platform = {
       isIe: () => false,

@@ -33,7 +33,7 @@ describes.realWin('media-tasks', {}, () => {
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     el = document.createElement('video');
 
     // Mock vsync

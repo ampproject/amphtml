@@ -41,7 +41,7 @@ describe('AmpDocService', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
@@ -197,7 +197,7 @@ describe('AmpDocService', () => {
     let host, content;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       ampdocService = new AmpDocService(window, /* isSingleDoc */ false);
       content = document.createElement('span');
       host = document.createElement('div');
@@ -301,7 +301,7 @@ describe('AmpDocSingle', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdoc = new AmpDocSingle(window);
   });
 
@@ -421,7 +421,7 @@ describe('AmpDocShadow', () => {
   let ampdoc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     content = document.createElement('div');
     host = document.createElement('div');
     shadowRoot = createShadowRoot(host);
@@ -520,7 +520,7 @@ describe('AmpDocShell', () => {
   let ampdocShell;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     ampdocShell = new AmpDocShell(window);
   });
 

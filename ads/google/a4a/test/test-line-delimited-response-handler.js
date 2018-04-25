@@ -84,7 +84,7 @@ describe('#line-delimited-response-handler', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     chunkHandlerStub = sandbox.stub();
   });
 
@@ -146,7 +146,7 @@ describe('#line-delimited-response-handler', () => {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       readStub = sandbox.stub();
       response = {
         text: () => Promise.resolve(),

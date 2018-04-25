@@ -39,7 +39,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
 
   beforeEach(() => {
     validator = new CryptographicValidator();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     userErrorStub = sandbox.stub(user(), 'error');
   });
 

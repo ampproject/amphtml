@@ -564,7 +564,7 @@ describes.realWin('SlideScroll', {
 
   describe('Looping', () => {
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {

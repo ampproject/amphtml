@@ -107,7 +107,7 @@ describe('doubleclick delayed fetch white list deprecation', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(dev(), 'error');
   });
 

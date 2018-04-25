@@ -91,7 +91,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         // part of the service's public API, but stubbing it here is the only
         // way to verify it is called. Revisit if another solution becomes
         // available.
-        sandbox = sinon.sandbox.create();
+        sandbox = sinon.sandbox;
         initializeSpy =
             sandbox.spy(AmpGwdRuntimeService.prototype, 'initialize_');
       });

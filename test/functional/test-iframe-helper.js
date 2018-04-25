@@ -32,7 +32,7 @@ describe('iframe-helper', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise().then(c => {
       container = c;
       const i = c.doc.createElement('iframe');

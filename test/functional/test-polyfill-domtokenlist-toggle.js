@@ -32,7 +32,7 @@ describes.fakeWin('DOMTokenList.toggle on non-IE', {
 
   beforeEach(() => {
     originalToggle = env.win.DOMTokenList.prototype.toggle;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = env.win.document.createElement('div');
     env.win.document.body.appendChild(element);
@@ -69,7 +69,7 @@ describes.fakeWin('DOMTokenList.toggle On IE', {
 
   beforeEach(() => {
     originalToggle = env.win.DOMTokenList.prototype.toggle;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = env.win.document.createElement('div');
     env.win.document.body.appendChild(element);

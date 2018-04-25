@@ -61,7 +61,7 @@ describe('Motion continueMotion', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {

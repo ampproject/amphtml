@@ -31,7 +31,7 @@ describe('vsync', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     win = {
       document: {

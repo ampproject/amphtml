@@ -45,7 +45,7 @@ describe('EventHelper', () => {
   let removeEventListenerStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {

@@ -37,7 +37,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   let testIndex = 0;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     const ampdocService = Services.ampdocServiceFor(window);
     const ampdoc = ampdocService.getAmpDoc();
     const adElement = document.createElement('container-element');

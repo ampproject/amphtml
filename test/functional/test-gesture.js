@@ -41,7 +41,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -390,7 +390,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
 
       eventListeners = {};

@@ -28,7 +28,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};

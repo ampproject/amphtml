@@ -511,7 +511,7 @@ describe('Action findAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -603,7 +603,7 @@ describe('Action hasAction', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -646,7 +646,7 @@ describe('Action method', () => {
   let targetElement, parent, child, execElement;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
@@ -736,7 +736,7 @@ describe('installActionHandler', () => {
   let action;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
   });
 
@@ -784,7 +784,7 @@ describe('Multiple handlers action method', () => {
   let targetElement, parent, child, execElement1, execElement2;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     onEnqueue1 = sandbox.spy();
     onEnqueue2 = sandbox.spy();
@@ -870,7 +870,7 @@ describe('Action interceptor', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
@@ -970,7 +970,7 @@ describe('Action common handler', () => {
   let target;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');

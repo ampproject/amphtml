@@ -54,7 +54,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
   let win;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
       win.context = {

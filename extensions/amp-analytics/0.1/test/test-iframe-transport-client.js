@@ -33,7 +33,7 @@ describe('iframe-transport-client', () => {
   let sentinel;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sentinel = createUniqueId();
     window.name = JSON.stringify({sentinel, type: 'some-vendor'});
     iframeTransportClient = new IframeTransportClient(window);

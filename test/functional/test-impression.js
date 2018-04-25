@@ -36,7 +36,7 @@ describe('impression', () => {
   let warnStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     viewer = Services.viewerForDoc(window.document);
     sandbox.stub(viewer, 'getParam');
     sandbox.stub(viewer, 'hasCapability');

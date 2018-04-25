@@ -23,7 +23,7 @@ describe('BindEvaluator', () => {
 
   beforeEach(() => {
     evaluator = new BindEvaluator();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {
