@@ -117,7 +117,13 @@ See the [Custom Validation](#custom-validations) section for more details.
 For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
 ## Actions
-`amp-form` exposes one action: `submit`. This allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). You can [read more about Actions and Events in AMP in the spec](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+`amp-form` exposes two actions: `submit`, and `clear`.
+
+`submit` allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events).
+
+`clear` empties the values from each input in the form. This can allow users to quickly fill out forms a second time.
+
+You can [read more about Actions and Events in AMP in the spec](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
 
 ## Events
 `amp-form` exposes the following events:

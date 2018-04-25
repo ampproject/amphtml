@@ -1345,6 +1345,90 @@ describes.repeated('', {
       });
     });
 
+    it('should handle clear action and restore initial values', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('value', 'jack@poc.com');
+      form.appendChild(emailInput);
+
+      return getAmpForm(form).then(ampForm => {
+        const initalFormValues = ampForm.getFormAsObject_();
+
+        ampForm.form_.elements.name.value = 'Jack Sparrow';
+
+        sandbox.spy(ampForm, 'handleClearAction_');
+        ampForm.actionHandler_({method: 'anything'});
+        expect(ampForm.handleClearAction_).to.have.not.been.called;
+
+        expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
+        ampForm.actionHandler_({method: 'clear'});
+        expect(ampForm.handleClearAction_).to.have.been.called;
+
+        expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
+      });
+    });
+
+    it('should remove all form state classes when form is cleared', () => {
+      const form = getForm();
+      form.setAttribute('method', 'GET');
+      document.body.appendChild(form);
+
+      form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
+
+      const fieldset = document.createElement('fieldset');
+      const usernameInput = document.createElement('input');
+      usernameInput.setAttribute('name', 'username');
+      usernameInput.setAttribute('id', 'username');
+      usernameInput.setAttribute('type', 'text');
+      usernameInput.setAttribute('required', '');
+      usernameInput.setAttribute('value', 'Jack Sparrow');
+      fieldset.appendChild(usernameInput);
+
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('id', 'email1');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      emailInput.setAttribute('value', '');
+      fieldset.appendChild(emailInput);
+
+      const validationMessage = document.createElement('span');
+      validationMessage.setAttribute('visible-when-invalid', 'valueMissing');
+      validationMessage.setAttribute('validation-for', 'email1');
+      fieldset.appendChild(validationMessage);
+
+      form.appendChild(fieldset);
+
+      return getAmpForm(form).then(ampForm => {
+        // trigger form validations
+        ampForm.checkValidity_();
+        const formValidator = ampForm.validator_;
+        // show validity message
+        formValidator.report();
+
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('valueMissing');
+        expect(fieldset.className).to.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('user-invalid');
+        expect(validationMessage.className).to.contain('visible');
+
+        ampForm.handleClearAction_();
+
+        expect(usernameInput.className).to.not.contain('user-valid');
+        expect(emailInput.className).to.not.contain('user-invalid');
+        expect(emailInput.className).to.not.contain('valueMissing');
+        expect(fieldset.className).to.not.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('amp-form-initial');
+        expect(validationMessage.className).to.not.contain('visible');
+      });
+    });
+
     it('should submit after timeout of waiting for amp-selector', function() {
       this.timeout(3000);
       return getAmpForm(getForm()).then(ampForm => {
