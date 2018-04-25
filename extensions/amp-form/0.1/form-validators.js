@@ -74,8 +74,8 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = getAmpdoc(form);
 
-    /** @protected @const {!Document} */
-    this.doc = /** @type {!Document} */ (form.ownerDocument);
+    /** @protected @const {!Document|!ShadowRoot} */
+    this.root = this.ampdoc.getRootNode();
 
     /**
      * Tribool indicating last known validity of form.
@@ -206,7 +206,7 @@ export class AbstractCustomValidator extends FormValidator {
    */
   hideAllValidations() {
     for (const id in this.inputVisibleValidationDict_) {
-      const input = this.doc.getElementById(id);
+      const input = this.root.getElementById(id);
       this.hideValidationFor(dev().assertElement(input));
     }
   }
@@ -223,7 +223,7 @@ export class AbstractCustomValidator extends FormValidator {
     const selector = `[visible-when-invalid=${invalidType}]` +
         `[validation-for=${input.id}]`;
     if (this.inputValidationsDict_[selector] === undefined) {
-      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+      this.inputValidationsDict_[selector] = this.root.querySelector(selector);
     }
     return this.inputValidationsDict_[selector];
   }
