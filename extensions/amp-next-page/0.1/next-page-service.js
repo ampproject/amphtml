@@ -41,7 +41,8 @@ const TAG = 'amp-next-page';
 /**
  * @typedef {{
  *   ampUrl: string,
- *   amp: ?Object
+ *   amp: ?Object,
+ *   recUnit: ?Element
  * }}
  */
 export let DocumentRef;
@@ -138,6 +139,7 @@ export class NextPageService {
     this.documentRefs_.push({
       ampUrl: win.document.location.href,
       amp: {title: win.document.title},
+      recUnit: null,
     });
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -193,7 +195,7 @@ export class NextPageService {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = {ampUrl: next.ampUrl, amp: null};
+      const documentRef = {ampUrl: next.ampUrl, amp: null, recUnit: null};
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
@@ -210,6 +212,7 @@ export class NextPageService {
 
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
+      documentRef.recUnit = articleLinks;
 
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
