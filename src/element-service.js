@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as dom from './dom';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -26,6 +25,7 @@ import {
 } from './service';
 import {toWin} from './types';
 import {user} from './log';
+import {whenDocumentReady} from './document-ready';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects
@@ -125,8 +125,8 @@ export function getElementServiceIfAvailableForDoc(
     if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
       return getServicePromiseForDoc(nodeOrDoc, id);
     }
-    // Wait for HEAD to fully form before denying access to the service.
-    return ampdoc.whenBodyAvailable().then(() => {
+    // Wait for BODY to fully form before denying access to the service.
+    return ampdoc.whenReady().then(() => {
       // If this service is provided by an element, then we can't depend on the
       // service (they may not use the element).
       if (opt_element) {
@@ -206,8 +206,8 @@ function getElementServicePromiseOrNull(win, id, extension, opt_element) {
     if (!opt_element && isElementScheduled(win, extension)) {
       return getServicePromise(win, id);
     }
-    // Wait for HEAD to fully form before denying access to the service.
-    return dom.waitForBodyPromise(win.document).then(() => {
+    // Wait for BODY to fully form before denying access to the service.
+    return whenDocumentReady(win.document).then(() => {
       // If this service is provided by an element, then we can't depend on the
       // service (they may not use the element).
       if (opt_element) {
