@@ -220,6 +220,8 @@ export class NextPageService {
               () => {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
                 documentRef.amp = amp;
+
+                setStyle(documentRef.recUnit, 'display', 'none');
                 this.documentQueued_ = false;
               }),
           e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
