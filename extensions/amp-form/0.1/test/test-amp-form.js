@@ -33,7 +33,6 @@ import {
 } from '../../../../src/service/cid-impl';
 import {fromIterator} from '../../../../src/utils/array';
 import {
-  getFormValidator,
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
