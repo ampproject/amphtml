@@ -163,19 +163,14 @@ export class NextPageService {
    * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(shadowRoot, doc) {
-    try {
-      const amp =
-          this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
-      installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
+    const amp =
+        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+    installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
 
-      const body = amp.ampdoc.getBody();
-      body.classList.add('i-amphtml-next-page-document');
+    const body = amp.ampdoc.getBody();
+    body.classList.add('i-amphtml-next-page-document');
 
-      return amp;
-    } catch (e) {
-      // TODO(emarchiori): Handle loading errors.
-    }
-    return null;
+    return amp;
   }
 
   /**
@@ -227,7 +222,9 @@ export class NextPageService {
                 documentRef.amp = amp;
                 this.documentQueued_ = false;
               }),
-          () => {});
+          e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
+          .catch(e => dev().error(TAG,
+              `failed to attach shadow document for ${next.ampUrl}`, e));
     }
   }
 
