@@ -496,6 +496,10 @@ The actions below are supported in the following AMP video elements: `amp-video`
     <th>Description</th>
   </tr>
   <tr>
+    <td><code>clear</code></td>
+    <td>Clears any values in the form's inputs.</td>
+  </tr>
+  <tr>
     <td><code>submit</code></td>
     <td>Submits the form.</td>
   </tr>

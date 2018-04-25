@@ -34,6 +34,7 @@ import {Services} from '../../../src/services';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  escapeCssSelectorIdent,
   removeElement,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -225,6 +226,7 @@ export class AmpForm {
   }
 
   /**
+   * Handle actions that require at least high trust.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @private
@@ -234,6 +236,8 @@ export class AmpForm {
       this.whenDependenciesReady_().then(() => {
         this.handleSubmitAction_(invocation);
       });
+    } else if (invocation.method === 'clear') {
+      this.handleClearAction_();
     }
     return null;
   }
@@ -333,6 +337,32 @@ export class AmpForm {
       // Trigger the actual submit of GET non-XHR.
       this.form_.submit();
     }
+  }
+
+  /**
+   * Handles clearing the form through action service invocations.
+   * @private
+   */
+  handleClearAction_() {
+    this.form_.reset();
+    this.setState_(FormState_.INITIAL);
+    this.form_.classList.remove('user-valid');
+    this.form_.classList.remove('user-invalid');
+
+    const validityElements = this.form_.querySelectorAll(
+        '.user-valid, .user-invalid');
+    iterateCursor(validityElements, element => {
+      element.classList.remove('user-valid');
+      element.classList.remove('user-invalid');
+    });
+
+    const messageElements = this.form_.querySelectorAll(
+        '.visible[validation-for]');
+    iterateCursor(messageElements, element => {
+      element.classList.remove('visible');
+    });
+
+    removeValidityStateClasses(this.form_);
   }
 
   /**
@@ -819,6 +849,18 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
+/**
+ * Removes all validity classes from elements in the given form.
+ * @param {!Element} form
+ */
+function removeValidityStateClasses(form) {
+  const dummyInput = document.createElement('input');
+  for (const validityState in dummyInput.validity) {
+    const elements = form.querySelectorAll(
+        `.${escapeCssSelectorIdent(validityState)}`);
+    iterateCursor(elements, element => element.classList.remove(validityState));
+  }
+}
 
 /**
  * Checks user validity which applies .user-valid and .user-invalid AFTER the user
