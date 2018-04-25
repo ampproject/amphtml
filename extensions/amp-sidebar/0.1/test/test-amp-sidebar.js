@@ -598,7 +598,7 @@ describes.realWin('amp-sidebar 0.1 version', {
       });
     });
 
-    it('should listen to animationend/transitionend event', () => {
+    it('should call onAnimationEnd after open and close', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
         clock = lolex.install(
@@ -610,17 +610,25 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        const animationEndEvent = new Event(
-            'animationend',
-            {bubbles: true}
-        );
-        sidebarElement.firstChild.dispatchEvent(animationEndEvent);
+        const historyPushSpy = sandbox.spy();
+        const historyPopSpy = sandbox.spy();
+        impl.scheduleLayout = sandbox.spy();
+        impl.getHistory_ = function() {
+          return {
+            push() {
+              historyPushSpy();
+              return Promise.resolve(11);
+            },
+            pop() {
+              historyPopSpy();
+              return Promise.resolve(11);
+            },
+          };
+        };
+        impl.open_();
         expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
-        const transitionEndEvent = new Event(
-            'transitionend',
-            {bubbles: true}
-        );
-        sidebarElement.firstChild.dispatchEvent(transitionEndEvent);
+
+        impl.close_();
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
       });
     });
