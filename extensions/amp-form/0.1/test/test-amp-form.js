@@ -33,7 +33,6 @@ import {
 } from '../../../../src/service/cid-impl';
 import {fromIterator} from '../../../../src/utils/array';
 import {
-  getFormValidator,
   setCheckValiditySupportedForTesting,
   setReportValiditySupportedForTesting,
 } from '../form-validators';
@@ -1336,9 +1335,9 @@ describes.repeated('', {
 
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandlerHigh_({method: 'anything'});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-      ampForm.actionHandler_({method: 'submit'});
+      ampForm.actionHandlerHigh_({method: 'submit'});
 
       return whenCalled(ampForm.xhr_.fetch).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
@@ -1362,11 +1361,11 @@ describes.repeated('', {
       ampForm.form_.elements.name.value = 'Jack Sparrow';
 
       sandbox.spy(ampForm, 'handleClearAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandlerLow_({method: 'anything'});
       expect(ampForm.handleClearAction_).to.have.not.been.called;
 
       expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-      ampForm.actionHandler_({method: 'clear'});
+      ampForm.actionHandlerLow_({method: 'clear'});
       expect(ampForm.handleClearAction_).to.have.been.called;
 
       expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
@@ -1441,7 +1440,7 @@ describes.repeated('', {
             .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandlerHigh_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1467,7 +1466,7 @@ describes.repeated('', {
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandlerHigh_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
