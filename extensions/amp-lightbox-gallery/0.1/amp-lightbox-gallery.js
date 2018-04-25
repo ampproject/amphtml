@@ -28,7 +28,6 @@ import {
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -172,11 +171,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.sourceElement_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */

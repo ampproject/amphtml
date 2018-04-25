@@ -35,7 +35,6 @@
  * the amp-geo element's layout type is nodisplay.
  */
 
-import {Layout} from '../../../src/layout';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
@@ -86,11 +85,6 @@ export class AmpGeo extends AMP.BaseElement {
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
     /** @Private {} */
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
