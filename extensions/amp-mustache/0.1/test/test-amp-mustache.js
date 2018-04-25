@@ -389,13 +389,71 @@ describe('amp-mustache template', () => {
 
   });
 
-  it('should sanitize triple-mustache', () => {
-    const templateElement = document.createElement('template');
-    templateElement.content.textContent = 'value = {{{value}}}';
-    const template = new AmpMustache(templateElement);
-    template.compileCallback();
-    const result = template.render({value: '<b>abc</b><img><div>def</div>'});
-    expect(result./*OK*/innerHTML).to.equal('value = <b>abc</b>');
+  describe('triple-mustache', () => {
+    it('should sanitize text formatting elements', () => {
+      const templateElement = document.createElement('template');
+      templateElement.content.textContent = 'value = {{{value}}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: '<b>abc</b><img><div>def</div>'
+            + '<br><code></code><del></del><em></em>'
+            + '<i></i><ins></ins><mark></mark><s></s>'
+            + '<small></small><strong></strong><sub></sub>'
+            + '<sup></sup><time></time><u></u>',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <b>abc</b><div>def</div>'
+           + '<br><code></code><del></del><em></em>'
+           + '<i></i><ins></ins><mark></mark><s></s>'
+           + '<small></small><strong></strong><sub></sub>'
+           + '<sup></sup><time></time><u></u>'
+      );
+    });
+
+    it('should sanitize table related elements and anchor tags', () => {
+      const templateElement = document.createElement('template');
+      templateElement.content.textContent = 'value = {{{value}}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: '<table class="valid-class">'
+            + '<caption>caption</caption>'
+            + '<thead><tr><th colspan="2">header</th></tr></thead>'
+            + '<tbody><tr><td>'
+            + '<a href="http://www.google.com">google</a>'
+            + '</td></tr></tbody>'
+            + '<tfoot><tr>'
+            + '<td colspan="2"><span>footer</span></td>'
+            + '</tr></tfoot>'
+            + '</table>',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <table class="valid-class">'
+          + '<caption>caption</caption>'
+          + '<thead><tr><th colspan="2">header</th></tr></thead>'
+          + '<tbody><tr><td>'
+          + '<a href="http://www.google.com/" target="_top">google</a>'
+          + '</td></tr></tbody>'
+          + '<tfoot><tr>'
+          + '<td colspan="2"><span>footer</span></td>'
+          + '</tr></tfoot>'
+          + '</table>'
+      );
+    });
+
+    it('should sanitize tags, removing unsafe attributes', () => {
+      const templateElement = document.createElement('template');
+      templateElement.content.textContent = 'value = {{{value}}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        value: '<a href="javascript:alert(\'XSS\')">test</a>'
+            + '<img src="x" onerror="alert(\'XSS\')" />',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'value = <a target="_top">test</a>');
+    });
   });
 
   it('should unwrap output', () => {
