@@ -50,10 +50,20 @@ env => {
     });
   });
 
-  describe('delegateActionToLocal', () => {
+  describe('delegateAction', () => {
     it('should call delegateActionToLocal of subscription service', () => {
       const p = Promise.resolve();
-      const stub = sandbox.stub(subscriptionService, 'delegateActionToLocal')
+      const stub = sandbox.stub(serviceAdapter, 'delegateActionToService')
+          .callsFake(() => p);
+      const action = 'action';
+      const result = serviceAdapter.delegateActionToLocal(action);
+      expect(stub).to.be.calledWith(action, 'local');
+      expect(result).to.equal(p);
+    });
+
+    it('should call delegateActionToService of subscription service', () => {
+      const p = Promise.resolve();
+      const stub = sandbox.stub(subscriptionService, 'delegateActionToService')
           .callsFake(() => p);
       const action = 'action';
       const result = serviceAdapter.delegateActionToLocal(action);

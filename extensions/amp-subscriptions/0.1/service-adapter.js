@@ -39,7 +39,7 @@ export class ServiceAdapter {
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    return this.subscriptionService_.delegateActionToService(action, 'local');
+    return this.delegateActionToService(action, 'local');
   }
 
   /**

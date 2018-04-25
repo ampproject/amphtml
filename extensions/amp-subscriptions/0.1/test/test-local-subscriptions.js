@@ -137,6 +137,36 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
   });
 
+  describe('handleClick_', () => {
+    let element;
+    beforeEach(() => {
+      element = document.createElement('div');
+      element.setAttribute('subscriptions-action', 'subscribe');
+    });
+
+    it('should call executeAction with subscriptions-action value', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.be.calledWith(
+          element.getAttribute('subscriptions-action'));
+    });
+
+    it('should delegate action to service specified in '
+        + 'subscriptions-service', () => {
+      const executeStub = sandbox.stub(localSubscriptionPlatform,
+          'executeAction');
+      const delegateStub = sandbox.stub(
+          localSubscriptionPlatform.serviceAdapter_,
+          'delegateActionToService'
+      );
+      element.setAttribute('subscriptions-service', 'swg.google.com');
+      localSubscriptionPlatform.handleClick_(element);
+      expect(executeStub).to.not.be.called;
+      expect(delegateStub).to.be.called;
+    });
+  });
+
   describe('executeAction', () => {
     it('should call executeAction on actions_', () => {
       const actionString = 'action';
