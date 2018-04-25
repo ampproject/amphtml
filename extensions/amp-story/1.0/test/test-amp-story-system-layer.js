@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
@@ -24,6 +25,7 @@ const NOOP = () => {};
 
 describes.fakeWin('amp-story system layer', {amp: true}, env => {
   let win;
+  let storeService;
   let systemLayer;
   let progressBarStub;
   let progressBarRoot;
@@ -31,10 +33,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store', () => ({
-      get: NOOP,
-      subscribe: NOOP,
-    }));
+    storeService = new AmpStoryStoreService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
+
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
@@ -81,5 +82,12 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
       systemLayer.setActivePageId(index);
       progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });
+  });
+
+  it('should set an attribute to toggle the UI when an ad is shown', () => {
+    systemLayer.build();
+    storeService.dispatch(Action.TOGGLE_AD, true);
+
+    expect(systemLayer.getShadowRoot()).to.have.attribute('ad-showing');
   });
 });
