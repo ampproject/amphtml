@@ -884,16 +884,6 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
-<<<<<<< HEAD
-function removeValidityStateClasses(form) {
-  const dummyInput = document.createElement('input');
-  for (const validityState in dummyInput.validity) {
-    const elements = form
-        .querySelectorAll(`.${escapeCssSelectorIdent(validityState)}`);
-    for (let i = 0; i < elements.length; i++) {
-      elements[i].classList.remove(validityState);
-    }
-=======
 /**
  * Removes all validity classes from elements in the given form.
  * @param {!Element} form
@@ -904,7 +894,6 @@ function removeValidityStateClasses(form) {
     const elements = form.querySelectorAll(
         `.${escapeCssSelectorIdent(validityState)}`);
     iterateCursor(elements, element => element.classList.remove(validityState));
->>>>>>> 3892a9aa9f2030ce9e0408ae57c56b463ff2f74a
   }
 }
 
