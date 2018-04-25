@@ -150,7 +150,12 @@ export class LocalSubscriptionPlatform {
           '[subscriptions-action]');
       if (element) {
         const action = element.getAttribute('subscriptions-action');
-        this.executeAction(action);
+        if (element.hasAttribute('subscriptions-service')) {
+          const serviceId = element.getAttribute('subscriptions-service');
+          this.serviceAdapter_.delegateActionToService(action, serviceId);
+        } else {
+          this.executeAction(action);
+        }
       }
     });
   }

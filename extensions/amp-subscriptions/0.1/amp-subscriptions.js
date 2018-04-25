@@ -449,6 +449,16 @@ export class SubscriptionService {
     );
     return localPlatform.executeAction(action);
   }
+
+  /**
+   * Delegates an action to specified platform
+   * @param {string} action
+   * @param {string} serviceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId) {
+
+  }
 }
 
 
