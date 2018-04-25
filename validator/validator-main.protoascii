@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 610
+spec_file_revision: 611
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -3197,10 +3197,7 @@ tags {  # <form method=GET ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go|interact-and-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3248,10 +3245,7 @@ tags {  # <form method=POST ...>
   attrs: { name: "autocomplete" }
   attrs: {
     name: "custom-validation-reporting"
-    value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+    value_regex: "(show-first-on-submit|show-all-on-submit|as-you-go)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3299,9 +3293,9 @@ tags {  # <form method=GET ...>
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+        "interact-and-submit|"
+        "show-all-on-submit|"
+        "show-first-on-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -3343,9 +3337,8 @@ tags {  # <form method=POST ...>
   attrs: {
     name: "custom-validation-reporting"
     value_regex: "(as-you-go|"
-                  "interact-and-submit|"
-                  "show-all-on-submit|"
-                  "show-first-on-submit)"
+        "show-all-on-submit|"
+        "show-first-on-submit)"
   }
   attrs: { name: "enctype" }
   attrs: {
@@ -4531,7 +4524,7 @@ attr_lists: {
   # https://www.ampproject.org/docs/reference/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
-    value_regex_casei: "(fade-in|fade-in-scroll|parallax)"
+    value_regex_casei: "(fade-in|parallax)"
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
