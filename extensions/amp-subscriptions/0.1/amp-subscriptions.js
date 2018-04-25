@@ -447,9 +447,8 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId) {
-    const platform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.platformStore_.getPlatform(serviceId),
-          'Local platform is not registered'));
+    const platform = dev().assert(this.platformStore_.getPlatform(serviceId),
+        'Platform is not registered');
     this.subscriptionAnalytics_.event(
         SubscriptionAnalyticsEvents.ACTION_DELEGATED,
         {

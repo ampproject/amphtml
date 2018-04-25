@@ -315,7 +315,8 @@ describes.realWin('Platform store', {}, () => {
       const platform = new SubscriptionPlatform();
       platform.getServiceId = () => 'test';
       platformStore.subscriptionPlatforms_['test'] = platform;
-      expect(platformStore.getPlatform('test').getServiceId()).to.be.equal('test');
+      expect(platformStore.getPlatform('test').getServiceId())
+          .to.be.equal('test');
     });
   });
 
