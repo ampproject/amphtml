@@ -26,6 +26,8 @@ import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
 
 
+/** @private @const {string} */
+const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
@@ -195,6 +197,10 @@ export class SystemLayer {
       }
     });
 
+    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+      this.onAdStateUpdate_(isAd);
+    });
+
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
@@ -224,6 +230,19 @@ export class SystemLayer {
    */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
+  }
+
+  /**
+   * Reacts to the ad state updates and updates the UI accordingly.
+   * @param {boolean} isAd
+   * @private
+   */
+  onAdStateUpdate_(isAd) {
+    this.vsync_.mutate(() => {
+      isAd ?
+        this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
+    });
   }
 
   /**
