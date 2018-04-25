@@ -1335,9 +1335,9 @@ describes.repeated('', {
 
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      ampForm.actionHandlerHigh_({method: 'anything'});
+      ampForm.actionHandler_({method: 'anything'});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-      ampForm.actionHandlerHigh_({method: 'submit'});
+      ampForm.actionHandler_({method: 'submit'});
 
       return whenCalled(ampForm.xhr_.fetch).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
@@ -1362,11 +1362,11 @@ describes.repeated('', {
         ampForm.form_.elements.name.value = 'Jack Sparrow';
 
         sandbox.spy(ampForm, 'handleClearAction_');
-        ampForm.actionHandlerLow_({method: 'anything'});
+        ampForm.actionHandler_({method: 'anything'});
         expect(ampForm.handleClearAction_).to.have.not.been.called;
 
         expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-        ampForm.actionHandlerLow_({method: 'clear'});
+        ampForm.actionHandler_({method: 'clear'});
         expect(ampForm.handleClearAction_).to.have.been.called;
 
         expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
@@ -1441,7 +1441,7 @@ describes.repeated('', {
             .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandlerHigh_({method: 'submit'});
+        ampForm.actionHandler_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1467,7 +1467,7 @@ describes.repeated('', {
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandlerHigh_({method: 'submit'});
+        ampForm.actionHandler_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;

@@ -198,9 +198,7 @@ export class AmpForm {
         this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandlerHigh_.bind(this), ActionTrust.HIGH);
-    this.actions_.installActionHandler(
-        this.form_, this.actionHandlerLow_.bind(this), ActionTrust.LOW);
+        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -233,23 +231,12 @@ export class AmpForm {
    * @return {?Promise}
    * @private
    */
-  actionHandlerHigh_(invocation) {
+  actionHandler_(invocation) {
     if (invocation.method == 'submit') {
       this.whenDependenciesReady_().then(() => {
         this.handleSubmitAction_(invocation);
       });
-    }
-    return null;
-  }
-
-  /**
-   * Handle actions that require at least low trust.
-   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   * @return {?Promise}
-   * @private
-   */
-  actionHandlerLow_(invocation) {
-    if (invocation.method === 'clear') {
+    } else if (invocation.method === 'clear') {
       this.handleClearAction_();
     }
     return null;
