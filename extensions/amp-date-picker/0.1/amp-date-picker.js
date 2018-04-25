@@ -129,6 +129,12 @@ const DateFieldType = {
   END_DATE: 'end-input',
 };
 
+const DateFieldNameByType = {
+  [DateFieldType.DATE]: 'date',
+  [DateFieldType.START_DATE]: 'start-date',
+  [DateFieldType.END_DATE]: 'end-date',
+};
+
 /** @enum {string} */
 const DatePickerEvent = {
   /**
@@ -600,19 +606,20 @@ export class AmpDatePicker extends AMP.BaseElement {
     const fieldSelector = this.element.getAttribute(`${type}-selector`);
     const existingField = this.getAmpDoc().getRootNode().querySelector(
         fieldSelector);
-    const form = this.element.closest('form');
-
     if (existingField) {
       return existingField;
-    } else if (this.mode_ == DatePickerMode.STATIC && form) {
+    }
+
+    const form = this.element.closest('form');
+    if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
       hiddenInput.name = this.getHiddenInputId_(form, type);
       this.element.appendChild(hiddenInput);
       return hiddenInput;
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   /**
@@ -620,23 +627,28 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Date pickers not in a form don't need named hidden inputs.
    * @param {!Element} form
    * @param {!DateFieldType} type
+   * @return {string}
    * @private
    */
   getHiddenInputId_(form, type) {
     const id = this.element.id;
-    if (form) {
-      const alternativeName = `${id}-${type}`;
-      if (!form.elements[type]) {
-        return type;
-      } else if (id && !form.elements[alternativeName]) {
-        return `${id}-${type}`;
-      } else {
-        user().error(TAG,
-            `Multiple date-pickers with implicit ${type} fields` +
-            'need to have IDs');
-        return '';
-      }
+    const name = DateFieldNameByType[type];
+    if (!form) {
+      return '';
     }
+
+    if (!form.elements[name]) {
+      return name;
+    }
+
+    const alternativeName = `${id}-${name}`;
+    if (id && !form.elements[alternativeName]) {
+      return alternativeName;
+    }
+
+    user().error(TAG, `Multiple date-pickers with implicit ${name} fields ` +
+        'need to have IDs');
+    return '';
   }
 
   /**
@@ -652,6 +664,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.listen_(root, 'click', this.handleClick_.bind(this));
     }
     this.listen_(root, 'input', this.handleInput_.bind(this));
+    // TODO(cvializ): Add aria message to use down arrow to trigger calendar.
     this.listen_(root, 'focusin', this.handleFocus_.bind(this));
     this.listen_(root, 'keydown', this.handleKeydown_.bind(this));
   }
