@@ -24,14 +24,17 @@ limitations under the License.
   height="50"
   type="caprofitx"
   data-tagid="15217"
-  data-placeid="0"
->
+  data-placeid="0">
 </amp-ad>
 ```
 
 ## Configuration
-For configuration in detail, [please contact us](ca_profitx_support@cyberagent.co.jp).
+For configuration details, please email ca_profitx_support@cyberagent.co.jp.
 
-### parameters
-- (Required) data-tagid
-- (Option) data-placeid
+### Required parameters
+
+- `data-tagid`
+
+### Optional parameters
+
+- `data-placeid`

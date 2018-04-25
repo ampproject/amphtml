@@ -76,11 +76,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {!../../../src/layout-rect.LayoutRectDef} */
-    this.elementBox_ = layoutRectLtwh(0, 0, 0, 0);
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.elementBox_ = null;
 
-    /** @private {!../../../src/layout-rect.LayoutRectDef} */
-    this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.imageBox_ = null;
 
     /** @private {!UnlistenDef|null} */
     this.unlistenOnSwipePan_ = null;
@@ -219,7 +219,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {?../../../src/layout-rect.LayoutRectDef}
    */
   getImageBox() {
     return this.imageBox_;
@@ -236,10 +236,10 @@ export class AmpImageViewer extends AMP.BaseElement {
   /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {?../../../src/layout-rect.LayoutRectDef}
    */
   getImageBoxWithOffset() {
-    if (this.posX_ == 0 && this.posY_ == 0) {
+    if (this.posX_ == 0 && this.posY_ == 0 || !this.imageBox_) {
       return this.imageBox_;
     }
     const expansionScale = (this.scale_ - 1) / 2;

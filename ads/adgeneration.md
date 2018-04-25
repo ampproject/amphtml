@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad width="300" height="250"
     type="adgeneration"
     data-id="10722">
 </amp-ad>
@@ -27,13 +27,13 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://github.com/AdGeneration/sdk/wiki).
+For details on the configuration semantics, please see [Ad Generation's documentation](https://github.com/AdGeneration/sdk/wiki).
 
 Supported parameters:
 
-- data-id
-- data-targetid
-- data-displayid
-- data-adtype
-- data-async
-- data-option
+- `data-id`
+- `data-targetid`
+- `data-displayid`
+- `data-adtype`
+- `data-async`
+- `data-option`

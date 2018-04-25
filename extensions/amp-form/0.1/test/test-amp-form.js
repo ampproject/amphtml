@@ -127,11 +127,15 @@ describes.repeated('', {
       const form = getForm();
       document.body.appendChild(form);
       form.setAttribute('action-xhr', 'http://example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr must start with/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr must start with/);
+      });
       form.setAttribute('action-xhr', 'https://cdn.ampproject.org/example.com');
-      expect(() => new AmpForm(form)).to.throw(
-          /form action-xhr should not be on AMP CDN/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /form action-xhr should not be on AMP CDN/);
+      });
       form.setAttribute('action-xhr', 'https://example.com');
       expect(() => new AmpForm(form)).to.not.throw;
       document.body.removeChild(form);
@@ -145,8 +149,10 @@ describes.repeated('', {
       illegalInput.setAttribute('name', '__amp_source_origin');
       illegalInput.value = 'https://example.com';
       form.appendChild(illegalInput);
-      expect(() => new AmpForm(form)).to.throw(
-          /Illegal input name, __amp_source_origin found/);
+      allowConsoleError(() => {
+        expect(() => new AmpForm(form)).to.throw(
+            /Illegal input name, __amp_source_origin found/);
+      });
       document.body.removeChild(form);
     });
 
@@ -232,7 +238,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const errorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
+      });
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
       document.body.removeChild(form);
@@ -292,7 +300,9 @@ describes.repeated('', {
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
         /Only XHR based \(via action-xhr attribute\) submissions are supported/;
-      expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      allowConsoleError(() => {
+        expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
+      });
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
     });
@@ -1326,9 +1336,9 @@ describes.repeated('', {
 
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandlerHigh_({method: 'anything'});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-      ampForm.actionHandler_({method: 'submit'});
+      ampForm.actionHandlerHigh_({method: 'submit'});
 
       return whenCalled(ampForm.xhr_.fetch).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
@@ -1352,24 +1362,22 @@ describes.repeated('', {
       ampForm.form_.elements.name.value = 'Jack Sparrow';
 
       sandbox.spy(ampForm, 'handleClearAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandlerLow_({method: 'anything'});
       expect(ampForm.handleClearAction_).to.have.not.been.called;
 
       expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-      ampForm.actionHandler_({method: 'clear'});
+      ampForm.actionHandlerLow_({method: 'clear'});
       expect(ampForm.handleClearAction_).to.have.been.called;
 
       expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
     });
 
-    it.only('should remove all form state classes when form is cleared', () => {
+    it('should remove all form state classes when form is cleared', () => {
       const form = getForm();
       form.setAttribute('method', 'GET');
       document.body.appendChild(form);
 
-      const ampForm = new AmpForm(form);
-      ampForm.form_
-          .setAttribute('custom-validation-reporting', 'show-all-on-submit');
+      form.setAttribute('custom-validation-reporting', 'show-all-on-submit');
 
       const fieldset = document.createElement('fieldset');
       const usernameInput = document.createElement('input');
@@ -1393,30 +1401,31 @@ describes.repeated('', {
       validationMessage.setAttribute('validation-for', 'email1');
       fieldset.appendChild(validationMessage);
 
-      ampForm.form_.appendChild(fieldset);
+      form.appendChild(fieldset);
 
-      // trigger form validations
-      ampForm.checkValidity_();
-      const formValidator = getFormValidator(form);
-      // show validity message
-      formValidator.report();
+      return getAmpForm(form).then(ampForm => {
+        // trigger form validations
+        ampForm.checkValidity_();
+        const formValidator = ampForm.validator_;
+        // show validity message
+        formValidator.report();
 
-      expect(usernameInput.className).to.contain('user-valid');
-      expect(emailInput.className).to.contain('user-invalid');
-      expect(emailInput.className).to.contain('valueMissing');
-      expect(fieldset.className).to.contain('user-valid');
-      expect(ampForm.form_.className).to.contain('user-invalid');
-      // This one is passing ONLY in debug mode
-      expect(validationMessage.className).to.contain('visible');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('valueMissing');
+        expect(fieldset.className).to.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('user-invalid');
+        expect(validationMessage.className).to.contain('visible');
 
-      ampForm.handleClearAction_();
+        ampForm.handleClearAction_();
 
-      expect(usernameInput.className).to.not.contain('user-valid');
-      expect(emailInput.className).to.not.contain('user-invalid');
-      expect(emailInput.className).to.not.contain('valueMissing');
-      expect(fieldset.className).to.not.contain('user-valid');
-      expect(ampForm.form_.className).to.contain('amp-form-initial');
-      expect(validationMessage.className).to.not.contain('visible');
+        expect(usernameInput.className).to.not.contain('user-valid');
+        expect(emailInput.className).to.not.contain('user-invalid');
+        expect(emailInput.className).to.not.contain('valueMissing');
+        expect(fieldset.className).to.not.contain('user-valid');
+        expect(ampForm.form_.className).to.contain('amp-form-initial');
+        expect(validationMessage.className).to.not.contain('visible');
+      });
     });
 
     it('should submit after timeout of waiting for amp-selector', function() {
@@ -1431,7 +1440,7 @@ describes.repeated('', {
             .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandlerHigh_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1457,7 +1466,7 @@ describes.repeated('', {
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandlerHigh_({method: 'submit'});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1757,6 +1766,27 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+
+      it('should not execute form submit with password field present', () => {
+        const form = getForm();
+        const input = document.createElement('input');
+        input.type = 'password';
+        form.appendChild(input);
+
+        return getAmpForm(form).then(ampForm => {
+          const form = ampForm.form_;
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitAction_(/* invocation */ {}))
+                .to.throw('input[type=password]');
+          });
+          expect(form.submit).to.have.not.been.called;
+        });
+      });
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1765,9 +1795,9 @@ describes.repeated('', {
         form.id = 'registration';
 
         const passwordInput = document.createElement('input');
-        passwordInput.setAttribute('name', 'password');
-        passwordInput.setAttribute('type', 'password');
-        passwordInput.setAttribute('value', 'god');
+        passwordInput.setAttribute('name', 'email');
+        passwordInput.setAttribute('type', 'email');
+        passwordInput.setAttribute('value', 'j@hnmiller.com');
         form.appendChild(passwordInput);
 
         const unnamedInput = document.createElement('input');
@@ -1785,7 +1815,7 @@ describes.repeated('', {
         const expectedFormData = {
           'formId': 'registration',
           'formFields[name]': 'John Miller',
-          'formFields[password]': 'god',
+          'formFields[email]': 'j@hnmiller.com',
         };
         expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(

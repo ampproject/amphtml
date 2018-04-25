@@ -19,7 +19,6 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionPlatformRenderer} from './local-subscription-platform-renderer';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics} from './analytics';
 import {UrlBuilder} from './url-builder';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestBySelector} from '../../../src/dom';
@@ -36,8 +35,9 @@ export class LocalSubscriptionPlatform {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   * @param {!./analytics.SubscriptionAnalytics} subscriptionAnalytics
    */
-  constructor(ampdoc, platformConfig, serviceAdapter) {
+  constructor(ampdoc, platformConfig, serviceAdapter, subscriptionAnalytics) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
@@ -71,8 +71,8 @@ export class LocalSubscriptionPlatform {
     /** @private {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(this.ampdoc_, this.getReaderId_());
 
-    /** @private {!SubscriptionAnalytics} */
-    this.subscriptionAnalytics_ = new SubscriptionAnalytics();
+    /** @private {!./analytics.SubscriptionAnalytics} */
+    this.subscriptionAnalytics_ = subscriptionAnalytics;
 
     user().assert(this.serviceConfig_['actions'],
         'Actions have not been defined in the service config');
@@ -160,13 +160,16 @@ export class LocalSubscriptionPlatform {
    * @param {!./amp-subscriptions.RenderState} renderState
    */
   activate(renderState) {
-    this.renderer_.render(renderState);
+    this.urlBuilder_.setAuthResponse(renderState.entitlement);
+    this.actions_.build().then(() => {
+      this.renderer_.render(renderState);
+    });
   }
 
   /**
    * Executes action for the local platform.
    * @param {string} action
-   * @returns {!Promise}
+   * @returns {!Promise<boolean>}
    */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
@@ -174,22 +177,22 @@ export class LocalSubscriptionPlatform {
       if (result) {
         this.serviceAdapter_.reAuthorizePlatform(this);
       }
-      return result;
+      return !!result;
     });
   }
 
   /** @override */
   getEntitlements() {
-    return this.xhr_
-        .fetchJson(this.authorizationUrl_, {
-          credentials: 'include',
-        })
-        .then(res => res.json())
-        .then(resJson => {
-          const entitlement = Entitlement.parseFromJson(resJson);
-          this.entitlement_ = entitlement;
-          return entitlement;
-        });
+    return this.urlBuilder_.buildUrl(this.authorizationUrl_,
+        /* useAuthData */ false)
+        .then(fetchUrl =>
+          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+              .then(res => res.json())
+              .then(resJson => {
+                const entitlement = Entitlement.parseFromJson(resJson);
+                this.entitlement_ = entitlement;
+                return entitlement;
+              }));
   }
 
   /** @override */
@@ -214,9 +217,19 @@ export class LocalSubscriptionPlatform {
         headers: {
           'Content-Type': 'text/plain',
         },
-        body: selectedEntitlement.raw,
+        body: JSON.stringify(selectedEntitlement.jsonForPingback()),
       });
     });
+  }
+
+  /** @override */
+  supportsCurrentViewer() {
+    return false;
+  }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
   }
 }
 

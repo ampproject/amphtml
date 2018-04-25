@@ -248,6 +248,12 @@ ValidatorTestCase.prototype.run = function() {
   if (observed === this.expectedOutput) {
     return;
   }
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1' &&
+      this.expectedOutputFile !== null) {
+    console/*OK*/.log('Updating ' +  this.expectedOutputFile + ' ...');
+    fs.writeFileSync(absolutePathFor(this.expectedOutputFile), observed);
+    return;
+  }
   let message = '';
   if (this.expectedOutputFile != null) {
     message = '\n' + this.expectedOutputFile + ':1:0\n';
@@ -925,21 +931,25 @@ describe('ValidatorRulesMakeSense', () => {
     }
   }
 
-  // satisfies and requires need to match up
+  // satisfies needs to match up with requires and excludes
   var allSatisfies = [];
-  var allRequires = [];
+  var allRequiresAndExcludes = [];
   for (const tagSpec of rules.tags) {
     for (const condition of tagSpec.requires) {
-      allRequires.push(condition);
+      allRequiresAndExcludes.push(condition);
     }
-    for (const condition of tagSpec.satisfies)
+    for (const condition of tagSpec.excludes) {
+      allRequiresAndExcludes.push(condition);
+    }
+    for (const condition of tagSpec.satisfies) {
       allSatisfies.push(condition);
+    }
   }
   sortAndUniquify(allSatisfies);
-  sortAndUniquify(allRequires);
+  sortAndUniquify(allRequiresAndExcludes);
   it('all conditions are both required and satisfied', ()=> {
-    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
-    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+    expect(subtractDiff(allSatisfies, allRequiresAndExcludes)).toEqual([]);
+    expect(subtractDiff(allRequiresAndExcludes, allSatisfies)).toEqual([]);
   });
 
   // attr_specs within rules.

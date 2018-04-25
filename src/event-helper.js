@@ -24,7 +24,7 @@ const LOAD_FAILURE_PREFIX = 'Failed to load:';
  * Returns a CustomEvent with a given type and detail; supports fallback for IE.
  * @param {!Window} win
  * @param {string} type
- * @param {Object} detail
+ * @param {Object|string|undefined} detail
  * @param {EventInit=} opt_eventInit
  * @return {!Event}
  */

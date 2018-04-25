@@ -49,10 +49,22 @@ function patchWebAnimations() {
 }
 
 /**
- * Does a yarn check on node_modules, and if it is outdated, runs yarn.
- * Follows it up with a call to patch web-animations-js if necessary.
+ * Installs custom lint rules in build-system/eslint-rules to node_modules.
  */
-function updatePackages() {
+function installCustomEslintRules() {
+  const customRuleDir = 'build-system/eslint-rules';
+  const customRuleName = 'eslint-plugin-amphtml-internal';
+  exec('yarn link', {'stdio': 'ignore', 'cwd': customRuleDir});
+  exec('yarn link ' + customRuleName, {'stdio': 'ignore'});
+  if (!process.env.TRAVIS) {
+    log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
+  }
+}
+
+/**
+ * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ */
+function runYarnCheck() {
   const integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
     log(colors.yellow('WARNING:'), 'The packages in',
@@ -64,10 +76,19 @@ function updatePackages() {
     const yarnCmd = 'yarn';
     exec(yarnCmd);
   } else {
-    if (!process.env.TRAVIS) {
-      log(colors.green('All packages in'),
-          colors.cyan('node_modules'), colors.green('are up to date.'));
-    }
+    log(colors.green('All packages in'),
+        colors.cyan('node_modules'), colors.green('are up to date.'));
+  }
+}
+
+/**
+ * Installs custom lint rules, updates node_modules (for local dev), and patches
+ * web-animations-js if necessary.
+ */
+function updatePackages() {
+  installCustomEslintRules();
+  if (!process.env.TRAVIS) {
+    runYarnCheck();
   }
   patchWebAnimations();
 }

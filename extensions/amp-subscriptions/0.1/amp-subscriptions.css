@@ -61,9 +61,9 @@ html.i-amphtml-subs-grant-unk [subscriptions-action] {
   display: none !important;
 }
 
-[subscriptions-actions]:not([i-amphtml-subs-display]),
-[subscriptions-section="actions"]:not([i-amphtml-subs-display]),
-[subscriptions-action]:not([i-amphtml-subs-display]) {
+[subscriptions-actions]:not(.i-amphtml-subs-display),
+[subscriptions-section="actions"]:not(.i-amphtml-subs-display),
+[subscriptions-action]:not(.i-amphtml-subs-display) {
   display: none !important;
 }
 
@@ -101,6 +101,10 @@ amp-subscriptions-dialog {
   border: none;
   border-radius: 12px 0 0 0;
   cursor: pointer;
+}
+
+html:not(.i-amphtml-subs-grant-yes) .i-amphtml-subs-dialog-close-button {
+  display: none;
 }
 
 /**

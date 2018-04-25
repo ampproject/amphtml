@@ -28,9 +28,9 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
 Supported parameters:
 
-- data-x
-- data-u
+- `data-x`
+- `data-u`

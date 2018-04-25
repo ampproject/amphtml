@@ -123,9 +123,9 @@ describe.configure().skipSafari().run('XHR', function() {
 
           expect(get).to.not.throw();
           expect(post).to.not.throw();
-          expect(put).to.throw();
-          expect(patch).to.throw();
-          expect(deleteMethod).to.throw();
+          allowConsoleError(() => { expect(put).to.throw(); });
+          allowConsoleError(() => { expect(patch).to.throw(); });
+          allowConsoleError(() => { expect(deleteMethod).to.throw(); });
         });
 
         it('should allow FormData as body', () => {
@@ -177,21 +177,21 @@ describe.configure().skipSafari().run('XHR', function() {
 
         it('should defend against invalid source origin query ' +
            'parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should defend against empty source origin query parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should defend against re-encoded source origin parameter', () => {
-          expect(() => {
+          allowConsoleError(() => { expect(() => {
             xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
-          }).to.throw(/Source origin is not allowed/);
+          }).to.throw(/Source origin is not allowed/); });
         });
 
         it('should not include __amp_source_origin if ampCors ' +
@@ -408,9 +408,9 @@ describe.configure().skipSafari().run('XHR', function() {
       });
 
       it('should NOT succeed CORS with invalid credentials', () => {
-        expect(() => {
+        allowConsoleError(() => { expect(() => {
           xhr.fetchJson('https://acme.org/', {credentials: null});
-        }).to.throw(/Only credentials=include|omit support: null/);
+        }).to.throw(/Only credentials=include|omit support: null/); });
       });
 
       it('should expose HTTP headers', () => {
@@ -671,10 +671,10 @@ describe.configure().skipSafari().run('XHR', function() {
 
         expect(objectFn).to.not.throw();
         expect(arrayFn).to.not.throw();
-        expect(stringFn).to.throw();
-        expect(numberFn).to.throw();
-        expect(booleanFn).to.throw();
-        expect(nullFn).to.throw();
+        allowConsoleError(() => { expect(stringFn).to.throw(); });
+        allowConsoleError(() => { expect(numberFn).to.throw(); });
+        allowConsoleError(() => { expect(booleanFn).to.throw(); });
+        allowConsoleError(() => { expect(nullFn).to.throw(); });
       });
 
     });

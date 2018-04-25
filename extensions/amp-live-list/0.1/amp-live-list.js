@@ -362,7 +362,9 @@ export class AmpLiveList extends AMP.BaseElement {
         const elementToScrollTo = this.isReverseOrder_ &&
           this.itemsSlot_.lastElementChild ?
           this.itemsSlot_.lastElementChild : this.element;
-        return this.viewport_.animateScrollIntoView(elementToScrollTo);
+        const pos = this.isReverseOrder_ ? 'bottom' : 'top';
+        return this.viewport_.animateScrollIntoView(
+            elementToScrollTo, 500, 'ease-in', pos);
       });
     }
     return promise;

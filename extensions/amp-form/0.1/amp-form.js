@@ -198,7 +198,9 @@ export class AmpForm {
         this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+        this.form_, this.actionHandlerHigh_.bind(this), ActionTrust.HIGH);
+    this.actions_.installActionHandler(
+        this.form_, this.actionHandlerLow_.bind(this), ActionTrust.LOW);
     this.installEventHandlers_();
 
     /** @private {?Promise} */
@@ -226,17 +228,31 @@ export class AmpForm {
   }
 
   /**
+   * Handle actions that require at least high trust.
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @return {?Promise}
    * @private
    */
-  actionHandler_(invocation) {
+  actionHandlerHigh_(invocation) {
     if (invocation.method == 'submit') {
       this.whenDependenciesReady_().then(() => {
         this.handleSubmitAction_(invocation);
       });
     }
     else if (invocation.method === 'clear') {
+      this.handleClearAction_();
+    }
+    return null;
+  }
+
+  /**
+   * Handle actions that require at least low trust.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
+   * @private
+   */
+  actionHandlerLow_(invocation) {
+    if (invocation.method === 'clear') {
       this.handleClearAction_();
     }
     return null;
@@ -356,6 +372,32 @@ export class AmpForm {
     }
     removeValidityStateClasses(this.form_);
     return;
+  }
+
+  /**
+   * Handles clearing the form through action service invocations.
+   * @private
+   */
+  handleClearAction_() {
+    this.form_.reset();
+    this.setState_(FormState_.INITIAL);
+    this.form_.classList.remove('user-valid');
+    this.form_.classList.remove('user-invalid');
+
+    const validityElements = this.form_.querySelectorAll(
+        '.user-valid, .user-invalid');
+    iterateCursor(validityElements, element => {
+      element.classList.remove('user-valid');
+      element.classList.remove('user-invalid');
+    });
+
+    const messageElements = this.form_.querySelectorAll(
+        '.visible[validation-for]');
+    iterateCursor(messageElements, element => {
+      element.classList.remove('visible');
+    });
+
+    removeValidityStateClasses(this.form_);
   }
 
   /**
@@ -504,6 +546,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
+      this.assertNoPasswordFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -582,11 +625,22 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
+    this.assertNoPasswordFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
     }
     this.triggerFormSubmitInAnalytics_();
+  }
+
+  /**
+   * Fail if there are password fields present when the function is called.
+   * @private
+   */
+  assertNoPasswordFields_() {
+    const passwordFields = this.form_.querySelectorAll('input[type=password]');
+    user().assert(passwordFields.length == 0,
+        'input[type=password] may only appear in form[method=post]');
   }
 
   /**
@@ -830,6 +884,7 @@ function updateInvalidTypesClasses(element) {
   }
 }
 
+<<<<<<< HEAD
 function removeValidityStateClasses(form) {
   const dummyInput = document.createElement('input');
   for (const validityState in dummyInput.validity) {
@@ -838,6 +893,18 @@ function removeValidityStateClasses(form) {
     for (let i = 0; i < elements.length; i++) {
       elements[i].classList.remove(validityState);
     }
+=======
+/**
+ * Removes all validity classes from elements in the given form.
+ * @param {!Element} form
+ */
+function removeValidityStateClasses(form) {
+  const dummyInput = document.createElement('input');
+  for (const validityState in dummyInput.validity) {
+    const elements = form.querySelectorAll(
+        `.${escapeCssSelectorIdent(validityState)}`);
+    iterateCursor(elements, element => element.classList.remove(validityState));
+>>>>>>> 3892a9aa9f2030ce9e0408ae57c56b463ff2f74a
   }
 }
 

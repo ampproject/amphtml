@@ -56,9 +56,9 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     // Gfycat iframe
     this.preconnect.url('https://gfycat.com', opt_onLayout);
@@ -90,13 +90,23 @@ class AmpGfycat extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('amp-img');
     const videoid = dev().assertString(this.videoid_);
-
+    this.propagateAttributes(['alt', 'aria-label'], placeholder);
     placeholder.setAttribute('src',
         'https://thumbs.gfycat.com/' +
         encodeURIComponent(videoid) + '-poster.jpg');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
+    if (this.element.hasAttribute('aria-label')) {
+      placeholder.setAttribute('alt',
+          'Loading gif ' + this.element.getAttribute('aria-label')
+      );
+    } else if (this.element.hasAttribute('alt')) {
+      placeholder.setAttribute('alt',
+          'Loading gif ' + this.element.getAttribute('alt'));
+    } else {
+      placeholder.setAttribute('alt', 'Loading gif');
+    }
     this.applyFillContent(placeholder);
 
     return placeholder;
