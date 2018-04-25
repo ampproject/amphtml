@@ -610,21 +610,14 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
-        const historyPushSpy = sandbox.spy();
-        const historyPopSpy = sandbox.spy();
-        impl.scheduleLayout = sandbox.spy();
-        impl.getHistory_ = function() {
-          return {
-            push() {
-              historyPushSpy();
-              return Promise.resolve(11);
-            },
-            pop() {
-              historyPopSpy();
-              return Promise.resolve(11);
-            },
-          };
-        };
+
+        impl.scheduleLayout = sandbox.stub();
+
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+          pop: sandbox.stub().resolves(11),
+        });
+
         impl.open_();
         expect(impl.boundOnAnimationEnd_).to.be.calledOnce;
 
