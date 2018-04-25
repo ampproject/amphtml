@@ -4054,11 +4054,11 @@ fbjs@^0.8.16, fbjs@^0.8.4:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.9"
 
-fetch-mock@6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-6.1.0.tgz#29a6b15d2b362b286a04b40255b069008c5931b2"
+fetch-mock@6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-6.3.0.tgz#4fcf710e49e6202c951d0d7ba8d4a862b6321cef"
   dependencies:
-    glob-to-regexp "^0.3.0"
+    glob-to-regexp "^0.4.0"
     path-to-regexp "^2.1.0"
 
 figures@^2.0.0:
@@ -4508,9 +4508,9 @@ glob-stream@^3.1.5:
     through2 "^0.6.1"
     unique-stream "^1.0.0"
 
-glob-to-regexp@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.3.0.tgz#8c5a1494d2066c570cc3bfe4496175acc4d502ab"
+glob-to-regexp@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.4.0.tgz#49bd677b1671022bd10921c3788f23cdebf9c7e6"
 
 glob-watcher@^0.0.6:
   version "0.0.6"
