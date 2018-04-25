@@ -18,6 +18,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {MediaType} from '../media-pool';
 import {PaginationButtons} from '../pagination-buttons';
 
 
@@ -368,6 +369,45 @@ describes.realWin('amp-story', {
         .then(() => {
           return expect(replaceStub).to.not.have.been.called;
         });
+  });
+
+  describe('#getMaxMediaElementCounts', () => {
+    it('should create 2 audio & video elements when no elements found', () => {
+      sandbox.stub(story.element, 'querySelectorAll').returns([]);
+
+      const expected = {
+        [MediaType.AUDIO]: 2,
+        [MediaType.VIDEO]: 2,
+      };
+      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+    });
+
+    it('should create 2 extra audio & video elements for ads', () => {
+      const qsStub = sandbox.stub(story.element, 'querySelectorAll');
+      qsStub.withArgs('amp-audio, [background-audio]').returns(['el']);
+      qsStub.withArgs('amp-video').returns(['el', 'el']);
+
+      const expected = {
+        [MediaType.AUDIO]: 3,
+        [MediaType.VIDEO]: 4,
+      };
+      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+    });
+
+    it('never have more than the defined maximums', () => {
+      const qsStub = sandbox.stub(story.element, 'querySelectorAll');
+      qsStub.withArgs('amp-audio, [background-audio]')
+          .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el']);
+      qsStub.withArgs('amp-video')
+          .returns(['el', 'el', 'el', 'el', 'el', 'el', 'el', 'el']);
+
+      const expected = {
+        [MediaType.AUDIO]: 4,
+        [MediaType.VIDEO]: 8,
+      };
+      expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
+    });
+
   });
 });
 

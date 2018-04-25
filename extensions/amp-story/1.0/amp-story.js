@@ -150,6 +150,13 @@ const AD_SHOWING_ATTR = 'ad-showing';
  */
 const PAGE_LOAD_TIMEOUT_MS = 5000;
 
+/**
+ * Single page ads may be injected later. If the original story contains 0 media
+ * elements the mediaPool will not be able to handle the injected audio/video
+ * Therefore we preallocate a minimum here.
+ * @const {number}
+ */
+const MINIMUM_AD_MEDIA_ELEMENTS = 2;
 
 /**
  * CSS class for an amp-story that indicates the initial load for the story has
@@ -1500,9 +1507,11 @@ export class AmpStory extends AMP.BaseElement {
 
     return {
       [MediaType.AUDIO]: Math.min(
-          audioMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
+          audioMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
+          MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
       [MediaType.VIDEO]: Math.min(
-          videoMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
+          videoMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
+          MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
     };
   }
 
