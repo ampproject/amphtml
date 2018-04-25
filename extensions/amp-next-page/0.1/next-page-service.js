@@ -172,9 +172,6 @@ export class NextPageService {
         PositionObserverFidelity.LOW,
         position => this.positionUpdate_(page, position));
 
-    const divider = this.createDivider_();
-    container.appendChild(divider);
-
     const articleLinks = this.createArticleLinks_(this.nextArticle_);
     container.appendChild(articleLinks);
 
@@ -250,6 +247,9 @@ export class NextPageService {
     }
 
     const element = doc.createElement('div');
+    const divider = this.createDivider_();
+    element.appendChild(divider);
+
     while (article < this.config_.pages.length &&
            article - nextPage < SEPARATOR_RECOS) {
       const next = this.config_.pages[article];
