@@ -84,7 +84,7 @@
     "fs-extra": "5.0.0",
     "greenkeeper-lockfile": "1.14.0",
     "gulp": "3.9.1",
-    "gulp-ava": "0.18.0",
+    "gulp-ava": "0.19.0",
     "gulp-batch-replace": "0.0.0",
     "gulp-closure-compiler": "0.4.0",
     "gulp-eslint": "4.0.1",
