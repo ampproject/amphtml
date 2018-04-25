@@ -161,6 +161,7 @@ describes.realWin('amp-install-serviceworker', {
       calledSrc = undefined;
       const p = new Promise(() => {});
       const win = {
+        complete: true,
         location: {
           href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
         },
@@ -225,9 +226,10 @@ describes.realWin('amp-install-serviceworker', {
         return returnedValue;
       });
       implementation.buildCallback();
-      return whenVisible.then(() => {
-        expect(mutateElement).to.have.been.calledOnce;
-      });
+      return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
+          () => {
+            expect(mutateElement).to.have.been.calledOnce;
+          });
     }
 
     it('should inject iframe on proxy if provided (valid canonical)',

@@ -76,7 +76,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
             'source (%s) or canonical URL (%s) of the AMP-document.',
             origin, sourceUrl.origin, canonicalUrl.origin);
         this.iframeSrc_ = iframeSrc;
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+        this.whenReadyAndVisiblePromise_().then(() => {
           return this.insertIframe_();
         });
       }
@@ -89,6 +89,18 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
+  }
+
+  /**
+   * A promise that resolves when both loadPromise and whenFirstVisible resolve.
+   * @return {!Promise}
+   * @private
+   */
+  whenReadyAndVisiblePromise_() {
+    const whenReady = this.loadPromise(this.win);
+    const whenVisible =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+    return Promise.all([whenReady, whenVisible]);
   }
 
   /**
@@ -158,11 +170,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
    * @private
    */
   waitToPreloadShell_(shellUrl) {
-    // Ensure that document is loaded and visible first.
-    const whenReady = this.loadPromise(this.win);
-    const whenVisible =
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
-    return Promise.all([whenReady, whenVisible]).then(() => {
+    this.whenReadyAndVisiblePromise_().then(() => {
       this.mutateElement(() => this.preloadShell_(shellUrl));
     });
   }
