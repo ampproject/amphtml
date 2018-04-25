@@ -627,24 +627,28 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Date pickers not in a form don't need named hidden inputs.
    * @param {!Element} form
    * @param {!DateFieldType} type
+   * @return {string}
    * @private
    */
   getHiddenInputId_(form, type) {
     const id = this.element.id;
     const name = DateFieldNameByType[type];
-    if (form) {
-      const alternativeName = `${id}-${name}`;
-      if (!form.elements[name]) {
-        return name;
-      } else if (id && !form.elements[alternativeName]) {
-        return alternativeName;
-      } else {
-        user().error(TAG,
-            `Multiple date-pickers with implicit ${name} fields ` +
-            'need to have IDs');
-        return '';
-      }
+    if (!form) {
+      return '';
     }
+
+    if (!form.elements[name]) {
+      return name;
+    }
+
+    const alternativeName = `${id}-${name}`;
+    if (id && !form.elements[alternativeName]) {
+      return alternativeName;
+    }
+
+    user().error(TAG, `Multiple date-pickers with implicit ${name} fields ` +
+        'need to have IDs');
+    return '';
   }
 
   /**
