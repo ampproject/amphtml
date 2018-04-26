@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Action, StateProperty} from './amp-story-store-service';
-import {BookendComponent} from './bookend/bookend-component';
-import {CSS} from '../../../build/amp-story-bookend-1.0.css';
-import {EventType, dispatch} from './events';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {ScrollableShareWidget} from './amp-story-share';
-import {Services} from '../../../src/services';
-import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
-import {dev, user} from '../../../src/log';
-import {dict} from './../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
-import {getJsonLd} from './jsonld';
-import {isArray} from '../../../src/types';
-import {isProtocolValid} from '../../../src/url';
-import {parseUrl} from '../../../src/url';
-import {relatedArticlesFromJson} from './related-articles';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
-import {throttle} from '../../../src/utils/rate-limit';
+import {Action, StateProperty} from '../amp-story-store-service';
+import {BookendComponent} from './bookend-component';
+import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
+import {EventType, dispatch} from '../events';
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {ScrollableShareWidget} from '../amp-story-share';
+import {Services} from '../../../../src/services';
+import {closest} from '../../../../src/dom';
+import {createShadowRootWithStyle} from '../utils';
+import {dev, user} from '../../../../src/log';
+import {dict} from '../../../../src/utils/object';
+import {getAmpdoc} from '../../../../src/service';
+import {getJsonLd} from '../jsonld';
+import {isArray} from '../../../../src/types';
+import {isProtocolValid} from '../../../../src/url';
+import {parseUrl} from '../../../../src/url';
+import {relatedArticlesFromJson} from '../related-articles';
+import {renderAsElement, renderSimpleTemplate} from '../simple-template';
+import {throttle} from '../../../../src/utils/rate-limit';
 
 
 /**
@@ -362,7 +362,7 @@ export class Bookend {
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
+   * @return {!Promise<?./bookend/amp-story-bookend.BookendConfigDef>}
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
@@ -381,8 +381,9 @@ export class Bookend {
           if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
             this.config_ = {
               [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
-              components: BookendComponent
+              'components': BookendComponent
                   .buildFromJson(response['components']),
+              'share-providers': response['share-providers'],
             };
           } else {
             // TODO(#14667): Write doc regarding amp-story bookend v1.0.

@@ -41,7 +41,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './amp-story-bookend';
+import {Bookend} from './bookend/amp-story-bookend';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -1374,7 +1374,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
+   * @return {!Promise<?./bookend/amp-story-bookend.BookendConfigDef>}
    * @private
    */
   buildAndPreloadBookend_() {
