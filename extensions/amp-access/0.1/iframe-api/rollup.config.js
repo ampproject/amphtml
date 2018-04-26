@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Export of IFrame API.
- */
+import babel from 'rollup-plugin-babel';
+import cleanup from 'rollup-plugin-cleanup';
+import path from 'path';
 
-import '../../../../src/polyfills';
-import {AmpAccessIframeApi} from './iframe-api';
-
-export default AmpAccessIframeApi;
+export default {
+  input: './amp-iframe-api-export.js',
+  output: {
+    name: 'AmpAccessIframeApi',
+    format: 'umd',
+    file: 'build/index.js',
+    sourceMap: true,
+  },
+  plugins: [
+    babel({
+      babelrc: false,
+      presets: [['env', {'modules': false}]],
+    }),
+    cleanup(),
+  ],
+  external: [
+    path.resolve('../../../../src/polyfills.js'),
+  ],
+};

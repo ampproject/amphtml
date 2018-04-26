@@ -198,6 +198,8 @@ function compile(entryModuleFilenames, outputDir,
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
+      // Don't include rollup configs
+      '!**/rollup.config.js',
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
