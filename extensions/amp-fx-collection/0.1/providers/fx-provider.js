@@ -49,6 +49,9 @@ export class FxProvider {
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
 
+    /** @private @const  {!../../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private @string */
     this.fxType_ = fxType;
   }
@@ -58,10 +61,11 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
+    const fxElement = new FxElement(
+        element, this.positionObserver_, this.viewport_, this.resources_,
+        this.fxType_);
     setStyles(element, installStyles(this.ampdoc_, element, this.fxType_,
         fxElement.getFlyInDistance()));
-    new FxElement(element, this.positionObserver_, this.viewport_,
-        this.resources_, this.fxType_);
   }
 }
 
