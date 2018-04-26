@@ -117,7 +117,6 @@ export class Animation {
   start(duration) {
     const player = new AnimationPlayer(this.vsync_, this.contextNode_,
         this.segments_, this.curve_, duration);
-    player.start_();
     return player;
   }
 }
@@ -167,7 +166,7 @@ class AnimationPlayer {
     this.duration_ = duration;
 
     /** @private {./time.timeDef} */
-    this.startTime_ = 0;
+    this.startTime_ = Date.now();
 
     /** @private {./time.normtimeDef} */
     // this.normLinearTime_ = 0;
@@ -176,7 +175,7 @@ class AnimationPlayer {
     // this.normTime_ = 0;
 
     /** @private {boolean} */
-    this.running_ = false;
+    this.running_ = true;
 
     /** @private {!Object<string, *>} */
     this.state_ = {};
@@ -197,6 +196,13 @@ class AnimationPlayer {
     this.task_ = this.vsync_.createAnimTask(this.contextNode_, {
       mutate: this.stepMutate_.bind(this),
     });
+
+    if (this.vsync_.canAnimate(this.contextNode_)) {
+      this.task_(this.state_);
+    } else {
+      dev().warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
   }
 
   /**
@@ -235,20 +241,6 @@ class AnimationPlayer {
    */
   halt(opt_dir) {
     this.complete_(/* success */ false, /* dir */ opt_dir || 0);
-  }
-
-  /**
-   * @private
-   */
-  start_() {
-    this.startTime_ = Date.now();
-    this.running_ = true;
-    if (this.vsync_.canAnimate(this.contextNode_)) {
-      this.task_(this.state_);
-    } else {
-      dev().warn(TAG_, 'cannot animate');
-      this.complete_(/* success */ false, /* dir */ 0);
-    }
   }
 
   /**

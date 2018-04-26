@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -99,9 +98,6 @@ export class SubscriptionService {
 
     /** @private @const {boolean} */
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
@@ -432,22 +428,32 @@ export class SubscriptionService {
   }
 
   /**
-   * Delegates an action to local platform
+   * Delegates an action to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.platformStore_.getLocalPlatform(),
-          'Local platform is not registered'));
-    // TODO: add which service is passing this event
+    return this.delegateActionToService(action, 'local');
+  }
+
+  /**
+   * Delegates an action to specified platform.
+   * @param {string} action
+   * @param {string} serviceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId) {
+    // TODO: add a promise to wait for resolve promise of a platform.
+    const platform = dev().assert(this.platformStore_.getPlatform(serviceId),
+        'Platform is not registered');
     this.subscriptionAnalytics_.event(
         SubscriptionAnalyticsEvents.ACTION_DELEGATED,
         {
           action,
+          serviceId,
         }
     );
-    return localPlatform.executeAction(action);
+    return platform.executeAction(action);
   }
 }
 

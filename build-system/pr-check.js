@@ -307,13 +307,14 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
-    if (!!process.env.SAUCE_USERNAME) {
-      // A subset of unit tests on other browsers via sauce labs
-      cmd = cmd + ' --saucelabs_lite';
-      startSauceConnect();
-      timedExecOrDie(cmd);
-      stopSauceConnect();
-    }
+    // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
+    // if (!!process.env.SAUCE_USERNAME) {
+    //   // A subset of unit tests on other browsers via sauce labs
+    //   cmd = cmd + ' --saucelabs_lite';
+    //   startSauceConnect();
+    //   timedExecOrDie(cmd);
+    //   stopSauceConnect();
+    // }
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
@@ -592,20 +593,24 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
+    } else {
+      // Generates a blank Percy build to satisfy the required Github check.
+      command.runVisualDiffTests(/* opt_mode */ 'skip');
     }
     command.runPresubmitTests();
     if (buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('RUNTIME')) {
       command.runIntegrationTests(/* compiled */ false);
     }
-    if (buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF')) {
-      command.verifyVisualDiffTests();
-    } else {
-      // Generates a blank Percy build to satisfy the required Github check.
-      command.runVisualDiffTests(/* opt_mode */ 'skip');
-    }
+    // TODO(rsimha, #14851): Failing due to long proessing times.
+    // if (buildTargets.has('INTEGRATION_TEST') ||
+    //     buildTargets.has('RUNTIME') ||
+    //     buildTargets.has('VISUAL_DIFF')) {
+    //   command.verifyVisualDiffTests();
+    // } else {
+    //   // Generates a blank Percy build to satisfy the required Github check.
+    //   command.runVisualDiffTests(/* opt_mode */ 'skip');
+    // }
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       command.buildValidatorWebUI();
     }

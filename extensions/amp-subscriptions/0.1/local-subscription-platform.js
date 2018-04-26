@@ -50,9 +50,6 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
-
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
 
@@ -93,9 +90,6 @@ export class LocalSubscriptionPlatform {
 
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
@@ -148,11 +142,25 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
-      if (element) {
-        const action = element.getAttribute('subscriptions-action');
+      this.handleClick_(element);
+    });
+  }
+
+  /**
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
+   */
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      if (element.hasAttribute('subscriptions-service')) {
+        const serviceId = element.getAttribute('subscriptions-service');
+        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      } else {
         this.executeAction(action);
       }
-    });
+    }
   }
 
   /**
@@ -166,11 +174,7 @@ export class LocalSubscriptionPlatform {
     });
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {

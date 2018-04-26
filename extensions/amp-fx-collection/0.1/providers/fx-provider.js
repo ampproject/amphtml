@@ -38,9 +38,6 @@ export class FxProvider {
    */
   constructor(ampdoc, fxType) {
 
-    /** @private @const {!../../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -61,12 +58,10 @@ export class FxProvider {
    * @param {!Element} element
    */
   installOn(element) {
-    const fxElement = new FxElement(
-        element, this.positionObserver_, this.viewport_, this.resources_,
-        this.fxType_);
     setStyles(element, installStyles(this.ampdoc_, element, this.fxType_,
         fxElement.getFlyInDistance()));
-    fxElement.initialize_();
+    new FxElement(element, this.positionObserver_, this.viewport_,
+        this.resources_, this.fxType_);
   }
 }
 
@@ -91,8 +86,8 @@ export class FxElement {
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
 
-    /** @private {?number} */
-    this.adjustedViewportHeight_ = null;
+    /** @type {?number} */
+    this.adjustedViewportHeight = null;
 
     /** @private @const {!Element} */
     this.element_ = element;
@@ -138,16 +133,8 @@ export class FxElement {
     /** @private {boolean} */
     this.hasRepeat_ = element.hasAttribute('data-repeat');
 
-  }
-
-  /**
-   * Handles initializations such as getting initial positions and listening to
-   * events.
-   * @private
-   */
-  initialize_() {
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-      this.adjustedViewportHeight_ = adjustedViewportHeight;
+      this.adjustedViewportHeight = adjustedViewportHeight;
 
       // start observing position of the element.
       this.observePositionChanges_();
@@ -164,7 +151,7 @@ export class FxElement {
 
     this.viewport_.onResize(() => {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-        this.adjustedViewportHeight_ = adjustedViewportHeight;
+        this.adjustedViewportHeight = adjustedViewportHeight;
       });
     });
   }

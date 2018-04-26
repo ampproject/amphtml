@@ -16,16 +16,21 @@
 import {Action, StateProperty} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
+import {LocalizedStringId} from './localization';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
+import {ShareWidget} from './amp-story-share';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
-import {renderAsElement} from './simple-template';
+import {renderAsElement, renderSimpleTemplate} from './simple-template';
 
 
+/** @private @const {string} */
+const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
@@ -77,6 +82,30 @@ const TEMPLATE = {
 
 
 /**
+ * Container for "pill-style" share widget, rendered on desktop.
+ * @private @const {!./simple-template.ElementDef}
+ */
+const SHARE_WIDGET_PILL_CONTAINER = {
+  tag: 'div',
+  attrs: dict({'class': 'i-amphtml-story-share-pill-container'}),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-share-pill'}),
+      children: [
+        {
+          tag: 'span',
+          attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
+          localizedStringId:
+              LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+        },
+      ],
+    },
+  ],
+};
+
+
+/**
  * System Layer (i.e. UI Chrome) for <amp-story>.
  * Chrome contains:
  *   - mute/unmute button
@@ -86,10 +115,14 @@ const TEMPLATE = {
 export class SystemLayer {
   /**
    * @param {!Window} win
+   * @param {!Element} parentEl
    */
-  constructor(win) {
-    /** @private {!Window} */
+  constructor(win, parentEl) {
+    /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!Element} */
+    this.parentEl_ = parentEl;
 
     /** @private {boolean} */
     this.isBuilt_ = false;
@@ -117,6 +150,9 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
+
+    /** @private {?Node} */
+    this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
@@ -195,6 +231,10 @@ export class SystemLayer {
       }
     });
 
+    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+      this.onAdStateUpdate_(isAd);
+    });
+
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
     });
@@ -227,6 +267,19 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the ad state updates and updates the UI accordingly.
+   * @param {boolean} isAd
+   * @private
+   */
+  onAdStateUpdate_(isAd) {
+    this.vsync_.mutate(() => {
+      isAd ?
+        this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '') :
+        this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
+    });
+  }
+
+  /**
    * Reacts to the bookend state updates and updates the UI accordingly.
    * @param {boolean} isActive
    * @private
@@ -242,6 +295,10 @@ export class SystemLayer {
    * @private
    */
   onDesktopStateUpdate_(isDesktop) {
+    if (isDesktop) {
+      this.buildSharePill_();
+    }
+
     this.vsync_.mutate(() => {
       isDesktop ?
         this.getShadowRoot().setAttribute('desktop', '') :
@@ -320,6 +377,27 @@ export class SystemLayer {
   }
 
   /**
+   * Builds and appends the share pill. Desktop only.
+   * @private
+   */
+  buildSharePill_() {
+    if (this.sharePillContainerNode_) {
+      return;
+    }
+
+    this.sharePillContainerNode_ =
+        renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
+
+    const shareWidget = new ShareWidget(this.win_);
+
+    this.sharePillContainerNode_
+        .querySelector('.i-amphtml-story-share-pill')
+        .appendChild(shareWidget.build(getAmpdoc(this.parentEl_)));
+
+    this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
+  }
+
+  /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    * @private
    */
@@ -377,18 +455,6 @@ export class SystemLayer {
     }
 
     this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Toggles the visibility of the developer log.
-   * @private
-   */
-  toggleDeveloperLog_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.toggle();
   }
 
   /**
