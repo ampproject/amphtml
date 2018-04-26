@@ -44,11 +44,17 @@ export function uzou(global, data) {
   container.appendChild(d);
 
   const uzouInjector = {
-    url: widgetParams['url'] || global.context.canonicalUrl || global.context.sourceUrl,
+    url: (
+      widgetParams['url'] ||
+      global.context.canonicalUrl ||
+      global.context.sourceUrl
+    ),
     referer: widgetParams['referer'] || global.context.referrer,
   };
   ['adServerHost', 'akamaiHost', 'iframeSrcPath'].forEach(function(elem) {
-    if (widgetParams[elem]) uzouInjector[elem] = widgetParams[elem];
+    if (widgetParams[elem]) {
+      uzouInjector[elem] = widgetParams[elem];
+    }
   });
   global.UzouInjector = uzouInjector;
 
