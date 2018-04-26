@@ -27,9 +27,6 @@ export class Toolbar {
     /** @private {!Element} */
     this.toolbarDomElement_ = element;
 
-    /** @private {number|undefined} */
-    this.height_ = undefined;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 

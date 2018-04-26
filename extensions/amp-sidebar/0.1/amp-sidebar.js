@@ -83,9 +83,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
-    /** @private {number|string|null} */
-    this.openOrCloseTimeOut_ = null;
-
     /** @const {function()} */
     this.boundOnAnimationEnd_ =
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
