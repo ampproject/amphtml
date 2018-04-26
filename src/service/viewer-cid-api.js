@@ -31,6 +31,9 @@ export class ViewerCidApi {
     /** @private {!./viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
+    /** @private {?Object<string, string>} */
+    this.apiKeyMap_ = null;
+
     const canonicalUrl = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
 
     /** @private {?string} */
