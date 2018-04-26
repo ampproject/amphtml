@@ -790,6 +790,21 @@ For complete documentation and additional examples please see: https://marketing
 {
   "vars": {
     "apikey": "example.com"
+  },
+  "triggers": {
+      "defaultPageview": {
+          "on": "visible",
+          "request": "pageview"
+      },
+      "defaultHeartbeat": {
+         "on": "timer",
+         "enabled": "${incrementalEngagedTime(parsely-js,false)}",
+         "timerSpec": {
+             "interval": 5,
+             "maxTimerLength": 7200
+         },
+         "request": "heartbeat"
+      }
   }
 }
 </script>
