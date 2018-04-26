@@ -62,6 +62,13 @@ export class SubscriptionPlatform {
   supportsCurrentViewer() {}
 
   /**
+   * Executes action for the local platform.
+   * @param {string} unusedAction
+   * @returns {!Promise<boolean>}
+   */
+  executeAction(unusedAction) {}
+
+  /**
    * Returns the base score configured for the platform.
    * @returns {number}
    */

@@ -310,6 +310,16 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('getPlatform', () => {
+    it('should return the platform for the serviceId', () => {
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'test';
+      platformStore.subscriptionPlatforms_['test'] = platform;
+      expect(platformStore.getPlatform('test').getServiceId())
+          .to.be.equal('test');
+    });
+  });
+
   describe('getGrantEntitlement', () => {
     const subscribedMeteredEntitlement = new Entitlement({
       source: 'local',
