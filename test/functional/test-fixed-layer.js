@@ -314,7 +314,8 @@ describe('FixedLayer', () => {
           return;
         }
         // Updating the placeholder means we have to update the tests.
-        expect(html.trim()).to.equal('<i-amphtml-fpa style="display: none" />');
+        expect(html.trim()).to.equal(
+            '<i-amphtml-fpa style="display: none"></i-amphtml-fpa>');
         this.firstElementChild = createElement('i-amphtml-fpa');
         this.firstElementChild.style.display = 'none';
       },

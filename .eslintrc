@@ -65,8 +65,9 @@
     "key-spacing": 2,
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
-      "ignoreUrls": true,
-      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$"
+      "ignoreRegExpLiterals": true,
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$",
+      "ignoreUrls": true
     }],
     "no-alert": 2,
     "no-cond-assign": 2,
