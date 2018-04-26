@@ -95,4 +95,40 @@ describes.realWin('amp-story-cta-layer', {
     });
   });
 
+  it('should add or overwrite role attribute to links', () => {
+    const ctaLink = win.document.createElement('a');
+    expect(ctaLink).to.not.have.attribute('role');
+
+    ampStoryCtaLayer.element.appendChild(ctaLink);
+    ampStoryCtaLayer.buildCallback();
+
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(ctaLink).to.have.attribute('role');
+      expect(ctaLink.getAttribute('role')).to.equal('link');
+    });
+  });
+
+  it('should add or overwrite role attribute to buttons', () => {
+    const ctaButton = win.document.createElement('button');
+    expect(ctaButton).to.not.have.attribute('role');
+
+    ampStoryCtaLayer.element.appendChild(ctaButton);
+    ampStoryCtaLayer.buildCallback();
+
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(ctaButton).to.have.attribute('role');
+      expect(ctaButton.getAttribute('role')).to.equal('button');
+    });
+  });
+
+  it('should not add role attribute to other elements', () => {
+    const elem = win.document.createElement('span');
+    ampStoryCtaLayer.element.appendChild(elem);
+    ampStoryCtaLayer.buildCallback();
+
+    return ampStoryCtaLayer.layoutCallback().then(() => {
+      expect(elem).to.not.have.attribute('role');
+    });
+  });
+
 });
