@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {LayoutPriority} from '../../src/layout';
@@ -27,7 +26,7 @@ describe('amp-img', () => {
   let windowWidth;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     screenWidth = 320;
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'isInViewport')

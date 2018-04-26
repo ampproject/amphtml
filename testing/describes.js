@@ -30,7 +30,7 @@
  *     describe('myTest', () => {
  *       // I gotta do this sandbox creation and restore for every test? Ugh...
  *       let sandbox;
- *       beforeEach(() => { sandbox = sinon.sandbox.create(); })
+ *       beforeEach(() => { sandbox = sinon.sandbox; })
  *       it('stubbing', () => { sandbox.stub(foo, 'bar'); });
  *       afterEach(() => { sandbox.restore(); });
  *     });
@@ -114,7 +114,6 @@ import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import * as sinon from 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -429,7 +428,7 @@ class SandboxFixture {
     // Sandbox.
     let sandbox = global.sandbox;
     if (!sandbox) {
-      sandbox = global.sandbox = sinon.sandbox.create();
+      sandbox = global.sandbox = sinon.sandbox;
       this.sandboxOwner_ = true;
     }
     env.sandbox = sandbox;

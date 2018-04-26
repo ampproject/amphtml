@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {debounce, throttle} from '../../../src/utils/rate-limit';
 
 describe('function utils', () => {
@@ -23,7 +22,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -94,7 +93,7 @@ describe('function utils', () => {
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
     });
 

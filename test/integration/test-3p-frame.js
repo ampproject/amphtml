@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {DomFingerprint} from '../../src/utils/dom-fingerprint';
 import {Services} from '../../src/services';
 import {
@@ -45,7 +44,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
   let preconnect;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     container = document.createElement('div');
     document.body.appendChild(container);

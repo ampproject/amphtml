@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {FocusHistory} from '../../src/focus-history';
 import {installTimerService} from '../../src/service/timer-impl';
 
@@ -30,7 +29,7 @@ describe('FocusHistory', () => {
   let focusHistory;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};

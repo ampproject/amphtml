@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
@@ -857,8 +856,7 @@ describe('Resource idleRenderOutsideViewport', () => {
   let withinViewportMultiplier;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     idleRenderOutsideViewport = sandbox.stub();
     element = {
       idleRenderOutsideViewport,
@@ -915,7 +913,7 @@ describe('Resource renderOutsideViewport', () => {
   let resolveRenderOutsideViewportSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     element = {
       ownerDocument: {defaultView: window},

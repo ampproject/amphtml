@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
 
@@ -26,7 +25,7 @@ describe('PullToRefreshBlocker', () => {
   let blocker;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     eventListeners = {};
     const documentApi = {

@@ -15,7 +15,6 @@
  */
 
 import * as analytics from '../../src/analytics';
-import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {
   cancellation,
@@ -103,7 +102,7 @@ describe('maybeReportErrorToViewer', () => {
       new Error('XYZ', false));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
@@ -172,7 +171,7 @@ describe('reportErrorToServer', () => {
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });

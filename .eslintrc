@@ -43,6 +43,7 @@
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
+    "amphtml-internal/no-import": 2,
     "amphtml-internal/no-spread": 2,
     "amphtml-internal/no-style-property-setting": 2,
     "amphtml-internal/query-selector": 2,

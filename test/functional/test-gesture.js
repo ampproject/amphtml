@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 
 
@@ -42,7 +41,7 @@ describe('Gestures', () => {
   let onGesture;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};
@@ -391,7 +390,7 @@ describe('Gestures', () => {
     let onGesture;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
       clock = sandbox.useFakeTimers();
 
       eventListeners = {};

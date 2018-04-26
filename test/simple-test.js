@@ -22,7 +22,7 @@ describe.configure().enableIe().run('simple-test', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
   });
 
   afterEach(() => {

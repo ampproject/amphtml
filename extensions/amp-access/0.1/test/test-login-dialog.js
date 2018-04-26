@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {
   WebLoginDialog,
@@ -33,7 +32,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   let windowApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
 
     viewer = {
       getParam: param => {

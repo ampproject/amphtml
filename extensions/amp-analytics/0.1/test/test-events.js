@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,

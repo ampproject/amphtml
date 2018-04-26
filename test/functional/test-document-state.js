@@ -15,7 +15,6 @@
  */
 
 import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
 import {DocumentState} from '../../src/service/document-state';
 
 
@@ -28,7 +27,7 @@ describe('DocumentState', () => {
   let docState;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'complete',

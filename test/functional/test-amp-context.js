@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {
   AmpContext,
 } from '../../3p/ampcontext';
@@ -29,7 +28,7 @@ describe('3p ampcontext.js', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     windowPostMessageSpy = sandbox.spy();
     win = {
       addEventListener: (eventType, handlerFn) => {

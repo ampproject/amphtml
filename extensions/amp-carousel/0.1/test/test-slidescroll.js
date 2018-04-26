@@ -15,7 +15,6 @@
  */
 
 import '../amp-carousel';
-import * as sinon from 'sinon';
 
 
 describes.realWin('SlideScroll', {
@@ -565,7 +564,7 @@ describes.realWin('SlideScroll', {
 
   describe('Looping', () => {
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
+      sandbox = sinon.sandbox;
     });
 
     afterEach(() => {

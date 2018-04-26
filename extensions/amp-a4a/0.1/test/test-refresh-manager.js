@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
@@ -43,7 +42,7 @@ describe('refresh-manager', () => {
   };
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     mockA4a = {
       win: window,
       element: getTestElement(),

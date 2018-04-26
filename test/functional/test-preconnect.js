@@ -15,7 +15,6 @@
  */
 
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {preconnectForElement, setPreconnectFeaturesForTesting} from
   '../../src/preconnect';
@@ -72,7 +71,7 @@ describe('preconnect', () => {
     // to test for preload/preconnect support.
     preloadSupported = false;
     preconnectSupported = false;
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
   });
 

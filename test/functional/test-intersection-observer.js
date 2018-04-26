@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {BaseElement} from '../../src/base-element';
 import {
   IntersectionObserver,
@@ -27,7 +26,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.useFakeTimers();
   });
 
@@ -351,7 +350,7 @@ describe('IntersectionObserver', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
     testElementCreatedCallback = sandbox.spy();
     testElementPreconnectCallback = sandbox.spy();

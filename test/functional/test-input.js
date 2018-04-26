@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import {Input} from '../../src/input';
 import {installTimerService} from '../../src/service/timer-impl.js';
 
@@ -29,7 +28,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     eventListeners = {};

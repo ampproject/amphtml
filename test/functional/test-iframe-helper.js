@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as IframeHelper from '../../src/iframe-helper';
-import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {generateSentinel} from '../../src/3p-frame.js';
 
@@ -33,7 +32,7 @@ describe('iframe-helper', function() {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     return createIframePromise().then(c => {
       container = c;
       const i = c.doc.createElement('iframe');

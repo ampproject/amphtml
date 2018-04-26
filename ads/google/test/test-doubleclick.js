@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as sinon from 'sinon';
 import {createServedIframe} from '../../../testing/iframe';
 import {dev} from '../../../src/log';
 import {doubleclick} from '../doubleclick';
@@ -108,7 +107,7 @@ describe('doubleclick delayed fetch white list deprecation', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     sandbox.stub(dev(), 'error');
   });
 
