@@ -42,7 +42,8 @@ const TAG = 'amp-next-page';
  * @typedef {{
  *   ampUrl: string,
  *   amp: ?Object,
- *   recUnit: ?Element
+ *   recUnit: ?Element,
+ *   cancelled: boolean
  * }}
  */
 export let DocumentRef;
@@ -140,6 +141,7 @@ export class NextPageService {
       ampUrl: win.document.location.href,
       amp: {title: win.document.title},
       recUnit: null,
+      cancelled: false,
     });
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -190,7 +192,12 @@ export class NextPageService {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = {ampUrl: next.ampUrl, amp: null, recUnit: null};
+      const documentRef = {
+        ampUrl: next.ampUrl,
+        amp: null,
+        recUnit: null,
+        cancelled: false,
+      };
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
@@ -201,13 +208,15 @@ export class NextPageService {
       container.appendChild(separator);
 
       const page = this.nextArticle_ - 1;
-      this.positionObserver_.observe(separator,
-          PositionObserverFidelity.LOW,
+      this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
           position => this.positionUpdate_(page, position));
 
       const articleLinks = this.createArticleLinks_(this.nextArticle_);
       container.appendChild(articleLinks);
       documentRef.recUnit = articleLinks;
+
+      this.positionObserver_.observe(articleLinks, PositionObserverFidelity.LOW,
+          unused => this.articleLinksPositionUpdate_(documentRef));
 
       const shadowRoot = this.win_.document.createElement('div');
       container.appendChild(shadowRoot);
@@ -217,6 +226,14 @@ export class NextPageService {
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
           .then(doc => new Promise((resolve, reject) => {
+            this.positionObserver_.unobserve(articleLinks);
+
+            if (documentRef.cancelled) {
+              // User has reached the end of the document already, don't render.
+              resolve();
+              return;
+            }
+
             this.resources_.mutateElement(container, () => {
               try {
                 const amp = this.attachShadowDoc_(shadowRoot, doc);
@@ -320,7 +337,7 @@ export class NextPageService {
 
   /**
    * Handles updates from the {@code PositionObserver} indicating a change in
-   * the position of a recommendation unit in the viewport.
+   * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
    * @param
@@ -344,6 +361,18 @@ export class NextPageService {
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     }
+  }
+
+  /**
+   * Handles updates from the {@code PositionObserver} indicating a change in
+   * the position of the recommendation unit in the viewport. Used to indicate
+   * when the recommendation unit has entered the viewport, and should not be
+   * hidden from view automatically.
+   * @param {!DocumentRef} documentRef Reference to the active document.
+   */
+  articleLinksPositionUpdate_(documentRef) {
+    documentRef.cancelled = true;
+    this.positionObserver_.unobserve(documentRef.recUnit);
   }
 
   /**
