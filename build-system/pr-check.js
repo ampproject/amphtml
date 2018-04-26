@@ -256,6 +256,7 @@ function determineBuildTargets(filePaths) {
 }
 
 function startSauceConnect() {
+  process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
       'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
@@ -308,7 +309,7 @@ const command = {
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
     // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-    // if (!!process.env.SAUCE_USERNAME) {
+    // if (process.env.TRAVIS) {
     //   // A subset of unit tests on other browsers via sauce labs
     //   cmd = cmd + ' --saucelabs_lite';
     //   startSauceConnect();
@@ -325,7 +326,7 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (!!process.env.SAUCE_USERNAME) {
+    if (process.env.TRAVIS) {
       startSauceConnect();
       cmd += ' --saucelabs';
       timedExecOrDie(cmd);
