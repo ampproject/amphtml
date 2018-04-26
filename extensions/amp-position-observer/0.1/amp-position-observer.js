@@ -109,7 +109,15 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    */
   init_() {
     this.parseAttributes_();
-    this.action_ = Services.actionServiceForDoc(this.element);
+    const doc = this.element.ownerDocument;
+    var allNodes = doc.getElementsByTagName('*');
+    var parent = this.element;
+    for (var i = 0; i < allNodes.length; i++) {
+      if(allNodes[i].shadowRoot) {
+        parent = allNodes[i].shadowRoot
+      }
+    }
+    this.action_ = Services.actionServiceForDoc(parent);
     this.maybeInstallPositionObserver_();
     this.getAmpDoc().whenReady().then(() => {
       const scene = this.discoverScene_();
