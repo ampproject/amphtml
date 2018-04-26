@@ -50,9 +50,6 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @const @private {!PageConfig} */
-    this.pageConfig_ = serviceAdapter.getPageConfig();
-
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
 
@@ -93,9 +90,6 @@ export class LocalSubscriptionPlatform {
 
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
-
-    /** @private @const {boolean} */
-    this.isPingbackEnabled_ = true;
 
     /** @private @const {?string} */
     this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
