@@ -84,11 +84,10 @@ export class PlatformStore {
 
   /**
    * Returns the platform for the given id
-   * @private
    * @param {string} servideId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
-  getPlatform_(servideId) {
+  getPlatform(servideId) {
     const platform = this.subscriptionPlatforms_[servideId];
     dev().assert(platform, `Platform for id ${servideId} is not resolved`);
     return platform;
@@ -101,7 +100,7 @@ export class PlatformStore {
   getLocalPlatform() {
     const localPlatform =
         /** @type{!./local-subscription-platform.LocalSubscriptionPlatform} */
-        (this.getPlatform_('local'));
+        (this.getPlatform('local'));
     return localPlatform;
   }
 
