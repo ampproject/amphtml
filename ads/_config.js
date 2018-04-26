@@ -839,6 +839,7 @@ export const adConfig = {
     preconnect: [
       'https://speee-ad.akamaized.net',
     ],
+    renderStartImplemented: true,
   },
 
   valuecommerce: {

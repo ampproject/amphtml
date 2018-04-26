@@ -58,5 +58,7 @@ export function uzou(global, data) {
   });
   global.UzouInjector = uzouInjector;
 
-  loadScript(global, entryPoint);
+  loadScript(global, entryPoint, () => {
+    global.context.renderStart();
+  });
 }
