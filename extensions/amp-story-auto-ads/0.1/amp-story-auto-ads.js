@@ -41,6 +41,8 @@ const MUSTACHE_TAG = 'amp-mustache';
 /** @const */
 const TIMEOUT_LIMIT = 10000; // 10 seconds
 
+const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
+
 /** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
@@ -244,10 +246,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
+    const glassPane = document.createElement('div');
+    glassPane.classList.add(GLASS_PANE_CLASS);
+
     const gridLayer = document.createElement('amp-story-grid-layer');
     gridLayer.setAttribute('template', 'fill');
+
+    const paneGridLayer = gridLayer.cloneNode(false);
+
     gridLayer.appendChild(ampAd);
+    paneGridLayer.appendChild(glassPane);
     ampStoryAdPage.appendChild(gridLayer);
+    ampStoryAdPage.appendChild(paneGridLayer);
 
     this.currentAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
