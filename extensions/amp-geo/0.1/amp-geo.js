@@ -48,6 +48,7 @@ import {waitForBodyPromise} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-geo';
+const SERVICE_TAG = 'geo';
 /**
  * COUNTRY is a special const the magic string AMP_ISO_COUNTRY_HOTPATCH
  * is replaced at serving time with the two letter country code or
@@ -77,6 +78,7 @@ export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+    const self = this;
 
     /** @private {number} */
     this.mode_ = mode.GEO_HOT_PATCH;
@@ -84,7 +86,15 @@ export class AmpGeo extends AMP.BaseElement {
     this.country_ = 'unknown';
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
+    /** @private {?function(!Object<string, (string|Array<string>)>)} */
+    this.res_ = null;
+    /** @private {!Promise<!Object<string, (string|Array<string>)>>} */
+    this.geoPromise_ = new Promise(resolve => {
+      self.res_ = resolve;
+    });
     /** @Private {} */
+
+    registerServiceBuilder(this.win, SERVICE_TAG, () => this.geoPromise_);
   }
 
   /** @override */
@@ -104,9 +114,7 @@ export class AmpGeo extends AMP.BaseElement {
         children.length ?
           parseJson(children[0].textContent) : {});
 
-    registerServiceBuilder(this.win, 'geo', function() {
-      return geo;
-    });
+    this.res_(geo);
   }
 
   /**
