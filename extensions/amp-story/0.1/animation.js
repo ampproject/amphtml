@@ -381,9 +381,6 @@ export class AnimationManager {
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
-
-    /** @private @const */
     this.timer_ = Services.timerFor(this.ampdoc_.win);
 
     /** @private @const */

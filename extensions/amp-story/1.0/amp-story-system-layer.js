@@ -399,18 +399,6 @@ export class SystemLayer {
   }
 
   /**
-   * Toggles the visibility of the developer log.
-   * @private
-   */
-  toggleDeveloperLog_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.toggle();
-  }
-
-  /**
    * Hides the developer log in the UI.
    */
   hideDeveloperLog() {

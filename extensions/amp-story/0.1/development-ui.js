@@ -176,20 +176,8 @@ export class DevelopmentModeLog {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /** @private {?Element} */
     this.root_ = null;
-
-    /** @private {?Element} */
-    this.errorButton_ = null;
-
-    /** @private {?Element} */
-    this.warningButton_ = null;
-
-    /** @private {?Element} */
-    this.successButton_ = null;
 
     /** @private {?Element} */
     this.entriesEl_ = null;
