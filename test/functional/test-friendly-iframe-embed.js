@@ -588,7 +588,7 @@ describe('friendly-iframe-embed', () => {
         appendChild: () => {},
       };
       renderStartStub = sandbox.stub(
-          FriendlyIframeEmbed.prototype, 'startRender_');
+          FriendlyIframeEmbed.prototype, 'startRender');
     });
 
     afterEach(() => {
