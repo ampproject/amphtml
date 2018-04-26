@@ -188,7 +188,7 @@ export class PageScalingService {
     this.rootEl_ = rootEl;
 
     /** @private @const */
-    this.vsync_ = Services.vsyncFor(win);
+    this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @private @const {?Element} */
     // Assumes active page to be determinant of the target size.
@@ -201,7 +201,7 @@ export class PageScalingService {
     this.scalableElsDimensions_ = {};
 
     Services.viewportForDoc(rootEl).onResize(
-        throttle(win, () => this.onViewportResize_(), 100));
+        throttle(this.win_, () => this.onViewportResize_(), 100));
   }
 
   /**
