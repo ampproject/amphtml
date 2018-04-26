@@ -25,11 +25,12 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import * as sinon from 'sinon';
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
+import {AMP_SIGNATURE_HEADER, VerificationStatus} from '../signature-verifier';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
   IFRAME_SANDBOXING_FLAGS,
+  INVALID_SPSA_RESPONSE,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
   SANDBOX_HEADER,
@@ -1684,7 +1685,69 @@ describe('amp-a4a', () => {
       expect(a4a.getAmpAdMetadata(buildCreativeString(metaData)).images.length)
           .to.equal(5);
     });
+
+    it('should throw due to missing CTA type', () => {
+      metaData.ctaUrl = 'http://foo.com';
+      a4a.isSinglePageStoryAd = true;
+      expect(() => a4a.getAmpAdMetadata(buildCreativeString(metaData)))
+          .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
+    });
+
+    it('should throw due to missing outlink', () => {
+      metaData.ctaType = '0';
+      a4a.isSinglePageStoryAd = true;
+      expect(() => a4a.getAmpAdMetadata(buildCreativeString(metaData)))
+          .to.throw(new RegExp(INVALID_SPSA_RESPONSE));
+    });
+
+    it('should set appropriate attributes and return metadata object', () => {
+      metaData.ctaType = '0';
+      metaData.ctaUrl = 'http://foo.com';
+      a4a.isSinglePageStoryAd = true;
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      const expected = Object.assign({
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+      }, metaData);
+      delete expected.ctaType;
+      delete expected.ctaUrl;
+      expect(actual).to.deep.equal(expected);
+      expect(a4a.element.dataset.varsCtatype).to.equal('0');
+      expect(a4a.element.dataset.varsCtaurl).to.equal('http://foo.com');
+    });
+
     // FAILURE cases here
+  });
+
+  describe('#maybeValidateAmpCreative', () => {
+
+    let a4a;
+    let verifier;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        a4a = new MockA4AImpl(createA4aElement(fixture.doc));
+        verifier = a4a.win['AMP_FAST_FETCH_SIGNATURE_VERIFIER_'] = {};
+        a4a.keysetPromise_ = Promise.resolve();
+        return fixture;
+      });
+    });
+
+    it('should pass verification with story ad', () => {
+      a4a.isSinglePageStoryAd = true;
+      verifier.verify = () => Promise.resolve(VerificationStatus.OK);
+      return a4a.maybeValidateAmpCreative(/* bytes */ 'foo').then(result => {
+        expect(result).to.equal('foo');
+      });
+    });
+
+    it('should throw due to invalid AMP creative with story ad', () => {
+      a4a.isSinglePageStoryAd = true;
+      verifier.verify = () => Promise.resolve(VerificationStatus.UNVERIFIED);
+      return a4a.maybeValidateAmpCreative().catch(error => {
+        expect(error.message).to.equal(INVALID_SPSA_RESPONSE);
+      });
+    });
   });
 
   describe('#renderOutsideViewport', () => {
@@ -2153,6 +2216,25 @@ describe('amp-a4a', () => {
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
           'forced_delta': 12345,
         })).to.be.calledOnce;
+      });
+    });
+
+    it('should set isSinglePageStoryAd to false', () => {
+      return createIframePromise().then(fixture => {
+        const element = createA4aElement(fixture.doc);
+        const a4a = new MockA4AImpl(element);
+        a4a.buildCallback();
+        expect(a4a.isSinglePageStoryAd).to.be.false;
+      });
+    });
+
+    it('should set isSinglePageStoryAd to true', () => {
+      return createIframePromise().then(fixture => {
+        const element = createA4aElement(fixture.doc);
+        element.setAttribute('amp-story', 1);
+        const a4a = new MockA4AImpl(element);
+        a4a.buildCallback();
+        expect(a4a.isSinglePageStoryAd).to.be.true;
       });
     });
   });
