@@ -20,15 +20,13 @@ import {ArticleComponent, ArticleTitle, BookendArticleComponentDef, BookendArtic
  * @typedef {{
  *   bookend-version: string,
  *   components: !Array<!BookendComponentDef>,
+ *   share-providers: !Array<(!JsonObject|string|undefined)>,
  * }}
  */
 export let BookendDataDef;
 
 /**
- * @typedef {{
- *   !BookendArticleComponentDef |
- *   !BookendArticleTitleComponentDef
- * }}
+ * @typedef {(!BookendArticleComponentDef|!BookendArticleTitleComponentDef)}
  */
 export let BookendComponentDef;
 
@@ -67,9 +65,9 @@ export class BookendComponent {
   /**
    * Delegates components to their corresponding template builder.
    * class.
-   * @param {!BookendComponentDef} components
+   * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
-   * @return {!Element}
+   * @return {!DocumentFragment}
    */
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();

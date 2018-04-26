@@ -37,7 +37,7 @@ import {throttle} from '../../../../src/utils/rate-limit';
 /**
  * @typedef {{
  *   shareProviders: (!JsonObject|undefined),
- *   relatedArticles: !Array<!./related-articles.RelatedArticleSetDef>
+ *   relatedArticles: !Array<!../related-articles.RelatedArticleSetDef>
  * }}
  */
 export let BookendConfigDef;
@@ -62,7 +62,7 @@ const BOOKEND_VERSION_1 = 'v1.0';
 const BOOKEND_VERSION_0 = 'v0.1';
 const BOOKEND_VERSION_KEY = 'bookend-version';
 
-/** @private @const {!./simple-template.ElementDef} */
+/** @private @const {!../simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
   attrs: dict({
@@ -86,7 +86,7 @@ const ROOT_TEMPLATE = {
 };
 
 
-/** @private @const {!./simple-template.ElementDef} */
+/** @private @const {!../simple-template.ElementDef} */
 const REPLAY_ICON_TEMPLATE = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
@@ -98,11 +98,11 @@ const TAG = 'amp-story';
 
 
 /**
- * @param {!./related-articles.RelatedArticleDef} articleData
- * @return {!./simple-template.ElementDef}
+ * @param {!../related-articles.RelatedArticleDef} articleData
+ * @return {!../simple-template.ElementDef}
  */
 function buildArticleTemplate(articleData) {
-  const template = /** @type {!./simple-template.ElementDef} */ ({
+  const template = /** @type {!../simple-template.ElementDef} */ ({
     tag: 'a',
     attrs: dict({
       'class': 'i-amphtml-story-bookend-article',
@@ -124,7 +124,7 @@ function buildArticleTemplate(articleData) {
   });
 
   if (articleData.image) {
-    template.children.unshift(/** @type {!./simple-template.ElementDef} */ ({
+    template.children.unshift(/** @type {!../simple-template.ElementDef} */ ({
       tag: 'amp-img',
       attrs: dict({
         'class': 'i-amphtml-story-bookend-article-image',
@@ -140,8 +140,8 @@ function buildArticleTemplate(articleData) {
 
 
 /**
- * @param {!Array<!./related-articles.RelatedArticleSetDef>} articleSets
- * @return {!Array<!./simple-template.ElementDef>}
+ * @param {!Array<!../related-articles.RelatedArticleSetDef>} articleSets
+ * @return {!Array<!../simple-template.ElementDef>}
  */
 function buildArticlesContainerTemplate(articleSets) {
   const template = [];
@@ -171,10 +171,10 @@ function buildArticlesContainerTemplate(articleSets) {
  * @param {string} title
  * @param {string} domainName
  * @param {string=} opt_imageUrl
- * @return {!./simple-template.ElementDef}
+ * @return {!../simple-template.ElementDef}
  */
 function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
-  return /** @type {!./simple-template.ElementDef} */ ({
+  return /** @type {!../simple-template.ElementDef} */ ({
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
     children: [
@@ -216,7 +216,7 @@ export class Bookend {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private {?./amp-story-bookend.BookendConfigDef|undefined} */
+    /** @private {?BookendConfigDef|?./bookend-component.BookendDataDef|undefined} */
     this.config_;
 
     /** @private {boolean} */
@@ -240,22 +240,22 @@ export class Bookend {
      */
     this.bookendEl_ = null;
 
-    /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
+    /** @private @const {!../amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = Services.storyRequestService(this.win_);
 
     /** @private {!ScrollableShareWidget} */
     this.shareWidget_ = ScrollableShareWidget.create(this.win_);
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreService(this.win_);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    /** @private @const {!../../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
   }
 
@@ -362,7 +362,7 @@ export class Bookend {
    * will prerender the bookend DOM, but there are cases where we need it before
    * the component is built. Eg: the desktop share button needs the providers.
    * @param {boolean=} applyConfig  Whether the config should be set.
-   * @return {!Promise<?./bookend/amp-story-bookend.BookendConfigDef>}
+   * @return {!Promise<(?BookendConfigDef|?./bookend-component.BookendDataDef)>}
    */
   loadConfig(applyConfig = true) {
     if (this.config_ !== undefined) {
@@ -379,16 +379,16 @@ export class Bookend {
           }
           // TODO(#14591): Clean when bookend API v0.1 is deprecated.
           if (response[BOOKEND_VERSION_KEY] === BOOKEND_VERSION_1) {
-            this.config_ = {
+            this.config_ = /** @type {./bookend-component.BookendDataDef} */ ({
               [BOOKEND_VERSION_KEY]: BOOKEND_VERSION_1,
               'components': BookendComponent
                   .buildFromJson(response['components']),
               'share-providers': response['share-providers'],
-            };
+            });
           } else {
             // TODO(#14667): Write doc regarding amp-story bookend v1.0.
-            console.warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
-            `-bookend is deprecated. Use ${BOOKEND_VERSION_1}.`);
+            dev().warn(TAG, `Version ${BOOKEND_VERSION_0} of the amp-story` +
+            `-bookend is deprecated. Use ${BOOKEND_VERSION_1} instead.`);
             this.config_ = {
               shareProviders: response['share-providers'],
               relatedArticles:
@@ -493,7 +493,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!BookendConfigDef} bookendConfig
+   * @param {!BookendConfigDef|!./bookend-component.BookendDataDef} bookendConfig
    * @private
    */
   setConfig_(bookendConfig) {
@@ -513,7 +513,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!Array<!./related-articles.RelatedArticleSetDef>} articleSets
+   * @param {!Array<!../related-articles.RelatedArticleSetDef>} articleSets
    * @private
    */
   setRelatedArticles_(articleSets) {
@@ -525,7 +525,7 @@ export class Bookend {
   }
 
   /**
-   * @param {!Array<!./bookend/bookend-component.BookendComponentDef>} components
+   * @param {!Array<!../bookend/bookend-component.BookendComponentDef>} components
    * @private
    */
   renderComponents_(components) {
@@ -540,8 +540,12 @@ export class Bookend {
           BookendComponent.buildTemplates(components, this.win_.document));
     };
 
-    this.resources_.measureMutateElement(
-        this.bookendEl_, measureContainer, mutateContainer);
+    if (this.bookendEl_) {
+      this.resources_.measureMutateElement(
+          this.bookendEl_, measureContainer, mutateContainer);
+    } else {
+      dev().error(TAG, 'Error rendering amp-story-bookend.');
+    }
   }
 
   /** @return {!Element} */

@@ -22,26 +22,23 @@ export class AbstractBookendComponent {
 
   /**
    * Checks if the component is valid.
-   * @param {BookendComponentDef} componentJson
+   * @param {../bookend-component.BookendComponentDef} opt_componentJson
    * @return {boolean}
-   * @abstract
    */
-  static isValid() {}
+  isValid(opt_componentJson) {}
 
   /**
    * Builds the component.
-   * @param {BookendComponentDef} componentJson
-   * @return {BookendComponentDef}
-   * @abstract
+   * @param {../bookend-component.BookendComponentDef} opt_componentJson
+   * @return {../bookend-component.BookendComponentDef}
    */
-  static build() {}
+  build(opt_componentJson) {}
 
   /**
    * Builds the template for the component.
-   * @param {BookendComponentDef} componentJson
-   * @param {!Document} doc
+   * @param {../bookend-component.BookendComponentDef} opt_componentJson
+   * @param {!Document} opt_doc
    * @return {!Element}
-   * @abstract
    */
-  static buildTemplate() {}
+  buildTemplate(opt_componentJson, opt_doc) {}
 }

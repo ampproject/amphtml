@@ -85,20 +85,21 @@ export class ArticleComponent extends AbstractBookendComponent {
 
     const html = htmlFor(doc);
     const template =
-    html`
-    <a class="i-amphtml-story-bookend-article"
-      target="_top">
-      <div class="i-amphtml-story-bookend-article-meta">
-      </div>
-    </a>`;
+        html`
+        <a class="i-amphtml-story-bookend-article"
+          target="_top">
+          <div class="i-amphtml-story-bookend-article-meta">
+          </div>
+        </a>`;
     addAttributesToElement(template, dict({'href': articleData.url}));
 
     if (articleData.image) {
-      const ampImg = htmlFor(doc)
-        `<amp-img class="i-amphtml-story-bookend-article-image"
-                width="100"
-                height="100">
-        </amp-img>`;
+      const ampImg =
+          html`
+          <amp-img class="i-amphtml-story-bookend-article-image"
+                  width="100"
+                  height="100">
+          </amp-img>`;
 
       addAttributesToElement(ampImg, dict({'src': articleData.image}));
       template.appendChild(ampImg);
@@ -106,12 +107,12 @@ export class ArticleComponent extends AbstractBookendComponent {
 
     const heading =
       html`<h2 class="i-amphtml-story-bookend-article-heading"></h2>`;
-    heading.append(articleData.title);
+    heading.textContent = articleData.title;
     template.appendChild(heading);
 
     const articleMeta =
       html`<div class="i-amphtml-story-bookend-article-meta"></div>`;
-    articleMeta.append(articleData.domainName);
+    articleMeta.textContent = articleData.domainName;
     template.appendChild(articleMeta);
 
     return template;
@@ -155,7 +156,7 @@ export class ArticleTitle extends AbstractBookendComponent {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
 
-    template.append(titleData.heading);
+    template.textContent = titleData.heading;
 
     return template;
   }
