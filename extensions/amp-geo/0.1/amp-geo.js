@@ -110,7 +110,7 @@ export class AmpGeo extends AMP.BaseElement {
         children.length ?
           parseJson(children[0].textContent) : {});
 
-    /* resolve the service promise singleton we stashes earlier */
+    /* resolve the service promise singleton we stashed earlier */
     geoResolver(geo);
   }
 
