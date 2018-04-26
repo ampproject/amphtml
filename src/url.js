@@ -556,7 +556,7 @@ export function rewriteAttributeValue(TAG, tagName, attrName, attrValue) {
  * @param {boolean} isProxyHost
  * @return {string}
  */
-function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
+export function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
 
   // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
@@ -587,7 +587,7 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
  * @return {string}
  * @private Visible for testing.
  */
-function resolveUrlAttr(tag, tagName, attrName, attrValue, windowLocation) {
+export function resolveUrlAttr(tag, tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
