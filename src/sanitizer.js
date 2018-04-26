@@ -526,7 +526,8 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
 
 /**
  * Tag policy for handling what is valid html in templates.
- * @type {!Function}
+ * @param {string} tagName
+ * @param {!Array<string>} attribs
  */
 function tripleMustacheTagPolicy(tagName, attribs) {
   if (tagName == 'template') {
