@@ -116,7 +116,7 @@ export function installExtensionsService(window) {
  * @restricted
  */
 export function registerExtension(extensions, extensionId, factory, arg) {
-  extensions.registerExtension_(extensionId, factory, arg);
+  extensions.registerExtension(extensionId, factory, arg);
 }
 
 
@@ -129,7 +129,7 @@ export function registerExtension(extensions, extensionId, factory, arg) {
  * @restricted
  */
 export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
-  return extensions.installExtensionsInDoc_(ampdoc, extensionIds);
+  return extensions.installExtensionsInDoc(ampdoc, extensionIds);
 }
 
 
@@ -146,7 +146,7 @@ export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
  */
 export function addElementToExtension(
   extensions, name, implementationClass, css) {
-  extensions.addElement_(name, implementationClass, css);
+  extensions.addElement(name, implementationClass, css);
 }
 
 /**
@@ -159,7 +159,7 @@ export function addElementToExtension(
  * @restricted
  */
 export function addServiceToExtension(extensions, name, implementationClass) {
-  extensions.addService_(name, implementationClass);
+  extensions.addService(name, implementationClass);
 }
 
 /**
@@ -172,7 +172,7 @@ export function addServiceToExtension(extensions, name, implementationClass) {
  * @restricted
  */
 export function addDocFactoryToExtension(extensions, factory, opt_forName) {
-  extensions.addDocFactory_(factory, opt_forName);
+  extensions.addDocFactory(factory, opt_forName);
 }
 
 
@@ -205,10 +205,9 @@ export class Extensions {
    * @param {string} extensionId
    * @param {function(!Object)} factory
    * @param {!Object} arg
-   * @private
    * @restricted
    */
-  registerExtension_(extensionId, factory, arg) {
+  registerExtension(extensionId, factory, arg) {
     const holder = this.getExtensionHolder_(extensionId, /* auto */ true);
     try {
       this.currentExtensionId_ = extensionId;
@@ -324,10 +323,9 @@ export class Extensions {
    * @param {string} name
    * @param {!Function} implementationClass
    * @param {?string|undefined} css
-   * @private
    * @restricted
    */
-  addElement_(name, implementationClass, css) {
+  addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
     this.addDocFactory_(ampdoc => {
@@ -370,12 +368,11 @@ export class Extensions {
    * Adds `name` to the list of services registered by the current extension.
    * @param {string} name
    * @param {function(new:Object, !./ampdoc-impl.AmpDoc)} implementationClass
-   * @private
    */
-  addService_(name, implementationClass) {
+  addService(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();
     holder.extension.services.push(name);
-    this.addDocFactory_(ampdoc => {
+    this.addDocFactory(ampdoc => {
       registerServiceBuilderForDoc(
           ampdoc,
           name,
@@ -413,10 +410,9 @@ export class Extensions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
    * @return {!Promise}
-   * @private
    * @restricted
    */
-  installExtensionsInDoc_(ampdoc, extensionIds) {
+  installExtensionsInDoc(ampdoc, extensionIds) {
     const promises = [];
     extensionIds.forEach(extensionId => {
       promises.push(this.installExtensionInDoc_(ampdoc, extensionId));
