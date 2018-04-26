@@ -134,9 +134,6 @@ export class Srcset {
 
     /** @private @const {boolean} */
     this.widthBased_ = hasWidth;
-
-    /** @private @const {boolean} */
-    this.dprBased_ = hasDpr;
   }
 
   /**

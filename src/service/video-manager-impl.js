@@ -131,9 +131,6 @@ export class VideoManager {
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
 
-    /** @private {boolean} */
-    this.resizeListenerInstalled_ = false;
-
     /** @private @const */
     this.timer_ = Services.timerFor(ampdoc.win);
 
@@ -364,17 +361,11 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @private {!../service/viewport/viewport-impl.Viewport} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
-
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
     /** @private {boolean} */
     this.allowAutoplay_ = true;
-
-    /** @private {?Element} */
-    this.autoplayAnimation_ = null;
 
     /** @private {boolean} */
     this.loaded_ = false;

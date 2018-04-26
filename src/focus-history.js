@@ -60,7 +60,7 @@ export class FocusHistory {
     this.win.addEventListener('blur', this.captureBlur_);
   }
 
-  /** @private For testing. */
+  /** @visibleForTesting */
   cleanup_() {
     this.win.document.removeEventListener('focus', this.captureFocus_, true);
     this.win.removeEventListener('blur', this.captureBlur_);

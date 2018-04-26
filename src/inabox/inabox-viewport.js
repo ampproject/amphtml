@@ -132,9 +132,6 @@ export class ViewportBindingInabox {
     /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
     this.requestPositionPromise_ = null;
 
-    /** @private {!../service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.win);
-
     /** @private {function()} */
     this.fireScrollThrottle_ = throttle(this.win, () => {
       this.scrollObservable_.fire();
