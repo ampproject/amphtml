@@ -142,11 +142,25 @@ export class LocalSubscriptionPlatform {
     this.rootNode_.addEventListener('click', e => {
       const element = closestBySelector(dev().assertElement(e.target),
           '[subscriptions-action]');
-      if (element) {
-        const action = element.getAttribute('subscriptions-action');
+      this.handleClick_(element);
+    });
+  }
+
+  /**
+   * Handle click on subscription-action
+   * @private
+   * @param {Node} element
+   */
+  handleClick_(element) {
+    if (element) {
+      const action = element.getAttribute('subscriptions-action');
+      if (element.hasAttribute('subscriptions-service')) {
+        const serviceId = element.getAttribute('subscriptions-service');
+        this.serviceAdapter_.delegateActionToService(action, serviceId);
+      } else {
         this.executeAction(action);
       }
-    });
+    }
   }
 
   /**
@@ -160,11 +174,7 @@ export class LocalSubscriptionPlatform {
     });
   }
 
-  /**
-   * Executes action for the local platform.
-   * @param {string} action
-   * @returns {!Promise<boolean>}
-   */
+  /** @override */
   executeAction(action) {
     const actionExecution = this.actions_.execute(action);
     return actionExecution.then(result => {

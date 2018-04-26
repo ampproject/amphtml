@@ -467,4 +467,28 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .to.be.deep.equal(entitlement.json());
     });
   });
+
+  describe('action delegation', () => {
+    it('should call delegateActionToService with serviceId local', () => {
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateActionToService');
+      const action = 'action';
+      subscriptionService.delegateActionToLocal(action);
+      expect(delegateStub).to.be.calledWith(action, 'local');
+    });
+
+    it('should delegate action to the specified platform', () => {
+      subscriptionService.platformStore_ =
+        new PlatformStore(['local'], null, null);
+      const platform = new SubscriptionPlatform();
+      const executeActionStub = sandbox.stub(platform, 'executeAction');
+      const getPlatformStub = sandbox.stub(
+          subscriptionService.platformStore_, 'getPlatform')
+          .callsFake(() => platform);
+      const action = action;
+      subscriptionService.delegateActionToService(action, 'local');
+      expect(getPlatformStub).to.be.calledWith('local');
+      expect(executeActionStub).to.be.calledWith(action);
+    });
+  });
 });
