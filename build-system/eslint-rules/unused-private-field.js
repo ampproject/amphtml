@@ -139,7 +139,6 @@ module.exports = {
         if (computed ||
           !isPrivateName(key)) {
           return;
-          return;
         }
 
         const {name} = key;
