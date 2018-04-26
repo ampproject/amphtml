@@ -181,14 +181,11 @@ export class PageScalingService {
    * @param {!Element} rootEl
    */
   constructor(win, rootEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     /** @private @const {!Element} */
     this.rootEl_ = rootEl;
 
     /** @private @const */
-    this.vsync_ = Services.vsyncFor(this.win_);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private @const {?Element} */
     // Assumes active page to be determinant of the target size.
@@ -201,7 +198,7 @@ export class PageScalingService {
     this.scalableElsDimensions_ = {};
 
     Services.viewportForDoc(rootEl).onResize(
-        throttle(this.win_, () => this.onViewportResize_(), 100));
+        throttle(win, () => this.onViewportResize_(), 100));
   }
 
   /**
