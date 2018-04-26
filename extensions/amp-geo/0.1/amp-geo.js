@@ -41,7 +41,6 @@ import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {registerServiceBuilder} from '../../../src/service';
 import {user} from '../../../src/log';
 import {waitForBodyPromise} from '../../../src/dom';
 
@@ -61,6 +60,7 @@ const COUNTRY_PREFIX = 'amp-iso-country-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
 const GEO_ID = 'ampGeo';
+const SERVICE_TAG = 'geo';
 
 /**
  * Operating Mode
@@ -104,9 +104,8 @@ export class AmpGeo extends AMP.BaseElement {
         children.length ?
           parseJson(children[0].textContent) : {});
 
-    registerServiceBuilder(this.win, 'geo', function() {
-      return geo;
-    });
+    /* resolve the service promise singleton we stashed earlier */
+    geoResolver(geo);
   }
 
   /**
@@ -243,4 +242,20 @@ export class AmpGeo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpGeo);
+
+/**
+ * Create the service promise at load time to prevent race between extensions
+ */
+
+/** singleton @type {?Promise<!Object<string, (string|Array<string>)>>} */
+let geoResolver = null;
+
+AMP.extension('amp-geo', '0.1', AMP => {
+  /** @type {Promise<!Object<string, (string|Array<string>)>>} */
+  const geoPromise = new Promise(resolve => {
+    geoResolver = resolve;
+  });
+  AMP.registerElement(TAG, AmpGeo);
+  AMP.registerServiceForDoc(SERVICE_TAG, () => geoPromise);
+});
+
