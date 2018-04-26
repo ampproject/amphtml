@@ -123,13 +123,6 @@ export class Xhr {
    */
   fetch_(input, init) {
     const ampdocSingle = this.ampdocService.getAmpDoc();
-    if (!getMode().test &&
-        ampdocSingle &&
-        Math.random() < 0.01 &&
-        parseUrl(input).origin != this.win.location.origin) {
-      dev().error('XHR', 'attempted to fetch URL from different origin',
-          input);
-    }
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
