@@ -122,7 +122,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
 
-    /** @private @const {boolean} */
+    /**
+     * Whether the user agent matches a bot.  This is used to prevent resource
+     * optimizations that make the document less useful at crawl time, e.g.
+     * removing sources from videos.
+     * @private @const {boolean}
+     */
     this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
   }
 
