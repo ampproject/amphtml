@@ -33,10 +33,7 @@ branches:
     - canary
     - /^amp-release-.*$/
     - /^greenkeeper/.*$/
-env:
-  global:
-    - SAUCE_USERNAME="amphtml"
-    - NPM_CONFIG_PROGRESS="false"
+    - /^videointerface-brightc.*$/
 addons:
   chrome: stable
   hosts:
