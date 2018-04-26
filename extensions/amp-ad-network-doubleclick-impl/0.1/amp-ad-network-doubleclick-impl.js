@@ -535,12 +535,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
     this.ifi_ = (this.isRefreshing && this.ifi_) ||
         this.win['ampAdGoogleIfiCounter']++;
+    const pageLayoutBox = this.isSinglePageStoryAd ?
+      this.element.getPageLayoutBox() : null;
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting_ &&
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
-      'sz': this.parameterSize_,
+      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize_,
       'output': 'html',
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,
@@ -554,6 +556,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (this.jsonTargeting_ && this.jsonTargeting_['targeting']) || null,
           (this.jsonTargeting_ &&
             this.jsonTargeting_['categoryExclusions']) || null),
+      'spsa': this.isSinglePageStoryAd ?
+        `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
     }, googleBlockParameters(this));
   }
 
