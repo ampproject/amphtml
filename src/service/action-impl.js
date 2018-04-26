@@ -229,6 +229,7 @@ export class ActionService {
 
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
+
     /**
      * Optional whitelist of actions e.g. ["AMP.navigateTo", "amp-form.submit"].
      * If not null, any actions that are not in the whitelist will be ignored
