@@ -532,7 +532,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'co': this.jsonTargeting_ &&
           this.jsonTargeting_['cookieOptOut'] ? '1' : null,
       'adk': this.adKey_,
-      'sz': this.parameterSize_,
+      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize_,
       'output': 'html',
       'impl': 'ifr',
       'tfcd': tfcd == undefined ? null : tfcd,

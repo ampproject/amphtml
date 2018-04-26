@@ -484,7 +484,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('handles Single Page Story Ad parameter', () => {
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       impl.isSinglePageStoryAd_ = true;
-      expect(impl.getAdUrl()).to.eventually.match(/(\?|&)spsa=\d+x\d+(&|$)/);
+      const urlPromise = impl.getAdUrl();
+      expect(urlPromise).to.eventually.match(/(\?|&)spsa=\d+x\d+(&|$)/);
+      expect(urlPromise).to.eventually.match(/(\?|&)sz=1x1(&|$)/);
     });
 
     it('handles tagForChildDirectedTreatment', () => {
