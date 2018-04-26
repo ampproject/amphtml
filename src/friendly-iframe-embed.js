@@ -406,7 +406,6 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** */
   startRender() {
     if (this.host) {
       this.host.renderStarted();
