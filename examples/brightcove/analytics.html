@@ -1,0 +1,130 @@
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://solutions.brightcove.com/bclifford/ampexamples/analytics.html" >
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Brightcove Examples</title>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, Helvetica, "Sans Serif";
+      background: white;
+    }
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <script async custom-element="amp-brightcove" src="http://localhost:8000/dist/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+</head>
+<body>
+  <header>
+    <a href="index.html">
+      <amp-img src="https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=1"
+        srcset="https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=1 1x,https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=2 2x"
+        width="164"
+        height="41"
+        alt="Brightcove">
+      </amp-img>
+    </a>
+    <h2>amp-brightcove examples</h2>
+  </header>
+  <article>
+    <h1>amp-analytics</h1>
+    <p>With videojs-amp-support, amp-analytics is able to track video events. (View calls to example.com in the dev tools).</p>
+    <amp-brightcove
+      id="myVideo"
+      data-account="1290862519001"
+      data-video-id="ref:amp-docs-sample"
+      data-player-id="SyIOV8yWM"
+      layout="responsive" width="480" height="270">
+    </amp-brightcove>
+    <amp-analytics id="analytics1">
+      <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "endpoint": "https://example.com",
+          "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+          "video": "${base}&type=${type}&currentTime=${currentTime}&f=${fullscreen}&a=${autoplay}"
+        },
+        "vars": {
+          "title": "Example Request"
+        },
+        "extraUrlParams": {
+          "param1": "${random}",
+          "platform": "AMP"
+        },
+        "extraUrlParamsReplaceMap": {
+          "param": "p"
+        },
+        "triggers": {
+          "videoPlays": {
+            "on": "video-play",
+            "selector": "#myVideo",
+            "videoSpec": {
+              "exclude-autoplay": true
+            },
+            "request": "video",
+            "vars": {
+              "type": "video-play"
+            }
+          },
+          "videoPauses": {
+            "on": "video-pause",
+            "selector": "#myVideo",
+            "videoSpec": {
+              "exclude-autoplay": false
+            },
+            "request": "video",
+            "vars": {
+              "type": "video-pause"
+            }
+          },
+          "videoSession": {
+            "on": "video-session",
+            "selector": "#myVideo",
+            "videoSpec": {
+              "end-session-when-invisible": true,
+              "exclude-autoplay": false
+            },
+            "request": "video",
+            "vars": {
+              "type": "video-session"
+            }
+          },
+          "videoSecondsPlayed": {
+            "on": "video-seconds-played",
+            "selector": "#myVideo",
+            "videoSpec": {
+              "end-session-when-invisible": false,
+              "exclude-autoplay": false,
+              "interval": 3
+            },
+            "request": "video",
+            "vars": {
+              "type": "video-seconds-played"
+            }
+          },
+          "videoEnded": {
+            "on": "video-ended",
+            "selector": "#myVideo",
+            "videoSpec": {
+              "end-session-when-invisible": true,
+              "exclude-autoplay": false
+            },
+            "request": "video",
+            "vars": {
+              "type": "video-ended"
+            }
+          }
+        }
+      }
+      </script>
+  </article>
+</body>
+</html>

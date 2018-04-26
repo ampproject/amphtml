@@ -199,6 +199,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-youtube/0.1/amp-youtube.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-brightcove/0.1/amp-brightcove.js->' +
+          'src/service/video-manager-impl.js',
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
