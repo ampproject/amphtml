@@ -303,16 +303,4 @@ export class VariableSource {
         .map(variable => variable.trim());
     return this.variableWhitelist_;
   }
-
-  /**
-   * Returns `true` if a variable whitelist is *not* present or the present
-   * whitelist contains the given variable name.
-   * @param {string} varName
-   * @return {boolean}
-   * @private
-   */
-  isWhitelisted_(varName) {
-    return !this.getUrlMacroWhitelist_() ||
-      this.getUrlMacroWhitelist_().includes(varName);
-  }
 }
