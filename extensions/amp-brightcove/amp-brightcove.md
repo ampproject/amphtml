@@ -97,7 +97,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Player configuration
 
-To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [THIS DOCUMENT TODO](https://example.com/doc/location) for instructions. 
+To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions. 
 
 ## Validation
 
