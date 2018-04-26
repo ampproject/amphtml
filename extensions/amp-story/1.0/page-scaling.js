@@ -181,9 +181,6 @@ export class PageScalingService {
    * @param {!Element} rootEl
    */
   constructor(win, rootEl) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
     /** @private @const {!Element} */
     this.rootEl_ = rootEl;
 
