@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
@@ -99,9 +98,6 @@ export class SubscriptionService {
 
     /** @private @const {boolean} */
     this.doesViewerProvideAuth_ = this.viewer_.hasCapability('auth');
-
-    /** @private @const {!JwtHelper} */
-    this.jwtHelper_ = new JwtHelper(ampdoc.win);
   }
 
   /**
