@@ -63,7 +63,6 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -84,13 +83,11 @@ import {
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsDe from './_locales/de';
@@ -174,25 +171,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 /** @type {string} */
 const TAG = 'amp-story';
 
-
-/**
- * Container for "pill-style" share widget, rendered on desktop.
- * @private @const {!./simple-template.ElementDef}
- */
-const SHARE_WIDGET_PILL_CONTAINER = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-share-pill'}),
-  children: [
-    {
-      tag: 'span',
-      attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-      localizedStringId:
-          LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
-    },
-  ],
-};
-
-
 /**
  * Selector for elements that should be hidden when the bookend is open on
  * desktop view.
@@ -236,7 +214,7 @@ export class AmpStory extends AMP.BaseElement {
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win);
+    this.systemLayer_ = new SystemLayer(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
@@ -276,12 +254,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?./pagination-buttons.PaginationButtons} */
     this.paginationButtons_ = null;
-
-    /** @private {?Element} */
-    this.topBar_ = null;
-
-    /** @private {?ShareWidget} */
-    this.shareWidget_ = null;
 
     /** @private @const {!Array<string>} */
     this.originWhitelist_ = ORIGIN_WHITELIST;
@@ -461,11 +433,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onDesktopStateUpdate_(isDesktop);
     });
 
-    this.storeService_.subscribe(
-        StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS, canShowButtons => {
-          this.onCanShowSystemLayerButtonsUpdate_(canShowButtons);
-        });
-
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
@@ -570,43 +537,6 @@ export class AmpStory extends AMP.BaseElement {
   /** @visibleForTesting */
   buildPaginationButtonsForTesting() {
     this.buildPaginationButtons_();
-  }
-
-  /** @private */
-  buildTopBar_() {
-    // TODO(gmajoulet): Move the desktop "top bar" into the system layer.
-    const doc = this.element.ownerDocument;
-
-    this.topBar_ = doc.createElement('div');
-    this.topBar_.classList.add(
-        'i-amphtml-story-top', 'i-amphtml-story-system-reset');
-    this.topBar_.appendChild(this.buildTopBarShare_());
-
-    this.element.insertBefore(this.topBar_, this.element.firstChild);
-
-    this.onCanShowSystemLayerButtonsUpdate_(
-        !!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS));
-  }
-
-  /**
-   * @return {!Node}
-   * @private
-   */
-  buildTopBarShare_() {
-    const container =
-        renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER);
-
-    this.shareWidget_ = new ShareWidget(this.win);
-
-    const shareLabelEl = dev().assertElement(
-        container.querySelector('.i-amphtml-story-share-pill-label'),
-        'Expected share pill label to be present.');
-
-    container.insertBefore(
-        this.shareWidget_.build(this.getAmpDoc()),
-        shareLabelEl);
-
-    return container;
   }
 
   /** @override */
@@ -1062,22 +992,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to system layer buttons display state.
-   * @param {boolean} canShowButtons
-   * @private
-   */
-  onCanShowSystemLayerButtonsUpdate_(canShowButtons) {
-    if (!this.topBar_) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.topBar_.classList
-          .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
-    });
-  }
-
-  /**
    * Reacts to desktop state updates.
    * @param {boolean} isDesktop
    * @private
@@ -1087,9 +1001,6 @@ export class AmpStory extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('desktop', '');
       });
-      if (!this.topBar_) {
-        this.buildTopBar_();
-      }
       if (!this.background_) {
         this.background_ = new AmpStoryBackground(this.win, this.element);
         this.background_.attach();
