@@ -476,12 +476,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.lastY_ = 0;
 
     /** @private {number} */
-    this.tapX_ = 0;
-
-    /** @private {number} */
-    this.tapY_ = 0;
-
-    /** @private {number} */
     this.tapCount_ = 0;
 
     /** @private {number} */
@@ -489,9 +483,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.prevY_ = 0;
-
-    /** @private {time} */
-    this.startTime_ = 0;
 
     /** @private {time} */
     this.lastTime_ = 0;
@@ -557,8 +548,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.tapCount_++;
     if (this.tapCount_ == 1) {
       this.signalPending(400);
-      this.tapX_ = this.lastX_;
-      this.tapY_ = this.lastY_;
       return;
     }
 
@@ -587,7 +576,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
   emit_(first, last, event) {
     this.lastTime_ = Date.now();
     if (first) {
-      this.startTime_ = this.lastTime_;
       this.velocityX_ = this.velocityY_ = 0;
     } else if (this.lastTime_ - this.prevTime_ > 2) {
       this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_,
