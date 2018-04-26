@@ -296,11 +296,11 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
 
-    /** @private @const {!../../../src/service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.win);
-
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
+    this.platform_ = Services.platformFor(this.win);
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
