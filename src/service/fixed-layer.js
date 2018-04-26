@@ -620,7 +620,7 @@ export class FixedLayer {
       // Never been transfered before: ensure that it's properly configured.
       setStyle(element, 'pointer-events', 'initial');
       const placeholder = fe.placeholder = htmlFor(element)`
-          <i-amphtml-fpa style="display: none" />`;
+          <i-amphtml-fpa style="display: none"></i-amphtml-fpa>`;
       placeholder.setAttribute('i-amphtml-fixedid', fe.id);
     }
 
