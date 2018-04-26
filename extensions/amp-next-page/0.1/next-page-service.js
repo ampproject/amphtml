@@ -112,7 +112,8 @@ export class NextPageService {
    * subsequent calls will be ignored.
    * @param {!Element} element {@link AmpNextPage} element.
    * @param {!./config.AmpNextPageConfig} config Element configuration.
-   * @param {!Element} separator Separator element to display between pages.
+   * @param {?Element} separator Separator element to display between pages. If
+   *     none is specified a default hairline separator will be used.
    */
   register(element, config, separator) {
     if (this.isActive()) {
@@ -123,8 +124,8 @@ export class NextPageService {
     const win = ampDoc.win;
 
     this.config_ = config;
-    this.separator_ = separator;
     this.win_ = win;
+    this.separator_ = separator || this.createDivider_();
     this.element_ = element;
 
     this.viewer_ = Services.viewerForDoc(ampDoc);
