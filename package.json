@@ -138,7 +138,7 @@
     "plugin-error": "0.1.2",
     "postcss": "6.0.20",
     "postcss-import": "11.1.0",
-    "preact": "8.2.7",
+    "preact": "8.2.8",
     "preact-compat": "3.17.0",
     "pretty-bytes": "4.0.2",
     "prop-types": "15.6.1",
