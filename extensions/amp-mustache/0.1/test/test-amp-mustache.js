@@ -190,7 +190,7 @@ describe('amp-mustache template', () => {
         'value = <a target="_top">test</a>');
   });
 
-  it('should override a unallowed target', () => {
+  it('should override an unallowed target', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
         '<a target="_self">_self</a>'
@@ -370,7 +370,7 @@ describe('amp-mustache template', () => {
     allowConsoleError(() => {
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
-    }); 
+    });
     expect(result./*OK*/innerHTML).to.equal(        
         '<p>hello</p>'
         + '<p>hello</p>'
@@ -378,6 +378,133 @@ describe('amp-mustache template', () => {
         + '<p>hello</p>'
         + '<p>hello</p>'
         + '<p>hello</p>');
+  });
+
+  it('should output "href" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML = 'a<a href="http://acme.com/">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal( 
+        'a<a href="http://acme.com/" target="_top">b</a>');
+  });
+
+  it('should output "rel" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'a<a href="http://acme.com/" rel="amphtml">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(   
+      'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
+  });
+
+  it('should NOT output security-sensitive attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'a<a onclick="alert">b</a>'
+        + 'a<a [onclick]="alert">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    }); 
+    expect(result./*OK*/innerHTML).to.equal(
+        'a<a>b</a>'
+        + 'a<a>b</a>');
+  });
+
+  it('should output "on" attribute', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML = 'a<a on="tap">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal('a<a on="tap">b</a>');
+  });
+
+  it('should output "data-, aria-, and role" attributes', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        '<a data-foo="bar" aria-label="bar" role="button">b</a>';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        '<a data-foo="bar" aria-label="bar" role="button">b</a>');
+  });
+
+  it('should NOT output security-sensitive markup', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        '<a data-foo="bar" aria-label="bar" role="button">b</a>';
+        + 'a<script>b</script>c'
+        + 'a<script>b<img>d</script>c'
+        + 'a<style>b</style>c'
+        + 'a<img>c'
+        + 'a<iframe></iframe>c'
+        + 'a<frame></frame>c'
+        + 'a<video></video>c'
+        + 'a<audio></audio>c'
+        + 'a<applet></applet>c'
+        + 'a<link>c'
+        + 'a<meta>c';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac'
+        + 'ac');
+  });
+
+  it('should NOT output security-sensitive markup when nested', () => {
+    const templateElement = document.createElement('template');
+    templateElement./*OK*/innerHTML =
+        'a<script><style>b</style></script>c'
+        + 'a<style><iframe>b</iframe></style>c'
+        + 'a<script><img></script>c';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    allowConsoleError(() => {
+      const result = template.render({
+        value: /*eslint no-script-url: 0*/ 'javascript:alert();',
+    });
+    expect(result./*OK*/innerHTML).to.equal(
+        'ac'
+        + 'ac'
+        + 'ac');
+  });
+
+  it('should NOT output security-sensitive markup when broken', () => {
+    expect(sanitizeHtml('a<script>bc')).to.be.equal('a');
+    expect(sanitizeHtml('a<SCRIPT>bc')).to.be.equal('a');
   });
 
   describe('Sanitizing data- attributes', () => {
