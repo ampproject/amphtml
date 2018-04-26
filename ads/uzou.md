@@ -28,7 +28,7 @@ For initial installation, let us know from [this form](https://docs.google.com/f
 </amp-ad>
 ```
 
-Uzou widget code code must be published by [our administration screen](https://uzou.speee-ad.jp/). Please do not directly install the above code.
+Uzou widget code must be published by [our administration screen](https://uzou.speee-ad.jp/). Please do not directly install the above code.
 
 ## Parameters
 
