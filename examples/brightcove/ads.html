@@ -1,0 +1,60 @@
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://solutions.brightcove.com/bclifford/ampexamples/ads.html" >
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Brightcove Examples</title>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, Helvetica, "Sans Serif";
+      background: white;
+    }
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <script async custom-element="amp-brightcove" src="http://localhost:8000/dist/v0/amp-brightcove-0.1.js"></script>
+</head>
+<body>
+  <header>
+    <a href="index.html">
+      <amp-img src="https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=1"
+        srcset="https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=1 1x,https://www.brightcove.com/images/static/logos/brightcove.png?presets=logo-header&amp;dpr=2 2x"
+        width="164"
+        height="41"
+        alt="Brightcove">
+      </amp-img>
+    </a>
+    <h2>amp-brightcove examples</h2>
+  </header>
+  <article>
+    <h1>Ads</h1>
+    <p>Any Brightcove Player in AMP can play ads. Player 6.18.1 makes the configuraiton easier with builtin mapping of query parameters to global variables.</p>
+    <p>The same player is used in each example below, the only difference being the value of a <code>data-param-ad-id</code> on each embed.</p>
+    <p>The ad configuration url uses macro <code>{pageVariable.adId}</code>. The player configuraiton has <code>{"query_string_to_window": {"globals": ["adId"]}}</code>.
+    <h2>Preroll and bumper</h2>
+    <p>The <code>amp-brightcove</code> element has <code>data-param-ad-id="preonlybumper"</code></p>
+    <amp-brightcove
+      data-video-id="ref:amp-docs-sample"
+      data-account="1290862519001"
+      data-player="ByeXtiU1bG"
+      data-param-ad-id="preonlybumper"
+      layout="responsive" width="480" height="270">
+    </amp-brightcove>
+    <h2>Postroll</h2>
+    <p>The <code>amp-brightcove</code> element has <code>data-param-ad-id="postonly"</code></p>
+    <amp-brightcove
+      data-video-id="ref:amp-docs-sample"
+      data-account="1290862519001"
+      data-player="ByeXtiU1bG"
+      data-param-ad-id="postonly"
+      layout="responsive" width="480" height="270">
+    </amp-brightcove>
+  </article>
+</body>
+</html>
