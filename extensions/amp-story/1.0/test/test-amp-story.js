@@ -15,7 +15,6 @@
  */
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
-import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {MediaType} from '../media-pool';
@@ -51,7 +50,6 @@ describes.realWin('amp-story', {
     return Array(count).fill(undefined).map((unused, i) => {
       const page = win.document.createElement('amp-story-page');
       page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
-      page.getImpl = () => Promise.resolve(new AmpStoryPage(page));
       container.appendChild(page);
       return page;
     });
