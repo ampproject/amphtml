@@ -187,8 +187,6 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     }, true);
 
-    this.element.addEventListener('transitionend', this.boundOnAnimationEnd_);
-    this.element.addEventListener('animationend', this.boundOnAnimationEnd_);
   }
 
   /** @override */
