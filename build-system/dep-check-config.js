@@ -245,6 +245,8 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-story/1.0/amp-story-page.js->' +
           'src/service/video-manager-impl.js',
+      'extensions/amp-story/1.0/page-advancement.js->' +
+          'src/service/action-impl.js',
     ],
   },
   {

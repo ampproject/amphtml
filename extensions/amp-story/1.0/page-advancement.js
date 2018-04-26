@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
-import {map} from '../../../src/utils/object';
-
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
@@ -33,12 +32,6 @@ export const TapNavigationDirection = {
   'NEXT': 1,
   'PREVIOUS': 2,
 };
-
-/** @const */
-const PROTECTED_ELEMENTS = map({
-  A: true,
-  BUTTON: true,
-});
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -308,7 +301,12 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    return !!PROTECTED_ELEMENTS[event.target.tagName];
+    const elementRole = event.target.getAttribute('role');
+
+    if (elementRole) {
+      return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
+    }
+    return false;
   }
 
 
