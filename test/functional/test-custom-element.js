@@ -124,7 +124,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
       win.ampExtendedElements['amp-test'] = TestElement;
       win.ampExtendedElements['amp-stub'] = ElementStub;
-      ampdoc.declareExtension_('amp-stub');
+      ampdoc.declareExtension('amp-stub');
 
       testElementCreatedCallback = sandbox.spy();
       testElementPreconnectCallback = sandbox.spy();
@@ -1432,7 +1432,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
     StubElementClass = doc.registerElement('amp-stub2', {
       prototype: createAmpElementProtoForTesting(win, 'amp-stub2', ElementStub),
     });
-    env.ampdoc.declareExtension_('amp-stub2');
+    env.ampdoc.declareExtension('amp-stub2');
     element = new StubElementClass();
   });
 
