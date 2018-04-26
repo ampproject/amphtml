@@ -27,6 +27,10 @@
   font-size: 17px;
 }
 
+.i-amphtml-next-page-document {
+  overflow-y: hidden;
+}
+
 .i-amphtml-next-page-document > *[i-amphtml-fixedid] {
   display: none;
 }
