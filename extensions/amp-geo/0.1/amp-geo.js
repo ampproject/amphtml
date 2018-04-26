@@ -253,11 +253,11 @@ export class AmpGeo extends AMP.BaseElement {
  * Create the service promise at load time to prevent race between extensions
  */
 
-/** singleton {?Promise<!Object<string, (string|Array<string>)>>} */
+/** singleton @type {?Promise<!Object<string, (string|Array<string>)>>} */
 let geoResolver = null;
 
 AMP.extension('amp-geo', '0.1', AMP => {
-  /** {Promise<!Object<string, (string|Array<string>)>>} */
+  /** @type {Promise<!Object<string, (string|Array<string>)>>} */
   const geoPromise = new Promise(resolve => {
     geoResolver = resolve;
   });
