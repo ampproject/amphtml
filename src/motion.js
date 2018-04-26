@@ -133,9 +133,6 @@ export class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
-    /** @private {time} */
-    this.startTime_ = Date.now();
-
     /** @private {!Function} */
     this.resolve_;
 
