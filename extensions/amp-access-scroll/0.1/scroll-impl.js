@@ -16,12 +16,15 @@
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
 
 /** @const {!JsonObject} */
-const CONFIG = /** @type {!JsonObject} */ ({
+const ACCESS_CONFIG = /** @type {!JsonObject} */ ({
   'authorization': 'https://connect.scroll.com/amp/access?' +
                    'rid=READER_ID&o=SOURCE_URL&' +
                    'cid=CLIENT_ID(cid-fallback-cookie)',
@@ -29,6 +32,28 @@ const CONFIG = /** @type {!JsonObject} */ ({
               'rid=READER_ID&o=SOURCE_URL&cid=CLIENT_ID(cid-fallback-cookie)&' +
               'd=AUTHDATA(scroll)&v=AUTHDATA(visitId)',
   'namespace': 'scroll',
+});
+
+const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+  'requests': {
+    'scroll': 'https://connect.scroll.com/amp/analytics'
+              + '?rid=ACCESS_READER_ID'
+              + '&cid=CLIENT_ID(cid-fallback-cookie)'
+              + '&o=SOURCE_URL&c=CANONICAL_URL'
+              + '&d=AUTHDATA(scroll.scroll)'
+              + '&v=AUTHDATA(scroll.visitId)'
+              + '&s=${totalEngagedTime}',
+  },
+  'triggers': {
+    'trackInterval': {
+      'on': 'timer',
+      'timerSpec': {
+        'interval': 15,
+        'maxTimerLength': 7200,
+      },
+      'request': 'scroll',
+    },
+  },
 });
 
 
@@ -48,13 +73,16 @@ export class ScrollAccessVendor extends AccessClientAdapter {
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
   constructor(ampdoc, accessService, accessSource) {
-    super(ampdoc, CONFIG, {
+    super(ampdoc, ACCESS_CONFIG, {
       buildUrl: accessSource.buildUrl.bind(accessSource),
       collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
 
     /** @private {!../../amp-access/0.1/amp-access.AccessService} */
     this.accessService_ = accessService;
+
+    /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
   }
 
   authorize() {
@@ -64,6 +92,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
               'amp-story[standalone]');
           if (response && response.scroll && !isStory) {
             new ScrollElement(this.ampdoc).show(this.accessService_);
+            addAnalytics(this.ampdoc, this.accessSource_.getAdapterConfig());
           }
           return response;
         });
@@ -132,4 +161,39 @@ class ScrollElement {
               encodeURIComponent(readerId));
         });
   }
+}
+
+/**
+ * Add analytics for Scroll to page.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!JsonObject} vendorConfig
+ */
+function addAnalytics(ampdoc, vendorConfig) {
+  if (vendorConfig['disableAnalytics']) {
+    return;
+  }
+
+  // Create analytics element
+  const doc = /** @type {!Document} */ (ampdoc.win.document);
+  const attributes = dict({'trigger': 'immediate'});
+  if (vendorConfig['dataConsentId']) {
+    attributes['data-block-on-consent'] = '';
+  }
+  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics',
+      attributes);
+  const scriptElem = createElementWithAttributes(
+      doc,
+      'script', dict({
+        'type': 'application/json',
+      }));
+  scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
+  analyticsElem.appendChild(scriptElem);
+  analyticsElem.CONFIG = ANALYTICS_CONFIG;
+
+  // Get extensions service and force load analytics extension
+  const extensions = Services.extensionsFor(ampdoc.win);
+  extensions./*OK*/installExtensionForDoc(ampdoc, 'amp-analytics');
+
+  // Append
+  ampdoc.getBody().appendChild(analyticsElem);
 }
