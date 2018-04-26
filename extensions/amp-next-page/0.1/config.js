@@ -20,7 +20,8 @@ import {user} from '../../../src/log';
 
 /**
  * @typedef {{
- *   pages: (!Array<!AmpNextPageItem>|undefined),
+ *   pages: !Array<!AmpNextPageItem>,
+ *   hideSelectors: (!Array<string>|undefined)
  * }}
  */
 export let AmpNextPageConfig;
@@ -35,9 +36,7 @@ export let AmpNextPageConfig;
 export let AmpNextPageItem;
 
 /**
- * Checks whether the object conforms to the AmpNextPageConfig
- * spec.
- *
+ * Checks whether the object conforms to the AmpNextPageConfig spec.
  * @param {*} config The config to validate.
  * @param {string} origin The origin of the current document
  *     (document.location.origin). All recommendations must be for the same
@@ -51,11 +50,33 @@ export function assertConfig(config, origin, sourceOrigin) {
   user().assert(config, 'amp-next-page config must be specified');
   user().assert(isArray(config.pages), 'pages must be an array');
   assertRecos(config.pages, origin, sourceOrigin);
+
+  if ('hideSelectors' in config) {
+    user().assert(isArray(config['hideSelectors']),
+        'amp-next-page hideSelectors should be an array');
+    assertSelectors(config['hideSelectors']);
+  }
+
   return /** @type {!AmpNextPageConfig} */ (config);
 }
 
 function assertRecos(recos, origin, sourceOrigin) {
   recos.forEach(reco => assertReco(reco, origin, sourceOrigin));
+}
+
+const BANNED_SELECTOR_PATTERNS = [
+  /(^|\W)i-amphtml-/,
+];
+
+function assertSelectors(selectors) {
+  selectors.forEach(selector => {
+    BANNED_SELECTOR_PATTERNS.forEach(pattern => {
+      user().assert(typeof selector === 'string',
+          `amp-next-page hideSelector value ${selector} is not a string`);
+      user().assert(!pattern.test(selector),
+          `amp-next-page hideSelector '${selector}' not allowed`);
+    });
+  });
 }
 
 function assertReco(reco, origin, sourceOrigin) {
