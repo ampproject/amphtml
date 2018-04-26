@@ -96,7 +96,7 @@ describe.configure().skipSafari().run('XHR', function() {
     beforeEach(() => {
       xhr = xhrServiceForTesting(test.win);
     });
-    // Since if it's the Native fetch, it won't use the XHR object so
+    // Since it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
@@ -258,6 +258,30 @@ describe.configure().skipSafari().run('XHR', function() {
             throw new Error('UNREACHABLE');
           }, error => {
             expect(error.message).to.contain('Response must contain');
+          });
+        });
+
+        describe('viewer visibility', () => {
+          afterEach(() => {
+            test.win.fetch.restore();
+          });
+          it('should not call fetch if view is not visible ', () => {
+            const fetchCall = sinon.spy(test.win, 'fetch');
+            ampdocViewerStub.returns({
+              whenFirstVisible: () => Promise.reject(),
+            });
+            xhr.fetchJson('/get', {ampCors: false});
+            expect(fetchCall.notCalled).to.be.true;
+          });
+          it('should call fetch if view is visible ', () => {
+            const fetchCall = sinon.spy(test.win, 'fetch');
+            ampdocViewerStub.returns({
+              whenFirstVisible: () => Promise.resolve(),
+            });
+            const fetch = xhr.fetchJson('/get', {ampCors: false});
+            fetch.then(() => {
+              expect(fetchCall.calledOnce).to.be.true;
+            });
           });
         });
       });
