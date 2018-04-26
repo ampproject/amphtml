@@ -59,7 +59,6 @@ describes.realWin('amp-story-auto-ads', {
       const parent = pane.parentElement;
       expect(parent.tagName).to.equal('AMP-STORY-GRID-LAYER');
       expect(parent.getAttribute('template')).to.equal('fill');
-    })
-
-  })
+    });
+  });
 });
