@@ -1023,7 +1023,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches;
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1229,6 +1229,13 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
+    if (this.platform_.isBot()) {
+      this.pages_.forEach(page => {
+        page.setDistance(0);
+      });
+      return;
+    }
+
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
