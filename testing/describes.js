@@ -694,7 +694,7 @@ class AmpFixture {
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
           if (env.ampdoc) {
-            env.ampdoc.declareExtension_(extensionId);
+            env.ampdoc.declareExtension(extensionId);
           }
           registerExtension(env.extensions, extensionId, installer, win.AMP);
         }
@@ -725,7 +725,7 @@ class AmpFixture {
             ' Make sure the module is imported');
       }
       if (env.ampdoc) {
-        env.ampdoc.declareExtension_(extensionId);
+        env.ampdoc.declareExtension(extensionId);
       }
       registerExtension(env.extensions, extensionId, installer, win.AMP);
     };
