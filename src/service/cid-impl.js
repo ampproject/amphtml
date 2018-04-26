@@ -224,10 +224,10 @@ export class Cid {
             setCidCookie(this.ampdoc.win, cookieName, scopedCid);
             return scopedCid;
           }
-          return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+          return Cid.getOrCreateCookie_(this, getCidStruct, persistenceConsent);
         });
       }
-      return getOrCreateCookie(this, getCidStruct, persistenceConsent);
+      return Cid.getOrCreateCookie_(this, getCidStruct, persistenceConsent);
     }
     if (this.cacheCidApi_.isSupported()) {
       const apiKey = this.isScopeOptedIn_(scope);
@@ -241,7 +241,7 @@ export class Cid {
         const apiKey = this.isScopeOptedIn_(scope);
         return this.viewerCidApi_.getScopedCid(apiKey, scope);
       }
-      return getBaseCid(this, persistenceConsent)
+      return Cid.getBaseCid_(this, persistenceConsent)
           .then(baseCid => {
             return Services.cryptoFor(this.ampdoc.win).sha384Base64(
                 baseCid + getProxySourceOrigin(url) + scope);
@@ -294,6 +294,102 @@ export class Cid {
     }
     return apiKeyMap;
   }
+
+  /**
+   * Returns the base cid for the current user(). This string must not
+   * be exposed to users without hashing with the current source origin
+   * and the externalCidScope.
+   * On a proxy this value is the same for a user across all source
+   * origins.
+   * @param {!Cid} cid
+   * @param {!Promise} persistenceConsent
+   * @return {!Promise<string>}
+   */
+  static getBaseCid_(cid, persistenceConsent) {
+    if (cid.baseCid_) {
+      return cid.baseCid_;
+    }
+    const win = cid.ampdoc.win;
+
+    return cid.baseCid_ = read(cid.ampdoc).then(stored => {
+      let needsToStore = false;
+      let baseCid;
+
+      // See if we have a stored base cid and whether it is still valid
+      // in terms of expiration.
+      if (stored && !isExpired(stored)) {
+        baseCid = Promise.resolve(stored.cid);
+        if (shouldUpdateStoredTime(stored)) {
+          needsToStore = true;
+        }
+      } else {
+        // We need to make a new one.
+        baseCid = Services.cryptoFor(win).sha384Base64(getEntropy(win));
+        needsToStore = true;
+      }
+
+      if (needsToStore) {
+        baseCid.then(baseCid => {
+          store(cid.ampdoc, persistenceConsent, baseCid);
+        });
+      }
+
+      return baseCid;
+    });
+  }
+
+  /**
+   * If cookie exists it's returned immediately. Otherwise, if instructed, the
+   * new cookie is created.
+   *
+   * @param {!Cid} cid
+   * @param {!GetCidDef} getCidStruct
+   * @param {!Promise} persistenceConsent
+   * @return {!Promise<?string>}
+   * @private
+   */
+  static getOrCreateCookie_(cid, getCidStruct, persistenceConsent) {
+    const win = cid.ampdoc.win;
+    const scope = getCidStruct.scope;
+    const cookieName = getCidStruct.cookieName || scope;
+    const existingCookie = getCookie(win, cookieName);
+
+    if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
+      return /** @type {!Promise<?string>} */ (Promise.resolve(null));
+    }
+
+    if (cid.externalCidCache_[scope]) {
+      return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
+    }
+
+    if (existingCookie) {
+      // If we created the cookie, update it's expiration time.
+      if (/^amp-/.test(existingCookie)) {
+        setCidCookie(win, cookieName, existingCookie);
+      }
+      return /** @type {!Promise<?string>} */ (
+        Promise.resolve(existingCookie));
+    }
+
+    const newCookiePromise = getNewCidForCookie(win)
+        // Create new cookie, always prefixed with "amp-", so that we can see
+        // from the value whether we created it.
+        .then(randomStr => 'amp-' + randomStr);
+
+    // Store it as a cookie based on the persistence consent.
+    Promise.all([newCookiePromise, persistenceConsent])
+        .then(results => {
+          // The initial CID generation is inherently racy. First one that gets
+          // consent wins.
+          const newCookie = results[0];
+          const relookup = getCookie(win, cookieName);
+          if (!relookup) {
+            setCidCookie(win, cookieName, newCookie);
+          }
+        });
+    return cid.externalCidCache_[scope] = newCookiePromise;
+  }
+
 }
 
 /**
@@ -345,57 +441,6 @@ function setCidCookie(win, scope, cookie) {
 }
 
 /**
- * If cookie exists it's returned immediately. Otherwise, if instructed, the
- * new cookie is created.
- *
- * @param {!Cid} cid
- * @param {!GetCidDef} getCidStruct
- * @param {!Promise} persistenceConsent
- * @return {!Promise<?string>}
- */
-function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const win = cid.ampdoc.win;
-  const scope = getCidStruct.scope;
-  const cookieName = getCidStruct.cookieName || scope;
-  const existingCookie = getCookie(win, cookieName);
-
-  if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
-    return /** @type {!Promise<?string>} */ (Promise.resolve(null));
-  }
-
-  if (cid.externalCidCache_[scope]) {
-    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
-  }
-
-  if (existingCookie) {
-    // If we created the cookie, update it's expiration time.
-    if (/^amp-/.test(existingCookie)) {
-      setCidCookie(win, cookieName, existingCookie);
-    }
-    return /** @type {!Promise<?string>} */ (
-      Promise.resolve(existingCookie));
-  }
-
-  const newCookiePromise = getNewCidForCookie(win)
-      // Create new cookie, always prefixed with "amp-", so that we can see from
-      // the value whether we created it.
-      .then(randomStr => 'amp-' + randomStr);
-
-  // Store it as a cookie based on the persistence consent.
-  Promise.all([newCookiePromise, persistenceConsent])
-      .then(results => {
-        // The initial CID generation is inherently racy. First one that gets
-        // consent wins.
-        const newCookie = results[0];
-        const relookup = getCookie(win, cookieName);
-        if (!relookup) {
-          setCidCookie(win, cookieName, newCookie);
-        }
-      });
-  return cid.externalCidCache_[scope] = newCookiePromise;
-}
-
-/**
  * Returns the source origin of an AMP document for documents served
  * on a proxy origin. Throws an error if the doc is not on a proxy origin.
  * @param {!Location} url URL of an AMP document.
@@ -406,49 +451,6 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
 export function getProxySourceOrigin(url) {
   user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
-}
-
-/**
- * Returns the base cid for the current user(). This string must not
- * be exposed to users without hashing with the current source origin
- * and the externalCidScope.
- * On a proxy this value is the same for a user across all source
- * origins.
- * @param {!Cid} cid
- * @param {!Promise} persistenceConsent
- * @return {!Promise<string>}
- */
-function getBaseCid(cid, persistenceConsent) {
-  if (cid.baseCid_) {
-    return cid.baseCid_;
-  }
-  const win = cid.ampdoc.win;
-
-  return cid.baseCid_ = read(cid.ampdoc).then(stored => {
-    let needsToStore = false;
-    let baseCid;
-
-    // See if we have a stored base cid and whether it is still valid
-    // in terms of expiration.
-    if (stored && !isExpired(stored)) {
-      baseCid = Promise.resolve(stored.cid);
-      if (shouldUpdateStoredTime(stored)) {
-        needsToStore = true;
-      }
-    } else {
-      // We need to make a new one.
-      baseCid = Services.cryptoFor(win).sha384Base64(getEntropy(win));
-      needsToStore = true;
-    }
-
-    if (needsToStore) {
-      baseCid.then(baseCid => {
-        store(cid.ampdoc, persistenceConsent, baseCid);
-      });
-    }
-
-    return baseCid;
-  });
 }
 
 /**
