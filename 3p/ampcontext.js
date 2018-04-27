@@ -68,10 +68,10 @@ export class AbstractAmpContext {
     /** @type {?boolean} */
     this.hidden = null;
 
-    /** @type {?Object} */
+    /** @type {?number} */
     this.initialConsentState = null;
 
-    /** @type {?number} */
+    /** @type {?Object} */
     this.initialLayoutRect = null;
 
     /** @type {?Object} */
