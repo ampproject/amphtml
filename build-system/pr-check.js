@@ -256,6 +256,7 @@ function determineBuildTargets(filePaths) {
 }
 
 function startSauceConnect() {
+  process.env['SAUCE_USERNAME'] = 'amphtml';
   process.env['SAUCE_ACCESS_KEY'] = getStdout('curl --silent ' +
       'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken').trim();
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
@@ -308,7 +309,7 @@ const command = {
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd + ' --headless');
     // TODO(rsimha, #14856): Re-enable after debugging Karma disconnects.
-    // if (!!process.env.SAUCE_USERNAME) {
+    // if (process.env.TRAVIS) {
     //   // A subset of unit tests on other browsers via sauce labs
     //   cmd = cmd + ' --saucelabs_lite';
     //   startSauceConnect();
@@ -325,7 +326,7 @@ const command = {
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (!!process.env.SAUCE_USERNAME) {
+    if (process.env.TRAVIS) {
       startSauceConnect();
       cmd += ' --saucelabs';
       timedExecOrDie(cmd);
@@ -507,13 +508,21 @@ function isGreenkeeperLockfilePushBuild() {
 function main() {
   const startTime = startTimer('pr-check.js');
 
-  // Eliminate unnecessary testing on greenkeeper branches by running tests only
-  // on the push build that contains the lockfile update.
-  if (isGreenkeeperPrBuild() ||
-      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
+  if (isGreenkeeperPrBuild()) {
     console.log(fileLogPrefix,
-        'Skipping unnecessary testing on greenkeeper branches. ' +
-        'Tests will only be run for the push build with the lockfile update.');
+        'This is a greenkeeper PR build. Tests will be run for the push ' +
+        'build with the lockfile update.');
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
+  if (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild()) {
+    console.log(fileLogPrefix,
+        'This is a greenkeeper push build. Updating and uploading lockfile...');
+    timedExec('./node_modules/.bin/greenkeeper-lockfile-update');
+    timedExec('./node_modules/.bin/greenkeeper-lockfile-upload');
+    console.log(fileLogPrefix, 'Lockfile updated and uploaded. Tests will be ' +
+        'run for the subsequent push build with the lockfile update.');
     stopTimer('pr-check.js', startTime);
     return 0;
   }
