@@ -245,20 +245,15 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Sets the source width and height based on the user-defined dimensions of
-   * the amp-img if exists, the natural dimensions of the source image if
-   * loaded, and the offset dimensions of amp-img element if not.
+   * Sets the source width and height based the natural dimensions of the
+   * source image if loaded, and the offset dimensions of amp-img element
+   * if not.
    * @param {!Element} ampImg
    * @private
    */
   setSourceDimensions_(ampImg) {
-    const width = ampImg.getAttribute('width');
-    const height = ampImg.getAttribute('height');
-    if (width && height) {
-      this.sourceWidth_ = width;
-      this.sourceHeight_ = height;
-    } else {
-      const img = elementByTag(ampImg, 'img');
+    const img = elementByTag(ampImg, 'img');
+    this.measureElement(() => {
       if (img) {
         this.sourceWidth_ = img.naturalWidth || ampImg./*OK*/offsetWidth;
         this.sourceHeight_ = img.naturalHeight || ampImg./*OK*/offsetHeight;
@@ -266,7 +261,7 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.sourceWidth_ = ampImg./*OK*/offsetWidth;
         this.sourceHeight_ = ampImg./*OK*/offsetHeight;
       }
-    }
+    });
   }
 
   /**
@@ -287,20 +282,17 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.srcset_ = srcsetFromElement(ampImg);
 
     return this.mutateElement(() => {
-      ARIA_ATTRIBUTES.forEach(key => {
-        let k; // inline assignment for reducing binary size
-        if ((k = this.sourceAmpImage_.getAttribute(key))) {
-          this.image_.setAttribute(key, k);
-        }
-      });
       st.setStyles(dev().assertElement(this.image_), {
-        top: st.px(0),
-        left: st.px(0),
-        width: st.px(0),
-        height: st.px(0),
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
       });
       st.toggle(ampImg, false);
       this.element.appendChild(this.image_);
+      return ampImg.getImpl().then(ampImg => {
+        ampImg.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
+      });
     });
   }
 
