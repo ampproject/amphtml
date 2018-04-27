@@ -17,6 +17,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import * as adCid from '../../../../src/ad-cid';
+import * as consent from '../../../../src/consent-state';
 import * as lolex from 'lolex';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {LayoutPriority} from '../../../../src/layout';
@@ -123,6 +124,34 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
         expect(data._context.clientId).to.equal('sentinel123');
+      });
+    });
+
+    it('should propagate consent state to ad iframe', () => {
+      ad3p.element.setAttribute('data-block-on-consent', '');
+      sandbox.stub(consent, 'getConsentPolicyState').callsFake(() => {
+        return Promise.resolve(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+      });
+
+      return ad3p.layoutCallback().then(() => {
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.initialConsentState)
+            .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+      });
+    });
+
+    it('should propagate null consent state to ad iframe', () => {
+      return ad3p.layoutCallback().then(() => {
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.initialConsentState).to.be.null;
       });
     });
 
