@@ -114,15 +114,15 @@ export function defaultDurationValues(fxType) {
 export function flyInDistanceValues(fxType) {
   switch (fxType) {
     case 'fly-in-bottom':
-      return '10';
+      return 10;
     case 'fly-in-top':
-      return '10';
+      return 10;
     case 'fly-in-left':
-      return '5';
+      return 5;
     case 'fly-in-right':
-      return '5';
+      return 5;
     default:
-      return '1';
+      return 1;
   }
 }
 

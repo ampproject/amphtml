@@ -75,11 +75,13 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+      if (!top || top - (fxElement.adjustedViewportHeight *
+        fxElement.getFlyInDistance() / 100) >
+          (1 - fxElement.getMarginStart()) *
+            fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -109,11 +111,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+        fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -143,11 +145,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+        fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -177,11 +179,13 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
-      if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+      if (!top || top + (fxElement.adjustedViewportHeight *
+        fxElement.getFlyInDistance() / 100) >
+          (1 - fxElement.getMarginStart()) *
+            fxElement.adjustedViewportHeight) {
         return;
       }
 
