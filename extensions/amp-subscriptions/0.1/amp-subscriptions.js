@@ -258,6 +258,9 @@ export class SubscriptionService {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
         return;
+      } else if (this.platformConfig_['alwaysGrant']) {
+        this.processGrantState_(true);
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
