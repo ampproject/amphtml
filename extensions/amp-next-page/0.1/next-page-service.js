@@ -41,7 +41,9 @@ const TAG = 'amp-next-page';
 /**
  * @typedef {{
  *   ampUrl: string,
- *   amp: ?Object
+ *   amp: ?Object,
+ *   recUnit: ?Element,
+ *   cancelled: boolean
  * }}
  */
 export let DocumentRef;
@@ -110,7 +112,8 @@ export class NextPageService {
    * subsequent calls will be ignored.
    * @param {!Element} element {@link AmpNextPage} element.
    * @param {!./config.AmpNextPageConfig} config Element configuration.
-   * @param {!Element} separator Separator element to display between pages.
+   * @param {?Element} separator Separator element to display between pages. If
+   *     none is specified a default hairline separator will be used.
    */
   register(element, config, separator) {
     if (this.isActive()) {
@@ -121,8 +124,8 @@ export class NextPageService {
     const win = ampDoc.win;
 
     this.config_ = config;
-    this.separator_ = separator;
     this.win_ = win;
+    this.separator_ = separator || this.createDivider_();
     this.element_ = element;
 
     this.viewer_ = Services.viewerForDoc(ampDoc);
@@ -138,6 +141,8 @@ export class NextPageService {
     this.documentRefs_.push({
       ampUrl: win.document.location.href,
       amp: {title: win.document.title},
+      recUnit: null,
+      cancelled: false,
     });
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -156,48 +161,19 @@ export class NextPageService {
 
   /**
    * Attach a ShadowDoc using the given document.
-   * @param {!Document} doc
-   * @return {!Promise<?Object>} Promise resolved with the return value of
-   *     {@link MultidocManager#attachShadowDoc}
+   * @param {!Element} shadowRoot Root element to attach the shadow document to.
+   * @param {!Document} doc Document to attach.
+   * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
    */
-  attachShadowDoc_(doc) {
-    const container = this.win_.document.createElement('div');
+  attachShadowDoc_(shadowRoot, doc) {
+    const amp =
+        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+    installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
 
-    const separator = this.separator_.cloneNode(true);
-    separator.removeAttribute('separator');
-    container.appendChild(separator);
+    const body = amp.ampdoc.getBody();
+    body.classList.add('i-amphtml-next-page-document');
 
-    const page = this.nextArticle_ - 1;
-    this.positionObserver_.observe(separator,
-        PositionObserverFidelity.LOW,
-        position => this.positionUpdate_(page, position));
-
-    const divider = this.createDivider_();
-    container.appendChild(divider);
-
-    const articleLinks = this.createArticleLinks_(this.nextArticle_);
-    container.appendChild(articleLinks);
-
-    const shadowRoot = this.win_.document.createElement('div');
-    container.appendChild(shadowRoot);
-
-    let amp = null;
-    return this.appendPageHandler_(container)
-        .then(() => {
-          return this.resources_.mutateElement(container, () => {
-            try {
-              amp = this.multidocManager_.attachShadowDoc(
-                  shadowRoot, doc, '', {});
-              installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
-
-              const body = amp.ampdoc.getBody();
-              body.classList.add('i-amphtml-next-page-document');
-            } catch (e) {
-              // TODO(emarchiori): Handle loading errors.
-            }
-          });
-        })
-        .then(() => amp);
+    return amp;
   }
 
   /**
@@ -217,19 +193,64 @@ export class NextPageService {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = {ampUrl: next.ampUrl, amp: null};
+      const documentRef = {
+        ampUrl: next.ampUrl,
+        amp: null,
+        recUnit: null,
+        cancelled: false,
+      };
       this.documentRefs_.push(documentRef);
       this.nextArticle_++;
 
-      // TODO(emarchiori): ampUrl needs to be updated to point to
-      // the cache or same domain, otherwise this is a CORS request.
+      const container = this.win_.document.createElement('div');
+
+      const separator = this.separator_.cloneNode(true);
+      separator.removeAttribute('separator');
+      container.appendChild(separator);
+
+      const page = this.nextArticle_ - 1;
+      this.positionObserver_.observe(separator, PositionObserverFidelity.LOW,
+          position => this.positionUpdate_(page, position));
+
+      const articleLinks = this.createArticleLinks_(this.nextArticle_);
+      container.appendChild(articleLinks);
+      documentRef.recUnit = articleLinks;
+
+      this.positionObserver_.observe(articleLinks, PositionObserverFidelity.LOW,
+          unused => this.articleLinksPositionUpdate_(documentRef));
+
+      const shadowRoot = this.win_.document.createElement('div');
+      container.appendChild(shadowRoot);
+
+      this.appendPageHandler_(container);
+
       Services.xhrFor(/** @type {!Window} */ (this.win_))
           .fetchDocument(next.ampUrl, {ampCors: false})
-          .then(doc => this.attachShadowDoc_(doc), () => {})
-          .then(amp => {
-            documentRef.amp = amp;
-            this.documentQueued_ = false;
-          });
+          .then(doc => new Promise((resolve, reject) => {
+            this.positionObserver_.unobserve(articleLinks);
+
+            if (documentRef.cancelled) {
+              // User has reached the end of the document already, don't render.
+              resolve();
+              return;
+            }
+
+            this.resources_.mutateElement(container, () => {
+              try {
+                const amp = this.attachShadowDoc_(shadowRoot, doc);
+                documentRef.amp = amp;
+
+                setStyle(documentRef.recUnit, 'display', 'none');
+                this.documentQueued_ = false;
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            });
+          }),
+          e => dev().error(TAG, `failed to fetch ${next.ampUrl}`, e))
+          .catch(e => dev().error(TAG,
+              `failed to attach shadow document for ${next.ampUrl}`, e));
     }
   }
 
@@ -250,6 +271,9 @@ export class NextPageService {
     }
 
     const element = doc.createElement('div');
+    const divider = this.createDivider_();
+    element.appendChild(divider);
+
     while (article < this.config_.pages.length &&
            article - nextPage < SEPARATOR_RECOS) {
       const next = this.config_.pages[article];
@@ -314,7 +338,7 @@ export class NextPageService {
 
   /**
    * Handles updates from the {@code PositionObserver} indicating a change in
-   * the position of a recommendation unit in the viewport.
+   * the position of a page separator in the viewport.
    * @param {number} i Index of the documentRef this recommendation unit is
    *     attached to.
    * @param
@@ -338,6 +362,18 @@ export class NextPageService {
           documentRef.ampUrl, this.activeDocumentRef_.ampUrl);
       this.setActiveDocument_(documentRef);
     }
+  }
+
+  /**
+   * Handles updates from the {@code PositionObserver} indicating a change in
+   * the position of the recommendation unit in the viewport. Used to indicate
+   * when the recommendation unit has entered the viewport, and should not be
+   * hidden from view automatically.
+   * @param {!DocumentRef} documentRef Reference to the active document.
+   */
+  articleLinksPositionUpdate_(documentRef) {
+    documentRef.cancelled = true;
+    this.positionObserver_.unobserve(documentRef.recUnit);
   }
 
   /**
