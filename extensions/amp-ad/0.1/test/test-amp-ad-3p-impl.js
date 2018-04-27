@@ -113,9 +113,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagete CID to ad iframe', () => {
-      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
-        return Promise.resolve('sentinel123');
-      });
+      sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
 
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -127,11 +125,22 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
 
+    it('should proceed w/o CID', () => {
+      sandbox.stub(adCid, 'getAdCid').resolves(undefined);
+      return ad3p.layoutCallback().then(() => {
+        const frame = ad3p.element.querySelector('iframe[src]');
+        expect(frame).to.be.ok;
+        const data = JSON.parse(frame.name).attributes;
+        expect(data).to.be.ok;
+        expect(data._context).to.be.ok;
+        expect(data._context.clientId).to.equal(null);
+      });
+    });
+
     it('should propagate consent state to ad iframe', () => {
       ad3p.element.setAttribute('data-block-on-consent', '');
-      sandbox.stub(consent, 'getConsentPolicyState').callsFake(() => {
-        return Promise.resolve(consent.CONSENT_POLICY_STATE.SUFFICIENT);
-      });
+      sandbox.stub(consent, 'getConsentPolicyState')
+          .resolves(consent.CONSENT_POLICY_STATE.SUFFICIENT);
 
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -152,20 +161,6 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data).to.be.ok;
         expect(data._context).to.be.ok;
         expect(data._context.initialConsentState).to.be.null;
-      });
-    });
-
-    it('should proceed w/o CID', () => {
-      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
-        return Promise.resolve(undefined);
-      });
-      return ad3p.layoutCallback().then(() => {
-        const frame = ad3p.element.querySelector('iframe[src]');
-        expect(frame).to.be.ok;
-        const data = JSON.parse(frame.name).attributes;
-        expect(data).to.be.ok;
-        expect(data._context).to.be.ok;
-        expect(data._context.clientId).to.equal(null);
       });
     });
 
