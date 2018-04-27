@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {startsWith} from '../../../src/string';
 
 export class Amp3dGltf extends AMP.BaseElement {
 
@@ -123,53 +121,35 @@ export class Amp3dGltf extends AMP.BaseElement {
     return Services.vsyncFor(this.win)
         .mutatePromise(() => {
           this.applyFillContent(iframe, true);
-          this.unlistenMessage_ = listen(
-              this.win,
-              'message',
-              this.handleGltfViewerMessage_.bind(this)
-          );
+          this.iframe_ = iframe;
+          this.unlistenMessage_ = this.listenGltfViewerMessages_();
 
           this.element.appendChild(iframe);
-          this.iframe_ = iframe;
         })
         .then(() => this.willBeLoaded_);
   }
 
   /** @private */
-  handleGltfViewerMessage_(event) {
-    if (this.iframe_ && event.source !== this.iframe_.contentWindow) {
+  listenGltfViewerMessages_() {
+    if (!this.iframe_) {
       return;
     }
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return; // Doesn't look like JSON.
-    }
 
-    /** @const {?JsonObject} */
-    const eventData = /** @type {?JsonObject} */ (isObject(getData(event))
-      ? getData(event)
-      : parseJson(getData(event)));
-    if (eventData === undefined) {
-      return; // We only process valid JSON.
-    }
-    if (eventData['action'] === 'ready') {
-      this.willBeReadyResolver_();
-    }
+    const listenIframe = (evName, cb) => listenFor(
+        dev().assertElement(this.iframe_),
+        evName,
+        cb,
+        true
+    );
 
-    if ('notify' in eventData) {
-      switch (eventData['notify']) {
-        case 'loaded':
-          this.willBeLoadedResolver_();
-          break;
-        case 'progress':
-          //todo
-          console.log(eventData['loaded'], eventData['total']);
-          break;
-        case 'error':
-          this.toggleFallback(true);
-          break;
-      }
-    }
+    const disposers = [
+      listenIframe('ready', this.willBeReadyResolver_),
+      listenIframe('loaded', this.willBeLoadedResolver_),
+      listenIframe('error', () => {
+        this.toggleFallback(true);
+      }),
+    ];
+    return () => disposers.forEach(d => d());
   }
 
   /**
@@ -180,13 +160,18 @@ export class Amp3dGltf extends AMP.BaseElement {
    * */
   sendCommand_(action, args) {
     this.willBeReady_.then(() => {
-      if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'action': action,
-          'args': args,
-        }));
-        this.iframe_.contentWindow.postMessage(message, '*');
-      }
+      const message = dict({
+        'action': action,
+        'args': args,
+      });
+
+      postMessage(
+          dev().assertElement(this.iframe_),
+          'action',
+          message,
+          '*',
+          true
+      );
     });
   }
 
@@ -203,6 +188,14 @@ export class Amp3dGltf extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     this.sendCommand_('toggleAmpPlay', true);
+  }
+
+  onLayoutMeasure() {
+    const box = this.getLayoutBox();
+    this.sendCommand_(
+        'setSize',
+        dict({'width': box.width, 'height': box.height})
+    );
   }
 
   /** @override */
