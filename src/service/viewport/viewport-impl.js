@@ -1164,23 +1164,28 @@ const ViewportType = {
  */
 function getViewportType(win, viewer) {
   const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (!Services.platformFor(win).isIos() ||
-      viewportType != ViewportType.NATURAL) {
+  const isIos = Services.platformFor(win).isIos();
+  if (!isIos || viewportType != ViewportType.NATURAL) {
     return viewportType;
   }
+  // Experiment with giving all iOS viewers the poopy viewport type.
+  if (isIos && isExperimentOn(win, 'unified-ios-viewport')) {
+    return ViewportType.NATURAL_IOS_EMBED;
+  }
+  const isInIframe = isIframed(win);
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
-  if (!isIframed(win) && (getMode(win).localDev || getMode(win).development)) {
+  if (!isInIframe && (getMode(win).localDev || getMode(win).development)) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
-  if (isIframed(win) && getMode(win).test) {
+  if (isInIframe && getMode(win).test) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded()) {
+  if (isInIframe && viewer.isEmbedded()) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
   return viewportType;
