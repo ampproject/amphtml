@@ -194,10 +194,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   createAdOverlay_() {
-    const container = document.createElement('aside');
+    const container = this.win.document.createElement('aside');
     container.className = 'i-amphtml-ad-overlay-container';
 
-    const span = document.createElement('p');
+    const span = this.win.document.createElement('p');
     span.className = 'i-amphtml-story-ad-attribution';
     span.textContent = 'Ad';
 
@@ -246,10 +246,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStoryAdPage = this.createPageElement_();
     const ampAd = this.createAdElement_();
 
-    const glassPane = document.createElement('div');
+    const glassPane = this.win.document.createElement('div');
     glassPane.classList.add(GLASS_PANE_CLASS);
 
-    const gridLayer = document.createElement('amp-story-grid-layer');
+    const gridLayer = this.win.document.createElement('amp-story-grid-layer');
     gridLayer.setAttribute('template', 'fill');
 
     const paneGridLayer = gridLayer.cloneNode(false);
@@ -287,7 +287,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     });
 
     return createElementWithAttributes(
-        document, 'amp-story-page', attributes);
+        this.win.document, 'amp-story-page', attributes);
   }
 
 
@@ -318,7 +318,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         configAttrs, requiredAttrs));
 
     return createElementWithAttributes(
-        document, 'amp-ad', attributes);
+        this.win.document, 'amp-ad', attributes);
   }
 
 
@@ -355,7 +355,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @return {boolean}
    */
   createCtaLayer_(adPageElement, ctaText, ctaUrl) {
-    const a = document.createElement('a');
+    const a = this.win.document.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
     a.setAttribute('target', '_blank');
     a.href = ctaUrl;
@@ -366,7 +366,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return false;
     }
 
-    const ctaLayer = document.createElement('amp-story-cta-layer');
+    const ctaLayer = this.win.document.createElement('amp-story-cta-layer');
     ctaLayer.appendChild(a);
     adPageElement.appendChild(ctaLayer);
     return true;
