@@ -557,13 +557,15 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
-    return this.viewport_.getClientRectAsync(this.baseInstance_.element).then(box => {
+    return this.viewport_.getClientRectAsync(
+        this.baseInstance_.element).then(box => {
       if (!optIsCollapse &&
-          width <= box.width &&
-          height <= box.height) {
+              width <= box.width &&
+              height <= box.height) {
         this.resizeSafeframe(height, width, messageType);
       } else {
-        this.resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse);
+        this.resizeAmpAdAndSafeframe(height, width, messageType,
+            optIsCollapse);
       }
     });
   }
