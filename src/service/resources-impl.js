@@ -1042,7 +1042,7 @@ export class Resources {
         const r = Resource.forElement(element);
         this.setRelayoutTop_(r.getLayoutBox().top);
       }
-      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement)
+      this.schedulePass(FOUR_FRAME_DELAY_, !isAmpElement);
     }
   }
 
