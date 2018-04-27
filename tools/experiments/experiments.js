@@ -196,12 +196,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: '3p-use-ampcontext',
-    name: 'Use AmpContext for window.context messaging',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
-    spec: 'https://github.com/ampproject/amphtml/issues/6829',
-  },
-  {
     id: 'as-use-attr-for-format',
     name: 'Use slot width/height attribute for AdSense size format',
   },
