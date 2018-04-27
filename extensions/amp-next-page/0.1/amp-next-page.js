@@ -86,11 +86,9 @@ export class AmpNextPage extends AMP.BaseElement {
     user().assert(separatorElements.length <= 1,
         `${TAG} should contain at most one <div separator> child`);
 
-    let separator;
+    let separator = null;
     if (separatorElements.length === 1) {
       separator = separatorElements[0];
-    } else {
-      separator = this.win.document.createElement('div');
     }
 
     this.service_.register(this.element, config, separator);
