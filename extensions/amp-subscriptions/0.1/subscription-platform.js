@@ -73,6 +73,12 @@ export class SubscriptionPlatform {
    * @returns {number}
    */
   getBaseScore() {}
+
+  /**
+   * Decorate the DomNode according to your platform
+   * @param {Node} unusedNode
+   */
+  decorateUI(unusedNode) {}
 }
 
 /**

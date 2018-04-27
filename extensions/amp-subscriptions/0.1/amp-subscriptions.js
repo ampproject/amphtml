@@ -448,17 +448,18 @@ export class SubscriptionService {
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId) {
-    // TODO: add a promise to wait for resolve promise of a platform.
-    const platform = dev().assert(this.platformStore_.getPlatform(serviceId),
-        'Platform is not registered');
-    this.subscriptionAnalytics_.event(
-        SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-        {
-          action,
-          serviceId,
-        }
-    );
-    return platform.executeAction(action);
+    return this.platformStore_.whenPlatformResolves(serviceId)
+        .then(platform => {
+          dev().assert(platform, 'Platform is not registered');
+          this.subscriptionAnalytics_.event(
+              SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+              {
+                action,
+                serviceId,
+              }
+          );
+          return platform.executeAction(action);
+        });
   }
 }
 

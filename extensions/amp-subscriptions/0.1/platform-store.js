@@ -43,13 +43,16 @@ export class PlatformStore {
     /** @private @const {!Object<string, !./entitlement.Entitlement>} */
     this.entitlements_ = {};
 
-    /** @private @const {Observable<!EntitlementChangeEventDef>} */
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
     this.onEntitlementResolvedCallbacks_ = new Observable();
+
+    /** @private @const {!Observable<{serviceId: string}>} */
+    this.onPlatformResolvedCallbacks_ = new Observable();
 
     /** @private {?Promise<boolean>} */
     this.grantStatusPromise_ = null;
 
-    /** @private @const {Observable} */
+    /** @private @const {!Observable} */
     this.onGrantStateResolvedCallbacks_ = new Observable();
 
     /** @private {?Entitlement} */
@@ -80,16 +83,38 @@ export class PlatformStore {
    */
   resolvePlatform(serviceId, platform) {
     this.subscriptionPlatforms_[serviceId] = platform;
+    this.onPlatformResolvedCallbacks_.fire({
+      serviceId,
+    });
+  }
+
+  /**
+   * Returns a promise to be solved when a platform is resolved.
+   * @param {string} serviceId
+   */
+  whenPlatformResolves(serviceId) {
+    const platform = this.subscriptionPlatforms_[serviceId];
+    if (platform) {
+      return Promise.resolve(platform);
+    } else {
+      return new Promise(resolve => {
+        this.onPlatformResolvedCallbacks_.add(e => {
+          if (e.serviceId === serviceId) {
+            resolve(this.getPlatform(serviceId));
+          }
+        });
+      });
+    }
   }
 
   /**
    * Returns the platform for the given id
-   * @param {string} servideId
+   * @param {string} serviceId
    * @returns {!./subscription-platform.SubscriptionPlatform}
    */
-  getPlatform(servideId) {
-    const platform = this.subscriptionPlatforms_[servideId];
-    dev().assert(platform, `Platform for id ${servideId} is not resolved`);
+  getPlatform(serviceId) {
+    const platform = this.subscriptionPlatforms_[serviceId];
+    dev().assert(platform, `Platform for id ${serviceId} is not resolved`);
     return platform;
   }
 
