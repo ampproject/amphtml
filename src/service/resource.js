@@ -691,7 +691,7 @@ export class Resource {
     if (this.useLayers_) {
       const {element} = this;
       return element.getLayers().iterateAncestry(element,
-        this.layersDistanceRatio_);
+          this.layersDistanceRatio_);
     }
 
     // Numeric interface, element is allowed to render outside viewport when it
