@@ -201,9 +201,6 @@ export class Viewport {
     if (isIframed(this.ampdoc.win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
-    if (viewer.getParam('webview') === '1') {
-      this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
-    }
 
     // To avoid browser restore scroll position when traverse history
     if (isIframed(this.ampdoc.win) &&

@@ -77,27 +77,6 @@ html.i-amphtml-fie > body {
 }
 
 /**
- * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
- * does NOT respect `html {overflow-x: hidden}`.
- * Note! For all other natural cases body's style is `body {overflow: visible}`
- * to avoid visibility issues with iframes.
- */
-html.i-amphtml-webview > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-}
-
-
-/**
- * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
- */
-html.i-amphtml-ios-embed-legacy > body {
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  position: absolute !important;
-}
-
-/**
  * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
  * element.
  */
