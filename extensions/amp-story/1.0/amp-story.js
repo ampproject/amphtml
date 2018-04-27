@@ -41,7 +41,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './amp-story-bookend';
+import {Bookend} from './bookend/amp-story-bookend';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -63,7 +63,6 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {ShareWidget} from './amp-story-share';
 import {SystemLayer} from './amp-story-system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -84,13 +83,11 @@ import {
 } from '../../../src/style';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsDe from './_locales/de';
@@ -150,6 +147,13 @@ const AD_SHOWING_ATTR = 'ad-showing';
  */
 const PAGE_LOAD_TIMEOUT_MS = 5000;
 
+/**
+ * Single page ads may be injected later. If the original story contains 0 media
+ * elements the mediaPool will not be able to handle the injected audio/video
+ * Therefore we preallocate a minimum here.
+ * @const {number}
+ */
+const MINIMUM_AD_MEDIA_ELEMENTS = 2;
 
 /**
  * CSS class for an amp-story that indicates the initial load for the story has
@@ -166,25 +170,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 
 /** @type {string} */
 const TAG = 'amp-story';
-
-
-/**
- * Container for "pill-style" share widget, rendered on desktop.
- * @private @const {!./simple-template.ElementDef}
- */
-const SHARE_WIDGET_PILL_CONTAINER = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-share-pill'}),
-  children: [
-    {
-      tag: 'span',
-      attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-      localizedStringId:
-          LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
-    },
-  ],
-};
-
 
 /**
  * Selector for elements that should be hidden when the bookend is open on
@@ -229,17 +214,13 @@ export class AmpStory extends AMP.BaseElement {
     this.shareMenu_ = new ShareMenu(this.win, this.element);
 
     /** @private @const {!SystemLayer} */
-    this.systemLayer_ = new SystemLayer(this.win);
+    this.systemLayer_ = new SystemLayer(this.win, this.element);
 
     /** @private @const {!UnsupportedBrowserLayer} */
     this.unsupportedBrowserLayer_ = new UnsupportedBrowserLayer(this.win);
 
-    /** @private @const {!ViewportWarningLayer} */
-    this.viewportWarningLayer_ =
-        new ViewportWarningLayer(this.win, this.element);
-
-    /** @private @const {!Array<string>} */
-    this.pageHistoryStack_ = [];
+    /** Instantiates the viewport warning layer. */
+    new ViewportWarningLayer(this.win, this.element);
 
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
@@ -273,12 +254,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?./pagination-buttons.PaginationButtons} */
     this.paginationButtons_ = null;
-
-    /** @private {?Element} */
-    this.topBar_ = null;
-
-    /** @private {?ShareWidget} */
-    this.shareWidget_ = null;
 
     /** @private @const {!Array<string>} */
     this.originWhitelist_ = ORIGIN_WHITELIST;
@@ -458,11 +433,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onDesktopStateUpdate_(isDesktop);
     });
 
-    this.storeService_.subscribe(
-        StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS, canShowButtons => {
-          this.onCanShowSystemLayerButtonsUpdate_(canShowButtons);
-        });
-
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
@@ -567,43 +537,6 @@ export class AmpStory extends AMP.BaseElement {
   /** @visibleForTesting */
   buildPaginationButtonsForTesting() {
     this.buildPaginationButtons_();
-  }
-
-  /** @private */
-  buildTopBar_() {
-    // TODO(gmajoulet): Move the desktop "top bar" into the system layer.
-    const doc = this.element.ownerDocument;
-
-    this.topBar_ = doc.createElement('div');
-    this.topBar_.classList.add(
-        'i-amphtml-story-top', 'i-amphtml-story-system-reset');
-    this.topBar_.appendChild(this.buildTopBarShare_());
-
-    this.element.insertBefore(this.topBar_, this.element.firstChild);
-
-    this.onCanShowSystemLayerButtonsUpdate_(
-        !!this.storeService_.get(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS));
-  }
-
-  /**
-   * @return {!Node}
-   * @private
-   */
-  buildTopBarShare_() {
-    const container =
-        renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER);
-
-    this.shareWidget_ = new ShareWidget(this.win);
-
-    const shareLabelEl = dev().assertElement(
-        container.querySelector('.i-amphtml-story-share-pill-label'),
-        'Expected share pill label to be present.');
-
-    container.insertBefore(
-        this.shareWidget_.build(this.getAmpDoc()),
-        shareLabelEl);
-
-    return container;
   }
 
   /** @override */
@@ -1059,22 +992,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Reacts to system layer buttons display state.
-   * @param {boolean} canShowButtons
-   * @private
-   */
-  onCanShowSystemLayerButtonsUpdate_(canShowButtons) {
-    if (!this.topBar_) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.topBar_.classList
-          .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
-    });
-  }
-
-  /**
    * Reacts to desktop state updates.
    * @param {boolean} isDesktop
    * @private
@@ -1084,9 +1001,6 @@ export class AmpStory extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('desktop', '');
       });
-      if (!this.topBar_) {
-        this.buildTopBar_();
-      }
       if (!this.background_) {
         this.background_ = new AmpStoryBackground(this.win, this.element);
         this.background_.attach();
@@ -1109,7 +1023,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches;
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1315,6 +1229,13 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
+    if (this.platform_.isBot()) {
+      this.pages_.forEach(page => {
+        page.setDistance(0);
+      });
+      return;
+    }
+
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
@@ -1376,7 +1297,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
+   * @return {!Promise<(?./bookend/amp-story-bookend.BookendConfigDef|./bookend/bookend-component.BookendDataDef)>}
    * @private
    */
   buildAndPreloadBookend_() {
@@ -1400,8 +1321,14 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.isDesktop_()) {
       return Promise.resolve(true);
     }
-    return this.bookend_.loadConfig(false /** applyConfig */).then(config =>
-      !!(config && config.relatedArticles && config.relatedArticles.length));
+
+    return this.bookend_.loadConfig(false /** applyConfig */).then(
+        config => {
+          // TODO(#14591): Remove config.relatedArticles references when bookend API v0.1 is deprecated.
+          return !!(config && (config.relatedArticles &&
+            config.relatedArticles.length) ||
+            (config.components && config.components.length));
+        });
   }
 
 
@@ -1500,9 +1427,11 @@ export class AmpStory extends AMP.BaseElement {
 
     return {
       [MediaType.AUDIO]: Math.min(
-          audioMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
+          audioMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
+          MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
       [MediaType.VIDEO]: Math.min(
-          videoMediaElementsCount, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
+          videoMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
+          MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
     };
   }
 

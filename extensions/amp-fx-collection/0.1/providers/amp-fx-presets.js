@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // outside viewport
-      if (!top || top > fxElement.adjustedViewportHeight_) {
+      if (!top || top > fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -47,7 +47,7 @@ export const Presets = {
       const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = (fxElement.adjustedViewportHeight_ - top) * adjustedFactor;
+      const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {
@@ -68,8 +68,7 @@ export const Presets = {
   },
   'fade-in': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fade-in'),
-          'amp-fx-fade-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fade-in');
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -82,11 +81,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport
       if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_) {
+        fxElement.adjustedViewportHeight) {
         return;
       }
 
@@ -109,8 +108,7 @@ export const Presets = {
   },
   'fade-in-scroll': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fade-in-scroll'),
-          'amp-fx-fade-in-scroll experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fade-in-scroll');
     },
     userAsserts(element) {
       const marginStart = parseFloat(element.getAttribute('data-margin-start'));
@@ -132,11 +130,11 @@ export const Presets = {
     },
     update(entry) {
       const fxElement = this;
-      dev().assert(fxElement.adjustedViewportHeight_);
+      dev().assert(fxElement.adjustedViewportHeight);
       const top = entry.positionRect ? entry.positionRect.top : null;
       // Outside viewport or margins
       if (!top || (top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight_)) {
+        fxElement.adjustedViewportHeight)) {
         return;
       }
 
@@ -152,9 +150,9 @@ export const Presets = {
       const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = 1 * (fxElement.adjustedViewportHeight_ - top -
-        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight_)) /
-        (marginDelta * fxElement.adjustedViewportHeight_);
+      const offset = 1 * (fxElement.adjustedViewportHeight - top -
+        (fxElement.getMarginStart() * fxElement.adjustedViewportHeight)) /
+        (marginDelta * fxElement.adjustedViewportHeight);
       fxElement.setOffset(offset);
 
       if (fxElement.isMutateScheduled()) {

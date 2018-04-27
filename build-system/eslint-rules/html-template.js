@@ -65,6 +65,38 @@ module.exports = function(context) {
           ' HEAD root elements. Please do so manually with' +
           ' document.createElement.');
     }
+
+    const invalids = invalidVoidTag(string);
+    if (invalids.length) {
+      const sourceCode = context.getSourceCode();
+      const {start} = template;
+
+      for (let i = 0; i < invalids.length; i++) {
+        const {tag, offset} = invalids[i];
+        context.report({
+          node: template,
+          loc: sourceCode.getLocFromIndex(start + offset),
+          message: `Invalid void tag "${tag}"`,
+        });
+      }
+    }
+  }
+
+  function invalidVoidTag(string) {
+    // Void tags are defined at
+    // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
+    const invalid = /<(?!area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)([a-zA-Z-]+)( [^>]*)?\/>/g;
+    const matches = [];
+
+    let match;
+    while ((match = invalid.exec(string))) {
+      matches.push({
+        tag: match[1],
+        offset: match.index,
+      });
+    }
+
+    return matches;
   }
 
   return {

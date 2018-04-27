@@ -59,7 +59,7 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
-  'form': ['submit'],
+  'form': ['submit', 'clear'],
 };
 
 /**
@@ -245,9 +245,6 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
-
-    /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');

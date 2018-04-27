@@ -81,9 +81,6 @@ export class ShareMenu {
     /** @private {boolean} */
     this.isSystemShareSupported_ = false;
 
-    /** @private @const {!../../../src/service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(this.win_);
-
     /** @private @const {!ShareWidget} */
     this.shareWidget_ = ShareWidget.create(this.win_);
 

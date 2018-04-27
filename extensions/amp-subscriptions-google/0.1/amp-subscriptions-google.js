@@ -228,6 +228,12 @@ export class GoogleSubscriptionsPlatform {
   getBaseScore() {
     return this.serviceConfig_['baseScore'] || 0;
   }
+
+  /** @override */
+  executeAction(unusedAction) {
+    //TODO: implement this
+    return Promise.resolve(false);
+  }
 }
 
 
