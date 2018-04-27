@@ -587,7 +587,8 @@ export function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
  * @return {string}
  * @private Visible for testing.
  */
-export function resolveUrlAttr(tag, tagName, attrName, attrValue, windowLocation) {
+export function resolveUrlAttr(
+  tag, tagName, attrName, attrValue, windowLocation) {
   checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
