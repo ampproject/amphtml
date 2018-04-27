@@ -161,7 +161,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(Object.keys(JSON.parse(payload['newGeometry']))).to.deep.equal([
           'windowCoords_t', 'windowCoords_r', 'windowCoords_b',
           'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-          'frameCoords_b', 'frameCoords_l', 'styleZIndex',
+          'frameCoords_b', 'frameCoords_l',
+          'posCoords_t', 'posCoords_b', 'posCoords_r', 'posCoords_l',
+          'styleZIndex',
           'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
           'allowedExpansion_l', 'yInView', 'xInView',
         ]);
@@ -185,7 +187,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       expect(Object.keys(initialGeometry)).to.deep.equal(
           ['windowCoords_t', 'windowCoords_r', 'windowCoords_b',
             'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-            'frameCoords_b', 'frameCoords_l', 'styleZIndex',
+            'frameCoords_b', 'frameCoords_l', 'posCoords_t',
+            'posCoords_b', 'posCoords_l', 'posCoords_r', 'styleZIndex',
             'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
             'allowedExpansion_l', 'yInView', 'xInView']);
       Object.keys(initialGeometry).forEach(key => {
