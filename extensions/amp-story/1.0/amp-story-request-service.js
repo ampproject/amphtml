@@ -52,11 +52,14 @@ export class AmpStoryRequestService {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    if (!this.storyElement_.hasAttribute(attributeName)) {
+    const bookendElem = this.getBookendElement_(this.storyElement_);
+
+    if (!this.storyElement_.hasAttribute(attributeName) && !bookendElem) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName);
+    const rawUrl = this.storyElement_.getAttribute(attributeName) ||
+        bookendElem.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
@@ -67,5 +70,10 @@ export class AmpStoryRequestService {
           user().assert(response.ok, 'Invalid HTTP response');
           return response.json();
         });
+  }
+
+  getBookendElement_(element) {
+    return [].slice.call(element.children)
+        .find(element => element.localName == 'amp-story-bookend');
   }
 }
