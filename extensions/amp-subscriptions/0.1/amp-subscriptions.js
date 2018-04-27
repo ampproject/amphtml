@@ -258,6 +258,11 @@ export class SubscriptionService {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
         return;
+      } else if (this.platformConfig_['alwaysGrant']) {
+        // If service config has `alwaysGrant` key as true,
+        // publisher wants it to be open always until a sviewer decides otherwise.
+        this.processGrantState_(true);
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
