@@ -2,7 +2,7 @@
 
 Doubleclick's Fast Fetch implementation supports some aspects of the [GPT SafeFrame API](https://support.google.com/dfp_premium/answer/6023110) for non-AMP creatives that are rendered within a SafeFrame. Please refer to the [IAB specification](https://www.iab.com/wp-content/uploads/2014/08/SafeFrames_v1.1_final.pdf) of SafeFrame and the [GPT implementation details](https://support.google.com/dfp_premium/answer/6023110) for a comprehensive explanation of SafeFrame. This document is primarily aimed to explain the AMP-specific differences.
 
-SafeFrame support (including ext.js library injection) can be forced client-side by setting data-force-safeframe=true attribute on amp-ad type=doubleclick elements.
+SafeFrame support (including ext.js library injection) can be forced client-side by setting `data-force-safeframe=true` attribute on amp-ad type=doubleclick elements.
 
 
 # Supported Methods
