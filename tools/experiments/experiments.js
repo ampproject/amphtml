@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-import '../../src/polyfills';
+import '../../src/polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';

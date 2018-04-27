@@ -16,7 +16,7 @@
 
 import {dict, map} from '../../../src/utils/object';
 import {htmlSanitizer} from '../../../third_party/caja/html-sanitizer';
-import {isExperimentOn} from '../../../tools/experiments/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';

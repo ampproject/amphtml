@@ -540,11 +540,11 @@ export function tryDecodeUriComponent(component, opt_fallback) {
  * @return {string}
  * @private Visible for testing.
  */
-export function rewriteAttributeValue(TAG, tagName, attrName, attrValue) {
-  const tag = tagName.toLowerCase();
+export function rewriteAttributeValue(tag, tagName, attrName, attrValue) {
   const attr = attrName.toLowerCase();
   if (attr == 'src' || attr == 'href' || attr == 'srcset') {
-    return resolveUrlAttr(TAG, tag, attr, attrValue, self.location);
+    return resolveUrlAttr(
+        tag, tagName.toLowerCase(), attr, attrValue, self.location);
   }
   return attrValue;
 }

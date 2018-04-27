@@ -284,6 +284,7 @@ exports.rules = [
       'src/service.js->src/polyfills.js',
       'src/service/timer-impl.js->src/polyfills.js',
       'src/service/extensions-impl.js->src/polyfills.js',
+      'tools/experiments/experiments.js->src/polyfills.js',
     ],
   },
 
