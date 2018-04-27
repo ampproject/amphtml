@@ -559,9 +559,7 @@ export class SafeframeHostApi {
   handleSizeChange(height, width, messageType, optIsCollapse) {
     return this.viewport_.getClientRectAsync(
         this.baseInstance_.element).then(box => {
-      if (!optIsCollapse &&
-              width <= box.width &&
-              height <= box.height) {
+      if (!optIsCollapse && width <= box.width && height <= box.height) {
         this.resizeSafeframe(height, width, messageType);
       } else {
         this.resizeAmpAdAndSafeframe(height, width, messageType,
