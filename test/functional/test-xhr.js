@@ -266,7 +266,7 @@ describe.configure().skipSafari().run('XHR', function() {
             test.win.fetch.restore();
           });
           it('should not call fetch if view is not visible ', () => {
-            const fetchCall = sinon.spy(test.win, 'fetch');
+            const fetchCall = sandbox.spy(test.win, 'fetch');
             ampdocViewerStub.returns({
               whenFirstVisible: () => Promise.reject(),
             });
@@ -274,7 +274,7 @@ describe.configure().skipSafari().run('XHR', function() {
             expect(fetchCall.notCalled).to.be.true;
           });
           it('should call fetch if view is visible ', () => {
-            const fetchCall = sinon.spy(test.win, 'fetch');
+            const fetchCall = sandbox.spy(test.win, 'fetch');
             ampdocViewerStub.returns({
               whenFirstVisible: () => Promise.resolve(),
             });
