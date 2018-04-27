@@ -15,6 +15,7 @@
  */
 
 import {AmpFxCollection} from '../amp-fx-collection';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Creates the relevant fx presets correctly', {
@@ -34,16 +35,8 @@ describes.realWin('Creates the relevant fx presets correctly', {
   });
 
   function createAmpFx(fxType, opt_attrs) {
-    const element = win.document.createElement('div');
-    element.setAttribute('amp-fx', fxType);
-    if (opt_attrs) {
-      for (const k in opt_attrs) {
-        element.setAttribute(k, opt_attrs[k]);
-      }
-    }
-
+    const element = createElementWithAttributes(win.document, 'div', opt_attrs);
     win.document.body.appendChild(element);
-
     const ampFxCollection = new AmpFxCollection(ampdoc);
     return ampFxCollection;
   }
