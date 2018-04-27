@@ -53,6 +53,15 @@ export class ServiceAdapter {
   }
 
   /**
+   * Delegate UI decoration to another service.
+   * @param {Element} element
+   * @param {string} serviceId
+   */
+  delegateDecorationToElement(element, serviceId) {
+    this.subscriptionService_.delegateDecorationToElement(element, serviceId);
+  }
+
+  /**
    * Reauthorize platforms
    * @param {!./subscription-platform.SubscriptionPlatform} subscriptionPlatform
    */

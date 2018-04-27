@@ -234,6 +234,12 @@ export class GoogleSubscriptionsPlatform {
     //TODO: implement this
     return Promise.resolve(false);
   }
+
+  /** @override */
+  decorateUI(element) {
+    element.innerHTML = '';
+    this.runtime_.buttonApi_.attach(element);
+  }
 }
 
 

@@ -86,7 +86,7 @@ export class LocalSubscriptionPlatform {
 
     /** @private {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
-        serviceAdapter.getDialog());
+        serviceAdapter.getDialog(), this.serviceAdapter_);
 
     /** @private {?Entitlement}*/
     this.entitlement_ = null;
@@ -234,6 +234,11 @@ export class LocalSubscriptionPlatform {
   /** @override */
   getBaseScore() {
     return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  decorateUI(unusedNode) {
+    user().warn('Local platform does not decorate UIs');
   }
 }
 

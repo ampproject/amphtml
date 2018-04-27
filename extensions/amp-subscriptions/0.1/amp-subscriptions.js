@@ -461,6 +461,19 @@ export class SubscriptionService {
           return platform.executeAction(action);
         });
   }
+
+  /**
+   * Delegate UI decoration to another service.
+   * @param {Element} element
+   * @param {string} serviceId
+   */
+  delegateDecorationToElement(element, serviceId) {
+    return this.platformStore_.whenPlatformResolves(serviceId)
+        .then(platform => {
+          dev().assert(platform, 'Platform is not registered');
+          platform.decorateUI(element);
+        });
+  }
 }
 
 
