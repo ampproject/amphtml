@@ -81,3 +81,9 @@ amp-story-page[active] .i-amphtml-story-ad-link {
 amp-story[ad-showing] .i-amphtml-story-ad-attribution {
   visibility: visible !important;
 }
+
+.i-amphtml-glass-pane {
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1 !important;
+}
