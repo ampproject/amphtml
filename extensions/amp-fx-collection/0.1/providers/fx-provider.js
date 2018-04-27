@@ -92,8 +92,8 @@ export class FxElement {
     /** @const @private {!../../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
 
-    /** @private {?number} */
-    this.adjustedViewportHeight_ = null;
+    /** {?number} */
+    this.adjustedViewportHeight = null;
 
     /** @private @const {!Element} */
     this.element_ = element;
@@ -158,7 +158,7 @@ export class FxElement {
    */
   initialize_() {
     this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-      this.adjustedViewportHeight_ = adjustedViewportHeight;
+      this.adjustedViewportHeight = adjustedViewportHeight;
 
       // start observing position of the element.
       this.observePositionChanges_();
@@ -175,7 +175,7 @@ export class FxElement {
 
     this.viewport_.onResize(() => {
       this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
-        this.adjustedViewportHeight_ = adjustedViewportHeight;
+        this.adjustedViewportHeight = adjustedViewportHeight;
       });
     });
   }

@@ -357,7 +357,7 @@ export class VideoManager {
    * Install the necessary listeners to be notified when the user changes
    * the orientation of their device
    *
-   * @param {VideoEntry} entry
+   * @param {VideoEntry} opt_entry
    * @private
    */
   maybeInstallOrientationObserver_(opt_entry) {
@@ -366,12 +366,13 @@ export class VideoManager {
     const win = this.ampdoc.win;
     const screen = win.screen;
     const handleOrientationChange = () => {
-      // let isLandscape;
+      let isLandscape;
       if (screen && 'orientation' in screen) {
         isLandscape = startsWith(screen.orientation.type, 'landscape');
       } else {
-        isLandscape = win.orientation == -90 || win.orientation == 90;
+        isLandscape = (win.orientation == -90 || win.orientation == 90);
       }
+      console.log(isLandscape);
     };
     // Chrome apparently considers 'orientationchange' to be an untrusted
     // event, while 'change' on screen.orientation is considered a user
