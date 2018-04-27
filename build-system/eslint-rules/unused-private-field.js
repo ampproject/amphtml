@@ -15,115 +15,168 @@
  */
 'use strict';
 
-module.exports = function(context) {
-  const stack = [];
-  function current() {
-    return stack[stack.length - 1];
-  }
+module.exports = {
+  meta: {
+    fixable: 'code',
+  },
 
-  function shouldIgnoreFile() {
-    return /\b(test|examples)\b/.test(context.getFilename());
-  }
+  create(context) {
+    const stack = [];
+    function current() {
+      return stack[stack.length - 1];
+    }
 
-  function shouldIgnoreDueToAnnotation(node) {
-    const comments = context.getCommentsBefore(node);
-    const annotated = comments.some(comment => {
-      return /@(visibleForTesting|protected|override)\b/.test(comment.value);
-    });
-    return annotated;
-  }
+    function shouldIgnoreFile() {
+      return /\b(test|examples)\b/.test(context.getFilename());
+    }
 
+    function shouldIgnoreDueToAnnotation(node, name) {
+      const comments = context.getCommentsBefore(node);
+      const annotated = comments.some(comment => {
+        return /@(visibleForTesting|protected|override)\b/.test(comment.value);
+      });
+      if (annotated) {
+        return true;
+      }
 
-  function shouldCheckMember(node, needsThis = true) {
-    const {computed, object, property} = node;
-    if (computed ||
-        (needsThis && object.type !== 'ThisExpression') ||
-        property.type !== 'Identifier') {
+      // Restricteds must be used in the file.
+      const restricted = comments.some(comment => {
+        return /@restricted\b/.test(comment.value);
+      });
+      if (!restricted) {
+        return false;
+      }
+
+      const sourceCode = context.getSourceCode();
+      const {text} = sourceCode;
+
+      let index = -1;
+      while ((index = text.indexOf(name, index + 1))) {
+        if (index === -1) {
+          break;
+        }
+
+        const node = sourceCode.getNodeByRangeIndex(index);
+        if (!node || node.type !== 'Identifier') {
+          continue;
+        }
+
+        const {parent} = node;
+        if (parent.type === 'MemberExpression' &&
+            shouldCheckMember(parent, false) &&
+            !isAssignment(parent)) {
+          return true;
+        }
+      }
+
       return false;
     }
 
-    return isPrivateName(property);
-  }
 
-  function isAssignment(node) {
-    const {parent} = node;
-    return parent.type === 'AssignmentExpression' && parent.left === node;
-  }
-
-  function isPrivateName(node) {
-    return node.name.endsWith('_');
-  }
-
-  return {
-    ClassBody() {
-      if (shouldIgnoreFile()) {
-        return;
+    function shouldCheckMember(node, needsThis = true) {
+      const {computed, object, property} = node;
+      if (computed ||
+        (needsThis && object.type !== 'ThisExpression') ||
+        property.type !== 'Identifier') {
+        return false;
       }
 
-      stack.push({used: new Set(), declared: new Map()});
-    },
+      return isPrivateName(property);
+    }
 
-    'ClassBody:exit': function() {
-      if (shouldIgnoreFile()) {
-        return;
-      }
+    function isAssignment(node) {
+      const {parent} = node;
+      return parent.type === 'AssignmentExpression' && parent.left === node;
+    }
 
-      const {used, declared} = stack.pop();
+    function isPrivateName(node) {
+      return node.name.endsWith('_');
+    }
 
-      declared.forEach((node, name) => {
-        if (used.has(name)) {
+    return {
+      ClassBody() {
+        if (shouldIgnoreFile()) {
           return;
         }
 
-        context.report(node, [
-          `Unused private "${name}".`.padEnd(80), // Padding for alignment
-          'If this is used for testing, annotate with `@visibleForTesting`.',
-          'If this is used in a subclass, annotate with `@protected`.',
-          'If this is an override of a protected, annotate with `@override`.',
-          'If none of these exceptions applies, please contact @jridgewell.',
-        ].join('\n\t'));
-      });
-    },
+        stack.push({used: new Set(), declared: new Map()});
+      },
 
-    'ClassBody > MethodDefinition': function(node) {
-      if (shouldIgnoreFile()) {
-        return;
-      }
+      'ClassBody:exit': function() {
+        if (shouldIgnoreFile()) {
+          return;
+        }
 
-      const {computed, key} = node;
-      if (computed ||
-          !isPrivateName(key) ||
-          shouldIgnoreDueToAnnotation(node)) {
-        return;
-      }
+        const {used, declared} = stack.pop();
 
-      const {name} = node.key;
-      const {declared} = current();
-      declared.set(name, node);
-    },
+        declared.forEach((node, name) => {
+          if (used.has(name)) {
+            return;
+          }
 
-    'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
-      if (shouldIgnoreFile() ||
-         !shouldCheckMember(node) ||
-         !isAssignment(node)) {
-        return;
-      }
+          const message = [
+            `Unused private "${name}".`.padEnd(80), // Padding for alignment
+            'If this is used for testing, annotate with `@visibleForTesting`.',
+            'If this is a private used in the file, `@restricted`.',
+            'If this is used in a subclass, `@protected`.',
+            'If this is an override of a protected, `@override`.',
+            'If none of these exceptions applies, please contact @jridgewell.',
+          ].join('\n\t');
 
-      const {name} = node.property;
-      const {declared} = current();
-      declared.set(name, node);
-    },
+          context.report({
+            node,
+            message,
+          });
+        });
+      },
 
-    'ClassBody MemberExpression': function(node) {
-      if (shouldIgnoreFile() ||
-         !shouldCheckMember(node, false) ||
-         isAssignment(node)) {
-        return;
-      }
+      'ClassBody > MethodDefinition': function(node) {
+        if (shouldIgnoreFile()) {
+          return;
+        }
 
-      const {name} = node.property;
-      const {used} = current();
-      used.add(name);
-    },
-  };
+        const {computed, key} = node;
+        if (computed ||
+          !isPrivateName(key)) {
+          return;
+        }
+
+        const {name} = key;
+        if (shouldIgnoreDueToAnnotation(node, name)) {
+          return;
+        }
+
+        const {declared} = current();
+        declared.set(name, node);
+      },
+
+      'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
+        if (shouldIgnoreFile() ||
+            !shouldCheckMember(node) ||
+            !isAssignment(node)) {
+          return;
+        }
+
+        const {name} = node.property;
+        if (shouldIgnoreDueToAnnotation(node, name)) {
+          return;
+        }
+
+        const {declared} = current();
+        declared.set(name, node.parent);
+      },
+
+      'ClassBody MemberExpression': function(node) {
+        if (shouldIgnoreFile() ||
+            !shouldCheckMember(node, false) ||
+            isAssignment(node)) {
+          return;
+        }
+
+        const {name} = node.property;
+        const {used} = current();
+        used.add(name);
+      },
+    };
+  },
 };
