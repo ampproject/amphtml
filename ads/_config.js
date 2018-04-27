@@ -881,6 +881,11 @@ export const adConfig = {
 
   wpmedia: {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
+    preconnect: [
+      'https://www.wp.pl',
+      'https://v.wpimg.pl',
+    ],
+    renderStartImplemented: true,
   },
 
   xlift: {
