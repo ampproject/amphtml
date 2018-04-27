@@ -97,7 +97,7 @@ function isSrcdocSupported() {
  * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
  */
 export function setFriendlyIframeEmbedVisible(embed, visible) {
-  embed.setVisible_(visible);
+  embed.setVisible(visible);
 }
 
 
@@ -209,7 +209,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     extensions.installExtensionsInChildWindow(
         childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    embed.startRender_();
+    embed.startRender();
     return embed;
   });
 }
@@ -406,8 +406,7 @@ export class FriendlyIframeEmbed {
     return this.signals_.whenSignal(CommonSignals.INI_LOAD);
   }
 
-  /** @private */
-  startRender_() {
+  startRender() {
     if (this.host) {
       this.host.renderStarted();
     } else {
@@ -463,9 +462,8 @@ export class FriendlyIframeEmbed {
 
   /**
    * @param {boolean} visible
-   * @private
    */
-  setVisible_(visible) {
+  setVisible(visible) {
     if (this.visible_ != visible) {
       this.visible_ = visible;
       this.visibilityObservable_.fire(this.visible_);
