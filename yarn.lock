@@ -8439,9 +8439,9 @@ preact-transition-group@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/preact-transition-group/-/preact-transition-group-1.1.1.tgz#f0a49327ea515ece34ea2be864c4a7d29e5d6e10"
 
-preact@8.2.7:
-  version "8.2.7"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-8.2.7.tgz#316249fb678cd5e93e7cee63cea7bfb62dbd6814"
+preact@8.2.8:
+  version "8.2.8"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-8.2.8.tgz#cf6cfa1d746541e31875f39dfadd9c76e932d29c"
 
 prebuild-install@^2.3.0:
   version "2.5.1"
