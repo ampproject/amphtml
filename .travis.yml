@@ -42,10 +42,10 @@ addons:
     - python-protobuf
 matrix:
   include:
-    # For non-greenkeeper branches, use the normal environment.
-    - if: NOT branch =~ ^greenkeeper/.*$
+    # For non-greenkeeper branches, use the normal environment (but skip PR builds on master from greenkeeper).
+    - if: NOT branch =~ ^greenkeeper/.*$ AND NOT sender =~ greenkeeper
       env: BUILD_SHARD="unit_tests"
-    - if: NOT branch =~ ^greenkeeper/.*$
+    - if: NOT branch =~ ^greenkeeper/.*$ AND NOT sender =~ greenkeeper
       env: BUILD_SHARD="integration_tests"
     # For greenkeeper branches, add a secure GH token for the lockfile upload.
     - if: branch =~ ^greenkeeper/.*$
