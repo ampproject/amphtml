@@ -475,14 +475,6 @@ function runYarnLockfileCheck() {
 }
 
 /**
- * Returns true if this is a PR build for a greenkeeper branch.
- */
-function isGreenkeeperPrBuild() {
-  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
-}
-
-/**
  * Returns true if this is a push build for a greenkeeper branch.
  */
 function isGreenkeeperPushBuild() {
@@ -507,14 +499,6 @@ function isGreenkeeperLockfilePushBuild() {
  */
 function main() {
   const startTime = startTimer('pr-check.js');
-
-  if (isGreenkeeperPrBuild()) {
-    console.log(fileLogPrefix,
-        'This is a greenkeeper PR build. Tests will be run for the push ' +
-        'build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   if (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild()) {
     console.log(fileLogPrefix,
