@@ -15,10 +15,10 @@
  */
 
 /**
- * Abstract class implemented by the bookend components.
- * @abstract
+ * Interface implemented by the bookend components.
+ * @interface
  */
-export class AbstractBookendComponent {
+export class BookendComponentInterface {
 
   /**
    * Checks if the component is valid.

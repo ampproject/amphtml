@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ArticleComponent, ArticleTitle, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
+import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
 
 /**
  * @typedef {{
@@ -31,12 +31,13 @@ export let BookendDataDef;
 export let BookendComponentDef;
 
 /**
- * Map used to dispatch the components to their specific builder classes.
- * @const {!Object<string, ./components/abstract.AbstractBookendComponent>}
+ * Dispatches the components to their specific builder classes.
+ * @param {string} componentType
+ * @return {?./components/interface.BookendComponentInterface}
  */
 export const componentsMap = {
   'small': ArticleComponent,
-  'article-set-title': ArticleTitle,
+  'article-set-title': ArticleTitleComponent,
 };
 
 /**
@@ -47,19 +48,19 @@ export class BookendComponent {
   /**
    * Takes components from JSON and delegates them to their corresponding
    * builder class.
-   * @param {!BookendComponentDef} components
+   * @param {!Array<BookendComponentDef>} components
    * @return {!Array<BookendComponentDef>}
    */
   static buildFromJson(components) {
-    return components
-        .map(component => {
-          if (component.type && componentsMap[component.type]) {
-            if (componentsMap[component.type].isValid(component)) {
-              return componentsMap[component.type].build(component);
-            }
-          }
-        })
-        .filter(valid => !!valid);
+    return components.reduce((builtComponents, component) => {
+      const klass = componentsMap[component.type];
+      if (!klass ||
+          !klass.isValid(component)) {
+        return;
+      }
+      builtComponents.push(klass.build(component));
+      return builtComponents;
+    }, []);
   }
 
   /**

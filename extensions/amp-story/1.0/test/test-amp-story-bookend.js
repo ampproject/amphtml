@@ -45,7 +45,7 @@ describes.realWin('amp-story-bookend', {
     },
   ];
 
-  const metadata = dict({
+  const metadata = {
     '@context': 'http://schema.org',
     '@type': 'NewsArticle',
     'mainEntityOfPage': {
@@ -69,7 +69,7 @@ describes.realWin('amp-story-bookend', {
       },
     },
     'description': 'My Story',
-  });
+  };
 
   beforeEach(() => {
     win = env.win;
@@ -143,10 +143,10 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfig().then(config => {
-      const components = config.components;
-      for (let i = 0; i < components.length; i++) {
-        return expect(components[i]).to.deep.equal(expectedComponents[i]);
-      }
+      config.components.forEach((currentComponent, index) => {
+        return expect(currentComponent).to.deep
+            .equal(expectedComponents[index]);
+      });
     });
   });
 
@@ -171,13 +171,9 @@ describes.realWin('amp-story-bookend', {
       ],
     });
 
-    const userErrLogSpy = sandbox.spy(user(), 'error');
-
     allowConsoleError(() => {
-      expect(ArticleComponent.isValid(userJson)).to.be.false;
-      expect(userErrLogSpy).to.be.calledOnce;
-      expect(userErrLogSpy.getCall(0).args[1]).to.have.string('Articles must ' +
-          'contain `title` and `url` fields, skipping invalid.');
+      expect(() => ArticleComponent.isValid(userJson)).to.throw('Articles' +
+        ' must contain `title` and `url` fields, skipping invalid.​​​');
     });
   });
 });
