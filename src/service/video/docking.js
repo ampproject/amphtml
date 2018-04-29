@@ -297,9 +297,6 @@ export class VideoDocking {
      */
     this.videoUnlisteners_ = [];
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
-    this.targetArea_ = null;
-
     /**
      * Memoizes x, y and scale to prevent useless mutations.
      * @private {?{x: number, y: number, scale: number}}
@@ -799,10 +796,6 @@ export class VideoDocking {
     this.setCurrentlyDocked_(video, posX, posY, step);
 
     this.getDockingTimeout_().trigger(DOCKING_TIMEOUT, video);
-  }
-
-  getFinalDisplayWidth_() {
-    return Math.max(MIN_WIDTH, this.getAreaWidth_() * 0.25);
   }
 
   /**
