@@ -591,7 +591,8 @@ export class VideoDocking {
     if (this.isCurrentlyDocked_(video)) {
       return dev().assert(this.currentlyDocked_).posY;
     }
-    const {top, bottom} = this.getLayoutBox_(video);
+    const {element} = video;
+    const {top, bottom} = element.getIntersectionChangeEntry().intersectionRect;
     if (top <= this.getTopEdge_() &&
         this.scrollDirection_ == Direction.UP) {
       return RelativeY.TOP;
