@@ -530,21 +530,29 @@ function compileCss(watch, opt_compileAll) {
     });
   }
 
+  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
+    return toPromise(gulp.src(`css/${originalCssFilename}`)
+        .pipe($$.file(jsFilename, 'export const cssText = ' +
+          JSON.stringify(css)))
+        .pipe(gulp.dest('build'))
+        .on('end', function() {
+          mkdirSync('build');
+          mkdirSync('build/css');
+          fs.writeFileSync(`build/css/${cssFilename}`, css);
+        }));
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
-      .then(function(css) {
-        return toPromise(gulp.src('css/**.css')
-            .pipe($$.file('css.js', 'export const cssText = ' +
-              JSON.stringify(css)))
-            .pipe(gulp.dest('build'))
-            .on('end', function() {
-              mkdirSync('build');
-              mkdirSync('build/css');
-              fs.writeFileSync('build/css/v0.css', css);
-            }));
-      })
+      .then(css => writeCss(css, 'amp.css', 'css.js', 'v0.css'))
       .then(() => {
         endBuildStep('Recompiled CSS in', 'amp.css', startTime);
+      })
+      .then(() => jsifyCssAsync('css/video-docking.css'))
+      .then(css => writeCss(css,
+          'video-docking.css', 'video-docking.css.js', 'video-docking.css'))
+      .then(() => {
+        endBuildStep('Recompiled CSS in', 'video-docking.css', startTime);
       })
       .then(() => {
         return buildExtensions({
@@ -562,6 +570,7 @@ function compileCss(watch, opt_compileAll) {
 function copyCss() {
   const startTime = Date.now();
   fs.copySync('build/css/v0.css', 'dist/v0.css');
+  fs.copySync('build/css/video-docking.css', 'dist/video-docking.css');
   return toPromise(gulp.src('build/css/amp-*.css')
       .pipe(gulp.dest('dist/v0')))
       .then(() => {

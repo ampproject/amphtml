@@ -462,3 +462,14 @@ export const VideoAnalyticsEvents = {
  * }}
  */
 export let VideoAnalyticsDetailsDef;
+
+
+/**
+ * Helper function to be used internally to cast types from VideoInterface to
+ * the public AMP component interface.
+ * @param {!VideoInterface} video
+ * @return {!./base-element.BaseElement}
+ */
+export function asBaseElement(video) {
+  return /** @type {!./base-element.BaseElement} */ (video);
+}

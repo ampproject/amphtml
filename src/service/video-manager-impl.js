@@ -30,6 +30,7 @@ import {
   VideoEvents,
 } from '../video-interface';
 import {Services} from '../services';
+import {VideoDocking} from './video/docking';
 import {VideoServiceSync} from './video-service-sync-impl';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils} from '../utils/video';
@@ -143,6 +144,9 @@ export class VideoManager {
     /** @private @const {function():!AutoFullscreenManager} */
     this.getAutoFullscreenManager_ =
         once(() => new AutoFullscreenManager(this.ampdoc));
+
+    /** @private @const {function():!VideoDocking} */
+    this.getDocking_ = once(() => new VideoDocking(this.ampdoc, this));
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -331,6 +335,14 @@ export class VideoManager {
   }
 
   /**
+   * @param {!../video-interface.VideoInterface} video
+   * @return {boolean}
+   */
+  isMuted(video) {
+    return this.getEntryForVideo_(video).isMuted();
+  }
+
+  /**
    * Returns whether the video was interacted with or not
    *
    * @param {!../video-interface.VideoInterface} video
@@ -343,6 +355,11 @@ export class VideoManager {
   /** @param {!VideoEntry} entry */
   registerForAutoFullscreen(entry) {
     this.getAutoFullscreenManager_().register(entry);
+  }
+
+  /** @param {!VideoEntry} entry */
+  registerForDocking(entry) {
+    this.getDocking_().register(entry.video);
   }
 }
 
@@ -441,16 +458,34 @@ class VideoEntry {
     }
   }
 
+  /** @return {boolean} */
+  isMuted() {
+    return this.muted_;
+  }
+
   /** @private */
   onRegister_() {
     if (this.hasAutoFullscreen_()) {
       this.manager_.registerForAutoFullscreen(this);
     }
 
+    if (this.isDockable_()) {
+      this.manager_.registerForDocking(this);
+    }
+
     this.updateVisibility();
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isDockable_() {
+    // TODO(alanorozco)
+    return true;
   }
 
   /**
