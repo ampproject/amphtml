@@ -61,30 +61,30 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     sandbox = env.sandbox;
     env.win.AMP_MODE.test = true;
     doc = env.win.document;
-    ampAd = createElementWithAttributes(env.win.document, 'amp-ad', {
-      'height': ampAdHeight,
-      'width': ampAdWidth,
-      'type': 'doubleclick',
-    });
-    doc.body.appendChild(ampAd);
-    doubleclickImpl = new AmpAdNetworkDoubleclickImpl(ampAd, doc, env.win);
-    const initialSize = {
-      width: ampAdWidth,
-      height: ampAdHeight,
-    };
-    const creativeSize = {
-      width: ampAdWidth,
-      height: ampAdHeight,
-    };
-    safeframeHost = new SafeframeHostApi(
-        doubleclickImpl, false, initialSize, creativeSize);
-    doubleclickImpl.upgradeCallback();
-    doubleclickImpl.layoutCallback();
+    setup(ampAdHeight, ampAdWidth, ampAdHeight, ampAdWidth);
   });
 
   afterEach(() => {
     removeSafeframeListener();
   });
+
+  function setup(slotHeight, slotWidth, creativeHeight, creativeWidth) {
+    ampAd = createElementWithAttributes(env.win.document, 'amp-ad', {
+      'height': slotHeight,
+      'width': slotWidth,
+      'type': 'doubleclick',
+    });
+    doc.body.appendChild(ampAd);
+    doubleclickImpl = new AmpAdNetworkDoubleclickImpl(ampAd, doc, env.win);
+    const creativeSize = {
+      width: creativeWidth,
+      height: creativeHeight,
+    };
+    safeframeHost = new SafeframeHostApi(
+        doubleclickImpl, false, creativeSize);
+    doubleclickImpl.upgradeCallback();
+    doubleclickImpl.layoutCallback();
+  }
 
   /**
    * Sends the intitial connection message that sets up the
@@ -215,6 +215,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         },
       });
     });
+
     it('should not pass canonicalUrl if referrer policy same-origin', () => {
       sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
@@ -459,6 +460,11 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     let resizeAmpAdAndSafeframeSpy;
     let attemptChangeSizeStub;
     beforeEach(() => {
+      setupForResize();
+    });
+
+    function setupForResize() {
+      sandbox.restore();
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML = '.safeframe' +
           '{height:50px!important;' +
@@ -489,7 +495,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         width: 1000,
       });
       safeframeHost.isCollapsed_ = true;
-    });
+    }
 
     /**
      * Send a message requesting an expand.
@@ -516,8 +522,40 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      * the amp-ad element, it succeeds immediately.
      */
     it('expand_request should succeed if within amp-ad bounds', () => {
-      safeframeHost.slotSize_.width = 500;
-      safeframeHost.slotSize_.height = 500;
+      const slotHeight = 500;
+      const slotWidth = 500;
+      setup(slotHeight, slotWidth, ampAdHeight, ampAdWidth);
+      setupForResize();
+      sendExpandMessage(50, 50);
+      // Verify that we can immediately resize the safeframe, and don't
+      // need to call any of the fancy AMP element resize things.
+      return Services.timerFor(env.win).promise(100).then(() => {
+        expect(resizeSafeframeSpy).to.be.calledOnce;
+        expect(resizeSafeframeSpy).to.be.calledWith(300, 350);
+        expect(safeframeMock.style.height).to.equal('300px');
+        expect(safeframeMock.style.width).to.equal('350px');
+        expect(sendResizeResponseSpy).to.be.calledWith(
+            true, SERVICE.EXPAND_RESPONSE);
+        expect(resizeAmpAdAndSafeframeSpy).to.not.be.called;
+      });
+    });
+
+    /**
+     * If the amp-ad slot size changes at any time, we should always be
+     * handling it properly. In this test, the initial size of the slot
+     * is such that an expand request should cause resizeAmpAdAndSafeframe
+     * to be called, but before the expand request is sent, we modify
+     * the slot size so that it is big enough that this is no longer the
+     * case.
+     */
+    it('expand_request should properly handle slot size change', () => {
+      const slotHeight = 10;
+      const slotWidth = 10;
+      setup(slotHeight, slotWidth, ampAdHeight, ampAdWidth);
+      setupForResize();
+      // Increase the slot size
+      ampAd.style.height = '600px';
+      ampAd.style.width = '600px';
       sendExpandMessage(50, 50);
       // Verify that we can immediately resize the safeframe, and don't
       // need to call any of the fancy AMP element resize things.
