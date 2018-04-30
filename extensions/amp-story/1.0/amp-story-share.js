@@ -353,7 +353,8 @@ export class ShareWidget {
   setProviders_(providers) {
     // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
     if (providers && isArray(providers)) {
-      providers = this.parseToClassicApi_(providers);
+      providers = this.parseToClassicApi_(
+          /** @type !Array<!Object|string> */ (providers));
     }
 
     Object.keys(providers).forEach(type => {

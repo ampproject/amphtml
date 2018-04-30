@@ -17,8 +17,6 @@
 import {AmpStory} from '../amp-story';
 import {ArticleComponent} from '../bookend/components/article';
 import {Bookend} from '../bookend/amp-story-bookend';
-import {dict} from '../../../../src/utils/object';
-import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
   amp: {
@@ -81,7 +79,7 @@ describes.realWin('amp-story-bookend', {
   });
 
   it('should build the users json', () => {
-    const userJson = dict({
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -100,7 +98,7 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
@@ -108,15 +106,15 @@ describes.realWin('amp-story-bookend', {
 
     bookend.build();
     return bookend.loadConfig().then(config => {
-      const components = config.components;
-      for (let i = 0; i < components.length; i++) {
-        return expect(components[i]).to.deep.equal(expectedComponents[i]);
-      }
+      config.components.forEach((currentComponent, index) => {
+        return expect(currentComponent).to.deep
+            .equal(expectedComponents[index]);
+      });
     });
   });
 
   it('should build the users json with share-providers alternative', () => {
-    const userJson = dict({
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -135,7 +133,7 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
     sandbox.stub(bookend.requestService_, 'loadBookendConfig')
@@ -151,7 +149,8 @@ describes.realWin('amp-story-bookend', {
   });
 
   it('should reject invalid user json for article', () => {
-    const userJson = dict({
+    const articleComponent = new ArticleComponent();
+    const userJson = {
       'bookend-version': 'v1.0',
       'share-providers': [
         'email',
@@ -169,10 +168,10 @@ describes.realWin('amp-story-bookend', {
           'image': 'http://placehold.it/256x128',
         },
       ],
-    });
+    };
 
     allowConsoleError(() => {
-      expect(() => ArticleComponent.isValid(userJson)).to.throw('Articles' +
+      expect(() => articleComponent.isValid(userJson)).to.throw('Articles' +
         ' must contain `title` and `url` fields, skipping invalid.​​​');
     });
   });

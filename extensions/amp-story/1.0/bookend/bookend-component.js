@@ -30,15 +30,29 @@ export let BookendDataDef;
  */
 export let BookendComponentDef;
 
+const articleComponent = new ArticleComponent();
+const articleTitleComponent = new ArticleTitleComponent();
+
+/**
+ * @typedef {(!ArticleComponent|!ArticleTitleComponent)}
+ */
+export let BookendComponentClass;
+
 /**
  * Dispatches the components to their specific builder classes.
  * @param {string} componentType
- * @return {?./components/interface.BookendComponentInterface}
+ * @return {?BookendComponentClass}
  */
-export const componentsMap = {
-  'small': ArticleComponent,
-  'article-set-title': ArticleTitleComponent,
-};
+function componentClassFor(componentType) {
+  switch (componentType) {
+    case 'small':
+      return articleComponent;
+    case 'article-set-title':
+      return articleTitleComponent;
+    default:
+      return null;
+  }
+}
 
 /**
  * Delegator class that dispatches the logic to build different components
@@ -53,7 +67,7 @@ export class BookendComponent {
    */
   static buildFromJson(components) {
     return components.reduce((builtComponents, component) => {
-      const klass = componentsMap[component.type];
+      const klass = componentClassFor(component.type);
       if (!klass ||
           !klass.isValid(component)) {
         return;
@@ -73,8 +87,8 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      if (component.type && componentsMap[component.type]) {
-        fragment.appendChild(componentsMap[component.type]
+      if (component.type && componentClassFor(component.type)) {
+        fragment.appendChild(componentClassFor(component.type)
             .buildTemplate(component, doc));
       }
     });

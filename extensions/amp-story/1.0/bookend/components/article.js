@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './interface';
+import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor} from '../../../../../src/static-template';
@@ -37,7 +37,7 @@ export let BookendArticleComponentDef;
  */
 export class ArticleComponent {
   /** @override */
-  static isValid(articleJson) {
+  isValid(articleJson) {
     if (!articleJson['title'] || !articleJson['url']) {
       return user().assert(false, 'Articles must contain `title` and `url` ' +
         'fields, skipping invalid.');
@@ -59,7 +59,7 @@ export class ArticleComponent {
    * @override
    * @return {!BookendArticleComponentDef}
    * */
-  static build(articleJson) {
+  build(articleJson) {
     const article = {
       type: 'small',
       title: articleJson['title'],
@@ -75,7 +75,7 @@ export class ArticleComponent {
   }
 
   /** @override */
-  static buildTemplate(articleData, doc) {
+  buildTemplate(articleData, doc) {
 
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
@@ -129,7 +129,7 @@ export let BookendArticleTitleComponentDef;
 export class ArticleTitleComponent {
 
   /** @override */
-  static isValid(titleJson) {
+  isValid(titleJson) {
     if (!titleJson['title']) {
       user().assert(false, 'Titles must contain `title` field, skipping' +
       ' invalid.');
@@ -138,7 +138,7 @@ export class ArticleTitleComponent {
   }
 
   /** @override */
-  static build(titleJson) {
+  build(titleJson) {
     const title = {
       type: 'article-set-title',
       heading: titleJson.title,
@@ -147,7 +147,7 @@ export class ArticleTitleComponent {
   }
 
   /** @override */
-  static buildTemplate(titleData, doc) {
+  buildTemplate(titleData, doc) {
     const html = htmlFor(doc);
     const template = html`<h3 class="i-amphtml-story-bookend-heading"></h3>`;
 
