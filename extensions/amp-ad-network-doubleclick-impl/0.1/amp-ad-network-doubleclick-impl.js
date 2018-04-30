@@ -1312,8 +1312,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(creativeSize, 'this.getCreativeSize returned null');
     this.safeframeApi_ = this.safeframeApi_ ||
         new SafeframeHostApi(
-            this, this.isFluid_, this.initialSize_,
-            /** @type {{height, width}} */(creativeSize),
+            this, this.isFluid_, /** @type {{height, width}} */(creativeSize),
             this.fluidImpressionUrl_);
 
     return this.safeframeApi_.getSafeframeNameAttr();

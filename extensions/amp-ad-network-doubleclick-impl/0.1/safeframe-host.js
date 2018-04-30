@@ -122,12 +122,10 @@ export class SafeframeHostApi {
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
-   * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
    * @param {{width:number, height:number}} creativeSize
    * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, initialSize, creativeSize,
-    fluidImpressionUrl) {
+  constructor(baseInstance, isFluid, creativeSize, fluidImpressionUrl) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -154,9 +152,6 @@ export class SafeframeHostApi {
 
     /** @private {boolean} */
     this.isFluid_ = isFluid;
-
-    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
-    this.slotSize_ = initialSize;
 
     /** @private {{width:number, height:number}} */
     this.creativeSize_ = creativeSize;
@@ -562,13 +557,15 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
-    if (!optIsCollapse &&
-        width <= this.slotSize_.width &&
-        height <= this.slotSize_.height) {
-      this.resizeSafeframe(height, width, messageType);
-    } else {
-      this.resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse);
-    }
+    return this.viewport_.getClientRectAsync(
+        this.baseInstance_.element).then(box => {
+      if (!optIsCollapse && width <= box.width && height <= box.height) {
+        this.resizeSafeframe(height, width, messageType);
+      } else {
+        this.resizeAmpAdAndSafeframe(height, width, messageType,
+            optIsCollapse);
+      }
+    });
   }
 
   /**
@@ -635,11 +632,6 @@ export class SafeframeHostApi {
       // If this resize succeeded, we always resize the safeframe.
       // resizeSafeframe also sends the resize response.
       this.resizeSafeframe(height, width, messageType);
-      // Update our stored record of what the amp-ad's size is. This
-      // is just for caching. Setting it here doesn't actually change
-      // the size of the amp-ad, the attempt change size above did that.
-      this.slotSize_.height = height;
-      this.slotSize_.width = width;
     }, /** REJECT CALLBACK */ () => {
       // If the resize initially failed, it may have been queued
       // as a pendingChangeSize, which will cause the size change
