@@ -67,7 +67,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 ## Analytics
 
-`amp-video` supports analytics out of the box. See [video analytics](../extensions/amp-analytics/amp-video-analytics.md) for more information.
+`amp-video` supports analytics out of the box. See [video analytics](/extensions/amp-analytics/amp-video-analytics.md) for more information.
 
 ## Attributes
 
@@ -86,7 +86,7 @@ Alternatively, you can present a click-to-play overlay. For details, see the [Cl
 
 If this attribute is present, and the browser supports autoplay, the video will be automatically
 played as soon as it becomes visible. There are some conditions that the component needs to meet
-to be played, [which are outlined here](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
+to be played, [which are outlined in the Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay).
 
 ##### controls
 
@@ -114,7 +114,7 @@ The `muted` attribute is deprecated and no longer has any effect. The `autoplay`
 
 ##### rotate-to-fullscreen
 
-Automatically shows the video on fullscreen after the user rotates their device into landscape mode, if the video is visible. See [more details about this feature.](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen)
+If the video is visible, the video displays fullscreen after the user rotates their device into landscape mode. For more details, see the [Video in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#rotate-to-fullscreen).
 
 ##### common attributes
 
