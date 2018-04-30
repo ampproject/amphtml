@@ -491,7 +491,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
               // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
-
     it('has experiment eid in adsense frmt exp and width/height numeric',
         () => {
           toggleExperiment(impl.win, 'as-use-attr-for-format', true);
@@ -511,7 +510,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return impl.getAdUrl().then(
           url => expect(url).to.not.match(/eid=[^&]*2106200(3|4)/));
     });
-
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
