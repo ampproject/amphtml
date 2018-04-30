@@ -311,4 +311,14 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       expect(platform.isGoogleViewer_).to.be.true;
     });
   });
+
+  it('should attach button given to decorateUI', () => {
+    const elem = env.win.document.createElement('div');
+    const decorateStub = sandbox.stub(platform.runtime_.buttonApi_,
+        'attach');
+    elem.innerHTML = 'some html';
+    platform.decorateUI(elem);
+    expect(elem.innerHTML).to.be.equal('');
+    expect(decorateStub).to.be.calledWith(elem);
+  });
 });
