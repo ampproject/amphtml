@@ -58,7 +58,7 @@ export class NameFrameRenderer extends Renderer {
     const iframe = createElementWithAttributes(
         /** @type {!Document} */ (element.ownerDocument), 'iframe',
         /** @type {!JsonObject} */ (attributes));
-    context.applyFillContent(iframe);
+    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
     element.appendChild(iframe);
     return Promise.resolve();
   }
