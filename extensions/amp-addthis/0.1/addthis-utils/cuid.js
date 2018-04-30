@@ -50,7 +50,7 @@ export const isDateInFuture = date => {
   const yearIsSame = date.getFullYear() === now.getFullYear();
   const monthIsLater = date.getMonth() > now.getMonth();
   const monthIsSame = date.getMonth() === now.getMonth();
-  const dateIsLater = date.getDay() > now.getDay();
+  const dateIsLater = date.getDate() > now.getDate();
   return (
     yearIsLater ||
     (yearIsSame && monthIsLater) ||
