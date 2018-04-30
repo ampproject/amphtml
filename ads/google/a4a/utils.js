@@ -465,10 +465,11 @@ export function additionalDimensions(win, viewportSize) {
  * Returns amp-analytics config for a new CSI trigger.
  * @param {string} on The name of the analytics trigger.
  * @param {!Object<string, string>} params Params to be included on the ping.
+ * @param {!JsonObject=} base A base for the trigger config.
  * @return {!JsonObject}
  */
-function csiTrigger(on, params) {
-  return dict({
+function csiTrigger(on, params, base = dict()) {
+  return dict(Object.assign(base, {
     'on': on,
     'request': 'csi',
     'sampleSpec': {
@@ -481,14 +482,16 @@ function csiTrigger(on, params) {
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
     'extraUrlParams': params,
-  });
+  }));
 }
 
 /**
  * Returns amp-analytics config for Google ads network impls.
+ * @param {!AMP.BaseElement} a4a The A4A element.
  * @return {!JsonObject}
  */
-export function getCsiAmpAnalyticsConfig() {
+export function getCsiAmpAnalyticsConfig(a4a) {
+  const adf = DomFingerprint.generate(a4a.element);
   return dict({
     'requests': {
       'csi': 'https://csi.gstatic.com/csi?',
@@ -501,8 +504,27 @@ export function getCsiAmpAnalyticsConfig() {
       }),
       'adResponseEnd': csiTrigger('ad-response-end', {
         // afe => ad fetch end
-        'met.a4a': 'afe.${time}',
-      }),
+        'met.a4a': 'afe_lvt.${viewerLastVisibleTime}~afe.${time}',
+        'rt': '${resourceTiming}',
+      }, dict({
+        'resourceTimingSpec': {
+          'resources': {
+            'ad': {
+              'host': 'securepubads.g.doubleclick.net',
+              'path': 'gampad/ads',
+              'query': `adf=${adf}`,
+            },
+          },
+          'encoding': {
+            'entry': '${key}.${initiatorType}.${startTime}.${duration}' +
+                '.${networkTransferTime}.${serverResponseTime}' +
+                '.${tcpConnectTime}.${domainLookupTime}' +
+                '.${transferSize}.${encodedBodySize}',
+            'delim': '~',
+            'base': 36,
+          },
+        },
+      })),
       'adRenderStart': csiTrigger('ad-render-start', {
         // ast => ad schedule time
         // ars => ad render start
@@ -512,7 +534,7 @@ export function getCsiAmpAnalyticsConfig() {
       }),
       'adIframeLoaded': csiTrigger('ad-iframe-loaded', {
         // ail => ad iframe loaded
-        'met.a4a': 'ail.${time}',
+        'met.a4a': 'ail_lvt.${viewerLastVisibleTime}~ail.${time}',
       }),
     },
     'extraUrlParams': {
@@ -521,8 +543,8 @@ export function getCsiAmpAnalyticsConfig() {
       'c': '${correlator}',
       'slotId': '${slotId}',
       // Time that the beacon was actually sent. Note that there can be delays
-      // between the time at which the event is fired and when ${nowMs} is
-      // evaluated when the URL is built by amp-analytics.
+      // between the time at which the event is fired and when the url is
+      // expanded by amp-analytics.
       'puid': '${requestCount}~${timestamp}',
     },
   });

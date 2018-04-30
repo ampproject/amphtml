@@ -1352,7 +1352,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getA4aAnalyticsConfig() {
-    return getCsiAmpAnalyticsConfig();
+    return getCsiAmpAnalyticsConfig(this);
   }
 }
 
