@@ -167,6 +167,9 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+        });
         impl.open_();
         expect(doc.querySelectorAll('.i-amphtml-sidebar-mask').length)
             .to.equal(1);
@@ -298,6 +301,11 @@ describes.realWin('amp-sidebar 0.1 version', {
           },
         };
 
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+          pop: sandbox.stub().resolves(11),
+        });
+
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
@@ -329,6 +337,10 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+          pop: sandbox.stub().resolves(11),
+        });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -363,6 +375,11 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+          pop: sandbox.stub().resolves(11),
+        });
 
         expect(impl.isOpen_()).to.be.false;
         clock.tick(600);
@@ -447,6 +464,10 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+          pop: sandbox.stub().resolves(11),
+        });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         impl.open_();
         expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -488,6 +509,9 @@ describes.realWin('amp-sidebar 0.1 version', {
                 callback();
               },
             };
+            impl.getHistory_ = () => ({
+              push: sandbox.stub().resolves(11),
+            });
             sandbox.stub(timer, 'delay').callsFake(function(callback) {
               callback();
             });
@@ -533,6 +557,9 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+        });
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
@@ -576,6 +603,9 @@ describes.realWin('amp-sidebar 0.1 version', {
             callback();
           },
         };
+        impl.getHistory_ = () => ({
+          push: sandbox.stub().resolves(11),
+        });
         sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
