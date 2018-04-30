@@ -130,7 +130,7 @@ export class LocalSubscriptionPlatformRenderer {
           if (candidate.hasAttribute('subscriptions-service')) {
             this.serviceAdapter_.delegateDecorationToElement(
                 candidate,
-                candidate.getAttribute('subscriptions-service'),
+                candidate.getAttribute('subscriptions-service')
             );
           }
         } else {

@@ -193,6 +193,11 @@ export class ViewerSubscriptionPlatform {
   executeAction(action) {
     return this.platform_.executeAction(action);
   }
+
+  /** @override */
+  decorateUI(action) {
+    return this.platform_.decorateUI(action);
+  }
 }
 
 /**

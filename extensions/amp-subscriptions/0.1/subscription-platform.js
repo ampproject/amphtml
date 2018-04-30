@@ -76,9 +76,9 @@ export class SubscriptionPlatform {
 
   /**
    * Decorate the DomNode according to your platform
-   * @param {Node} unusedNode
+   * @param {Element} unusedElement
    */
-  decorateUI(unusedNode) {}
+  decorateUI(unusedElement) {}
 }
 
 /**

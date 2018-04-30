@@ -530,7 +530,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           subscriptionService.platformStore_, 'whenPlatformResolves')
           .callsFake(() => Promise.resolve(platform));
       const action = action;
-      return subscriptionService.delegateActionToService(action, 'local').then(() => {
+      return subscriptionService.delegateActionToService(action,
+          'local').then(() => {
         expect(getPlatformStub).to.be.calledWith('local');
         expect(executeActionStub).to.be.calledWith(action);
       });
