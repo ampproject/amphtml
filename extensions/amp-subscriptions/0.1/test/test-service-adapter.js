@@ -87,4 +87,16 @@ env => {
       expect(stub).to.be.calledOnce;
     });
   });
+
+  describe('delegateDecorationToElement', () => {
+    it('should call delegateDecorationToElement of '
+      + 'subscription service', () => {
+      const element = win.document.createElement('div');
+      const serviceId = 'local';
+      const stub = sandbox.stub(subscriptionService,
+          'delegateDecorationToElement');
+      serviceAdapter.delegateDecorationToElement(element, serviceId);
+      expect(stub).to.be.calledWith(element, serviceId);
+    });
+  });
 });
