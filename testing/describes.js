@@ -79,41 +79,41 @@
  * and `integration` below.
  */
 
-import fetchMock from 'fetch-mock';
-import installCustomElements from
-    'document-register-element/build/document-register-element.node';
+import * as sinon from 'sinon';
 import {BaseElement} from '../src/base-element';
+import {CSS} from '../build/amp-ad-0.1.css.js';
 import {
   FakeCustomElements,
   FakeLocation,
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {stubService} from './test-helper';
-import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
-import {doNotLoadExternalResourcesInTest} from './iframe';
 import {Services} from '../src/services';
+import {addParamsToUrl} from '../src/url';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {createElementWithAttributes} from '../src/dom';
-import {addParamsToUrl} from '../src/url';
-import {cssText} from '../build/css';
-import {CSS} from '../build/amp-ad-0.1.css.js';
 import {createAmpElementProtoForTesting} from '../src/custom-element';
-import {installDocService} from '../src/service/ampdoc-impl';
+import {createElementWithAttributes} from '../src/dom';
+import {cssText} from '../build/css';
+import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
   installBuiltinElements,
   installExtensionsService,
 } from '../src/service/extensions-impl';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {
   resetScheduledElementForTesting,
 } from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import * as sinon from 'sinon';
+import {stubService} from './test-helper';
+import fetchMock from 'fetch-mock';
+import installCustomElements from
+  'document-register-element/build/document-register-element.node';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -182,7 +182,7 @@ export let AmpTestEnv;
  * @param {!TestSpec} spec
  * @param {function()} fn
  */
-export const sandboxed = describeEnv(spec => []);
+export const sandboxed = describeEnv(unusedSpec => []);
 
 
 /**
@@ -328,7 +328,7 @@ function describeEnv(factory) {
       beforeEach(() => {
         let totalPromise = undefined;
         // Set up all fixtures.
-        fixtures.forEach((fixture, index) => {
+        fixtures.forEach((fixture, unusedIndex) => {
           if (totalPromise) {
             totalPromise = totalPromise.then(() => fixture.setup(env));
           } else {
@@ -386,7 +386,7 @@ function describeEnv(factory) {
 
 
 /** @interface */
-class Fixture {
+class FixtureInterface {
 
   /** @return {boolean} */
   isOn() {}
@@ -395,16 +395,16 @@ class Fixture {
    * @param {!Object} env
    * @return {!Promise|undefined}
    */
-  setup(env) {}
+  setup(unusedEnv) {}
 
   /**
    * @param {!Object} env
    */
-  teardown(env) {}
+  teardown(unusedEnv) {}
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class SandboxFixture {
 
   /** @param {!TestSpec} spec */
@@ -423,8 +423,6 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
-
     // Sandbox.
     let sandbox = global.sandbox;
     if (!sandbox) {
@@ -445,7 +443,7 @@ class SandboxFixture {
   }
 }
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class IntegrationFixture {
 
   /** @param {!{body: string}} spec */
@@ -466,13 +464,13 @@ class IntegrationFixture {
   /** @override */
   setup(env) {
     const body = typeof this.spec.body == 'function' ?
-          this.spec.body() : this.spec.body;
+      this.spec.body() : this.spec.body;
     const css = typeof this.spec.css == 'function' ?
-          this.spec.css() : this.spec.css;
+      this.spec.css() : this.spec.css;
     const experiments = this.spec.experiments == undefined ?
-        undefined : this.spec.experiments.join(',');
+      undefined : this.spec.experiments.join(',');
     const extensions = this.spec.extensions == undefined ?
-        undefined : this.spec.extensions.join(',');
+      undefined : this.spec.extensions.join(',');
 
     return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
@@ -496,7 +494,7 @@ class IntegrationFixture {
   }
 }
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class FakeWinFixture {
 
   /** @param {!{win: !FakeWindowSpec}} spec */
@@ -520,7 +518,7 @@ class FakeWinFixture {
   }
 
   /** @override */
-  teardown(env) {
+  teardown(unusedEnv) {
     if (this.spec.mockFetch !== false) {
       fetchMock./*OK*/restore();
     }
@@ -528,7 +526,7 @@ class FakeWinFixture {
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class RealWinFixture {
 
   /** @param {!{
@@ -623,7 +621,7 @@ class RealWinFixture {
 }
 
 
-/** @implements {Fixture} */
+/** @implements {FixtureInterface} */
 class AmpFixture {
 
   /**
@@ -766,13 +764,13 @@ class AmpFixture {
             interceptEventListeners(embedWin.document.documentElement);
             interceptEventListeners(embedWin.document.body);
           }).then(embed => {
-            env.embed = embed;
-            env.parentWin = env.win;
-            env.win = embed.win;
-            configureAmpTestMode(embed.win);
-          });
+        env.embed = embed;
+        env.parentWin = env.win;
+        env.win = embed.win;
+        configureAmpTestMode(embed.win);
+      });
       completePromise = completePromise ?
-          completePromise.then(() => promise) : promise;
+        completePromise.then(() => promise) : promise;
     } else if (ampdocType == 'shadow') {
       const hostElement = win.document.createElement('div');
       win.document.body.appendChild(hostElement);
@@ -786,7 +784,7 @@ class AmpFixture {
         ampdoc.whenReady(),
       ]);
       completePromise = completePromise ?
-          completePromise.then(() => promise) : promise;
+        completePromise.then(() => promise) : promise;
     }
 
     return completePromise;
@@ -879,4 +877,4 @@ function createAmpElement(win, opt_name, opt_implementationClass) {
   element.createdCallback();
   element.classList.add('i-amphtml-element');
   return element;
-};
+}
