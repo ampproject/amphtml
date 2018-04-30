@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
+import {WindowInterface} from '../src/window-interface';
 import {
   getService,
   getServiceForDoc,
@@ -23,7 +22,8 @@ import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../src/service';
-import {WindowInterface} from '../src/window-interface';
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
