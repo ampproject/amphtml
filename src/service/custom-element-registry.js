@@ -16,7 +16,6 @@
 
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
-import {declareExtension} from './ampdoc-impl';
 import {reportError} from '../error';
 import {user} from '../log';
 
@@ -99,7 +98,7 @@ export function stubElementsForDoc(ampdoc) {
   const list = ampdoc.getHeadNode().querySelectorAll('script[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
-    declareExtension(ampdoc, name);
+    ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
   }
 }
