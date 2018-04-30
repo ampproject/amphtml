@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-var background = chrome.extension.getBackgroundPage();
+const background = chrome.extension.getBackgroundPage(); // eslint-disable-line no-undef
 
-function toggleProxy(e) {
+function toggleProxy(unusedE) {
   background.disabled = !background.disabled;
   background.updateBadge();
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  var switch_button = document.querySelector('input[type="checkbox"]');
-  switch_button.addEventListener('change', toggleProxy);
+document.addEventListener('DOMContentLoaded', function() {
+  const switchButton = document.querySelector('input[type="checkbox"]');
+  switchButton.addEventListener('change', toggleProxy);
   if (!background.disabled) {
-    switch_button.checked = true;
+    switchButton.checked = true;
   }
 });

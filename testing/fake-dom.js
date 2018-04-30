@@ -119,14 +119,13 @@ export class FakeWindow {
     this.cookie_ = [];
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
-        let cookie = [];
+        const cookie = [];
         for (let i = 0; i < this.cookie_.length; i += 2) {
           cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
         }
         return cookie.join(';');
       },
       set: value => {
-        const semi = value.indexOf(';');
         const cookie = value.match(/^([^=]*)=([^;]*)/);
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
         const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
@@ -141,7 +140,7 @@ export class FakeWindow {
         } else {
           this.cookie_.splice(i, 2, cookie[1], cookie[2]);
         }
-      }
+      },
     });
 
     // Create element to enhance test elements.
@@ -180,7 +179,7 @@ export class FakeWindow {
     // Storage.
     /** @const {!FakeStorage|undefined} */
     this.localStorage = spec.localStorageOff ?
-        undefined : new FakeStorage(this);
+      undefined : new FakeStorage(this);
 
     // Timers and animation frames.
     /** @const */
@@ -193,7 +192,7 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setTimeout = function () {
+    this.setTimeout = function() {
       return window.setTimeout.apply(window, arguments);
     };
 
@@ -201,7 +200,7 @@ export class FakeWindow {
      * @param {number} id
      * @const
      */
-    this.clearTimeout = function () {
+    this.clearTimeout = function() {
       return window.clearTimeout.apply(window, arguments);
     };
 
@@ -212,7 +211,7 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setInterval = function () {
+    this.setInterval = function() {
       return window.setInterval.apply(window, arguments);
     };
 
@@ -220,7 +219,7 @@ export class FakeWindow {
      * @param {number} id
      * @const
      */
-    this.clearInterval = function () {
+    this.clearInterval = function() {
       return window.clearInterval.apply(window, arguments);
     };
 
@@ -310,7 +309,7 @@ class EventListeners {
       type,
       handler,
       capture: typeof captureOrOpts == 'boolean' ? captureOrOpts :
-          typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
+        typeof captureOrOpts == 'object' ? captureOrOpts.capture || false :
           false,
       options: typeof captureOrOpts == 'object' ? captureOrOpts : null,
     };
@@ -409,7 +408,7 @@ export class FakeLocation {
     });
 
     const properties = ['protocol', 'host', 'hostname', 'port', 'pathname',
-        'search', 'hash', 'origin'];
+      'search', 'hash', 'origin'];
     properties.forEach(property => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
@@ -550,7 +549,7 @@ export class FakeHistory {
     this.index++;
     if (this.index < this.stack.length) {
       // Remove tail.
-      this.stack.splice(this.index, thius.stack.length - this.index);
+      this.stack.splice(this.index, this.stack.length - this.index);
     }
     this.stack[this.index] = {
       state: state ? freeze(state) : null,
