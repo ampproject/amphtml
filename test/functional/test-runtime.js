@@ -847,7 +847,7 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement)))
@@ -1171,7 +1171,7 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement)))
@@ -1518,7 +1518,7 @@ describes.realWin('runtime multidoc', {
       const shadowRoot = createShadowRoot(hostElement);
       const ampdoc = new AmpDocShadow(win, docUrl, shadowRoot);
 
-      ampdocServiceMock.expects('installShadowDoc_')
+      ampdocServiceMock.expects('installShadowDoc')
           .withExactArgs(
               docUrl,
               sinon.match(arg => arg == getShadowRoot(hostElement)))
