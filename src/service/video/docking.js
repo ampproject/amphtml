@@ -1018,8 +1018,6 @@ export class VideoDocking {
       this.offset_(offsetX, offsetY);
     };
 
-    this.viewport_.disableScroll();
-
     const onDragEnd = () => {
       unlisteners.forEach(unlisten => unlisten.call());
 
@@ -1038,6 +1036,8 @@ export class VideoDocking {
       listenOnce(root, 'touchend', onDragEnd),
       listenOnce(root, 'mouseup', onDragEnd),
     ];
+
+    this.viewport_.disableScroll();
   }
 
   /**
