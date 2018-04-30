@@ -9,16 +9,16 @@ these players implement.
 
 These players include:
 
-- amp-3q-player
-- amp-brid-player
-- amp-dailymotion
-- amp-gfycat
-- amp-ima-video
-- amp-nexxtv-player
-- amp-ooyala-player
-- amp-video
-- amp-wistia-player
-- amp-youtube
+- [amp-3q-player](https://www.ampproject.org/docs/reference/components/amp-3q-player)
+- [amp-brid-player](https://www.ampproject.org/docs/reference/components/amp-brid-player)
+- [amp-dailymotion](https://www.ampproject.org/docs/reference/components/amp-dailymotion)
+- [amp-gfycat](https://www.ampproject.org/docs/reference/components/amp-gfycat)
+- [amp-ima-video](https://www.ampproject.org/docs/reference/components/amp-ima-video)
+- [amp-nexxtv-player](https://www.ampproject.org/docs/reference/components/amp-nexxtv-player)
+- [amp-ooyala-player](https://www.ampproject.org/docs/reference/components/amp-ooyala-player)
+- [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
+- [amp-wistia-player](https://www.ampproject.org/docs/reference/components/amp-wistia-player)
+- [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
 
 <a id="analytics"></a>
 
