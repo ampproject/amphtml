@@ -76,7 +76,7 @@ export class FriendlyFrameRenderer extends Renderer {
             'allowtransparency': '',
             'scrolling': 'no',
           })));
-    context.applyFillContent(this.iframe_);
+    // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
 
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
