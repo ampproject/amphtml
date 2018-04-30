@@ -1,0 +1,20 @@
+{
+  "bookend-version": "v1.0",
+  "share-providers": [
+    "email",
+    {"provider": "facebook", "app-id": "254325784911610"},
+    "whatsapp"
+  ],
+  "components": [
+    {
+      "type": "article-set-title",
+      "title": "test"
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    }
+  ]
+}

@@ -61,6 +61,12 @@ const DEFAULT_BUTTON_PADDING = 16;
  */
 const MIN_BUTTON_PADDING = 10;
 
+/**
+ * Share providers tag.
+ * @private @const {string}
+ */
+const SHARE_PROVIDERS = 'share-providers';
+
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -307,7 +313,7 @@ export class ShareWidget {
     this.loadRequiredExtensions();
 
     this.requestService_.loadBookendConfig().then(config => {
-      const providers = config && config['share-providers'];
+      const providers = config && config[SHARE_PROVIDERS];
       if (!providers) {
         return;
       }
@@ -316,11 +322,39 @@ export class ShareWidget {
   }
 
   /**
-   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * TODO(#14591): Remove when bookend API v0.1 is deprecated.
+   * If using the bookend API v1.0, converts the contents to match with the bookend API v0.1.
+   * @param {!Array<!Object|string>} providers
+   * @return {!Object<string, boolean|!Object<string, string>>}
+   */
+  parseToClassicApi_(providers) {
+    const providersMap = {};
+
+    providers.forEach(currentProvider => {
+      if (isObject(currentProvider) &&
+          currentProvider['provider'] == 'facebook') {
+        providersMap['facebook'] = ({'app_id': currentProvider['app-id']});
+      } else if (isObject(currentProvider)) {
+        providersMap[currentProvider['provider']] = true;
+      } else {
+        providersMap[currentProvider] = true;
+      }
+    });
+
+    return providersMap;
+  }
+
+  /**
+   * @param {(!Object<string, (!JsonObject|boolean)> | !Array<!JsonObject|string>)} providers
    * @private
    */
   // TODO(alanorozco): Set story metadata in share config
   setProviders_(providers) {
+    // TODO(#14591): Check if using bookend API v1.0 and convert it to be v0.1 compatible if so.
+    if (Array.isArray(providers)) {
+      providers = this.parseToClassicApi_(providers);
+    }
+
     Object.keys(providers).forEach(type => {
       if (type == 'system') {
         user().warn('AMP-STORY',

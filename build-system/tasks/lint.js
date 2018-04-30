@@ -80,6 +80,10 @@ function logOnSameLine(message) {
 function runLinter(path, stream, options) {
   if (!process.env.TRAVIS) {
     log(colors.green('Starting linter...'));
+  } else {
+    // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+    log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
+    console./* OK*/log('travis_fold:start:lint_results\n');
   }
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
@@ -92,6 +96,10 @@ function runLinter(path, stream, options) {
         }
       }))
       .pipe(eslint.results(function(results) {
+        // TODO(jridgewell, #14761): Remove log folding after #14761 is fixed.
+        if (process.env.TRAVIS) {
+          console./* OK*/log('travis_fold:end:lint_results');
+        }
         if (results.errorCount == 0 && results.warningCount == 0) {
           if (!process.env.TRAVIS) {
             logOnSameLine(colors.green('SUCCESS: ') +

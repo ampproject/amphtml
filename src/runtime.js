@@ -20,15 +20,6 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {
-  addElementToExtension,
-  addServiceToExtension,
-  installBuiltinElements,
-  installExtensionsInDoc,
-  installExtensionsService,
-  registerExtension,
-  stubLegacyElements,
-} from './service/extensions-impl';
 import {childElementsByTag} from './dom';
 import {
   createShadowDomWriter,
@@ -46,6 +37,11 @@ import {
 } from './render-delaying-services';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
+import {
+  installBuiltinElements,
+  installExtensionsService,
+  stubLegacyElements,
+} from './service/extensions-impl';
 import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
@@ -56,11 +52,6 @@ import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
-import {
-  installShadowDoc,
-  shadowDocHasBody,
-  shadowDocReady,
-} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
@@ -195,7 +186,7 @@ function adoptShared(global, callback) {
    * @param {function(new:BaseElement, !Element)} implementationClass
    * @param {?string|undefined} css
    */
-  global.AMP.registerElement = addElementToExtension.bind(null, extensions);
+  global.AMP.registerElement = extensions.addElement.bind(extensions);
 
   /**
    * Registers an extended template.
@@ -211,8 +202,7 @@ function adoptShared(global, callback) {
    * @param {string} name
    * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} implementationClass
    */
-  global.AMP.registerServiceForDoc =
-      addServiceToExtension.bind(null, extensions);
+  global.AMP.registerServiceForDoc = extensions.addService.bind(extensions);
 
   // Experiments.
   /**
@@ -248,7 +238,7 @@ function adoptShared(global, callback) {
         if (typeof fnOrStruct == 'function') {
           fnOrStruct(global.AMP);
         } else {
-          registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
+          extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
         }
       });
     };
@@ -460,7 +450,7 @@ export class MultidocManager {
     amp.url = url;
     const origin = parseUrl(url).origin;
 
-    const ampdoc = installShadowDoc(this.ampdocService_, url, shadowRoot);
+    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
@@ -531,7 +521,7 @@ export class MultidocManager {
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
-      shadowDocReady(ampdoc);
+      ampdoc.setReady();
       ampdoc.signals().signal(CommonSignals.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     });
@@ -564,14 +554,14 @@ export class MultidocManager {
         (amp, shadowRoot, ampdoc) => {
           // Install extensions.
           const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
-          installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
+          this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
 
           // Append body.
           if (doc.body) {
             const body = importShadowBody(
                 shadowRoot, doc.body, /* deep */ true);
             body.classList.add('amp-shadow');
-            shadowDocHasBody(ampdoc, body);
+            ampdoc.setBody(body);
           }
 
           // TODO(dvoytenko): find a better and more stable way to make content
@@ -608,7 +598,7 @@ export class MultidocManager {
             // Install extensions.
             const extensionIds = this.mergeShadowHead_(ampdoc, shadowRoot, doc);
             // Apply all doc extensions.
-            installExtensionsInDoc(this.extensions_, ampdoc, extensionIds);
+            this.extensions_.installExtensionsInDoc(ampdoc, extensionIds);
 
             // Append shallow body.
             const body = importShadowBody(
@@ -616,7 +606,7 @@ export class MultidocManager {
                 dev().assertElement(doc.body),
                 /* deep */ false);
             body.classList.add('amp-shadow');
-            shadowDocHasBody(ampdoc, body);
+            ampdoc.setBody(body);
             return body;
           });
           writer.onBodyChunk(() => {

@@ -42,8 +42,9 @@ const FxType = {
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
+ * @visibleForTesting
  */
-class AmpFxCollection {
+export class AmpFxCollection {
 
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc

@@ -41,7 +41,7 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
-import {Bookend} from './amp-story-bookend';
+import {Bookend} from './bookend/amp-story-bookend';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {
@@ -1023,7 +1023,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return this.desktopMedia_.matches;
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1229,6 +1229,13 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
+    if (this.platform_.isBot()) {
+      this.pages_.forEach(page => {
+        page.setDistance(0);
+      });
+      return;
+    }
+
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
@@ -1290,7 +1297,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds, fetches and sets the bookend publisher configuration.
-   * @return {!Promise<?./amp-story-bookend.BookendConfigDef>}
+   * @return {!Promise<(?./bookend/amp-story-bookend.BookendConfigDef|./bookend/bookend-component.BookendDataDef)>}
    * @private
    */
   buildAndPreloadBookend_() {
@@ -1314,8 +1321,14 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.isDesktop_()) {
       return Promise.resolve(true);
     }
-    return this.bookend_.loadConfig(false /** applyConfig */).then(config =>
-      !!(config && config.relatedArticles && config.relatedArticles.length));
+
+    return this.bookend_.loadConfig(false /** applyConfig */).then(
+        config => {
+          // TODO(#14591): Remove config.relatedArticles references when bookend API v0.1 is deprecated.
+          return !!(config && (config.relatedArticles &&
+            config.relatedArticles.length) ||
+            (config.components && config.components.length));
+        });
   }
 
 
