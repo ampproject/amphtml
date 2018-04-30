@@ -20,6 +20,12 @@ These players include:
 - amp-wistia-player
 - amp-youtube
 
+<a id="analytics"></a>
+
+## Analytics
+
+See [video analytics](/extensions/amp-analytics/amp-video-analytics.md).
+
 <a id="autoplay"></a>
 
 ## Autoplay
@@ -36,19 +42,13 @@ If this attribute is present, and the browser supports autoplay:
 
 See [here for an example](https://ampbyexample.com/components/amp-video/#autoplay).
 
-<a id="analytics"></a>
-
-## Analytics
-
-See [video analytics](../extensions/amp-analytics/amp-video-analytics.md).
-
 <a id="rotate-to-fullscreen"></a>
 
 ## Rotate-to-fullscreen
 
 attribute: **`rotate-to-fullscreen`**
 
-**Experimental feature. Setting this attribute is not currently valid.**
+**Availability: Experimental**
 
 If this attribute is present and a video is playing manually, the video will be
 displayed on fullscreen after the user rotates their device into landscape mode,
