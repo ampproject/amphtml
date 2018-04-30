@@ -259,7 +259,7 @@ export class VideoDocking {
     // Upcoming fixes: #14657, #14658.
     // TODO(alanorozco): Cleanup markup for readability once fixes land.
         htmlFor(this.getDoc_())`
-          <div class="amp-docked-video-controls" ref="container" hidden>
+          <div class="amp-docked-video-controls" hidden>
             <div class="amp-docked-video-button-group">
               <div role="button" ref="playButton"
                   class="amp-docked-video-play"></div>
@@ -441,21 +441,22 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Element} container
    * @return {!ControlsDef}
    * @private
    */
-  installControls_(element) {
-    const controls = htmlRefs(element);
+  installControls_(container) {
+    const controls = htmlRefs(container);
 
     const {
-      container,
       playButton,
       pauseButton,
       unmuteButton,
       muteButton,
       fullscreenButton,
     } = controls;
+
+    Object.assign(controls, {container});
 
     listen(playButton, 'click', () =>
       this.getDockedVideo_().play(/* auto */ false));

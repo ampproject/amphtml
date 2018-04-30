@@ -16,7 +16,6 @@
 
 import {dev} from './log';
 import {map} from './utils/object.js';
-import {toArray} from './types';
 
 let container;
 
@@ -72,13 +71,8 @@ function html(strings) {
  * @return {!Object<string, !Element>}
  */
 export function htmlRefs(root) {
-  let elements = root.querySelectorAll('[ref]');
+  const elements = root.querySelectorAll('[ref]');
   const refs = map();
-
-  if (root.hasAttribute('ref')) {
-    elements = toArray(elements);
-    elements.push(root);
-  }
 
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
