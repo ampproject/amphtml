@@ -41,6 +41,7 @@ describe('Layout', () => {
       tagName: "hold"
     }
     let elementsValidTagNames = [
+      'AMP-AD',
       'AMP-ANIM',
       'AMP-BRIGHTCOVE',
       'AMP-EMBED',
