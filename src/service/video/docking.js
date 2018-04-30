@@ -434,6 +434,9 @@ export class VideoDocking {
     listen(element, 'touchstart', e =>
       this.startDragging_(/** @type {!TouchEvent} */ (e)));
 
+    listen(element, 'mousedown', e =>
+      this.startDragging_(/** @type {!TouchEvent} */ (e)));
+
     return element;
   }
 
@@ -975,9 +978,8 @@ export class VideoDocking {
     const {step, posX, posY} = currentlyDocked;
     const minTransitionTimeMs = 100;
     const maxTransitionTimeMs = 500;
-    const transitionTimeMs = Math.floor(Math.max(
-        minTransitionTimeMs,
-        (1 - step) * maxTransitionTimeMs));
+    const transitionTimeMs =
+        mapStep(step, maxTransitionTimeMs, minTransitionTimeMs);
 
     this.dock_(video, posX, posY, transitionTimeMs, /* finalize */ true);
   }
@@ -1018,12 +1020,6 @@ export class VideoDocking {
 
     this.viewport_.disableScroll();
 
-    const target = dev().assertElement(e.target);
-
-    const unlisteners = [
-      listen(target, 'touchmove', e => onDrag(e)),
-    ];
-
     const onDragEnd = () => {
       unlisteners.forEach(unlisten => unlisten.call());
 
@@ -1035,7 +1031,13 @@ export class VideoDocking {
       this.snapToCorner_(offsetX, offsetY);
     };
 
-    listenOnce(target, 'touchend', onDragEnd);
+    const root = this.ampdoc_.getRootNode();
+    const unlisteners = [
+      listen(root, 'touchmove', onDrag),
+      listen(root, 'mousemove', onDrag),
+      listenOnce(root, 'touchend', onDragEnd),
+      listenOnce(root, 'mouseup', onDragEnd),
+    ];
   }
 
   /**
