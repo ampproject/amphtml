@@ -484,8 +484,7 @@ class VideoEntry {
    * @private
    */
   isDockable_() {
-    // TODO(alanorozco)
-    return true;
+    return this.video.element.hasAttribute(VideoAttributes.DOCK);
   }
 
   /**
