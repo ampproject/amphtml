@@ -75,9 +75,6 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
     /** @private {?string} */
     this.shortcode_ = '';
 
@@ -180,7 +177,7 @@ class AmpInstagram extends AMP.BaseElement {
     setStyles(iframe, {
       'opacity': 0,
     });
-    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
+    return this.loadPromise(iframe).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
           'opacity': 1,
@@ -226,7 +223,6 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
-      this.iframePromise_ = null;
     }
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
