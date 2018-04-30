@@ -1887,6 +1887,7 @@ tags: {
   attrs: { name: "border" }
   attrs: { name: "height" }
   attrs: { name: "width" }
+  attrs: { name: "sizes" }
 }
 # 4.7.2 The iframe element
 tags: {
@@ -4174,6 +4175,7 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  attrs: { name: "native-sizes" }
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
@@ -4201,6 +4203,7 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  attrs: { name: "native-sizes" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   # <amp-bind>
