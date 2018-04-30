@@ -1,0 +1,66 @@
+# Video in AMP
+
+Most video player components in AMP implement the [VideoInterface](https://github.com/ampproject/amphtml/blob/master/src/video-interface.js). This means
+that a set of features is available in all of these components, either completely
+or partially.
+
+This document describes all the features (**work in progress, incomplete**) that
+these players implement.
+
+These players include:
+
+- amp-3q-player
+- amp-brid-player
+- amp-dailymotion
+- amp-gfycat
+- amp-ima-video
+- amp-nexxtv-player
+- amp-ooyala-player
+- amp-video
+- amp-wistia-player
+- amp-youtube
+
+<a id="autoplay"></a>
+
+## Autoplay
+
+attribute: **`autoplay`**
+
+If this attribute is present, and the browser supports autoplay:
+
+- the video is automatically muted before autoplay starts
+- when the video is scrolled out of view, the video is paused
+- when the video is scrolled into view, the video resumes playback
+- when the user taps the video, the video is unmuted
+- if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+
+See [here for an example](https://ampbyexample.com/components/amp-video/#autoplay).
+
+<a id="analytics"></a>
+
+## Analytics
+
+See [video analytics](../extensions/amp-analytics/amp-video-analytics.md).
+
+<a id="rotate-to-fullscreen"></a>
+
+## Rotate-to-fullscreen
+
+attribute: **`rotate-to-fullscreen`**
+
+**Experimental feature. Setting this attribute is not currently valid.**
+
+If this attribute is present and a video is playing manually, the video will be
+displayed on fullscreen after the user rotates their device into landscape mode,
+if the video is visible.
+
+When multiple videos with the `rotate-to-fullscreen` attribute set are visible
+at the same time, heuristics are employed to select which video to put on
+fullscreen. These are applied as follows, in descending priority:
+
+1. If a video is playing manually.
+2. If the visible percentage of the video is higher.
+3. If a video is closer to the center of the viewport.
+4. Everything else failing, select the video that is closest to the top of the
+page.
+
