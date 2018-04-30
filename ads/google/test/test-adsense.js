@@ -116,7 +116,7 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       adsense(env.win, data);
       expect(env.win.document.querySelector('ins.adsbygoogle')).to.be.ok;
       expect(pushCount).to.equal(1);
-      expect(env.win['requestNonPersonalizedAds']).to.be.undefined;
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.undefined;
     });
 
     it('should npa for unknown with npaOnUnknownConsent', () => {
@@ -125,16 +125,17 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       adsense(env.win, data);
       expect(env.win.document.querySelector('ins.adsbygoogle')).to.be.ok;
       expect(pushCount).to.equal(1);
-      expect(env.win['requestNonPersonalizedAds']).to.be.true;
+      expect(env.win.adsbygoogle).to.be.ok;
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.true;
     });
 
-    it('should no request for unknown with invalid npaOnUnknownConsent', () => {
+    it('should not request for unknown q/ invalid npaOnUnknownConsent', () => {
       env.win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
       data['npaOnUnknownConsent'] = 'blah';
       adsense(env.win, data);
       expect(env.win.document.querySelector('ins.adsbygoogle')).to.not.be.ok;
       expect(pushCount).to.equal(0);
-      expect(env.win['requestNonPersonalizedAds']).to.be.undefined;
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.undefined;
     });
 
     /**
@@ -171,10 +172,13 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
         if (result == RESULT_STATE.NO_REQUEST) {
           expect(insElement).to.not.be.ok;
           expect(pushCount).to.equal(0);
+          expect(env.win.adsbygoogle['requestNonPersonalizedAds'])
+              .to.be.undefined;
         } else {
           expect(insElement).to.be.ok;
           expect(pushCount).to.equal(1);
-          expect(env.win['requestNonPersonalizedAds']).to.equal(
+          expect(env.win.adsbygoogle).to.be.ok;
+          expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.equal(
               result == RESULT_STATE.NPA ? true : undefined);
         }
       });

@@ -77,7 +77,8 @@ export function adsense(global, data) {
         return;
       }
     case CONSENT_POLICY_STATE.INSUFFICIENT:
-      global['requestNonPersonalizedAds'] = true;
+      (global.adsbygoogle = global.adsbygoogle || [])
+          ['requestNonPersonalizedAds'] = true;
       break;
   }
   if (data['experimentId']) {
