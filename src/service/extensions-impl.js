@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {Timer} from './timer-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -50,6 +51,13 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
+
+/**
+ * Maximum milliseconds to wait for all extensions to load before erroring.
+ * (value is the same as render delaying extensions)
+ * @const
+ */
+const LOAD_TIMEOUT = 3000;
 
 /**
  * The structure that contains the declaration of a custom element.
@@ -238,12 +246,32 @@ export class Extensions {
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
+   * @param {!Window} win
    * @param {string} extensionId
    * @return {!Promise<!ExtensionDef>}
    */
-  waitForExtension(extensionId) {
-    return this.waitFor_(this.getExtensionHolder_(
-        extensionId, /* auto */ false));
+  waitForExtension(win, extensionId) {
+    // Note we can't use timeout service becuase it's not instantiated yet.
+    const timer = new Timer(win);
+    return timer.timeoutPromise(LOAD_TIMEOUT,
+        this.waitFor_(
+            this.getExtensionHolder_(extensionId, /* auto */ false)),
+        `Render timeout waiting for extension ${extensionId} to be load.`
+    );
+  }
+
+  /**
+   * Mark extension loaded for testing
+   * @param {!Window} win
+   * @param {string} extensionId
+   * @visibleForTesting
+   */
+  markExtensionLoadedForTesting(win, extensionId) {
+    const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
+    holder.loaded = true;
+    if (holder.promise) {
+      holder.resolve()
+    }
   }
 
   /**
