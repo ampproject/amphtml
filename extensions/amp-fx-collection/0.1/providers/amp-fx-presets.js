@@ -68,8 +68,7 @@ export const Presets = {
   },
   'fly-in-bottom': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
-          'amp-fx-fly-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
     },
@@ -104,8 +103,7 @@ export const Presets = {
   },
   'fly-in-left': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
-          'amp-fx-fly-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
     },
@@ -138,8 +136,7 @@ export const Presets = {
   },
   'fly-in-right': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
-          'amp-fx-fly-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
     },
@@ -172,8 +169,7 @@ export const Presets = {
   },
   'fly-in-top': {
     isFxTypeSupported(win) {
-      user().assert(isExperimentOn(win, 'amp-fx-fly-in'),
-          'amp-fx-fly-in experiment is not turned on.');
+      return isExperimentOn(win, 'amp-fx-fly-in');
     },
     userAsserts(unusedElement) {
     },
