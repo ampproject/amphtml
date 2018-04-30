@@ -535,4 +535,24 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(executeActionStub).to.be.calledWith(action);
     });
   });
+
+  describe('delegateDecorationToElement', () => {
+    it('should delegate element to platform of given serviceId', () => {
+      const element = document.createElement('div');
+      element.setAttribute('subscriptions-service', 'swg-google');
+      const platform = new SubscriptionPlatform();
+      platform.getServiceId = () => 'swg-google';
+      subscriptionService.platformStore_ = new PlatformStore(
+          ['local', 'swg-google']);
+      const whenResolveStub = sandbox.stub(subscriptionService.platformStore_,
+          'whenPlatformResolves').callsFake(() => Promise.resolve(platform));
+      const decorateUIStub = sandbox.stub(platform,
+          'decorateUI');
+      return subscriptionService.delegateDecorationToElement(
+          element, 'swg-google').then(() => {
+        expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+        expect(decorateUIStub).to.be.calledWith(element);
+      });
+    });
+  });
 });
