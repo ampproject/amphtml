@@ -75,9 +75,6 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
     /** @private {?string} */
     this.shortcode_ = '';
 
@@ -86,6 +83,12 @@ class AmpInstagram extends AMP.BaseElement {
 
     /** @private {string}  */
     this.captioned_ = '';
+
+    /**
+    * @private {?Promise}
+    * @visibleForTesting
+    */
+    this.iframePromise_ = null;
   }
   /**
   * @param {boolean=} opt_onLayout
