@@ -26,7 +26,7 @@ min_validator_revision_required: 322
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 614
+spec_file_revision: 616
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -827,6 +827,44 @@ tags: {
     name: "name"
     mandatory: true
     value_casei: "amp-to-amp-navigation"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# AMP metadata, name=amp-cta-type
+# Specifies the Single Page Story Ad call to action enum
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-type"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-type"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# AMP metadata, name=amp-cta-url
+# Specifies the Single Page Story Ad call to action outlink
+tags: {
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-cta-url"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-cta-url"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
@@ -4025,11 +4063,6 @@ tags: {
   html_format: AMP
   html_format: EXPERIMENTAL
   tag_name: "TT"
-}
-tags: {
-  html_format: AMP
-  html_format: EXPERIMENTAL
-  tag_name: "XMP"
 }
 
 # Some additional tags, microformats, allowances.
