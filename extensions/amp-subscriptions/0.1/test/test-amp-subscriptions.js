@@ -527,12 +527,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const platform = new SubscriptionPlatform();
       const executeActionStub = sandbox.stub(platform, 'executeAction');
       const getPlatformStub = sandbox.stub(
-          subscriptionService.platformStore_, 'getPlatform')
-          .callsFake(() => platform);
+          subscriptionService.platformStore_, 'whenPlatformResolves')
+          .callsFake(() => Promise.resolve(platform));
       const action = action;
-      subscriptionService.delegateActionToService(action, 'local');
-      expect(getPlatformStub).to.be.calledWith('local');
-      expect(executeActionStub).to.be.calledWith(action);
+      return subscriptionService.delegateActionToService(action, 'local').then(() => {
+        expect(getPlatformStub).to.be.calledWith('local');
+        expect(executeActionStub).to.be.calledWith(action);
+      });
     });
   });
 
