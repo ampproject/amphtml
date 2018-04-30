@@ -40,6 +40,10 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
+import {
+  addExperimentIdToElement,
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
@@ -59,9 +63,6 @@ import {
 } from '../../../ads/google/a4a/google-data-reporter';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isExperimentOn} from '../../../src/experiments';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 
@@ -254,10 +255,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     // Need to ensure these are numbers since width can be set to 'auto'.
     // Checking height just in case.
-    const useDefinedSizes = isExperimentOn(this.win, 'as-use-attr-for-format')
+    let useDefinedSizes = isExperimentOn(this.win, 'as-use-attr-for-format')
         && !this.isResponsive_()
         && !isNaN(width) && width > 0
         && !isNaN(height) && height > 0;
+    if (useDefinedSizes) {
+      if (Math.random() < 0.5) {
+        // In control: Do not use width / height attributes for size info.
+        useDefinedSizes = false;
+        addExperimentIdToElement('21062003', this.element);
+      } else {
+        addExperimentIdToElement('21062004', this.element);
+      }
+    }
     this.size_ = useDefinedSizes
       ? {width, height}
       : this.getIntersectionElementLayoutBox();

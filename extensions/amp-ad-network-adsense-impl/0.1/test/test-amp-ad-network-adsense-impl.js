@@ -479,8 +479,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
-        // With exp as-use-attr-for-format off, we can't test for specific
-        // numbers, but we know that the values should be numeric.
         expect(url).to.match(new RegExp(
             `format=${width}x${height}&w=${width}&h=${height}`)));
     });
@@ -493,6 +491,27 @@ describes.realWin('amp-ad-network-adsense-impl', {
               // Ensure that "auto" doesn't appear anywhere here:
             expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
+
+    it('has experiment eid in adsense frmt exp and width/height numeric',
+        () => {
+          toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+          sandbox.stub(Math, 'random').callsFake(() => 0.5);
+          return impl.getAdUrl().then(
+              url => expect(url).to.match(/eid=[^&]*21062004/));
+        });
+    it('has control eid in adsense frmt exp and width/height numeric', () => {
+      toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      sandbox.stub(Math, 'random').callsFake(() => 0.49);
+      return impl.getAdUrl().then(
+          url => expect(url).to.match(/eid=[^&]*21062003/));
+    });
+    it('has no eid in adsense frmt exp when width non-numeric', () => {
+      toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      element.setAttribute('width', 'auto');
+      return impl.getAdUrl().then(
+          url => expect(url).to.not.match(/eid=[^&]*2106200(3|4)/));
+    });
+
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
           ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
