@@ -138,7 +138,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    // TODO: refactor resize logic to go in onMeasureChange when exposed
+    // TODO (14936): refactor resize logic to go in onMeasureChange
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
     }
@@ -325,8 +325,8 @@ export class AmpImageViewer extends AMP.BaseElement {
         Math.round(height));
 
     // Adjust max scale to at least fit the screen.
-    const elementBoxRatio = this.elementBox_.width
-    / this.elementBox_.height;
+    const elementBoxRatio = this.elementBox_.width /
+     this.elementBox_.height;
     const maxScale = Math.max(
         elementBoxRatio / sourceAspectRatio,
         sourceAspectRatio / elementBoxRatio
