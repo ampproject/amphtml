@@ -831,7 +831,7 @@ export class VideoDocking {
       return;
     }
 
-    const {width, height} = asBaseElement(video).getLayoutBox();
+    const {width, height} = this.getLayoutBox_(video);
 
     this.placedAt_ = {x, y, scale};
 
@@ -1148,7 +1148,7 @@ export class VideoDocking {
    * @return {{x: number, y: number, targetWidth: number, targetHeight: number}}
    */
   getTargetArea_(video, posX, posY) {
-    const {width, height} = asBaseElement(video).getLayoutBox();
+    const {width, height} = this.getLayoutBox_(video);
     const margin = this.getMargin_();
     const aspectRatio = width / height;
     const targetWidth = Math.max(MIN_WIDTH, this.getAreaWidth_() * 0.25);
