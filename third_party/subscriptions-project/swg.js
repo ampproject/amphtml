@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /** Version: 0.1.22.8 */
+ /** Version: 0.1.22.10 */
 'use strict';
 import { ActivityPorts } from 'web-activities/activity-ports';
 
@@ -788,6 +788,320 @@ class Callbacks {
       callback(data);
       this.resetCallback_(id);
     });
+  }
+}
+
+
+
+
+/**
+ * The holder of the entitlements for a service.
+ */
+class Entitlements {
+
+  /**
+   * @param {string} service
+   * @param {string} raw
+   * @param {!Array<!Entitlement>} entitlements
+   * @param {?string} currentProduct
+   * @param {function(!Entitlements)} ackHandler
+   */
+  constructor(service, raw, entitlements, currentProduct, ackHandler) {
+    /** @const {string} */
+    this.service = service;
+    /** @const {string} */
+    this.raw = raw;
+    /** @const {!Array<!Entitlement>} */
+    this.entitlements = entitlements;
+
+    /** @private @const {?string} */
+    this.product_ = currentProduct;
+    /** @private @const {function(!Entitlements)} */
+    this.ackHandler_ = ackHandler;
+  }
+
+  /**
+   * @return {!Entitlements}
+   */
+  clone() {
+    return new Entitlements(
+        this.service,
+        this.raw,
+        this.entitlements.map(ent => ent.clone()),
+        this.product_,
+        this.ackHandler_);
+  }
+
+  /**
+   * @return {!Object}
+   */
+  json() {
+    return {
+      'service': this.service,
+      'entitlements': this.entitlements.map(item => item.json()),
+    };
+  }
+
+  /**
+   * @param {string=} opt_source
+   * @return {boolean}
+   */
+  enablesThis(opt_source) {
+    return this.enables(this.product_, opt_source);
+  }
+
+  /**
+   * @param {string=} opt_source
+   * @return {boolean}
+   */
+  enablesAny(opt_source) {
+    for (let i = 0; i < this.entitlements.length; i++) {
+      if (this.entitlements[i].products.length > 0 &&
+          (!opt_source || opt_source == this.entitlements[i].source)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param {?string} product
+   * @param {string=} opt_source
+   * @return {boolean}
+   */
+  enables(product, opt_source) {
+    if (!product) {
+      return false;
+    }
+    return !!this.getEntitlementFor(product, opt_source);
+  }
+
+  /**
+   * @param {string=} opt_source
+   * @return {?Entitlement}
+   */
+  getEntitlementForThis(opt_source) {
+    return this.getEntitlementFor(this.product_, opt_source);
+  }
+
+  /**
+   * @param {?string} product
+   * @param {string=} opt_source
+   * @return {?Entitlement}
+   */
+  getEntitlementFor(product, opt_source) {
+    if (product && this.entitlements.length > 0) {
+      for (let i = 0; i < this.entitlements.length; i++) {
+        if (this.entitlements[i].enables(product) &&
+            (!opt_source || opt_source == this.entitlements[i].source)) {
+          return this.entitlements[i];
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * A 3p site should call this method to acknowledge that it "saw" and
+   * "understood" entitlements.
+   */
+  ack() {
+    this.ackHandler_(this);
+  }
+}
+
+
+/**
+ * The single entitlement object.
+ */
+class Entitlement {
+
+  /**
+   * @param {string} source
+   * @param {!Array<string>} products
+   * @param {string} subscriptionToken
+   */
+  constructor(source, products, subscriptionToken) {
+    /** @const {string} */
+    this.source = source;
+    /** @const {!Array<string>} */
+    this.products = products;
+    /** @const {string} */
+    this.subscriptionToken = subscriptionToken;
+  }
+
+  /**
+   * @return {!Entitlement}
+   */
+  clone() {
+    return new Entitlement(
+        this.source,
+        this.products.slice(0),
+        this.subscriptionToken);
+  }
+
+  /**
+   * @return {!Object}
+   */
+  json() {
+    return {
+      'source': this.source,
+      'products': this.products,
+      'subscriptionToken': this.subscriptionToken,
+    };
+  }
+
+  /**
+   * @param {?string} product
+   * @return {boolean}
+   */
+  enables(product) {
+    if (!product) {
+      return false;
+    }
+    return this.products.includes(product);
+  }
+
+  /**
+   * @param {?Object} json
+   * @return {!Entitlement}
+   */
+  static parseFromJson(json) {
+    if (!json) {
+      json = {};
+    }
+    const source = json['source'] || '';
+    const products = json['products'] || [];
+    const subscriptionToken = json['subscriptionToken'];
+    return new Entitlement(source, products, subscriptionToken);
+  }
+
+  /**
+   * The JSON is expected in one of the forms:
+   * - Single entitlement: `{products: [], ...}`.
+   * - A list of entitlements: `[{products: [], ...}, {...}]`.
+   * @param {!Object|!Array<!Object>} json
+   * @return {!Array<!Entitlement>}
+   */
+  static parseListFromJson(json) {
+    const jsonList = Array.isArray(json) ?
+        /** @type {!Array<Object>} */ (json) : [json];
+    return jsonList.map(json => Entitlement.parseFromJson(json));
+  }
+}
+
+
+
+
+/**
+ */
+class UserData {
+
+  /**
+   * @param {string} idToken
+   * @param {!Object} data
+   */
+  constructor(idToken, data) {
+    /** @const {string} */
+    this.idToken = idToken;
+    /** @private @const {!Object} */
+    this.data = data;
+
+    /** @const {string} */
+    this.id = data['sub'];
+    /** @const {string} */
+    this.email = data['email'];
+    /** @const {boolean} */
+    this.emailVerified = data['email_verified'];
+    /** @const {string} */
+    this.name = data['name'];
+    /** @const {string} */
+    this.givenName = data['given_name'];
+    /** @const {string} */
+    this.familyName = data['family_name'];
+    /** @const {string} */
+    this.pictureUrl = data['picture'];
+  }
+
+  /**
+   * @return {!UserData}
+   */
+  clone() {
+    return new UserData(this.idToken, this.data);
+  }
+
+  /**
+   * @return {!Object}
+   */
+  json() {
+    return {
+      'id': this.id,
+      'email': this.email,
+      'emailVerified': this.emailVerified,
+      'name': this.name,
+      'givenName': this.givenName,
+      'familyName': this.familyName,
+      'pictureUrl': this.pictureUrl,
+    };
+  }
+}
+
+
+
+
+/**
+ */
+class DeferredAccountCreationResponse {
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @param {!UserData} userData
+   * @param {function():!Promise} completeHandler
+   */
+  constructor(entitlements, userData, completeHandler) {
+    /** @const {!Entitlements} */
+    this.entitlements = entitlements;
+    /** @const {!UserData} */
+    this.userData = userData;
+    /** @private @const {function():!Promise} */
+    this.completeHandler_ = completeHandler;
+  }
+
+  /**
+   * @return {!DeferredAccountCreationResponse}
+   */
+  clone() {
+    return new DeferredAccountCreationResponse(
+        this.entitlements,
+        this.userData,
+        this.completeHandler_);
+  }
+
+  /**
+   * @return {!Object}
+   */
+  json() {
+    return {
+      'entitlements': this.entitlements.json(),
+      'userData': this.userData.json(),
+    };
+  }
+
+  /**
+   * Allows the receiving site to complete/acknowledge that it registered
+   * the subscription info. The typical action would be to create an
+   * account (or match an existing one) and associated the subscription with
+   * that account.
+   *
+   * SwG will display progress indicator until this method is called and
+   * upon receiving this call will show the confirmation to the user.
+   * The promise returned by this method will yield once the user closes
+   * the confirmation.
+   *
+   * @return {!Promise}
+   */
+  complete() {
+    return this.completeHandler_();
   }
 }
 
@@ -1757,198 +2071,6 @@ function resolveDoc(input) {
 
 
 
-
-/**
- * The holder of the entitlements for a service.
- */
-class Entitlements {
-
-  /**
-   * @param {string} service
-   * @param {string} raw
-   * @param {!Array<!Entitlement>} entitlements
-   * @param {?string} currentProduct
-   * @param {function(!Entitlements)} ackHandler
-   */
-  constructor(service, raw, entitlements, currentProduct, ackHandler) {
-    /** @const {string} */
-    this.service = service;
-    /** @const {string} */
-    this.raw = raw;
-    /** @const {!Array<!Entitlement>} */
-    this.entitlements = entitlements;
-
-    /** @private @const {?string} */
-    this.product_ = currentProduct;
-    /** @private @const {function(!Entitlements)} */
-    this.ackHandler_ = ackHandler;
-  }
-
-  /**
-   * @return {!Entitlements}
-   */
-  clone() {
-    return new Entitlements(
-        this.service,
-        this.raw,
-        this.entitlements.map(ent => ent.clone()),
-        this.product_,
-        this.ackHandler_);
-  }
-
-  /**
-   * @return {!Object}
-   */
-  json() {
-    return {
-      'service': this.service,
-      'entitlements': this.entitlements.map(item => item.json()),
-    };
-  }
-
-  /**
-   * @return {boolean}
-   */
-  enablesThis() {
-    return this.enables(this.product_);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  enablesAny() {
-    for (let i = 0; i < this.entitlements.length; i++) {
-      if (this.entitlements[i].products.length > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * @param {?string} product
-   * @return {boolean}
-   */
-  enables(product) {
-    if (!product) {
-      return false;
-    }
-    return !!this.getEntitlementFor(product);
-  }
-
-  /**
-   * @return {?Entitlement}
-   */
-  getEntitlementForThis() {
-    return this.getEntitlementFor(this.product_);
-  }
-
-  /**
-   * @param {?string} product
-   * @return {?Entitlement}
-   */
-  getEntitlementFor(product) {
-    if (product && this.entitlements.length > 0) {
-      for (let i = 0; i < this.entitlements.length; i++) {
-        if (this.entitlements[i].enables(product)) {
-          return this.entitlements[i];
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
-   * A 3p site should call this method to acknowledge that it "saw" and
-   * "understood" entitlements.
-   */
-  ack() {
-    this.ackHandler_(this);
-  }
-}
-
-
-/**
- * The single entitlement object.
- */
-class Entitlement {
-
-  /**
-   * @param {string} source
-   * @param {!Array<string>} products
-   * @param {string} subscriptionToken
-   */
-  constructor(source, products, subscriptionToken) {
-    /** @const {string} */
-    this.source = source;
-    /** @const {!Array<string>} */
-    this.products = products;
-    /** @const {string} */
-    this.subscriptionToken = subscriptionToken;
-  }
-
-  /**
-   * @return {!Entitlement}
-   */
-  clone() {
-    return new Entitlement(
-        this.source,
-        this.products.slice(0),
-        this.subscriptionToken);
-  }
-
-  /**
-   * @return {!Object}
-   */
-  json() {
-    return {
-      'source': this.source,
-      'products': this.products,
-      'subscriptionToken': this.subscriptionToken,
-    };
-  }
-
-  /**
-   * @param {?string} product
-   * @return {boolean}
-   */
-  enables(product) {
-    if (!product) {
-      return false;
-    }
-    return this.products.includes(product);
-  }
-
-  /**
-   * @param {?Object} json
-   * @return {!Entitlement}
-   */
-  static parseFromJson(json) {
-    if (!json) {
-      json = {};
-    }
-    const source = json['source'] || '';
-    const products = json['products'] || [];
-    const subscriptionToken = json['subscriptionToken'];
-    return new Entitlement(source, products, subscriptionToken);
-  }
-
-  /**
-   * The JSON is expected in one of the forms:
-   * - Single entitlement: `{products: [], ...}`.
-   * - A list of entitlements: `[{products: [], ...}, {...}]`.
-   * @param {!Object|!Array<!Object>} json
-   * @return {!Array<!Entitlement>}
-   */
-  static parseListFromJson(json) {
-    const jsonList = Array.isArray(json) ?
-        /** @type {!Array<Object>} */ (json) : [json];
-    return jsonList.map(json => Entitlement.parseFromJson(json));
-  }
-}
-
-
-
 /**
  * Character mapping from base64url to base64.
  * @const {!Object<string, string>}
@@ -2398,7 +2520,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.8',
+    '_client': 'SwG 0.1.22.10',
   });
 }
 
@@ -3259,62 +3381,6 @@ class ActivityIframeView extends View {
 
 /**
  */
-class UserData {
-
-  /**
-   * @param {string} idToken
-   * @param {!Object} data
-   */
-  constructor(idToken, data) {
-    /** @const {string} */
-    this.idToken = idToken;
-    /** @private @const {!Object} */
-    this.data = data;
-
-    /** @const {string} */
-    this.id = data['sub'];
-    /** @const {string} */
-    this.email = data['email'];
-    /** @const {boolean} */
-    this.emailVerified = data['email_verified'];
-    /** @const {string} */
-    this.name = data['name'];
-    /** @const {string} */
-    this.givenName = data['given_name'];
-    /** @const {string} */
-    this.familyName = data['family_name'];
-    /** @const {string} */
-    this.pictureUrl = data['picture'];
-  }
-
-  /**
-   * @return {!UserData}
-   */
-  clone() {
-    return new UserData(this.idToken, this.data);
-  }
-
-  /**
-   * @return {!Object}
-   */
-  json() {
-    return {
-      'id': this.id,
-      'email': this.email,
-      'emailVerified': this.emailVerified,
-      'name': this.name,
-      'givenName': this.givenName,
-      'familyName': this.familyName,
-      'pictureUrl': this.pictureUrl,
-    };
-  }
-}
-
-
-
-
-/**
- */
 class SubscribeResponse {
 
   /**
@@ -3413,6 +3479,7 @@ const SubscriptionFlows = {
   SHOW_SUBSCRIBE_OPTION: 'showSubscribeOption',
   SHOW_ABBRV_OFFER: 'showAbbrvOffer',
   SUBSCRIBE: 'subscribe',
+  COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
 };
 
@@ -3610,9 +3677,9 @@ class LinkSaveFlow {
 
   /**
    * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SaveSubscriptionRequest} saveSubscriptionRequest
+   * @param {!../api/subscriptions.SaveSubscriptionRequest} request
    */
-  constructor(deps, saveSubscriptionRequest) {
+  constructor(deps, request) {
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
@@ -3625,12 +3692,8 @@ class LinkSaveFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    /** TODO(sohanirao): Default request only for test */
-    /** @type {!../api/subscriptions.SaveSubscriptionRequest} */
-    const defaultRequest = {token: 'test'};
-
     /** @private {!../api/subscriptions.SaveSubscriptionRequest} */
-    this.saveSubscriptionRequest_ = saveSubscriptionRequest || defaultRequest;
+    this.request_ = request;
 
     /** @private {?ActivityIframeView} */
     this.activityIframeView_ = null;
@@ -3641,15 +3704,28 @@ class LinkSaveFlow {
    * @return {!Promise}
    */
   start() {
+    const iframeArgs = {
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+      'isClosable': true,
+    };
+
+    if (this.request_.token) {
+      if (!this.request_.authCode) {
+        iframeArgs['token'] = this.request_.token;
+      } else {
+        throw new Error('Both authCode and token are available');
+      }
+    } else if (this.request_.authCode) {
+      iframeArgs['authCode'] = this.request_.authCode;
+    } else {
+      throw new Error('Neither token or authCode is available');
+    }
+
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
       feUrl('/linksaveiframe'),
-      feArgs({
-        'publicationId': this.deps_.pageConfig().getPublicationId(),
-        'token': this.saveSubscriptionRequest_['token'],
-        'isClosable': true,
-      }),
+      feArgs(iframeArgs),
       /* shouldFadeBody */ false
     );
     /** {!Promise<boolean>} */
@@ -4611,6 +4687,27 @@ class ConfiguredRuntime {
     return this.documentParsed_.then(() => {
       return new PayStartFlow(this, sku).start();
     });
+  }
+
+  /** @override */
+  completeDeferredAccountCreation(opt_options) {
+    // TODO(dvoytenko): implement.
+    const entitlements = /** @type {!../api/entitlements.Entitlements} */ (
+        opt_options && opt_options.entitlements);
+    const userData = new UserData('FAKE_TOKEN', {
+      'sub': 'fake_user_id',
+      'email': 'fake_user@example.com',
+      'email_verified': true,
+      'name': 'Fake User',
+      'given_name': 'Fake',
+      'family_name': 'User',
+      'picture': '',
+    });
+    const completeHandler = () => Promise.resolve();
+    return Promise.resolve(new DeferredAccountCreationResponse(
+        entitlements,
+        userData,
+        completeHandler));
   }
 
   /** @override */
