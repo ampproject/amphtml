@@ -68,6 +68,9 @@ export class AbstractAmpContext {
     /** @type {?boolean} */
     this.hidden = null;
 
+    /** @type {?number} */
+    this.initialConsentState = null;
+
     /** @type {?Object} */
     this.initialLayoutRect = null;
 
@@ -288,6 +291,7 @@ export class AbstractAmpContext {
     this.container = context.container;
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
+    this.initialConsentState = context.initialConsentState;
     this.initialLayoutRect = context.initialLayoutRect;
     this.initialIntersection = context.initialIntersection;
     this.location = parseUrl(context.location.href);

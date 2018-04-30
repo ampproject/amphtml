@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// import {AmpStoryAutoAds} from '../amp-story-auto-ads';
+import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 
 describes.realWin('amp-story-auto-ads', {
   amp: {
@@ -24,13 +24,41 @@ describes.realWin('amp-story-auto-ads', {
 
   let win;
   let element;
+  let storyElement;
+  let ASAAImpl;
 
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story-auto-ads');
-    win.document.body.appendChild(element);
+    storyElement = win.document.createElement('amp-story');
+    win.document.body.appendChild(storyElement);
+    storyElement.appendChild(element);
+    ASAAImpl = new AmpStoryAutoAds(element);
+    ASAAImpl.config_ = {
+      'ad-attributes': {
+        type: 'doubleclick',
+        'data-slot': '/30497360/samfrank_native_v2_a4a',
+      },
+    };
   });
 
-  it('should build', () => {
+  describe('glass pane', () => {
+    let page;
+    let pane;
+
+    beforeEach(() => {
+      page = ASAAImpl.createAdPage_();
+      pane = page.querySelector('.i-amphtml-glass-pane');
+    });
+
+    it('should create glassPane', () => {
+      expect(pane).to.exist;
+    });
+
+    it('glass pane should have full viewport grid parent', () => {
+      const parent = pane.parentElement;
+      expect(parent.tagName).to.equal('AMP-STORY-GRID-LAYER');
+      expect(parent.getAttribute('template')).to.equal('fill');
+    });
   });
 });
