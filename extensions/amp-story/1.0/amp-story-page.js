@@ -267,7 +267,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    let mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    const iframe = this.element.querySelector('iframe');
+    const iframeDoc = iframe && iframe.contentDocument;
+    if (iframeDoc) {
+      mediaSet = Array.from(mediaSet);
+      const fieMedia = scopedQuerySelectorAll(iframeDoc, PAGE_MEDIA_SELECTOR);
+      fieMedia.forEach(el => mediaSet.push(el));
+    }
+
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
       return new Promise(resolve => {
         switch (mediaEl.tagName.toLowerCase()) {
@@ -328,7 +336,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllMedia_() {
-    return this.element.querySelectorAll('audio, video');
+    const iframe = this.element.querySelector('iframe');
+    const iframeDoc = iframe && iframe.contentDocument;
+    let mediaSet = this.element.querySelectorAll('audio, video');
+    if (!iframeDoc) {
+      return mediaSet;
+    }
+    mediaSet = Array.from(mediaSet);
+    const fieMedia = iframeDoc.querySelectorAll('audio, video');
+    fieMedia.forEach(el => mediaSet.push(el));
+    return mediaSet;
   }
 
 
