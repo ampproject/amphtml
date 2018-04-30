@@ -24,7 +24,7 @@ import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+  'aria-describedby', 'aria-labelledby', 'srcset', 'sizes'];
 
 export class AmpImg extends BaseElement {
 
@@ -141,6 +141,13 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+
+    let nativeSizes;
+    if (nativeSizes = this.element.getAttribute('native-sizes')) {
+      // Otherwise sizes will be propagated normally if defined
+      this.img_.setAttribute('sizes', nativeSizes);
+    }
+
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
