@@ -114,6 +114,9 @@ class AmpFacebookLike extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
     return true;
   }
 }
