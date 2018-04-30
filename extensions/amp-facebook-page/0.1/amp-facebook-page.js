@@ -110,9 +110,6 @@ class AmpFacebookPage extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.unlistenMessage_) {
-      this.unlistenMessage_();
-    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
