@@ -1,7 +1,7 @@
 # Video in AMP
 
-Most video player components in AMP implement the VideoInterface. This means
-that a set of features is available in all of this components, either completely
+Most video player components in AMP implement the [VideoInterface](https://github.com/ampproject/amphtml/blob/master/src/video-interface.js). This means
+that a set of features is available in all of these components, either completely
 or partially.
 
 This document describes all the features (**work in progress, incomplete**) that
