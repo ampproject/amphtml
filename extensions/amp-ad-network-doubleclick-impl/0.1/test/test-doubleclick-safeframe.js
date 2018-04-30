@@ -161,7 +161,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(Object.keys(JSON.parse(payload['newGeometry']))).to.deep.equal([
           'windowCoords_t', 'windowCoords_r', 'windowCoords_b',
           'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-          'frameCoords_b', 'frameCoords_l', 'styleZIndex',
+          'frameCoords_b', 'frameCoords_l',
+          'posCoords_t', 'posCoords_b', 'posCoords_r', 'posCoords_l',
+          'styleZIndex',
           'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
           'allowedExpansion_l', 'yInView', 'xInView',
         ]);
@@ -185,7 +187,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       expect(Object.keys(initialGeometry)).to.deep.equal(
           ['windowCoords_t', 'windowCoords_r', 'windowCoords_b',
             'windowCoords_l', 'frameCoords_t', 'frameCoords_r',
-            'frameCoords_b', 'frameCoords_l', 'styleZIndex',
+            'frameCoords_b', 'frameCoords_l', 'posCoords_t',
+            'posCoords_b', 'posCoords_r', 'posCoords_l', 'styleZIndex',
             'allowedExpansion_r', 'allowedExpansion_b', 'allowedExpansion_t',
             'allowedExpansion_l', 'yInView', 'xInView']);
       Object.keys(initialGeometry).forEach(key => {
@@ -320,7 +323,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
-              '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
+              '"frameCoords_b":250,"frameCoords_l":0,' +
+              '"posCoords_t":0,"posCoords_b":250,"posCoords_r":300,' +
+              '"posCoords_l":0,"styleZIndex":"",' +
               '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
@@ -363,10 +368,59 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         expect(payload['newGeometry']).to.equal(
             '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
               '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":10,' +
-              '"frameCoords_b":10,"frameCoords_l":0,"styleZIndex":"",' +
+              '"frameCoords_b":10,"frameCoords_l":0,' +
+              '"posCoords_t":0,"posCoords_b":10,"posCoords_r":10,' +
+              '"posCoords_l":0,"styleZIndex":"",' +
               '"allowedExpansion_r":490,"allowedExpansion_b":990,' +
               '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
               '"xInView":1}');
+        expect(payload['uid']).to.equal(safeframeHost.uid_);
+        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+      });
+    });
+
+    it('should get geometry when scrolled', () => {
+      sandbox./*OK*/stub(safeframeHost.baseInstance_,
+          'getPageLayoutBox').returns({
+        top: 0,
+        left: 0,
+        right: 50,
+        bottom: 50,
+      });
+      // In this case, the safeframe is smaller than its containing
+      // amp-ad element.
+      const safeframeMock = createElementWithAttributes(doc, 'iframe', {
+        'class': 'safeframe',
+      });
+      const css = createElementWithAttributes(doc, 'style');
+      css.innerHTML = '.safeframe' +
+          '{height:100px!important;' +
+          'width:100px!important;' +
+          'background-color:blue!important;' +
+          'display:block!important;}';
+      doc.head.appendChild(css);
+      ampAd.appendChild(safeframeMock);
+      doubleclickImpl.iframe_ = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
+
+      // Scroll 100 px
+      safeframeHost.viewport_.setScrollTop(50);
+
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+          'sendMessage_');
+      safeframeHost.updateGeometry_();
+
+      return Services.timerFor(env.win).promise(100).then(() => {
+        const payload = sendMessageStub.firstCall.args[0];
+        const messageType = sendMessageStub.firstCall.args[1];
+        expect(payload['newGeometry']).to.equal(
+            '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
+              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":100,' +
+              '"frameCoords_b":100,"frameCoords_l":0,"posCoords_t":-50,' +
+              '"posCoords_b":50,"posCoords_r":100,"posCoords_l":0,' +
+              '"styleZIndex":"","allowedExpansion_r":400,' +
+              '"allowedExpansion_b":900,"allowedExpansion_t":0,' +
+              '"allowedExpansion_l":0,"yInView":0.5,"xInView":1}');
         expect(payload['uid']).to.equal(safeframeHost.uid_);
         expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
       });
@@ -439,7 +493,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const expectedParsedSfGU = {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
         'windowCoords_l': 0, 'frameCoords_t': 300, 'frameCoords_r': 500,
-        'frameCoords_b': 1000, 'frameCoords_l': 200, 'styleZIndex': '',
+        'frameCoords_b': 1000, 'frameCoords_l': 200,
+        'posCoords_b': 1000, 'posCoords_l': 200, 'posCoords_r': 500,
+        'posCoords_t': 300, 'styleZIndex': '',
         'allowedExpansion_r': 200, 'allowedExpansion_b': 300,
         'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
         'xInView': 1,
