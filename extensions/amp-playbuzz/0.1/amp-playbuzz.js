@@ -65,6 +65,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+
     /** @private {?number} */
     this.itemHeight_ = 300; //default
 
@@ -188,7 +191,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.loadPromise(iframe).then(function() {
+    return this.iframePromise_ = this.loadPromise(iframe).then(function() {
       this.iframeLoaded_ = true;
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
@@ -298,6 +301,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+      this.iframePromise_ = null;
     }
     return true; // Call layoutCallback again.
   }
