@@ -445,5 +445,31 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
+  describe('whenPlatformResolves', () => {
+    let localPlatform;
+
+    beforeEach(() => {
+      localPlatform = new SubscriptionPlatform();
+      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+    });
+
+    it('should return a promise resolving the requested platform '
+      + 'if it is already registered', () => {
+      platformStore.resolvePlatform('local', localPlatform);
+      return platformStore.whenPlatformResolves('local').then(platform => {
+        expect(platform.getServiceId()).to.be.equal('local');
+      });
+    });
+
+    it('should return a promise resolving when the requested platform '
+      + 'gets registered', done => {
+      platformStore.whenPlatformResolves('local').then(platform => {
+        expect(platform.getServiceId()).to.be.equal('local');
+        done();
+      });
+      platformStore.resolvePlatform('local', localPlatform);
+    });
+  });
+
 });
 
