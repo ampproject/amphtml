@@ -135,6 +135,10 @@ export class AmpSelector extends AMP.BaseElement {
         this.toggle_(args['index'], args['value']);
       }
     }, ActionTrust.LOW);
+
+    this.registerAction('invocate', invocation => {
+      this.keyDownHandler_(invocation.event);
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
@@ -436,7 +440,6 @@ export class AmpSelector extends AMP.BaseElement {
         return;
     }
 
-    event.preventDefault();
 
     // Make currently selected option unfocusable
     this.options_[this.focusedIndex_].tabIndex = -1;
@@ -467,11 +470,14 @@ export class AmpSelector extends AMP.BaseElement {
   selectionKeyDownHandler_(event) {
     const keyCode = event.keyCode;
     if (keyCode == KeyCodes.SPACE || keyCode == KeyCodes.ENTER) {
+      let target = event.target;
       if (this.options_.includes(event.target)) {
         event.preventDefault();
-        const el = dev().assertElement(event.target);
-        this.onOptionPicked_(el);
+      } else {
+        target = this.options_[this.focusedIndex_];
       }
+      const el = dev().assertElement(target);
+      this.onOptionPicked_(el);
     }
   }
 
