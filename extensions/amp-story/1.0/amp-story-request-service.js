@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {childElementsByTag} from '../../../src/dom';
+import {childElementByTag} from '../../../src/dom';
 import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
@@ -54,8 +54,8 @@ export class AmpStoryRequestService {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    const bookendEl = childElementsByTag(this.storyElement_,
-        'amp-story-bookend')[0];
+    const bookendEl = childElementByTag(this.storyElement_,
+        'amp-story-bookend');
 
     if (!this.storyElement_.hasAttribute(attributeName) && !bookendEl) {
       return Promise.resolve(null);
