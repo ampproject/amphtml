@@ -51,5 +51,15 @@ amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'autoplay' in tag
 >>   ^~~~~~~~~
 amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
 |      loop="1" preload="metadata" controls="controls"></amp-video>
+|  
+|    <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
+|    <amp-video rotate-to-fullscreen layout=fill width=300 height=500
+|      loop preload="metadata" controls></amp-video>
+|  
+|    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
+|    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
+>>   ^~~~~~~~~
+amp-video/0.1/test/validator-amp-video.html:55:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+|      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>
