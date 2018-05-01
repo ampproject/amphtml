@@ -100,18 +100,78 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
-  it('should setup store and page on start', () => {
-    sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
-    const renderLoadingStub =
-        sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
+  describe('start', () => {
+    it('should setup store and page on start', () => {
+      sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+      const renderLoadingStub =
+          sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
 
-    subscriptionService.start();
-    return subscriptionService.initialize_().then(() => {
-      // Should show loading on the page
-      expect(renderLoadingStub).to.be.calledWith(true);
-      // Should setup platform store
-      expect(subscriptionService.platformStore_).to.be
-          .instanceOf(PlatformStore);
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        // Should show loading on the page
+        expect(renderLoadingStub).to.be.calledWith(true);
+        // Should setup platform store
+        expect(subscriptionService.platformStore_).to.be
+            .instanceOf(PlatformStore);
+      });
+    });
+
+    it('should start auth flow for short circuiting', () => {
+      const authFlowStub = sandbox.stub(subscriptionService,
+          'startAuthorizationFlow_');
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateAuthToViewer_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = serviceConfig;
+        subscriptionService.pageConfig_ = pageConfig;
+        subscriptionService.doesViewerProvideAuth_ = true;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+        expect(delegateStub).to.be.calledOnce;
+      });
+    });
+
+    it('should skip everything and unlock document for alwaysGrant', () => {
+      const processStateStub = sandbox.stub(subscriptionService,
+          'processGrantState_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: true,
+        };
+        subscriptionService.pageConfig_ = pageConfig;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(processStateStub).to.be.calledWith(true);
+      });
+    });
+
+    it('should not skip everything and unlock document for alwaysGrant '
+        + 'if viewer provides authorization', () => {
+      const processStateStub = sandbox.stub(subscriptionService,
+          'processGrantState_');
+      const authFlowStub = sandbox.stub(subscriptionService,
+          'startAuthorizationFlow_');
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateAuthToViewer_');
+      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: true,
+        };
+        subscriptionService.pageConfig_ = pageConfig;
+        subscriptionService.doesViewerProvideAuth_ = true;
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        expect(authFlowStub.withArgs(false)).to.be.calledOnce;
+        expect(delegateStub).to.be.calledOnce;
+        expect(processStateStub).to.not.be.called;
+      });
     });
   });
 
@@ -124,22 +184,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   it('should search ampdoc-scoped config', () => {
     return subscriptionService.initialize_().then(() => {
       expect(configResolver.doc_.ampdoc_).to.equal(ampdoc);
-    });
-  });
-
-  it('should start auth flow for short circuiting', () => {
-    const authFlowStub = sandbox.stub(subscriptionService,
-        'startAuthorizationFlow_');
-    const delegateStub = sandbox.stub(subscriptionService,
-        'delegateAuthToViewer_');
-    sandbox.stub(subscriptionService, 'initialize_')
-        .callsFake(() => Promise.resolve());
-    subscriptionService.pageConfig_ = pageConfig;
-    subscriptionService.doesViewerProvideAuth_ = true;
-    subscriptionService.start();
-    return subscriptionService.initialize_().then(() => {
-      expect(authFlowStub.withArgs(false)).to.be.calledOnce;
-      expect(delegateStub).to.be.calledOnce;
     });
   });
 
@@ -465,6 +509,30 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           .to.be.deep.equal(['local']);
       expect(subscriptionService.platformStore_.fallbackEntitlement_.json())
           .to.be.deep.equal(entitlement.json());
+    });
+  });
+
+  describe('action delegation', () => {
+    it('should call delegateActionToService with serviceId local', () => {
+      const delegateStub = sandbox.stub(subscriptionService,
+          'delegateActionToService');
+      const action = 'action';
+      subscriptionService.delegateActionToLocal(action);
+      expect(delegateStub).to.be.calledWith(action, 'local');
+    });
+
+    it('should delegate action to the specified platform', () => {
+      subscriptionService.platformStore_ =
+        new PlatformStore(['local'], null, null);
+      const platform = new SubscriptionPlatform();
+      const executeActionStub = sandbox.stub(platform, 'executeAction');
+      const getPlatformStub = sandbox.stub(
+          subscriptionService.platformStore_, 'getPlatform')
+          .callsFake(() => platform);
+      const action = action;
+      subscriptionService.delegateActionToService(action, 'local');
+      expect(getPlatformStub).to.be.calledWith('local');
+      expect(executeActionStub).to.be.calledWith(action);
     });
   });
 });

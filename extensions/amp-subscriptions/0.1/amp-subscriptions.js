@@ -258,6 +258,11 @@ export class SubscriptionService {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
         return;
+      } else if (this.platformConfig_['alwaysGrant']) {
+        // If service config has `alwaysGrant` key as true,
+        // publisher wants it to be open always until a sviewer decides otherwise.
+        this.processGrantState_(true);
+        return;
       }
 
       user().assert(this.platformConfig_['services'],
@@ -428,22 +433,32 @@ export class SubscriptionService {
   }
 
   /**
-   * Delegates an action to local platform
+   * Delegates an action to local platform.
    * @param {string} action
    * @return {!Promise<boolean>}
    */
   delegateActionToLocal(action) {
-    const localPlatform = /** @type {LocalSubscriptionPlatform} */ (
-      dev().assert(this.platformStore_.getLocalPlatform(),
-          'Local platform is not registered'));
-    // TODO: add which service is passing this event
+    return this.delegateActionToService(action, 'local');
+  }
+
+  /**
+   * Delegates an action to specified platform.
+   * @param {string} action
+   * @param {string} serviceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId) {
+    // TODO: add a promise to wait for resolve promise of a platform.
+    const platform = dev().assert(this.platformStore_.getPlatform(serviceId),
+        'Platform is not registered');
     this.subscriptionAnalytics_.event(
         SubscriptionAnalyticsEvents.ACTION_DELEGATED,
         {
           action,
+          serviceId,
         }
     );
-    return localPlatform.executeAction(action);
+    return platform.executeAction(action);
   }
 }
 

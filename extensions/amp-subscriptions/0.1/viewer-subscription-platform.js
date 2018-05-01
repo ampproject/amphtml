@@ -188,6 +188,11 @@ export class ViewerSubscriptionPlatform {
   getBaseScore() {
     return 0;
   }
+
+  /** @override */
+  executeAction(action) {
+    return this.platform_.executeAction(action);
+  }
 }
 
 /**
