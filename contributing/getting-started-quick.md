@@ -27,7 +27,19 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). [nvm](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+  On Mac and Linux, you can use [nvm](https://github.com/creationix/nvm), especially if you have other projects that require different versions of Node.
+
+   ```
+   nvm install --lts
+   ```
+
+* Install the stable version of [Yarn](https://yarnpkg.com/) (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+
+  On Mac and Linux, you can do so like this.
+
+   ```
+   curl -o- -L https://yarnpkg.com/install.sh | bash
+   ```
 
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
