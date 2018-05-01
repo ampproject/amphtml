@@ -13,6 +13,8 @@ before_install:
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara capybara selenium-webdriver chromedriver-helper rspec-retry
