@@ -67,7 +67,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 ## Analytics
 
-`amp-video` supports analytics out of the box. See [video analytics](/extensions/amp-analytics/amp-video-analytics.md) for more information.
+`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
 
 ## Attributes
 

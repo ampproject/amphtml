@@ -24,7 +24,7 @@ These players include:
 
 ## Analytics
 
-See [video analytics](/extensions/amp-analytics/amp-video-analytics.md).
+See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md).
 
 <a id="autoplay"></a>
 
