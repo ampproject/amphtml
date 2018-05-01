@@ -6,7 +6,7 @@
   "main": "index.js",
   "engines": {
     "node": "^8.0.0",
-    "yarn": ">=1.2.0"
+    "yarn": "^1.6.0"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
