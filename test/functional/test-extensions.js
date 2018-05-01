@@ -136,6 +136,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration with promise', () => {
+      const promise = extensions.waitForExtension(win , 'amp-ext');
       allowConsoleError(() => { expect(() => {
         registerExtension(extensions, 'amp-ext', () => {
           throw new Error('intentional');
@@ -150,6 +151,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.resolve).to.exist;
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
+      expect(promise).to.eventually.equal(holder.promise);
 
       return extensions.waitForExtension(win, 'amp-ext').then(() => {
         throw new Error('must have been rejected');
