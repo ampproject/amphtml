@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {adsense} from '../adsense';
 
 describes.realWin('adsenseDelayedFetch', {}, env => {
@@ -99,5 +100,89 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
           /Responsive AdSense ad units require the attribute data-full-width.​/
       );
     });
+  });
+
+  describe('amp-consent integration', () => {
+
+    let pushCount = 0;
+    beforeEach(() => {
+      pushCount = 0;
+      env.win.adsbygoogle = {
+        push: () => pushCount++,
+      };
+    });
+
+    it('should handle missing consentState', () => {
+      adsense(env.win, data);
+      expect(env.win.document.querySelector('ins.adsbygoogle')).to.be.ok;
+      expect(pushCount).to.equal(1);
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.undefined;
+    });
+
+    it('should npa for unknown with npaOnUnknownConsent', () => {
+      env.win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
+      data['npaOnUnknownConsent'] = 'true';
+      adsense(env.win, data);
+      expect(env.win.document.querySelector('ins.adsbygoogle')).to.be.ok;
+      expect(pushCount).to.equal(1);
+      expect(env.win.adsbygoogle).to.be.ok;
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.true;
+    });
+
+    it('should not request for unknown q/ invalid npaOnUnknownConsent', () => {
+      env.win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
+      data['npaOnUnknownConsent'] = 'blah';
+      adsense(env.win, data);
+      expect(env.win.document.querySelector('ins.adsbygoogle')).to.not.be.ok;
+      expect(pushCount).to.equal(0);
+      expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be.undefined;
+    });
+
+    /**
+     * Possible consent policy state to proceed with.
+     * @enum {string}
+     */
+    const RESULT_STATE = {
+      NO_EFFECT: 'no effect',
+      NPA: 'npa',
+      NO_REQUEST: 'no request',
+    };
+    for (const policy in CONSENT_POLICY_STATE) {
+      let result;
+      switch (CONSENT_POLICY_STATE[policy]) {
+        case CONSENT_POLICY_STATE.UNKNOWN:
+          result = RESULT_STATE.NO_REQUEST;
+          break;
+        case CONSENT_POLICY_STATE.SUFFICIENT:
+          result = RESULT_STATE.NO_EFFECT;
+          break;
+        case CONSENT_POLICY_STATE.INSUFFICIENT:
+          result = RESULT_STATE.NPA;
+          break;
+        case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+          result = RESULT_STATE.NO_EFFECT;
+          break;
+        default:
+          throw new Error(`Unknown policy: ${policy}`);
+      }
+      it(`should ${result} when ${policy}`, () => {
+        env.win.context.initialConsentState = CONSENT_POLICY_STATE[policy];
+        adsense(env.win, data);
+        const insElement = env.win.document.querySelector('ins.adsbygoogle');
+        if (result == RESULT_STATE.NO_REQUEST) {
+          expect(insElement).to.not.be.ok;
+          expect(pushCount).to.equal(0);
+          expect(env.win.adsbygoogle['requestNonPersonalizedAds'])
+              .to.be.undefined;
+        } else {
+          expect(insElement).to.be.ok;
+          expect(pushCount).to.equal(1);
+          expect(env.win.adsbygoogle).to.be.ok;
+          expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.equal(
+              result == RESULT_STATE.NPA ? true : undefined);
+        }
+      });
+    }
+
   });
 });
