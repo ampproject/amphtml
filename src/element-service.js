@@ -18,7 +18,6 @@ import * as dom from './dom';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
-  getService,
   getServicePromise,
   getServicePromiseForDoc,
   getServicePromiseOrNull,
@@ -126,15 +125,8 @@ export function getElementServiceIfAvailableForDoc(
     if (!opt_element && isElementScheduled(ampdoc.win, extension)) {
       return getServicePromiseForDoc(nodeOrDoc, id);
     }
-    // Can't use Services.extensionsFor() due to circular types ref
-    /** @const {Object} */
-    const extensions = getService(global, 'extensions');
-    // Wait for HEAD to fully form and extension (if there is one) to load
-    // before denying access to the service.
-    return Promise.all([
-      ampdoc.whenBodyAvailable(),
-      extension ? extensions.waitForExtension(ampdoc.win, extension) : null,
-    ]).then(() => {
+    // Wait for HEAD to fully form before denying access to the service.
+    return ampdoc.whenBodyAvailable().then(() => {
       // If this service is provided by an element, then we can't depend on the
       // service (they may not use the element).
       if (opt_element) {
@@ -143,11 +135,6 @@ export function getElementServiceIfAvailableForDoc(
         return getServicePromiseForDoc(nodeOrDoc, id);
       }
       return null;
-    }).catch(e => {
-      if (/timeout/.test(e.message)) {
-        assertService(null, id, extension);
-      }
-      throw e;
     });
   });
 }
@@ -219,15 +206,8 @@ function getElementServicePromiseOrNull(win, id, extension, opt_element) {
     if (!opt_element && isElementScheduled(win, extension)) {
       return getServicePromise(win, id);
     }
-    // Can't use Services.extensionsFor() due to circular types ref
-    /** @const {Object} */
-    const extensions = getService(global, 'extensions');
-    // Wait for HEAD to fully form and extension (if there is one) to load
-    // before denying access to the service.
-    return Promise.all([
-      dom.waitForBodyPromise(win.document),
-      extension ? extensions.waitForExtension(win, extension) : null,
-    ]).then(() => {
+    // Wait for HEAD to fully form before denying access to the service.
+    return dom.waitForBodyPromise(win.document).then(() => {
       // If this service is provided by an element, then we can't depend on the
       // service (they may not use the element).
       if (opt_element) {
@@ -236,11 +216,6 @@ function getElementServicePromiseOrNull(win, id, extension, opt_element) {
         return getServicePromise(win, id);
       }
       return null;
-    }).catch(e => {
-      if (/timeout/.test(e.message)) {
-        assertService(null, id, extension);
-      }
-      throw e;
     });
   });
 }
