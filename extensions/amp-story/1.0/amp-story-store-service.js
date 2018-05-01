@@ -29,6 +29,7 @@ const TAG = 'amp-story';
  *    canshowbookend: boolean,
  *    canshownavigationoverlayhint: boolean,
  *    canshowpreviouspagehelp: boolean,
+ *    canshowsharinguis: boolean,
  *    canshowsystemlayerbuttons: boolean,
  *    bookendstate: boolean,
  *    desktopstate: boolean,
@@ -50,6 +51,7 @@ export const StateProperty = {
   CAN_SHOW_BOOKEND: 'canshowbookend',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canshownavigationoverlayhint',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canshowpreviouspagehelp',
+  CAN_SHOW_SHARING_UIS: 'canshowsharinguis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canshowsystemlayerbuttons',
 
   // App States.
@@ -225,6 +227,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_BOOKEND]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.AD_STATE]: false,
       [StateProperty.BOOKEND_STATE]: false,
@@ -255,6 +258,10 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
+        };
+      case EmbedMode.NO_SHARING:
+        return {
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
       default:
         return {};
