@@ -122,7 +122,7 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    const ampdocSingle = this.ampdocService.getAmpDoc();
+    const ampdoc = this.ampdocService.getAmpDoc();
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -130,9 +130,12 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-    return Services.viewerForDoc(ampdocSingle).whenFirstVisible()
+    if (!this.ampdocService.isSingleDoc()) {
+      return Promise.resolve();
+    }
+    return Services.viewerForDoc(ampdoc).whenFirstVisible()
         .then(() => {
-          return this.maybeIntercept_(input, init, ampdocSingle);
+          return this.maybeIntercept_(input, init, ampdoc);
         }).then(interceptorResponse => {
           if (interceptorResponse) {
             return interceptorResponse;
@@ -174,9 +177,6 @@ export class Xhr {
    * @private
    */
   maybeIntercept_(input, init, ampdocSingle) {
-    if (!this.ampdocService.isSingleDoc()) {
-      return Promise.resolve();
-    }
     const htmlElement = ampdocSingle.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     if (!docOptedIn) {
