@@ -23,9 +23,8 @@ export class BookendComponentInterface {
   /**
    * Checks if the component is valid.
    * @param {../bookend-component.BookendComponentDef} opt_componentJson
-   * @return {boolean}
    */
-  isValid(opt_componentJson) {}
+  assertValidity(opt_componentJson) {}
 
   /**
    * Builds the component.

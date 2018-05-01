@@ -31,28 +31,29 @@ import {user} from '../../../../../src/log';
  */
 export let BookendArticleComponentDef;
 
+const TAG = 'amp-story-bookend';
+
 /**
  * Builder class for the small article component.
  * @implements {BookendComponentInterface}
  */
 export class ArticleComponent {
   /** @override */
-  isValid(articleJson) {
+  assertValidity(articleJson) {
     if (!articleJson['title'] || !articleJson['url']) {
-      return user().assert(false, 'Articles must contain `title` and `url` ' +
+      user().error(TAG, 'Articles must contain `title` and `url` ' +
         'fields, skipping invalid.');
     }
 
     if (!isProtocolValid(articleJson['url'])) {
-      return user().assert(false, 'Unsupported protocol for article URL ' +
+      user().error(TAG, 'Unsupported protocol for article URL ' +
         `${articleJson['url']}`);
     }
 
     if (!isProtocolValid(articleJson['image'])) {
-      return user().assert(false, 'Unsupported protocol for article image URL' +
+      user().error(TAG, 'Unsupported protocol for article image URL' +
       ` ${articleJson['image']}`);
     }
-    return true;
   }
 
   /**
@@ -129,12 +130,11 @@ export let BookendArticleTitleComponentDef;
 export class ArticleTitleComponent {
 
   /** @override */
-  isValid(titleJson) {
+  assertValidity(titleJson) {
     if (!titleJson['title']) {
-      user().assert(false, 'Titles must contain `title` field, skipping' +
+      user().error(TAG, 'Titles must contain `title` field, skipping' +
       ' invalid.');
     }
-    return true;
   }
 
   /** @override */

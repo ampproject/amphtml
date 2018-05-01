@@ -17,6 +17,7 @@
 import {AmpStory} from '../amp-story';
 import {ArticleComponent} from '../bookend/components/article';
 import {Bookend} from '../bookend/amp-story-bookend';
+import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {
   amp: {
@@ -170,9 +171,13 @@ describes.realWin('amp-story-bookend', {
       ],
     };
 
+    const userErrLogSpy = sandbox.spy(user(), 'error');
+
     allowConsoleError(() => {
-      expect(() => articleComponent.isValid(userJson)).to.throw('Articles' +
-        ' must contain `title` and `url` fields, skipping invalid.​​​');
+      articleComponent.assertValidity(userJson);
+      expect(userErrLogSpy).to.be.calledOnce;
+      expect(userErrLogSpy.getCall(0).args[1]).to.have.string(
+          'Articles must contain `title` and `url` fields, skipping invalid.');
     });
   });
 });
