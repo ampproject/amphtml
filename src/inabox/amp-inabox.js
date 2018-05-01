@@ -19,6 +19,7 @@
  */
 
 import '../polyfills';
+import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {
   adopt,
@@ -29,7 +30,6 @@ import {
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
-import {installAnchorClickInterceptor} from '../anchor-click-interceptor';
 import {installCacheServiceWorker} from '../service-worker/install';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
@@ -104,8 +104,7 @@ startupChunk(self.document, function initial() {
       stubElementsForDoc(ampdoc);
     });
     startupChunk(self.document, function final() {
-      installAnchorClickInterceptor(ampdoc, self);
-
+      Navigation.installAnchorClickInterceptor(ampdoc, self);
       maybeValidate(self);
       makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
