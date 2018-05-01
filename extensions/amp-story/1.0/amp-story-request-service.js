@@ -55,7 +55,7 @@ export class AmpStoryRequestService {
     const bookendEl = childElementByTag(this.storyElement_,
         'amp-story-bookend');
 
-    if (!bookendEl) {
+    if (!bookendEl || !bookendEl.hasAttribute(attributeName)) {
       return Promise.resolve(null);
     }
 
