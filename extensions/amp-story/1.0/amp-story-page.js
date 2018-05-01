@@ -267,13 +267,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    let mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    let mediaSet = Array.from(
+        scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR));
     const iframe = this.element.querySelector('iframe');
     const iframeDoc = iframe && iframe.contentDocument;
     if (iframeDoc) {
-      mediaSet = Array.from(mediaSet);
-      const fieMedia = scopedQuerySelectorAll(iframeDoc, PAGE_MEDIA_SELECTOR);
-      fieMedia.forEach(el => mediaSet.push(el));
+      const fieMedia = Array.from(
+          scopedQuerySelectorAll(iframeDoc, PAGE_MEDIA_SELECTOR));
+      mediaSet = mediaSet.concat(fieMedia);
     }
 
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
@@ -332,30 +333,39 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all media elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<!Element>}
    * @private
    */
   getAllMedia_() {
     const iframe = this.element.querySelector('iframe');
     const iframeDoc = iframe && iframe.contentDocument;
-    let mediaSet = this.element.querySelectorAll('audio, video');
+    const mediaSet = Array.from(
+        this.element.querySelectorAll('audio, video'));
     if (!iframeDoc) {
       return mediaSet;
     }
-    mediaSet = Array.from(mediaSet);
-    const fieMedia = iframeDoc.querySelectorAll('audio, video');
-    fieMedia.forEach(el => mediaSet.push(el));
-    return mediaSet;
+    const fieMedia = Array.from(
+        iframeDoc.querySelectorAll('audio, video'));
+    return mediaSet.concat(fieMedia);
   }
 
 
   /**
    * Gets all video elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<!Element>}
    * @private
    */
   getAllVideos_() {
-    return this.element.querySelectorAll('video');
+    const iframe = this.element.querySelector('iframe');
+    const iframeDoc = iframe && iframe.contentDocument;
+    const mediaSet = Array.from(
+        this.element.querySelectorAll('video'));
+    if (!iframeDoc) {
+      return mediaSet;
+    }
+    const fieMedia = Array.from(
+        iframeDoc.querySelectorAll('video'));
+    return mediaSet.concat(fieMedia);
   }
 
 
