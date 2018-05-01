@@ -366,15 +366,21 @@ export class SafeframeHostApi {
    */
   formatGeom_(iframeBox) {
     const viewportSize = this.viewport_.getSize();
+    const scrollLeft = this.viewport_.getScrollLeft();
+    const scrollTop = this.viewport_.getScrollTop();
     const currentGeometry = /** @type {JsonObject} */({
       'windowCoords_t': 0,
       'windowCoords_r': viewportSize.width,
       'windowCoords_b': viewportSize.height,
       'windowCoords_l': 0,
-      'frameCoords_t': iframeBox.top,
-      'frameCoords_r': iframeBox.right,
-      'frameCoords_b': iframeBox.bottom,
-      'frameCoords_l': iframeBox.left,
+      'frameCoords_t': iframeBox.top + scrollTop,
+      'frameCoords_r': iframeBox.right + scrollLeft,
+      'frameCoords_b': iframeBox.bottom + scrollTop,
+      'frameCoords_l': iframeBox.left + scrollLeft,
+      'posCoords_t': iframeBox.top,
+      'posCoords_b': iframeBox.bottom,
+      'posCoords_r': iframeBox.right,
+      'posCoords_l': iframeBox.left,
       'styleZIndex': getStyle(this.baseInstance_.element, 'zIndex'),
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.

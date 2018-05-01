@@ -259,8 +259,8 @@ describes.realWin('Ad loader', {amp: true}, env => {
             const zortInstance = {};
             const zortConstructor = function() { return zortInstance; };
             const extensions = Services.extensionsFor(win);
-            extensions.registerExtension_('amp-ad-network-zort-impl', () => {
-              extensions.addElement_('amp-ad-network-zort-impl',
+            extensions.registerExtension('amp-ad-network-zort-impl', () => {
+              extensions.addElement('amp-ad-network-zort-impl',
                   zortConstructor);
             }, {});
           });
