@@ -1645,11 +1645,17 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isLoadingEnabled_()).to.be.true;
       // If loading is enabled, we should be able to toggle the classes
       element.toggleLoading(true);
-      expect(element.loadingContainer_.classList.contains('amp-hidden')).to.be.false;
-      expect(element.loadingElement_.classList.contains('amp-active')).to.be.true;
+      expect(
+          element.loadingContainer_.classList.contains(
+              'amp-hidden')).to.be.false;
+      expect(
+          element.loadingElement_.classList.contains('amp-active')).to.be.true;
       element.toggleLoading(false);
-      expect(element.loadingContainer_.classList.contains('amp-hidden')).to.be.true;
-      expect(element.loadingElement_.classList.contains('amp-active')).to.be.false;
+      expect(
+          element.loadingContainer_.classList.contains(
+              'amp-hidden')).to.be.true;
+      expect(
+          element.loadingElement_.classList.contains('amp-active')).to.be.false;
     });
 
     it('should be disabled in A4A', () => {
