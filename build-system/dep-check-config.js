@@ -249,7 +249,7 @@ exports.rules = [
           'src/service/action-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
           'src/service/navigation.js',
-      'extensions/amp-ad-network-doubleclick-impl.js/0.1/amp-ad-network-doubleclick-impl.js->' +
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->' +
           'src/service/navigation.js',
     ],
   },
