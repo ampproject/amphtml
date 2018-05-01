@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {childElementsByTag} from '../../../src/dom';
 import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
@@ -53,14 +54,15 @@ export class AmpStoryRequestService {
    * @private
    */
   loadJsonFromAttribute_(attributeName) {
-    const bookendElem = this.getBookendElement_(this.storyElement_);
+    const bookendEl = childElementsByTag(this.storyElement_,
+        'amp-story-bookend')[0];
 
-    if (!this.storyElement_.hasAttribute(attributeName) && !bookendElem) {
+    if (!this.storyElement_.hasAttribute(attributeName) && !bookendEl) {
       return Promise.resolve(null);
     }
 
     const rawUrl = this.storyElement_.getAttribute(attributeName) ||
-        bookendElem.getAttribute('src');
+        bookendEl.getAttribute('src');
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
@@ -71,10 +73,5 @@ export class AmpStoryRequestService {
           user().assert(response.ok, 'Invalid HTTP response');
           return response.json();
         });
-  }
-
-  getBookendElement_(element) {
-    return [].slice.call(element.children)
-        .filter(element => element.localName == 'amp-story-bookend')[0];
   }
 }
