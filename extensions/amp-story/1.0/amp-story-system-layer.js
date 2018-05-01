@@ -301,7 +301,7 @@ export class SystemLayer {
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
     this.getShadowRoot()
-        .classList.toggle('i-amphtml-story-allow-sharing', canShowSharingUis);
+        .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
   }
 
   /**
