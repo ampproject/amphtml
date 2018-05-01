@@ -22,6 +22,10 @@
   margin: 16px 8px !important;
 }
 
+.i-amphtml-story-no-sharing .i-amphtml-story-share-widget {
+  display: none !important;
+}
+
 .i-amphtml-story-share-widget-scrollable {
   padding: 16px 0 !important;
   height: 66px !important;

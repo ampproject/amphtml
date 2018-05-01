@@ -144,6 +144,10 @@
   background-position-y: calc(50% - 2px) !important;
 }
 
+.i-amphtml-story-no-sharing .i-amphtml-story-share-control {
+  display: none !important;
+}
+
 [desktop].i-amphtml-story-system-layer {
   background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
   top: auto!important;
