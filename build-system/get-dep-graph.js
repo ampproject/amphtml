@@ -318,13 +318,13 @@ function setupBundles(graph) {
     // Count in how many bundles a modules wants to be.
     Object.keys(graph.depOf).sort().forEach(function(entry) {
       if (graph.depOf[entry][id]) {
-        inBundleCount++;
+        //inBundleCount++;
         dest = entry;
       }
     });
-    console/*OK*/.assert(inBundleCount >= 1,
-        'Should be in at least 1 bundle', id, 'Bundle count',
-        inBundleCount, graph.depOf);
+    //console.assert(inBundleCount >= 1,
+        //'Should be in at least 1 bundle', id, 'Bundle count',
+        //inBundleCount, graph.depOf);
     // If a module is in more than 1 bundle, it must go into _base.
     if (inBundleCount > 1) {
       dest = '_base';
@@ -410,13 +410,11 @@ exports.getFlags = function(config) {
 
 exports.getBundleFlags = function(g, files) {
   var flagsArray = [];
-  //files.forEach(x => {
-    //flagsArray.push('--js', x);
-  //});
+  if (1) {
   Object.keys(g.bundles).sort().forEach(bundleName => {
-    if (bundleName == '_base') {
-      return;
-    }
+    //if (bundleName == '_base') {
+      //return;
+    //}
     const bundle = g.bundles[bundleName];
     const deps = bundle.modules;
     deps.forEach(x => {
@@ -429,6 +427,20 @@ exports.getBundleFlags = function(g, files) {
     flagsArray.push('--module', `${name}:${bundle.modules.length}`);
     //flagsArray.push('--module', `${name}:${bundle.modules.length}${depslist}`);
   });
+  } else {
+    files.forEach(x => {
+      flagsArray.push('--js', x);
+    });
+
+    Object.keys(g.bundles).sort().forEach(bundleName => {
+      if (bundleName == '_base') {
+        return;
+      }
+      const bundle = g.bundles[bundleName];
+      const name = bundleName.replace(/\.js$/g, '').replace(/[\/\\]/g, '-');
+      flagsArray.push('--module', `${name}:357`);
+    });
+  }
   flagsArray.push('--js_module_root', './');
   flagsArray.push('--js_module_root', 'node_modules/');
   //console.log(flagsArray);
@@ -522,7 +534,8 @@ exports.getFlags({
     //}),
   modules: [
     './extensions/amp-audio-1/0.1/amp-audio-1.js',
-    './extensions/amp-live-list/0.1/amp-live-list.js',
+    './extensions/amp-audio-2/0.1/amp-audio-2.js',
+    //'./extensions/amp-live-list/0.1/amp-live-list.js',
     //'./src/amp.js',
   ],
   writeTo: './sample/out/',
