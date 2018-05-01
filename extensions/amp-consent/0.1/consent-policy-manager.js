@@ -116,7 +116,7 @@ export class ConsentPolicyManager {
    * @return {!Promise<Object>}
    */
   getMergedSharedData(policyId) {
-    return this.whenPolicyInstanceReady_(policyId)
+    return this.whenPolicyResolved(policyId)
         .then(() => this.ConsentStateManagerPromise_)
         .then(manager => {
           const promises = this.instances_[policyId].getConsentInstanceIds()

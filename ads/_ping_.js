@@ -81,7 +81,8 @@ export function _ping_(global, data) {
       dev().info('GET-HTML', html);
     });
     if (global.context.consentSharedData) {
-      dev().info('consentSharedData', global.context.consentSharedData);
+      const TAG = 'consentSharedData';
+      dev().info(TAG, global.context.consentSharedData);
     }
   } else {
     global.setTimeout(() => {
