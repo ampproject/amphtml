@@ -45,6 +45,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         onConsentStateChange: (id, handler) => {
           consentManagerOnChangeSpy(id, handler);
         },
+        getConsentInstanceSharedData: id => {
+          const sharedData = {
+            common: id,
+          };
+          sharedData[id] = true;
+          return Promise.resolve(sharedData);
+        },
       });
     });
   });
@@ -253,6 +260,32 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       instance.consentStateChangeHandler('ABC', CONSENT_ITEM_STATE.REJECTED);
       expect(instance.getCurrentPolicyStatus()).to.equal(
           CONSENT_POLICY_STATE.INSUFFICIENT);
+    });
+  });
+
+  describe('getMergedSharedData', () => {
+    let manager;
+
+    beforeEach(() => {
+      manager = new ConsentPolicyManager(ampdoc);
+      sandbox.stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .callsFake(() => {return Promise.resolve();});
+    });
+
+    it('should return merged sharedData', function*() {
+      manager.registerConsentPolicyInstance('test', {
+        'waitFor': {
+          'ABC': undefined,
+          'DEF': undefined,
+        },
+      });
+      yield macroTask();
+      return expect(manager.getMergedSharedData('test'))
+          .to.eventually.deep.equal({
+            common: 'DEF',
+            ABC: true,
+            DEF: true,
+          });
     });
   });
 });
