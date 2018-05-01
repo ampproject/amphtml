@@ -527,8 +527,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const platform = new SubscriptionPlatform();
       const executeActionStub = sandbox.stub(platform, 'executeAction');
       const getPlatformStub = sandbox.stub(
-          subscriptionService.platformStore_, 'whenPlatformResolves')
-          .callsFake(() => Promise.resolve(platform));
+          subscriptionService.platformStore_, 'onPlatformResolves')
+          .callsFake((serviceId, callback) => callback(platform));
       const action = action;
       return subscriptionService.delegateActionToService(action,
           'local').then(() => {
@@ -538,7 +538,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
-  describe('delegateDecorationToElement', () => {
+  describe('decorateServiceAction', () => {
     it('should delegate element to platform of given serviceId', () => {
       const element = document.createElement('div');
       element.setAttribute('subscriptions-service', 'swg-google');
@@ -547,14 +547,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.platformStore_ = new PlatformStore(
           ['local', 'swg-google']);
       const whenResolveStub = sandbox.stub(subscriptionService.platformStore_,
-          'whenPlatformResolves').callsFake(() => Promise.resolve(platform));
+          'onPlatformResolves').callsFake(
+          (serviceId, callback) => callback(platform));
       const decorateUIStub = sandbox.stub(platform,
           'decorateUI');
-      return subscriptionService.delegateDecorationToElement(
-          element, 'swg-google').then(() => {
-        expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
-        expect(decorateUIStub).to.be.calledWith(element);
-      });
+      subscriptionService.decorateServiceAction(element, 'swg-google', 'login')
+      expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
+      expect(decorateUIStub).to.be.calledWith(element);
     });
   });
 });

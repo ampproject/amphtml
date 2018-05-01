@@ -68,7 +68,9 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
         id: 'actions2',
         'subscriptions-section': 'actions',
         'subscriptions-display': 'subscribed',
+        'subscriptions-action': 'login',
         'subscriptions-service': 'service',
+        'subscriptions-decorate': '',
       });
       elements = [
         actions1, actions2,
@@ -79,8 +81,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     });
 
     beforeEach(() => {
-      delegateUIStub = sandbox.stub(serviceAdapter,
-          'delegateDecorationToElement');
+      delegateUIStub = sandbox.stub(serviceAdapter, 'decorateServiceAction');
     });
 
     function isDisplayed(el) {
@@ -106,10 +107,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     it('should display actions and action-sections', () => {
       return renderer.render({subscribed: true}).then(() => {
         displayed([actions2]);
-        expect(delegateUIStub).to.be.calledWith(
-            actions2,
-            'service'
-        );
+        expect(delegateUIStub).to.be.called;
       });
     });
   });

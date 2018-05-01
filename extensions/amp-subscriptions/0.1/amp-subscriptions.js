@@ -445,21 +445,23 @@ export class SubscriptionService {
    * Delegates an action to specified platform.
    * @param {string} action
    * @param {string} serviceId
+   * @param {JsonObject} action
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId) {
-    return this.platformStore_.whenPlatformResolves(serviceId)
-        .then(platform => {
-          dev().assert(platform, 'Platform is not registered');
-          this.subscriptionAnalytics_.event(
-              SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-              {
-                action,
-                serviceId,
-              }
-          );
-          return platform.executeAction(action);
-        });
+  delegateActionToService(action, serviceId, options) {
+    return new Promise(resolve => {
+      this.platformStore_.onPlatformResolves(serviceId, platform => {
+        dev().assert(platform, 'Platform is not registered');
+        this.subscriptionAnalytics_.event(
+            SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+            {
+              action,
+              serviceId,
+            }
+        );
+        resolve(platform.executeAction(action, options));
+      });
+    });
   }
 
   /**
@@ -469,11 +471,10 @@ export class SubscriptionService {
    * @param {string} action
    */
   decorateServiceAction(element, serviceId, action) {
-    return this.platformStore_.whenPlatformResolves(serviceId)
-        .then(platform => {
-          dev().assert(platform, 'Platform is not registered');
-          platform.decorateUI(element, action);
-        });
+    this.platformStore_.onPlatformResolves(serviceId, platform => {
+      dev().assert(platform, 'Platform is not registered');
+      platform.decorateUI(element, action);
+    });
   }
 }
 

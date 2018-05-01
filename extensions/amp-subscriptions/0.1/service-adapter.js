@@ -57,9 +57,11 @@ export class ServiceAdapter {
    * @param {!Element} element
    * @param {string} serviceId
    * @param {string} action
+   * @param {JsonObject} options
    */
-  decorateServiceAction(element, serviceId, action) {
-    this.subscriptionService_.decorateServiceAction(element, serviceId, action);
+  decorateServiceAction(element, serviceId, action, options) {
+    this.subscriptionService_.decorateServiceAction(element, serviceId,
+        action, options);
   }
 
   /**

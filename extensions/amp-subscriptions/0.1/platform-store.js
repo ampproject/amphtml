@@ -89,20 +89,18 @@ export class PlatformStore {
   }
 
   /**
-   * Returns a promise to be solved when a platform is resolved.
+   *Calls a callback for when a platform is resolved.
    * @param {string} serviceId
    */
-  whenPlatformResolves(serviceId) {
+  onPlatformResolves(serviceId, callback) {
     const platform = this.subscriptionPlatforms_[serviceId];
     if (platform) {
-      return Promise.resolve(platform);
+      callback(platform);
     } else {
-      return new Promise(resolve => {
-        this.onPlatformResolvedCallbacks_.add(e => {
-          if (e.serviceId === serviceId) {
-            resolve(this.getPlatform(serviceId));
-          }
-        });
+      this.onPlatformResolvedCallbacks_.add(e => {
+        if (e.serviceId === serviceId) {
+          callback(this.getPlatform(serviceId));
+        }
       });
     }
   }

@@ -445,7 +445,7 @@ describes.realWin('Platform store', {}, () => {
     });
   });
 
-  describe('whenPlatformResolves', () => {
+  describe('onPlatformResolves', () => {
     let localPlatform;
 
     beforeEach(() => {
@@ -456,14 +456,14 @@ describes.realWin('Platform store', {}, () => {
     it('should return a promise resolving the requested platform '
       + 'if it is already registered', () => {
       platformStore.resolvePlatform('local', localPlatform);
-      return platformStore.whenPlatformResolves('local').then(platform => {
+      platformStore.onPlatformResolves('local', platform => {
         expect(platform.getServiceId()).to.be.equal('local');
       });
     });
 
     it('should return a promise resolving when the requested platform '
       + 'gets registered', done => {
-      platformStore.whenPlatformResolves('local').then(platform => {
+      platformStore.onPlatformResolves('local', platform => {
         expect(platform.getServiceId()).to.be.equal('local');
         done();
       });

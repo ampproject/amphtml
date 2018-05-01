@@ -195,8 +195,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  decorateUI(action) {
-    return this.platform_.decorateUI(action);
+  decorateUI(action, options) {
+    return this.platform_.decorateUI(action, options);
   }
 }
 

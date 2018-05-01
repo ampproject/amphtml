@@ -236,9 +236,11 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  decorateUI(element) {
-    element.innerHTML = '';
-    this.runtime_.buttonApi_.attach(element);
+  decorateUI(element, action, options) {
+    if (action === 'login') {
+      element.innerHTML = '';
+      this.runtime_.buttonApi_.attach(element, options);
+    }
   }
 }
 
