@@ -242,7 +242,7 @@ export class SystemLayer {
   /**
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
-   * @param {boolean} isActive
+   * @param {boolean} canShowSharingUis
    * @private
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
