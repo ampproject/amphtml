@@ -36,6 +36,7 @@ import {PageScalingService} from './page-scaling';
 import {Services} from '../../../src/services';
 import {
   closestBySelector,
+  iterateCursor,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -58,10 +59,15 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 
 /**
- * Selector for which media to wait for on page layout.
- * @const {string}
+ * Selectors for media elements
+ * @enum {string}
  */
-const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
+const SELECTORS = {
+  // which media to wait for on page layout.
+  ALL_AMP_MEDIA: 'amp-audio, amp-video, amp-img, amp-anim',
+  ALL_MEDIA: 'audio, video',
+  ALL_VIDEO: 'video',
+};
 
 
 /** @private @const {string} */
@@ -267,15 +273,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   waitForMediaLayout_() {
-    let mediaSet = Array.from(
-        scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR));
-    const iframe = this.element.querySelector('iframe');
-    const iframeDoc = iframe && iframe.contentDocument;
-    if (iframeDoc) {
-      const fieMedia = Array.from(
-          scopedQuerySelectorAll(iframeDoc, PAGE_MEDIA_SELECTOR));
-      mediaSet = mediaSet.concat(fieMedia);
-    }
+    const mediaSet = this.getMediaBySelector_(SELECTORS.ALL_AMP_MEDIA);
 
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
       return new Promise(resolve => {
@@ -337,16 +335,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllMedia_() {
-    const iframe = this.element.querySelector('iframe');
-    const iframeDoc = iframe && iframe.contentDocument;
-    const mediaSet = Array.from(
-        this.element.querySelectorAll('audio, video'));
-    if (!iframeDoc) {
-      return mediaSet;
-    }
-    const fieMedia = Array.from(
-        iframeDoc.querySelectorAll('audio, video'));
-    return mediaSet.concat(fieMedia);
+    return this.getMediaBySelector_(SELECTORS.ALL_MEDIA);
   }
 
 
@@ -356,16 +345,30 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllVideos_() {
+    return this.getMediaBySelector_(SELECTORS.ALL_VIDEO);
+  }
+
+
+  /**
+   * Gets media on page by given selector. Finds elements through friendly
+   * iframe (if one exists).
+   * @param {string} selector
+   */
+  getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
     const iframeDoc = iframe && iframe.contentDocument;
-    const mediaSet = Array.from(
-        this.element.querySelectorAll('video'));
+    const mediaSet = [];
+
+    iterateCursor(scopedQuerySelectorAll(this.element, selector),
+        el => mediaSet.push(el));
+
     if (!iframeDoc) {
       return mediaSet;
     }
-    const fieMedia = Array.from(
-        iframeDoc.querySelectorAll('video'));
-    return mediaSet.concat(fieMedia);
+
+    iterateCursor(iframeDoc.querySelectorAll(selector),
+        el => mediaSet.push(el));
+    return mediaSet;
   }
 
 
