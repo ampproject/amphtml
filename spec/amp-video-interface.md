@@ -50,7 +50,7 @@ attribute: **`rotate-to-fullscreen`**
 
 **Availability: Experimental**
 
-If this attribute is present and a video is playing manually, the video will be
+If this attribute is present and a video is playing manually (i.e. user initiated playback, or tapped on the video after autoplay), the video will be
 displayed on fullscreen after the user rotates their device into landscape mode,
 if the video is visible.
 
@@ -58,7 +58,7 @@ When multiple videos with the `rotate-to-fullscreen` attribute set are visible
 at the same time, heuristics are employed to select which video to put on
 fullscreen. These are applied as follows, in descending priority:
 
-1. If a video is playing manually.
+1. If a video is playing manually (i.e. user initiated playback, or tapped on the video after autoplay)
 2. If the visible percentage of the video is higher.
 3. If a video is closer to the center of the viewport.
 4. Everything else failing, select the video that is closest to the top of the
