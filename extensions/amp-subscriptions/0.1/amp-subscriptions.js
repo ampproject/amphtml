@@ -464,14 +464,15 @@ export class SubscriptionService {
 
   /**
    * Delegate UI decoration to another service.
-   * @param {Element} element
+   * @param {!Element} element
    * @param {string} serviceId
+   * @param {string} action
    */
-  delegateDecorationToElement(element, serviceId) {
+  decorateServiceAction(element, serviceId, action) {
     return this.platformStore_.whenPlatformResolves(serviceId)
         .then(platform => {
           dev().assert(platform, 'Platform is not registered');
-          platform.decorateUI(element);
+          platform.decorateUI(element, action);
         });
   }
 }

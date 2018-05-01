@@ -127,10 +127,13 @@ export class LocalSubscriptionPlatformRenderer {
         if (expr && evaluateExpr(expr,
             /** @type {!JsonObject} */(renderState))) {
           candidate.classList.add('i-amphtml-subs-display');
-          if (candidate.hasAttribute('subscriptions-service')) {
-            this.serviceAdapter_.delegateDecorationToElement(
+          if (candidate.getAttribute('subscriptions-service')
+            && candidate.getAttribute('subscriptions-action')
+            && candidate.hasAttribute('subscriptions-decorate')) {
+            this.serviceAdapter_.decorateServiceAction(
                 candidate,
-                candidate.getAttribute('subscriptions-service')
+                candidate.getAttribute('subscriptions-service'),
+                candidate.getAttribute('subscriptions-action')
             );
           }
         } else {

@@ -54,11 +54,12 @@ export class ServiceAdapter {
 
   /**
    * Delegate UI decoration to another service.
-   * @param {Element} element
+   * @param {!Element} element
    * @param {string} serviceId
+   * @param {string} action
    */
-  delegateDecorationToElement(element, serviceId) {
-    this.subscriptionService_.delegateDecorationToElement(element, serviceId);
+  decorateServiceAction(element, serviceId, action) {
+    this.subscriptionService_.decorateServiceAction(element, serviceId, action);
   }
 
   /**
