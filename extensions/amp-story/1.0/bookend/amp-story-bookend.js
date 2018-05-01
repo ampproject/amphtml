@@ -316,6 +316,10 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
+    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
+      this.onCanShowSharingUisUpdate_(show);
+    }, true /** callToInitialize */);
+
     this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
       this.onDesktopStateUpdate_(isDesktop);
     }, true /** callToInitialize */);
@@ -346,6 +350,17 @@ export class Bookend {
    */
   onBookendStateUpdate_(isActive) {
     this.toggle_(isActive);
+  }
+
+  /**
+   * Reacts to updates to whether sharing UIs may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} isActive
+   * @private
+   */
+  onCanShowSharingUisUpdate_(canShowSharingUis) {
+    this.getShadowRoot()
+        .classList.toggle('i-amphtml-story-allow-sharing', canShowSharingUis);
   }
 
   /**
