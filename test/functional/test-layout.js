@@ -60,7 +60,7 @@ describe('Layout', () => {
       expect(isLoadingAllowed(el)).to.be.true;
     });
 
-    // This isn't an exhaustest list of elements that aren't allowed
+    // This isn't an exhaustive list of elements that aren't allowed
     // to have loading indicators.
     const elementsInvalidTagNames = [
       'AMP-POSITION-OBSERVER',
