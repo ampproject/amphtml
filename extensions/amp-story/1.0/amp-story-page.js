@@ -331,7 +331,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all media elements on this page.
-   * @return {!Array<!Element>}
+   * @return {Array<!Element>}
    * @private
    */
   getAllMedia_() {
@@ -341,7 +341,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets all video elements on this page.
-   * @return {!Array<!Element>}
+   * @return {Array<!Element>}
    * @private
    */
   getAllVideos_() {
@@ -353,6 +353,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets media on page by given selector. Finds elements through friendly
    * iframe (if one exists).
    * @param {string} selector
+   * @return {Array<!Element>}
    */
   getMediaBySelector_(selector) {
     const iframe = this.element.querySelector('iframe');
