@@ -14,13 +14,5 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../../src/layout';
-
 /** Class corresponding to the <amp-story-bookend> DOM element tag.  */
-export class AmpStoryBookend extends AMP.BaseElement {
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
-  }
-}
+export class AmpStoryBookend extends AMP.BaseElement {}
