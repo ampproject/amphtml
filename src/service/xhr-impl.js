@@ -180,10 +180,9 @@ export class Xhr {
     if (!docOptedIn) {
       return Promise.resolve();
     }
-
-    return Services.viewerForDoc(ampdoc).whenFirstVisible()
+    const viewer = Services.viewerForDoc(ampdoc);
+    return viewer.whenFirstVisible()
         .then(() => {
-          const viewer = Services.viewerForDoc(ampdoc);
           if (!viewer.hasCapability('xhrInterceptor')) {
             return Promise.resolve();
           }
