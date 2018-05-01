@@ -19,7 +19,7 @@ const getStdout = require('./exec').getStdout;
 const https = require('https');
 
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
-const nodeScheduleUrl = 'https://raw.githubusercontent.com/nodejs/Release/master/schedule.json';
+const nodeDistributionsUrl = 'https://nodejs.org/dist/index.json';
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
@@ -32,41 +32,46 @@ function yellow(text) {return '\x1b[33m' + text + '\x1b[0m';}
  */
 
 function startVersionChecks() {
-  https.get(nodeScheduleUrl, res => {
+  https.get(nodeDistributionsUrl, res => {
     res.setEncoding('utf8');
-    let schedule = '';
+    let distributions = '';
     res.on('data', data => {
-      schedule += data;
+      distributions += data;
     });
     res.on('end', () => {
-      continueVersionChecks(schedule);
+      continueVersionChecks(distributions);
     });
   });
 }
 
-function continueVersionChecks(schedule) {
-  const scheduleJson = JSON.parse(schedule);
-  const latestLtsMajorVersion = getNodeLatestLtsMajorVersion(scheduleJson);
-  performNodeVersionCheck(latestLtsMajorVersion);
+function continueVersionChecks(distributions) {
+  const distributionsJson = JSON.parse(distributions);
+  const latestLtsVersion = getNodeLatestLtsVersion(distributionsJson);
+  performNodeVersionCheck(latestLtsVersion);
   performYarnVersionCheck();
 }
 
-function getNodeLatestLtsMajorVersion(scheduleJson) {
-  const versions = Object.keys(scheduleJson);
-  let latestLtsMajorVersion = '';
-  versions.forEach(version => {
-    const lts = scheduleJson[version]['lts'];
-    const maintenance = scheduleJson[version]['maintenance'];
-    if (lts && maintenance) {
-      const ltsDate = Date.parse(lts);
-      const maintenanceDate = Date.parse(maintenance);
-      const today = new Date();
-      if (today >= ltsDate && today < maintenanceDate) {
-        latestLtsMajorVersion = version;
-      }
-    }
-  });
-  return latestLtsMajorVersion;
+function getNodeLatestLtsVersion(distributionsJson) {
+  if (distributionsJson) {
+    // Versions are in descending order, so the first match is the latest lts.
+    return distributionsJson.find(function(distribution) {
+      return distribution.hasOwnProperty('version') &&
+          distribution.hasOwnProperty('lts') &&
+          distribution.lts;
+    }).version;
+  } else {
+    return '';
+  }
+}
+
+function getYarnStableVersion(infoJson) {
+  if (infoJson &&
+      infoJson.hasOwnProperty('data') &&
+      infoJson.data.hasOwnProperty('version')) {
+    return infoJson.data.version;
+  } else {
+    return '';
+  }
 }
 
 // If npm is being run, print a message and cause 'npm install' to fail.
@@ -94,25 +99,23 @@ function ensureYarn() {
 }
 
 // Check the node version and print a warning if it is not the latest LTS.
-function performNodeVersionCheck(latestLtsMajorVersion) {
+function performNodeVersionCheck(latestLtsVersion) {
   const nodeVersion = getStdout('node --version').trim();
-  const nodeMajorVersion = nodeVersion.split('.')[0];
-  if (latestLtsMajorVersion === '') {
+  if (latestLtsVersion === '') {
     console.log(yellow('WARNING: Something went wrong. ' +
-        'Could not determine latest LTS node version.'));
-  }
-  if (latestLtsMajorVersion !== '' &&
-      nodeMajorVersion !== latestLtsMajorVersion) {
+        'Could not determine latest LTS version of node.'));
+  } else if (nodeVersion !== latestLtsVersion) {
     console.log(yellow('WARNING: Detected node version'),
-        cyan(nodeMajorVersion) +
+        cyan(nodeVersion) +
         yellow('. Recommended (latest LTS) version is'),
-        cyan(latestLtsMajorVersion) + yellow('.'));
+        cyan(latestLtsVersion) + yellow('.'));
     console.log(yellow('To fix this, run'),
         cyan('"nvm install --lts"'), yellow('or see'),
         cyan('https://nodejs.org/en/download/package-manager'),
         yellow('for instructions.'));
   } else {
-    console.log(green('Detected node version'), cyan(nodeVersion) +
+    console.log(green('Detected node version'),
+        cyan(nodeVersion + ' (latest LTS)') +
         green('.'));
   }
 }
@@ -120,19 +123,24 @@ function performNodeVersionCheck(latestLtsMajorVersion) {
 // If yarn is being run, perform a version check and proceed with the install.
 function performYarnVersionCheck() {
   const yarnVersion = getStdout('yarn --version').trim();
-  const major = parseInt(yarnVersion.split('.')[0], 10);
-  const minor = parseInt(yarnVersion.split('.')[1], 10);
-  if ((major < 1) || (minor < 2)) {
+  const yarnInfo = getStdout('yarn info --json yarn').trim();
+  const yarnInfoJson = JSON.parse(yarnInfo.split('\n')[0]); // First line
+  const stableVersion = getYarnStableVersion(yarnInfoJson);
+  if (stableVersion === '') {
+    console.log(yellow('WARNING: Something went wrong. ' +
+        'Could not determine stable version of yarn.'));
+  } else if (yarnVersion !== stableVersion) {
     console.log(yellow('WARNING: Detected yarn version'),
-        cyan(yarnVersion) + yellow('. Minimum recommended version is'),
-        cyan('1.2.0') + yellow('.'));
-    console.log(yellow('To upgrade, run'),
+        cyan(yarnVersion) + yellow('. Recommended (stable) version is'),
+        cyan(stableVersion) + yellow('.'));
+    console.log(yellow('To fix this, run'),
         cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
         yellow('or see'), cyan('https://yarnpkg.com/docs/install'),
         yellow('for instructions.'));
     console.log(yellow('Attempting to install packages...'));
   } else {
-    console.log(green('Detected yarn version'), cyan(yarnVersion) +
+    console.log(green('Detected yarn version'),
+        cyan(yarnVersion + ' (stable)') +
         green('. Installing packages...'));
   }
 }

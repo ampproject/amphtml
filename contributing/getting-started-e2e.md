@@ -168,7 +168,13 @@ amphtml uses Node.js, the Yarn package manager and the Gulp build system to buil
    nvm install --lts
    ```
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+* Install the stable version of [Yarn](https://yarnpkg.com/) (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+
+  On Mac and Linux, you can do so like this.
+
+   ```
+   curl -o- -L https://yarnpkg.com/install.sh | bash
+   ```
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
