@@ -130,13 +130,8 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-    if (!this.ampdocService.isSingleDoc()) {
-      return Promise.resolve();
-    }
-    return Services.viewerForDoc(ampdoc).whenFirstVisible()
-        .then(() => {
-          return this.maybeIntercept_(input, init, ampdoc);
-        }).then(interceptorResponse => {
+    return this.maybeIntercept_(input, init, ampdoc)
+        .then(interceptorResponse => {
           if (interceptorResponse) {
             return interceptorResponse;
           }
@@ -170,37 +165,42 @@ export class Xhr {
    * @param {string} input The URL of the XHR which may get intercepted.
    * @param {!FetchInitDef} init The options of the XHR which may get
    *     intercepted.
-   * @param {!./ampdoc-impl.AmpDoc} ampdocSingle The single doc amp viewer.
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @return {!Promise<!FetchResponse|!Response|undefined>}
    *     A response returned by the interceptor if XHR is intercepted or
    *     `Promise<undefined>` otherwise.
    * @private
    */
-  maybeIntercept_(input, init, ampdocSingle) {
-    const htmlElement = ampdocSingle.getRootNode().documentElement;
+  maybeIntercept_(input, init, ampdoc) {
+    if (!this.ampdocService.isSingleDoc()) {
+      return Promise.resolve();
+    }
+    const htmlElement = ampdoc.getRootNode().documentElement;
     const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     if (!docOptedIn) {
       return Promise.resolve();
     }
 
-    const viewer = Services.viewerForDoc(ampdocSingle);
-    if (!viewer.hasCapability('xhrInterceptor')) {
-      return Promise.resolve();
-    }
+    return Services.viewerForDoc(ampdoc).whenFirstVisible()
+        .then(() => {
+          const viewer = Services.viewerForDoc(ampdoc);
+          if (!viewer.hasCapability('xhrInterceptor')) {
+            return Promise.resolve();
+          }
+          return viewer.isTrustedViewer().then(viewerTrusted => {
+            if (!viewerTrusted && !getMode(this.win).development) {
+              return;
+            }
 
-    return viewer.isTrustedViewer().then(viewerTrusted => {
-      if (!viewerTrusted && !getMode(this.win).development) {
-        return;
-      }
+            const messagePayload = dict({
+              'originalRequest': this.toStructuredCloneable_(input, init),
+            });
 
-      const messagePayload = dict({
-        'originalRequest': this.toStructuredCloneable_(input, init),
-      });
-
-      return viewer.sendMessageAwaitResponse('xhr', messagePayload)
-          .then(response =>
-            this.fromStructuredCloneable_(response, init.responseType));
-    });
+            return viewer.sendMessageAwaitResponse('xhr', messagePayload)
+                .then(response =>
+                  this.fromStructuredCloneable_(response, init.responseType));
+          });
+        });
   }
 
   /**
