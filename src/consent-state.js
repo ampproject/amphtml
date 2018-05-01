@@ -45,4 +45,13 @@ export function getConsentPolicyState(ampdoc, policyId) {
       });
 }
 
-
+export function getConsentPolicySharedData(ampdoc, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return null;
+        }
+        return consentPolicy.getMergedSharedData(
+            /** @type {string} */ (policyId));
+      });
+}
