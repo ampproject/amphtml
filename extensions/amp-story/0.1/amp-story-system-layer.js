@@ -246,8 +246,10 @@ export class SystemLayer {
    * @private
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
-    this.getShadowRoot()
-        .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    this.vsync_.mutate(() => {
+      this.getShadowRoot()
+          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+    });
   }
 
   /**
