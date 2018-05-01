@@ -312,11 +312,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         '<amp-ad> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element);
 
-    const consentPolicyId = super.getConsentPolicy();
-    const consentPromise = consentPolicyId
-      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
-      : Promise.resolve(null);
-
+    const consentPromise = this.getConsentState();
     this.layoutPromise_ = Promise.all(
         [getAdCid(this), consentPromise]).then(consents => {
       const opt_context = {
@@ -363,6 +359,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     return this.uiHandler.createPlaceholder();
+  }
+
+  getConsentState() {
+    const consentPolicyId = super.getConsentPolicy();
+    return consentPolicyId
+      ? getConsentPolicyState(this.getAmpDoc(), consentPolicyId)
+      : Promise.resolve(null);
   }
 
   /**

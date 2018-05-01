@@ -80,6 +80,9 @@ export function _ping_(global, data) {
     global.context.getHtml('a', ['href'], function(html) {
       dev().info('GET-HTML', html);
     });
+    global.context.getConsentState(function(consentState) {
+      dev().info('GET-CONSENT-STATE', consentState);
+    });
   } else {
     global.setTimeout(() => {
       global.context.noContentAvailable();
