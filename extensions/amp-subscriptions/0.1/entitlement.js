@@ -50,18 +50,18 @@ export class Entitlement {
    * @param {boolean} [input.loggedIn]
    * @param {?MeteringData} [input.metering]
    */
-  constructor({source, raw = '', service, products = [],
-    subscriptionToken = '', loggedIn = false, metering = null}) {
+  constructor({source, raw = '', service, granted = false,
+    grantReason = '', loggedIn = false, metering = null}) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
     this.source = source;
     /** {string} */
     this.service = service;
-    /** @const {!Array<string>} */
-    this.products = products;
+    /** @const {boolean} */
+    this.granted = granted;
     /** @const {?string} */
-    this.subscriptionToken = subscriptionToken;
+    this.grantReason = grantReason;
     /** @const {boolean} */
     this.loggedIn = loggedIn;
     /** @const {?MeteringData} */
