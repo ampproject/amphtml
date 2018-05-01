@@ -67,12 +67,12 @@ export class BookendComponent {
    */
   static buildFromJson(components) {
     return components.reduce((builtComponents, component) => {
-      const klass = componentBuilderInstanceFor(component.type);
-      if (!klass) {
+      const componentBuilder = componentBuilderInstanceFor(component.type);
+      if (!componentBuilder) {
         return;
       }
-      klass.assertValidity(component);
-      builtComponents.push(klass.build(component));
+      componentBuilder.assertValidity(component);
+      builtComponents.push(componentBuilder.build(component));
       return builtComponents;
     }, []);
   }
@@ -87,8 +87,9 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      if (component.type && componentBuilderInstanceFor(component.type)) {
-        fragment.appendChild(componentBuilderInstanceFor(component.type)
+      const type = component.type;
+      if (type && componentBuilderInstanceFor(type)) {
+        fragment.appendChild(componentBuilderInstanceFor(type)
             .buildTemplate(component, doc));
       }
     });
