@@ -26,6 +26,7 @@ const bodyParser = require('body-parser');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
+const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
