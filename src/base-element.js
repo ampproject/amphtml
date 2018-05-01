@@ -725,7 +725,7 @@ export class BaseElement {
    * @public @final
    */
   toggleLoading(state) {
-    this.element.toggleLoading(state, {force: true});
+    this.element.toggleLoading(state);
   }
 
   /**
