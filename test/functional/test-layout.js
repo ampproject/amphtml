@@ -16,7 +16,7 @@
 
 import {Layout, applyStaticLayout,
   assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
-  parseLayout, parseLength} from '../../src/layout';
+  isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
 
 
 describe('Layout', () => {
@@ -35,6 +35,47 @@ describe('Layout', () => {
     expect(parseLayout('fill')).to.equal('fill');
     expect(parseLayout('fluid')).to.equal('fluid');
   });
+
+  it('are loading components allowed', () => {
+    const el = {
+      tagName: 'hold',
+    };
+    const elementsValidTagNames = [
+      'AMP-AD',
+      'AMP-ANIM',
+      'AMP-BRIGHTCOVE',
+      'AMP-EMBED',
+      'AMP-IFRAME',
+      'AMP-IMG',
+      'AMP-INSTAGRAM',
+      'AMP-LIST',
+      'AMP-OOYALA-PLAYER',
+      'AMP-PINTEREST',
+      'AMP-PLAYBUZZ',
+      'AMP-VIDEO',
+      'AMP-YOUTUBE',
+    ];
+    elementsValidTagNames.forEach(function(tag) {
+      el.tagName = tag;
+      expect(isLoadingAllowed(el)).to.be.true;
+    });
+
+    // This isn't an exhaustive list of elements that aren't allowed
+    // to have loading indicators.
+    const elementsInvalidTagNames = [
+      'AMP-POSITION-OBSERVER',
+      'AMP-BODYMOVIN-ANIMATION',
+      'AMP-TWITTER',
+      'AMP-REDDIT',
+      'AMP-GITHUB',
+    ];
+    elementsInvalidTagNames.forEach(function(tag) {
+      el.tagName = tag;
+      expect(isLoadingAllowed(el)).to.be.false;
+    });
+
+  });
+
 
   it('parseLayout - failure', () => {
     expect(parseLayout('abc')).to.be.undefined;
