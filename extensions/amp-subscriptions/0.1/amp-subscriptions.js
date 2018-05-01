@@ -445,7 +445,7 @@ export class SubscriptionService {
    * Delegates an action to specified platform.
    * @param {string} action
    * @param {string} serviceId
-   * @param {JsonObject} action
+   * @param {?JsonObject} options
    * @return {!Promise<boolean>}
    */
   delegateActionToService(action, serviceId, options) {
