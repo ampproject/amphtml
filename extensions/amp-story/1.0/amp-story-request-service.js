@@ -20,10 +20,8 @@ import {getAmpdoc} from '../../../src/service';
 import {once} from '../../../src/utils/function';
 import {user} from '../../../src/log';
 
-// TODO(#14591): Replace with 'src' when bookend api v0.1 is deprecated.
 /** @private @const {string} */
-export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
-
+export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'src';
 
 export class AmpStoryRequestService {
   constructor(win, storyElement) {
@@ -57,12 +55,11 @@ export class AmpStoryRequestService {
     const bookendEl = childElementByTag(this.storyElement_,
         'amp-story-bookend');
 
-    if (!this.storyElement_.hasAttribute(attributeName) && !bookendEl) {
+    if (!bookendEl) {
       return Promise.resolve(null);
     }
 
-    const rawUrl = this.storyElement_.getAttribute(attributeName) ||
-        bookendEl.getAttribute('src');
+    const rawUrl = bookendEl.getAttribute(attributeName);
     const opts = {};
     opts.requireAmpResponseSourceOrigin = false;
 
