@@ -507,7 +507,7 @@ export class AmpForm {
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
 
     if (isHeadOrGet) {
-      this.assertNoPasswordFields_();
+      this.assertNoInsecureFields_();
       const values = this.getFormAsObject_();
       if (opt_extraFields) {
         deepMerge(values, opt_extraFields);
@@ -586,7 +586,7 @@ export class AmpForm {
    * @private
    */
   handleNonXhrGet_(varSubsFields) {
-    this.assertNoPasswordFields_();
+    this.assertNoInsecureFields_();
     // Non-xhr GET requests replacement should happen synchronously.
     for (let i = 0; i < varSubsFields.length; i++) {
       this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
@@ -595,13 +595,16 @@ export class AmpForm {
   }
 
   /**
-   * Fail if there are password fields present when the function is called.
+   * Fail if there are password or file fields present when the function
+   * is called.
    * @private
    */
-  assertNoPasswordFields_() {
-    const passwordFields = this.form_.querySelectorAll('input[type=password]');
-    user().assert(passwordFields.length == 0,
-        'input[type=password] may only appear in form[method=post]');
+  assertNoInsecureFields_() {
+    const fields = this.form_.querySelectorAll(
+        'input[type=password],input[type=file]');
+    user().assert(fields.length == 0,
+        'input[type=password] or input[type=file] ' +
+        'may only appear in form[method=post]');
   }
 
   /**

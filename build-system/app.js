@@ -200,6 +200,18 @@ app.use('/form/json/poll1', (req, res) => {
   });
 });
 
+const upload = multer();
+
+app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
+  assertCors(req, res, ['POST']);
+
+  const fileData = req.files['myFile'][0];
+  const contents = fileData.buffer.toString();
+
+  res.send({message: contents});
+  res.end();
+});
+
 app.use('/form/search-html/get', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
   res.end(`

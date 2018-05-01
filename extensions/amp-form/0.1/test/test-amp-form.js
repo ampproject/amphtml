@@ -1793,6 +1793,27 @@ describes.repeated('', {
           expect(form.submit).to.have.not.been.called;
         });
       });
+
+      it('should not execute form submit with file field present', () => {
+        const form = getForm();
+        const input = document.createElement('input');
+        input.type = 'file';
+        form.appendChild(input);
+
+        return getAmpForm(form).then(ampForm => {
+          const form = ampForm.form_;
+          ampForm.method_ = 'GET';
+          ampForm.xhrAction_ = null;
+          sandbox.stub(form, 'submit');
+          sandbox.stub(form, 'checkValidity').returns(true);
+          sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+          allowConsoleError(() => {
+            expect(() => ampForm.handleSubmitAction_(/* invocation */ {}))
+                .to.throw('input[type=file]');
+          });
+          expect(form.submit).to.have.not.been.called;
+        });
+      });
     });
 
     it('should trigger amp-form-submit analytics event with form data', () => {
@@ -1800,11 +1821,11 @@ describes.repeated('', {
         const form = ampForm.form_;
         form.id = 'registration';
 
-        const passwordInput = createElement('input');
-        passwordInput.setAttribute('name', 'email');
-        passwordInput.setAttribute('type', 'email');
-        passwordInput.setAttribute('value', 'j@hnmiller.com');
-        form.appendChild(passwordInput);
+        const emailInput = document.createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('value', 'j@hnmiller.com');
+        form.appendChild(emailInput);
 
         const unnamedInput = createElement('input');
         unnamedInput.setAttribute('type', 'text');
