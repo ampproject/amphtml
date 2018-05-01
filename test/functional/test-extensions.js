@@ -86,14 +86,14 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.scriptPresent).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension('amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
     });
 
     it('should register successfully with promise', () => {
-      const promise = extensions.waitForExtension('amp-ext');
+      const promise = extensions.waitForExtension(win, 'amp-ext');
       registerExtension(extensions, 'amp-ext', () => {}, {});
       expect(extensions.currentExtensionId_).to.be.null;
 
@@ -103,7 +103,6 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.resolve).to.exist;
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
-      expect(promise).to.equal(holder.promise);
 
       return promise.then(extension => {
         expect(extension).to.exist;
@@ -129,7 +128,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.promise).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension('amp-ext').then(() => {
+      return extensions.waitForExtension(win, 'amp-ext').then(() => {
         throw new Error('must have been rejected');
       }, reason => {
         expect(reason.message).to.equal('intentional');
@@ -137,7 +136,6 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should fail registration with promise', () => {
-      const promise = extensions.waitForExtension('amp-ext');
       allowConsoleError(() => { expect(() => {
         registerExtension(extensions, 'amp-ext', () => {
           throw new Error('intentional');
@@ -152,9 +150,8 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.resolve).to.exist;
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
-      expect(promise).to.equal(holder.promise);
 
-      return extensions.waitForExtension('amp-ext').then(() => {
+      return extensions.waitForExtension(win, 'amp-ext').then(() => {
         throw new Error('must have been rejected');
       }, reason => {
         expect(reason.message).to.equal('intentional');
@@ -166,7 +163,7 @@ describes.sandboxed('Extensions', {}, () => {
       registerExtension(extensions, 'amp-ext', () => {
         addElementToExtension(extensions, 'e1', ctor);
       }, {});
-      return extensions.waitForExtension('amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
         expect(extension.elements['e1']).to.exist;
         expect(extension.elements['e1'].implementationClass).to.equal(ctor);
       });

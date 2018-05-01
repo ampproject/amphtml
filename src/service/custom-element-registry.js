@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {ElementStub, stubbedElements} from '../element-stub';
+import {ElementStub} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {declareExtension} from './ampdoc-impl';
 import {reportError} from '../error';
+import {stubbedElements} from '../services';
 import {user} from '../log';
 
 

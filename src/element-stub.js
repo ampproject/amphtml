@@ -16,10 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
-
-/** @type {!Array} */
-export const stubbedElements = [];
-
+import {stubbedElements} from './services';
 
 export class ElementStub extends BaseElement {
   constructor(element) {
