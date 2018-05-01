@@ -157,9 +157,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private  {?Element} */
     this.topBar_ = null;
 
-    /** @private  {?Element} */
-    this.topGradient_ = null;
-
     /** @private {!LightboxControlsModes} */
     this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
 
