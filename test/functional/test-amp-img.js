@@ -205,6 +205,39 @@ describe('amp-img', () => {
     });
   });
 
+  it('should propagate srcset and sizes', () => {
+    return getImg({
+      src: 'test.jpg',
+      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      sizes: '(min-width: 320px) 320px, 100vw',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('srcset')).to
+          .equal('large.jpg 2000w, small.jpg 1000w');
+      expect(img.getAttribute('sizes')).to
+          .equal('(min-width: 320px) 320px, 100vw');
+    });
+  });
+
+  it('should propagate native-sizes as sizes when it exists', () => {
+    return getImg({
+      src: 'test.jpg',
+      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      sizes: '(min-width: 320px) 320px, 100vw',
+      'native-sizes': '(min-width: 320px) 300px, 100vw',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('srcset')).to
+          .equal('large.jpg 2000w, small.jpg 1000w');
+      expect(img.getAttribute('sizes')).to
+          .equal('(min-width: 320px) 300px, 100vw');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
