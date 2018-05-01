@@ -108,6 +108,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-PLAYBUZZ': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
+  'AMP-TEST': true,
 };
 
 

@@ -80,17 +80,6 @@ describes.realWin('BaseElement', {amp: true}, env => {
     expect(target.getAttribute('data-test3')).to.equal('123');
   });
 
-  it.only('should not show loading indicator for all elements', () => {
-    expect(customElement.isLoadingEnabled_()).to.be.false;
-    doc.registerElement('amp-facebook', {
-      prototype: createAmpElementProtoForTesting(win,
-          'amp-facebook', BaseElement),
-    });
-    let el = doc.createElement('amp-facebook');
-    element = new BaseElement(el);
-    expect(el.isLoadingEnabled_()).to.be.false;
-  });
-
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);
