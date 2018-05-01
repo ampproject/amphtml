@@ -1640,7 +1640,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     });
 
 
-    it.only('should be enabled by default', () => {
+    it('should be enabled by default', () => {
       stubInA4A(false);
       expect(element.isLoadingEnabled_()).to.be.true;
       // If loading is enabled, we should be able to toggle the classes
@@ -1652,7 +1652,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.loadingElement_.classList.contains('amp-active')).to.be.false;
     });
 
-    it.only('should be disabled in A4A', () => {
+    it('should be disabled in A4A', () => {
       stubInA4A(true);
       expect(element.isLoadingEnabled_()).to.be.false;
       // If loading is disabled, we should not be able to toggle the classes
@@ -1667,7 +1667,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.isLoadingEnabled_()).to.be.false;
     });
 
-    it.only('should disable when element is not whitelisted', () => {
+    it('should disable when element is not whitelisted', () => {
       stubInA4A(false);
       LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
       expect(element.isLoadingEnabled_()).to.be.false;
