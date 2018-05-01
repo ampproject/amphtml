@@ -142,8 +142,8 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
 
-    let nativeSizes;
-    if ((nativeSizes = this.element.getAttribute('native-sizes'))) {
+    const nativeSizes = this.element.getAttribute('native-sizes');
+    if (nativeSizes) {
       // Otherwise sizes will be propagated normally if defined
       this.img_.setAttribute('sizes', nativeSizes);
     }
