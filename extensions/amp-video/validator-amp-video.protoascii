@@ -66,6 +66,10 @@ attr_lists: {
     value_regex: "(none|metadata|auto|)"
   }
   attrs: {
+    name: "rotate-to-fullscreen"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "https"
