@@ -476,6 +476,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('has correct format when as-use-attr-for-format is on', () => {
       toggleExperiment(impl.win, 'as-use-attr-for-format', true);
+      sandbox.stub(Math, 'random').callsFake(() => 0.5);
       const width = element.getAttribute('width');
       const height = element.getAttribute('height');
       return impl.getAdUrl().then(url =>
@@ -619,7 +620,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         expect(adUrl1).to.match(/ifi=1/);
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
-          expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
           expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
           return impl3.getAdUrl().then(adUrl3 => {
@@ -629,7 +630,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // has a bounding rectangle of 0x0. The important thing to
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
-                /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+                /prev_fmts=(\d+?x\d+?%2C\d+?x\d+?|\d+?x\d+?%2C\d+?x\d+?)/);
             expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
