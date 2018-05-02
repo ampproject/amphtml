@@ -183,7 +183,7 @@ describes.realWin('amp-consent', {
     });
 
     it('parse server response', function* () {
-      const parseSpy = sandbox.spy(ampConsent, 'parseConsentResponse_');
+      const parseSpy = sandbox.spy(ampConsent, 'isPromptRequired_');
       ampConsent.buildCallback();
       yield macroTask();
       expect(parseSpy).to.be.calledWith('ABC', {

@@ -317,28 +317,36 @@ export class AmpConsent extends AMP.BaseElement {
     let remoteConfigPromise = Promise.resolve(null);
     if (config['checkConsentHref']) {
       remoteConfigPromise = this.getConsentRemote_(instanceId);
-      const sharedDataPromise = remoteConsentPromise.then(response => {
-        if (!response || response['sharedData'] === undefined) {
-          return null;
-        }
-        return response['sharedData'];
-      });
-      this.consentStateManager_.setConsentInstanceSharedData(
-          instanceId, sharedDataPromise);
+      this.passSharedData_(instanceId, remoteConfigPromise);
     }
     let geoPromise = Promise.resolve();
     if (config['promptIfUnknownForGeoGroup']) {
       const geoGroup = config['promptIfUnknownForGeoGroup'];
-      geoPromise = this.isConsentRequiredGeo_(geoGroup).then(
-          promptIfUnknown => {
-            this.consentRequired_[instanceId] = !!promptIfUnknown;
-          });
+      geoPromise = this.isConsentRequiredGeo_(geoGroup);
     }
-    return geoPromise.then(() => {
+    return geoPromise.then(promptIfUnknown => {
       return remoteConfigPromise.then(response => {
-        this.parseConsentResponse_(instanceId, response);
+        this.consentRequired_[instanceId] =
+            this.isPromptRequired_(instanceId, response, promptIfUnknown);
       });
     });
+  }
+
+  /**
+   * Blindly pass sharedData
+   * @param {string} instanceId
+   * @param {!Promise<?JsonObject>} responsePromise
+   */
+  passSharedData_(instanceId, responsePromise) {
+    const sharedDataPromise = responsePromise.then(response => {
+      if (!response || response['sharedData'] === undefined) {
+        return null;
+      }
+      return response['sharedData'];
+    })
+
+    this.consentStateManager_.setConsentInstanceSharedData(
+          instanceId, sharedDataPromise);
   }
 
   /**
@@ -458,16 +466,20 @@ export class AmpConsent extends AMP.BaseElement {
    * TODO: Support vendor lists
    * @param {string} instanceId
    * @param {?JsonObject} response
+   * @param {boolean=} opt_initValue
+   * @return {boolean}
    */
-  parseConsentResponse_(instanceId, response) {
+  isPromptRequired_(instanceId, response, opt_initValue) {
+    let promptIfUnknown = opt_initValue;
     if (response && response['promptIfUnknown'] == true) {
-      this.consentRequired_[instanceId] = true;
+      promptIfUnknown = true;
     } else if (response && response['promptIfUnknown'] == false) {
-      this.consentRequired_[instanceId] = false;
-    } else if (this.consentRequired_[instanceId] == undefined) {
+      promptIfUnknown = false;
+    } else if (promptIfUnknown == undefined) {
       // Set to false if not defined
-      this.consentRequired_[instanceId] = false;
+      promptIfUnknown = false;
     }
+    return promptIfUnknown;
   }
 
   /**
