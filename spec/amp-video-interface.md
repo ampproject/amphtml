@@ -70,11 +70,6 @@ References a layer that draws a `box-shadow` under the video. The shadow can be
 overridden or removed. Its opacity will change from 0 to 1 while the video is
 being docked.
 
-#### `.amp-docked-video-nudged`
-
-References a layer that draws an overlay background over the video. The
-background color can be overridden or removed.
-
 #### `.amp-docked-video-controls`
 
 References a layer that contains the docked video controls. Usually, this

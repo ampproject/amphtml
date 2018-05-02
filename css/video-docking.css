@@ -86,11 +86,6 @@
   box-shadow: 0px 4px 20px 4px rgba(0, 0, 0, 0.2);
 }
 
-.amp-docked-video-nudged {
-  background: rgba(100, 100, 100, 0.3);
-  opacity: 1;
-}
-
 .amp-docked-video-controls-bg {
   background: rgba(230, 230, 230, 0.6);
   opacity: 1;
