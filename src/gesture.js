@@ -324,6 +324,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} offset
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalReady_(recognizer, offset) {
     // Somebody got here first.
@@ -352,6 +354,8 @@ export class Gestures {
    * @param {!GestureRecognizer} recognizer
    * @param {number} timeLeft
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalPending_(recognizer, timeLeft) {
     // Somebody got here first.
@@ -373,6 +377,8 @@ export class Gestures {
    * emitting gestures.
    * @param {!GestureRecognizer} recognizer
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
@@ -388,6 +394,8 @@ export class Gestures {
    * @param {*} data
    * @param {?Event} event
    * @private
+   * @restricted
+   * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
     dev().assert(this.eventing_ == recognizer,
