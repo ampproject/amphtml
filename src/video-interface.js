@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-vars
-
 /**
  * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
@@ -125,21 +123,6 @@ export class VideoInterface {
    */
   preimplementsMediaSessionAPI() {}
 
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {!AmpElement}
-   */
-  get element() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @return {boolean}
-   */
-  isInViewport() {}
-
   /**
    * Enables fullscreen on the internal video element
    * NOTE: While implementing, keep in mind that Safari/iOS do not allow taking
@@ -161,16 +144,6 @@ export class VideoInterface {
    * @return {boolean}
    */
   isFullscreen() {}
-
-  /**
-   * Automatically comes from {@link ./base-element.BaseElement}
-   *
-   * @param {string} unusedMethod
-   * @param {function(!./service/action-impl.ActionInvocation)} unusedHandler
-   * @param {ActionTrust} unusedMinTrust
-   * @public
-   */
-  registerAction(unusedMethod, unusedHandler, unusedMinTrust) {}
 }
 
 
@@ -462,3 +435,14 @@ export const VideoAnalyticsEvents = {
  * }}
  */
 export let VideoAnalyticsDetailsDef;
+
+
+/**
+ * Helper function to be used internally to cast types from VideoInterface to
+ * the public AMP component interface.
+ * @param {!VideoInterface} video
+ * @return {!./base-element.BaseElement}
+ */
+export function asBaseElement(video) {
+  return /** @type {!./base-element.BaseElement} */ (video);
+}
