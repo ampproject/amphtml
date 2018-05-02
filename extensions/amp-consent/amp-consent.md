@@ -228,5 +228,15 @@ AMP may support customizing blocking behaviors in the future. Because of this, t
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
+## Integrations and availablity 
+The table below lists the vendors and components that are integrated with amp-consent
+
+| Integration        | Availability| Documentation|
+| ------------- |-------------| -----|
+| DoubleClick & AdSense Integration      | 05/10/18 |  |
+| AMP IMA Video Integration   |       |   |
+| AMP Geo usage with AMP Consent |  05/10/18      |   |
+| AMP Stories |       |    05/15/18 |
+
 
 
