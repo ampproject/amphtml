@@ -141,6 +141,8 @@ describes.realWin('amp-ad-3p-impl', {
       ad3p.element.setAttribute('data-block-on-consent', '');
       sandbox.stub(consent, 'getConsentPolicyState')
           .resolves(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+      sandbox.stub(consent, 'getConsentPolicySharedData')
+          .resolves({a: 1, b: 2});
 
       return ad3p.layoutCallback().then(() => {
         const frame = ad3p.element.querySelector('iframe[src]');
@@ -150,6 +152,8 @@ describes.realWin('amp-ad-3p-impl', {
         expect(data._context).to.be.ok;
         expect(data._context.initialConsentState)
             .to.equal(consent.CONSENT_POLICY_STATE.SUFFICIENT);
+        expect(data._context.consentSharedData)
+            .to.deep.equal({a: 1, b: 2});
       });
     });
 

@@ -45,4 +45,20 @@ export function getConsentPolicyState(ampdoc, policyId) {
       });
 }
 
-
+/**
+ * Returns a promise that resolves to a sharedData retrieved from consent
+ * remote endpoint.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} policyId
+ * @return {!Promise<?Object>}
+ */
+export function getConsentPolicySharedData(ampdoc, policyId) {
+  return Services.consentPolicyServiceForDocOrNull(ampdoc)
+      .then(consentPolicy => {
+        if (!consentPolicy) {
+          return null;
+        }
+        return consentPolicy.getMergedSharedData(
+            /** @type {string} */ (policyId));
+      });
+}

@@ -59,6 +59,9 @@ export class AbstractAmpContext {
     /** @type {?string|undefined} */
     this.container = null;
 
+    /** @type {?Object} */
+    this.consentSharedData = null;
+
     /** @type {?Object<string, *>} */
     this.data = null;
 
@@ -288,6 +291,7 @@ export class AbstractAmpContext {
     this.canary = context.canary;
     this.canonicalUrl = context.canonicalUrl;
     this.clientId = context.clientId;
+    this.consentSharedData = context.consentSharedData;
     this.container = context.container;
     this.domFingerprint = context.domFingerprint;
     this.hidden = context.hidden;
