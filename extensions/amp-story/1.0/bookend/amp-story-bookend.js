@@ -546,23 +546,12 @@ export class Bookend {
    * @private
    */
   renderComponents_(components) {
-    let container;
-
-    const measureContainer = () => {
-      container = this.getInnerContainer_();
-    };
-
-    const mutateContainer = () => {
-      container.appendChild(
-          BookendComponent.buildTemplates(components, this.win_.document));
-    };
-
-    if (this.bookendEl_) {
-      this.resources_.measureMutateElement(
-          this.bookendEl_, measureContainer, mutateContainer);
-    } else {
-      dev().error(TAG, 'Error rendering amp-story-bookend.');
-    }
+    dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
+    const fragment = BookendComponent
+        .buildTemplates(components, this.win_.document);
+    const container = this.getInnerContainer_();
+    this.resources_.mutateElement(container,
+        () => container.appendChild(fragment));
   }
 
   /** @return {!Element} */
