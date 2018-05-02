@@ -129,7 +129,7 @@ export class LocalSubscriptionPlatformRenderer {
           candidate.classList.add('i-amphtml-subs-display');
           if (candidate.getAttribute('subscriptions-service')
             && candidate.getAttribute('subscriptions-action')
-            && candidate.hasAttribute('subscriptions-decorate')) {
+            && candidate.getAttribute('subscriptions-decorate') !== 'false') {
             this.serviceAdapter_.decorateServiceAction(
                 candidate,
                 candidate.getAttribute('subscriptions-service'),

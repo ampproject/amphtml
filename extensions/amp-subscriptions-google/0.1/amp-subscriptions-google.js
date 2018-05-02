@@ -237,9 +237,9 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
-    if (action === 'login') {
-      element.innerHTML = '';
-      this.runtime_.buttonApi_.attach(element, options);
+    if (action === 'subscribe') {
+      element.textContent = '';
+      this.runtime_.attachButton(element, options, () => {});
     }
   }
 }

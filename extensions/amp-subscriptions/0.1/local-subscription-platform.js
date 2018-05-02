@@ -237,9 +237,7 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
-  decorateUI(unusedNode, unusedOptions) {
-    user().warn('Local platform does not decorate UIs');
-  }
+  decorateUI(unusedNode, unusedOptions) {}
 }
 
 /**
