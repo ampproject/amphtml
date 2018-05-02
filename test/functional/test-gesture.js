@@ -178,14 +178,14 @@ describe('Gestures', () => {
   it('should deny ready state if already eventing', () => {
     gestures.eventing_ = {};
     recognizerMock.expects('acceptCancel').once();
-    gestures.signalReady_(recognizer, 0);
+    gestures.signalReady(recognizer, 0);
   });
 
   it('should enter ready state', () => {
     clock.tick(1);
     recognizerMock.expects('acceptCancel').never();
     gestures.pending_[0] = 10;
-    gestures.signalReady_(recognizer, 0);
+    gestures.signalReady(recognizer, 0);
     expect(gestures.ready_[0]).to.equal(1);
     expect(gestures.pending_[0]).to.equal(0);
     expect(gestures.passAfterEvent_).to.equal(true);
@@ -196,21 +196,21 @@ describe('Gestures', () => {
     gestures.eventing_ = {};
     gestures.pending_[0] = 0;
     recognizerMock.expects('acceptCancel').once();
-    gestures.signalPending_(recognizer, 10);
+    gestures.signalPending(recognizer, 10);
     expect(gestures.pending_[0]).to.equal(0);
   });
 
   it('should enter ready state', () => {
     clock.tick(1);
     recognizerMock.expects('acceptCancel').never();
-    gestures.signalPending_(recognizer, 10);
+    gestures.signalPending(recognizer, 10);
     expect(gestures.pending_[0]).to.equal(11);
   });
 
 
   it('should stop eventing', () => {
     gestures.eventing_ = recognizer;
-    gestures.signalEnd_(recognizer);
+    gestures.signalEnd(recognizer);
     expect(gestures.eventing_).to.equal(null);
   });
 
@@ -218,7 +218,7 @@ describe('Gestures', () => {
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
     allowConsoleError(() => { expect(() => {
-      gestures.signalEmit_(recognizer, {}, null);
+      gestures.signalEmit(recognizer, {}, null);
     }).to.throw(/Recognizer is not currently allowed/); });
     expect(onGesture).to.have.not.been.called;
   });
@@ -228,7 +228,7 @@ describe('Gestures', () => {
     const event = {};
     clock.tick(1);
     gestures.eventing_ = recognizer;
-    gestures.signalEmit_(recognizer, data, event);
+    gestures.signalEmit(recognizer, data, event);
     expect(onGesture).to.be.calledOnce;
     const gesture = onGesture.getCall(0).args[0];
     expect(gesture.type).to.equal('test');
@@ -306,7 +306,7 @@ describe('Gestures', () => {
 
   it('should cancel event after eventing stopped', () => {
     gestures.eventing_ = recognizer;
-    gestures.signalEnd_(recognizer);
+    gestures.signalEnd(recognizer);
     expect(gestures.eventing_).to.equal(null);
     expect(gestures.wasEventing_).to.equal(true);
 
@@ -432,7 +432,7 @@ describe('Gestures', () => {
 
     it('should cancel event after eventing stopped', () => {
       gestures.eventing_ = recognizer;
-      gestures.signalEnd_(recognizer);
+      gestures.signalEnd(recognizer);
       expect(gestures.eventing_).to.equal(null);
       expect(gestures.wasEventing_).to.equal(true);
 
