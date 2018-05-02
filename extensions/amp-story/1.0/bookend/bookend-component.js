@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ArticleComponent, ArticleTitle, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
+import {ArticleComponent, ArticleTitleComponent, BookendArticleComponentDef, BookendArticleTitleComponentDef} from './components/article';
 
 /**
  * @typedef {{
@@ -30,14 +30,29 @@ export let BookendDataDef;
  */
 export let BookendComponentDef;
 
+const articleComponentBuilder = new ArticleComponent();
+const articleTitleComponentBuilder = new ArticleTitleComponent();
+
 /**
- * Map used to dispatch the components to their specific builder classes.
- * @const {!Object<string, ./components/abstract.AbstractBookendComponent>}
+ * @typedef {(!ArticleComponent|!ArticleTitleComponent)}
  */
-export const componentsMap = {
-  'small': ArticleComponent,
-  'article-set-title': ArticleTitle,
-};
+export let BookendComponentClass;
+
+/**
+ * Dispatches the components to their specific builder classes.
+ * @param {string} componentType
+ * @return {?BookendComponentClass}
+ */
+function componentBuilderInstanceFor(componentType) {
+  switch (componentType) {
+    case 'small':
+      return articleComponentBuilder;
+    case 'article-set-title':
+      return articleTitleComponentBuilder;
+    default:
+      return null;
+  }
+}
 
 /**
  * Delegator class that dispatches the logic to build different components
@@ -47,19 +62,19 @@ export class BookendComponent {
   /**
    * Takes components from JSON and delegates them to their corresponding
    * builder class.
-   * @param {!BookendComponentDef} components
+   * @param {!Array<BookendComponentDef>} components
    * @return {!Array<BookendComponentDef>}
    */
   static buildFromJson(components) {
-    return components
-        .map(component => {
-          if (component.type && componentsMap[component.type]) {
-            if (componentsMap[component.type].isValid(component)) {
-              return componentsMap[component.type].build(component);
-            }
-          }
-        })
-        .filter(valid => !!valid);
+    return components.reduce((builtComponents, component) => {
+      const componentBuilder = componentBuilderInstanceFor(component.type);
+      if (!componentBuilder) {
+        return;
+      }
+      componentBuilder.assertValidity(component);
+      builtComponents.push(componentBuilder.build(component));
+      return builtComponents;
+    }, []);
   }
 
   /**
@@ -72,8 +87,9 @@ export class BookendComponent {
   static buildTemplates(components, doc) {
     const fragment = doc.createDocumentFragment();
     components.forEach(component => {
-      if (component.type && componentsMap[component.type]) {
-        fragment.appendChild(componentsMap[component.type]
+      const type = component.type;
+      if (type && componentBuilderInstanceFor(type)) {
+        fragment.appendChild(componentBuilderInstanceFor(type)
             .buildTemplate(component, doc));
       }
     });
