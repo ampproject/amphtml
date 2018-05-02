@@ -41,9 +41,13 @@ describes.sandboxed('Extensions', {}, () => {
   describes.fakeWin('registerExtension', {}, env => {
     let win;
     let extensions;
+    let timeoutCallback;
 
     beforeEach(() => {
       win = env.win;
+      win.setTimeout = cb => {
+        timeoutCallback = cb;
+      };
       installDocService(win, /* isSingleDoc */ true);
       extensions = new Extensions(win);
       installRuntimeStylesTo(win.document.head);
@@ -152,6 +156,18 @@ describes.sandboxed('Extensions', {}, () => {
         throw new Error('must have been rejected');
       }, reason => {
         expect(reason.message).to.equal('intentional');
+      });
+    });
+
+    it('should fail on timeout', () => {
+      const promise = extensions.waitForExtension(win , 'amp-ext');
+      expect(timeoutCallback).to.be.a('function');
+      timeoutCallback();
+
+      return promise.then(() => {
+        throw new Error('must have been rejected');
+      }, reason => {
+        expect(reason.message).to.match(/^Render timeout/);
       });
     });
 
